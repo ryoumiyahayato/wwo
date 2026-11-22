@@ -10,6 +10,24 @@
     "interpretation_url": "https://www.stat.go.jp/english/data/nenkan/1431-02e.html"
   },
   {
+    "id": "jp_tottori_1902_resident_ages",
+    "title": "鳥取縣統計書 明治35年 第四 人口",
+    "publisher": "鳥取縣",
+    "url": "https://www.pref.tottori.lg.jp/secure/618481/b1902m35_04_jin.pdf#page=17",
+    "locator": "Tables 34–35, printed pp. 48–51, December 31 local residence by age and sex.",
+    "raw_paths": ["tottori_1902_1903_age_sex.csv", "TOTTORI_AGE.md"],
+    "rights": "Numerical facts from the public-domain prefectural statistical yearbook."
+  },
+  {
+    "id": "jp_tottori_1903_resident_ages",
+    "title": "鳥取縣統計書 明治36年 第四 人口",
+    "publisher": "鳥取縣",
+    "url": "https://www.pref.tottori.lg.jp/secure/618482/b1903m36_04_jin_1.pdf#page=19",
+    "locator": "Tables 37–38, printed pp. 50–53, December 31 local residence by age and sex.",
+    "raw_paths": ["tottori_1902_1903_age_sex.csv", "TOTTORI_AGE.md"],
+    "rights": "Numerical facts from the public-domain prefectural statistical yearbook."
+  },
+  {
     "id": "tw_governor_general_1900",
     "title": "臺灣總督府第四統計書（明治三十三年）",
     "publisher": "臺灣總督府, 1902. National Archives of Japan digital collection.",

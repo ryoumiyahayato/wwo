@@ -8,7 +8,7 @@ from itertools import chain
 from pathlib import Path
 
 from opening import AGRA_DISTRICT_BALANCE, AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, JAVA_MADOERA, OTTOMAN_REGISTRATION_SOURCE, SPANISH_CIVIL_STATUS_SCOPE
-from opening import ROMANIA_CENSUS_SOURCE, apportion, egypt_age_sex_controls, opening_fraction, romanian_county_controls
+from opening import BERAR_DISTRICT_SOURCE, BERAR_RAILWAY_BALANCE, ROMANIA_CENSUS_SOURCE, apportion, egypt_age_sex_controls, opening_fraction, romanian_county_controls
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import cochin_language, india_princely_residence, madras_states_religion, travancore_language
@@ -268,6 +268,9 @@ def india_structure(pools, version):
                 continue
             if table == "7" and pool_id == "raj_madras_states" and "raj_travancore_state" in pools:
                 continue
+            if table == "1" and pool_id == "raj_berar" and version >= 41:
+                yield from berar_district_residence(pools, classification, definition, dict(zip(labels, row["counts"], strict=True)))
+                continue
             pool = pools.get(pool_id)
             if not pool or pool.get("endpoint_values", [None])[-1] != row["total"]:
                 continue
@@ -278,6 +281,30 @@ def india_structure(pools, version):
                 total=row["total"], observed_counts=dict(zip(labels, row["counts"], strict=True)),
                 unknown=row["unknown"], definition=definition,
             )
+
+
+def berar_district_residence(pools, classification, definition, province_counts):
+    path = COLLECTIONS / "india_berar_districts" / "berar_district_residence_1901.csv"
+    with path.open(encoding="utf8", newline="") as source:
+        rows = list(csv.DictReader(source))
+    districts = {key for key, pool in pools.items() if pool.get("statistical_parent") == "raj_berar"
+                 and key != BERAR_RAILWAY_BALANCE}
+    if (len(rows) != len(districts) or {row["unit_id"] for row in rows} != districts
+            or any(sum(int(row[label.lower()]) for row in rows) != count
+                   for label, count in province_counts.items())):
+        raise ValueError("Berar residence counts do not match the provincial report")
+    for row in rows:
+        unit = row["unit_id"]
+        total = int(row["total"])
+        if row["date"] != INDIA_DATE or total != pools[unit]["endpoint_values"][-1]:
+            raise ValueError(f"{unit}: Berar residence coverage differs from the district census")
+        yield unit, "residence", distribution(
+            pools[unit]["population_value"], classification=classification, source=BERAR_DISTRICT_SOURCE,
+            date=INDIA_DATE, observed_unit=unit, scope="District on the March 1901 common-area boundaries",
+            locator=row["locator"], total=total, unknown=0, definition=definition,
+            observed_counts={label: int(row[label.lower()]) for label in province_counts},
+            method=SHARE_METHOD + " The famine and settlement changes between January 1900 and the census are unquantified.",
+        )
 
 
 def india_language(pools):
@@ -979,6 +1006,35 @@ def bombay_city_social(pools, version):
         definition="Principal occupation of actual workers, orders I–XXII. Dependents and orders XXIII–XXIV are unassigned.",
         method=f"{SHARE_METHOD} The effect of migration and plague on the distribution is unquantified.",
     )
+
+
+def bombay_sind_religion(pools):
+    folder = COLLECTIONS / "india_bombay_districts_1901"
+    with (folder / "bombay_districts.csv").open(encoding="utf8", newline="") as source:
+        districts = {row["unit_id"] for row in csv.DictReader(source)
+                     if row["division"] == "Sind" and row["row_role"] == "district"}
+    with (folder / "bombay_sind_district_religion_1901.csv").open(encoding="utf8", newline="") as source:
+        control, *rows = csv.DictReader(source)
+    categories = INDIA_TABLES["7"][3]
+    if (control["source_scope_id"] != "sind_control" or len(rows) != len(districts)
+            or {row["source_scope_id"] for row in rows} != districts
+            or any(sum(int(row[key]) for row in rows) != int(control[key])
+                   for key in ("population", *categories, "others"))):
+        raise ValueError("Sind district religion does not match the provincial census control")
+    for row in rows:
+        unit = row["source_scope_id"]
+        pool = pools[unit]
+        total = int(row["population"])
+        if row["observation_date"] != INDIA_DATE or pool["endpoint_values"][-1] != total:
+            raise ValueError(f"{unit}: religion and district population scopes differ")
+        yield unit, "religion", distribution(
+            pool["population_value"], classification="india_1901_reported_religion",
+            source="india_bombay_sind_1901_religion", date=INDIA_DATE, observed_unit=unit,
+            scope=f"{row['scope']} census district, all persons present", locator=row["locator"], total=total,
+            observed_counts={category: int(row[category]) for category in categories}, unknown=int(row["others"]),
+            definition="Named census religions. Other religions and unspecified reports remain unassigned. Khairpur and Aden are outside the five districts.",
+            method=SHARE_METHOD + " Composition changes between opening and the census are unquantified.",
+        )
 
 
 def agra_oudh_religion(pools, observations, version):
@@ -2081,6 +2137,8 @@ def opening_social(opening_groups, observations, *, version):
         marginals = chain(marginals, french_department_social(pools))
     if version >= 39:
         marginals = chain(marginals, bombay_city_social(pools, version))
+    if version >= 41:
+        marginals = chain(marginals, bombay_sind_religion(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

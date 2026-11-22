@@ -1,0 +1,7 @@
+source_scope_id,scope,observation_date,population,Hindus,Sikhs,Jains,Buddhists,Parsis,Muhammadans,Christians,Jews,Animistic,others,locator
+sind_control,Sind,1901-03-01,3210910,751252,0,921,0,2000,2446489,7817,428,0,2003,"Vol. IX-A, Table VI, printed pp. 50–51, row 25, Persons"
+raj_bombay_karachi,Karachi,1901-03-01,607828,115240,0,126,0,1841,483474,6486,381,0,280,"Vol. IX-A, Table VI, printed pp. 50–51, row 26, Persons"
+raj_bombay_hyderabad,Hyderabad,1901-03-01,989030,242692,0,119,0,89,744632,747,10,0,741,"Vol. IX-A, Table VI, printed pp. 50–51, row 27, Persons"
+raj_bombay_shikarpur,Shikarpur,1901-03-01,1018113,218829,0,0,0,66,797882,492,31,0,813,"Vol. IX-A, Table VI, printed pp. 50–51, row 28, Persons"
+raj_bombay_thar_and_parkar,Thar and Parkar,1901-03-01,363894,151726,0,657,0,4,211309,30,6,0,162,"Vol. IX-A, Table VI, printed pp. 50–51, row 29, Persons"
+raj_bombay_upper_sind_frontier,Upper Sind Frontier,1901-03-01,232045,22765,0,19,0,0,209192,62,0,0,7,"Vol. IX-A, Table VI, printed pp. 50–51, row 30, Persons"
