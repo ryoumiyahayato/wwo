@@ -9,3 +9,7 @@
 ## 17 个统计区
 
 表 IV 第 24 页复列按 1901 年范围计的 1882 年 1 月 1 日在场人口 28,459,628 人和 1901 年 2 月 10 日 32,475,253 人。两端点各区闭合。Roma 对应 Lazio。Emilia 分原两组 Emilia ex Ducati 和 Emilia Romagne。逐区按日期线性内插，按同一比例将 32,242,221 的全国内插数校准到原有 32,296,914 人开局控制，约增 0.17%。区际迁移和这段长间隔的误差无可用区间。各区年龄用表 XX(b) 第 104–109 页当地分布，逐档逐性别加总与全国独立核对。全国婚姻仍按原普查范围入账，各区婚姻未知。[端点](observations.jsonl) · [各区年龄](regional_age_sex.csv)
+
+## 聚居形态
+
+表 X(b) 第 62 页 1901 年在场人口中，20,539,420 人住在至少 500 人的聚居点，2,762,919 人住在较小聚居点，9,172,914 人分散居住。各区以该区原始比例分配。普查委员会按当地聚落形态划分聚居点。Piemonte、Liguria、Romagne 和 Lazio 的交叉校读见 [地区原数](settlement.csv)。[原普查](sources.json) · [官方年鉴复列](https://ebiblio.istat.it/digibib/Annuario%20Statistico%20Italiano/RAV0040597ASI1905_1907.pdf)

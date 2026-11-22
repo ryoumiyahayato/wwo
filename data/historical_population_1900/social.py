@@ -825,6 +825,27 @@ def mexico_census_social(pools):
             )
 
 
+def italian_settlement(pools):
+    path = COLLECTIONS / "italy_census_1901" / "settlement.csv"
+    columns = ("centers_at_least_500", "centers_under_500", "dispersed_countryside")
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit = row["unit_id"]
+            pool = pools[unit]
+            total = int(row["observed_total"])
+            if pool["endpoint_values"][-1] != total:
+                raise ValueError(f"{unit}: census settlement and opening endpoints differ")
+            yield unit, "residence", distribution(
+                pool["population_value"], classification="italy_1901_settlement_pattern",
+                source="it_1901_census_v5_age_and_marital", date=row["observed_date"], observed_unit=unit,
+                scope=f"{row['source_label']}, census population present",
+                locator=row["locator"], total=total, unknown=int(row["unknown"]),
+                observed_counts={key: int(row[key]) for key in columns},
+                definition="Population in census centers of at least 500 residents, smaller centers, "
+                           "or dispersed settlements. Commissioners identified centers using local conditions.",
+            )
+
+
 CANADA_ORIGIN_COLUMNS = {
     "British": "british", "French": "french", "German": "german",
     "Indian and h. b.": "indigenous_and_mixed_indigenous",
@@ -940,6 +961,8 @@ def opening_social(opening_groups, *, version):
         marginals = chain(marginals, italy_marital_status(pools[italian_marital_unit]), mexico_census_social(pools))
     if version >= 22:
         marginals = chain(marginals, canada_reported_origin(pools))
+    if version >= 23:
+        marginals = chain(marginals, italian_settlement(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

@@ -366,6 +366,7 @@ def age_sex_panels():
         HERE / "andaman_census_demography", HERE / "india_princely_age", HERE / "india_statistical_abstract_ages",
         HERE / "prussia_census_1900", HERE / "saxony_census_1900", HERE / "wuerttemberg_census_1900",
         HERE / "us_territorial_ages_1900", HERE / "baden_census_1900", HERE / "italy_census_1901",
+        HERE / "brazil_census_1900_age",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -770,30 +771,47 @@ def check_italian_age_controls(panels, observations):
         row["unit_id"]: row for row in observations
         if row["source_id"] == "it_1901_census_v5_age_and_marital" and row["date"] == "1901-01-01"
     }
-    national_rows = panels["kingdom_of_italy"][1]
-    by_band = {row["label"]: {sex: 0 for sex in SEX_COUNTS} for row in national_rows}
     for unit_id, observed in dated_returns.items():
         if unit_id == "kingdom_of_italy":
             continue
-        panel, rows = panels[unit_id]
+        _, rows = panels[unit_id]
         control = next(row for row in rows if row["role"] == "total")
         if control["both"] != observed["population_value"] or any(
             control[sex] != observed["sex"][sex] for sex in SEX_COUNTS
         ):
             raise ValueError(f"{unit_id}: age rows differ from the Italian January 1901 population control")
+    verify_national_age_totals(
+        panels["kingdom_of_italy"][1],
+        (panels[unit_id][1] for unit_id in dated_returns if unit_id != "kingdom_of_italy"),
+        "kingdom_of_italy",
+    )
+
+
+def verify_national_age_totals(national_rows, regional_rows, unit_id):
+    by_band = {row["label"]: {sex: 0 for sex in SEX_COUNTS} for row in national_rows}
+    for rows in regional_rows:
         for row, national in zip(rows, national_rows, strict=True):
             if any(row[key] != national[key] for key in ("label", "role", "age_min", "age_max")):
-                raise ValueError(f"{panel['id']}: regional and national age bands differ")
+                raise ValueError(f"{unit_id}: regional and national age bands differ")
             for sex in SEX_COUNTS:
                 by_band[row["label"]][sex] += row[sex]
     if any(by_band[row["label"]][sex] != row[sex] for row in national_rows for sex in SEX_COUNTS):
-        raise ValueError("Italy: regional age and sex counts do not close to the independent national return")
+        raise ValueError(f"{unit_id}: regional age and sex counts do not close to the national return")
+
+
+def apportion_local_ages(bands, local_sex):
+    sex_totals = {sex: sum(band[sex] for band in bands) for sex in SEX_COUNTS}
+    allocations = {
+        sex: apportion({band["id"]: Fraction(local_sex[sex] * band[sex], sex_totals[sex])
+                        for band in bands}, local_sex[sex])
+        for sex in SEX_COUNTS
+    }
+    return [band | {sex: allocations[sex][band["id"]] for sex in SEX_COUNTS} for band in bands]
 
 
 def united_provinces_state_age_models(panels, observations, aggregate, local_balances):
     dates = aggregate["endpoint_dates"]
     regional = indian_abstract_opening_age_model(panels, aggregate, dates, "united_provinces_states")
-    sex_totals = {sex: sum(band[sex] for band in regional["bands"]) for sex in SEX_COUNTS}
     for unit_id, balance in local_balances.items():
         if balance.get("statistical_parent") != aggregate["unit_id"]:
             continue
@@ -806,11 +824,6 @@ def united_provinces_state_age_models(panels, observations, aggregate, local_bal
             raise ValueError(f"{unit_id}: published sex totals do not close")
         local_sex = apportion({sex: earlier["sex"][sex] * (1 - fraction) + later["sex"][sex] * fraction
                                for sex in SEX_COUNTS}, persons)
-        local_age = {
-            sex: apportion({band["id"]: Fraction(local_sex[sex] * band[sex], sex_totals[sex])
-                            for band in regional["bands"]}, local_sex[sex])
-            for sex in SEX_COUNTS
-        }
         yield regional | dict(
             unit_id=unit_id, observed_unit_id=unit_id, opening_total=persons, observed_total=persons,
             source_id=balance["source_id"], locator=f"{balance['locator']}; {regional['locator']}",
@@ -818,7 +831,47 @@ def united_provinces_state_age_models(panels, observations, aggregate, local_bal
                    "the interpolated age profile for that sex across both United Provinces princely states.",
             uncertainty="Local age variation is unknown. Census error and change caused by migration or famine "
                         "have no quantified interval.",
-            bands=[band | {sex: local_age[sex][band["id"]] for sex in SEX_COUNTS} for band in regional["bands"]],
+            bands=apportion_local_ages(regional["bands"], local_sex),
+        )
+
+
+def mysore_local_age_models(panels, observations, local_balances):
+    root = "raj_mysore_state"
+    panel, rows = panels["india_census_1901_table_vii_mysore"]
+    regional = opening_age_group(panel, rows, root, 0)
+    observed = {
+        (row["unit_id"], row["date"]): row for row in observations
+        if row["parent_id"] == root and "sex" in row
+    }
+    leaves = [balance for balance in local_balances.values() if balance.get("statistical_parent") == root]
+    late = panel["observed_date"]
+    published = [observed[leaf["unit_id"], late] for leaf in leaves]
+    for sex in SEX_COUNTS:
+        if sum(row["sex"][sex] for row in published) != sum(band[sex] for band in regional["bands"]):
+            raise ValueError("Mysore local sex totals do not close to the state age return")
+    for balance, current in zip(leaves, published, strict=True):
+        unit_id = balance["unit_id"]
+        persons = balance["population_value"]
+        early, _ = balance["source_dates"]
+        previous = observed.get((unit_id, early))
+        if any(sum(row["sex"].values()) != row["population_value"]
+               for row in (current, previous) if row is not None):
+            raise ValueError(f"{unit_id}: published sex counts do not close")
+        if previous is None:
+            sex_quotas = {sex: Fraction(persons * current["sex"][sex], current["population_value"])
+                          for sex in SEX_COUNTS}
+            method = "Hold the local 1901 census sex shares at opening."
+        else:
+            fraction = opening_fraction(balance["source_dates"])
+            sex_quotas = {sex: previous["sex"][sex] * (1 - fraction) + current["sex"][sex] * fraction
+                          for sex in SEX_COUNTS}
+            method = "Interpolate both local census sex counts to 1900-01-01."
+        yield regional | dict(
+            unit_id=unit_id, observed_unit_id=unit_id, opening_total=persons, observed_total=persons,
+            observed_date=DATE, source_id=current["source_id"], locator=f"{current['locator']}; {panel['locator']}",
+            method=f"{method} Apply the state census age profile within each sex. Round by largest remainders.",
+            uncertainty="Local age variation is unknown. Census error and intercensal change have no quantified interval.",
+            bands=apportion_local_ages(regional["bands"], apportion(sex_quotas, persons)),
         )
 
 
@@ -828,6 +881,8 @@ def opening_structure(opening_groups, observations, *, version=6):
     leaf_age_scopes = {unit["statistical_parent"] for unit in district_pools.values()} | {
         ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, "raj_united_provinces_states",
     }
+    if version >= 23:
+        leaf_age_scopes.add("raj_mysore_state")
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -860,6 +915,14 @@ def opening_structure(opening_groups, observations, *, version=6):
             if endpoints[-1] != model["observed_total"] + panel.get("opening_population_endpoint_difference", 0):
                 raise ValueError(f"Census age and population controls differ for {unit_id}")
         groups.append(model)
+    if version >= 23:
+        groups.extend(mysore_local_age_models(panels, observations, opening_balances))
+        verify_national_age_totals(
+            panels["brazil_1900_dge_1900_ages"][1],
+            (rows for panel, rows in panels.values()
+             if panel["source_id"] == "br_dge_1916_1900_age_sex" and "opening_unit_id" in panel),
+            "brazil_1900",
+        )
     if version >= 22:
         check_italian_age_controls(panels, observations)
         groups.extend(united_provinces_state_age_models(
