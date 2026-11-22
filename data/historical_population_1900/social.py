@@ -1646,6 +1646,29 @@ def ottoman_registered_religion(pools, observations):
         )
 
 
+def romanian_religion(pools):
+    columns = {
+        "ortodoxa": "Orthodox", "mozaica": "Jewish", "catolica": "Catholic",
+        "protestanta": "Protestant", "mahometana": "Muslim", "armeana": "Armenian", "lipovana": "Lipovan",
+    }
+    path = COLLECTIONS / "romania" / "raw" / "romania_1899_religion_table_iva.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit = row["unit_id"]
+            total = int(row["observed_total"])
+            if total != pools[unit]["population_value"] or total != int(row["male_total"]) + int(row["female_total"]):
+                raise ValueError(f"{unit}: Romanian religion accounts differ from the stable population controls")
+            yield unit, "religion", distribution(
+                total, classification="romania_1899_reported_religion", source="ro_colescu_1899_census_report",
+                date=row["observed_month"], observed_unit=unit, scope=f"{row['source_name']}, stable population",
+                locator=row["locator"], total=total,
+                observed_counts={label: int(row[column]) for column, label in columns.items()},
+                unknown=int(row["alta_si_necunoscuta"]),
+                definition="Seven named census religions. The joint other-or-unknown column remains unassigned.",
+                method="Carry December census counts at original scale to January 1. Census dates varied locally.",
+            )
+
+
 def opening_social(opening_groups, observations, *, version):
     """Return independent person distributions at each source's published scope."""
     pools = {
@@ -1800,7 +1823,7 @@ def opening_social(opening_groups, observations, *, version):
         marginals = chain(marginals, argentine_occupation(pools, version), java_residency_registration(pools),
                           egyptian_urban_literacy(pools))
     if version >= 35:
-        marginals = chain(marginals, ottoman_registered_religion(pools, observations))
+        marginals = chain(marginals, ottoman_registered_religion(pools, observations), romanian_religion(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

@@ -43,6 +43,7 @@
     "netherlands_census_1899": 12,
     "nigeria_lagos_population": 3,
     "nordic_population_1900": 4,
+    "ottoman_registration_1897": 34,
     "peru_1900_reconstruction": 3,
     "philippines": 51,
     "philippines_opening_1900": 81,
@@ -63,23 +64,23 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 277,
+  "cited_sources": 279,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
   "production_roots": 57,
-  "partially_located_legacy_roots": 3,
-  "documented_people_under_legacy_controls": 677527339,
+  "partially_located_legacy_roots": 4,
+  "documented_people_under_legacy_controls": 696112006,
   "replaced_legacy_roots": 31,
   "new_roots": 26,
-  "production_people": 1350045091,
-  "production_people_pct_world_estimate": 84.638,
-  "population_outside_evidence_opening_estimate": 245029157,
-  "legacy_only_people": 124552661,
+  "production_people": 1368629758,
+  "production_people_pct_world_estimate": 85.804,
+  "population_outside_evidence_opening_estimate": 226444490,
+  "legacy_only_people": 105967994,
   "authoritative_total_for_new_game": 1474597752,
-  "roots_with_partitions": 28,
-  "disjoint_leaves": 1257,
-  "people_in_partitions": 1264838457,
+  "roots_with_partitions": 29,
+  "disjoint_leaves": 1287,
+  "people_in_partitions": 1283423124,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -122,11 +123,11 @@
       "people": 9267405
     }
   ],
-  "partitions_with_explicit_places": 41,
-  "people_in_partitions_with_explicit_places": 92374486,
+  "partitions_with_explicit_places": 42,
+  "people_in_partitions_with_explicit_places": 93277968,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 66,
+  "political_catalogue_members_of_production_groups": 67,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -368,7 +369,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2747,
+  "source_statistical_units": 2781,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 29,
@@ -379,8 +380,8 @@
       "people": 335956934
     },
     "documented_subdivisions_of_legacy_control": {
-      "roots": 3,
-      "people": 677527339
+      "roots": 4,
+      "people": 696112006
     }
   },
   "city_index_representative_bands": {
@@ -392,8 +393,8 @@
   "city_index_unresolved": 31,
   "opening_social_coverage": {
     "class": {
-      "assigned_people": 11231121,
-      "unknown_people": 1463366631
+      "assigned_people": 11239501,
+      "unknown_people": 1463358251
     },
     "culture": {
       "assigned_people": 5273225,
@@ -424,16 +425,16 @@
       "unknown_people": 1134879825
     },
     "occupation": {
-      "assigned_people": 206968477,
-      "unknown_people": 1267629275
+      "assigned_people": 207258162,
+      "unknown_people": 1267339590
     },
     "property_declaration": {
       "assigned_people": 32296914,
       "unknown_people": 1442300838
     },
     "religion": {
-      "assigned_people": 446678532,
-      "unknown_people": 1027919220
+      "assigned_people": 471219667,
+      "unknown_people": 1003378085
     },
     "residence": {
       "assigned_people": 367464724,
@@ -495,15 +496,16 @@
     "ah_cisleithania_census_1900_ages": 168,
     "ksh_hungarian_statistical_yearbook_1908": 42,
     "mx_census_1900_dge_1901": 341,
+    "ro_colescu_1899_census_report": 170,
     "ah_hungarian_census_1900_part10": 18,
     "jp_cabinet_population_1898_original": 23,
     "jp_cabinet_local_occupations_1913_tokyo": 8,
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 879278691,
-  "structure_opening_pool_count": 879,
-  "structure_opening_residents_outside_modeled_pools": 595319061,
+  "structure_opening_pool_controls": 887732549,
+  "structure_opening_pool_count": 885,
+  "structure_opening_residents_outside_modeled_pools": 586865203,
   "structure_opening_scopes": [
     {
       "unit_id": "abs_new_south_wales",
@@ -4832,6 +4834,20 @@
       "observed_date": "1900-01-01"
     },
     {
+      "unit_id": "ottoman_1897_ankara",
+      "opening_total": 1018744,
+      "observed_unit_id": "ottoman_1897_ankara",
+      "observed_total": 1018744,
+      "observed_date": "1898-03-12"
+    },
+    {
+      "unit_id": "ottoman_1897_aydin",
+      "opening_total": 1478424,
+      "observed_unit_id": "ottoman_1897_aydin",
+      "observed_total": 1478424,
+      "observed_date": "1898-03-12"
+    },
+    {
       "unit_id": "pt1900_angra_do_heroismo",
       "opening_total": 73224,
       "observed_unit_id": "pt1900_angra_do_heroismo",
@@ -6008,6 +6024,34 @@
       "observed_date": "1900-01-01"
     },
     {
+      "unit_id": "ro_1899_moldova",
+      "opening_total": 1848122,
+      "observed_unit_id": "ro_1899_moldova",
+      "observed_total": 1848122,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_muntenia",
+      "opening_total": 2659517,
+      "observed_unit_id": "ro_1899_muntenia",
+      "observed_total": 2659517,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_northern_dobruja",
+      "opening_total": 267808,
+      "observed_unit_id": "ro_1899_northern_dobruja",
+      "observed_total": 267808,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_oltenia",
+      "opening_total": 1181243,
+      "observed_unit_id": "ro_1899_oltenia",
+      "observed_total": 1181243,
+      "observed_date": "1899-12"
+    },
+    {
       "unit_id": "ru1897_64",
       "opening_total": 307071,
       "observed_unit_id": "ru1897_64",
@@ -6830,8 +6874,8 @@
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 527,
-  "dated_parent_controls_arithmetic_closure": 490,
+  "dated_parent_controls": 528,
+  "dated_parent_controls_arithmetic_closure": 491,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -7449,10 +7493,10 @@
         "opening_unit_id": "kingdom_of_romania",
         "research_region": "Europe",
         "opening_control": 5956690,
-        "in_model_pools": 0,
-        "outside_model_pools": 5956690,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 5956690,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 5955145,
+        "modeled_sex_age_unknown": 1545
       },
       {
         "opening_unit_id": "kingdom_of_serbia",
@@ -7521,10 +7565,10 @@
         "opening_unit_id": "ottoman_empire",
         "research_region": null,
         "opening_control": 24000000,
-        "in_model_pools": 0,
-        "outside_model_pools": 24000000,
+        "in_model_pools": 2497168,
+        "outside_model_pools": 21502832,
         "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "modeled_sex_age_unknown": 2497168
       },
       {
         "opening_unit_id": "paraguay_1900",
@@ -7697,10 +7741,10 @@
       },
       "Europe": {
         "opening_control": 408687464,
-        "in_model_pools": 389724849,
-        "outside_model_pools": 18962615,
-        "modeled_age_and_sex": 387840281,
-        "modeled_sex_age_unknown": 1884568
+        "in_model_pools": 395681539,
+        "outside_model_pools": 13005925,
+        "modeled_age_and_sex": 393795426,
+        "modeled_sex_age_unknown": 1886113
       },
       "Africa": {
         "opening_control": 18751671,
@@ -7711,10 +7755,10 @@
       },
       "no_reviewed_research_region": {
         "opening_control": 98080000,
-        "in_model_pools": 0,
-        "outside_model_pools": 98080000,
+        "in_model_pools": 2497168,
+        "outside_model_pools": 95582832,
         "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "modeled_sex_age_unknown": 2497168
       },
       "Asia": {
         "opening_control": 812681304,
@@ -7726,10 +7770,10 @@
     },
     "world": {
       "opening_control": 1474597752,
-      "in_model_pools": 879278691,
-      "outside_model_pools": 595319061,
-      "modeled_age_and_sex": 865953722,
-      "modeled_sex_age_unknown": 13324969
+      "in_model_pools": 887732549,
+      "outside_model_pools": 586865203,
+      "modeled_age_and_sex": 871908867,
+      "modeled_sex_age_unknown": 15823682
     }
   },
   "opening_count_basis": {
@@ -7743,12 +7787,12 @@
         "pct_of_research_reference": 43.867
       },
       "date_models_from_territorial_returns": {
-        "people": 645222984,
-        "pct_of_research_reference": 40.451
+        "people": 663807651,
+        "pct_of_research_reference": 41.616
       },
       "retained_legacy_estimates": {
-        "people": 124552661,
-        "pct_of_research_reference": 7.809
+        "people": 105967994,
+        "pct_of_research_reference": 6.643
       }
     },
     "scopes": [
@@ -8432,10 +8476,10 @@
       },
       {
         "unit_id": "ottoman_empire",
-        "source_id": null,
-        "sourced_people": 0,
-        "sourced_basis": null,
-        "retained_legacy_people": 24000000
+        "source_id": "ottoman_1897_official_registration",
+        "sourced_people": 18584667,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 5415333
       },
       {
         "unit_id": "paraguay_1900",

@@ -2743,6 +2743,29 @@
     "collection": "nordic_population_1900"
   },
   {
+    "id": "ottoman_1897_official_registration",
+    "title": "1897 Tarihli İlk İstatistik Yıllığı",
+    "publisher": "Tevfik Güran, editor; Turkish State Institute of Statistics (2000), reproducing the Ottoman General Statistical Administration's first statistical yearbook",
+    "url": "https://makale.isam.org.tr/items/3ec91b3b-5c56-404f-abe8-7a6fdae6f470",
+    "locator": "Printed pp. 173–174, Tables 2–4. The administrative population comes from Table 2. The original Rumi 1313 yearbook lists population material in Tables 5–13, pp. 19–29.",
+    "rights": "Numeric facts and historical labels transcribed from the official editor's published tables",
+    "raw_paths": [
+      "registered_population_by_administration_1897.csv",
+      "registered_communities_1897.csv",
+      "registered_age_sex_1897.csv"
+    ],
+    "collection": "ottoman_registration_1897"
+  },
+  {
+    "id": "ottoman_population_mutlu_2003",
+    "title": "Late Ottoman Population and Its Ethnic Distribution",
+    "publisher": "Servet Mutlu, Turkish Journal of Population Studies 25 (2003), pp. 3–38",
+    "url": "https://dergipark.org.tr/tr/download/article-file/213586",
+    "locator": "Printed pp. 12–13, coverage of the 1897 register and sex ratios in Aydın and Ankara; Table III, territorial exclusions",
+    "rights": "Reference only",
+    "collection": "ottoman_registration_1897"
+  },
+  {
     "id": "pe_inei_historical_population_1900",
     "title": "Estado de la población peruana 2000",
     "publisher": "Instituto Nacional de Estadística e Informática",
@@ -2980,9 +3003,14 @@
     "id": "ro_colescu_1899_census_report",
     "title": "Recensământul general al populațiunei României din decembrie 1899: rezultate definitive",
     "publisher": "Serviciul Statisticei Generale, Ministerul Domeniilor (1905)",
-    "url": "https://bibgtkneamt.ebibliophil.ro/mon/recensamantul-general-al-populatiunei-romaniei-din-decembrie-1899-pcx9fwwk",
-    "locator": "Biblioteca Județeană G. T. Kirileanu Neamț, catalogue of the definitive census report",
-    "rights": "Catalogue reference only",
+    "url": "https://archive.org/details/recensamantulgen00serv",
+    "locator": "University of Illinois copy; Table II.A, printed pp. 8–13 (PDF pp. 98–103); Table 12, printed p. XXXIV (PDF p. 54); stable-population county controls, printed p. 4 (PDF p. 94)",
+    "rights": "Numeric facts transcribed from a publicly accessible scan; scan redistribution rights not asserted",
+    "raw_paths": [
+      "raw/regional_age_sex_table_ii_a.csv",
+      "raw/national_age_sex_table_12.csv",
+      "raw/county_sex_controls.csv"
+    ],
     "collection": "romania"
   },
   {

@@ -228,9 +228,9 @@
       "ft_ottoman_balkans"
     ],
     "opening_replacement": null,
-    "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "legacy_unlocated_balance": 5415333,
+    "replacement_minus_legacy": 0,
+    "status": "legacy_control_with_verified_subdivisions",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {
