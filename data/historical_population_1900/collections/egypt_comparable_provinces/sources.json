@@ -1,0 +1,15 @@
+[
+  {
+    "id": "egypt_census_1907_comparable_provinces",
+    "title": "The Census of Egypt Taken in 1907, Arabic edition",
+    "publisher": "Ministry of Finance, National Printing Department, 1909; Princeton University Library digitization",
+    "url": "https://hdl.handle.net/2333.1/jq2bw0q4",
+    "locator": "Table 5, printed pp. 29–32. Page 29 compares the original 1897 counts and the 1897 counts restated for comparison with 1907. Pages 31–32 report both populations and their male and female counts.",
+    "rights": "Historical official publication. Numeric facts transcribed.",
+    "files": {
+      "page_29": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/55/full/1600,/0/default.jpg",
+      "page_31": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/57/full/1600,/0/default.jpg",
+      "page_32": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/58/full/1600,/0/default.jpg"
+    }
+  }
+]

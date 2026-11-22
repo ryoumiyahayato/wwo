@@ -26,9 +26,9 @@
         "khedivate_of_egypt",
         "sultanate_of_zanzibar"
       ],
-      "production_people": 9666780,
-      "production_pct_of_regional_research_estimate": 7.437,
-      "people_with_opening_subdivision": 1489104,
+      "production_people": 14556281,
+      "production_pct_of_regional_research_estimate": 11.199,
+      "people_with_opening_subdivision": 6378605,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -3184,9 +3184,9 @@
         "Africa"
       ],
       "research_people": 10110129,
-      "documented_opening_people": 915109,
+      "documented_opening_people": 5804610,
       "opening_people_including_retained_balances": 10000000,
-      "research_minus_documented": 9195020
+      "research_minus_documented": 4305519
     },
     {
       "comparison_id": "france",
@@ -4251,23 +4251,23 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1329288036,
+    "documented_opening_population": 1334177537,
     "untouched_legacy_population": 101880000,
-    "retained_unlocated_population": 34104208,
+    "retained_unlocated_population": 29214707,
     "authoritative_opening_population": 1465272244,
-    "published_minus_documented_opening": 265786212,
+    "published_minus_documented_opening": 260896711,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 224844706,
       "comparisons_by_scope": {
         "comparable_extent": 2063357,
         "scope_unconfirmed": 86844,
-        "partial_extent": 38790877,
+        "partial_extent": 33901376,
         "adopted_research_series": 426
       },
       "opening_without_benchmark_link": 0,
       "untouched_legacy_controls": -101880000,
-      "unlocated_balances_under_retained_controls": -34104208
+      "unlocated_balances_under_retained_controls": -29214707
     },
     "published_minus_authoritative_opening": 129802004
   }

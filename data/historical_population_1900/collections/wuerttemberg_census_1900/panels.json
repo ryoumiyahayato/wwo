@@ -11,6 +11,21 @@
     "opening_unit_id": "administrative_region:germany_wuerttemberg",
     "opening_from_version": 19,
     "opening_match_population_endpoint": true,
-    "uncertainty": "Age and sex proportions are from the Württemberg census 334 days after the opening. Changes over that interval have no quantified uncertainty."
+    "uncertainty": "Age and sex proportions are from the Württemberg census 334 days after the opening. Changes over that interval have no quantified uncertainty.",
+    "opening_through_version": 19
+  },
+  {
+    "id": "wuerttemberg_1900_detail",
+    "published_scope": "Kingdom of Württemberg, population present",
+    "source_id": "de_wuerttemberg_1900_age_marital",
+    "observed_unit_id": "administrative_region:germany_wuerttemberg",
+    "observed_date": "1900-12-01",
+    "locator": "Table D, printed pp. 13–16, cols. 2–4, lower lines",
+    "definition": "Single-year ages by sex for the population present in the entire kingdom.",
+    "broad_observation": false,
+    "opening_unit_id": "administrative_region:germany_wuerttemberg",
+    "opening_from_version": 20,
+    "opening_match_population_endpoint": true,
+    "uncertainty": "The Württemberg census was 334 days after the opening. Changes over that interval have no quantified uncertainty. Compared with Table G(a), the single-year table puts three fewer men at ages 0–15 and three more at ages 16–29. Both tables match the kingdom total and the total by sex."
   }
 ]

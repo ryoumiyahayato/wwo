@@ -654,6 +654,15 @@
     "collection": "austria_hungary"
   },
   {
+    "id": "ah_hungarian_census_1900_work_status",
+    "title": "Dénombrement de la population des pays de la Sainte Couronne Hongroise en 1900. 10. part. Résumé des résultats",
+    "publisher": "Magyar Királyi Központi Statisztikai Hivatal, Budapest, 1909",
+    "url": "https://www.kshkonyvtar.hu/file-download/L2hvbWUvc2lsaW5mby9hcHBsaWNhdGlvbi93b3JrZGlyL2NrZWRpdG9yQ3VzdG9tRmlsZXMvRsOpbnllcyBFbGVrIGRpZ2l0w6FsaXMgc3RhdGlzenRpa2FpIGvDtm55dnTDoXIvTWFneWFyIFN0YXRpc3p0aWthaSBLw7Z6bGVtw6lueWVrL01TS18wMjcucGRm",
+    "locator": "Part X, Table 48, printed pp. 182–183 (PDF p. 226), nine territories, 1900 columns. Part I, Chapter VII, pp. 138*–139*, summarizes the definitions. The full census controls are in Table 15.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "austria_hungary"
+  },
+  {
     "id": "ah_cisleithania_census_1900_ages",
     "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Alters- und Familienstandsgliederung",
     "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
@@ -723,6 +732,15 @@
     "raw_path": "literacy.csv",
     "related_raw_path": "locality_population_size.csv",
     "collection": "austrian_crown_1900"
+  },
+  {
+    "id": "de_baden_1900_age_marital",
+    "title": "Statistisches Jahrbuch für das Grossherzogtum Baden, 1902",
+    "publisher": "Grossherzogliches Statistisches Bureau",
+    "url": "https://digital.blb-karlsruhe.de/blbihd/periodical/structure/1464934",
+    "locator": "Table II.A.1c, printed p. 39, age by sex. Table II.A.1d, printed p. 40, civil status by sex in the final row.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "baden_census_1900"
   },
   {
     "id": "belgium_census_provinces_1890_1900",
@@ -1280,6 +1298,20 @@
     ],
     "boundary_note": "The original booklet is located in the archive catalogue. The numbers are from the 1911 transcription. Its table leaves the Oriente population blank and lists the Galápagos separately. The article describes the claimed Oriente as larger than the region then occupied by Ecuador. It does not define the population perimeter of the 1,500,000 headline. The 1894 Chicago estimate gives the same headline but a different breakdown and does not validate this estimate.",
     "collection": "ecuador_population"
+  },
+  {
+    "id": "egypt_census_1907_comparable_provinces",
+    "title": "The Census of Egypt Taken in 1907, Arabic edition",
+    "publisher": "Ministry of Finance, National Printing Department, 1909; Princeton University Library digitization",
+    "url": "https://hdl.handle.net/2333.1/jq2bw0q4",
+    "locator": "Table 5, printed pp. 29–32. Page 29 compares the original 1897 counts and the 1897 counts restated for comparison with 1907. Pages 31–32 report both populations and their male and female counts.",
+    "rights": "Historical official publication. Numeric facts transcribed.",
+    "files": {
+      "page_29": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/55/full/1600,/0/default.jpg",
+      "page_31": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/57/full/1600,/0/default.jpg",
+      "page_32": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/58/full/1600,/0/default.jpg"
+    },
+    "collection": "egypt_comparable_provinces"
   },
   {
     "id": "el_salvador_1901_diario_oficial",
