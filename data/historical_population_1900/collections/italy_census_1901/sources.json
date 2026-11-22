@@ -6,5 +6,29 @@
     "url": "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf",
     "locator": "Table XX(b), printed p. 109; methods pp. LVIII–LX; civil status pp. LXIV–LXV.",
     "rights": "Historic public statistical return. Numeric facts transcribed."
+  },
+  {
+    "id": "it_1901_census_v4_occupation",
+    "title": "Censimento della popolazione del Regno al 10 febbraio 1901, vol. IV, Professioni e condizioni",
+    "publisher": "Ministero di Agricoltura, Industria e Commercio, Direzione generale della statistica",
+    "url": "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7956cp1901_v4%2BOCR_ottimizzato.pdf",
+    "locator": "Table I(c), pp. 164–169, persons born through 1891 by occupation and sex; Table VII(c), p. 306, registered real property",
+    "rights": "Historic public statistical return. Numeric facts transcribed."
+  },
+  {
+    "id": "it_1901_census_v2_literacy",
+    "title": "Censimento della popolazione del Regno al 10 febbraio 1901, vol. II",
+    "publisher": "Ministero di Agricoltura, Industria e Commercio, Direzione generale della statistica",
+    "url": "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/rav237689cp1901_vol2%2BOCR_ottimizzato.pdf",
+    "locator": "Table III(c), printed pp. 338–341, reported ability to read",
+    "rights": "Historic public statistical return. Numeric facts transcribed."
+  },
+  {
+    "id": "it_1901_census_v5_industrial_position",
+    "title": "Censimento della popolazione del Regno al 10 febbraio 1901, vol. V",
+    "publisher": "Ministero di Agricoltura, Industria e Commercio, Direzione generale della statistica",
+    "url": "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf#page=302",
+    "locator": "Table XXXII, printed pp. 144–145; national control §18, printed p. LXXXV and Prospetto XLV",
+    "rights": "Historic public statistical return. Numeric facts transcribed."
   }
 ]

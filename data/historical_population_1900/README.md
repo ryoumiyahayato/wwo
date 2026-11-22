@@ -1,6 +1,12 @@
 # 1900 年全球人口数据综合报告
 
-**v23 状态为 PARTIAL。** 1900-01-01 游戏人口为 **1,468,068,587 人**。其中 **1,336,973,880 人**有可追溯历史来源，**131,094,707 人**沿用旧估计。**1,245,730,646 人**进入 **987 个互斥历史分区**。全球研究基准为 **1,595,074,248 人**。两套总数的差额包含统计范围差异。[发布统计](summary.json) · [新游戏开局](opening_v23.json) · [逐研究区与游戏账户的差额](world_accounts.json)
+**v24 状态为 PARTIAL。** 1900-01-01 游戏人口为 **1,468,068,587 人**。其中 **1,336,973,880 人**有可追溯历史来源，**131,094,707 人**沿用旧估计。**1,245,730,646 人**进入 **999 个互斥历史分区**。全球研究基准为 **1,595,074,248 人**。两套总数的差额包含统计范围差异。[发布统计](summary.json) · [新游戏开局](opening_v24.json) · [逐研究区与游戏账户的差额](world_accounts.json)
+
+奥德 12 县 12,811,936 人由两期同范围县普查插值。各县及阿格拉本部采用当地调查的性别比例、联合省各性别的年龄分布。联合省宗教已分配 47,600,488 人，另有 293 人未分配。英国直辖地区与两个土邦分别入账。[奥德和阿格拉原表](collections/india_local_areas_1901)
+
+西班牙半岛及两群岛 18,511,807 人按年底普查的年龄、性别和婚姻比例分组。北非属地逐档扣除。具名人口入账前，全球有 810,135,402 人同时具备年龄和性别，7,226,599 人有性别且年龄未知，650,706,586 人在年龄性别模型范围之外。[西班牙原表](collections/spain_census_1900) · [年龄开局输入](opening_structure_v24.json)
+
+意大利 17 区分配职业和登记地产申报，15 区分配阅读，14 区分配工业从业身份。各维度独立，有职业、明示无职业和职业未知保留区别。埃及三省按 1897 年各省原数分配宗教，共 2,452,603 人。[意大利原表](collections/italy_census_1901) · [埃及原表](collections/egypt_religion_1897) · [社会属性开局输入](opening_social_v24.json)
 
 意大利 17 个统计区按两期官方地区总数分配到原来的全国开局控制，再用各区 1901 年元旦年龄表分组。全国婚姻保留原范围。印度兰普尔与特赫里使用两期本地男女总数和两土邦合计的分性别年龄比例。迈索尔五账户合计保留原州控制。各地使用原普查男女比例，军站男女总数按两期内插，按性别配置的年龄档来自州级普查。 [意大利原表](collections/italy_census_1901) · [印度原表](collections/india_local_areas_1901) · [加拿大祖源](collections/canada_origin_1901)
 
@@ -195,7 +201,7 @@ cargo run --locked --manifest-path rust/strategic-host/Cargo.toml --bin wwo-form
 cargo run --locked --manifest-path rust/strategic-host/Cargo.toml --bin wwo-formal-state -- inspect-market-livelihood russian_empire
 ```
 
-`population_1900.jsonl.gz` 每行含单位、父级、日期、数值、来源、页表、口径、方法、质量和地域状态。地理有效期与调查日期分别保存。用 `record_id` 从城市和地域索引回查原行，用 `source_id` 查出版资料。研究观测、母项、子项和不同史料可指向同一批人。正式新游戏读取 `opening_v23.json`、`opening_structure_v23.json` 和 `opening_social_v23.json`。完整分区之和等于父级。部分分区之和加未定位余额等于相应开局控制。v1 至 v22 存档继续读取冻结的对应输入。
+`population_1900.jsonl.gz` 每行含单位、父级、日期、数值、来源、页表、口径、方法、质量和地域状态。地理有效期与调查日期分别保存。用 `record_id` 从城市和地域索引回查原行，用 `source_id` 查出版资料。研究观测、母项、子项和不同史料可指向同一批人。正式新游戏读取 `opening_v24.json`、`opening_structure_v24.json` 和 `opening_social_v24.json`。完整分区之和等于父级。部分分区之和加未定位余额等于相应开局控制。v1 至 v23 存档继续读取冻结的对应输入。
 
 正式游戏沿用 Rust `Population`。迁移、具名化和征召共用人口余额。模拟出生及死亡进入同一人口日志，旧原生存档和旧平面快照按原开局恢复。`inspect-population city:<key>` 返回原日期城市参考，`inspect-population history:<unit-id>` 查询同一历史单位的地理、人数和人口结构原表。`inspect-food-history` 查询已录的住户账本。`inspect-age-range <world|unit-id> <min> <max> [<native-save>]` 返回年龄区间确定人数和可能人数，并单列已服役者。年龄区间是人口统计量，职业资格和各地征兵制度仍缺地区参数。全球历史年龄分层、消费篮子、城乡与地图边界仍待核。[Rust 入口和存档说明](../../rust/strategic-host/README.md) · [正式人口读取器](../../rust/strategic-host/src/formal_population/opening.rs)
 

@@ -1332,6 +1332,15 @@
     "collection": "egypt_comparable_provinces"
   },
   {
+    "id": "egypt_1897_markaz_religion",
+    "title": "Census of Egypt 1897, provincial subtotals transcribed in Demographic Change in Rural Egypt, 1882–1917",
+    "publisher": "Hirofumi Tanada, Institute of Economic Research, Hitotsubashi University",
+    "url": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap2-1.htm",
+    "locator": "Appendix 2-1 (MARKAZ), religion columns of province totals",
+    "rights": "Historical census counts. Numeric facts transcribed.",
+    "collection": "egypt_religion_1897"
+  },
+  {
     "id": "el_salvador_1901_diario_oficial",
     "title": "Dirección General de Estadística, Resumen del censo de 1901",
     "publisher": "Diario Oficial, San Salvador, 13 July 1901. Universidad Centroamericana José Simeón Cañas digitization.",
@@ -1651,6 +1660,15 @@
     "collection": "india_local_areas_1901"
   },
   {
+    "id": "india_oudh_census_1901_districts",
+    "title": "Census of India 1901, Vol. XVI-A, North-Western Provinces and Oudh, Imperial Tables",
+    "publisher": "Census of India",
+    "url": "https://censusindia.gov.in/nada/index.php/catalog/31349/download/34530/140099_1901.pdf#page=10",
+    "locator": "Table II pp. 5–6, comparable-boundary district populations; Table I pp. 2–3, sex counts; Table VI pp. 38–40, district religion",
+    "rights": "Historic public census. Numeric facts transcribed.",
+    "collection": "india_local_areas_1901"
+  },
+  {
     "id": "india_1901_occupation_table_xv_part_iii",
     "title": "Census of India, 1901, Vol. I-A, India, Part II: Tables",
     "publisher": "Office of the Superintendent of Government Printing, India, 1903",
@@ -1832,6 +1850,33 @@
     "publisher": "Ministero di Agricoltura, Industria e Commercio, Direzione generale della statistica",
     "url": "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf",
     "locator": "Table XX(b), printed p. 109; methods pp. LVIII–LX; civil status pp. LXIV–LXV.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "italy_census_1901"
+  },
+  {
+    "id": "it_1901_census_v4_occupation",
+    "title": "Censimento della popolazione del Regno al 10 febbraio 1901, vol. IV, Professioni e condizioni",
+    "publisher": "Ministero di Agricoltura, Industria e Commercio, Direzione generale della statistica",
+    "url": "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7956cp1901_v4%2BOCR_ottimizzato.pdf",
+    "locator": "Table I(c), pp. 164–169, persons born through 1891 by occupation and sex; Table VII(c), p. 306, registered real property",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "italy_census_1901"
+  },
+  {
+    "id": "it_1901_census_v2_literacy",
+    "title": "Censimento della popolazione del Regno al 10 febbraio 1901, vol. II",
+    "publisher": "Ministero di Agricoltura, Industria e Commercio, Direzione generale della statistica",
+    "url": "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/rav237689cp1901_vol2%2BOCR_ottimizzato.pdf",
+    "locator": "Table III(c), printed pp. 338–341, reported ability to read",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "italy_census_1901"
+  },
+  {
+    "id": "it_1901_census_v5_industrial_position",
+    "title": "Censimento della popolazione del Regno al 10 febbraio 1901, vol. V",
+    "publisher": "Ministero di Agricoltura, Industria e Commercio, Direzione generale della statistica",
+    "url": "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf#page=302",
+    "locator": "Table XXXII, printed pp. 144–145; national control §18, printed p. LXXXV and Prospetto XLV",
     "rights": "Historic public statistical return. Numeric facts transcribed.",
     "collection": "italy_census_1901"
   },
@@ -2775,6 +2820,15 @@
       }
     ],
     "collection": "sierra_leone_population"
+  },
+  {
+    "id": "es_census_1900_age_marital",
+    "title": "Censo de la población de España en 1900, tomo III",
+    "publisher": "Instituto Geográfico y Estadístico, archived by Instituto Geográfico Nacional",
+    "url": "https://www.ign.es/web/BibliotecaIGN/Biblioteca/312-C-1900%283%29.pdf",
+    "locator": "Printed pp. 64–65, 292–293, and 296–297",
+    "rights": "Historical census counts. Numeric facts transcribed.",
+    "collection": "spain_census_1900"
   },
   {
     "id": "swiss_federal_census_comparison_1911",

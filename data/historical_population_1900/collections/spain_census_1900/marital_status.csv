@@ -1,0 +1,21 @@
+panel,label,category,both,male,female
+es_census_1900_nacional,Solteros,single,10310425,5200816,5109609
+es_census_1900_nacional,Casados,married,7021512,3491938,3529574
+es_census_1900_nacional,Viudos,widowed,1280081,391452,888629
+es_census_1900_nacional,No consta,unknown,6068,3615,2453
+es_census_1900_ceuta,Solteros,single,8660,6180,2480
+es_census_1900_ceuta,Casados,married,3687,2313,1374
+es_census_1900_ceuta,Viudos,widowed,897,350,547
+es_census_1900_ceuta,No consta,unknown,25,17,8
+es_census_1900_melilla,Solteros,single,6117,4466,1651
+es_census_1900_melilla,Casados,married,2357,1278,1079
+es_census_1900_melilla,Viudos,widowed,463,95,368
+es_census_1900_melilla,No consta,unknown,19,15,4
+es_census_1900_otras_posesiones,Solteros,single,972,802,170
+es_census_1900_otras_posesiones,Casados,married,392,286,106
+es_census_1900_otras_posesiones,Viudos,widowed,92,54,38
+es_census_1900_otras_posesiones,No consta,unknown,0,0,0
+es_census_1900_peninsula_islas,Solteros,single,10294676,5189368,5105308
+es_census_1900_peninsula_islas,Casados,married,7015076,3488061,3527015
+es_census_1900_peninsula_islas,Viudos,widowed,1278629,390953,887676
+es_census_1900_peninsula_islas,No consta,unknown,6024,3583,2441

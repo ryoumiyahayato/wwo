@@ -1,0 +1,16 @@
+unit_id,name,row_role,source_row,population,hindu,sikh,jain,buddhist,parsi,muslim,christian,jewish,arya,brahmo
+raj_oudh_lucknow,Lucknow,district,37,793241,621762,156,668,63,121,162800,7247,18,378,28
+raj_oudh_unao,Unao,district,38,976639,898014,12,8,1,0,78278,136,0,190,0
+raj_oudh_rae_bareli,Rae Bareli,district,39,1033761,943788,6,46,6,0,89728,117,0,68,2
+raj_oudh_sitapur,Sitapur,district,40,1175473,999927,112,261,0,0,174349,751,0,73,0
+raj_oudh_hardoi,Hardoi,district,41,1092834,973752,13,15,0,0,117875,513,0,666,0
+raj_oudh_kheri,Kheri,district,42,905138,780659,88,21,12,0,123702,473,0,183,0
+raj_oudh_fyzabad,Fyzabad,district,43,1225374,1086637,762,63,8,5,136095,1502,5,297,0
+raj_oudh_gonda,Gonda,district,44,1403195,1189005,315,8,0,1,213451,321,0,94,0
+raj_oudh_bahraich,Bahraich,district,45,1051347,856552,730,82,0,0,193674,221,5,83,0
+raj_oudh_sultanpur,Sultanpur,district,46,1083904,963879,151,2,0,1,119740,103,0,28,0
+raj_oudh_partabgarh,Partabgarh,district,47,912848,817899,69,8,0,0,94680,102,0,90,0
+raj_oudh_bara_banki,Bara Banki,district,48,1179323,978604,33,972,0,0,199474,188,1,51,0
+oudh,Oudh,aggregate,,12833077,11110478,2447,2154,90,128,1703846,11674,29,2201,30
+oudh_lucknow_division,Lucknow Division,aggregate,,5977086,5217902,387,1019,82,121,746732,9237,18,1558,30
+oudh_fyzabad_division,Fyzabad Division,aggregate,,6855991,5892576,2060,1135,8,7,957114,2437,11,643,0

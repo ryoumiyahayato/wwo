@@ -17,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 23
+OPENING_VERSION = 24
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -280,7 +280,7 @@ def main():
     structural=dimensions(observations)
     structural.append(england_wales_habitations())
     structure_opening=opening_structure(selection, observations, version=OPENING_VERSION)
-    social_opening=opening_social(selection, version=OPENING_VERSION)
+    social_opening=opening_social(selection, observations, version=OPENING_VERSION)
     social_coverage=Counter()
     for region in social_opening["regions"]:
         for dimension, allocation in region["marginal_distributions"].items():

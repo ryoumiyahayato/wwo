@@ -19,3 +19,11 @@ Opening age bands use the applicable parent age tables. The locality rows in thi
 ### Local age and sex at opening
 
 Five accounts sum to 2,797,024 males and 2,742,375 females in the 1901 census. From v23 the division and districts use their own reported sex shares. The separately reported Bangalore station uses both census dates for sex counts. Within each sex, the models use the 1901 all-Mysore age table. Local age differences remain unknown. [Talukwar Table I PDF pp. 19–31](https://censusindia.gov.in/nada/index.php/catalog/32404/download/35585/138949_1901.pdf#page=19)
+
+## Agra and Oudh
+
+Provincial Table II, pp. 5–6, rows 37–48, compares the 12 Oudh districts on the 1901 boundary. Their counts close to 12,650,831 in 1891 and 12,833,077 in 1901. The main Fyzabad row includes the Ajodhya fair. The source's alternate redistribution to Allahabad and other districts is excluded. The United Provinces princely states have separate returns. [Table II](https://censusindia.gov.in/nada/index.php/catalog/31349/download/34530/140099_1901.pdf#page=10)
+
+The twelve district openings sum to 12,811,936. Agra retains 34,788,845, including 294 people not identified by the provincial census. Both are parts of the 47,600,781 joint opening. Table I independently reports sex by locality. The local sex ratios and combined age distribution within each sex are used at opening. District-specific age variation is unquantified. [Provincial Table I](https://censusindia.gov.in/nada/index.php/catalog/31349/download/34530/140099_1901.pdf#page=6)
+
+Table VI gives ten main religious groups. District counts match each division and Oudh. The Agra footnote counts two New Hindu Vedantists in Almora. Its 294-person comparable-area difference remains unassigned for religion. [Religion extract](oudh_religion.csv) · [Table VI](https://censusindia.gov.in/nada/index.php/catalog/31349/download/34530/140099_1901.pdf#page=41)
