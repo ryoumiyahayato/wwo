@@ -94,20 +94,27 @@ fn landscape_material(page: LandscapePage) -> LandCover {
 }
 
 fn geographic_ground_tint(ll: vec2f, fallback: vec3f) -> vec3f {
-    if textureNumLayers(landscape_data)<=1u || view.map_style.z<6. {return fallback;}
-    var page=landscape_page(ll,7u,true);
-    if page.fade<.5 {
-        page=landscape_page(ll,6u,true);
+    if textureNumLayers(landscape_data) <= 1u { return fallback; }
+    var color = fallback;
+    var remaining = 1.;
+    for (var level = 7u; level >= 6u; level -= 1u) {
+        let opacity = natural_lod_weight(level);
+        if opacity <= 0. { continue; }
+        let page = landscape_page(ll,level,true);
+        let visible = remaining*opacity*page.fade;
+        if visible <= 0. { continue; }
+        let land = landscape_material(page);
+        color += visible * (
+            (vec3f(.255,.41,.31)-fallback)*land.forest
+            + (vec3f(.47,.53,.33)-fallback)*(land.grass+land.shrub)
+            + (vec3f(.41,.46,.34)-fallback)*land.damp
+            + (vec3f(.61,.57,.36)-fallback)*land.crop
+            + (vec3f(.73,.61,.44)-fallback)*land.bare
+            + (vec3f(.89,.92,.91)-fallback)*land.snow
+        );
+        remaining -= visible;
     }
-    if page.fade<=0. {return fallback;}
-    let land=landscape_material(page);
-    return fallback
-        + (vec3f(.255,.41,.31)-fallback)*land.forest
-        + (vec3f(.47,.53,.33)-fallback)*(land.grass+land.shrub)
-        + (vec3f(.41,.46,.34)-fallback)*land.damp
-        + (vec3f(.61,.57,.36)-fallback)*land.crop
-        + (vec3f(.73,.61,.44)-fallback)*land.bare
-        + (vec3f(.89,.92,.91)-fallback)*land.snow;
+    return color;
 }
 
 fn landscape_survey_mask(ll: vec2f, mpp: f32) -> f32 {

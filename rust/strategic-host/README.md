@@ -1,6 +1,6 @@
 # WWO Rust Windows 游戏
 
-`wwo-map-lab` 是当前原生 Windows 游戏入口。在此目录用 `cargo build --release --locked --bin wwo-map-lab --bin wwo-formal-state` 构建。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [仓库 README](../../README.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。界面字形更新使用归档项目和 Pillow，运行 `python tools/build_hud.py <R68 项目> <游戏数据目录>`。
+`wwo-map-lab` 是当前原生 Windows 游戏入口。正式 Windows 构建由 GitHub CI 执行。本机验证使用固定工作树内的 `tools/wwo-cargo.ps1`。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [仓库 README](../../README.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。界面字形更新使用归档项目和 Pillow，运行 `python tools/build_hud.py <R68 项目> <游戏数据目录>`。
 
 ## 军事地图方格与装甲战场
 
@@ -251,8 +251,8 @@ Z7 水文按复杂度加密。QWG 含边界的单元、Natural Earth 的岸线�
 
 | 用途 | 目录 |
 | --- | --- |
-| Rust 主线源码 | `wwo-character-integration/rust/strategic-host` |
-| Cargo 构建缓存 | `offline-map-sources/natural-terrain/target`，使用 `CARGO_TARGET_DIR` 指向该目录 |
+| Rust 正式构建工作树 | `wwo-population-foundation-v32` |
+| Cargo 构建缓存 | `.wwo-historical-population-v31-target`，由 `rust/strategic-host/tools/wwo-cargo.ps1` 管理 |
 | 当前 Windows 运行目录 | `wwo/local-artifacts/strategic-map-phase4`，随 EXE 保留所需 `data/` |
 | 自然地理候选和回退 | 当前 Windows 运行目录下的 `natural-terrain-preview`，同机位交付截图在 `z7-review` |
 | 地理输入和来源记录 | `offline-map-sources` |
