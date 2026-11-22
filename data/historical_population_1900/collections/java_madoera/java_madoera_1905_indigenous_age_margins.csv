@@ -1,0 +1,4 @@
+unit_id,region,date,registration,under16_both,printed_16_to_50_both,printed_50_plus_both,total_1905,total_1900,opening_indigenous,status,source_locator,crosscheck_1911_ocr_locator
+java_madoera_djokjakarta,Djokjakarta,1905-12-31,inlanders,351168,674460,85186,1110814,1076993,1020879,opening_candidate,CBS Jaarcijfers Kolonien 1906 III.IX pp. 8-9 and 1911 IX pp. 8-9,lines 6599-6601
+java_madoera_madioen,Madioen,1905-12-31,inlanders,620694,617216,104886,1342796,1227761,1204050,opening_candidate,CBS Jaarcijfers Kolonien 1906 III.IX pp. 8-9 and 1911 IX pp. 8-9,lines 6627-6629
+java_madoera_madoera,Madoera,1905-12-31,inlanders,680016,691451,116458,1487925,1751498,1725213,research_conflicting_endpoint,CBS Jaarcijfers Kolonien 1906 III.IX pp. 8-9 and 1911 IX pp. 8-9,lines 6650-6652

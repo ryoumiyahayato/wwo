@@ -1124,7 +1124,13 @@
     "title": "Données historiques de la Statistique générale de France — Recensements de 1851 à 1921",
     "publisher": "Statistique générale de la France; ICPSR transcription; Insee electronic tables (12 January 2010)",
     "url": "https://www.insee.fr/fr/statistiques/2653233",
-    "locator": "REC_T256.dbf V21/V114 (1896), V22/V120 (1901); REC_T24.dbf V132 (1896); REC_T214.dbf V89/V78 (1901). libelles_var_rec.dbf specifies the variables.",
+    "locator": "REC_T256.dbf V21/V114 (1896), V22/V120 (1901), V43/V66 (1896 residence), V118/V119 (1901 residence); REC_T24.dbf V132 (1896); REC_T214.dbf V89/V78 (1901); REC_T257.dbf V7–V34 (1901 occupations). libelles_var_rec.dbf specifies the variables.",
+    "raw_paths": [
+      "france_1901_department_occupation.csv",
+      "france_1901_department_occupation_source.md",
+      "france_1896_1901_department_residence.csv",
+      "france_1896_1901_department_residence_source.md"
+    ],
     "rights": "Source: Insee, 2010-01-12. Licence Ouverte / Open Licence 2.0 (Etalab); field extraction, identity mapping and interpolations by WWO.",
     "rights_url": "https://www.insee.fr/fr/information/2008466",
     "dates_url": "https://www.bnsp.insee.fr/ark:/12148/bc6p06z2rd0.pdf",
@@ -1171,7 +1177,9 @@
     "locator": "Table I, printed pp. 364–365, Staat row. Control in Statistisches Jahrbuch für das Deutsche Reich 1900, Table I.11, p. 10.",
     "raw_paths": [
       "prussia_1895_occupation.csv",
-      "prussia_1895_occupation_source.md"
+      "prussia_1895_occupation_source.md",
+      "prussia_1895_industrial_employment_position.csv",
+      "prussia_1895_industrial_employment_position_source.md"
     ],
     "rights": "Historical published numeric facts.",
     "collection": "cities_europe"
@@ -2339,7 +2347,9 @@
     "locator": "Oost-Indië, III.I.A printed p. 2 and III.IX printed pp. 8–9, December 1905 counts.",
     "raw_paths": [
       "java_madoera_1905_indigenous_age_sex_matched.csv",
-      "DEMOGRAPHY.md"
+      "java_madoera_1905_indigenous_age_margins.csv",
+      "DEMOGRAPHY.md",
+      "JAVA_AGE_FOLLOWUP.md"
     ],
     "rights": "Published historical numeric facts",
     "collection": "java_madoera"
@@ -3009,6 +3019,19 @@
       "README.md"
     ],
     "collection": "qing_hubei_shandong_prefectures"
+  },
+  {
+    "id": "cao_qing_jiangxi_prefecture_reconstruction",
+    "title": "中国人口史，第五卷《清时期》，表 12–13",
+    "publisher": "曹树基，复旦大学出版社，2001 年。黄志繁、杨金鹏，《江西社会科学》2016 年第 6 期复列表。",
+    "url": "https://yangtze.silkroadinfo.org.cn/2016/9/18/20160918094227.pdf#page=2",
+    "locator": "原表第 535 页；复列表第 124 页表 1，1865 和 1910 两列。",
+    "rights": "Published numeric facts",
+    "raw_paths": [
+      "cao_jiangxi_table_12_13.csv",
+      "README.md"
+    ],
+    "collection": "qing_jiangxi_prefectures"
   },
   {
     "id": "lu_qing_shaangan_prefecture_reconstruction",

@@ -1,0 +1,16 @@
+role,parent_unit_id,unit_id,name,en_name,chgis_id,population_1865,population_1910
+area,qing_hist_jiangxi,qing_hist_jiangxi_nanchang,南昌府,Nanchang Fu,hvd_32593,1871000,2164000
+area,qing_hist_jiangxi,qing_hist_jiangxi_jiujiang,九江府,Jiujiang Fu,hvd_32608,501000,600000
+area,qing_hist_jiangxi,qing_hist_jiangxi_nankang,南康府,Nankang Fu,hvd_32632,477000,546000
+area,qing_hist_jiangxi,qing_hist_jiangxi_ruizhou,瑞州府,Ruizhou Fu,hvd_32628,378000,464000
+area,qing_hist_jiangxi,qing_hist_jiangxi_linjiang,临江府,Linjiang Fu,hvd_32539,524000,589000
+area,qing_hist_jiangxi,qing_hist_jiangxi_jianchang,建昌府,Jianchang Fu,hvd_32524,471000,539000
+area,qing_hist_jiangxi,qing_hist_jiangxi_yuanzhou,袁州府,Yuanzhou Fu,hvd_32573,653000,817000
+area,qing_hist_jiangxi,qing_hist_jiangxi_raozhou,饶州府,Raozhou Fu,hvd_32621,1238000,1522000
+area,qing_hist_jiangxi,qing_hist_jiangxi_guangxin,广信府,Guangxin Fu,hvd_32624,1181000,1410000
+area,qing_hist_jiangxi,qing_hist_jiangxi_fuzhou,抚州府,Fuzhou Fu,hvd_32536,1011000,1192000
+area,qing_hist_jiangxi,qing_hist_jiangxi_jian,吉安府,Ji'an Fu,hvd_32549,1415000,1852000
+area,qing_hist_jiangxi,qing_hist_jiangxi_ganzhou,赣州府,Ganzhou Fu,hvd_32567,1645000,1892000
+area,qing_hist_jiangxi,qing_hist_jiangxi_ningdu,宁都州,Ningdu Directly Administered Zhou,hvd_32578,621000,711000
+area,qing_hist_jiangxi,qing_hist_jiangxi_nanan,南安府,Nan'an Fu,hvd_32552,580000,663000
+control,qing_empire,qing_hist_jiangxi,江西省,Jiangxi Province,hvd_98237,12566000,14961000

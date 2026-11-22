@@ -1,0 +1,11 @@
+[
+  {
+    "id": "cao_qing_jiangxi_prefecture_reconstruction",
+    "title": "中国人口史，第五卷《清时期》，表 12–13",
+    "publisher": "曹树基，复旦大学出版社，2001 年。黄志繁、杨金鹏，《江西社会科学》2016 年第 6 期复列表。",
+    "url": "https://yangtze.silkroadinfo.org.cn/2016/9/18/20160918094227.pdf#page=2",
+    "locator": "原表第 535 页；复列表第 124 页表 1，1865 和 1910 两列。",
+    "rights": "Published numeric facts",
+    "raw_paths": ["cao_jiangxi_table_12_13.csv", "README.md"]
+  }
+]

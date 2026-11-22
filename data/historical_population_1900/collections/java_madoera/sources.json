@@ -48,7 +48,8 @@
     "publisher": "Centraal Bureau voor de Statistiek, The Hague",
     "url": "https://seadelt.net/Asset/Source/Document_ID-120_No-01.pdf",
     "locator": "Oost-Indië, III.I.A printed p. 2 and III.IX printed pp. 8–9, December 1905 counts.",
-    "raw_paths": ["java_madoera_1905_indigenous_age_sex_matched.csv", "DEMOGRAPHY.md"],
+    "raw_paths": ["java_madoera_1905_indigenous_age_sex_matched.csv", "java_madoera_1905_indigenous_age_margins.csv",
+                  "DEMOGRAPHY.md", "JAVA_AGE_FOLLOWUP.md"],
     "rights": "Published historical numeric facts"
   }
 ]
