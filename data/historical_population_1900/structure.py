@@ -441,6 +441,7 @@ def age_sex_panels():
         HERE / "us_territorial_ages_1900", HERE / "baden_census_1900", HERE / "italy_census_1901",
         HERE / "brazil_census_1900_age", HERE / "spain_census_1900", HERE / "india_remaining_princely_demography",
         HERE / "argentina_age_1895_1914", HERE / "australia_age_1901",
+        HERE / "philippines_surigao_opening",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))

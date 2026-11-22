@@ -1164,6 +1164,19 @@
     "collection": "cities_europe"
   },
   {
+    "id": "de_prussia_1895_occupational_census",
+    "title": "Principal occupations in the 14 June 1895 Census of Prussia",
+    "publisher": "Imperial Statistical Office census returns reproduced in Zeitschrift des Oberschlesischen Berg- und Hüttenmännischen Vereins, 1896",
+    "url": "https://sbc.org.pl/Content/429814/PDF/iii4217-1896-10_11-0001.pdf",
+    "locator": "Table I, printed pp. 364–365, Staat row. Control in Statistisches Jahrbuch für das Deutsche Reich 1900, Table I.11, p. 10.",
+    "raw_paths": [
+      "prussia_1895_occupation.csv",
+      "prussia_1895_occupation_source.md"
+    ],
+    "rights": "Historical published numeric facts.",
+    "collection": "cities_europe"
+  },
+  {
     "id": "us_gazetteer_places_2024",
     "title": "2024 Gazetteer Files, national places",
     "publisher": "U.S. Census Bureau",
@@ -1486,7 +1499,8 @@
       "table_xi_province_markaz_source_rows.csv",
       "table_5_sex_scope_controls.csv",
       "table_viii_national_age_sex.csv",
-      "README.md"
+      "README.md",
+      "BEHEIRA_SOURCES.md"
     ],
     "rights": "Published historical numeric facts. Digital facsimile held by Arabic Collections Online.",
     "collection": "egypt_age_1907"
@@ -2867,6 +2881,28 @@
     "collection": "philippines_opening_1900"
   },
   {
+    "id": "ph_commission_1900_surigao_guide",
+    "title": "Report of the Philippine Commission to the President, Volume III",
+    "publisher": "U.S. Philippine Commission / Government Printing Office (1901)",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Report_of_the_Philippine_commission_to_the_President._-_January_31%2C_1900%28-December_20%2C_1900%29_%28IA_aex9637.0001.003.umich.edu%29.pdf",
+    "locator": "Printed p. 111, Third District or Province of Surigao, Number of Inhabitants, citing the official guide of 1898",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "observations.jsonl"
+    ],
+    "corroboration": {
+      "title": "A Pronouncing Gazetteer and Geographical Dictionary of the Philippine Islands",
+      "publisher": "U.S. War Department / Government Printing Office (1902)",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/A_pronouncing_gazetteer_and_geographical_dictionary_of_the_Philippine_islands_.._%28IA_pronouncinggazet00unit%29.pdf",
+      "locator": "Island and province population table, Surigao footnote"
+    },
+    "boundary_reference": {
+      "establishment": "https://lawphil.net/statutes/acts/act1901/act_127_1901.html",
+      "post_census_change": "https://lawphil.net/statutes/acts/act1903/act_787_1903.html"
+    },
+    "collection": "philippines_surigao_opening"
+  },
+  {
     "id": "borchgrevink_southern_cross_expedition",
     "title": "First on the Antarctic Continent: Being an Account of the British Antarctic Expedition, 1898–1900",
     "publisher": "Carsten E. Borchgrevink, George Newnes, London, 1901",
@@ -3004,14 +3040,18 @@
     "title": "Recensământul general al populațiunei României din decembrie 1899: rezultate definitive",
     "publisher": "Serviciul Statisticei Generale, Ministerul Domeniilor (1905)",
     "url": "https://archive.org/details/recensamantulgen00serv",
-    "locator": "University of Illinois copy; Table II.A, printed pp. 8–13 (PDF pp. 98–103); Table 12, printed p. XXXIV (PDF p. 54); stable-population county controls, printed p. 4 (PDF p. 94)",
+    "locator": "University of Illinois copy; Tables I, II.A, III.1–4.A, IV.A and V.A; Table 12, printed p. XXXIV (PDF p. 54)",
     "rights": "Numeric facts transcribed from a publicly accessible scan; scan redistribution rights not asserted",
     "raw_paths": [
       "raw/regional_age_sex_table_ii_a.csv",
       "raw/national_age_sex_table_12.csv",
       "raw/county_sex_controls.csv",
       "raw/county_age_sex_table_ii_a_published_bands.csv",
-      "raw/county_age_sex_table_ii_a_reconciled_bands.csv"
+      "raw/county_age_sex_table_ii_a_reconciled_bands.csv",
+      "raw/romania_1899_county_religion_table_iva.csv",
+      "raw/romania_1899_county_literacy_table_va.csv",
+      "raw/romania_1899_county_residence_table_i.csv",
+      "raw/romania_1899_county_marital_status_table_iii.csv"
     ],
     "collection": "romania"
   },

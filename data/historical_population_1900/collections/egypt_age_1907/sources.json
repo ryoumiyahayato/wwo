@@ -6,7 +6,7 @@
     "url": "https://sites.dlib.nyu.edu/viewer/books/princeton_aco003741/display",
     "locator": "Table XI, printed p. 123 onward, age and sex by reported literacy, 29 April 1907. National comparison in Table VIII, printed p. 116.",
     "raw_paths": ["table_xi_opening_age_sex.csv", "table_xi_province_markaz_source_rows.csv",
-                  "table_5_sex_scope_controls.csv", "table_viii_national_age_sex.csv", "README.md"],
+                  "table_5_sex_scope_controls.csv", "table_viii_national_age_sex.csv", "README.md", "BEHEIRA_SOURCES.md"],
     "rights": "Published historical numeric facts. Digital facsimile held by Arabic Collections Online."
   }
 ]

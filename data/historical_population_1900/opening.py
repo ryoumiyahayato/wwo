@@ -1003,6 +1003,9 @@ def egypt_opening(observations, version):
             "mutually exclusive census territory. The rest of the national control remains geographically unlocated. "
             "The comparison uses 1897 counts restated for the 1907 territorial definitions."
         )
+    if version >= 37:
+        opening["scope"] += (" Eight comparable Beheira districts enter as separate accounts. "
+                             "Ramleh is separate from Alexandria; Siwa and the Matruh group remain unallocated.")
     return opening
 
 
@@ -1533,6 +1536,41 @@ def ottoman_registered_opening(observations):
     )
 
 
+def add_philippine_surigao(group, observations):
+    first, = (row for row in observations
+              if row["unit_id"] == "ph_1898_surigao_guide_main"
+              and row["source_id"] == "ph_commission_1900_surigao_guide")
+    last, = (row for row in observations
+             if row["unit_id"] == "ph_1903_surigao" and row["source_id"] == "ph_census_1903_vol2")
+    main_population = last["source_classification"]["Civilized"]
+    separate_population = last["source_classification"]["Wild"]
+    if main_population + separate_population != last["population_value"]:
+        raise ValueError("Surigao main and separate schedules do not close to the 1903 total")
+    early_proxy_date = f"{first['date']}-07-01"
+    fraction = opening_fraction((early_proxy_date, last["date"]))
+    population = round(first["population_value"] + (main_population - first["population_value"]) * fraction)
+    group["research_unlocated_balance"] = group["population_value"] - population
+    group["partition_source"] = "collections/philippines_surigao_opening/observations.jsonl"
+    group["units"] = [dict(
+        unit_id="ph_1900_surigao_main_population", name="Surigao (main-schedule population)", date=DATE,
+        population_value=population, source_id=last["source_id"], source_quality=first["quality"],
+        source_unit_ids=[first["unit_id"], last["unit_id"]], source_dates=[first["date"], last["date"]],
+        source_observations=[first["record_id"], last["record_id"]],
+        endpoint_values=[first["population_value"], main_population],
+        locator=f"{first['locator']}; {last['locator']}, main schedule",
+        method=("Interpolate to opening using the midpoint of the 1898 publication year as a date proxy "
+                "and the 1903 main-schedule count. Round to the nearest person."),
+        scope=("Main-schedule population of the former Spanish Third District, including Butuan. Act 127 "
+               "retained the district in 1901. Act 787 changed the boundaries after the 1903 census. "
+               "The separately reported 1903 population and the rest of the archipelago remain unlocated "
+               "within the inherited Philippines control."),
+        uncertainty_kind=("The 1898 directory gives a publication year and no enumeration date. Its count "
+                          "excludes Indigenous groups outside the regular returns. The 1903 census uses an "
+                          "individual schedule and reports other groups separately. Boundary and coverage "
+                          "differences, demographic change and interpolation error have no quantified interval."),
+    )]
+
+
 def groups(observations, version=1):
     study = {r["unit_id"]: r for r in observations if r["kind"] == "territory" and r["date"] == DATE and r["source_id"].startswith("ft_world_")}
     endpoints = {(r["unit_id"], r["date"]): r["population_value"] for r in observations if r["source_id"].startswith("ft_world_")}
@@ -1692,6 +1730,8 @@ def groups(observations, version=1):
         result[ottoman["unit_id"]] = ottoman
     if version >= 36:
         add_romanian_counties(result[ROMANIA_ROOT])
+    if version >= 37:
+        add_philippine_surigao(result["cshapes_gw_840"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

@@ -18,7 +18,7 @@
     "danish": 56,
     "eastern": 1105,
     "ecuador_population": 35,
-    "egypt_age_1907": 12,
+    "egypt_age_1907": 28,
     "egypt_comparable_provinces": 12,
     "egypt_faiyum_1900": 6,
     "egypt_religion_1897": 3,
@@ -47,6 +47,7 @@
     "peru_1900_reconstruction": 3,
     "philippines": 51,
     "philippines_opening_1900": 81,
+    "philippines_surigao_opening": 1,
     "polar_presence": 1,
     "portugal_census_1900": 44,
     "qing_hubei_shandong_prefectures": 44,
@@ -64,27 +65,31 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 279,
+  "cited_sources": 281,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
   "production_roots": 57,
   "partially_located_legacy_roots": 4,
-  "documented_people_under_legacy_controls": 696692245,
+  "documented_people_under_legacy_controls": 697355207,
   "replaced_legacy_roots": 31,
   "new_roots": 26,
-  "production_people": 1369209997,
-  "production_people_pct_world_estimate": 85.84,
-  "population_outside_evidence_opening_estimate": 225864251,
-  "legacy_only_people": 105387755,
+  "production_people": 1369872959,
+  "production_people_pct_world_estimate": 85.881,
+  "population_outside_evidence_opening_estimate": 225201289,
+  "legacy_only_people": 104724793,
   "authoritative_total_for_new_game": 1474597752,
-  "roots_with_partitions": 29,
-  "disjoint_leaves": 1316,
-  "people_in_partitions": 1284003363,
+  "roots_with_partitions": 30,
+  "disjoint_leaves": 1325,
+  "people_in_partitions": 1284756016,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
       "people": 121455
+    },
+    {
+      "unit_id": "cshapes_gw_840",
+      "people": 6871648
     },
     {
       "unit_id": "cshapes_gw_850",
@@ -369,19 +374,19 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2782,
+  "source_statistical_units": 2791,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 29,
-      "people": 336560818
+      "roots": 30,
+      "people": 343522157
     },
     "historical_world_reconstruction": {
-      "roots": 28,
-      "people": 335956934
+      "roots": 27,
+      "people": 328995595
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 4,
-      "people": 696692245
+      "people": 697355207
     }
   },
   "city_index_representative_bands": {
@@ -417,16 +422,16 @@
       "unknown_people": 1314484651
     },
     "literacy": {
-      "assigned_people": 327429224,
-      "unknown_people": 1147168528
+      "assigned_people": 327978086,
+      "unknown_people": 1146619666
     },
     "marital_status": {
-      "assigned_people": 339717927,
-      "unknown_people": 1134879825
+      "assigned_people": 345674617,
+      "unknown_people": 1128923135
     },
     "occupation": {
-      "assigned_people": 207258162,
-      "unknown_people": 1267339590
+      "assigned_people": 221170126,
+      "unknown_people": 1253427626
     },
     "property_declaration": {
       "assigned_people": 32296914,
@@ -489,6 +494,7 @@
     "ar_capital_federal_1904_age_sex": 20,
     "ar_capital_federal_1914_age_sex": 20,
     "abs_yearbook_1908_census_ages": 189,
+    "ph_census_1903_vol2": 25,
     "pt_census_1890": 105,
     "pt_census_1900": 105,
     "be_census_1900_age_and_spoken_languages": 40,
@@ -503,9 +509,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 888312788,
-  "structure_opening_pool_count": 914,
-  "structure_opening_residents_outside_modeled_pools": 586284964,
+  "structure_opening_pool_controls": 889065441,
+  "structure_opening_pool_count": 923,
+  "structure_opening_residents_outside_modeled_pools": 585532311,
   "structure_opening_scopes": [
     {
       "unit_id": "abs_new_south_wales",
@@ -3252,10 +3258,38 @@
       "observed_date": "1907-04-29"
     },
     {
+      "unit_id": "egy_markaz_abu_hummus",
+      "opening_total": 80919,
+      "observed_unit_id": "egy_markaz_abu_hummus",
+      "observed_total": 80919,
+      "observed_date": "1907-04-29"
+    },
+    {
+      "unit_id": "egy_markaz_damanhur",
+      "opening_total": 97293,
+      "observed_unit_id": "egy_markaz_damanhur",
+      "observed_total": 97293,
+      "observed_date": "1907-04-29"
+    },
+    {
+      "unit_id": "egy_markaz_dilingat",
+      "opening_total": 63400,
+      "observed_unit_id": "egy_markaz_dilingat",
+      "observed_total": 63400,
+      "observed_date": "1907-04-29"
+    },
+    {
       "unit_id": "egy_markaz_faiyum",
       "opening_total": 132375,
       "observed_unit_id": "egy_markaz_faiyum",
       "observed_total": 132375,
+      "observed_date": "1907-04-29"
+    },
+    {
+      "unit_id": "egy_markaz_itay_al_barud",
+      "opening_total": 85527,
+      "observed_unit_id": "egy_markaz_itay_al_barud",
+      "observed_total": 85527,
       "observed_date": "1907-04-29"
     },
     {
@@ -3266,10 +3300,38 @@
       "observed_date": "1907-04-29"
     },
     {
+      "unit_id": "egy_markaz_kafr_al_dawwar",
+      "opening_total": 51426,
+      "observed_unit_id": "egy_markaz_kafr_al_dawwar",
+      "observed_total": 51426,
+      "observed_date": "1907-04-29"
+    },
+    {
+      "unit_id": "egy_markaz_kom_hamada",
+      "opening_total": 131865,
+      "observed_unit_id": "egy_markaz_kom_hamada",
+      "observed_total": 131865,
+      "observed_date": "1907-04-29"
+    },
+    {
       "unit_id": "egy_markaz_ramleh",
       "opening_total": 24335,
       "observed_unit_id": "egy_markaz_ramleh",
       "observed_total": 24335,
+      "observed_date": "1907-04-29"
+    },
+    {
+      "unit_id": "egy_markaz_rashid",
+      "opening_total": 58969,
+      "observed_unit_id": "egy_markaz_rashid",
+      "observed_total": 58969,
+      "observed_date": "1907-04-29"
+    },
+    {
+      "unit_id": "egy_markaz_shubrakhit",
+      "opening_total": 93563,
+      "observed_unit_id": "egy_markaz_shubrakhit",
+      "observed_total": 93563,
       "observed_date": "1907-04-29"
     },
     {
@@ -4853,6 +4915,13 @@
       "observed_unit_id": "ottoman_1897_aydin",
       "observed_total": 1478424,
       "observed_date": "1898-03-12"
+    },
+    {
+      "unit_id": "ph_1900_surigao_main_population",
+      "opening_total": 89691,
+      "observed_unit_id": "ph_1903_surigao",
+      "observed_total": 99298,
+      "observed_date": "1903-03-02"
     },
     {
       "unit_id": "pt1900_angra_do_heroismo",
@@ -7104,9 +7173,9 @@
         "khedivate_of_egypt",
         "sultanate_of_zanzibar"
       ],
-      "production_people": 17878566,
-      "production_pct_of_regional_research_estimate": 13.755,
-      "people_with_opening_subdivision": 9700890,
+      "production_people": 18541528,
+      "production_pct_of_regional_research_estimate": 14.265,
+      "people_with_opening_subdivision": 10363852,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -7173,7 +7242,7 @@
       ],
       "production_people": 787661987,
       "production_pct_of_regional_research_estimate": 88.068,
-      "people_with_opening_subdivision": 731784726,
+      "people_with_opening_subdivision": 731874417,
       "research_only_units": 25,
       "research_only_people": 79176163
     },
@@ -7516,9 +7585,9 @@
         "opening_unit_id": "cshapes_gw_840",
         "research_region": "Asia",
         "opening_control": 6961339,
-        "in_model_pools": 0,
-        "outside_model_pools": 6961339,
-        "modeled_age_and_sex": 0,
+        "in_model_pools": 89691,
+        "outside_model_pools": 6871648,
+        "modeled_age_and_sex": 89691,
         "modeled_sex_age_unknown": 0
       },
       {
@@ -7615,10 +7684,10 @@
         "opening_unit_id": "khedivate_of_egypt",
         "research_region": "Africa",
         "opening_control": 10000000,
-        "in_model_pools": 9126895,
-        "outside_model_pools": 873105,
-        "modeled_age_and_sex": 9101804,
-        "modeled_sex_age_unknown": 25091
+        "in_model_pools": 9789857,
+        "outside_model_pools": 210143,
+        "modeled_age_and_sex": 9761604,
+        "modeled_sex_age_unknown": 28253
       },
       {
         "opening_unit_id": "kingdom_of_belgium",
@@ -7951,10 +8020,10 @@
       },
       "Africa": {
         "opening_control": 18751671,
-        "in_model_pools": 11392451,
-        "outside_model_pools": 7359220,
-        "modeled_age_and_sex": 11366440,
-        "modeled_sex_age_unknown": 26011
+        "in_model_pools": 12055413,
+        "outside_model_pools": 6696258,
+        "modeled_age_and_sex": 12026240,
+        "modeled_sex_age_unknown": 29173
       },
       "no_reviewed_research_region": {
         "opening_control": 98080000,
@@ -7965,18 +8034,18 @@
       },
       "Asia": {
         "opening_control": 812681304,
-        "in_model_pools": 358263382,
-        "outside_model_pools": 454417922,
-        "modeled_age_and_sex": 347300384,
+        "in_model_pools": 358353073,
+        "outside_model_pools": 454328231,
+        "modeled_age_and_sex": 347390075,
         "modeled_sex_age_unknown": 10962998
       }
     },
     "world": {
       "opening_control": 1474597752,
-      "in_model_pools": 888312788,
-      "outside_model_pools": 586284964,
-      "modeled_age_and_sex": 872486322,
-      "modeled_sex_age_unknown": 15826466
+      "in_model_pools": 889065441,
+      "outside_model_pools": 585532311,
+      "modeled_age_and_sex": 873235813,
+      "modeled_sex_age_unknown": 15829628
     }
   },
   "opening_count_basis": {
@@ -7986,16 +8055,16 @@
         "pct_of_research_reference": 0.32
       },
       "published_historical_estimates": {
-        "people": 699717970,
-        "pct_of_research_reference": 43.867
+        "people": 699628279,
+        "pct_of_research_reference": 43.862
       },
       "date_models_from_territorial_returns": {
-        "people": 664387890,
-        "pct_of_research_reference": 41.652
+        "people": 665140543,
+        "pct_of_research_reference": 41.7
       },
       "retained_legacy_estimates": {
-        "people": 105387755,
-        "pct_of_research_reference": 6.607
+        "people": 104724793,
+        "pct_of_research_reference": 6.566
       }
     },
     "scopes": [
@@ -8260,7 +8329,7 @@
       {
         "unit_id": "cshapes_gw_840",
         "source_id": "ph_us_census_1900_plehn",
-        "sourced_people": 6961339,
+        "sourced_people": 6871648,
         "sourced_basis": "published_historical_estimates",
         "retained_legacy_people": 0
       },
@@ -8473,9 +8542,9 @@
       {
         "unit_id": "khedivate_of_egypt",
         "source_id": "egypt_historical_census_primary_tables",
-        "sourced_people": 9126895,
+        "sourced_people": 9789857,
         "sourced_basis": "date_models_from_territorial_returns",
-        "retained_legacy_people": 873105
+        "retained_legacy_people": 210143
       },
       {
         "unit_id": "kingdom_of_belgium",
@@ -8704,6 +8773,14 @@
         "sourced_people": 3383000,
         "sourced_basis": "published_historical_estimates",
         "retained_legacy_people": 0
+      },
+      {
+        "unit_id": "ph_1900_surigao_main_population",
+        "source_id": "ph_census_1903_vol2",
+        "sourced_people": 89691,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_840"
       },
       {
         "unit_id": "principality_of_bulgaria",
