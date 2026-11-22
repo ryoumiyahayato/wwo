@@ -21,5 +21,15 @@
       "locator": "CBS Koloniën 1904 edition (1906), printed p. 2 (PDF p. 24), III.I.A and the same 1900 row.",
       "note": "The later edition prints 28,746,638. Its printed component counts sum to 28,747,028, a difference of 390. The 1900 edition supplies the explicit date and a consistent aggregate row."
     }
+  },
+  {
+    "id": "nl_cbs_java_population_1904",
+    "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1904",
+    "publisher": "Centraal Bureau voor de Statistiek, The Hague, 1906",
+    "url": "https://seadelt.net/Asset/Source/Document_ID-122_No-01.pdf#page=26",
+    "locator": "Oost-Indië, II.III and II.V, 31 December 1900 columns.",
+    "raw_paths": ["civilian_sex_1900.csv"],
+    "rights": "Published historical numeric facts",
+    "note": "The age threshold separating adults and children in II.III is unverified. The indigenous sex table contains 1,390 more people than the 1900 yearbook I.A table used for the opening total. Use each publication within its own denominator."
   }
 ]

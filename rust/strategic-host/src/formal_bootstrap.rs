@@ -2352,6 +2352,34 @@ mod tests {
         assert_eq!(profile.residents_with_cohort_age_and_sex, 4_505_257);
         assert_eq!(profile.cohort_residents, 4_524_861);
         assert_eq!(profile.unclassified_residents, 99_825);
+        assert_eq!(argentina.children.len(), 4);
+        assert_eq!(argentina.children.iter().map(|child| child.population_total).sum::<u64>(), 4_624_686);
+        let capital = world.inspect_population("place:buenos_aires").unwrap();
+        assert_eq!(capital.account_id, Some("ar_capital_federal"));
+        assert_eq!(capital.population_total, Some(772_173));
+        assert_eq!(capital.structure.unwrap().residents_with_cohort_age_and_sex, 768_331);
+        let religion = &capital.social.unwrap().dimensions["religion"];
+        assert_eq!(religion.assigned_residents, 771_251);
+        assert_eq!(religion.unknown_residents, 922);
+        assert_eq!(capital.dietary_norms[0].residents_with_matching_religion, 876);
+        assert_eq!(capital.dietary_norms[0].observed_adherents, None);
+        let province = world.inspect_population("ar_buenos_aires_province").unwrap();
+        assert_eq!(province.population_total, Some(1_072_742));
+        assert_eq!(province.structure.unwrap().residents_with_cohort_age_and_sex, 1_069_246);
+        let rosario = world.inspect_population("place:rosario").unwrap();
+        assert_eq!(rosario.scope_relation, "residence_site_in_account");
+        assert_eq!(rosario.population_total, None);
+
+        let java = world.inspect_population("java_madoera_colonial_population").unwrap();
+        assert_eq!(java.population_total, Some(28_092_332));
+        let profile = java.structure.unwrap();
+        assert_eq!(profile.cohort_residents, 27_798_112);
+        assert_eq!(profile.residents_with_cohort_age_and_sex, 0);
+        assert_eq!(profile.unclassified_residents, 294_220);
+        let before = bootstrap.base_opening_version("country_fra", None, Some(30)).unwrap();
+        assert_eq!(before.inspect_population("java_madoera_colonial_population").unwrap()
+            .structure.unwrap().cohort_residents, 0);
+        assert_eq!(before.inspect_population("place:buenos_aires").unwrap().population_total, None);
 
         let australia = world.inspect_population("australia_colonies_1900").unwrap();
         assert_eq!(australia.population_total, Some(3_837_578));
@@ -2375,6 +2403,10 @@ mod tests {
         assert_eq!(bengal.dimensions["occupation"].assigned_residents, 29_712_198);
         let agra_oudh = world.inspect_population("raj_agra_oudh").unwrap().social.unwrap();
         assert_eq!(agra_oudh.dimensions["occupation"].assigned_residents, 22_793_163);
+        let central = world.inspect_population("raj_central_provinces").unwrap().social.unwrap();
+        assert_eq!(central.dimensions["occupation"].assigned_residents, 6_626_834);
+        let old_central = before.inspect_population("raj_central_provinces").unwrap().social.unwrap();
+        assert_eq!(old_central.dimensions["occupation"].assigned_residents, 0);
         let old_bengal = old.inspect_population("raj_bengal_province").unwrap().social.unwrap();
         assert_eq!(old_bengal.dimensions["occupation"].assigned_residents, 0);
     }

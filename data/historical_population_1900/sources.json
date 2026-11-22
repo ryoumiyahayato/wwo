@@ -579,6 +579,70 @@
     "collection": "andaman_census_demography"
   },
   {
+    "id": "ar_alsina_pop_1901_estimate",
+    "title": "Población, tierras y producción",
+    "publisher": "Juan A. Alsina, Buenos Aires, 1903",
+    "url": "https://books.google.com/books?id=X1ACAAAAYAAJ&pg=PA20",
+    "locator": "Printed p. 20, Superficie y población, 31 Diciembre 1901",
+    "raw_paths": [
+      "alsina_1901_geography.csv",
+      "geography_crosswalk.csv",
+      "GEOGRAPHY.md",
+      "observations.jsonl"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "argentina_age_1895_1914"
+  },
+  {
+    "id": "ar_census_1895_religion",
+    "title": "Segundo Censo de la República Argentina, Tomo II, Cuadro XIX a/b",
+    "publisher": "Comisión Directiva del Censo, 1898. Biblioteca INDEC.",
+    "url": "https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=184",
+    "locator": "Printed pp. CLXXVIII–CLXXIX, 10 May 1895.",
+    "raw_paths": [
+      "religion_1895.csv",
+      "RELIGION.md"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "argentina_age_1895_1914"
+  },
+  {
+    "id": "ar_capital_federal_1895_age_sex",
+    "title": "Capital Federal, 1895 census population by sex and age",
+    "publisher": "Dirección General de Estadística y Censos, Ciudad de Buenos Aires",
+    "url": "https://www.estadisticaciudad.gob.ar/eyc/publicaciones/anuario_2005/Cd_Cap01/c1_24.htm",
+    "locator": "IDECBA Anuario 2005 Cuadro 1.24",
+    "raw_paths": [
+      "capital_federal_age_sex.csv"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "argentina_age_1895_1914"
+  },
+  {
+    "id": "ar_capital_federal_1904_age_sex",
+    "title": "Capital Federal, 1904 census population by sex and age",
+    "publisher": "Dirección General de Estadística y Censos, Ciudad de Buenos Aires",
+    "url": "https://www.estadisticaciudad.gob.ar/eyc/publicaciones/anuario_2005/Cd_Cap01/c1_25.htm",
+    "locator": "IDECBA Anuario 2005 Cuadro 1.25",
+    "raw_paths": [
+      "capital_federal_age_sex.csv"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "argentina_age_1895_1914"
+  },
+  {
+    "id": "ar_capital_federal_1914_age_sex",
+    "title": "Capital Federal, 1914 census population by sex and age",
+    "publisher": "Dirección General de Estadística y Censos, Ciudad de Buenos Aires",
+    "url": "https://www.estadisticaciudad.gob.ar/eyc/publicaciones/anuario_2006/Cd_Cap01/c01_31.htm",
+    "locator": "IDECBA Anuario 2006 Cuadro 1.31",
+    "raw_paths": [
+      "capital_federal_age_sex.csv"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "argentina_age_1895_1914"
+  },
+  {
     "id": "abs_yearbook_1908_census_ages",
     "title": "Official Year Book of the Commonwealth of Australia 1908",
     "publisher": "Commonwealth Bureau of Census and Statistics",
@@ -1840,6 +1904,7 @@
     "raw_paths": [
       "occupation_orders.json",
       "occupation_orders_complete.json",
+      "occupation_orders_additional.json",
       "README.md"
     ],
     "collection": "india_occupation_1901"
@@ -2174,6 +2239,19 @@
       "locator": "CBS Koloniën 1904 edition (1906), printed p. 2 (PDF p. 24), III.I.A and the same 1900 row.",
       "note": "The later edition prints 28,746,638. Its printed component counts sum to 28,747,028, a difference of 390. The 1900 edition supplies the explicit date and a consistent aggregate row."
     },
+    "collection": "java_madoera"
+  },
+  {
+    "id": "nl_cbs_java_population_1904",
+    "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1904",
+    "publisher": "Centraal Bureau voor de Statistiek, The Hague, 1906",
+    "url": "https://seadelt.net/Asset/Source/Document_ID-122_No-01.pdf#page=26",
+    "locator": "Oost-Indië, II.III and II.V, 31 December 1900 columns.",
+    "raw_paths": [
+      "civilian_sex_1900.csv"
+    ],
+    "rights": "Published historical numeric facts",
+    "note": "The age threshold separating adults and children in II.III is unverified. The indigenous sex table contains 1,390 more people than the 1900 yearbook I.A table used for the opening total. Use each publication within its own denominator.",
     "collection": "java_madoera"
   },
   {

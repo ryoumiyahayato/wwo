@@ -1,0 +1,58 @@
+[
+  {
+    "id": "ar_alsina_pop_1901_estimate",
+    "title": "Población, tierras y producción",
+    "publisher": "Juan A. Alsina, Buenos Aires, 1903",
+    "url": "https://books.google.com/books?id=X1ACAAAAYAAJ&pg=PA20",
+    "locator": "Printed p. 20, Superficie y población, 31 Diciembre 1901",
+    "raw_paths": [
+      "alsina_1901_geography.csv",
+      "geography_crosswalk.csv",
+      "GEOGRAPHY.md",
+      "observations.jsonl"
+    ],
+    "rights": "Published historical numeric facts"
+  },
+  {
+    "id": "ar_census_1895_religion",
+    "title": "Segundo Censo de la República Argentina, Tomo II, Cuadro XIX a/b",
+    "publisher": "Comisión Directiva del Censo, 1898. Biblioteca INDEC.",
+    "url": "https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=184",
+    "locator": "Printed pp. CLXXVIII–CLXXIX, 10 May 1895.",
+    "raw_paths": ["religion_1895.csv", "RELIGION.md"],
+    "rights": "Published historical numeric facts"
+  },
+  {
+    "id": "ar_capital_federal_1895_age_sex",
+    "title": "Capital Federal, 1895 census population by sex and age",
+    "publisher": "Dirección General de Estadística y Censos, Ciudad de Buenos Aires",
+    "url": "https://www.estadisticaciudad.gob.ar/eyc/publicaciones/anuario_2005/Cd_Cap01/c1_24.htm",
+    "locator": "IDECBA Anuario 2005 Cuadro 1.24",
+    "raw_paths": [
+      "capital_federal_age_sex.csv"
+    ],
+    "rights": "Published historical numeric facts"
+  },
+  {
+    "id": "ar_capital_federal_1904_age_sex",
+    "title": "Capital Federal, 1904 census population by sex and age",
+    "publisher": "Dirección General de Estadística y Censos, Ciudad de Buenos Aires",
+    "url": "https://www.estadisticaciudad.gob.ar/eyc/publicaciones/anuario_2005/Cd_Cap01/c1_25.htm",
+    "locator": "IDECBA Anuario 2005 Cuadro 1.25",
+    "raw_paths": [
+      "capital_federal_age_sex.csv"
+    ],
+    "rights": "Published historical numeric facts"
+  },
+  {
+    "id": "ar_capital_federal_1914_age_sex",
+    "title": "Capital Federal, 1914 census population by sex and age",
+    "publisher": "Dirección General de Estadística y Censos, Ciudad de Buenos Aires",
+    "url": "https://www.estadisticaciudad.gob.ar/eyc/publicaciones/anuario_2006/Cd_Cap01/c01_31.htm",
+    "locator": "IDECBA Anuario 2006 Cuadro 1.31",
+    "raw_paths": [
+      "capital_federal_age_sex.csv"
+    ],
+    "rights": "Published historical numeric facts"
+  }
+]

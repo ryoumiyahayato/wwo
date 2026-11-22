@@ -20,5 +20,60 @@
     "definition": "Reported age in years by sex, retaining the published unknown-age band.",
     "broad_observation": false,
     "uncertainty": "Official estimates for coverage gaps were published separately and have no age or sex counts. The 1900 composition is modeled using both endpoints."
+  },
+  {
+    "id": "ar_capital_federal_1895_age_sex",
+    "observed_unit_id": "ar_capital_federal",
+    "observed_date": "1895-05-10",
+    "source_id": "ar_capital_federal_1895_age_sex",
+    "locator": "IDECBA Anuario 2005 Cuadro 1.24",
+    "published_scope": "Federal Capital, present population individually enumerated",
+    "definition": "Completed age in groups by sex, including the separate unknown-age category.",
+    "broad_observation": false,
+    "uncertainty": "Enumeration and reported ages are subject to error. The 1914 column is a later historical reference."
+  },
+  {
+    "id": "ar_capital_federal_1904_age_sex",
+    "observed_unit_id": "ar_capital_federal",
+    "observed_date": "1904-09-18",
+    "source_id": "ar_capital_federal_1904_age_sex",
+    "locator": "IDECBA Anuario 2005 Cuadro 1.25",
+    "published_scope": "Federal Capital, present population individually enumerated",
+    "definition": "Completed age in groups by sex, including the separate unknown-age category.",
+    "broad_observation": false,
+    "uncertainty": "Enumeration and reported ages are subject to error. The 1914 column is a later historical reference."
+  },
+  {
+    "id": "ar_capital_federal_1914_age_sex",
+    "observed_unit_id": "ar_capital_federal",
+    "observed_date": "1914-06-01",
+    "source_id": "ar_capital_federal_1914_age_sex",
+    "locator": "IDECBA Anuario 2006 Cuadro 1.31",
+    "published_scope": "Federal Capital, present population individually enumerated",
+    "definition": "Completed age in groups by sex, including the separate unknown-age category.",
+    "broad_observation": false,
+    "uncertainty": "Enumeration and reported ages are subject to error. The 1914 column is a later historical reference."
+  },
+  {
+    "id": "ar_buenos_aires_province_1895_age_sex",
+    "observed_unit_id": "ar_buenos_aires_province",
+    "observed_date": "1895-05-10",
+    "source_id": "ar_censo_1947_retrospective",
+    "locator": "IV Censo General de la Nación Tomo I p75 Cuadro 3",
+    "published_scope": "Province of Buenos Aires, excluding Capital Federal, persons individually enumerated.",
+    "definition": "Completed age by sex, with the separately enumerated unknown-age group.",
+    "broad_observation": false,
+    "uncertainty": "Enumeration and reported ages are subject to error. The 1900 composition is modeled using both local endpoints."
+  },
+  {
+    "id": "ar_buenos_aires_province_1914_age_sex",
+    "observed_unit_id": "ar_buenos_aires_province",
+    "observed_date": "1914-06-01",
+    "source_id": "ar_censo_1947_retrospective",
+    "locator": "IV Censo General de la Nación Tomo I p75 Cuadro 3",
+    "published_scope": "Province of Buenos Aires, excluding Capital Federal, persons individually enumerated.",
+    "definition": "Completed age by sex, with the separately enumerated unknown-age group.",
+    "broad_observation": false,
+    "uncertainty": "Enumeration and reported ages are subject to error. The 1900 composition is modeled using both local endpoints."
   }
 ]

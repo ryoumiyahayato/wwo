@@ -17,6 +17,7 @@
     "raw_paths": [
       "occupation_orders.json",
       "occupation_orders_complete.json",
+      "occupation_orders_additional.json",
       "README.md"
     ]
   }

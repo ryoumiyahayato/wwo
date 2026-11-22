@@ -18,6 +18,9 @@ AGRA_DISTRICT_BALANCE = "raj_agra_unlocated_table_ii_a"
 BENGAL_DISTRICT_SOURCE = "india_bengal_census_1901_districts"
 BENGAL_DISCREPANCY = "raj_bengal_unlocated_comparison"
 BOMBAY_DISTRICT_SOURCE = "india_bombay_census_1901_districts"
+ARGENTINA_CENSUS_SCOPE = "ar_census_represented_opening"
+ARGENTINA_LOCAL_AGE_UNITS = ("ar_capital_federal", "ar_buenos_aires_province")
+JAVA_MADOERA = "java_madoera_colonial_population"
 MADRAS_STATES_REMAINDER = "raj_madras_states_ex_cochin_travancore"
 MADRAS_STATES_AGE_SOURCE = "india_madras_1901_princely_age_and_religion"
 
@@ -1049,7 +1052,7 @@ def bosnia_herzegovina(observations):
 
 
 def add_java_and_madura(group, observations):
-    unit = "java_madoera_colonial_population"
+    unit = JAVA_MADOERA
     first, last = sorted((r for r in observations if r["unit_id"] == unit), key=lambda r: r["date"])
     start, end = (date.fromisoformat(row["date"]) for row in (first, last))
     fraction = Fraction((date.fromisoformat(DATE) - start).days, (end - start).days)
@@ -1069,6 +1072,19 @@ def add_java_and_madura(group, observations):
         uncertainty_kind="The first return is provisional. Private-estate coverage and interpolation error have no quantified interval. No opening polygon or residence point is assigned.",
         place_ids=[],
     )]
+
+
+def java_madoera_opening_registration(total, observations):
+    first, last = sorted((row for row in observations if row["unit_id"] == JAVA_MADOERA),
+                         key=lambda row: row["date"])
+    fraction = opening_fraction([first["date"], last["date"]])
+    early, late = (row["breakdowns"]["historical_colonial_classification"] for row in (first, last))
+    if early.keys() != late.keys() or any(
+        sum(cells.values()) != row["population_value"]
+        for cells, row in zip((early, late), (first, last), strict=True)
+    ):
+        raise ValueError("Java and Madura registration classes do not match their source controls")
+    return apportion({key: (1 - fraction) * early[key] + fraction * late[key] for key in early}, total)
 
 
 def belgium_opening(previous, observations):
@@ -1240,6 +1256,82 @@ def add_qing_prefectures(group, observations, version):
     group.update(units=units, statistical_aggregates=aggregates)
 
 
+def argentina_unenumerated_residents(total, dates, controls):
+    fraction = opening_fraction(dates)
+    outside_share = sum(weight * Fraction(
+        int(row["population_including_adjustments"]) - int(row["individual_enumeration"]),
+        int(row["population_including_adjustments"]),
+    ) for weight, row in zip((1 - fraction, fraction), controls, strict=True))
+    return int(total * outside_share + Fraction(1, 2))
+
+
+def add_argentine_opening_geography(group):
+    folder = HERE / "collections" / "argentina_age_1895_1914"
+    def rows(name):
+        with (folder / name).open(encoding="utf8", newline="") as stream:
+            return list(csv.DictReader(stream))
+
+    controls = rows("census_controls.csv")
+    national = group["population_value"]
+    reserve = argentina_unenumerated_residents(national, [row["census_date"] for row in controls], controls)
+    modeled = national - reserve
+    early = {row["unit_id"]: int(row["enumerated_1895_05_10"]) for row in rows("census_geography.csv")}
+    late = {row["unit_id"]: int(row["population_value"]) for row in rows("alsina_1901_geography.csv")}
+    dates = ("1895-05-10", "1901-12-31")
+    totals = (sum(early.values()), sum(late.values()))
+    if totals != (int(controls[0]["individual_enumeration"]), 4_926_913):
+        raise ValueError("Argentina geographic controls do not match national source totals")
+
+    crosswalk = rows("geography_crosswalk.csv")
+    coverage, = (row for row in crosswalk if row["geographic_role"] == "coverage_unlocated")
+    uses = [row for row in crosswalk if row is not coverage]
+    members = {row["unit_id"]: row["members"].split("|") for row in uses}
+    flat_members = [unit for units in members.values() for unit in units]
+    if len(flat_members) != len(set(flat_members)) or set(flat_members) != early.keys() | late.keys():
+        raise ValueError("Argentina opening geographic crosswalk overlaps or misses source areas")
+    fraction = opening_fraction(dates)
+    endpoints = {unit: (sum(early.get(member, 0) for member in units), sum(late[member] for member in units))
+                 for unit, units in members.items()}
+    quotas = {unit: modeled * (Fraction(a, totals[0]) * (1 - fraction) + Fraction(b, totals[1]) * fraction)
+              for unit, (a, b) in endpoints.items()}
+    counts = apportion(quotas, modeled)
+    if reserve != int(coverage["opening_coverage_reserve"]) or any(
+        counts[row["unit_id"]] != int(row["opening_population_1900_01_01"]) for row in uses
+    ):
+        raise ValueError("Argentina opening populations differ from the documented apportionment")
+
+    uncertainty = "Enumeration coverage, geographic change and intercensal trends have no quantified opening interval."
+    group["units"] = [
+        dict(unit_id=row["unit_id"], name=row["name"], date=DATE, population_value=counts[row["unit_id"]],
+             subdivision_of=group["unit_id"],
+             **({} if row["unit_id"] in ARGENTINA_LOCAL_AGE_UNITS else dict(statistical_parent=ARGENTINA_CENSUS_SCOPE)),
+             endpoint_values=endpoints[row["unit_id"]], source_dates=dates,
+             source_id="ar_alsina_pop_1901_estimate", source_unit_ids=members[row["unit_id"]],
+             locator="1895 INDEC retrospective Cuadro 1, p. 1; Alsina 1903, Superficie y población, p. 20.",
+             scope=row["scope_note"], uncertainty_kind=uncertainty,
+             geographically_unlocated=row["geographic_role"] == "census_geography_unlocated",
+             coextensive_place=row["geographic_role"] == "capital", place_ids=row["place_ids"].split("|") if row["place_ids"] else [],
+             method="Interpolate the 1895 and 1901 territorial shares, then apportion the census-represented opening control.")
+        for row in uses
+    ]
+    group["units"].append(dict(
+        unit_id=coverage["unit_id"], name=coverage["name"], population_value=reserve, date=DATE,
+        subdivision_of=group["unit_id"], geographically_unlocated=True,
+        source_id="ar_censo_1947_retrospective", locator="Censos Nacionales, printed p. XXVIII, 1895 and 1914.",
+        scope=coverage["scope_note"], uncertainty_kind="The endpoint coverage fractions imply 90,287–102,900 people at the same national control.",
+        method="Interpolate the two national coverage fractions outside individual enumeration.",
+    ))
+    group["statistical_aggregates"] = [dict(
+        unit_id=ARGENTINA_CENSUS_SCOPE, name="Argentina, other census-represented opening residents", date=DATE,
+        population_value=modeled - sum(counts[unit] for unit in ARGENTINA_LOCAL_AGE_UNITS),
+        source_id="ar_alsina_pop_1901_estimate", endpoint_dates=dates,
+        locator="1895 INDEC retrospective Cuadro 1, p. 1; Alsina 1903, Superficie y población, p. 20.",
+        scope="Historical jurisdictions and the unresolved Puna geography balance without separate age tables. "
+              "Excludes the separate non-enumeration reserve.",
+        uncertainty_kind=uncertainty, method="Sum the disjoint census-represented opening accounts.",
+    )]
+
+
 def groups(observations, version=1):
     study = {r["unit_id"]: r for r in observations if r["kind"] == "territory" and r["date"] == DATE and r["source_id"].startswith("ft_world_")}
     endpoints = {(r["unit_id"], r["date"]): r["population_value"] for r in observations if r["source_id"].startswith("ft_world_")}
@@ -1390,6 +1482,8 @@ def groups(observations, version=1):
                               "unquantified. The source reports no Philippines-specific uncertainty interval."),
             units=[],
         )
+    if version >= 31:
+        add_argentine_opening_geography(result["argentina_1900"])
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

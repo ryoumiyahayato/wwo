@@ -316,9 +316,12 @@ def india_language(pools):
 
 
 def india_occupation(pools, version):
+    directory = COLLECTIONS / "india_occupation_1901"
     filename = "occupation_orders_complete.json" if version >= 30 else "occupation_orders.json"
-    path = COLLECTIONS / "india_occupation_1901" / filename
-    for row in json.loads(path.read_text(encoding="utf8")):
+    rows = json.loads((directory / filename).read_text(encoding="utf8"))
+    if version >= 31:
+        rows.extend(json.loads((directory / "occupation_orders_additional.json").read_text(encoding="utf8")))
+    for row in rows:
         pool_id = row["unit_id"]
         pool = pools[pool_id]
         total = row["observed_total"]
@@ -1433,6 +1436,50 @@ def bengal_district_literacy(pools, observations, version):
             )
 
 
+def argentine_religion(pools):
+    directory = COLLECTIONS / "argentina_age_1895_1914"
+    churches = {
+        "catolicos": "Católicos",
+        "protestantes_todas_las_confesiones": "Protestantes, todas las confesiones",
+        "israelitas": "Israelitas",
+    }
+    with (directory / "religion_1895.csv").open(encoding="utf8", newline="") as stream:
+        source_rows = list(csv.DictReader(stream))
+    rows = {row["source_unit_id"]: row for row in source_rows}
+    with (directory / "census_geography.csv").open(encoding="utf8", newline="") as stream:
+        controls = {row["unit_id"]: int(row["enumerated_1895_05_10"]) for row in csv.DictReader(stream)}
+    if len(source_rows) != len(rows) or rows.keys() != controls.keys() or any(
+        row["observed_date"] != "1895-05-10" or int(row["observed_total"]) != controls[key]
+        or sum(int(row[field]) for field in (*churches, "otras_religiones")) != controls[key]
+        for key, row in rows.items()
+    ):
+        raise ValueError("Argentina's religious returns do not match the 1895 enumerated geography")
+    used = set()
+    for pool_id, pool in pools.items():
+        if pool.get("subdivision_of") != "argentina_1900" or pool.get("geographically_unlocated"):
+            continue
+        units = pool["source_unit_ids"]
+        if used.intersection(units):
+            raise ValueError(f"{pool_id}: overlapped Argentine religion source rows")
+        used.update(units)
+        yield pool_id, "religion", distribution(
+            pool["population_value"], classification="argentina_1895_reported_religion",
+            source="ar_census_1895_religion", date="1895-05-10", observed_unit="|".join(units),
+            scope="Persons individually enumerated in the matching census jurisdiction or combined area.",
+            locator="Tomo II, Cuadro XIX a/b, pp. CLXXVIII–CLXXIX.",
+            total=sum(controls[unit] for unit in units),
+            observed_counts={label: sum(int(rows[unit][field]) for unit in units)
+                             for field, label in churches.items()},
+            unknown=sum(int(rows[unit]["otras_religiones"]) for unit in units),
+            definition="Published census religion. The original other column mixes other religions "
+                       "and persons without a reported religion. It remains unassigned.",
+            method=SHARE_METHOD + " The enumerator asked about religion only where the person "
+                   "was thought to be non-Catholic. Bias from that rule and changes since the census are unquantified.",
+        )
+    if used != rows.keys():
+        raise ValueError("Argentina religion allocation does not cover the disjoint source jurisdictions")
+
+
 def opening_social(opening_groups, observations, *, version):
     """Return independent person distributions at each source's published scope."""
     pools = {
@@ -1559,6 +1606,8 @@ def opening_social(opening_groups, observations, *, version):
         marginals = chain(marginals, india_language(pools))
     if version >= 30:
         marginals = chain(marginals, cochin_language(pools, distribution))
+    if version >= 31:
+        marginals = chain(marginals, argentine_religion(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))
