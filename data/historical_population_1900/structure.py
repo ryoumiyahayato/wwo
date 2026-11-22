@@ -387,6 +387,7 @@ def age_sex_panels():
     portuguese_regions = HERE / "portugal_census_1900" / "age_sex.csv"
     argentine_capital = HERE / "argentina_age_1895_1914" / "capital_federal_age_sex.csv"
     buenos_aires_province = HERE / "argentina_age_1895_1914" / "buenos_aires_province_age_sex.csv"
+    argentine_provinces = HERE / "argentina_age_1895_1914" / "provincial_age_sex.csv"
     for year in (1890, 1900):
         for scope, page in (("kingdom", 2), ("lisboa", 28), ("porto", 32)):
             key = f"pt_census_{year}_{scope}"
@@ -438,7 +439,7 @@ def age_sex_panels():
         by_panel[panel_id] = []
     for path in [*(AGE_SOURCES / name for name in filenames), *(source / "age_sex.csv" for source in regional_sources),
                  italian_regions, spanish_regions, agra_oudh_regions, belgian_regions, portuguese_regions,
-                 argentine_capital, buenos_aires_province]:
+                 argentine_capital, buenos_aires_province, argentine_provinces]:
         for row in read_csv(path):
             for key in ("age_min", "age_max", "both", "male", "female"):
                 row[key] = int(row[key]) if row[key] else None
@@ -1425,13 +1426,22 @@ def argentina_local_age_model(unit_id, total, endpoints, locator):
     for panel, rows in endpoints:
         opening_age_group(panel, rows, unit_id, total)
     dates = [panel["observed_date"] for panel, _ in endpoints]
-    fraction = opening_fraction(dates)
     controls = [next(row["both"] for row in rows if row["role"] == "total") for _, rows in endpoints]
-    early, late = (list(regroup_age_rows(rows, endpoints[0][1])) for _, rows in endpoints)
+    if len(endpoints) == 1:
+        weights = (1,)
+        method = "Project the area's 1895 census shares to the local opening total."
+        uncertainty = "The later census uses different boundaries. Changes in age composition after 1895 are unquantified."
+    else:
+        fraction = opening_fraction(dates)
+        weights = (1 - fraction, fraction)
+        method = "Interpolate the area's two census age-by-sex share tables to 1900-01-01."
+        uncertainty = "Migration can change age shares unevenly between censuses. No quantified opening interval is available."
+    early = endpoints[0][1]
+    profiles = [list(regroup_age_rows(rows, early)) for _, rows in endpoints]
     quotas = {
-        (index, sex): total * ((1 - fraction) * Fraction(first[sex], controls[0])
-                               + fraction * Fraction(last[sex], controls[1]))
-        for index, (first, last) in enumerate(zip(early, late, strict=True)) if first["role"] == "band"
+        (index, sex): total * sum(weight * Fraction(profile[index][sex], control)
+                                  for weight, profile, control in zip(weights, profiles, controls, strict=True))
+        for index, row in enumerate(early) if row["role"] == "band"
         for sex in SEX_COUNTS
     }
     shares = apportion(quotas, total)
@@ -1440,12 +1450,10 @@ def argentina_local_age_model(unit_id, total, endpoints, locator):
     for row in local_rows:
         row["both"] = row["male"] + row["female"]
     control = dict(role="total", both=total, **{sex: sum(row[sex] for row in local_rows) for sex in SEX_COUNTS})
-    panel = endpoints[1][0] | dict(
+    panel = endpoints[-1][0] | dict(
         id=f"{unit_id}_opening_age_model", observed_date=DATE, locator=locator,
-        opening_method="Interpolate the area's two census age-by-sex share tables to 1900-01-01. "
-                       "Scale the shares to the local opening control, retaining unknown ages.",
-        uncertainty="Migration can change age shares unevenly between censuses. "
-                    "No quantified opening interval is available.",
+        opening_method=method + " Retain unknown ages.",
+        uncertainty=uncertainty,
     )
     return opening_age_group(panel, [control, *local_rows], unit_id, total), local_rows
 
@@ -1483,18 +1491,112 @@ def argentina_regional_age_models(panels, national, balances):
     return [*groups, national]
 
 
-def java_madoera_sex_model(total, observations):
+def argentina_exclusive_local_age_models(panels, units):
+    directory = HERE / "argentina_age_1895_1914"
+    crosswalk = read_csv(directory / "opening_age_profile_sources.csv")
+    balances = {unit["unit_id"]: unit for unit in units}
+    if len(crosswalk) != len(balances) or {row["opening_unit_id"] for row in crosswalk} != balances.keys():
+        raise ValueError("Argentina's age crosswalk does not match the opening geography")
+    source_units = []
+    available_years = {"1895_1904": (1895, 1904), "1895_1914": (1895, 1914), "1895_only": (1895,)}
+    for row in crosswalk:
+        unit_id = row["opening_unit_id"]
+        unit = balances[unit_id]
+        if unit.get("geographically_unlocated"):
+            if row["profile_selection"] != "unknown" or row["source_unit_ids"]:
+                raise ValueError("An unlocated Argentine balance specifies a local age profile")
+            continue
+        sources = row["source_unit_ids"].split("|")
+        if sources != unit["source_unit_ids"]:
+            raise ValueError(f"{unit_id}: age and opening boundary units differ")
+        source_units.extend(sources)
+        endpoints = []
+        locators = []
+        for year in available_years[row["profile_selection"]]:
+            component_panels = [panels[f"{source}_{year}_age_sex"] for source in sources]
+            first_panel, target = component_panels[0]
+            components = []
+            for panel, rows in component_panels:
+                if panel["observed_date"] != first_panel["observed_date"]:
+                    raise ValueError(f"{unit_id}: census component dates differ")
+                opening_age_group(panel, rows, panel["observed_unit_id"], 0)
+                components.append(list(regroup_age_rows(rows, target)))
+                locators.append(panel["locator"])
+            combined = [
+                band | {key: sum(component[index][key] for component in components) for key in AGE_COUNTS}
+                for index, band in enumerate(target)
+            ]
+            endpoints.append((first_panel | dict(observed_unit_id="|".join(sources)), combined))
+        model, _ = argentina_local_age_model(unit_id, unit["population_value"], endpoints,
+                                             " / ".join(dict.fromkeys(locators)))
+        model["uncertainty"] += " " + row["scope_note"]
+        yield model
+
+    if len(source_units) != len(set(source_units)):
+        raise ValueError("Argentina's local age profiles overlap")
+    for year in (1895, 1914):
+        target = panels[f"ar_census_{year}_national_age_sex"][1]
+        rows = (regroup_age_rows(panels[f"{source}_{year}_age_sex"][1], target) for source in source_units)
+        verify_national_age_totals(target, rows, f"Argentina {year}")
+
+
+def java_madoera_age_bands(indigenous_sex, assigned_sex):
+    directory = HERE / "java_madoera"
+    controls = read_csv(directory / "java_madoera_1900_indigenous_regional_controls.csv")
+    observed = read_csv(directory / "java_madoera_1905_indigenous_age_sex_matched.csv")
+    regions = {row["region"]: row for row in controls}
+    absorbed = [row["absorbed_1901"] for row in controls if row["absorbed_1901"]]
+    scopes = {row["region"] for row in controls if row["age_sex_1905_status"] == "matched_complete"}
+    if (len(regions) != len(controls) or scopes != {row["region"] for row in observed} or len(scopes) != len(observed)
+            or len(set(absorbed)) != len(absorbed) or set(absorbed) & regions.keys()):
+        raise ValueError("The Java age and sex tables have different or overlapping territorial scopes")
+    for row in controls:
+        if sum(int(row[f"{sex}_1900"]) for sex in SEX_COUNTS) != int(row["total_1900"]):
+            raise ValueError(f'{row["region"]}: 1900 sex totals do not match regional control')
+    children = dict.fromkeys(SEX_COUNTS, 0)
+    adults = dict.fromkeys(SEX_COUNTS, 0)
+    for sex in SEX_COUNTS:
+        counts = {region: int(row[f"{sex}_1900"]) for region, row in regions.items()}
+        source_sex_total = sum(counts.values())
+        opening_count, island_control = indigenous_sex[sex]
+        if source_sex_total != island_control:
+            raise ValueError(f"Java regional {sex} returns do not match the island control")
+        local = apportion({region: Fraction(opening_count * count, source_sex_total) for region, count in counts.items()},
+                         opening_count)
+        for row in observed:
+            region = row["region"]
+            count = local[region]
+            younger, older = int(row[f"under16_{sex}"]), int(row[f"16_plus_{sex}"])
+            middle, oldest = int(row[f"printed_16_to_50_{sex}"]), int(row[f"printed_50_plus_{sex}"])
+            if (middle + oldest != older or younger + older != int(row[f"{sex}_total"])
+                    or int(row["male_total"]) + int(row["female_total"]) != int(regions[region]["total_1905"])):
+                raise ValueError(f"{region}: 1905 age counts do not match the census controls")
+            below_16 = int(Fraction(count * younger, younger + older) + Fraction(1, 2))
+            children[sex] += below_16
+            adults[sex] += count - below_16
+    return [
+        dict(role="band", label="Under 16", age_min=0, age_max=15, **children),
+        dict(role="band", label="16 and older", age_min=16, age_max=None, **adults),
+        dict(role="band", label="Age unassigned", age_min=None, age_max=None,
+             **{sex: assigned_sex[sex] - children[sex] - adults[sex] for sex in SEX_COUNTS}),
+    ]
+
+
+def java_madoera_demographic_model(total, observations, version):
     table = read_csv(HERE / "java_madoera" / "civilian_sex_1900.csv")
     registration = java_madoera_opening_registration(total, observations)
     if {row["registration"] for row in table} != {"inlanders", "europeanen"} or len(table) != 2:
         raise ValueError("Java and Madura sex table covers unexpected registration categories")
     assigned = dict.fromkeys(SEX_COUNTS, 0)
+    indigenous_sex = {}
     for row in table:
         count = registration[row["registration"]]
         observed = {sex: int(row[sex]) for sex in SEX_COUNTS}
         if sum(observed.values()) != int(row["printed_total"]):
             raise ValueError("Java and Madura sex table differs from its printed total")
         counts = apportion({sex: count * Fraction(value, sum(observed.values())) for sex, value in observed.items()}, count)
+        if row["registration"] == "inlanders":
+            indigenous_sex = {sex: (counts[sex], observed[sex]) for sex in SEX_COUNTS}
         for sex in SEX_COUNTS:
             assigned[sex] += counts[sex]
     represented = sum(assigned.values())
@@ -1514,7 +1616,22 @@ def java_madoera_sex_model(total, observations):
         dict(role="total", both=represented, **assigned),
         dict(role="band", label="Age unassigned", age_min=None, age_max=None, **assigned),
     ], JAVA_MADOERA, total)
-    return group | dict(sex_only=True, unclassified_opening_residents=total - represented)
+    if version < 32:
+        return group | dict(sex_only=True, unclassified_opening_residents=total - represented)
+    panel.update(
+        id="java_madoera_opening_age_sex_model", source_id="nl_cbs_java_population_1906_demography",
+        locator="1904 edition, III.III p. 4 and III.V p. 5. 1906 edition, III.I.A p. 2 and III.IX pp. 8–9.",
+        opening_method=panel["opening_method"] + " Allocate the modeled indigenous sex counts to the 17 "
+                       "non-overlapping residency scopes using the 1900 sex returns. Apply the 1905 same-sex "
+                       "under-16 shares to ten matched scopes and then sum back to the opening account.",
+        uncertainty="Incomplete private-estate reporting and migration, disease and coverage changes "
+                    "between 1900 and 1905 have no quantified interval. Seven scopes lack validated age cells. "
+                    "The other civilian registration categories retain unknown ages. "
+                    "Combine the two printed older bands because the printed boundary at 50 is ambiguous.",
+    )
+    group = opening_age_group(panel, [dict(role="total", both=represented, **assigned),
+                                      *java_madoera_age_bands(indigenous_sex, assigned)], JAVA_MADOERA, total)
+    return group | dict(unclassified_opening_residents=total - represented)
 
 
 def australian_opening_age_models(panels, balances):
@@ -1603,6 +1720,8 @@ def opening_structure(opening_groups, observations, *, version=6):
                                 "administrative_region:uk_constituent_ireland"))
     if version >= 28:
         leaf_age_scopes.add("raj_bombay_presidency")
+    if version >= 32:
+        leaf_age_scopes.add(ARGENTINA_CENSUS_SCOPE)
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -1654,12 +1773,16 @@ def opening_structure(opening_groups, observations, *, version=6):
         groups.extend(bengal_district_age_models(panels, observations, opening_balances))
     if version >= 30:
         argentina, = (group for group in opening_groups if group["unit_id"] == "argentina_1900")
-        age = argentina_opening_age_model(panels, argentina)
-        if version >= 31:
-            groups.extend(argentina_regional_age_models(panels, age, opening_totals))
-            groups.append(java_madoera_sex_model(opening_totals[JAVA_MADOERA], observations))
+        if version >= 32:
+            groups.extend(argentina_exclusive_local_age_models(panels, argentina["units"]))
         else:
-            groups.append(age)
+            age = argentina_opening_age_model(panels, argentina)
+            if version >= 31:
+                groups.extend(argentina_regional_age_models(panels, age, opening_totals))
+            else:
+                groups.append(age)
+        if version >= 31:
+            groups.append(java_madoera_demographic_model(opening_totals[JAVA_MADOERA], observations, version))
         groups.extend(australian_opening_age_models(panels, opening_balances))
     if version >= 28:
         groups.extend(taiwan_register_age_models(opening_balances))

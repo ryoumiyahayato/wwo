@@ -1326,7 +1326,8 @@ def add_argentine_opening_geography(group):
         population_value=modeled - sum(counts[unit] for unit in ARGENTINA_LOCAL_AGE_UNITS),
         source_id="ar_alsina_pop_1901_estimate", endpoint_dates=dates,
         locator="1895 INDEC retrospective Cuadro 1, p. 1; Alsina 1903, Superficie y población, p. 20.",
-        scope="Historical jurisdictions and the unresolved Puna geography balance without separate age tables. "
+        scope="Historical jurisdictions and the unresolved Puna geography balance outside Capital Federal "
+              "and Buenos Aires province. "
               "Excludes the separate non-enumeration reserve.",
         uncertainty_kind=uncertainty, method="Sum the disjoint census-represented opening accounts.",
     )]

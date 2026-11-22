@@ -61,7 +61,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 271,
+  "cited_sources": 273,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -410,8 +410,8 @@
       "unknown_people": 1342576983
     },
     "literacy": {
-      "assigned_people": 312169329,
-      "unknown_people": 1162428423
+      "assigned_people": 315883286,
+      "unknown_people": 1158714466
     },
     "marital_status": {
       "assigned_people": 339717927,
@@ -477,7 +477,7 @@
     "br_dge_1916_1900_age_sex": 440,
     "es_census_1900_age_marital": 322,
     "india_madras_1901_princely_age_and_religion": 32,
-    "ar_censo_1947_retrospective": 44,
+    "ar_censo_1947_retrospective": 528,
     "ar_capital_federal_1895_age_sex": 20,
     "ar_capital_federal_1904_age_sex": 20,
     "ar_capital_federal_1914_age_sex": 20,
@@ -495,9 +495,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 875622285,
-  "structure_opening_pool_count": 837,
-  "structure_opening_residents_outside_modeled_pools": 598975467,
+  "structure_opening_pool_controls": 875621536,
+  "structure_opening_pool_count": 855,
+  "structure_opening_residents_outside_modeled_pools": 598976216,
   "structure_opening_scopes": [
     {
       "unit_id": "abs_new_south_wales",
@@ -2621,10 +2621,136 @@
       "observed_date": "1900-01-01"
     },
     {
-      "unit_id": "ar_census_represented_opening",
-      "opening_total": 2679946,
-      "observed_unit_id": "argentina_1900",
-      "observed_total": 2679946,
+      "unit_id": "ar_catamarca",
+      "opening_total": 95671,
+      "observed_unit_id": "ar_catamarca",
+      "observed_total": 95671,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_central_chaco_comparable",
+      "opening_total": 1078542,
+      "observed_unit_id": "ar_cordoba|ar_santa_fe|ar_santiago_del_estero|ar_chaco",
+      "observed_total": 1078542,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_chubut",
+      "opening_total": 4203,
+      "observed_unit_id": "ar_chubut",
+      "observed_total": 4203,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_corrientes",
+      "opening_total": 264014,
+      "observed_unit_id": "ar_corrientes",
+      "observed_total": 264014,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_entre_rios",
+      "opening_total": 325156,
+      "observed_unit_id": "ar_entre_rios",
+      "observed_total": 325156,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_formosa",
+      "opening_total": 5355,
+      "observed_unit_id": "ar_formosa",
+      "observed_total": 5355,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_jujuy",
+      "opening_total": 52268,
+      "observed_unit_id": "ar_jujuy",
+      "observed_total": 52268,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_la_pampa",
+      "opening_total": 39418,
+      "observed_unit_id": "ar_la_pampa",
+      "observed_total": 39418,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_la_rioja",
+      "opening_total": 74642,
+      "observed_unit_id": "ar_la_rioja",
+      "observed_total": 74642,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_mendoza",
+      "opening_total": 135020,
+      "observed_unit_id": "ar_mendoza",
+      "observed_total": 135020,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_misiones",
+      "opening_total": 33703,
+      "observed_unit_id": "ar_misiones",
+      "observed_total": 33703,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_neuquen",
+      "opening_total": 15497,
+      "observed_unit_id": "ar_neuquen",
+      "observed_total": 15497,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_rio_negro",
+      "opening_total": 12466,
+      "observed_unit_id": "ar_rio_negro",
+      "observed_total": 12466,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_salta",
+      "opening_total": 126674,
+      "observed_unit_id": "ar_salta",
+      "observed_total": 126674,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_san_juan",
+      "opening_total": 91067,
+      "observed_unit_id": "ar_san_juan",
+      "observed_total": 91067,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_san_luis",
+      "opening_total": 87562,
+      "observed_unit_id": "ar_san_luis",
+      "observed_total": 87562,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_santa_cruz",
+      "opening_total": 1350,
+      "observed_unit_id": "ar_santa_cruz",
+      "observed_total": 1350,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_tierra_del_fuego",
+      "opening_total": 830,
+      "observed_unit_id": "ar_tierra_del_fuego",
+      "observed_total": 830,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ar_tucuman",
+      "opening_total": 235759,
+      "observed_unit_id": "ar_tucuman",
+      "observed_total": 235759,
       "observed_date": "1900-01-01"
     },
     {
@@ -6699,10 +6825,10 @@
         "opening_unit_id": "argentina_1900",
         "research_region": "America",
         "opening_control": 4624686,
-        "in_model_pools": 4524861,
-        "outside_model_pools": 99825,
-        "modeled_age_and_sex": 4505257,
-        "modeled_sex_age_unknown": 19604
+        "in_model_pools": 4524112,
+        "outside_model_pools": 100574,
+        "modeled_age_and_sex": 4502031,
+        "modeled_sex_age_unknown": 22081
       },
       {
         "opening_unit_id": "australia_colonies_1900",
@@ -6980,8 +7106,8 @@
         "opening_control": 44363679,
         "in_model_pools": 27798112,
         "outside_model_pools": 16565567,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 27798112
+        "modeled_age_and_sex": 17092483,
+        "modeled_sex_age_unknown": 10705629
       },
       {
         "opening_unit_id": "cshapes_gw_920",
@@ -7383,10 +7509,10 @@
     "by_research_region": {
       "America": {
         "opening_control": 131491928,
-        "in_model_pools": 115815322,
-        "outside_model_pools": 15676606,
-        "modeled_age_and_sex": 115381559,
-        "modeled_sex_age_unknown": 433763
+        "in_model_pools": 115814573,
+        "outside_model_pools": 15677355,
+        "modeled_age_and_sex": 115378333,
+        "modeled_sex_age_unknown": 436240
       },
       "Oceania": {
         "opening_control": 4905385,
@@ -7420,16 +7546,16 @@
         "opening_control": 812681304,
         "in_model_pools": 358263382,
         "outside_model_pools": 454417922,
-        "modeled_age_and_sex": 330222276,
-        "modeled_sex_age_unknown": 28041106
+        "modeled_age_and_sex": 347314759,
+        "modeled_sex_age_unknown": 10948623
       }
     },
     "world": {
       "opening_control": 1474597752,
-      "in_model_pools": 875622285,
-      "outside_model_pools": 598975467,
-      "modeled_age_and_sex": 840354491,
-      "modeled_sex_age_unknown": 35267794
+      "in_model_pools": 875621536,
+      "outside_model_pools": 598976216,
+      "modeled_age_and_sex": 857443748,
+      "modeled_sex_age_unknown": 18177788
     }
   },
   "opening_count_basis": {
