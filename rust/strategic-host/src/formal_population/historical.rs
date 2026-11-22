@@ -2,7 +2,10 @@ use super::MAX_POPULATION;
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{collections::{BTreeMap, BTreeSet}, io::{self, BufRead, BufReader}, sync::OnceLock};
+use std::{
+    collections::{BTreeMap, BTreeSet}, fs::File,
+    io::{self, BufRead, BufReader}, path::PathBuf, sync::OnceLock,
+};
 
 const SOURCE: &[u8] = include_bytes!("../../../../data/alpha/historical_world_economy_1900/countries_compact.json");
 const SCHEMA: &str = "historical_world_economy_1900_compact_country_table_v1";
@@ -46,14 +49,7 @@ pub(super) fn opening_estimate(unit: &str) -> io::Result<Option<HistoricalPopula
 /// Dated evidence from the historical catalogue, outside the live population
 /// ledger. A city is already part of its parent population.
 pub fn city_population_reference(city_key: &str) -> io::Result<Option<Value>> {
-    let bytes = include_bytes!("../../../../data/historical_population_1900/cities_1900.jsonl.gz");
-    for row in catalogue_rows(bytes) {
-        let row = row?;
-        if row["city_key"].as_str() == Some(city_key) {
-            return Ok(Some(row));
-        }
-    }
-    Ok(None)
+    PopulationCatalogue::default_location()?.city(city_key)
 }
 
 #[derive(Default, Serialize)]
@@ -69,110 +65,150 @@ pub struct PopulationArchive {
 
 /// Coverage of dated historical panels. It does not allocate live residents.
 pub fn structural_coverage_reference(unit: &str) -> io::Result<Option<Value>> {
-    let bytes = include_bytes!("../../../../data/historical_population_1900/structure_coverage_1900.json");
-    let catalogue: Value = serde_json::from_slice(bytes)?;
-    let scope = if unit == "world" {
-        &catalogue["world"]
-    } else if unit == "region:unassigned" {
-        &catalogue["no_unique_research_region"]
-    } else if let Some(region) = unit.strip_prefix("region:") {
-        &catalogue["research_regions"][region]
-    } else {
-        &catalogue["opening_roots"][unit]
-    };
-    let Some(dimensions) = scope["dimensions"].as_object() else { return Ok(None); };
-    let panel_ids: BTreeSet<_> = dimensions.values().flat_map(|value| {
-        ["reviewed_panels", "candidate_panels"].into_iter()
-            .filter_map(|key| value[key].as_array()).flatten().filter_map(Value::as_str)
-    }).collect();
-    let panels: BTreeMap<_, _> = panel_ids.into_iter().map(|key| (key, &catalogue["panels"][key])).collect();
-    Ok(Some(serde_json::json!({
-        "scope": scope,
-        "panels": panels,
-        "opening_date": catalogue["opening_date"],
-        "accounting_note": catalogue["accounting_note"],
-    })))
-}
-
-pub(super) fn historical_source(id: &str) -> io::Result<Option<Value>> {
-    Ok(sources()?.iter().find(|row| row["id"].as_str() == Some(id)).cloned())
-}
-
-fn sources() -> io::Result<&'static [Value]> {
-    static SOURCES: OnceLock<Result<Vec<Value>, serde_json::Error>> = OnceLock::new();
-    let bytes = include_bytes!("../../../../data/historical_population_1900/sources.json");
-    SOURCES.get_or_init(|| serde_json::from_slice(bytes)).as_ref().map(Vec::as_slice)
-        .map_err(|error| invalid(error.to_string()))
+    PopulationCatalogue::default_location()?.structural_coverage(unit)
 }
 
 /// Historical evidence can be queried independently of whether a place has an
 /// account in the current game. Matching rows can use overlapping scopes and dates.
 pub fn population_archive(unit: &str) -> io::Result<Option<PopulationArchive>> {
-    Ok(population_archive_scope(unit)?.0)
+    Ok(PopulationCatalogue::default_location()?.archive(unit)?.0)
 }
 
-pub(super) fn population_archive_scope(unit: &str) -> io::Result<(Option<PopulationArchive>, Option<Value>)> {
-    let geography = include_bytes!("../../../../data/historical_population_1900/geography_1900.jsonl.gz");
-    let population = include_bytes!("../../../../data/historical_population_1900/population_1900.jsonl.gz");
-    let structure = include_bytes!("../../../../data/historical_population_1900/demography_1900.jsonl.gz");
-    let mut archive = PopulationArchive::default();
-    for row in catalogue_rows(geography) {
-        let row = row?;
-        if row["id"].as_str() == Some(unit) {
-            archive.geographies.push(row);
-        } else if row["parent"].as_str() == Some(unit) || contains_text(&row["parent_ids"], unit) {
-            archive.geography_children.push(row);
-        }
-    }
-    let dated_units = linked_units(&archive.geographies, "historical_observation_ids");
-    let research_units = linked_units(&archive.geographies, "study_candidates");
-    let city_key = unit.strip_prefix("city:").or_else(|| {
-        if unit.starts_with("place:") && dated_units.len() == 1 { dated_units.first().copied() } else { None }
-    });
-    let city_reference = city_key.map(city_population_reference).transpose()?.flatten();
-    for row in catalogue_rows(population) {
-        let row = row?;
-        let Some(source_unit) = row["unit_id"].as_str() else { continue; };
-        if source_unit == unit || row["wwo_id"].as_str() == Some(unit) || dated_units.contains(source_unit)
-            || city_reference.as_ref().is_some_and(|city| row["city_key"] == city["city_key"])
-        {
-            archive.dated_population.push(row);
-        } else if research_units.contains(source_unit) {
-            archive.candidate_research_population.push(row);
-        }
-    }
-    for row in catalogue_rows(structure) {
-        let row = row?;
-        if row["unit_id"].as_str().is_some_and(|source_unit| source_unit == unit || dated_units.contains(source_unit))
-            || contains_text(&row["opening_reference_ids"], unit)
-        {
-            archive.dated_structure.push(row);
-        }
-    }
-    let source_ids: BTreeSet<_> = archive.dated_population.iter()
-        .chain(&archive.dated_structure).chain(&archive.candidate_research_population)
-        .filter_map(|row| row["source_id"].as_str()).collect();
-    archive.sources = sources()?.iter().filter(|row| row["id"].as_str().is_some_and(|id| source_ids.contains(id))).cloned().collect();
-    Ok(((!archive.geographies.is_empty() || !archive.geography_children.is_empty() || !archive.dated_population.is_empty()
-        || !archive.dated_structure.is_empty()).then_some(archive), city_reference))
+pub(super) struct PopulationCatalogue {
+    directory: PathBuf,
+    sources: OnceLock<io::Result<Vec<Value>>>,
+    traits: OnceLock<io::Result<(Vec<Value>, Vec<Value>)>>,
 }
 
-pub(super) fn traits_for_scope(unit: &str) -> io::Result<(Vec<Value>, Vec<Value>)> {
-    static TRAITS: OnceLock<io::Result<(Vec<Value>, Vec<Value>)>> = OnceLock::new();
-    let (rows, sources) = TRAITS.get_or_init(|| {
-        let raw = include_str!("../../../../data/historical_population_1900/collections/pop_traits/traits.jsonl");
-        let sources = include_bytes!("../../../../data/historical_population_1900/collections/pop_traits/sources.json");
-        Ok((raw.lines().map(serde_json::from_str).collect::<Result<_, _>>()?, serde_json::from_slice(sources)?))
-    }).as_ref().map_err(|error| invalid(error.to_string()))?;
-    let matched: Vec<_> = rows.iter().filter(|row| {
-        unit == "world" || row["place_id"].as_str() == Some(unit) || row["observed_unit_id"].as_str() == Some(unit)
-            || unit.strip_prefix("trait:").is_some_and(|id| row["id"].as_str() == Some(id))
-            || unit.strip_prefix("region:").is_some_and(|region| row["region"].as_str() == Some(region))
-            || row["opening_links"].as_array().into_iter().flatten().any(|link| link["unit_id"].as_str() == Some(unit))
-    }).cloned().collect();
-    let ids: BTreeSet<_> = matched.iter().filter_map(|row| row["source_id"].as_str()).collect();
-    let matched_sources = sources.iter().filter(|row| row["id"].as_str().is_some_and(|id| ids.contains(id))).cloned().collect();
-    Ok((matched, matched_sources))
+impl PopulationCatalogue {
+    pub(super) fn new(directory: PathBuf) -> Self {
+        Self { directory, sources: OnceLock::new(), traits: OnceLock::new() }
+    }
+
+    pub(super) fn default_location() -> io::Result<Self> {
+        Ok(Self::new(default_data_directory()?.join("historical_population_1900")))
+    }
+
+    fn open(&self, name: &str) -> io::Result<File> {
+        let path = self.directory.join(name);
+        File::open(&path).map_err(|error| io::Error::new(error.kind(), format!("{}: {error}", path.display())))
+    }
+
+    fn city(&self, city_key: &str) -> io::Result<Option<Value>> {
+        for row in catalogue_rows(self.open("cities_1900.jsonl.gz")?) {
+            let row = row?;
+            if row["city_key"].as_str() == Some(city_key) {
+                return Ok(Some(row));
+            }
+        }
+        Ok(None)
+    }
+
+    pub(super) fn structural_coverage(&self, unit: &str) -> io::Result<Option<Value>> {
+        let catalogue: Value = serde_json::from_reader(BufReader::new(self.open("structure_coverage_1900.json")?))?;
+        let scope = if unit == "world" {
+            &catalogue["world"]
+        } else if unit == "region:unassigned" {
+            &catalogue["no_unique_research_region"]
+        } else if let Some(region) = unit.strip_prefix("region:") {
+            &catalogue["research_regions"][region]
+        } else {
+            &catalogue["opening_roots"][unit]
+        };
+        let Some(dimensions) = scope["dimensions"].as_object() else { return Ok(None); };
+        let panel_ids: BTreeSet<_> = dimensions.values().flat_map(|value| {
+            ["reviewed_panels", "candidate_panels"].into_iter()
+                .filter_map(|key| value[key].as_array()).flatten().filter_map(Value::as_str)
+        }).collect();
+        let panels: BTreeMap<_, _> = panel_ids.into_iter().map(|key| (key, &catalogue["panels"][key])).collect();
+        Ok(Some(serde_json::json!({
+            "scope": scope,
+            "panels": panels,
+            "opening_date": catalogue["opening_date"],
+            "accounting_note": catalogue["accounting_note"],
+        })))
+    }
+
+    pub(super) fn source(&self, id: &str) -> io::Result<Option<Value>> {
+        Ok(self.sources()?.iter().find(|row| row["id"].as_str() == Some(id)).cloned())
+    }
+
+    fn sources(&self) -> io::Result<&[Value]> {
+        self.sources.get_or_init(|| Ok(serde_json::from_reader(BufReader::new(self.open("sources.json")?))?))
+            .as_ref().map(Vec::as_slice).map_err(|error| io::Error::new(error.kind(), error.to_string()))
+    }
+
+    pub(super) fn archive(&self, unit: &str) -> io::Result<(Option<PopulationArchive>, Option<Value>)> {
+        let mut archive = PopulationArchive::default();
+        for row in catalogue_rows(self.open("geography_1900.jsonl.gz")?) {
+            let row = row?;
+            if row["id"].as_str() == Some(unit) {
+                archive.geographies.push(row);
+            } else if row["parent"].as_str() == Some(unit) || contains_text(&row["parent_ids"], unit) {
+                archive.geography_children.push(row);
+            }
+        }
+        let dated_units = linked_units(&archive.geographies, "historical_observation_ids");
+        let research_units = linked_units(&archive.geographies, "study_candidates");
+        let city_key = unit.strip_prefix("city:").or_else(|| {
+            if unit.starts_with("place:") && dated_units.len() == 1 { dated_units.first().copied() } else { None }
+        });
+        let city_reference = city_key.map(|key| self.city(key)).transpose()?.flatten();
+        for row in catalogue_rows(self.open("population_1900.jsonl.gz")?) {
+            let row = row?;
+            let Some(source_unit) = row["unit_id"].as_str() else { continue; };
+            if source_unit == unit || row["wwo_id"].as_str() == Some(unit) || dated_units.contains(source_unit)
+                || city_reference.as_ref().is_some_and(|city| row["city_key"] == city["city_key"])
+            {
+                archive.dated_population.push(row);
+            } else if research_units.contains(source_unit) {
+                archive.candidate_research_population.push(row);
+            }
+        }
+        for row in catalogue_rows(self.open("demography_1900.jsonl.gz")?) {
+            let row = row?;
+            if row["unit_id"].as_str().is_some_and(|source_unit| source_unit == unit || dated_units.contains(source_unit))
+                || contains_text(&row["opening_reference_ids"], unit)
+            {
+                archive.dated_structure.push(row);
+            }
+        }
+        let source_ids: BTreeSet<_> = archive.dated_population.iter()
+            .chain(&archive.dated_structure).chain(&archive.candidate_research_population)
+            .filter_map(|row| row["source_id"].as_str()).collect();
+        archive.sources = self.sources()?.iter().filter(|row| row["id"].as_str().is_some_and(|id| source_ids.contains(id))).cloned().collect();
+        Ok(((!archive.geographies.is_empty() || !archive.geography_children.is_empty() || !archive.dated_population.is_empty()
+            || !archive.dated_structure.is_empty()).then_some(archive), city_reference))
+    }
+
+    pub(super) fn traits_for_scope(&self, unit: &str) -> io::Result<(Vec<Value>, Vec<Value>)> {
+        let (rows, sources) = self.traits.get_or_init(|| {
+            let rows = BufReader::new(self.open("collections/pop_traits/traits.jsonl")?).lines()
+                .map(|line| Ok(serde_json::from_str(&line?)?)).collect::<io::Result<_>>()?;
+            let sources = BufReader::new(self.open("collections/pop_traits/sources.json")?);
+            Ok((rows, serde_json::from_reader(sources)?))
+        }).as_ref().map_err(|error| io::Error::new(error.kind(), error.to_string()))?;
+        let matched: Vec<_> = rows.iter().filter(|row| {
+            unit == "world" || row["place_id"].as_str() == Some(unit) || row["observed_unit_id"].as_str() == Some(unit)
+                || unit.strip_prefix("trait:").is_some_and(|id| row["id"].as_str() == Some(id))
+                || unit.strip_prefix("region:").is_some_and(|region| row["region"].as_str() == Some(region))
+                || row["opening_links"].as_array().into_iter().flatten().any(|link| link["unit_id"].as_str() == Some(unit))
+        }).cloned().collect();
+        let ids: BTreeSet<_> = matched.iter().filter_map(|row| row["source_id"].as_str()).collect();
+        let matched_sources = sources.iter().filter(|row| row["id"].as_str().is_some_and(|id| ids.contains(id))).cloned().collect();
+        Ok((matched, matched_sources))
+    }
+}
+
+pub(crate) fn default_data_directory() -> io::Result<PathBuf> {
+    if let Some(data) = std::env::var_os("WWO_DATA_DIR") {
+        return Ok(PathBuf::from(data));
+    }
+    #[cfg(test)]
+    let data = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data");
+    #[cfg(not(test))]
+    let data = std::env::current_exe()?.with_file_name("data");
+    Ok(data)
 }
 
 fn contains_text(items: &Value, text: &str) -> bool {
@@ -184,8 +220,8 @@ fn linked_units<'a>(geographies: &'a [Value], field: &str) -> BTreeSet<&'a str> 
         .filter_map(Value::as_str).collect()
 }
 
-fn catalogue_rows(bytes: &[u8]) -> impl Iterator<Item = io::Result<Value>> + '_ {
-    BufReader::new(flate2::read::GzDecoder::new(bytes)).lines()
+fn catalogue_rows(file: File) -> impl Iterator<Item = io::Result<Value>> {
+    BufReader::new(flate2::read::GzDecoder::new(file)).lines()
         .map(|line| Ok(serde_json::from_str(&line?)?))
 }
 
