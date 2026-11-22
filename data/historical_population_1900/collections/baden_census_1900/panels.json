@@ -1,0 +1,16 @@
+[
+  {
+    "id": "baden_1900",
+    "published_scope": "Grand Duchy of Baden, population present",
+    "source_id": "de_baden_1900_age_marital",
+    "observed_unit_id": "administrative_region:germany_baden",
+    "observed_date": "1900-12-01",
+    "locator": "Table II.A.1c, printed p. 39, columns 3–5",
+    "definition": "Population present by sex and completed single year of age, from 0 through 99.",
+    "broad_observation": false,
+    "opening_unit_id": "administrative_region:germany_baden",
+    "opening_from_version": 20,
+    "opening_match_population_endpoint": true,
+    "uncertainty": "Age and sex proportions are from the Baden census 334 days after the opening. Changes over that interval have no quantified uncertainty."
+  }
+]

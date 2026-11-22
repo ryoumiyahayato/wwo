@@ -1,0 +1,6 @@
+state_id,census_date,marital_status,both,male,female,locator,source_url
+administrative_region:germany_baden,1900-12-01,single,1129823,578677,551146,Printed page 40 Table II.A.1d bottom row,https://digital.blb-karlsruhe.de/blbihd/periodical/pageview/1280268
+administrative_region:germany_baden,1900-12-01,married,626469,314312,312157,Printed page 40 Table II.A.1d bottom row,https://digital.blb-karlsruhe.de/blbihd/periodical/pageview/1280268
+administrative_region:germany_baden,1900-12-01,widowed,109660,32547,77113,Printed page 40 Table II.A.1d bottom row,https://digital.blb-karlsruhe.de/blbihd/periodical/pageview/1280268
+administrative_region:germany_baden,1900-12-01,divorced,1992,741,1251,Printed page 40 Table II.A.1d bottom row,https://digital.blb-karlsruhe.de/blbihd/periodical/pageview/1280268
+administrative_region:germany_baden,1900-12-01,total,1867944,926277,941667,Printed page 40 Table II.A.1d bottom row,https://digital.blb-karlsruhe.de/blbihd/periodical/pageview/1280268

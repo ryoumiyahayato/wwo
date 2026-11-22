@@ -2387,6 +2387,93 @@ mod tests {
     }
 
     #[test]
+    fn historical_baden_survey_adds_age_and_civil_status_without_changing_the_balance() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let unit = "administrative_region:germany_baden";
+        let world = bootstrap.create("country_fra").unwrap();
+        let report = world.inspect_population(unit).unwrap();
+        assert_eq!(report.population_total, Some(1_841_868));
+        assert_eq!(report.structure.unwrap().residents_with_cohort_age_and_sex, 1_841_868);
+        assert_eq!(report.social.unwrap().dimensions["marital_status"].assigned_residents, 1_841_868);
+
+        let wuerttemberg = "administrative_region:germany_wuerttemberg";
+        let structure = world.inspect_population(wuerttemberg).unwrap().structure.unwrap();
+        assert_eq!(structure.residents_with_cohort_age_and_sex, 2_153_315);
+        assert!(structure.cohorts.iter().all(|cohort| {
+            cohort.age_years.is_some_and(|age| age.oldest == Some(age.youngest))
+        }));
+
+        let previous = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
+        let before = previous.inspect_population(unit).unwrap();
+        assert_eq!(before.population_total, report.population_total);
+        assert_eq!(before.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        assert_eq!(before.social.unwrap().dimensions["marital_status"].assigned_residents, 0);
+        let before_wuerttemberg = previous.inspect_population(wuerttemberg).unwrap().structure.unwrap();
+        assert_eq!(before_wuerttemberg.residents_with_cohort_age_and_sex, 2_153_315);
+        assert!(before_wuerttemberg.cohorts.iter().any(|cohort| {
+            cohort.age_years.is_some_and(|age| age.oldest == Some(15) && age.youngest == 0)
+        }));
+    }
+
+    #[test]
+    fn historical_egypt_provinces_partition_the_control_with_known_sex_only() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let egypt = world.inspect_population("khedivate_of_egypt").unwrap();
+        assert_eq!(egypt.population_total, Some(10_000_000));
+        assert_eq!(egypt.direct_residents, Some(4_195_390));
+        assert_eq!(egypt.children.iter().map(|child| child.population_total).sum::<u64>(), 5_804_610);
+        for (unit, total) in [
+            ("egy_mudiriya_asyut", 815_260),
+            ("egy_mudiriya_faiyum", 389_421),
+            ("egy_mudiriya_gharbiya", 1_346_489),
+            ("egy_mudiriya_jirja", 716_693),
+            ("egy_mudiriya_menufiya", 892_075),
+            ("egy_mudiriya_qena", 729_563),
+        ] {
+            let report = world.inspect_population(unit).unwrap();
+            assert_eq!(report.population_total, Some(total));
+            let structure = report.structure.unwrap();
+            assert_eq!(structure.residents_with_cohort_age_and_sex, 0);
+            assert_eq!(structure.cohort_residents, total);
+            assert_eq!(structure.cohorts.len(), 2);
+            assert!(structure.cohorts.iter().all(|cohort| cohort.sex.is_some() && cohort.age_years.is_none()));
+            assert_eq!(report.social.unwrap().dimensions["occupation"].unknown_residents, total);
+        }
+
+        let unit = "egy_mudiriya_faiyum";
+        let report = world.inspect_population(unit).unwrap();
+        let structure = report.structure.unwrap();
+        assert!(structure.cohorts.iter().any(|cohort| cohort.members == 196_981));
+        assert!(structure.cohorts.iter().any(|cohort| cohort.members == 192_440));
+        let previous = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
+        assert_eq!(previous.inspect_population(unit).unwrap().population_total, None);
+        assert_eq!(previous.inspect_population("khedivate_of_egypt").unwrap().direct_residents, Some(9_084_891));
+    }
+
+    #[test]
+    fn historical_hungarian_work_status_keeps_occupation_and_county_scope_separate() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let unit = "ah_croatia_slavonia";
+        let report = world.inspect_population(unit).unwrap();
+        let social = report.social.unwrap();
+        let class = &social.dimensions["class"];
+        assert_eq!((class.assigned_residents, class.unknown_residents), (1_266_506, 1_128_372));
+        assert_eq!(social.dimensions["occupation"].assigned_residents, 1_270_958);
+        let tisza = world.inspect_population("ah_tisza_maros").unwrap().social.unwrap();
+        assert_eq!(tisza.dimensions["class"].assigned_residents, 893_916);
+        let global = world.population().social_distribution(None).unwrap();
+        assert_eq!(global.dimensions["class"].assigned_residents, 8_368_163);
+        let county = world.inspect_population(report.children[0].unit_id).unwrap();
+        assert_eq!(county.social.unwrap().dimensions["class"].assigned_residents, 0);
+        let previous = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
+        let old_social = previous.inspect_population(unit).unwrap().social.unwrap();
+        assert_eq!(old_social.dimensions["class"].assigned_residents, 0);
+        assert_eq!(old_social.dimensions["occupation"].assigned_residents, 1_270_958);
+    }
+
+    #[test]
     fn historical_alaska_and_hawaii_keep_own_age_tables_and_missing_ages() {
         let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
         for (unit, total, with_age) in [("cshapes_gw_3", 62_288, 45_724), ("cshapes_gw_4", 151_193, 150_640)] {

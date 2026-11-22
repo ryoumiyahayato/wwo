@@ -5,7 +5,7 @@ import re
 from fractions import Fraction
 from pathlib import Path
 
-from opening import DATE, ENGLAND_WALES_OCCUPATION_REMAINDER, apportion, opening_fraction
+from opening import DATE, EGYPT_COMPARABLE_PROVINCES, ENGLAND_WALES_OCCUPATION_REMAINDER, apportion, opening_fraction
 
 HERE=Path(__file__).resolve().parent/"collections"
 AGE_SOURCES = HERE / "age_sex"
@@ -312,7 +312,7 @@ def age_sex_panels():
         HERE / "netherlands_census_1899", HERE / "nordic_population_1900", HERE / "swiss_census_ages",
         HERE / "andaman_census_demography", HERE / "india_princely_age", HERE / "india_statistical_abstract_ages",
         HERE / "prussia_census_1900", HERE / "saxony_census_1900", HERE / "wuerttemberg_census_1900",
-        HERE / "us_territorial_ages_1900",
+        HERE / "us_territorial_ages_1900", HERE / "baden_census_1900",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -682,6 +682,33 @@ def princely_state_opening_age_model(panels, unit, state):
     return opening_age_group(model, [control, *rows], unit["unit_id"], total)
 
 
+def egypt_provincial_sex_models(opening_balances, observations):
+    records = {row["record_id"]: row for row in observations if row["source_id"] == EGYPT_COMPARABLE_PROVINCES}
+    for unit in opening_balances.values():
+        if unit.get("source_id") != EGYPT_COMPARABLE_PROVINCES:
+            continue
+        dates = unit["source_dates"]
+        first, last = [records[record_id] for record_id in unit["source_observations"]]
+        for row in (first, last):
+            if sum(row["breakdowns"]["sex"].values()) != row["population_value"]:
+                raise ValueError(f"{unit['unit_id']}: sex totals do not sum to the census population")
+        fraction = opening_fraction(dates)
+        total = unit["population_value"]
+        allocated = apportion({
+            sex: first["breakdowns"]["sex"][sex] * (1 - fraction) + last["breakdowns"]["sex"][sex] * fraction
+            for sex in SEX_COUNTS
+        }, total)
+        yield dict(
+            unit_id=unit["unit_id"], opening_total=total, observed_total=total, source_id=unit["source_id"],
+            observed_unit_id=unit["unit_id"], observed_date=DATE, locator=unit["locator"],
+            method="Interpolate the two published sex counts to 1900-01-01 and reconcile integer people "
+                   "to the opening control.",
+            uncertainty=unit["uncertainty_kind"] + " Ages are unknown.",
+            sex_only=True,
+            bands=[dict(id="unknown", label="Modeled sex totals; age unknown", age_min=None, age_max=None, **allocated)],
+        )
+
+
 def opening_structure(opening_groups, observations, *, version=6):
     district_pools = {unit["unit_id"]: unit for group in opening_groups for unit in group["units"]
                       if "district_boundary_source" in unit}
@@ -718,6 +745,8 @@ def opening_structure(opening_groups, observations, *, version=6):
             if endpoints[-1] != model["observed_total"]:
                 raise ValueError(f"Census age and population controls differ for {unit_id}")
         groups.append(model)
+    if version >= 20:
+        groups.extend(egypt_provincial_sex_models(opening_balances, observations))
     if version >= 18:
         groups.extend(hungarian_opening_age_models(panels, opening_balances))
     if version >= 13:

@@ -9,6 +9,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DATE = "1900-01-01"
 ENGLAND_WALES_OCCUPATION_REMAINDER = "uk_england_wales_except_anglesey"
+EGYPT_COMPARABLE_PROVINCES = "egypt_census_1907_comparable_provinces"
 
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
@@ -575,7 +576,7 @@ def fiji_and_rotuma(observations):
         partition_source="collections/eastern/observations.jsonl", units=[])
 
 
-def egypt_two_cities(observations):
+def egypt_opening(observations, version):
     root = "khedivate_of_egypt"
     source = "egypt_historical_census_primary_tables"
     dates = ["1897-06-01", "1907-04-29"]
@@ -598,8 +599,27 @@ def egypt_two_cities(observations):
             scope=scope, place_ids=["place:"+city],
             uncertainty_kind="No statistical interval. Enumeration coverage, changes to the reported urban extent and interpolation error are unquantified.",
         ))
+    if version >= 20:
+        provinces = defaultdict(dict)
+        for row in observations:
+            if row["source_id"] == EGYPT_COMPARABLE_PROVINCES:
+                provinces[row["unit_id"]][row["date"]] = row
+        for unit, endpoints in sorted(provinces.items()):
+            before, after = [endpoints[day] for day in dates]
+            initial, final = [row["population_value"] for row in (before, after)]
+            leaves.append(dict(
+                unit_id=unit, name=before["name"], population_value=round(initial + (final - initial) * fraction),
+                source_unit_ids=[unit], source_id=before["source_id"], source_quality=before["quality"],
+                source_observations=[before["record_id"], after["record_id"]],
+                endpoint_values=[initial, final], source_dates=dates,
+                locator=before["locator"] + " / " + after["locator"],
+                scope=before["definition"],
+                uncertainty_kind="Enumeration coverage and interpolation error have no quantified interval. "
+                                 "The comparison table includes some estimated nomadic populations. "
+                                 "Boundary changes below the provincial level are unresolved.",
+            ))
     control = legacy_population_control(root)
-    return dict(
+    opening = dict(
         unit_id=root, date=DATE, population_value=control, source_id=source,
         legacy_control_source="data/alpha/historical_world_economy_1900/countries_compact.json: khedivate_of_egypt population_value",
         legacy_unlocated_balance=control-sum(leaf["population_value"] for leaf in leaves),
@@ -611,6 +631,18 @@ def egypt_two_cities(observations):
         uncertainty_kind="The national control retains its inherited source basis. The interpolated town estimates have no statistical interval.",
         units=leaves,
     )
+    if version >= 20:
+        opening.update(
+            locator="Tanada, Tables 2 and 4; Census of Egypt, 1907, Table 5, printed pp. 29–32.",
+            method=f"Linear daily interpolation of two town returns and comparable provincial totals, "
+                   f"elapsed fraction {fraction}.",
+            scope="Cairo, Alexandria and six provinces are disjoint subdivisions of the retained Egypt control. "
+                  "The balance has no geographic allocation. Census and map extents differ for western "
+                  "oases and the southern frontier.",
+            uncertainty_kind="The national control retains its inherited source basis. The interpolated "
+                             "local estimates have no statistical interval.",
+        )
+    return opening
 
 
 def natal_and_zululand(observations):
@@ -957,7 +989,7 @@ def groups(observations, version=1):
         fiji = fiji_and_rotuma(observations)
         result[fiji["unit_id"]] = fiji
     if version >= 3:
-        for group in (egypt_two_cities(observations), natal_and_zululand(observations)):
+        for group in (egypt_opening(observations, version), natal_and_zululand(observations)):
             root = group["unit_id"]
             if root in result:
                 raise ValueError(f"two production partitions for {root}")

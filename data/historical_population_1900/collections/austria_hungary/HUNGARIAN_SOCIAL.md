@@ -33,3 +33,9 @@
 | capital_pensions_etc | Tőkések, nyugdíjasok, stb. | Persons living from capital, pensions, etc. |
 | other_and_unknown_occupations | Egyéb és ismeretlen foglalkozásúak | Other and unknown occupations |
 | domestic_servants | Házi cselédek | Domestic servants |
+
+# 匈牙利王冠领地 1900 年在业地位
+
+匈牙利中央统计局《1900 年匈牙利王冠领地人口普查》第 X 卷，表 48，印刷页 182–183。采用七个匈牙利统计地区、Fiume 与克罗地亚－斯拉沃尼亚的计数。各区独立从业者与业主、职员、其他辅助从业人员的合计与表 47 对应组复核。[普查原件](https://www.kshkonyvtar.hu/file-download/L2hvbWUvc2lsaW5mby9hcHBsaWNhdGlvbi93b3JrZGlyL2NrZWRpdG9yQ3VzdG9tRmlsZXMvRsOpbnllcyBFbGVrIGRpZ2l0w6FsaXMgc3RhdGlzenRpa2FpIGvDtm55dnTDoXIvTWFneWFyIFN0YXRpc3p0aWthaSBLw7Z6bGVtw6lueWVrL01TS18wMjcucGRm#page=226)
+
+普查总数 19,254,559 人。原表三个类别依次为 2,607,643 人、230,594 人、5,607,434 人。按各区同日人口控制比例分到开局账户。受扶养者、另列家佣及其他不属这三类者保留未知。统计口径包括部分国防、退休与资本收入人员，不能用来推算劳动年龄或本人职业。[原表摘录](hungarian_crown_class_1900.csv)

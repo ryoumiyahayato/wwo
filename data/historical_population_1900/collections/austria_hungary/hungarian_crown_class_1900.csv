@@ -1,0 +1,10 @@
+unit_id,observed_name,observed_date,source_id,locator,observed_total,census_total,independent,employees,other_auxiliaries
+ah_danube_left,Duna bal partja,1900-12-31,ah_hungarian_census_1900_work_status,"Part X, MSK 27 (1909), Table 48, printed p. 182 (PDF p. 226), a subtotal, 1900 columns",868842,2049611,268141,22405,578296
+ah_danube_right,Duna jobb partja,1900-12-31,ah_hungarian_census_1900_work_status,"Part X, MSK 27 (1909), Table 48, printed p. 182 (PDF p. 226), b subtotal, 1900 columns",1274758,2923401,388988,29857,855913
+ah_danube_tisza,Duna-Tisza köze,1900-12-31,ah_hungarian_census_1900_work_status,"Part X, MSK 27 (1909), Table 48, printed p. 182 (PDF p. 226), c subtotal, 1900 columns",1318154,3284233,383726,71529,862899
+ah_tisza_right,Tisza jobb partja,1900-12-31,ah_hungarian_census_1900_work_status,"Part X, MSK 27 (1909), Table 48, printed p. 182 (PDF p. 226), d subtotal, 1900 columns",676509,1674241,209578,18898,448033
+ah_tisza_left,Tisza bal partja,1900-12-31,ah_hungarian_census_1900_work_status,"Part X, MSK 27 (1909), Table 48, printed p. 183 (PDF p. 226), e subtotal, 1900 columns",923775,2336104,291188,22132,610455
+ah_tisza_maros,Tisza-Maros szöge,1900-12-31,ah_hungarian_census_1900_work_status,"Part X, MSK 27 (1909), Table 48, printed p. 183 (PDF p. 226), f subtotal, 1900 columns",899873,2054712,282935,20524,596414
+ah_transylvania,Királyhágón túl,1900-12-31,ah_hungarian_census_1900_work_status,"Part X, MSK 27 (1909), Table 48, printed p. 183 (PDF p. 226), g subtotal, 1900 columns",1189249,2476998,402228,25161,761860
+ah_fiume,Fiume város és kerülete,1900-12-31,ah_hungarian_census_1900_work_status,"Part X, MSK 27 (1909), Table 48, printed p. 183 (PDF p. 226), h, 1900 columns",16674,38955,3334,1870,11470
+ah_croatia_slavonia,Horvát-Szlavonországok,1900-12-31,ah_hungarian_census_1900_work_status,"Part X, MSK 27 (1909), Table 48, printed p. 183 (PDF p. 226), Horv.-Szlav.-orsz. subtotal, 1900 columns",1277837,2416304,377525,18218,882094

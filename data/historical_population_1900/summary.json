@@ -17,6 +17,7 @@
     "danish": 56,
     "eastern": 1105,
     "ecuador_population": 35,
+    "egypt_comparable_provinces": 12,
     "el_salvador_population": 19,
     "french_indochina_population": 14,
     "gold_coast_population": 2,
@@ -46,23 +47,23 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 214,
+  "cited_sources": 217,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
   "production_roots": 54,
   "partially_located_legacy_roots": 3,
-  "documented_people_under_legacy_controls": 669895792,
+  "documented_people_under_legacy_controls": 674785293,
   "replaced_legacy_roots": 30,
   "new_roots": 24,
-  "production_people": 1329288036,
-  "production_people_pct_world_estimate": 83.337,
-  "population_outside_evidence_opening_estimate": 265786212,
-  "legacy_only_people": 135984208,
+  "production_people": 1334177537,
+  "production_people_pct_world_estimate": 83.644,
+  "population_outside_evidence_opening_estimate": 260896711,
+  "legacy_only_people": 131094707,
   "authoritative_total_for_new_game": 1465272244,
   "roots_with_partitions": 23,
-  "disjoint_leaves": 953,
-  "people_in_partitions": 1205786070,
+  "disjoint_leaves": 959,
+  "people_in_partitions": 1210675571,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -300,7 +301,7 @@
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
-      "people": 669895792
+      "people": 674785293
     }
   },
   "city_index_representative_bands": {
@@ -311,6 +312,10 @@
   },
   "city_index_unresolved": 31,
   "opening_social_coverage": {
+    "class": {
+      "assigned_people": 8368163,
+      "unknown_people": 1456904081
+    },
     "household": {
       "assigned_people": 72890961,
       "unknown_people": 1392381283
@@ -332,8 +337,8 @@
       "unknown_people": 1282131517
     },
     "marital_status": {
-      "assigned_people": 175633120,
-      "unknown_people": 1289639124
+      "assigned_people": 177474988,
+      "unknown_people": 1287797256
     },
     "occupation": {
       "assigned_people": 59646786,
@@ -384,8 +389,9 @@
     "india_census_cp_states_1901_table_vii": 8,
     "de_prussia_handbook_1903_census_ages": 9,
     "de_saxony_1900_age_marital": 33,
-    "de_wuerttemberg_1900_age_marital": 6,
+    "de_wuerttemberg_1900_age_marital": 107,
     "us_twelfth_census_1900_alaska_hawaii_age": 26,
+    "de_baden_1900_age_marital": 101,
     "ah_cisleithania_census_1900_ages": 168,
     "ksh_hungarian_statistical_yearbook_1908": 42,
     "ah_hungarian_census_1900_part10": 18,
@@ -394,9 +400,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 729353028,
-  "structure_opening_pool_count": 539,
-  "structure_opening_residents_outside_modeled_pools": 735919216,
+  "structure_opening_pool_controls": 736084397,
+  "structure_opening_pool_count": 546,
+  "structure_opening_residents_outside_modeled_pools": 729187847,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -1349,6 +1355,13 @@
       "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
       "observed_total": 31403796,
       "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:germany_baden",
+      "opening_total": 1841868,
+      "observed_unit_id": "administrative_region:germany_baden",
+      "observed_total": 1867944,
+      "observed_date": "1900-12-01"
     },
     {
       "unit_id": "administrative_region:germany_bayern",
@@ -2721,6 +2734,48 @@
       "observed_unit_id": "nz_colony",
       "observed_total": 815862,
       "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "egy_mudiriya_asyut",
+      "opening_total": 815260,
+      "observed_unit_id": "egy_mudiriya_asyut",
+      "observed_total": 815260,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "egy_mudiriya_faiyum",
+      "opening_total": 389421,
+      "observed_unit_id": "egy_mudiriya_faiyum",
+      "observed_total": 389421,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "egy_mudiriya_gharbiya",
+      "opening_total": 1346489,
+      "observed_unit_id": "egy_mudiriya_gharbiya",
+      "observed_total": 1346489,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "egy_mudiriya_jirja",
+      "opening_total": 716693,
+      "observed_unit_id": "egy_mudiriya_jirja",
+      "observed_total": 716693,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "egy_mudiriya_menufiya",
+      "opening_total": 892075,
+      "observed_unit_id": "egy_mudiriya_menufiya",
+      "observed_total": 892075,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "egy_mudiriya_qena",
+      "opening_total": 729563,
+      "observed_unit_id": "egy_mudiriya_qena",
+      "observed_total": 729563,
+      "observed_date": "1900-01-01"
     },
     {
       "unit_id": "ft_finland",
@@ -4370,9 +4425,9 @@
         "khedivate_of_egypt",
         "sultanate_of_zanzibar"
       ],
-      "production_people": 9666780,
-      "production_pct_of_regional_research_estimate": 7.437,
-      "people_with_opening_subdivision": 1489104,
+      "production_people": 14556281,
+      "production_pct_of_regional_research_estimate": 11.199,
+      "people_with_opening_subdivision": 6378605,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -4851,9 +4906,9 @@
         "opening_unit_id": "german_empire",
         "research_region": "Europe",
         "opening_control": 55619152,
-        "in_model_pools": 47450617,
-        "outside_model_pools": 8168535,
-        "modeled_age_and_sex": 47443969,
+        "in_model_pools": 49292485,
+        "outside_model_pools": 6326667,
+        "modeled_age_and_sex": 49285837,
         "modeled_sex_age_unknown": 6648
       },
       {
@@ -4869,10 +4924,10 @@
         "opening_unit_id": "khedivate_of_egypt",
         "research_region": "Africa",
         "opening_control": 10000000,
-        "in_model_pools": 0,
-        "outside_model_pools": 10000000,
+        "in_model_pools": 4889501,
+        "outside_model_pools": 5110499,
         "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "modeled_sex_age_unknown": 4889501
       },
       {
         "opening_unit_id": "kingdom_of_belgium",
@@ -5189,17 +5244,17 @@
       },
       "Europe": {
         "opening_control": 408702638,
-        "in_model_pools": 325053948,
-        "outside_model_pools": 83648690,
-        "modeled_age_and_sex": 323204133,
+        "in_model_pools": 326895816,
+        "outside_model_pools": 81806822,
+        "modeled_age_and_sex": 325046001,
         "modeled_sex_age_unknown": 1849815
       },
       "Africa": {
         "opening_control": 18751671,
-        "in_model_pools": 2265556,
-        "outside_model_pools": 16486115,
+        "in_model_pools": 7155057,
+        "outside_model_pools": 11596614,
         "modeled_age_and_sex": 2264636,
-        "modeled_sex_age_unknown": 920
+        "modeled_sex_age_unknown": 4890421
       },
       "no_reviewed_research_region": {
         "opening_control": 101880000,
@@ -5218,10 +5273,10 @@
     },
     "world": {
       "opening_control": 1465272244,
-      "in_model_pools": 729353028,
-      "outside_model_pools": 735919216,
-      "modeled_age_and_sex": 727188920,
-      "modeled_sex_age_unknown": 2164108
+      "in_model_pools": 736084397,
+      "outside_model_pools": 729187847,
+      "modeled_age_and_sex": 729030788,
+      "modeled_sex_age_unknown": 7053609
     }
   },
   "opening_count_basis": {
@@ -5235,12 +5290,12 @@
         "pct_of_research_reference": 43.555
       },
       "date_models_from_territorial_returns": {
-        "people": 629444294,
-        "pct_of_research_reference": 39.462
+        "people": 634333795,
+        "pct_of_research_reference": 39.768
       },
       "retained_legacy_estimates": {
-        "people": 135984208,
-        "pct_of_research_reference": 8.525
+        "people": 131094707,
+        "pct_of_research_reference": 8.219
       }
     },
     "scopes": [
@@ -5583,9 +5638,9 @@
       {
         "unit_id": "khedivate_of_egypt",
         "source_id": "egypt_historical_census_primary_tables",
-        "sourced_people": 915109,
+        "sourced_people": 5804610,
         "sourced_basis": "date_models_from_territorial_returns",
-        "retained_legacy_people": 9084891
+        "retained_legacy_people": 4195390
       },
       {
         "unit_id": "kingdom_of_belgium",

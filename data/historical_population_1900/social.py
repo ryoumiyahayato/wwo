@@ -690,6 +690,37 @@ def hungarian_crown_social(pools, dimension, columns, definition):
         )
 
 
+def hungarian_crown_work_status(pools):
+    path = COLLECTIONS / "austria_hungary" / "hungarian_crown_class_1900.csv"
+    columns = {
+        "independent": "Independent persons and proprietors",
+        "employees": "Salaried employees",
+        "other_auxiliaries": "Other auxiliary personnel",
+    }
+    with path.open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    crown_pools = {key for key, pool in pools.items() if pool.get("control_unit_id") == "ah_lands_of_st_stephen"}
+    if len(rows) != len(crown_pools) or {row["unit_id"] for row in rows} != crown_pools:
+        raise ValueError("Hungarian work-status table does not cover the opening Crown of St Stephen")
+    for row in rows:
+        unit_id = row["unit_id"]
+        unit = pools[unit_id]
+        total = int(row["census_total"])
+        counts = {label: int(row[column]) for column, label in columns.items()}
+        if total != unit["endpoint_values"][-1] or sum(counts.values()) != int(row["observed_total"]):
+            raise ValueError(f"Hungarian work status and population controls differ for {unit_id}")
+        yield unit_id, "class", distribution(
+            unit["population_value"], classification="hungarian_crown_1900_work_status",
+            source=row["source_id"], date=row["observed_date"], observed_unit=unit_id,
+            scope=row["observed_name"], locator=row["locator"], total=total, observed_counts=counts,
+            unknown=total - int(row["observed_total"]),
+            definition="Census social position by the person's own livelihood. Its active population includes "
+                       "the defence category, retirees and capital holders. Domestic servants and people outside "
+                       "the published groups remain unassigned. The table gives neither labour participation "
+                       "nor income or landholding.",
+        )
+
+
 def prussian_marital_status(pools):
     unit_id = "administrative_region:germany_preussen"
     unit = pools[unit_id]
@@ -801,6 +832,12 @@ def opening_social(opening_groups, *, version):
                 locator="Table D, printed p. 16, all ages, entire kingdom",
             ),
         )
+    if version >= 20:
+        marginals = chain(marginals, german_state_marital_status(
+            pools, "baden_census_1900", classification="baden_1900_reported_marital_status",
+            source="de_baden_1900_age_marital", scope="Grand Duchy of Baden, population present",
+            locator="Table II.A.1d, printed p. 40, all ages",
+        ), hungarian_crown_work_status(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))
