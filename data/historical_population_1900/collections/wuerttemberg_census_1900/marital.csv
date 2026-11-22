@@ -1,0 +1,6 @@
+state_id,census_date,marital_status,both,male,female,locator,source_url
+administrative_region:germany_wuerttemberg,1900-12-01,single,1312990,652488,660502,Printed page 16 Table D bottom row,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
+administrative_region:germany_wuerttemberg,1900-12-01,married,728736,364547,364189,Printed page 16 Table D bottom row,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
+administrative_region:germany_wuerttemberg,1900-12-01,widowed,125381,34939,90442,Printed page 16 Table D bottom row,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
+administrative_region:germany_wuerttemberg,1900-12-01,divorced,2373,795,1578,Printed page 16 Table D bottom row,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
+administrative_region:germany_wuerttemberg,1900-12-01,total,2169480,1052769,1116711,Printed page 16 Table D bottom row,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf

@@ -311,7 +311,8 @@ def age_sex_panels():
     regional_sources = (
         HERE / "netherlands_census_1899", HERE / "nordic_population_1900", HERE / "swiss_census_ages",
         HERE / "andaman_census_demography", HERE / "india_princely_age", HERE / "india_statistical_abstract_ages",
-        HERE / "prussia_census_1900",
+        HERE / "prussia_census_1900", HERE / "saxony_census_1900", HERE / "wuerttemberg_census_1900",
+        HERE / "us_territorial_ages_1900",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -711,9 +712,11 @@ def opening_structure(opening_groups, observations, *, version=6):
         ) and unit_id not in opening_totals:
             continue
         model = opening_age_group(panel, rows, unit_id, opening_totals[unit_id])
-        if (panel.get("opening_match_population_endpoint")
-                and opening_balances[unit_id]["endpoint_values"][-1] != model["observed_total"]):
-            raise ValueError(f"Census age and population controls differ for {unit_id}")
+        if panel.get("opening_match_population_endpoint"):
+            balance = opening_balances[unit_id]
+            endpoints = balance.get("endpoint_values") or balance["country_endpoint_values"]
+            if endpoints[-1] != model["observed_total"]:
+                raise ValueError(f"Census age and population controls differ for {unit_id}")
         groups.append(model)
     if version >= 18:
         groups.extend(hungarian_opening_age_models(panels, opening_balances))

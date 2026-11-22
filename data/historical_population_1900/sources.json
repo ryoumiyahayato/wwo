@@ -860,6 +860,20 @@
     "collection": "canada_social_1901"
   },
   {
+    "id": "ca_fourth_census_1901_occupation_bulletin_xi",
+    "title": "Occupations of the People, Bulletin XI, 1901 census",
+    "publisher": "Census and Statistics Office, Dominion of Canada, Ottawa, 1910",
+    "url": "https://publications.gc.ca/collections/collection_2017/statcan/CS91-Pre-DBS-10-eng.pdf#page=15",
+    "locator": "Table I, printed pp. 1–3; Volume I, Table I, printed pp. 2–5 for the all-resident denominators.",
+    "rights": "Historical Government of Canada publication, public domain in Canada",
+    "raw_path": "occupation_1901_table_i.csv",
+    "table_urls": [
+      "https://publications.gc.ca/collections/collection_2017/statcan/CS91-Pre-DBS-10-fra.pdf",
+      "https://publications.gc.ca/collections/collection_2016/statcan/CS98-1901-1.pdf"
+    ],
+    "collection": "canada_social_1901"
+  },
+  {
     "id": "cape_colony_1899_imperial_conference",
     "title": "Conference between the Secretary of State for the Colonies and the Prime Ministers of Self-Governing Colonies, June to August 1902",
     "publisher": "New Zealand House of Representatives, published as Appendix to the Journals of the House of Representatives, 1903, Session I, A-02a. Digitized by the National Library of New Zealand.",
@@ -2310,6 +2324,17 @@
     "collection": "prussia_census_1900"
   },
   {
+    "id": "lu_qing_shaangan_prefecture_reconstruction",
+    "title": "GIS支撑下的长时段区域人口变动规律分析——以1776至1953年陕甘地区人口为例",
+    "publisher": "路伟东，《历史地理》第30辑，上海人民出版社，2014年，第314–324页",
+    "url": "https://hgis.com.cn/wp-content/uploads/2020/06/%E8%91%9B%E5%B8%88%E8%8D%A3%E4%BC%91_%E5%9B%BE%E4%B9%A6%E5%87%BA%E7%89%88%E4%BF%AE%E6%94%B9%E7%A8%BF_GIS%E6%94%AF%E6%92%91%E4%B8%8B%E7%9A%84%E9%95%BF%E6%97%B6%E6%AE%B5%E5%8C%BA%E5%9F%9F%E4%BA%BA%E5%8F%A3%E5%8F%98%E5%8A%A8%E8%A7%84%E5%BE%8B%E5%88%86%E6%9E%90_%E4%BB%A51776%E8%87%B31953%E5%B9%B4%E9%99%95%E7%94%98%E5%9C%B0%E5%8C%BA%E4%BA%BA%E5%8F%A3%E4%B8%BA%E4%BE%8B_20190713.pdf#page=6",
+    "locator": "Linked manuscript, Table 2, pp. 6–7, 1880 and corrected 1910 columns. Read against the extant Shaanxi and Gansu jurisdictions in 清史稿, vols. 63 and 64.",
+    "rights": "Numeric facts transcribed, with attribution. Source PDF and text remain linked.",
+    "raw_path": "lu_shaangan_table_2.csv",
+    "publisher_bibliography": "https://yugong.fudan.edu.cn/info/1451/12401.htm",
+    "collection": "qing_shaangan_prefectures"
+  },
+  {
     "id": "ro_colescu_1899_census_report",
     "title": "Recensământul general al populațiunei României din decembrie 1899: rezultate definitive",
     "publisher": "Serviciul Statisticei Generale, Ministerul Domeniilor (1905)",
@@ -2587,6 +2612,15 @@
     "collection": "saint_helena_population"
   },
   {
+    "id": "de_saxony_1900_age_marital",
+    "title": "Die Bevölkerung Sachsens nach Geschlecht, Alter und Familienstand nach der Volkszählung vom 1. Dezember 1900",
+    "publisher": "Georg Wächter, Zeitschrift des Königlich Sächsischen Statistischen Bureaus, vol. 48, nos. 3–4, 1902",
+    "url": "https://digital.slub-dresden.de/data/kitodo/ZeitdeKS_351638016-19020000/ZeitdeKS_351638016-19020000_tif/jpegs/00000174.tif.pdf",
+    "locator": "Table 3, printed p. 160. Age by sex in columns 6 and 11. Civil status by sex in the final row.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "saxony_census_1900"
+  },
+  {
     "id": "scotland_civil_counties_census_1901",
     "title": "Eleventh Decennial Census of the Population of Scotland taken 31st March 1901, with Report",
     "publisher": "Registrar-General for Scotland",
@@ -2749,6 +2783,15 @@
     "collection": "us_social"
   },
   {
+    "id": "us_twelfth_census_1900_alaska_hawaii_age",
+    "title": "Twelfth Census of the United States, Taken in the Year 1900, Volume II, Population, Part II",
+    "publisher": "United States Census Office",
+    "url": "https://usa.ipums.org/usa/resources/voliii/pubdocs/1900/Vol2/33405927v2ch04.pdf#page=110",
+    "locator": "Table 3, printed pp. 110–111, all-person Alaska and Hawaii rows at the foot of the paired pages.",
+    "rights": "Historic US federal statistical return. Numeric facts transcribed.",
+    "collection": "us_territorial_ages_1900"
+  },
+  {
     "id": "venezuela_1904_pan_american_handbook",
     "title": "N. Veloz Goiticoa, Venezuela: Geographical Sketch, Natural Resources, Laws, Economic Conditions, Actual Development, Prospects of Future Growth",
     "publisher": "International Bureau of the American Republics. Government Printing Office, Washington, 1904.",
@@ -2860,6 +2903,15 @@
     "locator": "1900 AD row; population in millions, lower/upper summary. Original references listed below the table.",
     "rights": "Factual numeric extract from US federal table; underlying researchers credited by the publisher.",
     "collection": "world"
+  },
+  {
+    "id": "de_wuerttemberg_1900_age_marital",
+    "title": "Statistisches Handbuch für das Königreich Württemberg, Jahrgang 1902 und 1903",
+    "publisher": "Königlich Statistisches Landesamt Württemberg",
+    "url": "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf",
+    "locator": "Table F(a), printed p. 18, columns 10 and 11 for the entire kingdom by age and sex. Table D, printed p. 16, final row, lower figures for the entire kingdom by civil status and sex.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "wuerttemberg_census_1900"
   },
   {
     "id": "zanzibar_statesmans_year_book_1899",

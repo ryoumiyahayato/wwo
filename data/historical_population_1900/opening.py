@@ -855,7 +855,45 @@ def qing_interior(observations, version):
         group["additional_territorial_source"] = additions.relative_to(HERE).as_posix()
     if version >= 11:
         group["v11_territorial_source"] = coastal_and_frontier.relative_to(HERE).as_posix()
+    if version >= 19:
+        add_shaangan_prefectures(group, observations)
     return group
+
+
+def add_shaangan_prefectures(group, observations):
+    source = "lu_qing_shaangan_prefecture_reconstruction"
+    dates = group["interpolation_reference_dates"]
+    year_to_anchor = dict(zip(group["endpoint_dates"], dates, strict=True))
+    prefectures = defaultdict(list)
+    for row in observations:
+        if row["source_id"] == source:
+            prefectures[row["parent_id"]].append(row | dict(date=year_to_anchor[row["date"]]))
+    units, aggregates = [], []
+    for parent in group["units"]:
+        parent_id = parent["unit_id"]
+        if parent_id not in prefectures:
+            units.append(parent)
+            continue
+        if parent["place_ids"]:
+            raise ValueError(f"Assign the existing places to prefectures before splitting {parent_id}")
+        children = interpolate_partition(prefectures.pop(parent_id), parent, dates)
+        for child in children:
+            child.update(
+                statistical_parent=parent_id, date=DATE,
+                source_dates=group["endpoint_dates"], interpolation_reference_dates=dates,
+                method=child["method"] + " The two anchor dates are conventional July midpoints of source years.",
+                uncertainty_kind=("The source estimates are rounded to thousands. Local boundary differences and "
+                                  "interpolation errors have no calibrated interval."),
+            )
+        units.extend(children)
+        aggregates.append(parent | dict(
+            date=DATE, endpoint_dates=group["endpoint_dates"],
+            interpolation_reference_dates=dates,
+            method="Sum the non-overlapping historical prefectural statistical areas using the provincial controls.",
+        ))
+    if prefectures or {parent["unit_id"] for parent in aggregates} != {"qing_hist_shaanxi", "qing_hist_gansu"}:
+        raise ValueError("The prefectural data must close to both existing Shaanxi and Gansu controls")
+    group.update(units=units, statistical_aggregates=aggregates)
 
 
 def groups(observations, version=1):

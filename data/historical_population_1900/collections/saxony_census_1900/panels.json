@@ -1,0 +1,16 @@
+[
+  {
+    "id": "saxony_1900",
+    "published_scope": "Kingdom of Saxony, population present",
+    "source_id": "de_saxony_1900_age_marital",
+    "observed_unit_id": "administrative_region:germany_sachsen",
+    "observed_date": "1900-12-01",
+    "locator": "Table 3, printed p. 160, columns 6 and 11",
+    "definition": "Population present by sex and age at the 1900 census. Single years through age 14, five-year groups from 15 through 94 and ages 95 and over.",
+    "broad_observation": false,
+    "opening_unit_id": "administrative_region:germany_sachsen",
+    "opening_from_version": 19,
+    "opening_match_population_endpoint": true,
+    "uncertainty": "Age and sex proportions are from the Saxon census 334 days after the opening. Changes over that interval have no quantified uncertainty."
+  }
+]

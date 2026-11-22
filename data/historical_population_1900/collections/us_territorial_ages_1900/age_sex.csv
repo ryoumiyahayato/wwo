@@ -1,0 +1,27 @@
+panel,label,role,age_min,age_max,both,male,female
+alaska_1900,All ages,total,,,63592,45872,17720
+alaska_1900,Under 5 years,band,0,4,3634,1867,1767
+alaska_1900,5 to 9 years,band,5,9,3977,2037,1940
+alaska_1900,10 to 14 years,band,10,14,3210,1749,1461
+alaska_1900,15 to 19 years,band,15,19,3154,1692,1462
+alaska_1900,20 to 24 years,band,20,24,4704,3122,1582
+alaska_1900,25 to 29 years,band,25,29,5706,4140,1566
+alaska_1900,30 to 34 years,band,30,34,5624,4307,1317
+alaska_1900,35 to 44 years,band,35,44,9301,7331,1970
+alaska_1900,45 to 54 years,band,45,54,4808,3558,1250
+alaska_1900,55 to 64 years,band,55,64,1799,1281,518
+alaska_1900,65 years and over,band,65,,764,457,307
+alaska_1900,Age unknown,band,,,16911,14331,2580
+hawaii_1900,All ages,total,,,154001,106369,47632
+hawaii_1900,Under 5 years,band,0,4,15084,7734,7350
+hawaii_1900,5 to 9 years,band,5,9,11149,5701,5448
+hawaii_1900,10 to 14 years,band,10,14,8438,4484,3954
+hawaii_1900,15 to 19 years,band,15,19,10844,6633,4211
+hawaii_1900,20 to 24 years,band,20,24,21070,15067,6003
+hawaii_1900,25 to 29 years,band,25,29,26541,20008,6533
+hawaii_1900,30 to 34 years,band,30,34,19478,15107,4371
+hawaii_1900,35 to 44 years,band,35,44,24201,19095,5106
+hawaii_1900,45 to 54 years,band,45,54,9337,6990,2347
+hawaii_1900,55 to 64 years,band,55,64,4619,3436,1183
+hawaii_1900,65 years and over,band,65,,2677,1744,933
+hawaii_1900,Age unknown,band,,,563,370,193
