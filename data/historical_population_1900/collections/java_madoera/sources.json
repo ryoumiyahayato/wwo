@@ -51,5 +51,14 @@
     "raw_paths": ["java_madoera_1905_indigenous_age_sex_matched.csv", "java_madoera_1905_indigenous_age_margins.csv",
                   "DEMOGRAPHY.md", "JAVA_AGE_FOLLOWUP.md"],
     "rights": "Published historical numeric facts"
+  },
+  {
+    "id": "nl_colonial_report_1907_java_age",
+    "title": "Koloniaal Verslag 1907, Bijlage A, Java en Madoera",
+    "publisher": "Handelingen der Staten-Generaal, Bijlagen 1907/1908",
+    "url": "https://archive.org/details/UNIVERSITEITLEIDEN-DIG-KOLONIAAL-VERSLAG-1907/page/n219/mode/1up",
+    "locator": "Appendix A, Table IX pp. 42–43 (age and sex), Table I pp. 4–5 (population control and Madoera note h).",
+    "raw_paths": ["java_madoera_1905_indigenous_appendix_a.csv", "JAVA_AGE_FOLLOWUP.md"],
+    "rights": "Published historical numeric facts"
   }
 ]

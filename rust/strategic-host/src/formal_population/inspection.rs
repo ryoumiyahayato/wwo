@@ -34,26 +34,30 @@ pub struct DietaryNormApplicability {
     pub observed_adherents: Option<u64>,
 }
 
-const DIETARY_NORMS: &[(u32, &str, &[(&str, &str)])] = &[
-    (10, "quran_al_maidah_5_3_food_restrictions", &[
-        ("russia_1897_reported_confession", "Магометане"),
-        ("india_1901_reported_religion", "Muhammadans"),
-        ("austria_1900_reported_religion", "Muslim"),
-        ("mexico_1900_reported_religion", "Mahometanos"),
-        ("egypt_1897_reported_religion", "Muslim"),
-        ("portugal_1900_reported_religion", "Muslim"),
+// Each source category has its own first opening version for save-compatible reports.
+const DIETARY_NORMS: &[(&str, &[(u32, &str, &str)])] = &[
+    ("quran_al_maidah_5_3_food_restrictions", &[
+        (10, "russia_1897_reported_confession", "Магометане"),
+        (10, "india_1901_reported_religion", "Muhammadans"),
+        (10, "austria_1900_reported_religion", "Muslim"),
+        (10, "mexico_1900_reported_religion", "Mahometanos"),
+        (10, "egypt_1897_reported_religion", "Muslim"),
+        (10, "portugal_1900_reported_religion", "Muslim"),
+        (39, "ottoman_1897_reported_binary_religion", "Muslim"),
+        (39, "romania_1899_reported_religion", "Muslim"),
     ]),
-    (29, "leviticus_11_7_12_food_restrictions", &[
-        ("russia_1897_reported_confession", "Иудеи"),
-        ("india_1901_reported_religion", "Jews"),
-        ("austria_1900_reported_religion", "Jewish"),
-        ("hungarian_crown_1900_religion", "Jewish"),
-        ("netherlands_1899_census_denomination", "Dutch Israelite"),
-        ("netherlands_1899_census_denomination", "Portuguese Israelite"),
-        ("mexico_1900_reported_religion", "Israelitas"),
-        ("egypt_1897_reported_religion", "Jewish"),
-        ("portugal_1900_reported_religion", "Jewish"),
-        ("argentina_1895_reported_religion", "Israelitas"),
+    ("leviticus_11_7_12_food_restrictions", &[
+        (29, "russia_1897_reported_confession", "Иудеи"),
+        (29, "india_1901_reported_religion", "Jews"),
+        (29, "austria_1900_reported_religion", "Jewish"),
+        (29, "hungarian_crown_1900_religion", "Jewish"),
+        (29, "netherlands_1899_census_denomination", "Dutch Israelite"),
+        (29, "netherlands_1899_census_denomination", "Portuguese Israelite"),
+        (29, "mexico_1900_reported_religion", "Israelitas"),
+        (29, "egypt_1897_reported_religion", "Jewish"),
+        (29, "portugal_1900_reported_religion", "Jewish"),
+        (29, "argentina_1895_reported_religion", "Israelitas"),
+        (39, "romania_1899_reported_religion", "Jewish"),
     ]),
 ];
 
@@ -150,11 +154,12 @@ impl Population {
         let mut dietary_norms = Vec::new();
         if let Some(religion) = social.as_ref().and_then(|report| report.dimensions.get("religion")) {
             let version = self.opening_version().unwrap_or(0);
-            for &(first_version, trait_id, categories) in DIETARY_NORMS {
-                if version < first_version { continue; }
-                let matching = categories.iter().filter_map(|(classification, category)| {
-                    religion.by_classification.get(classification)?.get(category)
-                }).sum();
+            for &(trait_id, categories) in DIETARY_NORMS {
+                let matching = categories.iter()
+                    .filter(|(first_version, _, _)| version >= *first_version)
+                    .filter_map(|(_, classification, category)| {
+                        religion.by_classification.get(classification)?.get(category)
+                    }).sum();
                 if matching == 0 { continue; }
                 dietary_norms.push(DietaryNormApplicability {
                     trait_id,
