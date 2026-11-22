@@ -646,6 +646,47 @@ def england_wales_remaining_ages(panels):
     return panel, rows
 
 
+def japanese_prefecture_age_models(national_panel, national_rows, balances):
+    directory = HERE / "japan_taiwan"
+    date = "1899-12-31"
+    dated_rows = [row for row in read_csv(directory / "japan_prefectures_otsu_sex.csv") if row["date"] == date]
+    rows = {row["unit_id"]: row for row in dated_rows}
+    prefectures = {unit_id: unit for unit_id, unit in balances.items() if unit_id.startswith("jp_otsu_pref_")}
+    national, = (row for row in read_csv(directory / "japan_national_otsu_sex.csv") if row["source_date"] == date)
+    if (len(dated_rows) != len(rows) or rows.keys() != prefectures.keys()
+            or sum(int(national[sex]) for sex in SEX_COUNTS) != int(national["printed_total"])
+            or any(sum(int(row[sex]) for row in rows.values()) != int(national[sex]) for sex in SEX_COUNTS)):
+        raise ValueError("Japanese prefecture sex counts do not match the independent 1899 register controls")
+    national_total = next(row for row in national_rows if row["role"] == "total")
+    reference = [row for row in national_rows if row["role"] == "band"]
+    models = {}
+    for unit_id, unit in prefectures.items():
+        row = rows[unit_id]
+        totals = {sex: int(row[sex]) for sex in SEX_COUNTS}
+        population = sum(totals.values())
+        if population != int(row["source_population"]) or population != unit["observed_value"]:
+            raise ValueError(f"{unit_id}: sex counts differ from the published prefectural population")
+        ages = {
+            sex: apportion({i: Fraction(totals[sex] * band[sex], national_total[sex])
+                            for i, band in enumerate(reference)}, totals[sex])
+            for sex in SEX_COUNTS
+        }
+        bands = [band | {sex: ages[sex][i] for sex in SEX_COUNTS} for i, band in enumerate(reference)]
+        panel = national_panel | dict(
+            source_id="jp_cabinet_1909_resident_prefectures", observed_unit_id=unit_id,
+            locator=f"道府縣現住人口, printed p. {row['printed_page']}, 1899 Otsu sex columns; "
+                    "LTES Manpower Tables 3-1 and 3-2, 1899, within-sex age shares.",
+            opening_method="Preserve the prefectural male and female register counts in the reference model. "
+                           "Allocate ages within each sex from the 1899 national resident reconstruction, then "
+                           "use the resulting shares in the existing opening prefecture population.",
+            uncertainty="The local sex controls are official estimates, rounded to hundreds. Age within each "
+                        "sex uses national resident shares. Prefectural age variation and the impact of "
+                        "foreign residents outside the register are unquantified.",
+        )
+        models[unit_id] = panel, [dict(role="total", both=population, **totals), *bands]
+    return models
+
+
 def russian_regional_age_models(panels, observations, district_pools):
     provinces = [row for row in observations if row["source_id"] == "russia_first_census"
                  and row.get("parent_id") == "ru_census_1897_ex_finland"]
@@ -2166,6 +2207,7 @@ def opening_structure(opening_groups, observations, *, version=6):
         ), ireland_rows
         japan_panel, japan_rows = panels["japan_1899_resident_reconstruction"]
         japan = japan_panel, regroup_single_years(japan_rows)
+        japan_prefectures = japanese_prefecture_age_models(*japan, opening_balances) if version >= 40 else {}
         france_panel, france_rows = panels["france_1901"]
         france = france_panel | dict(
             opening_band_roles=["band", "mixed_age_band"],
@@ -2195,7 +2237,7 @@ def opening_structure(opening_groups, observations, *, version=6):
             elif unit_id.startswith("administrative_region:france_"):
                 model = (france_aggregate if unit_id in statistical_aggregates else france), france_rows
             elif unit_id == "empire_of_japan" or unit_id.startswith("jp_otsu_pref_"):
-                model = japan
+                model = japan_prefectures.get(unit_id, japan)
             if model is not None:
                 groups.append(opening_age_group(*model, unit_id, unit["population_value"]))
     unit = "statistical_area:bosnia_herzegovina_1900"

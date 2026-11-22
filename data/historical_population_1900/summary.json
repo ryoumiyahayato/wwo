@@ -66,7 +66,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 287,
+  "cited_sources": 288,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -439,8 +439,8 @@
       "unknown_people": 1442300838
     },
     "religion": {
-      "assigned_people": 472000338,
-      "unknown_people": 1002597414
+      "assigned_people": 472000827,
+      "unknown_people": 1002596925
     },
     "residence": {
       "assigned_people": 412274162,
@@ -4290,330 +4290,330 @@
     {
       "unit_id": "jp_otsu_pref_aichi",
       "opening_total": 1566346,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_aichi",
+      "observed_total": 1575500,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_akita",
       "opening_total": 769801,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_akita",
+      "observed_total": 774300,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_aomori",
       "opening_total": 609240,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_aomori",
+      "observed_total": 612800,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_chiba",
       "opening_total": 1239357,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_chiba",
+      "observed_total": 1246600,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_ehime",
       "opening_total": 969534,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_ehime",
+      "observed_total": 975200,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_fukui",
       "opening_total": 605362,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_fukui",
+      "observed_total": 608900,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_fukuoka",
       "opening_total": 1395345,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_fukuoka",
+      "observed_total": 1403500,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_fukushima",
       "opening_total": 1068655,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_fukushima",
+      "observed_total": 1074900,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_gifu",
       "opening_total": 952235,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_gifu",
+      "observed_total": 957800,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_gunma",
       "opening_total": 793165,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_gunma",
+      "observed_total": 797800,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_hiroshima",
       "opening_total": 1407475,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_hiroshima",
+      "observed_total": 1415700,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_hokkaido",
       "opening_total": 803007,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_hokkaido",
+      "observed_total": 807700,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_hyogo",
       "opening_total": 1669742,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_hyogo",
+      "observed_total": 1679500,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_ibaraki",
       "opening_total": 1118861,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_ibaraki",
+      "observed_total": 1125400,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_ishikawa",
       "opening_total": 730431,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_ishikawa",
+      "observed_total": 734700,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_iwate",
       "opening_total": 709653,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_iwate",
+      "observed_total": 713800,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_kagawa",
       "opening_total": 674956,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_kagawa",
+      "observed_total": 678900,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_kagoshima",
       "opening_total": 1095697,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_kagoshima",
+      "observed_total": 1102100,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_kanagawa",
       "opening_total": 880156,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_kanagawa",
+      "observed_total": 885300,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_kochi",
       "opening_total": 605163,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_kochi",
+      "observed_total": 608700,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_kumamoto",
       "opening_total": 1132382,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_kumamoto",
+      "observed_total": 1139000,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_kyoto",
       "opening_total": 961382,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_kyoto",
+      "observed_total": 967000,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_mie",
       "opening_total": 964364,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_mie",
+      "observed_total": 970000,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_miyagi",
       "opening_total": 835716,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_miyagi",
+      "observed_total": 840600,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_miyazaki",
       "opening_total": 458520,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_miyazaki",
+      "observed_total": 461200,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_nagano",
       "opening_total": 1227526,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_nagano",
+      "observed_total": 1234700,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_nagasaki",
       "opening_total": 881449,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_nagasaki",
+      "observed_total": 886600,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_nara",
       "opening_total": 519961,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_nara",
+      "observed_total": 523000,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_niigata",
       "opening_total": 1702451,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_niigata",
+      "observed_total": 1712400,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_oita",
       "opening_total": 815037,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_oita",
+      "observed_total": 819800,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_okayama",
       "opening_total": 1101165,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_okayama",
+      "observed_total": 1107600,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_okinawa",
       "opening_total": 455438,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_okinawa",
+      "observed_total": 458100,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_osaka",
       "opening_total": 1512859,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_osaka",
+      "observed_total": 1521700,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_saga",
       "opening_total": 609935,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_saga",
+      "observed_total": 613500,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_saitama",
       "opening_total": 1137552,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_saitama",
+      "observed_total": 1144200,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_shiga",
       "opening_total": 665610,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_shiga",
+      "observed_total": 669500,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_shimane",
       "opening_total": 702793,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_shimane",
+      "observed_total": 706900,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_shizuoka",
       "opening_total": 1169764,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_shizuoka",
+      "observed_total": 1176600,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_tochigi",
       "opening_total": 803504,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_tochigi",
+      "observed_total": 808200,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_tokushima",
       "opening_total": 670283,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_tokushima",
+      "observed_total": 674200,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_tokyo",
       "opening_total": 1935986,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_tokyo",
+      "observed_total": 1947300,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_tottori",
       "opening_total": 408711,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_tottori",
+      "observed_total": 411100,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_toyama",
       "opening_total": 752403,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_toyama",
+      "observed_total": 756800,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_wakayama",
       "opening_total": 656861,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_wakayama",
+      "observed_total": 660700,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_yamagata",
       "opening_total": 819014,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_yamagata",
+      "observed_total": 823800,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_yamaguchi",
       "opening_total": 954522,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_yamaguchi",
+      "observed_total": 960100,
       "observed_date": "1899-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_yamanashi",
       "opening_total": 493317,
-      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
-      "observed_total": 43520895,
+      "observed_unit_id": "jp_otsu_pref_yamanashi",
+      "observed_total": 496200,
       "observed_date": "1899-12-31"
     },
     {

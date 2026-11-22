@@ -917,10 +917,12 @@ def spain_marital_status(pools, observations, version):
         )
 
 
-def bombay_city_social(pools):
+def bombay_city_social(pools, version):
     unit = "raj_bombay_bombay_city"
     pool = pools[unit]
-    path = COLLECTIONS / "india_bombay_districts_1901" / "bombay_city_religion_1901.csv"
+    detailed = version >= 40
+    filename = "bombay_city_religion_1901_detailed.csv" if detailed else "bombay_city_religion_1901.csv"
+    path = COLLECTIONS / "india_bombay_districts_1901" / filename
     with path.open(encoding="utf8", newline="") as stream:
         row, = csv.DictReader(stream)
     total = int(row["population"])
@@ -928,13 +930,14 @@ def bombay_city_social(pools):
         raise ValueError("Bombay City religion does not match its 1901 city census control")
     yield unit, "religion", distribution(
         pool["population_value"], classification="india_1901_reported_religion",
-        source="india_bombay_city_1901_religion", date=INDIA_DATE, observed_unit=unit,
+        source="india_bombay_city_1901_religion_detailed" if detailed else "india_bombay_city_1901_religion",
+        date=INDIA_DATE, observed_unit=unit,
         scope="Bombay City and Island, all persons present on the census date",
-        locator="Census of 1901, Vol. XI, Part V p. 24; Gazetteer of Bombay City and Island, Vol. I, Ch. III.",
+        locator=("Census of 1901, Vol. I-A, Table V pp. 38–39; Gazetteer of Bombay City and Island, Vol. I, Ch. III."
+                 if detailed else "Census of 1901, Vol. XI, Part V p. 24; Gazetteer of Bombay City and Island, Vol. I, Ch. III."),
         total=total, unknown=int(row["others"]),
-        observed_counts={category: int(row[category]) for category in
-                         ("Hindus", "Jains", "Parsis", "Muhammadans", "Christians", "Jews")},
-        definition="Six named census religions. The remaining other religions are kept unassigned. "
+        observed_counts={category: int(row[category]) for category in INDIA_TABLES["7"][3] if category in row},
+        definition="Named census religions. The remaining other religions are kept unassigned. "
                    "The census did not include estimated evacuees.",
         method=f"{SHARE_METHOD} The effect of migration and plague on religious composition is unquantified.",
     )
@@ -2077,7 +2080,7 @@ def opening_social(opening_groups, observations, *, version):
     if version >= 38:
         marginals = chain(marginals, french_department_social(pools))
     if version >= 39:
-        marginals = chain(marginals, bombay_city_social(pools))
+        marginals = chain(marginals, bombay_city_social(pools, version))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))
