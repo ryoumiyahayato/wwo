@@ -1,5 +1,21 @@
 [
   {
+    "id": "es_census_1897_provincial_population",
+    "title": "Censo de la población de España en 1897, tomo I",
+    "publisher": "Instituto Geográfico y Estadístico, archived by Instituto Nacional de Estadística",
+    "url": "https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=69536",
+    "locator": "Printed pp. XX–XXI, población de hecho",
+    "rights": "Historical census counts. Numeric facts transcribed."
+  },
+  {
+    "id": "es_census_1900_provincial_population",
+    "title": "Censo de la población de España en 1900, tomo I",
+    "publisher": "Instituto Geográfico y Estadístico, archived by Instituto Nacional de Estadística",
+    "url": "https://www.ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=69538",
+    "locator": "Printed p. 323; resident population present plus temporary visitors by sex",
+    "rights": "Historical census counts. Numeric facts transcribed."
+  },
+  {
     "id": "es_census_1900_age_marital",
     "title": "Censo de la población de España en 1900, tomo III",
     "publisher": "Instituto Geográfico y Estadístico, archived by Instituto Geográfico Nacional",

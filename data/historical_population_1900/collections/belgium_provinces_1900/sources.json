@@ -12,5 +12,21 @@
       "url": "https://doc.statbel.fgov.be/publications/S210.B4/S210.B4F_Recensement_1900_Tome_1-a.pdf",
       "locator": "1900 general census, vol. I, introduction printed p. XI, Table IV. Population par province."
     }
+  },
+  {
+    "id": "be_census_1900_age_and_spoken_languages",
+    "title": "Recensement général de la population du 31 décembre 1900, Tome I, part c",
+    "publisher": "Ministère de l’Intérieur de Belgique, Statistique générale",
+    "url": "https://doc.statbel.fgov.be/publications/S210.B4/S210.B4F_Recensement_1900_Tome_1-c.pdf#page=262",
+    "locator": "Printed pp. 628–629, ages and reported national languages by sex and province",
+    "rights": "Historical official statistical publication digitized by Statbel. Numerical transcription."
+  },
+  {
+    "id": "be_census_1900_marital_and_citizenship",
+    "title": "Recensement général de la population du 31 décembre 1900, Tome I, part b",
+    "publisher": "Ministère de l’Intérieur de Belgique, Statistique générale",
+    "url": "https://doc.statbel.fgov.be/publications/S210.B4/S210.B4F_Recensement_1900_Tome_1-b.pdf#page=188",
+    "locator": "Section II C, printed pp. 370–371, marital status and citizenship by birthplace by province and sex",
+    "rights": "Historical official statistical publication digitized by Statbel. Numerical transcription."
   }
 ]

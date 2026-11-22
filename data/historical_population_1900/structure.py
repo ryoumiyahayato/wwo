@@ -6,7 +6,8 @@ from fractions import Fraction
 from pathlib import Path
 
 from opening import (
-    DATE, EGYPT_COMPARABLE_PROVINCES, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE,
+    DATE, EGYPT_COMPARABLE_PROVINCES, EGYPT_FAIYUM_SOURCES, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE,
+    SPANISH_CIVIL_STATUS_SCOPE,
     apportion, opening_fraction,
 )
 
@@ -377,8 +378,49 @@ def age_sex_panels():
         "opening_1900_regional_ages.csv",
     )
     italian_regions = HERE / "italy_census_1901" / "regional_age_sex.csv"
+    spanish_regions = HERE / "spain_census_1900" / "provincial_age_sex_1900.csv"
+    agra_oudh_regions = HERE / "india_local_areas_1901" / "agra_oudh_age_vii_b_1901.csv"
+    belgian_regions = HERE / "belgium_provinces_1900" / "age_sex.csv"
+    for row in read_csv(belgian_regions):
+        if row["role"] != "total":
+            continue
+        unit = row["panel"]
+        panels.append(dict(
+            id=unit, published_scope="Usual residents of the 1900 census territory",
+            source_id="be_census_1900_age_and_spoken_languages", observed_unit_id=unit,
+            observed_date="1900-12-31", locator="Tome I(c), printed p. 628",
+            definition="The three reported census age intervals. The original table has no independent unknown-age column.",
+            broad_observation=False, uncertainty="Shift the province's age-by-sex shares to January 1900. "
+            "Change over the year and ages within each broad band are unquantified.",
+            **({} if unit == "be_census_kingdom" else dict(
+                opening_unit_id=unit, opening_from_version=25, opening_match_population_endpoint=True,
+            )),
+        ))
+        by_panel[unit] = []
+    for panel_id, scope in (
+        ("raj_agra_oudh", "Agra and Oudh combined"),
+        ("raj_agra_oudh_agra_remainder", "Agra"),
+        ("raj_agra_oudh_oudh", "Oudh"),
+    ):
+        panels.append(dict(
+            id=panel_id, published_scope=scope, source_id="india_oudh_census_1901_districts",
+            observed_unit_id=panel_id, observed_date="1901-03-01", locator="Provincial Table VII(B), printed pp. 50–51",
+            definition="People present, grouped by completed age and sex.", broad_observation=False,
+            uncertainty="Enumeration error and the shift to January 1900 are unquantified.",
+        ))
+        by_panel[panel_id] = []
+    for source in read_csv(HERE / "spain_census_1900" / "provincial_age_sources_1900.csv"):
+        panel_id = source["panel"]
+        panels.append(dict(
+            id=panel_id, published_scope=f"{source['province']} province, population present",
+            source_id="es_census_1900_age_marital", observed_unit_id=panel_id, observed_date=source["date"],
+            locator=f"Vol. III, printed pp. {source['printed_pages']}; {source['method']}",
+            definition="Province census population present by sex and age.", broad_observation=False,
+            opening_band_roles=["band", "unknown"],
+        ))
+        by_panel[panel_id] = []
     for path in [*(AGE_SOURCES / name for name in filenames), *(source / "age_sex.csv" for source in regional_sources),
-                 italian_regions]:
+                 italian_regions, spanish_regions, agra_oudh_regions, belgian_regions]:
         for row in read_csv(path):
             for key in ("age_min", "age_max", "both", "male", "female"):
                 row[key] = int(row[key]) if row[key] else None
@@ -740,9 +782,10 @@ def princely_state_opening_age_model(panels, unit, state):
 
 
 def egypt_provincial_sex_models(opening_balances, observations):
-    records = {row["record_id"]: row for row in observations if row["source_id"] == EGYPT_COMPARABLE_PROVINCES}
+    sources = EGYPT_FAIYUM_SOURCES | {EGYPT_COMPARABLE_PROVINCES}
+    records = {row["record_id"]: row for row in observations if row["source_id"] in sources}
     for unit in opening_balances.values():
-        if unit.get("source_id") != EGYPT_COMPARABLE_PROVINCES:
+        if unit.get("source_id") not in sources:
             continue
         dates = unit["source_dates"]
         first, last = [records[record_id] for record_id in unit["source_observations"]]
@@ -875,7 +918,58 @@ def mysore_local_age_models(panels, observations, local_balances):
         )
 
 
-def agra_oudh_local_age_models(panels, observations, local_balances):
+def spanish_provincial_age_models(panels, observations, local_balances):
+    panel, rows = panels["es_census_1900_peninsula_islas"]
+    national = opening_age_group(panel, rows, "kingdom_of_spain", 0)
+    leaves = {row["unit_id"]: row for row in observations if row["source_id"] == "es_census_1900_provincial_population"
+              and row["parent_id"] == "kingdom_of_spain"}
+    remaining = {band["id"]: band.copy() for band in national["bands"]}
+    direct = {}
+    for unit, observed in leaves.items():
+        if unit not in panels:
+            continue
+        local_panel, local_rows = panels[unit]
+        direct[unit] = model = opening_age_group(local_panel | dict(uncertainty=national["uncertainty"]),
+                                                local_rows, unit, local_balances[unit]["population_value"])
+        if model["observed_total"] != observed["population_value"]:
+            raise ValueError(f"{unit}: local age observation does not close to the census population")
+        for sex in SEX_COUNTS:
+            if sum(band[sex] for band in model["bands"]) != observed["sex"][sex]:
+                raise ValueError(f"{unit}: local age and sex observations disagree")
+            for band in model["bands"]:
+                remaining[band["id"]][sex] -= band[sex]
+    for sex in SEX_COUNTS:
+        if (any(band[sex] < 0 for band in remaining.values())
+                or sum(band[sex] for band in remaining.values())
+                != sum(row["sex"][sex] for unit, row in leaves.items() if unit not in direct)):
+            raise ValueError("Spanish residual age bands do not close to the remaining provincial sex counts")
+    yield from direct.values()
+    for unit, observed in leaves.items():
+        if unit in direct:
+            continue
+        yield national | dict(
+            unit_id=unit, observed_unit_id=unit, observed_total=observed["population_value"],
+            opening_total=local_balances[unit]["population_value"], source_id=observed["source_id"],
+            locator=f"{observed['locator']}; {national['locator']}; subtract nine independently assigned provinces",
+            method="Apply the province's own census sex ratio. Within each sex, use the age distribution for "
+                   "the remaining provinces after subtracting the nine directly assigned census returns.",
+            uncertainty=national["uncertainty"] + " Differences among the remaining provinces are unquantified.",
+            bands=apportion_local_ages(remaining.values(), observed["sex"]),
+        )
+
+
+def refine_age_bands(coarse_bands, fine_bands):
+    for coarse in coarse_bands:
+        if coarse["age_min"] is None:
+            yield coarse
+            continue
+        fine = [band for band in fine_bands if band["age_min"] is not None
+                and coarse["age_min"] <= band["age_min"]
+                and (coarse["age_max"] is None or (band["age_max"] is not None and band["age_max"] <= coarse["age_max"]))]
+        yield from apportion_local_ages(fine, coarse)
+
+
+def agra_oudh_local_age_models(panels, observations, local_balances, version):
     root = "raj_agra_oudh"
     panel, rows = panels["india_census_1901_table_vii_agra_oudh_opening"]
     regional = opening_age_group(panel, rows, root, 0)
@@ -886,6 +980,23 @@ def agra_oudh_local_age_models(panels, observations, local_balances):
     if any(sum(row["sex"][sex] for row in local.values()) != sum(band[sex] for band in regional["bands"])
            for sex in SEX_COUNTS):
         raise ValueError("Agra and Oudh sex counts do not close to the combined age return")
+    finer_agra, finer_oudh = None, None
+    if version >= 25:
+        agra_panel, agra_rows = panels["raj_agra_oudh_agra_remainder"]
+        oudh_panel, oudh_rows = panels["raj_agra_oudh_oudh"]
+        combined_panel, combined_rows = panels[root]
+        verify_national_age_totals(combined_rows, (agra_rows, oudh_rows), root)
+        fine = [band.copy() for band in regional["bands"]]
+        # The provincial table independently resolves the 300-person female discrepancy in the all-India table.
+        next(band for band in fine if band["age_min"] == 15)["female"] += 300
+        next(band for band in fine if band["age_min"] is None)["female"] -= 300
+        agra_coarse = opening_age_group(agra_panel, agra_rows, root, 0)["bands"]
+        oudh_coarse = opening_age_group(oudh_panel, oudh_rows, root, 0)["bands"]
+        combined = opening_age_group(combined_panel, combined_rows, root, 0)["bands"]
+        if list(refine_age_bands(combined, fine)) != fine:
+            raise ValueError("Joint fine age bands do not close to the provincial age bands")
+        finer_agra = list(refine_age_bands(agra_coarse, fine))
+        finer_oudh = list(refine_age_bands(oudh_coarse, fine))
     for balance in local_balances.values():
         if balance.get("statistical_parent") != root:
             continue
@@ -897,14 +1008,22 @@ def agra_oudh_local_age_models(panels, observations, local_balances):
         if sum(local_sex.values()) != observed_total or observed_total + difference != balance["endpoint_values"][-1]:
             raise ValueError(f"{unit}: census population and sex counts do not close")
         uncertainty = "The local return covers 294 fewer people than the comparative control. " if difference else ""
+        age_bands = regional["bands"]
+        method = "Apply observed local sex shares and the joint Agra–Oudh census age profile within each sex."
+        age_locator = panel["locator"]
+        if version >= 25:
+            age_bands = finer_agra if observed is agra else finer_oudh
+            age_locator = f"Provincial Table VII(B), printed pp. 50–51; {age_locator}"
+            method = ("Use Agra's own age bands by sex." if observed is agra else
+                      "Use district sex counts and the Oudh age bands within each sex.")
+            method += " Divide the broad age bands by the joint Agra–Oudh age profile within each sex."
         yield regional | dict(
             unit_id=unit, observed_unit_id=observed["unit_id"], opening_total=balance["population_value"],
             observed_total=observed_total, source_id=observed["source_id"],
-            locator=f"{observed['locator']}; {panel['locator']}",
-            method="Apply the observed local sex shares to the opening balance and use the joint Agra–Oudh "
-                   "census age profile within each sex.",
+            locator=f"{observed['locator']}; {age_locator}",
+            method=method,
             uncertainty=f"{uncertainty}Local age variation, census error and change to January 1900 are unquantified.",
-            bands=apportion_local_ages(regional["bands"], local_sex),
+            bands=apportion_local_ages(age_bands, local_sex),
         )
 
 
@@ -918,6 +1037,8 @@ def opening_structure(opening_groups, observations, *, version=6):
         leaf_age_scopes.add("raj_mysore_state")
     if version >= 24:
         leaf_age_scopes.add("raj_agra_oudh")
+    if version >= 25:
+        leaf_age_scopes.update((SPANISH_CIVIL_STATUS_SCOPE, "egy_mudiriya_faiyum"))
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -951,7 +1072,15 @@ def opening_structure(opening_groups, observations, *, version=6):
                 raise ValueError(f"Census age and population controls differ for {unit_id}")
         groups.append(model)
     if version >= 24:
-        groups.extend(agra_oudh_local_age_models(panels, observations, opening_balances))
+        groups.extend(agra_oudh_local_age_models(panels, observations, opening_balances, version))
+    if version >= 25:
+        groups.extend(spanish_provincial_age_models(panels, observations, opening_balances))
+        verify_national_age_totals(
+            panels["be_census_kingdom"][1],
+            (rows for panel, rows in panels.values()
+             if panel["source_id"] == "be_census_1900_age_and_spoken_languages" and "opening_unit_id" in panel),
+            "kingdom_of_belgium",
+        )
     if version >= 23:
         groups.extend(mysore_local_age_models(panels, observations, opening_balances))
         verify_national_age_totals(

@@ -1,0 +1,41 @@
+panel,label,role,age_min,age_max,both,male,female
+be_census_antwerp,Nombre total des habitants,total,,,819159,406275,412884
+be_census_antwerp,âgés de moins de 15 ans,band,0,14,285073,142119,142954
+be_census_antwerp,âgés de 15 à moins de 55 ans,band,15,54,445090,223046,222044
+be_census_antwerp,âgés de 55 ans ou plus,band,55,,88996,41110,47886
+be_census_brabant,Nombre total des habitants,total,,,1263535,612142,651393
+be_census_brabant,âgés de moins de 15 ans,band,0,14,390475,195780,194695
+be_census_brabant,âgés de 15 à moins de 55 ans,band,15,54,717250,347166,370084
+be_census_brabant,âgés de 55 ans ou plus,band,55,,155810,69196,86614
+be_census_west_flanders,Nombre total des habitants,total,,,805236,398969,406267
+be_census_west_flanders,âgés de moins de 15 ans,band,0,14,274686,137426,137260
+be_census_west_flanders,âgés de 15 à moins de 55 ans,band,15,54,411314,203917,207397
+be_census_west_flanders,âgés de 55 ans ou plus,band,55,,119236,57626,61610
+be_census_east_flanders,Nombre total des habitants,total,,,1029971,511375,518596
+be_census_east_flanders,âgés de moins de 15 ans,band,0,14,346994,174334,172660
+be_census_east_flanders,âgés de 15 à moins de 55 ans,band,15,54,532312,264067,268245
+be_census_east_flanders,âgés de 55 ans ou plus,band,55,,150665,72974,77691
+be_census_hainaut,Nombre total des habitants,total,,,1142954,578769,564185
+be_census_hainaut,âgés de moins de 15 ans,band,0,14,330650,166515,164135
+be_census_hainaut,âgés de 15 à moins de 55 ans,band,15,54,655501,337047,318454
+be_census_hainaut,âgés de 55 ans ou plus,band,55,,156803,75207,81596
+be_census_liege,Nombre total des habitants,total,,,826175,410878,415297
+be_census_liege,âgés de moins de 15 ans,band,0,14,246941,123956,122985
+be_census_liege,âgés de 15 à moins de 55 ans,band,15,54,474827,238429,236398
+be_census_liege,âgés de 55 ans ou plus,band,55,,104407,48493,55914
+be_census_limburg,Nombre total des habitants,total,,,240796,122655,118141
+be_census_limburg,âgés de moins de 15 ans,band,0,14,83925,42746,41179
+be_census_limburg,âgés de 15 à moins de 55 ans,band,15,54,124363,63600,60763
+be_census_limburg,âgés de 55 ans ou plus,band,55,,32508,16309,16199
+be_census_luxembourg,Nombre total des habitants,total,,,219210,111636,107574
+be_census_luxembourg,âgés de moins de 15 ans,band,0,14,66151,33544,32607
+be_census_luxembourg,âgés de 15 à moins de 55 ans,band,15,54,118966,60919,58047
+be_census_luxembourg,âgés de 55 ans ou plus,band,55,,34093,17173,16920
+be_census_namur,Nombre total des habitants,total,,,346512,172135,174377
+be_census_namur,âgés de moins de 15 ans,band,0,14,97608,49081,48527
+be_census_namur,âgés de 15 à moins de 55 ans,band,15,54,193594,96525,97069
+be_census_namur,âgés de 55 ans ou plus,band,55,,55310,26529,28781
+be_census_kingdom,Nombre total des habitants,total,,,6693548,3324834,3368714
+be_census_kingdom,âgés de moins de 15 ans,band,0,14,2122503,1065501,1057002
+be_census_kingdom,âgés de 15 à moins de 55 ans,band,15,54,3673217,1834716,1838501
+be_census_kingdom,âgés de 55 ans ou plus,band,55,,897828,424617,473211

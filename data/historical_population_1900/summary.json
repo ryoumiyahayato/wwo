@@ -18,6 +18,7 @@
     "eastern": 1105,
     "ecuador_population": 35,
     "egypt_comparable_provinces": 12,
+    "egypt_faiyum_1900": 6,
     "egypt_religion_1897": 3,
     "el_salvador_population": 19,
     "french_indochina_population": 14,
@@ -44,13 +45,14 @@
     "saint_helena_population": 1,
     "scotland_civil_counties": 66,
     "sierra_leone_population": 3,
+    "spain_census_1900": 100,
     "swiss": 57,
     "venezuela_population": 23,
     "world": 499,
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 230,
+  "cited_sources": 238,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -64,9 +66,9 @@
   "population_outside_evidence_opening_estimate": 258100368,
   "legacy_only_people": 131094707,
   "authoritative_total_for_new_game": 1468068587,
-  "roots_with_partitions": 25,
-  "disjoint_leaves": 999,
-  "people_in_partitions": 1245730646,
+  "roots_with_partitions": 26,
+  "disjoint_leaves": 1050,
+  "people_in_partitions": 1264242453,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -296,7 +298,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2428,
+  "source_statistical_units": 2481,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 27,
@@ -320,8 +322,8 @@
   "city_index_unresolved": 31,
   "opening_social_coverage": {
     "class": {
-      "assigned_people": 11045764,
-      "unknown_people": 1457022823
+      "assigned_people": 11197505,
+      "unknown_people": 1456871082
     },
     "culture": {
       "assigned_people": 5273225,
@@ -336,24 +338,24 @@
       "unknown_people": 1466412706
     },
     "language": {
-      "assigned_people": 193442597,
-      "unknown_people": 1274625990
+      "assigned_people": 200073927,
+      "unknown_people": 1267994660
     },
     "legal_estate": {
       "assigned_people": 132020769,
       "unknown_people": 1336047818
     },
     "literacy": {
-      "assigned_people": 226285376,
-      "unknown_people": 1241783211
+      "assigned_people": 242888766,
+      "unknown_people": 1225179821
     },
     "marital_status": {
-      "assigned_people": 237000568,
-      "unknown_people": 1231068019
+      "assigned_people": 259978255,
+      "unknown_people": 1208090332
     },
     "occupation": {
-      "assigned_people": 93235288,
-      "unknown_people": 1374833299
+      "assigned_people": 93624709,
+      "unknown_people": 1374443878
     },
     "property_declaration": {
       "assigned_people": 32296914,
@@ -409,7 +411,9 @@
     "de_baden_1900_age_marital": 101,
     "it_1901_census_v5_age_and_marital": 648,
     "br_dge_1916_1900_age_sex": 440,
-    "es_census_1900_age_marital": 115,
+    "es_census_1900_age_marital": 322,
+    "be_census_1900_age_and_spoken_languages": 40,
+    "india_oudh_census_1901_districts": 27,
     "ah_cisleithania_census_1900_ages": 168,
     "ksh_hungarian_statistical_yearbook_1908": 42,
     "mx_census_1900_dge_1901": 341,
@@ -419,9 +423,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 817362001,
-  "structure_opening_pool_count": 632,
-  "structure_opening_residents_outside_modeled_pools": 650706586,
+  "structure_opening_pool_controls": 823993331,
+  "structure_opening_pool_count": 691,
+  "structure_opening_residents_outside_modeled_pools": 644075256,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -2489,6 +2493,69 @@
       "observed_date": "1900-12-31"
     },
     {
+      "unit_id": "be_census_antwerp",
+      "opening_total": 807274,
+      "observed_unit_id": "be_census_antwerp",
+      "observed_total": 819159,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "be_census_brabant",
+      "opening_total": 1247849,
+      "observed_unit_id": "be_census_brabant",
+      "observed_total": 1263535,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "be_census_east_flanders",
+      "opening_total": 1021953,
+      "observed_unit_id": "be_census_east_flanders",
+      "observed_total": 1029971,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "be_census_hainaut",
+      "opening_total": 1133544,
+      "observed_unit_id": "be_census_hainaut",
+      "observed_total": 1142954,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "be_census_liege",
+      "opening_total": 819254,
+      "observed_unit_id": "be_census_liege",
+      "observed_total": 826175,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "be_census_limburg",
+      "opening_total": 239004,
+      "observed_unit_id": "be_census_limburg",
+      "observed_total": 240796,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "be_census_luxembourg",
+      "opening_total": 218463,
+      "observed_unit_id": "be_census_luxembourg",
+      "observed_total": 219210,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "be_census_namur",
+      "opening_total": 345411,
+      "observed_unit_id": "be_census_namur",
+      "observed_total": 346512,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "be_census_west_flanders",
+      "opening_total": 798578,
+      "observed_unit_id": "be_census_west_flanders",
+      "observed_total": 805236,
+      "observed_date": "1900-12-31"
+    },
+    {
       "unit_id": "br_alagoas",
       "opening_total": 635535,
       "observed_unit_id": "br_alagoas",
@@ -2902,17 +2969,31 @@
       "observed_date": "1901-03-31"
     },
     {
+      "unit_id": "egy_markaz_faiyum",
+      "opening_total": 132375,
+      "observed_unit_id": "egy_markaz_faiyum",
+      "observed_total": 132375,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "egy_markaz_itsa",
+      "opening_total": 124623,
+      "observed_unit_id": "egy_markaz_itsa",
+      "observed_total": 124623,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "egy_markaz_sinuris",
+      "opening_total": 132423,
+      "observed_unit_id": "egy_markaz_sinuris",
+      "observed_total": 132423,
+      "observed_date": "1900-01-01"
+    },
+    {
       "unit_id": "egy_mudiriya_asyut",
       "opening_total": 815260,
       "observed_unit_id": "egy_mudiriya_asyut",
       "observed_total": 815260,
-      "observed_date": "1900-01-01"
-    },
-    {
-      "unit_id": "egy_mudiriya_faiyum",
-      "opening_total": 389421,
-      "observed_unit_id": "egy_mudiriya_faiyum",
-      "observed_total": 389421,
       "observed_date": "1900-01-01"
     },
     {
@@ -2942,6 +3023,349 @@
       "observed_unit_id": "egy_mudiriya_qena",
       "observed_total": 729563,
       "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "es_census_1900_province_01",
+      "opening_total": 96213,
+      "observed_unit_id": "es_census_1900_province_01",
+      "observed_total": 96385,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_02",
+      "opening_total": 237269,
+      "observed_unit_id": "es_census_1900_province_02",
+      "observed_total": 237877,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_03",
+      "opening_total": 467478,
+      "observed_unit_id": "es_census_1900_province_03",
+      "observed_total": 470149,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_04",
+      "opening_total": 355798,
+      "observed_unit_id": "es_census_1900_province_04",
+      "observed_total": 359013,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_05",
+      "opening_total": 200393,
+      "observed_unit_id": "es_census_1900_province_05",
+      "observed_total": 200457,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_06",
+      "opening_total": 515384,
+      "observed_unit_id": "es_census_1900_province_06",
+      "observed_total": 520246,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_07",
+      "opening_total": 311325,
+      "observed_unit_id": "es_census_1900_province_07",
+      "observed_total": 311649,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_08",
+      "opening_total": 1052534,
+      "observed_unit_id": "es_census_1900_province_08",
+      "observed_total": 1054541,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_09",
+      "opening_total": 340670,
+      "observed_unit_id": "es_census_1900_province_09",
+      "observed_total": 338828,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_10",
+      "opening_total": 361131,
+      "observed_unit_id": "es_census_1900_province_10",
+      "observed_total": 362164,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_11",
+      "opening_total": 435243,
+      "observed_unit_id": "es_census_1900_province_11",
+      "observed_total": 439390,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_12",
+      "opening_total": 352061,
+      "observed_unit_id": "es_census_1900_province_12",
+      "observed_total": 358564,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_13",
+      "opening_total": 309945,
+      "observed_unit_id": "es_census_1900_province_13",
+      "observed_total": 310828,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_14",
+      "opening_total": 317482,
+      "observed_unit_id": "es_census_1900_province_14",
+      "observed_total": 321580,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_15",
+      "opening_total": 453728,
+      "observed_unit_id": "es_census_1900_province_15",
+      "observed_total": 455859,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_16",
+      "opening_total": 649419,
+      "observed_unit_id": "es_census_1900_province_16",
+      "observed_total": 653556,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_17",
+      "opening_total": 248070,
+      "observed_unit_id": "es_census_1900_province_17",
+      "observed_total": 249696,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_18",
+      "opening_total": 300497,
+      "observed_unit_id": "es_census_1900_province_18",
+      "observed_total": 299287,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_19",
+      "opening_total": 490077,
+      "observed_unit_id": "es_census_1900_province_19",
+      "observed_total": 492460,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_20",
+      "opening_total": 200766,
+      "observed_unit_id": "es_census_1900_province_20",
+      "observed_total": 200186,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_21",
+      "opening_total": 195349,
+      "observed_unit_id": "es_census_1900_province_21",
+      "observed_total": 195850,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_22",
+      "opening_total": 260004,
+      "observed_unit_id": "es_census_1900_province_22",
+      "observed_total": 260880,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_23",
+      "opening_total": 243983,
+      "observed_unit_id": "es_census_1900_province_23",
+      "observed_total": 244867,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_24",
+      "opening_total": 473724,
+      "observed_unit_id": "es_census_1900_province_24",
+      "observed_total": 474490,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_25",
+      "opening_total": 387368,
+      "observed_unit_id": "es_census_1900_province_25",
+      "observed_total": 386083,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_26",
+      "opening_total": 275966,
+      "observed_unit_id": "es_census_1900_province_26",
+      "observed_total": 274590,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_27",
+      "opening_total": 189229,
+      "observed_unit_id": "es_census_1900_province_27",
+      "observed_total": 189376,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_28",
+      "opening_total": 465286,
+      "observed_unit_id": "es_census_1900_province_28",
+      "observed_total": 465386,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_29",
+      "opening_total": 765828,
+      "observed_unit_id": "es_census_1900_province_29",
+      "observed_total": 775034,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_30",
+      "opening_total": 505247,
+      "observed_unit_id": "es_census_1900_province_30",
+      "observed_total": 511989,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_31",
+      "opening_total": 566044,
+      "observed_unit_id": "es_census_1900_province_31",
+      "observed_total": 577987,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_32",
+      "opening_total": 307472,
+      "observed_unit_id": "es_census_1900_province_32",
+      "observed_total": 307669,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_33",
+      "opening_total": 405012,
+      "observed_unit_id": "es_census_1900_province_33",
+      "observed_total": 404311,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_34",
+      "opening_total": 624971,
+      "observed_unit_id": "es_census_1900_province_34",
+      "observed_total": 627069,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_35",
+      "opening_total": 193716,
+      "observed_unit_id": "es_census_1900_province_35",
+      "observed_total": 192473,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_36",
+      "opening_total": 456234,
+      "observed_unit_id": "es_census_1900_province_36",
+      "observed_total": 457262,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_37",
+      "opening_total": 320889,
+      "observed_unit_id": "es_census_1900_province_37",
+      "observed_total": 320765,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_38",
+      "opening_total": 273182,
+      "observed_unit_id": "es_census_1900_province_38",
+      "observed_total": 276003,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_39",
+      "opening_total": 158877,
+      "observed_unit_id": "es_census_1900_province_39",
+      "observed_total": 159243,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_40",
+      "opening_total": 555139,
+      "observed_unit_id": "es_census_1900_province_40",
+      "observed_total": 555256,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_41",
+      "opening_total": 150243,
+      "observed_unit_id": "es_census_1900_province_41",
+      "observed_total": 150462,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_42",
+      "opening_total": 338765,
+      "observed_unit_id": "es_census_1900_province_42",
+      "observed_total": 337964,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_43",
+      "opening_total": 245067,
+      "observed_unit_id": "es_census_1900_province_43",
+      "observed_total": 246001,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_44",
+      "opening_total": 376237,
+      "observed_unit_id": "es_census_1900_province_44",
+      "observed_total": 376814,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_45",
+      "opening_total": 799843,
+      "observed_unit_id": "es_census_1900_province_45",
+      "observed_total": 806556,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_46",
+      "opening_total": 279390,
+      "observed_unit_id": "es_census_1900_province_46",
+      "observed_total": 278561,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_47",
+      "opening_total": 305784,
+      "observed_unit_id": "es_census_1900_province_47",
+      "observed_total": 311361,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_48",
+      "opening_total": 276651,
+      "observed_unit_id": "es_census_1900_province_48",
+      "observed_total": 275545,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "es_census_1900_province_49",
+      "opening_total": 420824,
+      "observed_unit_id": "es_census_1900_province_49",
+      "observed_total": 421843,
+      "observed_date": "1900-12-31"
     },
     {
       "unit_id": "ft_finland",
@@ -3677,13 +4101,6 @@
       "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
       "observed_total": 43520895,
       "observed_date": "1899-12-31"
-    },
-    {
-      "unit_id": "kingdom_of_spain",
-      "opening_total": 18511807,
-      "observed_unit_id": "es_census_1900_peninsula_islas",
-      "observed_total": 18594405,
-      "observed_date": "1900-12-31"
     },
     {
       "unit_id": "mx_aguascalientes",
@@ -5019,8 +5436,8 @@
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 521,
-  "dated_parent_controls_arithmetic_closure": 485,
+  "dated_parent_controls": 523,
+  "dated_parent_controls_arithmetic_closure": 487,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -5152,7 +5569,7 @@
       ],
       "production_people": 408702638,
       "production_pct_of_regional_research_estimate": 97.509,
-      "people_with_opening_subdivision": 376439154,
+      "people_with_opening_subdivision": 394950961,
       "research_only_units": 9,
       "research_only_people": 10103353
     },
@@ -5431,8 +5848,8 @@
         "opening_control": 294000000,
         "in_model_pools": 272782484,
         "outside_model_pools": 21217516,
-        "modeled_age_and_sex": 272737490,
-        "modeled_sex_age_unknown": 44994
+        "modeled_age_and_sex": 272737788,
+        "modeled_sex_age_unknown": 44696
       },
       {
         "opening_unit_id": "cshapes_gw_780",
@@ -5555,9 +5972,9 @@
         "opening_unit_id": "kingdom_of_belgium",
         "research_region": "Europe",
         "opening_control": 6631330,
-        "in_model_pools": 0,
-        "outside_model_pools": 6631330,
-        "modeled_age_and_sex": 0,
+        "in_model_pools": 6631330,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 6631330,
         "modeled_sex_age_unknown": 0
       },
       {
@@ -5656,8 +6073,8 @@
         "opening_control": 18511807,
         "in_model_pools": 18511807,
         "outside_model_pools": 0,
-        "modeled_age_and_sex": 18491261,
-        "modeled_sex_age_unknown": 20546
+        "modeled_age_and_sex": 18491255,
+        "modeled_sex_age_unknown": 20552
       },
       {
         "opening_unit_id": "korean_empire",
@@ -5875,10 +6292,10 @@
       },
       "Europe": {
         "opening_control": 408702638,
-        "in_model_pools": 377704537,
-        "outside_model_pools": 30998101,
-        "modeled_age_and_sex": 375832737,
-        "modeled_sex_age_unknown": 1871800
+        "in_model_pools": 384335867,
+        "outside_model_pools": 24366771,
+        "modeled_age_and_sex": 382464061,
+        "modeled_sex_age_unknown": 1871806
       },
       "Africa": {
         "opening_control": 18751671,
@@ -5898,16 +6315,16 @@
         "opening_control": 805719965,
         "in_model_pools": 320264394,
         "outside_model_pools": 485455571,
-        "modeled_age_and_sex": 320219074,
-        "modeled_sex_age_unknown": 45320
+        "modeled_age_and_sex": 320219372,
+        "modeled_sex_age_unknown": 45022
       }
     },
     "world": {
       "opening_control": 1468068587,
-      "in_model_pools": 817362001,
-      "outside_model_pools": 650706586,
-      "modeled_age_and_sex": 810135402,
-      "modeled_sex_age_unknown": 7226599
+      "in_model_pools": 823993331,
+      "outside_model_pools": 644075256,
+      "modeled_age_and_sex": 816767024,
+      "modeled_sex_age_unknown": 7226307
     }
   },
   "opening_count_basis": {

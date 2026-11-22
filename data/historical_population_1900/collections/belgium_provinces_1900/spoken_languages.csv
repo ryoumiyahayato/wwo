@@ -1,0 +1,81 @@
+panel,label,category,both,male,female
+be_census_antwerp,le français seulement,french_only,10035,5296,4739
+be_census_antwerp,le flamand seulement,flemish_only,630224,310218,320006
+be_census_antwerp,l’allemand seulement,german_only,3675,2085,1590
+be_census_antwerp,le français et le flamand,french_and_flemish,104041,50970,53071
+be_census_antwerp,le français et l’allemand,french_and_german,1798,1033,765
+be_census_antwerp,le flamand et l’allemand,flemish_and_german,3581,1749,1832
+be_census_antwerp,les trois langues,all_three,13024,8426,4598
+be_census_antwerp,aucune des trois langues,none_of_three,52781,26498,26283
+be_census_brabant,le français seulement,french_only,305150,142478,162672
+be_census_brabant,le flamand seulement,flemish_only,524030,257183,266847
+be_census_brabant,l’allemand seulement,german_only,3008,1291,1717
+be_census_brabant,le français et le flamand,french_and_flemish,336847,163082,173765
+be_census_brabant,le français et l’allemand,french_and_german,10011,4315,5696
+be_census_brabant,le flamand et l’allemand,flemish_and_german,1818,591,1227
+be_census_brabant,les trois langues,all_three,16411,9895,6516
+be_census_brabant,aucune des trois langues,none_of_three,66260,33307,32953
+be_census_west_flanders,le français seulement,french_only,26982,13364,13618
+be_census_west_flanders,le flamand seulement,flemish_only,605575,299168,306407
+be_census_west_flanders,l’allemand seulement,german_only,140,62,78
+be_census_west_flanders,le français et le flamand,french_and_flemish,123121,61065,62056
+be_census_west_flanders,le français et l’allemand,french_and_german,270,131,139
+be_census_west_flanders,le flamand et l’allemand,flemish_and_german,166,88,78
+be_census_west_flanders,les trois langues,all_three,2189,1501,688
+be_census_west_flanders,aucune des trois langues,none_of_three,46793,23590,23203
+be_census_east_flanders,le français seulement,french_only,8164,3839,4325
+be_census_east_flanders,le flamand seulement,flemish_only,843142,419045,424097
+be_census_east_flanders,l’allemand seulement,german_only,178,83,95
+be_census_east_flanders,le français et le flamand,french_and_flemish,116638,56591,60047
+be_census_east_flanders,le français et l’allemand,french_and_german,320,151,169
+be_census_east_flanders,le flamand et l’allemand,flemish_and_german,331,174,157
+be_census_east_flanders,les trois langues,all_three,3840,2677,1163
+be_census_east_flanders,aucune des trois langues,none_of_three,57358,28815,28543
+be_census_hainaut,le français seulement,french_only,1033959,520134,513825
+be_census_hainaut,le flamand seulement,flemish_only,15231,8194,7037
+be_census_hainaut,l’allemand seulement,german_only,300,121,179
+be_census_hainaut,le français et le flamand,french_and_flemish,40828,23672,17156
+be_census_hainaut,le français et l’allemand,french_and_german,2259,1064,1195
+be_census_hainaut,le flamand et l’allemand,flemish_and_german,102,42,60
+be_census_hainaut,les trois langues,all_three,981,688,293
+be_census_hainaut,aucune des trois langues,none_of_three,49294,24854,24440
+be_census_liege,le français seulement,french_only,683060,337340,345720
+be_census_liege,le flamand seulement,flemish_only,15772,7926,7846
+be_census_liege,l’allemand seulement,german_only,9853,4801,5052
+be_census_liege,le français et le flamand,french_and_flemish,46237,25005,21232
+be_census_liege,le français et l’allemand,french_and_german,27694,13235,14459
+be_census_liege,le flamand et l’allemand,flemish_and_german,596,276,320
+be_census_liege,les trois langues,all_three,4162,2594,1568
+be_census_liege,aucune des trois langues,none_of_three,38801,19701,19100
+be_census_limburg,le français seulement,french_only,8306,4114,4192
+be_census_limburg,le flamand seulement,flemish_only,187340,94158,93182
+be_census_limburg,l’allemand seulement,german_only,131,47,84
+be_census_limburg,le français et le flamand,french_and_flemish,29306,16179,13127
+be_census_limburg,le français et l’allemand,french_and_german,185,72,113
+be_census_limburg,le flamand et l’allemand,flemish_and_german,539,310,229
+be_census_limburg,les trois langues,all_three,1316,871,445
+be_census_limburg,aucune des trois langues,none_of_three,13673,6904,6769
+be_census_luxembourg,le français seulement,french_only,174092,88584,85508
+be_census_luxembourg,le flamand seulement,flemish_only,167,135,32
+be_census_luxembourg,l’allemand seulement,german_only,10899,4854,6045
+be_census_luxembourg,le français et le flamand,french_and_flemish,1058,691,367
+be_census_luxembourg,le français et l’allemand,french_and_german,22470,11876,10594
+be_census_luxembourg,le flamand et l’allemand,flemish_and_german,47,13,34
+be_census_luxembourg,les trois langues,all_three,464,350,114
+be_census_luxembourg,aucune des trois langues,none_of_three,10013,5133,4880
+be_census_namur,le français seulement,french_only,325057,161099,163958
+be_census_namur,le flamand seulement,flemish_only,524,359,165
+be_census_namur,l’allemand seulement,german_only,130,35,95
+be_census_namur,le français et le flamand,french_and_flemish,3511,2084,1427
+be_census_namur,le français et l’allemand,french_and_german,1440,558,882
+be_census_namur,le flamand et l’allemand,flemish_and_german,58,27,31
+be_census_namur,les trois langues,all_three,502,350,152
+be_census_namur,aucune des trois langues,none_of_three,15290,7623,7667
+be_census_kingdom,le français seulement,french_only,2574805,1276248,1298557
+be_census_kingdom,le flamand seulement,flemish_only,2822005,1396386,1425619
+be_census_kingdom,l’allemand seulement,german_only,28314,13379,14935
+be_census_kingdom,le français et le flamand,french_and_flemish,801587,399339,402248
+be_census_kingdom,le français et l’allemand,french_and_german,66447,32435,34012
+be_census_kingdom,le flamand et l’allemand,flemish_and_german,7238,3270,3968
+be_census_kingdom,les trois langues,all_three,42889,27352,15537
+be_census_kingdom,aucune des trois langues,none_of_three,350263,176425,173838

@@ -1,0 +1,21 @@
+unit_id,province,date,male,female,both,printed_page,source_url
+be_census_antwerp,Anvers,1890-12-31,351498,348421,699919,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_antwerp,Anvers,1900-12-31,406275,412884,819159,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_brabant,Brabant,1890-12-31,538708,567450,1106158,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_brabant,Brabant,1900-12-31,612142,651393,1263535,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_west_flanders,Flandre occidentale,1890-12-31,367093,371349,738442,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_west_flanders,Flandre occidentale,1900-12-31,398969,406267,805236,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_east_flanders,Flandre orientale,1890-12-31,473309,476217,949526,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_east_flanders,Flandre orientale,1900-12-31,511375,518596,1029971,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_hainaut,Hainaut,1890-12-31,530291,518255,1048546,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_hainaut,Hainaut,1900-12-31,578769,564185,1142954,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_liege,Liége,1890-12-31,377375,379359,756734,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_liege,Liége,1900-12-31,410878,415297,826175,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_limburg,Limbourg,1890-12-31,113847,108967,222814,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_limburg,Limbourg,1900-12-31,122655,118141,240796,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_luxembourg,Luxembourg,1890-12-31,107525,104186,211711,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_luxembourg,Luxembourg,1900-12-31,111636,107574,219210,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_namur,Namur,1890-12-31,167308,168163,335471,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+be_census_namur,Namur,1900-12-31,172135,174377,346512,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+belgium,Le Royaume,1890-12-31,3026954,3042367,6069321,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
+belgium,Le Royaume,1900-12-31,3324834,3368714,6693548,42,https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf
