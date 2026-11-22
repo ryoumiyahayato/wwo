@@ -1,0 +1,7 @@
+# Argentina 1895 census literacy
+
+`literacy_1895.csv` transcribes the population aged six years and older (column 2) and the two classification totals (columns 11 and 12) for each of the 24 geographic rows in *Segundo Censo de la República Argentina, Mayo 10 de 1895*, Tomo II, *Población* (1898), Cuadro XIII, printed p. CLXXIII. This is INDEC PDF page 179. The printed labels are Saben leer y escribir and No saben leer ni escribir. [INDEC scan](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=179)
+
+The 24 lines sum to the printed national control of 3,245,888 residents aged six and older, of whom 1,479,704 could read and write and 1,766,184 were in the other published category. The all-age denominator is 3,954,911 individually counted residents from the same 10 May 1895 census. The 709,023 outside the tabulated age scope are unknown for literacy. The data support two independent literacy counts. Ability to read only or write only has no separately published category in this table.
+
+The row IDs and geographical mapping are the same as the 1895 religion collection. Córdoba, Santa Fé, Santiago del Estero and Chaco sum to the single comparable opening geography. Puna and the unlocated enumeration reserve lack mapped observations. The social distribution is observed on 10 May 1895. An opening allocation projects this distribution to the opening account using the all-age denominator, with change from 1895 unmeasured.

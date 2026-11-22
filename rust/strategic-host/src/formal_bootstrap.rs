@@ -2342,7 +2342,7 @@ mod tests {
     #[test]
     fn historical_argentine_and_australian_ages_preserve_coverage_gaps() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(31)).unwrap();
         let old = bootstrap.base_opening_version("country_fra", None, Some(29)).unwrap();
         assert_eq!(world.population().global_total(), old.population().global_total());
 
@@ -2409,6 +2409,28 @@ mod tests {
         assert_eq!(old_central.dimensions["occupation"].assigned_residents, 0);
         let old_bengal = old.inspect_population("raj_bengal_province").unwrap().social.unwrap();
         assert_eq!(old_bengal.dimensions["occupation"].assigned_residents, 0);
+
+        let latest = bootstrap.create("country_fra").unwrap();
+        let argentina = latest.inspect_population("argentina_1900").unwrap();
+        assert_eq!(argentina.population_total, Some(4_624_686));
+        let profile = argentina.structure.unwrap();
+        assert_eq!(profile.residents_with_cohort_age_and_sex, 4_502_031);
+        assert_eq!(profile.cohort_residents, 4_524_112);
+        assert_eq!(profile.unclassified_residents, 100_574);
+        let literacy = &argentina.social.unwrap().dimensions["literacy"];
+        assert_eq!(literacy.assigned_residents, 3_713_957);
+        assert_eq!(literacy.unknown_residents, 910_729);
+        let chaco = latest.inspect_population("ar_central_chaco_comparable").unwrap();
+        assert_eq!(chaco.structure.unwrap().residents_with_cohort_age_and_sex, 1_072_009);
+        let puna = latest.inspect_population("ar_puna_1899_geography_unlocated").unwrap();
+        assert_eq!(puna.structure.unwrap().unclassified_residents, 749);
+
+        let java = latest.inspect_population("java_madoera_colonial_population").unwrap();
+        assert_eq!(java.population_total, Some(28_092_332));
+        let profile = java.structure.unwrap();
+        assert_eq!(profile.cohort_residents, 27_798_112);
+        assert_eq!(profile.residents_with_cohort_age_and_sex, 17_092_483);
+        assert_eq!(profile.unclassified_residents, 294_220);
     }
 
     #[test]

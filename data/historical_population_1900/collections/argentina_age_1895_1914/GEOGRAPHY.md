@@ -23,9 +23,15 @@
 2. Divide each row's 1895 count by 3,954,911 and each 1901 estimate by 4,926,913. For the Puna balance, use a zero share of the 1895 national enumeration because it supplied no record for the area. Blend the two shares with later weight 1697/2426. Multiply by 4,524,861. Assign the integer remainder in descending order of fractional part and then ascending unit ID. The output sums to the national control. This is a share allocation estimate. A 1900 jurisdiction-level margin of error is unavailable.
 3. `opening_coverage_reserve` flags the portion outside the age model. The 749 geography balance remains part of the opening age model. Capital Federal uses the city census shares from May 1895 and September 1904, in five-year age groups by sex. Buenos Aires province uses the 1895 and 1914 provincial census shares in ten-year age groups by sex. The model interpolates both sets of local shares to 1900 and retains unreported ages. It subtracts both local models from the national cells by age and sex, then applies the residual to the other census-represented accounts. Migration and differences among provinces have no quantified interval.
 
+Step 3 describes v31. In v32 each of the 21 geographic accounts uses the eligible local census panels specified in `opening_age_profile_sources.csv`. The national censuses each contain 24 source regions. All 24 add to the corresponding national table by age and sex after regrouping the capital's five-year intervals. Some 1914 boundaries include population transferred after opening. The crosswalk uses the 1895 shares for nine affected accounts with 482,567 opening residents and uses two compatible dates for the other twelve accounts. Córdoba, Santa Fe, Santiago del Estero and Chaco are summed by age and sex before applying shares to their single comparable account.
+
+The v32 national age and sex distribution sums the territory models and leaves 749 people in the unresolved Puna geography balance unclassified, alongside the separate 99,825 coverage reserve. The number with both age and sex is 4,502,031. The v31 national-share estimate was 4,505,257. The opening total remains 4,624,686. The difference in modeled age coverage reflects the use of independent local distributions and the unclassified Puna balance. No census observed the opening age structure directly. The geographic crosswalk retains the excluded 1914 panels as dated historical observations.
+
 ## Files
 
 - `alsina_1901_geography.csv` contains the 25 reference rows from the contemporary estimate.
 - `geography_crosswalk.csv` contains the dated geography allocation, component IDs and point associations.
 - `capital_federal_age_sex.csv` contains the age-by-sex controls reproduced in the Buenos Aires municipal yearbook. Its 1914 results remain available as historical reference.
 - `buenos_aires_province_age_sex.csv` records the separate provincial controls in the INDEC retrospective, Cuadro 3, printed p. 75.
+- `provincial_age_sex.csv` records the other forty-four 1895 and 1914 source panels.
+- `opening_age_profile_sources.csv` records the eligible census years and geographic exceptions for every opening account.

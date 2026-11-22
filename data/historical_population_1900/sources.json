@@ -607,6 +607,19 @@
     "collection": "argentina_age_1895_1914"
   },
   {
+    "id": "ar_census_1895_literacy",
+    "title": "Segundo Censo de la República Argentina, Tomo II, Cuadro XIII",
+    "publisher": "Comisión Directiva del Censo, 1898. Biblioteca INDEC.",
+    "url": "https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=179",
+    "locator": "Printed p. CLXXIII, 10 May 1895.",
+    "raw_paths": [
+      "literacy_1895.csv",
+      "LITERACY.md"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "argentina_age_1895_1914"
+  },
+  {
     "id": "ar_capital_federal_1895_age_sex",
     "title": "Capital Federal, 1895 census population by sex and age",
     "publisher": "Dirección General de Estadística y Censos, Ciudad de Buenos Aires",
@@ -2246,12 +2259,27 @@
     "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1904",
     "publisher": "Centraal Bureau voor de Statistiek, The Hague, 1906",
     "url": "https://seadelt.net/Asset/Source/Document_ID-122_No-01.pdf#page=26",
-    "locator": "Oost-Indië, II.III and II.V, 31 December 1900 columns.",
+    "locator": "Oost-Indië, III.III (printed p. 4) and III.V (printed p. 5), 31 December 1900 columns.",
     "raw_paths": [
-      "civilian_sex_1900.csv"
+      "civilian_sex_1900.csv",
+      "java_madoera_1900_indigenous_regional_controls.csv",
+      "DEMOGRAPHY.md"
     ],
     "rights": "Published historical numeric facts",
     "note": "The age threshold separating adults and children in II.III is unverified. The indigenous sex table contains 1,390 more people than the 1900 yearbook I.A table used for the opening total. Use each publication within its own denominator.",
+    "collection": "java_madoera"
+  },
+  {
+    "id": "nl_cbs_java_population_1906_demography",
+    "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1906",
+    "publisher": "Centraal Bureau voor de Statistiek, The Hague",
+    "url": "https://seadelt.net/Asset/Source/Document_ID-120_No-01.pdf",
+    "locator": "Oost-Indië, III.I.A printed p. 2 and III.IX printed pp. 8–9, December 1905 counts.",
+    "raw_paths": [
+      "java_madoera_1905_indigenous_age_sex_matched.csv",
+      "DEMOGRAPHY.md"
+    ],
+    "rights": "Published historical numeric facts",
     "collection": "java_madoera"
   },
   {

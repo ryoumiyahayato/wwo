@@ -1436,48 +1436,44 @@ def bengal_district_literacy(pools, observations, version):
             )
 
 
-def argentine_religion(pools):
+def argentine_local_distribution(pools, dimension, fields, unknown_field, *, source, locator, definition, method):
     directory = COLLECTIONS / "argentina_age_1895_1914"
-    churches = {
-        "catolicos": "Católicos",
-        "protestantes_todas_las_confesiones": "Protestantes, todas las confesiones",
-        "israelitas": "Israelitas",
-    }
-    with (directory / "religion_1895.csv").open(encoding="utf8", newline="") as stream:
+    with (directory / f"{dimension}_1895.csv").open(encoding="utf8", newline="") as stream:
         source_rows = list(csv.DictReader(stream))
     rows = {row["source_unit_id"]: row for row in source_rows}
     with (directory / "census_geography.csv").open(encoding="utf8", newline="") as stream:
         controls = {row["unit_id"]: int(row["enumerated_1895_05_10"]) for row in csv.DictReader(stream)}
     if len(source_rows) != len(rows) or rows.keys() != controls.keys() or any(
         row["observed_date"] != "1895-05-10" or int(row["observed_total"]) != controls[key]
-        or sum(int(row[field]) for field in (*churches, "otras_religiones")) != controls[key]
+        or sum(int(row[field]) for field in (*fields, unknown_field)) != controls[key]
         for key, row in rows.items()
     ):
-        raise ValueError("Argentina's religious returns do not match the 1895 enumerated geography")
+        raise ValueError(f"Argentina's {dimension} returns do not match the 1895 enumerated geography")
+    if dimension == "literacy" and any(
+        sum(int(row[field]) for field in fields) != int(row["population_6_and_over"]) for row in rows.values()
+    ):
+        raise ValueError("Argentina's adult and child literacy counts do not match the age-six-plus control")
     used = set()
     for pool_id, pool in pools.items():
         if pool.get("subdivision_of") != "argentina_1900" or pool.get("geographically_unlocated"):
             continue
         units = pool["source_unit_ids"]
         if used.intersection(units):
-            raise ValueError(f"{pool_id}: overlapped Argentine religion source rows")
+            raise ValueError(f"{pool_id}: overlapped Argentine {dimension} source rows")
         used.update(units)
-        yield pool_id, "religion", distribution(
-            pool["population_value"], classification="argentina_1895_reported_religion",
-            source="ar_census_1895_religion", date="1895-05-10", observed_unit="|".join(units),
+        yield pool_id, dimension, distribution(
+            pool["population_value"], classification=f"argentina_1895_reported_{dimension}",
+            source=source, date="1895-05-10", observed_unit="|".join(units),
             scope="Persons individually enumerated in the matching census jurisdiction or combined area.",
-            locator="Tomo II, Cuadro XIX a/b, pp. CLXXVIII–CLXXIX.",
+            locator=locator,
             total=sum(controls[unit] for unit in units),
             observed_counts={label: sum(int(rows[unit][field]) for unit in units)
-                             for field, label in churches.items()},
-            unknown=sum(int(rows[unit]["otras_religiones"]) for unit in units),
-            definition="Published census religion. The original other column mixes other religions "
-                       "and persons without a reported religion. It remains unassigned.",
-            method=SHARE_METHOD + " The enumerator asked about religion only where the person "
-                   "was thought to be non-Catholic. Bias from that rule and changes since the census are unquantified.",
+                             for field, label in fields.items()},
+            unknown=sum(int(rows[unit][unknown_field]) for unit in units),
+            definition=definition, method=method,
         )
     if used != rows.keys():
-        raise ValueError("Argentina religion allocation does not cover the disjoint source jurisdictions")
+        raise ValueError(f"Argentina {dimension} allocation does not cover the disjoint source jurisdictions")
 
 
 def opening_social(opening_groups, observations, *, version):
@@ -1607,7 +1603,29 @@ def opening_social(opening_groups, observations, *, version):
     if version >= 30:
         marginals = chain(marginals, cochin_language(pools, distribution))
     if version >= 31:
-        marginals = chain(marginals, argentine_religion(pools))
+        marginals = chain(marginals, argentine_local_distribution(
+            pools, "religion", {
+                "catolicos": "Católicos",
+                "protestantes_todas_las_confesiones": "Protestantes, todas las confesiones",
+                "israelitas": "Israelitas",
+            }, "otras_religiones",
+            source="ar_census_1895_religion", locator="Tomo II, Cuadro XIX a/b, pp. CLXXVIII–CLXXIX.",
+            definition="Published census religion. The original other column mixes other religions "
+                       "and persons without a reported religion. It remains unassigned.",
+            method=SHARE_METHOD + " The enumerator asked about religion only where the person "
+                   "was thought to be non-Catholic. Bias from that rule and changes since the census are unquantified.",
+        ))
+    if version >= 32:
+        marginals = chain(marginals, argentine_local_distribution(
+            pools, "literacy", {
+                "saben_leer_y_escribir": "Saben leer y escribir",
+                "no_saben_leer_ni_escribir": "No saben leer ni escribir",
+            }, "outside_tabulated_scope",
+            source="ar_census_1895_literacy", locator="Tomo II, Cuadro XIII, printed p. CLXXIII.",
+            definition="Two published literacy categories for residents aged six and over. "
+                       "People outside the eligible age scope are unassigned.",
+            method=SHARE_METHOD + " Changes in age composition and literacy from 1895 are unquantified.",
+        ))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))
