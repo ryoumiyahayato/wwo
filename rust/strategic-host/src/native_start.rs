@@ -8,7 +8,7 @@ use crate::{
     timeline::Date,
 };
 use serde_json::{json, Value};
-use std::{fs::{self, File}, io, path::PathBuf, time::Instant};
+use std::{fs::{self, File}, io, path::{Path, PathBuf}, time::Instant};
 use wwo_map_lab::{
     battlefield_terrain::BattlefieldTerrain,
     formal_bootstrap::{freight::FreightState, mode_name, InitialWorld, PersonalActivity, WorldBootstrap},
@@ -91,13 +91,14 @@ impl NativeSession {
         self.world.as_mut()
     }
 
-    pub fn start() -> io::Result<Self> {
+    pub fn start(data: &Path) -> io::Result<Self> {
+        let bootstrap = WorldBootstrap::load_from(data)?;
         let (profile, lock) = lock_profile()?;
         let preferences = profile.join("WWO_R68_Candidate/interface_settings.cfg");
         let save_dir = profile.join("formal-world");
         fs::create_dir_all(&save_dir)?;
         let mut session = Self {
-            bootstrap: WorldBootstrap::load()?, world: None, revision: 0, save_dir, preferences, _lock: lock,
+            bootstrap, world: None, revision: 0, save_dir, preferences, _lock: lock,
             slots: Vec::new(), control: TimeControl::default(), next_tick: Instant::now(),
             clock_ack: 0, finance_page: 0, slot_open: false, slot_error: String::new(),
             lobby_status: String::new(), departure: None, exit: false, market: None, market_serial: 0,

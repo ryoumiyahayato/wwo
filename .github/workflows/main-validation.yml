@@ -45,6 +45,23 @@ jobs:
                   ast.parse(path.read_text(encoding='utf-8-sig'), filename=name)
               elif path.suffix == '.json':
                   json.loads(path.read_text(encoding='utf-8-sig'))
+          population = pathlib.Path('data/historical_population_1900')
+          manifest_path = population / 'runtime-manifest.json'
+          prior = subprocess.run(
+              ['git', 'show', f'HEAD^1:{manifest_path}'], capture_output=True
+          )
+          if prior.returncode == 0:
+              previous = json.loads(prior.stdout)
+              manifest = json.loads(manifest_path.read_text(encoding='utf-8-sig'))
+              changed_paths = set(subprocess.check_output([
+                  'git', 'diff', '--name-only', '--no-renames', '-z', 'HEAD^1', 'HEAD'
+              ]).decode().split('\0'))
+              for version, assets in previous['versions'].items():
+                  if manifest['versions'].get(version) != assets:
+                      raise SystemExit(f'Bindings for population v{version} changed; add a new version')
+                  for asset in assets.values():
+                      if str(population / asset) in changed_paths:
+                          raise SystemExit(f'Population v{version} asset {asset} changed; add a new version')
           print('Changed Python/JSON syntax and diff whitespace passed')
           PY
       - name: Check Actions syntax
@@ -68,3 +85,18 @@ jobs:
       - name: Build the formal game and state tool
         working-directory: rust/strategic-host
         run: cargo +stable build --release --locked --bin wwo-map-lab --bin wwo-formal-state
+      - name: Stage the offline Windows build
+        if: github.event_name != 'pull_request'
+        shell: pwsh
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'wwo-rust-windows'
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          Copy-Item rust/strategic-host/target/release/wwo-map-lab.exe -Destination $stage
+          Copy-Item rust/strategic-host/target/release/wwo-formal-state.exe -Destination $stage
+          ./rust/strategic-host/tools/package_population.ps1 -DataDirectory (Join-Path $stage 'data')
+      - name: Retain the Windows build in private repositories
+        if: github.event_name != 'pull_request' && github.event.repository.private
+        uses: actions/upload-artifact@v4
+        with:
+          name: wwo-rust-windows
+          path: ${{ runner.temp }}/wwo-rust-windows

@@ -153,7 +153,7 @@ impl Config {
                 result.preferences=Some(desktop.preferences.clone());
                 result.desktop=Some(desktop);
             } else {
-                let native=native_start::NativeSession::start()?;
+                let native=native_start::NativeSession::start(&result.root)?;
                 if result.preferences.is_none(){result.preferences=Some(native.preferences.clone());}
                 result.native=Some(native);
                 return Ok(result);

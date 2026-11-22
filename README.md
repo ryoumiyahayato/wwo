@@ -13,13 +13,21 @@ Godot 4.6.3 工程、场景和旧回归保存在 [R68 源码归档](https://gith
 
 ## 构建与恢复
 
-Windows x64 使用 Rust MSVC 工具链、MSVC C++ Build Tools 和 Windows SDK。在仓库根目录运行：
+Windows x64 使用 Rust MSVC 工具链、MSVC C++ Build Tools 和 Windows SDK。正式构建由 [Main validation](.github/workflows/main-validation.yml) 执行。本机在固定工作树运行 `./rust/strategic-host/tools/wwo-cargo.ps1 check --bin wwo-map-lab`，也可调用 `build`、`test` 或 `run`。入口复用同一个 Cargo target，串行构建，超限时回收对应的可重建构建配置。dev/test 关闭调试信息和增量编译。需要调试器时加 `-DebugSymbols`，使用独立的 `dev-debug` 配置目录。
+
+需要重建 Windows 正式二进制时，在仓库根目录运行以下命令。
 
 ```powershell
 cargo build --release --locked --manifest-path rust/strategic-host/Cargo.toml --bin wwo-map-lab --bin wwo-formal-state
 ```
 
-将阶段资源恢复到新构建 EXE 旁的 `data/`，运行 `wwo-map-lab.exe --play`。`wwo-formal-state.exe` 提供企业班次检查和训练地形读取。
+将阶段资源恢复到新构建 EXE 旁的 `data/`。在仓库根目录用以下命令打包人口数据，指定 EXE 旁的 `data` 或游戏 `--data` 指定的运行目录。
+
+```powershell
+./rust/strategic-host/tools/package_population.ps1 -DataDirectory <运行目录>
+```
+
+运行 `wwo-map-lab.exe --play`。状态工具默认也读取 EXE 旁的 `data/`，可用 `WWO_DATA_DIR` 指定同一目录。人口清单 `data/historical_population_1900/runtime-manifest.json` 声明新开局版本、市场校准版本和各版所需文件。更新人口数据时新增版本并更新清单，保留旧版文件及绑定。旧存档按人口版本读取对应文件，缺少历史资源时启动或读档会给出具体路径与版本。该目录可随游戏离线使用。
 
 私有 [Rust Windows 阶段资源包](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115) 保存实跑的预览 EXE、运行数据、压缩地貌和训练高程。Release 标签固定阶段源码版本。附件说明登记来源、恢复目录及回读状态。
 
@@ -43,6 +51,6 @@ git worktree add --detach ../wwo-r68-candidate archive/godot-r68-source-20261120
 
 1. 每完成一个可验证阶段，先本地运行相关检查，在同一轮提交并推送源码、配置、测试和报告。施工中的改动留在开发分支。使用短期分支和 PR，按 [Main validation](.github/workflows/main-validation.yml) 完成检查后合入 `main`。
 2. 大型运行资源、必要原件及发布包使用私有附件。记录版本、来源、对应提交和存储服务提供的完整性信息。玩家存档、凭据、私人资料及可重建缓存不得进入 Git 或附件。
-3. 从远端重新读取 `main`、代码、构建文件、报告和对应附件。下载到独立目录，验证本阶段成果能否恢复。报告提交 ID、附件、实际恢复结果和仅在本机的内容。云端同步和已要求的恢复检查完成后才标记完整交付。
+3. 普通 PR 合并后核对远端 `main` 和必需 CI。正式发布、运行资源打包或存档格式改变、重建环境时，使用固定验证目录从云端冷恢复。优先使用能访问的既有 CI 构建和归档附件。报告提交 ID、资源状态、实际恢复结果和仅在本机的内容。
 
 代码合并、资源归档和正式候选提升分别记录。长期开发规则见 [AGENTS.md](AGENTS.md)。
