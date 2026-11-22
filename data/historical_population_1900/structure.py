@@ -92,6 +92,107 @@ def austrian_age_panels():
                         "change and reporting error are unquantified. The source rows used do not establish single ages.",
         ), [total, *rows]
 
+
+def hungarian_crown_age_panels():
+    by_territory = {}
+    for row in read_csv(HERE / "austria_hungary" / "hungarian_crown_age_1900.csv"):
+        male, female, civilians_male, civilians_female, civilians, population, military = (
+            int(row[column]) for column in ("all_male", "all_female", "civilian_male", "civilian_female",
+                                             "civilian_total", "civilian_and_military_total", "military_male")
+        )
+        if (male != civilians_male + military or female != civilians_female
+                or civilians != civilians_male + civilians_female or population != civilians + military):
+            raise ValueError(f"Hungarian census age row does not close: {row}")
+        low = int(row["age_min"]) if row["age_min"] else None
+        high = int(row["age_max"]) if row["age_max"] else None
+        by_territory.setdefault(row["unit_id"], []).append(dict(
+            label=row["source_age_label"], role="band", age_min=low, age_max=high,
+            both=population, male=male, female=female,
+        ))
+
+    scopes = {"ah_hungary_including_fiume": ("Hungary including Fiume", 16_838_255),
+              "ah_croatia_slavonia": ("Croatia-Slavonia", 2_416_304)}
+    if by_territory.keys() != scopes.keys():
+        raise ValueError("Hungarian census ages do not cover both territories")
+    for unit_id, (name, expected_total) in scopes.items():
+        rows = by_territory[unit_id]
+        total = dict(role="total", label="Civilian and military population present",
+                     age_min=None, age_max=None, **{key: sum(row[key] for row in rows) for key in AGE_COUNTS})
+        bands = {(row["age_min"], row["age_max"]) for row in rows}
+        if total["both"] != expected_total or len(rows) != 20 or len(bands) != len(rows):
+            raise ValueError(f"Hungarian census age coverage differs for {unit_id}")
+        yield dict(
+            id=f"{unit_id}_1900_age_sex", observed_unit_id=unit_id, observed_date="1900-12-31",
+            source_id="ksh_hungarian_statistical_yearbook_1908", published_scope=name,
+            broad_observation=unit_id == "ah_hungary_including_fiume",
+            locator=f"Section II.A, Table 7, p. 17; Table 5 sex controls, p. 16; {name}",
+            definition="Census-night age of civilians and military. The difference between the civilian "
+                       "and full age totals is assigned to men because Table 5 places all serving military in the male total.",
+            uncertainty="Change between the January opening and the December census is unquantified.",
+        ), [total, *rows]
+
+
+
+def hungarian_regional_sex():
+    controls = {}
+    filename = HERE / "austria_hungary" / "hungarian_regional_sex_1890_1900.csv"
+    for row in read_csv(filename):
+        dates = controls.setdefault(row["unit_id"], {})
+        census_date = row["census_date"]
+        male, female, total = (int(row[key]) for key in ("all_male", "all_female", "all_total"))
+        if (census_date in dates or male != int(row["civilian_male"]) + int(row["military_male"])
+                or female != int(row["civilian_female"]) or male + female != total):
+            raise ValueError(f"Hungarian regional sex control does not close: {row}")
+        dates[census_date] = row | dict(male=male, female=female, both=total)
+    return controls
+
+
+def hungarian_opening_age_models(panels, opening_balances):
+    units = {key: unit for key, unit in opening_balances.items()
+             if unit.get("control_unit_id") == "ah_lands_of_st_stephen"}
+    local = hungarian_regional_sex()
+    if local.keys() != units.keys():
+        raise ValueError("Hungarian regional sex controls do not cover the opening Crown lands")
+    census_dates = ("1890-12-31", "1900-12-31")
+    weight = opening_fraction(("1891-01-01", "1901-01-01"))
+    for unit_id, unit in units.items():
+        dated = local[unit_id]
+        if (dated.keys() != set(census_dates)
+                or [dated[date]["both"] for date in census_dates] != unit["endpoint_values"]):
+            raise ValueError(f"Hungarian sex and population controls differ for {unit_id}")
+        earlier, later = (dated[date] for date in census_dates)
+        population = unit["population_value"]
+        opening_sex = apportion({sex: earlier[sex] * (1 - weight) + later[sex] * weight for sex in SEX_COUNTS}, population)
+        whole = "ah_hungary_including_fiume"
+        territory = unit_id if unit_id == "ah_croatia_slavonia" else whole
+        panel, (control, *bands) = panels[f"{territory}_1900_age_sex"]
+        by_sex = {
+            sex: apportion({i: Fraction(opening_sex[sex] * band[sex], control[sex])
+                            for i, band in enumerate(bands)}, opening_sex[sex])
+            for sex in SEX_COUNTS
+        }
+        allocated = [
+            band | dict(male=by_sex["male"][i], female=by_sex["female"][i],
+                        both=by_sex["male"][i] + by_sex["female"][i])
+            for i, band in enumerate(bands)
+        ]
+        source_name, page = later["source_region"], later["source_print_page"]
+        model = panel | dict(
+            observed_date=DATE, observed_unit_id=unit_id,
+            locator=f"{panel['locator']}; 1900 census Part X, Table 15, p. {page}, {source_name}",
+            opening_method="Interpolate local male and female census totals from the 1890 and 1900 census nights. "
+                           "For each sex, apply its age shares from the December 1900 source territory, "
+                           "preserving the unknown age class. Round persons by largest remainders.",
+            uncertainty=panel["uncertainty"] + (
+                " Age shares below the Croatia-Slavonia reporting level are unobserved."
+                if territory == unit_id else
+                " The age shares are for Hungary including Fiume. Local age differences are unquantified."
+            ),
+        )
+        yield opening_age_group(model, [control | dict(both=population, **opening_sex), *allocated],
+                                unit_id, population)
+
+
 def province_key(name):
     return re.sub(r"\s+(губерния|область|обл\.?)$","",name.strip().casefold())
 
@@ -153,6 +254,16 @@ def dimensions(population):
                 definition=panel["definition"], dimension=panel.get("dimension", "age_by_sex"),
                 panel_id=panel["id"], row_role=row["role"],
                 age_min=row["age_min"], age_max=row["age_max"],
+            ))
+    for unit_id, dates in hungarian_regional_sex().items():
+        for census_date, row in dates.items():
+            result.append(dict(
+                unit_id=unit_id, published_scope=row["source_region"], date=census_date,
+                source_id="ah_hungarian_census_1900_part10",
+                locator=f"Census Part X, Table 15, printed p. {row['source_print_page']}",
+                dimension="sex", category="Civilian and military persons present",
+                values={key: row[key] for key in AGE_COUNTS},
+                definition="Male and female census controls. Military persons are included in the male total.",
             ))
     # The family register and the estimated present population have different
     # denominators. Link the published panels for inspection only.
@@ -273,7 +384,7 @@ def age_sex_panels():
             for key in AGE_COUNTS:
                 row[key] = sum(component[key] for component in matched_rows)
             by_panel[panel["id"]].append(row)
-    return [(panel, by_panel[panel["id"]]) for panel in panels] + list(austrian_age_panels())
+    return [(panel, by_panel[panel["id"]]) for panel in panels] + list(austrian_age_panels()) + list(hungarian_crown_age_panels())
 
 
 def opening_age_group(panel, rows, unit_id, opening_total):
@@ -604,6 +715,8 @@ def opening_structure(opening_groups, observations, *, version=6):
                 and opening_balances[unit_id]["endpoint_values"][-1] != model["observed_total"]):
             raise ValueError(f"Census age and population controls differ for {unit_id}")
         groups.append(model)
+    if version >= 18:
+        groups.extend(hungarian_opening_age_models(panels, opening_balances))
     if version >= 13:
         for group in opening_groups:
             if group["unit_id"] == "swiss_confederation":

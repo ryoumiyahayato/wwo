@@ -2336,6 +2336,46 @@ mod tests {
     }
 
     #[test]
+    fn historical_hungarian_counties_preserve_parent_controls() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        for (unit, total, children, occupied, primary) in [
+            ("ah_tisza_maros", 2_041_110, 9, 901_454, 660_774),
+            ("ah_croatia_slavonia", 2_394_878, 12, 1_270_958, 1_081_677),
+        ] {
+            let report = world.inspect_population(unit).unwrap();
+            assert_eq!(report.population_total, Some(total));
+            assert_eq!(report.direct_residents, None);
+            assert_eq!(report.children.len(), children);
+            assert_eq!(report.children.iter().map(|child| child.population_total).sum::<u64>(), total);
+            let structure = report.structure.unwrap();
+            assert_eq!(structure.cohort_residents, total);
+            assert!(structure.residents_with_cohort_age_and_sex >= total - 200);
+            let social = report.social.unwrap();
+            let religion = &social.dimensions["religion"];
+            let language = &social.dimensions["language"];
+            assert_eq!(religion.assigned_residents + religion.unknown_residents, total);
+            assert!(religion.assigned_residents > total - 16_000);
+            assert_eq!(language.assigned_residents + language.unknown_residents, total);
+            assert!((language.assigned_residents as i64 - religion.assigned_residents as i64).abs() <= 1);
+            let occupation = &social.dimensions["occupation"];
+            assert_eq!(occupation.assigned_residents, occupied);
+            assert_eq!(occupation.unknown_residents, total - occupied);
+            assert_eq!(occupation.by_classification["hungarian_crown_1900_occupation"]["Primary production"], primary);
+        }
+        let municipality = world.inspect_population("ah_zagrab_city").unwrap();
+        assert_eq!(municipality.population_total, Some(59_051));
+        assert_eq!(municipality.parent_id, Some("ah_croatia_slavonia"));
+        let social = municipality.social.unwrap();
+        for dimension in ["occupation", "religion", "language"] {
+            assert_eq!(social.dimensions[dimension].assigned_residents, 0);
+            assert_eq!(social.dimensions[dimension].unknown_residents, 59_051);
+        }
+        assert_eq!(world.population().population_total("austria_hungary"), Some(45_000_882));
+        assert_eq!(world.social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 57_872_694);
+    }
+
+    #[test]
     fn historical_england_wales_occupation_stays_at_the_census_scope() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let current = bootstrap.create("country_fra").unwrap();
@@ -2353,8 +2393,6 @@ mod tests {
         let local = &world.social_distribution(Some(county)).unwrap().dimensions["occupation"];
         assert_eq!(local.assigned_residents, 21_579);
         assert_eq!(local.by_classification["england_wales_1901_occupation_orders"]["Agriculture"], 6_868);
-        assert_eq!(world.social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 49_325_409);
-
         let previous = bootstrap.base_opening_version("country_fra", None, Some(16)).unwrap();
         assert_eq!(world.population_total(county), previous.population().population_total(county));
         let county_structure = current.inspect_population(county).unwrap().structure.unwrap();

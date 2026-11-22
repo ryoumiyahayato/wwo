@@ -586,6 +586,65 @@ def austrian_social_distribution(pools, filename, dimension, columns, source, lo
         )
 
 
+
+HUNGARIAN_RELIGION_COLUMNS = {
+    "Római kath.": "Roman Catholic", "Görög kath.": "Greek Catholic",
+    "Görög keleti": "Greek Orthodox", "Ágostai evang.": "Lutheran, Augsburg Confession",
+    "Evang. reform.": "Reformed Protestant", "Unitárius": "Unitarian",
+    "Izraelita": "Jewish", "Egyéb": "Other",
+}
+
+
+HUNGARIAN_LANGUAGE_COLUMNS = {
+    "Magyar": "Hungarian", "Német": "German", "Tót": "Slovak", "Oláh": "Romanian",
+    "Ruthén": "Ruthenian", "Horvát": "Croatian", "Szerb": "Serbian", "Egyéb": "Other",
+}
+
+
+HUNGARIAN_OCCUPATION_COLUMNS = {
+    "primary_production_kereso": "Primary production",
+    "mining_and_metallurgy_kereso": "Mining and metallurgy",
+    "industry_kereso": "Industry",
+    "trade_and_credit_kereso": "Trade and credit",
+    "transport_kereso": "Transport",
+    "public_service_and_professions_kereso": "Public service and liberal professions",
+    "armed_forces_kereso": "Armed forces census category",
+    "day_labour_unspecified_kereso": "Day labourers, activity unspecified",
+    "domestic_servants_kereso": "Domestic servants",
+}
+
+
+def hungarian_crown_social(pools, dimension, columns, definition):
+    path = COLLECTIONS / "austria_hungary" / f"hungarian_crown_{dimension}_1900.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    crown_pools = {key for key, pool in pools.items() if pool.get("control_unit_id") == "ah_lands_of_st_stephen"}
+    if len(rows) != len(crown_pools) or {row["unit_id"] for row in rows} != crown_pools:
+        raise ValueError(f"Hungarian {dimension} table does not cover the opening Crown of St Stephen")
+    for row in rows:
+        unit_id = row["unit_id"]
+        unit = pools[unit_id]
+        total, observed = (int(row[key]) for key in ("census_total", "observed_total"))
+        counts = {label: int(row[column]) for column, label in columns.items()}
+        if dimension == "occupation":
+            earners = sum(int(value) for key, value in row.items() if key.endswith("_kereso"))
+            dependants = sum(int(value) for key, value in row.items() if key.endswith("_eltartott"))
+            if (earners, dependants) != (int(row["kereso_total"]), int(row["eltartott_total"])) or earners + dependants != observed:
+                raise ValueError(f"Hungarian occupation groups do not close for {unit_id}")
+            observed = sum(counts.values())
+            unknown = total - observed
+        else:
+            unknown = int(row["unknown"])
+        if total != unit["endpoint_values"][-1] or observed + unknown != total:
+            raise ValueError(f"Hungarian {dimension} and population controls differ for {unit_id}")
+        yield unit_id, dimension, distribution(
+            unit["population_value"], classification=f"hungarian_crown_1900_{dimension}",
+            source=row["source_id"], date=row["observed_date"], observed_unit=unit_id,
+            scope=row["observed_name"], locator=row["locator"], total=total, observed_counts=counts,
+            unknown=unknown, definition=definition,
+        )
+
+
 def prussian_marital_status(pools):
     unit_id = "administrative_region:germany_preussen"
     unit = pools[unit_id]
@@ -649,6 +708,20 @@ def opening_social(opening_groups, *, version):
         )
     if version >= 17:
         marginals = chain(marginals, england_wales_occupation(pools))
+    if version >= 18:
+        marginals = chain(
+            marginals,
+            hungarian_crown_social(pools, "religion", HUNGARIAN_RELIGION_COLUMNS,
+                                  "Reported civilian confession. The local military balance is unassigned. "
+                                  "The published other category remains a counted group."),
+            hungarian_crown_social(pools, "language", HUNGARIAN_LANGUAGE_COLUMNS,
+                                  "Reported civilian mother tongue. The local military balance is unassigned. "
+                                  "The published other category remains a counted group."),
+            hungarian_crown_social(pools, "occupation", HUNGARIAN_OCCUPATION_COLUMNS,
+                                  "Reported own occupational group among people with an independent livelihood. "
+                                  "Dependants, persons living from capital or pensions, and other or unknown occupations "
+                                  "remain unassigned. The armed forces census category is not a military roster."),
+        )
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))
