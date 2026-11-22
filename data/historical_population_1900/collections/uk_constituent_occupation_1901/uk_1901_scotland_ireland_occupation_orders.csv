@@ -1,0 +1,28 @@
+order_id,order_label,england_wales,scotland,ireland,printed_page
+I,General or Local Government of the Country,198187,21397,34281,270
+II,Defence of the Country,168238,8057,27698,270
+III,Professional Occupations and their Subordinate Services,606260,71607,55715,270
+IV,Domestic Offices or Services (excluding Domestic Outdoor Service),1814949,182330,202238,272
+V,Commercial Occupations,590629,82513,39323,272
+VI,"Conveyance of Men, Goods, and Messages",1266758,159616,71255,272
+VII,Agriculture,1197922,205007,859525,274
+VIII,Fishing,23891,27600,10434,274
+IX,"In and About, and Dealing in the Products of, Mines and Quarries",805185,132183,6512,274
+X,"Metals, Machines, Implements, and Conveyances",1228504,205727,41179,274
+XI,"Precious Metals, Jewels, Watches, Instruments, and Games (including Electricity Supply)",152353,12843,3148,276
+XII,Building and Works of Construction,1128680,146163,60977,276
+XIII,"Wood, Furniture, Fittings, and Decorations",257592,39000,11040,276
+XIV,"Brick, Cement, Pottery, and Glass",175513,12962,1381,276
+XV,"Chemicals, Oil, Grease, Soap, Resin, &c.",128640,18139,2896,278
+XVI,"Skins, Leather, Hair and Feathers",105341,8258,4267,278
+XVII,"Paper, Prints, Books, and Stationery",278957,43741,11563,278
+XVIII,Textile Fabrics,1155397,196396,110208,278
+XIX,"Workers and Dealers in Dress (including “Machinists, Machine Workers, undefined” for Females only)",1126423,127784,141588,278
+XX,"Food, Tobacco, Drink, and Lodging",1073809,152119,75148,280
+XXI,"Gas, Water, and Sanitary Service (not including Electricity Supply)",68510,8461,1715,280
+XXII,"Other, General, and Undefined Workers and Dealers",776989,120909,177516,280
+XXIII,Without Specified Occupations or Unoccupied,10995117,1463511,1615576,280
+table_total,Total Occupied and Unoccupied,25323844,3446323,3565183,270
+occupied_total,Engaged in Occupations,14328727,1982812,1949607,270
+outside_occupation_table,All-ages census total less occupation table total,7203999,1025780,893592,
+all_ages_total,Census population of all ages,32527843,4472103,4458775,

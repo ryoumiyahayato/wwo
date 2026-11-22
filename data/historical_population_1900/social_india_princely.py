@@ -1,7 +1,11 @@
 """Social census counts at Indian princely state boundaries."""
 
+import csv
 import json
+from collections import defaultdict
 from pathlib import Path
+
+from opening import MADRAS_STATES_AGE_SOURCE
 
 
 COLLECTIONS = Path(__file__).resolve().parent / "collections"
@@ -50,7 +54,10 @@ def madras_states_religion(pools, distribution, table_definition):
                  "unknown": parent["unknown"] - sum(row["unknown"] for row in states),
                  "counts": [total - travancore - cochin for total, travancore, cochin in
                             zip(parent["counts"], *(row["counts"] for row in states), strict=True)]}
-    for unit_id, row in zip((TRAVANCORE, COCHIN, OTHER_MADRAS_STATES), [*states, remainder], strict=True):
+    allocations = dict(zip((TRAVANCORE, COCHIN), states, strict=True))
+    if OTHER_MADRAS_STATES in pools:
+        allocations[OTHER_MADRAS_STATES] = remainder
+    for unit_id, row in allocations.items():
         pool = pools[unit_id]
         if (pool["statistical_parent"] != MADRAS_STATES or pool["endpoint_values"][-1] != row["total"]
                 or pool["source_dates"][-1] != date):
@@ -63,6 +70,37 @@ def madras_states_religion(pools, distribution, table_definition):
             date=date, observed_unit=unit_id, scope=pool["name"], locator=locator,
             total=row["total"], observed_counts=dict(zip(labels, row["counts"], strict=True)),
             unknown=row["unknown"], definition=definition,
+        )
+    if OTHER_MADRAS_STATES not in pools:
+        yield from madras_remaining_states_religion(pools, distribution, classification, remainder)
+
+
+def madras_remaining_states_religion(pools, distribution, classification, aggregate):
+    path = COLLECTIONS / "india_remaining_princely_demography" / "madras_states_religion_1901.csv"
+    by_state = defaultdict(list)
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            by_state[row["area"]].append(row)
+    labels = {"Hindu": "Hindus", "Musalman": "Muhammadans", "Christian": "Christians"}
+    if len(by_state) != 3 or sum(int(row["persons"]) for rows in by_state.values() for row in rows) != aggregate["total"]:
+        raise ValueError("The three Madras State religion returns do not match the remainder control")
+    for state, rows in by_state.items():
+        unit_id = f"raj_madras_{state}"
+        pool = pools[unit_id]
+        counts = {labels[row["religion"]]: int(row["persons"]) for row in rows if row["religion"] != "Others"}
+        unknown = sum(int(row["persons"]) for row in rows if row["religion"] == "Others")
+        dates = {row["date"] for row in rows}
+        pages = {row["printed_page"] for row in rows}
+        date, = dates
+        page, = pages
+        if date != pool["source_dates"][-1]:
+            raise ValueError(f"{unit_id}: religion and population census dates differ")
+        yield unit_id, "religion", distribution(
+            pool["population_value"], classification=classification, source=MADRAS_STATES_AGE_SOURCE,
+            date=date, observed_unit=unit_id, scope=pool["name"], locator=f"Vol. XV-A, Table VII, p. {page}",
+            total=pool["endpoint_values"][-1], observed_counts=counts, unknown=unknown,
+            definition="Census All Religions control and named religious returns. The residual Others group has "
+                       "no individually reported religions and remains unassigned.",
         )
 
 

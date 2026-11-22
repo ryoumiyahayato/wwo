@@ -1,0 +1,11 @@
+[
+  {
+    "id": "uk_general_census_report_1901_occupation_orders",
+    "title": "Census of England and Wales, 1901: General Report with Appendices",
+    "publisher": "General Register Office",
+    "url": "https://iiif.wellcomecollection.org/presentation/v2/b32183161_0001",
+    "locator": "Appendix A, Table 35, pp. 270–281, Scotland and Ireland",
+    "rights": "Published historical numeric facts",
+    "raw_path": "uk_1901_scotland_ireland_occupation_orders.csv"
+  }
+]

@@ -1,0 +1,3 @@
+unit_id,observed_date,observed_total,observed_male,observed_female,literate,illiterate,literate_male,literate_female,illiterate_male,illiterate_female,observed_unknown,locator
+raj_bengal_calcutta,1901-03-01,847796,562596,285200,210443,637353,177687,32756,384909,252444,0,"Vol. VI-A, Imperial Table VIII, Part B, Calcutta, All Religions"
+raj_bengal_dacca,1901-03-01,2649522,1312417,1337105,173345,2476177,159389,13956,1153028,1323149,0,"Vol. VI-A, Imperial Table VIII, Part B, Dacca district, All Religions"

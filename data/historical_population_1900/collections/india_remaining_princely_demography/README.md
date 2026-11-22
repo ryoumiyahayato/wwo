@@ -1,0 +1,21 @@
+# Census of India age and sex in the Madras and Bombay States
+
+## Three Madras States
+
+The opening account `raj_madras_states_ex_cochin_travancore` covers Pudukkottai, Banganapalle and Sandur. The India return treats these three states, Cochin, and Travancore as one five-state aggregate in Table II-A. The new age rows use only the first three states. British Madras, Cochin and Travancore have separate opening accounts.
+
+`madras_states_age_sex.csv` records the All Religions population columns in W. Francis, *Census of India 1901*, Vol. XV-A, Madras, Part II, Table VII, printed pp. 61–63. Pudukkottai is on p. 61, Banganapalle on p. 62, and Sandur on p. 63. The final `india_census_madras_states_ex_cochin_travancore_1901` panel is their sum. [Madras imperial tables](https://ignca.gov.in/Asi_data/31014.pdf)
+
+The 1901 Pudukkottai digital transcription reads 69,119 for women aged 20–39. The three female civil-condition counts on that row are 2,380, 53,219 and 6,520. Their sum is 62,119. This also reconciles the age column to the state's independently published 199,646 women. The corresponding both-sex cells are 112,190 for that band and 380,440 for the state. [India census 1911, Table II, p. 10](https://storage.lib.uchicago.edu/pres/2014/pres2014-0779-1911-01-02.pdf)
+
+`madras_states_sex_controls.csv` includes 1891 and 1901 controls checked against the later official Madras Table II. The three states sum to 201,657 men and 218,323 women in 1891 and 202,683 men and 221,221 women in 1901. These close to the opening series endpoints of 419,980 and 423,904. All seven 1901 bands close by sex in each state. The published first six bands have exclusive upper ages. There is no unassigned age balance in these census cells. [Madras census 1941, Vol. II, Table II, p. 18](https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/37348/GIPE-020589.pdf?isAllowed=y&sequence=3)
+
+For 1900-01-01 interpolate the two sex controls and apportion each sex to its 1901 age profile. The opening aggregate of 423,449 gives 202,564 males and 220,885 females. This estimates the opening year using one census's age distribution. Enumeration and temporal errors are unquantified. The three component tables permit an optional mutually exclusive geographic split using the same endpoint controls.
+
+## Bombay States
+
+`bombay_states_sex_controls.csv` records the common 1891 area by sex from *Census of India 1901*, Vol. I-A, Table II-A, printed p. 10, row 15. The 1891 counts close to the archived 1891 age panel. `bombay_states_1901_age_scope_bounds.csv` uses the archived *Statistical Abstract relating to British India, 1894/95 to 1903/04*, Table 14, printed pp. 10–11, Bombay States, as the full 1901 age reference. [National imperial tables facsimile](https://archive.org/details/in.gov.ignca.30982) · [Statistical Abstract Table 14](https://dsal.uchicago.edu/statistics/1894_excel/1894.014.XLS)
+
+The late full-scope return exceeds the common-area return by 8,645 males and 14,164 females. Table II-A identifies the common reporting area. The affected age distribution and named localities have not been verified. Assuming the common return is a subset of the full count for each sex, an observed age cell with count `n`, sex-specific excess `d` and common sex population `c` lies between `max(0, n - d)` and `min(n, c)` in the common scope. These are separate cell limits. Feasible simultaneous exclusions sum to `d` within each sex. The limits measure the reporting-scope difference in 1901. They carry no information about exact ages in 1900.
+
+A 1900 model can interpolate the common-area sex totals, then reuse the late full-area age proportions within each sex with this scope uncertainty. Another model can first harmonize the two age tables to 0–4, 5–14, 15–24, 25–44, 45+ and unspecified. Then scale the late cells to the common-area sex totals and interpolate with the early age counts. The early abstract has inconsistent labels above age 44. Use the two oldest 1891 bands together. Keep unspecified ages. The 1899–1900 famine was ongoing near the opening, so age composition need not change linearly. [1901 General Report, pp. 54–56](https://indiadisabilitywatch.in/wp-content/uploads/2025/10/report_on_the_census_of_india_1901-2.pdf)

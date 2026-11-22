@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from itertools import chain
 from pathlib import Path
 
-from opening import AGRA_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, SPANISH_CIVIL_STATUS_SCOPE
+from opening import AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, SPANISH_CIVIL_STATUS_SCOPE
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import india_princely_residence, madras_states_religion, travancore_language
@@ -721,6 +721,38 @@ def hungarian_crown_work_status(pools):
         )
 
 
+def uk_constituent_occupation(pools):
+    path = COLLECTIONS / "uk_constituent_occupation_1901" / "uk_1901_scotland_ireland_occupation_orders.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        rows = {row["order_id"]: row for row in csv.DictReader(stream)}
+    occupied_orders = [row for order, row in rows.items()
+                       if order not in ("XXIII", "table_total", "occupied_total",
+                                        "outside_occupation_table", "all_ages_total")]
+    if len(occupied_orders) != 22:
+        raise ValueError("United Kingdom General Report must have 22 specified occupation orders")
+    for constituent in ("scotland", "ireland"):
+        unit_id = f"administrative_region:uk_constituent_{constituent}"
+        pool = pools[unit_id]
+        counts = {row["order_label"]: int(row[constituent]) for row in occupied_orders}
+        occupied = int(rows["occupied_total"][constituent])
+        table_total = int(rows["table_total"][constituent])
+        unknown_in_table = int(rows["XXIII"][constituent])
+        outside_table = int(rows["outside_occupation_table"][constituent])
+        total = int(rows["all_ages_total"][constituent])
+        if (sum(counts.values()) != occupied or occupied + unknown_in_table != table_total
+                or table_total + outside_table != total or pool["endpoint_values"][-1] != total):
+            raise ValueError(f"{unit_id}: occupational orders do not close to the constituent's population")
+        yield unit_id, "occupation", distribution(
+            pool["population_value"], classification="uk_1901_general_report_occupation_orders",
+            source="uk_general_census_report_1901_occupation_orders", date="1901-03-31",
+            observed_unit=unit_id, scope=pool["name"], locator="Appendix A, Table 35, pp. 270–281",
+            total=total, observed_counts=counts, unknown=unknown_in_table + outside_table,
+            definition="Specified occupational orders for persons aged 10 and older. Ireland also includes "
+                       "occupied children below ten. Unoccupied or unspecified and people outside the return "
+                       "remain unassigned. County occupations are unknown.",
+        )
+
+
 def prussian_marital_status(pools):
     unit_id = "administrative_region:germany_preussen"
     unit = pools[unit_id]
@@ -1101,6 +1133,41 @@ def egyptian_faiyum_social(pools, observations):
             )
 
 
+def egyptian_provincial_work_and_instruction(pools, observations):
+    source = "egypt_1897_markaz_occupation_and_instruction"
+    census = {row["unit_id"]: row for row in observations
+              if row["source_id"] == "egypt_census_1907_comparable_provinces" and row["date"] == "1897-06-01"}
+    path = COLLECTIONS / "egypt_comparable_provinces" / "egypt_1897_province_social.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit_id = row["unit_id"]
+            pool = pools[unit_id]
+            control = census[unit_id]
+            total = int(row["observed_total"])
+            cells = [(row[f"category_{key}"], int(row[f"category_{key}_male"]), int(row[f"category_{key}_female"]))
+                     for key in ("a", "b")]
+            for sex, amount in zip(("male", "female"), (sum(cell[1] for cell in cells), sum(cell[2] for cell in cells)),
+                                   strict=True):
+                if amount != int(row[f"{sex}_total"]) or amount != control["breakdowns"]["sex"][sex]:
+                    raise ValueError(f"{unit_id}: 1897 social counts differ from the comparative sex control")
+            if total != pool["endpoint_values"][0] or row["date"] != control["date"]:
+                raise ValueError(f"{unit_id}: social census scope differs from the opening endpoint")
+            if row["dimension"] == "occupation_status":
+                dimension, classification = "occupation", "egypt_1897_reported_occupation_status"
+                labels = {"with occupation": "With occupation", "without": "Without occupation"}
+                definition = "Reported occupation status. The return gives no individual trade or work arrangement."
+            else:
+                dimension, classification = "literacy", "egypt_1897_reported_instruction"
+                labels = {"READ&WRITE": "Read and write", "ILLITERATE": "Illiterate"}
+                definition = "Census instruction categories for all ages."
+            yield unit_id, dimension, distribution(
+                pool["population_value"], classification=classification, source=source, date=row["date"],
+                observed_unit=unit_id, scope=pool["name"], locator=row["locator"], total=total,
+                observed_counts={labels[label]: male + female for label, male, female in cells},
+                unknown=int(row["unknown"]), definition=definition,
+            )
+
+
 def brazilian_state_distribution(pools, filename, dimension, classification, source, columns, definition):
     path = COLLECTIONS / "brazil_census_1900_age" / filename
     with path.open(encoding="utf8", newline="") as stream:
@@ -1267,6 +1334,37 @@ def canada_reported_origin(pools):
             )
 
 
+def bengal_district_literacy(pools, observations):
+    controls = {row["unit_id"]: row for row in observations
+                if row["source_id"] == BENGAL_DISTRICT_SOURCE and row["date"] == INDIA_DATE}
+    path = COLLECTIONS / "india_bengal_districts_1901" / "bengal_literacy_1901.csv"
+    with path.open(encoding="utf-8", newline="") as source:
+        for row in csv.DictReader(source):
+            unit_id = row["unit_id"]
+            control = controls[unit_id]
+            pool = pools[unit_id]
+            observed_total = int(row["observed_total"])
+            counts = {name.title(): int(row[name]) for name in ("literate", "illiterate")}
+            if (row["observed_date"] != INDIA_DATE or observed_total != pool["endpoint_values"][-1]
+                    or int(row["observed_unknown"]) != 0):
+                raise ValueError(f"{unit_id}: incompatible Bengal literacy scope")
+            for sex in ("male", "female"):
+                if not (sum(int(row[f"{name}_{sex}"]) for name in ("literate", "illiterate"))
+                        == int(row[f"observed_{sex}"]) == control["sex"][sex]):
+                    raise ValueError(f"{unit_id}: Bengal literacy does not match the census {sex} population")
+            for name, count in counts.items():
+                if sum(int(row[f"{name.lower()}_{sex}"]) for sex in ("male", "female")) != count:
+                    raise ValueError(f"{unit_id}: Bengal literacy category {name} does not close")
+            yield unit_id, "literacy", distribution(
+                pool["population_value"], classification=INDIA_TABLES["16"][1],
+                source="india_bengal_census_1901_literacy", date=INDIA_DATE, observed_unit=unit_id,
+                scope=f"{pool['name']}, population on the March 1901 census jurisdiction",
+                locator=row["locator"], total=observed_total, observed_counts=counts, unknown=0,
+                definition="Ability to read and write a letter, all ages. English and vernacular subcolumns may overlap and are excluded. "
+                           "Change between January 1900 and March 1901 has no quantified interval.",
+            )
+
+
 def opening_social(opening_groups, observations, *, version):
     """Return independent person distributions at each source's published scope."""
     pools = {
@@ -1385,6 +1483,10 @@ def opening_social(opening_groups, observations, *, version):
         )
     if version >= 26:
         marginals = chain(marginals, portuguese_district_social(pools), brazilian_state_religion(pools))
+    if version >= 27:
+        marginals = chain(marginals, uk_constituent_occupation(pools),
+                          egyptian_provincial_work_and_instruction(pools, observations),
+                          bengal_district_literacy(pools, observations))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

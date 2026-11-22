@@ -1,0 +1,46 @@
+[
+  {
+    "id": "india_census_madras_states_ex_cochin_travancore_1901_pudukkottai",
+    "observed_unit_id": "raj_madras_pudukkottai",
+    "published_scope": "Pudukkottai State",
+    "locator": "Vol. XV-A, Table VII, p. 61",
+    "source_id": "india_madras_1901_princely_age_and_religion",
+    "observed_date": "1901-03-01",
+    "definition": "Census persons present by age and sex, all reported religions.",
+    "uncertainty": "Census coverage and age reporting errors are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_madras_states_ex_cochin_travancore_1901_banganapalle",
+    "observed_unit_id": "raj_madras_banganapalle",
+    "published_scope": "Banganapalle State",
+    "locator": "Vol. XV-A, Table VII, p. 62",
+    "source_id": "india_madras_1901_princely_age_and_religion",
+    "observed_date": "1901-03-01",
+    "definition": "Census persons present by age and sex, all reported religions.",
+    "uncertainty": "Census coverage and age reporting errors are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_madras_states_ex_cochin_travancore_1901_sandur",
+    "observed_unit_id": "raj_madras_sandur",
+    "published_scope": "Sandur State",
+    "locator": "Vol. XV-A, Table VII, p. 63",
+    "source_id": "india_madras_1901_princely_age_and_religion",
+    "observed_date": "1901-03-01",
+    "definition": "Census persons present by age and sex, all reported religions.",
+    "uncertainty": "Census coverage and age reporting errors are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_madras_states_ex_cochin_travancore_1901",
+    "observed_unit_id": "raj_madras_states_ex_cochin_travancore",
+    "published_scope": "Pudukkottai, Banganapalle and Sandur",
+    "locator": "Vol. XV-A, Table VII, pp. 61–63; sum of the three state returns",
+    "source_id": "india_madras_1901_princely_age_and_religion",
+    "observed_date": "1901-03-01",
+    "definition": "Census persons present by age and sex, all reported religions.",
+    "uncertainty": "Census coverage and age reporting errors are unquantified.",
+    "broad_observation": false
+  }
+]

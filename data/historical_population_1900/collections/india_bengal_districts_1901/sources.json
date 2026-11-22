@@ -1,0 +1,20 @@
+[
+  {
+    "id": "india_bengal_census_1901_districts",
+    "title": "Census of India, 1901, Vol. VI-A: Bengal, Part II, Imperial Tables",
+    "publisher": "Government of Bengal",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55931",
+    "locator": "Tables I and II, printed pp. 2–7. Province control, two dates of district populations and 1901 district populations by sex.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "bengal_districts.csv"
+  },
+  {
+    "id": "india_bengal_census_1901_literacy",
+    "title": "Census of India, 1901, Vol. VI-A: Bengal, Part II, Imperial Tables",
+    "publisher": "Government of Bengal",
+    "url": "https://ignca.gov.in/Asi_data/30991.pdf",
+    "locator": "Table VIII, Education, part B, All Religions, Calcutta and Dacca.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "bengal_literacy_1901.csv"
+  }
+]

@@ -25,9 +25,11 @@
     "gold_coast_population": 2,
     "honduras_population": 25,
     "india_agra_districts_1901": 74,
+    "india_bengal_districts_1901": 96,
     "india_comparable": 87,
     "india_local_areas_1901": 43,
     "india_princely_1901": 10,
+    "india_remaining_princely_demography": 6,
     "italy_census_1901": 54,
     "japan_taiwan": 232,
     "java_madoera": 2,
@@ -55,7 +57,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 246,
+  "cited_sources": 252,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -70,8 +72,8 @@
   "legacy_only_people": 127294707,
   "authoritative_total_for_new_game": 1467636413,
   "roots_with_partitions": 27,
-  "disjoint_leaves": 1106,
-  "people_in_partitions": 1269631141,
+  "disjoint_leaves": 1155,
+  "people_in_partitions": 1269631115,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -92,10 +94,14 @@
     {
       "unit_id": "raj_agra_unlocated_table_ii_a",
       "people": 294
+    },
+    {
+      "unit_id": "raj_bengal_unlocated_comparison",
+      "people": 26
     }
   ],
   "partitions_with_explicit_places": 37,
-  "people_in_partitions_with_explicit_places": 162675390,
+  "people_in_partitions_with_explicit_places": 89153272,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
   "political_catalogue_members_of_production_groups": 65,
@@ -103,7 +109,7 @@
     "britain_historic_counties_identity.json": {
       "units": 414,
       "with_linked_observation": 88,
-      "with_opening_partition": 49
+      "with_opening_partition": 51
     },
     "france_administrative_identity_1900.json": {
       "units": 87,
@@ -126,8 +132,8 @@
       "with_opening_partition": 132
     }
   },
-  "city_observation_count": 2269,
-  "city_keys_after_reviewed_matches": 1696,
+  "city_observation_count": 2271,
+  "city_keys_after_reviewed_matches": 1697,
   "nonadditive_city_panels": [
     {
       "source_id": "ar_dge_bulletin_219",
@@ -181,6 +187,20 @@
         "200k–<500k": 1,
         "500k+": 1,
         "50k–<100k": 1
+      }
+    },
+    {
+      "source_id": "india_bengal_census_1901_districts",
+      "date": "1891-02-26",
+      "bands": {
+        "500k+": 1
+      }
+    },
+    {
+      "source_id": "india_bengal_census_1901_districts",
+      "date": "1901-03-01",
+      "bands": {
+        "500k+": 1
       }
     },
     {
@@ -305,7 +325,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2541,
+  "source_statistical_units": 2591,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 29,
@@ -321,10 +341,10 @@
     }
   },
   "city_index_representative_bands": {
+    "500k+": 43,
     "100k–<200k": 143,
     "50k–<100k": 358,
-    "200k–<500k": 100,
-    "500k+": 42
+    "200k–<500k": 100
   },
   "city_index_unresolved": 31,
   "opening_social_coverage": {
@@ -353,24 +373,24 @@
       "unknown_people": 1335615644
     },
     "literacy": {
-      "assigned_people": 248277748,
-      "unknown_people": 1219358665
+      "assigned_people": 252443085,
+      "unknown_people": 1215193328
     },
     "marital_status": {
       "assigned_people": 265367237,
       "unknown_people": 1202269176
     },
     "occupation": {
-      "assigned_people": 98938930,
-      "unknown_people": 1368697483
+      "assigned_people": 104206586,
+      "unknown_people": 1363429827
     },
     "property_declaration": {
       "assigned_people": 32296914,
       "unknown_people": 1435339499
     },
     "religion": {
-      "assigned_people": 367805145,
-      "unknown_people": 1099831268
+      "assigned_people": 442155512,
+      "unknown_people": 1025480901
     },
     "residence": {
       "assigned_people": 367464724,
@@ -419,6 +439,7 @@
     "it_1901_census_v5_age_and_marital": 648,
     "br_dge_1916_1900_age_sex": 440,
     "es_census_1900_age_marital": 322,
+    "india_madras_1901_princely_age_and_religion": 32,
     "pt_census_1890": 105,
     "pt_census_1900": 105,
     "be_census_1900_age_and_spoken_languages": 40,
@@ -432,9 +453,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 829382019,
-  "structure_opening_pool_count": 747,
-  "structure_opening_residents_outside_modeled_pools": 638254394,
+  "structure_opening_pool_controls": 836827409,
+  "structure_opening_pool_count": 798,
+  "structure_opening_residents_outside_modeled_pools": 630809004,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -4833,10 +4854,339 @@
       "observed_date": "1901-03-01"
     },
     {
-      "unit_id": "raj_bengal_province",
-      "opening_total": 74350716,
-      "observed_unit_id": "raj_bengal_province_1901_census",
-      "observed_total": 74744866,
+      "unit_id": "raj_bengal_24_parganas",
+      "opening_total": 2056658,
+      "observed_unit_id": "raj_bengal_24_parganas",
+      "observed_total": 2078359,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_angul_and_khondmals",
+      "opening_total": 189376,
+      "observed_unit_id": "raj_bengal_angul_and_khondmals",
+      "observed_total": 191911,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_backergunge",
+      "opening_total": 2275768,
+      "observed_unit_id": "raj_bengal_backergunge",
+      "observed_total": 2291752,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_balasore",
+      "opening_total": 1062320,
+      "observed_unit_id": "raj_bengal_balasore",
+      "observed_total": 1071197,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_bankura",
+      "opening_total": 1110989,
+      "observed_unit_id": "raj_bengal_bankura",
+      "observed_total": 1116411,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_bhagalpur",
+      "opening_total": 2082427,
+      "observed_unit_id": "raj_bengal_bhagalpur",
+      "observed_total": 2088953,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_birbhum",
+      "opening_total": 890212,
+      "observed_unit_id": "raj_bengal_birbhum",
+      "observed_total": 902280,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_bogra",
+      "opening_total": 844084,
+      "observed_unit_id": "raj_bengal_bogra",
+      "observed_total": 854533,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_burdwan",
+      "opening_total": 1516165,
+      "observed_unit_id": "raj_bengal_burdwan",
+      "observed_total": 1532475,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_calcutta",
+      "opening_total": 828598,
+      "observed_unit_id": "raj_bengal_calcutta",
+      "observed_total": 847796,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_champaran",
+      "opening_total": 1798468,
+      "observed_unit_id": "raj_bengal_champaran",
+      "observed_total": 1790463,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_chittagong",
+      "opening_total": 1345932,
+      "observed_unit_id": "raj_bengal_chittagong",
+      "observed_total": 1353250,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_chittagong_hill_tracts",
+      "opening_total": 122735,
+      "observed_unit_id": "raj_bengal_chittagong_hill_tracts",
+      "observed_total": 124762,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_cuttack",
+      "opening_total": 2048247,
+      "observed_unit_id": "raj_bengal_cuttack",
+      "observed_total": 2062758,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_dacca",
+      "opening_total": 2620046,
+      "observed_unit_id": "raj_bengal_dacca",
+      "observed_total": 2649522,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_darbhanga",
+      "opening_total": 2899774,
+      "observed_unit_id": "raj_bengal_darbhanga",
+      "observed_total": 2912611,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_darjeeling",
+      "opening_total": 246124,
+      "observed_unit_id": "raj_bengal_darjeeling",
+      "observed_total": 249117,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_dinajpur",
+      "opening_total": 1557276,
+      "observed_unit_id": "raj_bengal_dinajpur",
+      "observed_total": 1567080,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_faridpur",
+      "opening_total": 1924429,
+      "observed_unit_id": "raj_bengal_faridpur",
+      "observed_total": 1937646,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_gaya",
+      "opening_total": 2069028,
+      "observed_unit_id": "raj_bengal_gaya",
+      "observed_total": 2059933,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_hazaribagh",
+      "opening_total": 1176379,
+      "observed_unit_id": "raj_bengal_hazaribagh",
+      "observed_total": 1177961,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_hooghly",
+      "opening_total": 1047544,
+      "observed_unit_id": "raj_bengal_hooghly",
+      "observed_total": 1049282,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_howrah",
+      "opening_total": 840434,
+      "observed_unit_id": "raj_bengal_howrah",
+      "observed_total": 850514,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_jalpaiguri",
+      "opening_total": 775009,
+      "observed_unit_id": "raj_bengal_jalpaiguri",
+      "observed_total": 787380,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_jessore",
+      "opening_total": 1821933,
+      "observed_unit_id": "raj_bengal_jessore",
+      "observed_total": 1813155,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_khulna",
+      "opening_total": 1244297,
+      "observed_unit_id": "raj_bengal_khulna",
+      "observed_total": 1253043,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_malda",
+      "opening_total": 876013,
+      "observed_unit_id": "raj_bengal_malda",
+      "observed_total": 884030,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_manbhum",
+      "opening_total": 1288831,
+      "observed_unit_id": "raj_bengal_manbhum",
+      "observed_total": 1301364,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_midnapore",
+      "opening_total": 2770826,
+      "observed_unit_id": "raj_bengal_midnapore",
+      "observed_total": 2789114,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_monghyr",
+      "opening_total": 2065001,
+      "observed_unit_id": "raj_bengal_monghyr",
+      "observed_total": 2068804,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_murshidabad",
+      "opening_total": 1323644,
+      "observed_unit_id": "raj_bengal_murshidabad",
+      "observed_total": 1333184,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_muzaffarpur",
+      "opening_total": 2749926,
+      "observed_unit_id": "raj_bengal_muzaffarpur",
+      "observed_total": 2754790,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_mymensingh",
+      "opening_total": 3863691,
+      "observed_unit_id": "raj_bengal_mymensingh",
+      "observed_total": 3915068,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_nadia",
+      "opening_total": 1664778,
+      "observed_unit_id": "raj_bengal_nadia",
+      "observed_total": 1667491,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_noakhali",
+      "opening_total": 1126411,
+      "observed_unit_id": "raj_bengal_noakhali",
+      "observed_total": 1141728,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_pabna",
+      "opening_total": 1413589,
+      "observed_unit_id": "raj_bengal_pabna",
+      "observed_total": 1420461,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_palamau",
+      "opening_total": 616952,
+      "observed_unit_id": "raj_bengal_palamau",
+      "observed_total": 619600,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_patna",
+      "opening_total": 1642203,
+      "observed_unit_id": "raj_bengal_patna",
+      "observed_total": 1624985,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_puri",
+      "opening_total": 1008898,
+      "observed_unit_id": "raj_bengal_puri",
+      "observed_total": 1017284,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_purnea",
+      "opening_total": 1882899,
+      "observed_unit_id": "raj_bengal_purnea",
+      "observed_total": 1874794,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_rajshahi",
+      "opening_total": 1459765,
+      "observed_unit_id": "raj_bengal_rajshahi",
+      "observed_total": 1462407,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_ranchi",
+      "opening_total": 1181076,
+      "observed_unit_id": "raj_bengal_ranchi",
+      "observed_total": 1187925,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_rangpur",
+      "opening_total": 2143889,
+      "observed_unit_id": "raj_bengal_rangpur",
+      "observed_total": 2154181,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_saran",
+      "opening_total": 2415947,
+      "observed_unit_id": "raj_bengal_saran",
+      "observed_total": 2409509,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_shahabad",
+      "opening_total": 1974051,
+      "observed_unit_id": "raj_bengal_shahabad",
+      "observed_total": 1962696,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_singhbhum",
+      "opening_total": 605680,
+      "observed_unit_id": "raj_bengal_singhbhum",
+      "observed_total": 613579,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_sonthal_parganas",
+      "opening_total": 1803245,
+      "observed_unit_id": "raj_bengal_sonthal_parganas",
+      "observed_total": 1809737,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_tippera",
+      "opening_total": 2079123,
+      "observed_unit_id": "raj_bengal_tippera",
+      "observed_total": 2117991,
       "observed_date": "1901-03-01"
     },
     {
@@ -4852,6 +5202,13 @@
       "observed_unit_id": "raj_bombay_with_aden_1901_census",
       "observed_total": 18559561,
       "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bombay_states",
+      "opening_total": 7021967,
+      "observed_unit_id": "raj_bombay_states_1901_full_census",
+      "observed_total": 7021967,
+      "observed_date": "1900-01-01"
     },
     {
       "unit_id": "raj_burma_comparable",
@@ -4903,11 +5260,32 @@
       "observed_date": "1901-03-01"
     },
     {
+      "unit_id": "raj_madras_banganapalle",
+      "opening_total": 32639,
+      "observed_unit_id": "raj_madras_banganapalle",
+      "observed_total": 32639,
+      "observed_date": "1900-01-01"
+    },
+    {
       "unit_id": "raj_madras_presidency",
       "opening_total": 37910258,
       "observed_unit_id": "raj_madras_presidency_1901_census",
       "observed_total": 38209436,
       "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_madras_pudukkottai",
+      "opening_total": 379588,
+      "observed_unit_id": "raj_madras_pudukkottai",
+      "observed_total": 379588,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_madras_sandur",
+      "opening_total": 11222,
+      "observed_unit_id": "raj_madras_sandur",
+      "observed_total": 11222,
+      "observed_date": "1900-01-01"
     },
     {
       "unit_id": "raj_mysore_eastern_division",
@@ -5932,7 +6310,7 @@
       ],
       "production_people": 780700648,
       "production_pct_of_regional_research_estimate": 87.29,
-      "people_with_opening_subdivision": 743843568,
+      "people_with_opening_subdivision": 743843542,
       "research_only_units": 26,
       "research_only_people": 86662194
     },
@@ -6248,10 +6626,10 @@
         "opening_unit_id": "cshapes_gw_750",
         "research_region": "Asia",
         "opening_control": 294000000,
-        "in_model_pools": 272782190,
-        "outside_model_pools": 21217810,
-        "modeled_age_and_sex": 272737492,
-        "modeled_sex_age_unknown": 44698
+        "in_model_pools": 280227580,
+        "outside_model_pools": 13772420,
+        "modeled_age_and_sex": 280177550,
+        "modeled_sex_age_unknown": 50030
       },
       {
         "opening_unit_id": "cshapes_gw_780",
@@ -6715,18 +7093,18 @@
       },
       "Asia": {
         "opening_control": 805719965,
-        "in_model_pools": 320264100,
-        "outside_model_pools": 485455865,
-        "modeled_age_and_sex": 320219076,
-        "modeled_sex_age_unknown": 45024
+        "in_model_pools": 327709490,
+        "outside_model_pools": 478010475,
+        "modeled_age_and_sex": 327659134,
+        "modeled_sex_age_unknown": 50356
       }
     },
     "world": {
       "opening_control": 1467636413,
-      "in_model_pools": 829382019,
-      "outside_model_pools": 638254394,
-      "modeled_age_and_sex": 822142948,
-      "modeled_sex_age_unknown": 7239071
+      "in_model_pools": 836827409,
+      "outside_model_pools": 630809004,
+      "modeled_age_and_sex": 829583006,
+      "modeled_sex_age_unknown": 7244403
     }
   },
   "opening_count_basis": {

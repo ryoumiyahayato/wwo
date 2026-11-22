@@ -17,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 26
+OPENING_VERSION = 27
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -212,12 +212,11 @@ def main():
     observations.extend(derived)
     regional_counts["asian_interpolation"]=len(derived)
     selection=groups(observations, version=OPENING_VERSION)
-    bengal=next(u for g in selection for u in g["units"] if u["unit_id"]=="raj_bengal_province")
-    bengal["place_ids"].append("place:kolkata")
-    bengal["place_evidence"]={"place:kolkata": {
-        "locator": "Imperial Gazetteer of India, vol. IX, p. 260, Calcutta (Kalikata)",
-        "url": "https://dsal.uchicago.edu/cgi-bin/reference/gazetteer/query.py?bookid=DS405.1.I34_V09&display_type=page_display&object=266",
-        "scope": "Siting of Calcutta in Bengal; one residence location, no city population or polygon inferred.",
+    calcutta=next(u for g in selection for u in g["units"] if u["unit_id"]=="raj_bengal_calcutta")
+    calcutta["place_evidence"]={"place:kolkata": {
+        "locator": "Census of India 1901, Vol. VI-A, Table II, p. 6, Presidency Division, Calcutta row",
+        "url": "https://archive.org/details/in.ernet.dli.2015.55931",
+        "scope": "Calcutta as its own census account. The game place locates that account without a boundary polygon.",
     }}
     geography,dates=catalogue(observations,selection)
     for r in observations:

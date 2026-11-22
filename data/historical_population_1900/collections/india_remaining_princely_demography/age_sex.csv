@@ -1,0 +1,33 @@
+panel,label,role,age_min,age_max,both,male,female
+india_census_madras_states_ex_cochin_travancore_1901_pudukkottai,Total,total,,,380440,180794,199646
+india_census_madras_states_ex_cochin_travancore_1901_pudukkottai,0–5,band,0,4,50750,24539,26211
+india_census_madras_states_ex_cochin_travancore_1901_pudukkottai,5–10,band,5,9,53363,26261,27102
+india_census_madras_states_ex_cochin_travancore_1901_pudukkottai,10–15,band,10,14,40955,21307,19648
+india_census_madras_states_ex_cochin_travancore_1901_pudukkottai,15–20,band,15,19,27744,14092,13652
+india_census_madras_states_ex_cochin_travancore_1901_pudukkottai,20–40,band,20,39,112190,50071,62119
+india_census_madras_states_ex_cochin_travancore_1901_pudukkottai,40–60,band,40,59,70814,33669,37145
+india_census_madras_states_ex_cochin_travancore_1901_pudukkottai,60 and over,band,60,,24624,10855,13769
+india_census_madras_states_ex_cochin_travancore_1901_banganapalle,Total,total,,,32264,16231,16033
+india_census_madras_states_ex_cochin_travancore_1901_banganapalle,0–5,band,0,4,3283,1557,1726
+india_census_madras_states_ex_cochin_travancore_1901_banganapalle,5–10,band,5,9,4050,1972,2078
+india_census_madras_states_ex_cochin_travancore_1901_banganapalle,10–15,band,10,14,4492,2354,2138
+india_census_madras_states_ex_cochin_travancore_1901_banganapalle,15–20,band,15,19,2009,1112,897
+india_census_madras_states_ex_cochin_travancore_1901_banganapalle,20–40,band,20,39,9770,4796,4974
+india_census_madras_states_ex_cochin_travancore_1901_banganapalle,40–60,band,40,59,6521,3410,3111
+india_census_madras_states_ex_cochin_travancore_1901_banganapalle,60 and over,band,60,,2139,1030,1109
+india_census_madras_states_ex_cochin_travancore_1901_sandur,Total,total,,,11200,5658,5542
+india_census_madras_states_ex_cochin_travancore_1901_sandur,0–5,band,0,4,1276,643,633
+india_census_madras_states_ex_cochin_travancore_1901_sandur,5–10,band,5,9,1664,808,856
+india_census_madras_states_ex_cochin_travancore_1901_sandur,10–15,band,10,14,1543,808,735
+india_census_madras_states_ex_cochin_travancore_1901_sandur,15–20,band,15,19,794,430,364
+india_census_madras_states_ex_cochin_travancore_1901_sandur,20–40,band,20,39,3475,1753,1722
+india_census_madras_states_ex_cochin_travancore_1901_sandur,40–60,band,40,59,1835,956,879
+india_census_madras_states_ex_cochin_travancore_1901_sandur,60 and over,band,60,,613,260,353
+india_census_madras_states_ex_cochin_travancore_1901,Total,total,,,423904,202683,221221
+india_census_madras_states_ex_cochin_travancore_1901,0–5,band,0,4,55309,26739,28570
+india_census_madras_states_ex_cochin_travancore_1901,5–10,band,5,9,59077,29041,30036
+india_census_madras_states_ex_cochin_travancore_1901,10–15,band,10,14,46990,24469,22521
+india_census_madras_states_ex_cochin_travancore_1901,15–20,band,15,19,30547,15634,14913
+india_census_madras_states_ex_cochin_travancore_1901,20–40,band,20,39,125435,56620,68815
+india_census_madras_states_ex_cochin_travancore_1901,40–60,band,40,59,79170,38035,41135
+india_census_madras_states_ex_cochin_travancore_1901,60 and over,band,60,,27376,12145,15231

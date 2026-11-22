@@ -17,6 +17,7 @@
   "7": [
     {"unit_id": "raj_ajmer_merwara", "scope": "Ajmer-Merwara", "sheet_rows": [4], "total": 476912, "counts": [380819, 264, 19922, 0, 164, 72031, 3712, 0, 0], "unknown": 0},
     {"unit_id": "raj_baroda_state", "scope": "Baroda", "sheet_rows": [21], "total": 1952692, "counts": [1546992, 38, 48290, 0, 8409, 165014, 7691, 8, 176250], "unknown": 0},
+    {"unit_id": "raj_bengal_province", "scope": "Bengal, British Territory excluding Bengal States", "sheet_rows": [8], "total": 74744866, "counts": [46740661, 328, 7457, 210628, 388, 25265342, 275125, 1939, 2242770], "unknown": 228},
     {"unit_id": "raj_berar", "scope": "Berar", "sheet_rows": [9], "total": 2754016, "counts": [2388016, 1449, 19639, 0, 530, 212040, 2375, 3, 129964], "unknown": 0},
     {"unit_id": "raj_central_india_agency", "scope": "Central India Agency", "sheet_rows": [24], "total": 8628781, "counts": [6983348, 2004, 112998, 0, 1002, 528833, 8114, 24, 992458], "unknown": 0},
     {"unit_id": "raj_central_provinces", "scope": "Central Provinces", "sheet_rows": [12], "total": 9876646, "counts": [8171925, 477, 47306, 169, 969, 295291, 24809, 127, 1335573], "unknown": 0},

@@ -1386,6 +1386,16 @@
     "collection": "egypt_comparable_provinces"
   },
   {
+    "id": "egypt_1897_markaz_occupation_and_instruction",
+    "title": "Census of Egypt 1897, provincial subtotals transcribed in Demographic Change in Rural Egypt, 1882–1917",
+    "publisher": "Hirofumi Tanada, Institute of Economic Research, Hitotsubashi University",
+    "url": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap2-1.htm",
+    "locator": "Appendix 2-1 (MARKAZ), Gharbiya and Jirja provincial totals for occupation and instruction",
+    "rights": "Published historical numeric facts",
+    "raw_path": "egypt_1897_province_social.csv",
+    "collection": "egypt_comparable_provinces"
+  },
+  {
     "id": "egypt_faiyum_census_1897",
     "title": "Census of Egypt 1897, Faiyum districts, transcribed in Demographic Change in Rural Egypt, 1882–1917",
     "publisher": "Hirofumi Tanada, Institute of Economic Research, Hitotsubashi University",
@@ -1685,6 +1695,26 @@
     "collection": "india_agra_districts_1901"
   },
   {
+    "id": "india_bengal_census_1901_districts",
+    "title": "Census of India, 1901, Vol. VI-A: Bengal, Part II, Imperial Tables",
+    "publisher": "Government of Bengal",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55931",
+    "locator": "Tables I and II, printed pp. 2–7. Province control, two dates of district populations and 1901 district populations by sex.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "bengal_districts.csv",
+    "collection": "india_bengal_districts_1901"
+  },
+  {
+    "id": "india_bengal_census_1901_literacy",
+    "title": "Census of India, 1901, Vol. VI-A: Bengal, Part II, Imperial Tables",
+    "publisher": "Government of Bengal",
+    "url": "https://ignca.gov.in/Asi_data/30991.pdf",
+    "locator": "Table VIII, Education, part B, All Religions, Calcutta and Dacca.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "bengal_literacy_1901.csv",
+    "collection": "india_bengal_districts_1901"
+  },
+  {
     "id": "india_census_1901_comparable_area",
     "title": "Census of India, 1901, Vol. I-A, India, Part II, Tables. Government of India, 1903.",
     "publisher": "Government of India, 1903",
@@ -1851,6 +1881,26 @@
     "independent_url": "https://censusindia.gov.in/nada/index.php/catalog/28352/download/31534/20246_1911_IMP.pdf",
     "extract": "The 1911 reprint, Chapter V, Subsidiary Table II, printed p. 31, and the original 1901 subtotals resolve conflicting digit readings for 1901. The unclear female rate for ages 40–59 is the difference between the female rate control and the other published bands. Unknown ages remain a separate band.",
     "collection": "india_princely_age"
+  },
+  {
+    "id": "india_madras_1941_princely_sex_comparison",
+    "title": "Census of India, 1941, Madras, Vol. II: Tables",
+    "publisher": "Census of India",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/37348/GIPE-020589.pdf?isAllowed=y&sequence=3",
+    "locator": "Table II, printed p. 18, 1891 and 1901 sex totals for Pudukkottai, Banganapalle and Sandur.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "madras_states_sex_controls.csv",
+    "collection": "india_remaining_princely_demography"
+  },
+  {
+    "id": "india_madras_1901_princely_age_and_religion",
+    "title": "Census of India, 1901, Madras, Vol. XV-A, Part II: Tables",
+    "publisher": "Government of India",
+    "url": "https://ignca.gov.in/Asi_data/31014.pdf",
+    "locator": "Table VII, printed pp. 61–63, age by sex and religion for Pudukkottai, Banganapalle and Sandur.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "age_sex.csv",
+    "collection": "india_remaining_princely_demography"
   },
   {
     "id": "india_1901_abstract_religion",
@@ -3027,6 +3077,16 @@
     "catalog_url": "https://www.niph.go.jp/toshokan/koten/Statistics/index_k1.html",
     "interpretation_url": "https://www.stat.go.jp/museum/toukei150/shiryo/shiryo38.html",
     "collection": "tokyo_occupation_1900"
+  },
+  {
+    "id": "uk_general_census_report_1901_occupation_orders",
+    "title": "Census of England and Wales, 1901: General Report with Appendices",
+    "publisher": "General Register Office",
+    "url": "https://iiif.wellcomecollection.org/presentation/v2/b32183161_0001",
+    "locator": "Appendix A, Table 35, pp. 270–281, Scotland and Ireland",
+    "rights": "Published historical numeric facts",
+    "raw_path": "uk_1901_scotland_ireland_occupation_orders.csv",
+    "collection": "uk_constituent_occupation_1901"
   },
   {
     "id": "us_twelfth_census_table_31_occupations",
