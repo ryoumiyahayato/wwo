@@ -6,7 +6,13 @@
     "url": "https://archive.org/details/recensamantulgen00serv",
     "locator": "University of Illinois copy; Table II.A, printed pp. 8–13 (PDF pp. 98–103); Table 12, printed p. XXXIV (PDF p. 54); stable-population county controls, printed p. 4 (PDF p. 94)",
     "rights": "Numeric facts transcribed from a publicly accessible scan; scan redistribution rights not asserted",
-    "raw_paths": ["raw/regional_age_sex_table_ii_a.csv", "raw/national_age_sex_table_12.csv", "raw/county_sex_controls.csv"]
+    "raw_paths": [
+      "raw/regional_age_sex_table_ii_a.csv",
+      "raw/national_age_sex_table_12.csv",
+      "raw/county_sex_controls.csv",
+      "raw/county_age_sex_table_ii_a_published_bands.csv",
+      "raw/county_age_sex_table_ii_a_reconciled_bands.csv"
+    ]
   },
   {
     "id": "ro_huber_1913_census_comparison",

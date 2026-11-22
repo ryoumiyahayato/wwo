@@ -24,6 +24,9 @@ JAVA_MADOERA = "java_madoera_colonial_population"
 MADRAS_STATES_REMAINDER = "raj_madras_states_ex_cochin_travancore"
 MADRAS_STATES_AGE_SOURCE = "india_madras_1901_princely_age_and_religion"
 OTTOMAN_REGISTRATION_SOURCE = "ottoman_1897_official_registration"
+ROMANIA_ROOT = "kingdom_of_romania"
+ROMANIA_CENSUS_SOURCE = "ro_colescu_1899_census_report"
+ROMANIA_COUNTY_CONTROLS = "collections/romania/raw/county_sex_controls.csv"
 
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
@@ -1444,6 +1447,45 @@ def add_argentine_opening_geography(group):
     )]
 
 
+def romanian_county_controls():
+    count_columns = ("population", "male", "female", "male_age_unknown", "female_age_unknown")
+    with (HERE / ROMANIA_COUNTY_CONTROLS).open(encoding="utf8", newline="") as source:
+        return {
+            row["unit_id"]: row | {key: int(row[key]) for key in count_columns}
+            for row in csv.DictReader(source)
+        }
+
+
+def add_romanian_counties(group):
+    by_region = defaultdict(int)
+    counties = []
+    for unit_id, row in romanian_county_controls().items():
+        by_region[row["parent_id"]] += row["population"]
+        counties.append(dict(
+            unit_id=unit_id, name=row["county_name"], population_value=row["population"], date=DATE,
+            statistical_parent=row["parent_id"], source_id=ROMANIA_CENSUS_SOURCE,
+            source_dates=[row["date"]],
+            locator="Table I.A, printed p. 4, and Table II.A, printed p. 13",
+            method="Carry the definitive December county census counts to January 1.",
+            scope="Stable residents of the historical county, including its urban and rural communes.",
+            uncertainty_kind=group["uncertainty_kind"],
+        ))
+    regions = group["units"]
+    if by_region != {region["unit_id"]: region["population_value"] for region in regions}:
+        raise ValueError("Romanian county and regional population controls differ")
+    group["statistical_aggregates"] = [
+        region | dict(
+            source_id=ROMANIA_CENSUS_SOURCE, date=DATE, locator="Table II.A, printed p. 13",
+            method="Sum the disjoint historical county opening accounts.",
+            uncertainty_kind=group["uncertainty_kind"],
+        )
+        for region in regions
+    ]
+    group["units"] = counties
+    group["partition_source"] = ROMANIA_COUNTY_CONTROLS
+    group["scope"] = "Romanian Old Kingdom, before the 1913 and 1918 territorial gains. Its 32 counties close to four census regions."
+
+
 def ottoman_registered_opening(observations):
     root = "ottoman_empire"
     source = OTTOMAN_REGISTRATION_SOURCE
@@ -1648,6 +1690,8 @@ def groups(observations, version=1):
         if ottoman["unit_id"] in result:
             raise ValueError("Duplicate Ottoman opening control")
         result[ottoman["unit_id"]] = ottoman
+    if version >= 36:
+        add_romanian_counties(result[ROMANIA_ROOT])
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

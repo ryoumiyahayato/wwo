@@ -1,0 +1,289 @@
+unit_id,parent_id,county_name,date,age_min,age_max,reported_age_label,male,female,population,source_id,source_table,printed_page,pdf_page,basis
+ro_1899_county_arges,ro_1899_muntenia,Argeș,1899-12,0,6,0-7,21776,21596,43372,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_arges,ro_1899_muntenia,Argeș,1899-12,7,14,7-15,20874,20638,41512,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_arges,ro_1899_muntenia,Argeș,1899-12,15,19,15-20,9857,10592,20449,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_arges,ro_1899_muntenia,Argeș,1899-12,20,39,20-40,29376,29391,58767,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_arges,ro_1899_muntenia,Argeș,1899-12,40,69,40-70,21322,19593,40915,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_arges,ro_1899_muntenia,Argeș,1899-12,70,79,70-80,1304,810,2114,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_arges,ro_1899_muntenia,Argeș,1899-12,80,89,80-90,229,135,364,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_arges,ro_1899_muntenia,Argeș,1899-12,90,,Peste 90,51,39,90,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_arges,ro_1899_muntenia,Argeș,1899-12,,,Etate necunoscuta,10,12,22,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_bacau,ro_1899_moldova,Bacău,1899-12,0,6,0-7,20497,20534,41031,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_bacau,ro_1899_moldova,Bacău,1899-12,7,14,7-15,18244,17856,36100,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_bacau,ro_1899_moldova,Bacău,1899-12,15,19,15-20,8904,10064,18968,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_bacau,ro_1899_moldova,Bacău,1899-12,20,39,20-40,27559,27716,55275,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_bacau,ro_1899_moldova,Bacău,1899-12,40,69,40-70,20856,19114,39970,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_bacau,ro_1899_moldova,Bacău,1899-12,70,79,70-80,1830,1086,2916,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_bacau,ro_1899_moldova,Bacău,1899-12,80,89,80-90,447,237,684,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_bacau,ro_1899_moldova,Bacău,1899-12,90,,Peste 90,111,70,181,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_bacau,ro_1899_moldova,Bacău,1899-12,,,Etate necunoscuta,34,35,69,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_botosani,ro_1899_moldova,Botoșani,1899-12,0,6,0-7,18756,18352,37108,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_botosani,ro_1899_moldova,Botoșani,1899-12,7,14,7-15,16025,16066,32091,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_botosani,ro_1899_moldova,Botoșani,1899-12,15,19,15-20,8567,9869,18436,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_botosani,ro_1899_moldova,Botoșani,1899-12,20,39,20-40,22252,23570,45822,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_botosani,ro_1899_moldova,Botoșani,1899-12,40,69,40-70,18154,16585,34739,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_botosani,ro_1899_moldova,Botoșani,1899-12,70,79,70-80,1558,997,2555,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_botosani,ro_1899_moldova,Botoșani,1899-12,80,89,80-90,338,183,521,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_botosani,ro_1899_moldova,Botoșani,1899-12,90,,Peste 90,85,67,152,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_botosani,ro_1899_moldova,Botoșani,1899-12,,,Etate necunoscuta,9,4,13,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_braila,ro_1899_muntenia,Brăila,1899-12,0,6,0-7,15263,15511,30774,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_braila,ro_1899_muntenia,Brăila,1899-12,7,14,7-15,13483,13132,26615,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_braila,ro_1899_muntenia,Brăila,1899-12,15,19,15-20,7187,8317,15504,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_braila,ro_1899_muntenia,Brăila,1899-12,20,39,20-40,20571,20225,40796,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_braila,ro_1899_muntenia,Brăila,1899-12,40,69,40-70,15759,13158,28917,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_braila,ro_1899_muntenia,Brăila,1899-12,70,79,70-80,1274,887,2161,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_braila,ro_1899_muntenia,Brăila,1899-12,80,89,80-90,261,190,451,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_braila,ro_1899_muntenia,Brăila,1899-12,90,,Peste 90,58,56,114,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_braila,ro_1899_muntenia,Brăila,1899-12,,,Etate necunoscuta,8,7,15,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_buzau,ro_1899_muntenia,Buzău,1899-12,0,6,0-7,24067,23835,47902,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_buzau,ro_1899_muntenia,Buzău,1899-12,7,14,7-15,22032,21916,43948,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_buzau,ro_1899_muntenia,Buzău,1899-12,15,19,15-20,9750,11944,21694,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_buzau,ro_1899_muntenia,Buzău,1899-12,20,39,20-40,30231,29139,59370,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_buzau,ro_1899_muntenia,Buzău,1899-12,40,69,40-70,22956,20905,43861,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_buzau,ro_1899_muntenia,Buzău,1899-12,70,79,70-80,1624,1061,2685,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_buzau,ro_1899_muntenia,Buzău,1899-12,80,89,80-90,334,191,525,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_buzau,ro_1899_muntenia,Buzău,1899-12,90,,Peste 90,86,57,143,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_buzau,ro_1899_muntenia,Buzău,1899-12,,,Etate necunoscuta,81,54,135,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_constanta,ro_1899_northern_dobruja,Constanța,1899-12,0,6,0-7,16652,16720,33372,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_constanta,ro_1899_northern_dobruja,Constanța,1899-12,7,14,7-15,14696,13577,28273,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_constanta,ro_1899_northern_dobruja,Constanța,1899-12,15,19,15-20,6973,6589,13562,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_constanta,ro_1899_northern_dobruja,Constanța,1899-12,20,39,20-40,21349,17523,38872,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_constanta,ro_1899_northern_dobruja,Constanța,1899-12,40,69,40-70,14884,10098,24982,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_constanta,ro_1899_northern_dobruja,Constanța,1899-12,70,79,70-80,978,589,1567,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_constanta,ro_1899_northern_dobruja,Constanța,1899-12,80,89,80-90,183,147,330,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_constanta,ro_1899_northern_dobruja,Constanța,1899-12,90,,Peste 90,49,32,81,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_constanta,ro_1899_northern_dobruja,Constanța,1899-12,,,Etate necunoscuta,15,2,17,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_covurlui,ro_1899_moldova,Covurlui,1899-12,0,6,0-7,14293,14245,28538,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_covurlui,ro_1899_moldova,Covurlui,1899-12,7,14,7-15,12862,12519,25381,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_covurlui,ro_1899_moldova,Covurlui,1899-12,15,19,15-20,7236,7867,15103,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_covurlui,ro_1899_moldova,Covurlui,1899-12,20,39,20-40,22507,20263,42770,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_covurlui,ro_1899_moldova,Covurlui,1899-12,40,69,40-70,15752,13712,29464,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_covurlui,ro_1899_moldova,Covurlui,1899-12,70,79,70-80,1105,872,1977,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_covurlui,ro_1899_moldova,Covurlui,1899-12,80,89,80-90,238,192,430,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_covurlui,ro_1899_moldova,Covurlui,1899-12,90,,Peste 90,48,59,107,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_covurlui,ro_1899_moldova,Covurlui,1899-12,,,Etate necunoscuta,9,5,14,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_dambovita,ro_1899_muntenia,Dâmbovița,1899-12,0,6,0-7,22563,22457,45020,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_dambovita,ro_1899_muntenia,Dâmbovița,1899-12,7,14,7-15,21494,21457,42951,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_dambovita,ro_1899_muntenia,Dâmbovița,1899-12,15,19,15-20,10781,11364,22145,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_dambovita,ro_1899_muntenia,Dâmbovița,1899-12,20,39,20-40,28432,29029,57461,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_dambovita,ro_1899_muntenia,Dâmbovița,1899-12,40,69,40-70,21207,19860,41067,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_dambovita,ro_1899_muntenia,Dâmbovița,1899-12,70,79,70-80,1398,980,2378,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_dambovita,ro_1899_muntenia,Dâmbovița,1899-12,80,89,80-90,286,160,446,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_dambovita,ro_1899_muntenia,Dâmbovița,1899-12,90,,Peste 90,82,57,139,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_dambovita,ro_1899_muntenia,Dâmbovița,1899-12,,,Etate necunoscuta,30,30,60,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_doljiu,ro_1899_oltenia,Doljiu,1899-12,0,6,0-7,39452,39376,78828,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_doljiu,ro_1899_oltenia,Doljiu,1899-12,7,14,7-15,34558,33102,67660,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_doljiu,ro_1899_oltenia,Doljiu,1899-12,15,19,15-20,18514,18017,36531,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_doljiu,ro_1899_oltenia,Doljiu,1899-12,20,39,20-40,55986,51465,107451,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_doljiu,ro_1899_oltenia,Doljiu,1899-12,40,69,40-70,37362,33686,71048,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_doljiu,ro_1899_oltenia,Doljiu,1899-12,70,79,70-80,1889,1423,3312,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_doljiu,ro_1899_oltenia,Doljiu,1899-12,80,89,80-90,302,256,558,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_doljiu,ro_1899_oltenia,Doljiu,1899-12,90,,Peste 90,55,52,107,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_doljiu,ro_1899_oltenia,Doljiu,1899-12,,,Etate necunoscuta,43,41,84,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_dorohoi,ro_1899_moldova,Dorohoi,1899-12,0,6,0-7,18089,17622,35711,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_dorohoi,ro_1899_moldova,Dorohoi,1899-12,7,14,7-15,15816,15543,31359,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_dorohoi,ro_1899_moldova,Dorohoi,1899-12,15,19,15-20,7566,8812,16378,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_dorohoi,ro_1899_moldova,Dorohoi,1899-12,20,39,20-40,20002,21164,41166,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_dorohoi,ro_1899_moldova,Dorohoi,1899-12,40,69,40-70,16537,14857,31394,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_dorohoi,ro_1899_moldova,Dorohoi,1899-12,70,79,70-80,1466,966,2432,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_dorohoi,ro_1899_moldova,Dorohoi,1899-12,80,89,80-90,400,196,596,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_dorohoi,ro_1899_moldova,Dorohoi,1899-12,90,,Peste 90,124,69,193,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_dorohoi,ro_1899_moldova,Dorohoi,1899-12,,,Etate necunoscuta,4,7,11,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_falciu,ro_1899_moldova,Fălciu,1899-12,0,6,0-7,9857,10070,19927,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_falciu,ro_1899_moldova,Fălciu,1899-12,7,14,7-15,8691,8580,17271,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_falciu,ro_1899_moldova,Fălciu,1899-12,15,19,15-20,4153,4588,8741,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_falciu,ro_1899_moldova,Fălciu,1899-12,20,39,20-40,12889,13172,26061,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_falciu,ro_1899_moldova,Fălciu,1899-12,40,69,40-70,10548,9688,20236,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_falciu,ro_1899_moldova,Fălciu,1899-12,70,79,70-80,763,478,1241,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_falciu,ro_1899_moldova,Fălciu,1899-12,80,89,80-90,180,102,282,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_falciu,ro_1899_moldova,Fălciu,1899-12,90,,Peste 90,32,34,66,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_falciu,ro_1899_moldova,Fălciu,1899-12,,,Etate necunoscuta,1,5,6,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_gorjiu,ro_1899_oltenia,Gorjiu,1899-12,0,6,0-7,17734,17508,35242,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_gorjiu,ro_1899_oltenia,Gorjiu,1899-12,7,14,7-15,15973,15751,31724,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_gorjiu,ro_1899_oltenia,Gorjiu,1899-12,15,19,15-20,8391,9017,17408,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_gorjiu,ro_1899_oltenia,Gorjiu,1899-12,20,39,20-40,25060,26390,51450,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_gorjiu,ro_1899_oltenia,Gorjiu,1899-12,40,69,40-70,16860,16607,33467,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_gorjiu,ro_1899_oltenia,Gorjiu,1899-12,70,79,70-80,1051,614,1665,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_gorjiu,ro_1899_oltenia,Gorjiu,1899-12,80,89,80-90,162,89,251,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_gorjiu,ro_1899_oltenia,Gorjiu,1899-12,90,,Peste 90,30,26,56,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_gorjiu,ro_1899_oltenia,Gorjiu,1899-12,,,Etate necunoscuta,15,22,37,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ialomita,ro_1899_muntenia,Ialomița,1899-12,0,6,0-7,21097,21417,42514,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_ialomita,ro_1899_muntenia,Ialomița,1899-12,7,14,7-15,18801,18499,37300,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_ialomita,ro_1899_muntenia,Ialomița,1899-12,15,19,15-20,9469,10316,19785,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_ialomita,ro_1899_muntenia,Ialomița,1899-12,20,39,20-40,24477,22661,47138,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_ialomita,ro_1899_muntenia,Ialomița,1899-12,40,69,40-70,20410,17092,37502,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_ialomita,ro_1899_muntenia,Ialomița,1899-12,70,79,70-80,1636,1148,2784,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ialomita,ro_1899_muntenia,Ialomița,1899-12,80,89,80-90,413,260,673,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ialomita,ro_1899_muntenia,Ialomița,1899-12,90,,Peste 90,105,71,176,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ialomita,ro_1899_muntenia,Ialomița,1899-12,,,Etate necunoscuta,12,5,17,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_iasi,ro_1899_moldova,Iași,1899-12,0,6,0-7,18983,18992,37975,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_iasi,ro_1899_moldova,Iași,1899-12,7,14,7-15,16341,16508,32849,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_iasi,ro_1899_moldova,Iași,1899-12,15,19,15-20,9203,10604,19807,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_iasi,ro_1899_moldova,Iași,1899-12,20,39,20-40,28370,29844,58214,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_iasi,ro_1899_moldova,Iași,1899-12,40,69,40-70,21211,19206,40417,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_iasi,ro_1899_moldova,Iași,1899-12,70,79,70-80,1598,965,2563,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_iasi,ro_1899_moldova,Iași,1899-12,80,89,80-90,310,181,491,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_iasi,ro_1899_moldova,Iași,1899-12,90,,Peste 90,65,78,143,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_iasi,ro_1899_moldova,Iași,1899-12,,,Etate necunoscuta,44,28,72,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ilfov,ro_1899_muntenia,Ilfov,1899-12,0,6,0-7,50025,50266,100291,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_ilfov,ro_1899_muntenia,Ilfov,1899-12,7,14,7-15,47729,46391,94120,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_ilfov,ro_1899_muntenia,Ilfov,1899-12,15,19,15-20,28989,30905,59894,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_ilfov,ro_1899_muntenia,Ilfov,1899-12,20,39,20-40,91407,81496,172903,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_ilfov,ro_1899_muntenia,Ilfov,1899-12,40,69,40-70,55279,51011,106290,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_ilfov,ro_1899_muntenia,Ilfov,1899-12,70,79,70-80,3195,2640,5835,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ilfov,ro_1899_muntenia,Ilfov,1899-12,80,89,80-90,672,558,1230,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ilfov,ro_1899_muntenia,Ilfov,1899-12,90,,Peste 90,157,153,310,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ilfov,ro_1899_muntenia,Ilfov,1899-12,,,Etate necunoscuta,138,169,307,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_mehedinti,ro_1899_oltenia,Mehedinți,1899-12,0,6,0-7,26858,26350,53208,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_mehedinti,ro_1899_oltenia,Mehedinți,1899-12,7,14,7-15,24658,23109,47767,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_mehedinti,ro_1899_oltenia,Mehedinți,1899-12,15,19,15-20,11930,12389,24319,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_mehedinti,ro_1899_oltenia,Mehedinți,1899-12,20,39,20-40,36912,36903,73815,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_mehedinti,ro_1899_oltenia,Mehedinți,1899-12,40,69,40-70,24757,22670,47427,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_mehedinti,ro_1899_oltenia,Mehedinți,1899-12,70,79,70-80,1520,1025,2545,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_mehedinti,ro_1899_oltenia,Mehedinți,1899-12,80,89,80-90,296,149,445,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_mehedinti,ro_1899_oltenia,Mehedinți,1899-12,90,,Peste 90,63,25,88,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_mehedinti,ro_1899_oltenia,Mehedinți,1899-12,,,Etate necunoscuta,32,42,74,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_muscel,ro_1899_muntenia,Muscel,1899-12,0,6,0-7,12282,12330,24612,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_muscel,ro_1899_muntenia,Muscel,1899-12,7,14,7-15,10705,10954,21659,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_muscel,ro_1899_muntenia,Muscel,1899-12,15,19,15-20,5397,5745,11142,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_muscel,ro_1899_muntenia,Muscel,1899-12,20,39,20-40,15667,16243,31910,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_muscel,ro_1899_muntenia,Muscel,1899-12,40,69,40-70,12253,11762,24015,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_muscel,ro_1899_muntenia,Muscel,1899-12,70,79,70-80,908,507,1415,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_muscel,ro_1899_muntenia,Muscel,1899-12,80,89,80-90,202,114,316,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_muscel,ro_1899_muntenia,Muscel,1899-12,90,,Peste 90,40,36,76,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_muscel,ro_1899_muntenia,Muscel,1899-12,,,Etate necunoscuta,12,23,35,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_neamtu,ro_1899_moldova,Neamțu,1899-12,0,6,0-7,15224,15445,30669,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_neamtu,ro_1899_moldova,Neamțu,1899-12,7,14,7-15,13197,13381,26578,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_neamtu,ro_1899_moldova,Neamțu,1899-12,15,19,15-20,6856,7888,14744,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_neamtu,ro_1899_moldova,Neamțu,1899-12,20,39,20-40,20504,21434,41938,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_neamtu,ro_1899_moldova,Neamțu,1899-12,40,69,40-70,16719,15880,32599,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_neamtu,ro_1899_moldova,Neamțu,1899-12,70,79,70-80,1539,954,2493,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_neamtu,ro_1899_moldova,Neamțu,1899-12,80,89,80-90,335,225,560,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_neamtu,ro_1899_moldova,Neamțu,1899-12,90,,Peste 90,60,47,107,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_neamtu,ro_1899_moldova,Neamțu,1899-12,,,Etate necunoscuta,11,12,23,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_olt,ro_1899_muntenia,Olt,1899-12,0,6,0-7,15616,15471,31087,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_olt,ro_1899_muntenia,Olt,1899-12,7,14,7-15,14679,14152,28831,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_olt,ro_1899_muntenia,Olt,1899-12,15,19,15-20,7242,7714,14956,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_olt,ro_1899_muntenia,Olt,1899-12,20,39,20-40,21022,19805,40827,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_olt,ro_1899_muntenia,Olt,1899-12,40,69,40-70,13962,12666,26628,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_olt,ro_1899_muntenia,Olt,1899-12,70,79,70-80,749,511,1260,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_olt,ro_1899_muntenia,Olt,1899-12,80,89,80-90,113,78,191,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_olt,ro_1899_muntenia,Olt,1899-12,90,,Peste 90,20,15,35,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_olt,ro_1899_muntenia,Olt,1899-12,,,Etate necunoscuta,9,19,28,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_prahova,ro_1899_muntenia,Prahova,1899-12,0,6,0-7,32419,32863,65282,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_prahova,ro_1899_muntenia,Prahova,1899-12,7,14,7-15,30663,30520,61183,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_prahova,ro_1899_muntenia,Prahova,1899-12,15,19,15-20,15014,16492,31506,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_prahova,ro_1899_muntenia,Prahova,1899-12,20,39,20-40,42605,41646,84251,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_prahova,ro_1899_muntenia,Prahova,1899-12,40,69,40-70,31414,29175,60589,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_prahova,ro_1899_muntenia,Prahova,1899-12,70,79,70-80,2103,1438,3541,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_prahova,ro_1899_muntenia,Prahova,1899-12,80,89,80-90,416,254,670,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_prahova,ro_1899_muntenia,Prahova,1899-12,90,,Peste 90,105,68,173,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_prahova,ro_1899_muntenia,Prahova,1899-12,,,Etate necunoscuta,55,52,107,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_putna,ro_1899_moldova,Putna,1899-12,0,6,0-7,15151,15218,30369,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_putna,ro_1899_moldova,Putna,1899-12,7,14,7-15,13487,13355,26842,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_putna,ro_1899_moldova,Putna,1899-12,15,19,15-20,7599,8000,15599,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_putna,ro_1899_moldova,Putna,1899-12,20,39,20-40,22818,20959,43777,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_putna,ro_1899_moldova,Putna,1899-12,40,69,40-70,16821,15180,32001,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_putna,ro_1899_moldova,Putna,1899-12,70,79,70-80,1184,837,2021,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_putna,ro_1899_moldova,Putna,1899-12,80,89,80-90,292,179,471,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_putna,ro_1899_moldova,Putna,1899-12,90,,Peste 90,86,63,149,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_putna,ro_1899_moldova,Putna,1899-12,,,Etate necunoscuta,9,11,20,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ramnicu_sarat,ro_1899_muntenia,R.-Sărat,1899-12,0,6,0-7,15267,15274,30541,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_ramnicu_sarat,ro_1899_muntenia,R.-Sărat,1899-12,7,14,7-15,13376,13392,26768,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_ramnicu_sarat,ro_1899_muntenia,R.-Sărat,1899-12,15,19,15-20,6200,7214,13414,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_ramnicu_sarat,ro_1899_muntenia,R.-Sărat,1899-12,20,39,20-40,18520,18126,36646,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_ramnicu_sarat,ro_1899_muntenia,R.-Sărat,1899-12,40,69,40-70,14152,12749,26901,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_ramnicu_sarat,ro_1899_muntenia,R.-Sărat,1899-12,70,79,70-80,1103,858,1961,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ramnicu_sarat,ro_1899_muntenia,R.-Sărat,1899-12,80,89,80-90,269,185,454,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ramnicu_sarat,ro_1899_muntenia,R.-Sărat,1899-12,90,,Peste 90,72,66,138,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_ramnicu_sarat,ro_1899_muntenia,R.-Sărat,1899-12,,,Etate necunoscuta,14,9,23,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_roman,ro_1899_moldova,Roman,1899-12,0,6,0-7,11150,11270,22420,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_roman,ro_1899_moldova,Roman,1899-12,7,14,7-15,10124,9976,20100,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_roman,ro_1899_moldova,Roman,1899-12,15,19,15-20,5421,6191,11612,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_roman,ro_1899_moldova,Roman,1899-12,20,39,20-40,16353,15592,31945,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_roman,ro_1899_moldova,Roman,1899-12,40,69,40-70,12183,11226,23409,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_roman,ro_1899_moldova,Roman,1899-12,70,79,70-80,994,631,1625,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_roman,ro_1899_moldova,Roman,1899-12,80,89,80-90,202,133,335,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_roman,ro_1899_moldova,Roman,1899-12,90,,Peste 90,67,45,112,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_roman,ro_1899_moldova,Roman,1899-12,,,Etate necunoscuta,12,18,30,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_romanati,ro_1899_oltenia,Romanați,1899-12,0,6,0-7,23401,23231,46632,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_romanati,ro_1899_oltenia,Romanați,1899-12,7,14,7-15,19807,19320,39127,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_romanati,ro_1899_oltenia,Romanați,1899-12,15,19,15-20,9852,10315,20167,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_romanati,ro_1899_oltenia,Romanați,1899-12,20,39,20-40,28564,27662,56226,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_romanati,ro_1899_oltenia,Romanați,1899-12,40,69,40-70,20611,18797,39408,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_romanati,ro_1899_oltenia,Romanați,1899-12,70,79,70-80,1069,771,1840,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_romanati,ro_1899_oltenia,Romanați,1899-12,80,89,80-90,186,105,291,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_romanati,ro_1899_oltenia,Romanați,1899-12,90,,Peste 90,31,25,56,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_romanati,ro_1899_oltenia,Romanați,1899-12,,,Etate necunoscuta,15,11,26,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_suceava,ro_1899_moldova,Suceava,1899-12,0,6,0-7,14144,14113,28257,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_suceava,ro_1899_moldova,Suceava,1899-12,7,14,7-15,12064,11854,23918,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_suceava,ro_1899_moldova,Suceava,1899-12,15,19,15-20,6100,6997,13097,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_suceava,ro_1899_moldova,Suceava,1899-12,20,39,20-40,17508,18064,35572,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_suceava,ro_1899_moldova,Suceava,1899-12,40,69,40-70,14259,13386,27645,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_suceava,ro_1899_moldova,Suceava,1899-12,70,79,70-80,1431,948,2379,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_suceava,ro_1899_moldova,Suceava,1899-12,80,89,80-90,358,195,553,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_suceava,ro_1899_moldova,Suceava,1899-12,90,,Peste 90,89,66,155,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_suceava,ro_1899_moldova,Suceava,1899-12,,,Etate necunoscuta,10,10,20,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tecuci,ro_1899_moldova,Tecuci,1899-12,0,6,0-7,12801,12626,25427,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_tecuci,ro_1899_moldova,Tecuci,1899-12,7,14,7-15,11102,10692,21794,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_tecuci,ro_1899_moldova,Tecuci,1899-12,15,19,15-20,6342,6593,12935,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_tecuci,ro_1899_moldova,Tecuci,1899-12,20,39,20-40,18299,16375,34674,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_tecuci,ro_1899_moldova,Tecuci,1899-12,40,69,40-70,12609,11326,23935,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_tecuci,ro_1899_moldova,Tecuci,1899-12,70,79,70-80,1114,748,1862,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tecuci,ro_1899_moldova,Tecuci,1899-12,80,89,80-90,260,151,411,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tecuci,ro_1899_moldova,Tecuci,1899-12,90,,Peste 90,68,51,119,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tecuci,ro_1899_moldova,Tecuci,1899-12,,,Etate necunoscuta,10,12,22,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_teleorman,ro_1899_muntenia,Teleorman,1899-12,0,6,0-7,27258,27426,54684,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_teleorman,ro_1899_muntenia,Teleorman,1899-12,7,14,7-15,24164,22825,46989,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_teleorman,ro_1899_muntenia,Teleorman,1899-12,15,19,15-20,11207,11994,23201,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_teleorman,ro_1899_muntenia,Teleorman,1899-12,20,39,20-40,33593,31948,65541,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_teleorman,ro_1899_muntenia,Teleorman,1899-12,40,69,40-70,24055,21359,45414,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_teleorman,ro_1899_muntenia,Teleorman,1899-12,70,79,70-80,1323,960,2283,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_teleorman,ro_1899_muntenia,Teleorman,1899-12,80,89,80-90,226,144,370,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_teleorman,ro_1899_muntenia,Teleorman,1899-12,90,,Peste 90,52,43,95,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_teleorman,ro_1899_muntenia,Teleorman,1899-12,,,Etate necunoscuta,26,25,51,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tulcea,ro_1899_northern_dobruja,Tulcea,1899-12,0,6,0-7,15250,14931,30181,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_tulcea,ro_1899_northern_dobruja,Tulcea,1899-12,7,14,7-15,12954,12632,25586,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_tulcea,ro_1899_northern_dobruja,Tulcea,1899-12,15,19,15-20,6500,7486,13986,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_tulcea,ro_1899_northern_dobruja,Tulcea,1899-12,20,39,20-40,16346,15422,31768,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_tulcea,ro_1899_northern_dobruja,Tulcea,1899-12,40,69,40-70,12992,10152,23144,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_tulcea,ro_1899_northern_dobruja,Tulcea,1899-12,70,79,70-80,966,581,1547,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tulcea,ro_1899_northern_dobruja,Tulcea,1899-12,80,89,80-90,252,141,393,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tulcea,ro_1899_northern_dobruja,Tulcea,1899-12,90,,Peste 90,78,45,123,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tulcea,ro_1899_northern_dobruja,Tulcea,1899-12,,,Etate necunoscuta,17,7,24,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tutova,ro_1899_moldova,Tutova,1899-12,0,6,0-7,11602,11511,23113,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_tutova,ro_1899_moldova,Tutova,1899-12,7,14,7-15,10731,10251,20982,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_tutova,ro_1899_moldova,Tutova,1899-12,15,19,15-20,5610,6058,11668,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_tutova,ro_1899_moldova,Tutova,1899-12,20,39,20-40,16693,16232,32925,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_tutova,ro_1899_moldova,Tutova,1899-12,40,69,40-70,13391,12028,25419,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_tutova,ro_1899_moldova,Tutova,1899-12,70,79,70-80,1090,692,1782,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tutova,ro_1899_moldova,Tutova,1899-12,80,89,80-90,210,142,352,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tutova,ro_1899_moldova,Tutova,1899-12,90,,Peste 90,48,35,83,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_tutova,ro_1899_moldova,Tutova,1899-12,,,Etate necunoscuta,25,28,53,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_vaslui,ro_1899_moldova,Vaslui,1899-12,0,6,0-7,11362,11548,22910,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_vaslui,ro_1899_moldova,Vaslui,1899-12,7,14,7-15,10235,10065,20300,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_vaslui,ro_1899_moldova,Vaslui,1899-12,15,19,15-20,5269,5882,11151,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_vaslui,ro_1899_moldova,Vaslui,1899-12,20,39,20-40,15454,15765,31219,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_vaslui,ro_1899_moldova,Vaslui,1899-12,40,69,40-70,12168,10613,22781,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_vaslui,ro_1899_moldova,Vaslui,1899-12,70,79,70-80,893,508,1401,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_vaslui,ro_1899_moldova,Vaslui,1899-12,80,89,80-90,174,107,281,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_vaslui,ro_1899_moldova,Vaslui,1899-12,90,,Peste 90,49,47,96,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_vaslui,ro_1899_moldova,Vaslui,1899-12,,,Etate necunoscuta,19,26,45,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_valcea,ro_1899_oltenia,Vâlcea,1899-12,0,6,0-7,19988,19870,39858,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_valcea,ro_1899_oltenia,Vâlcea,1899-12,7,14,7-15,18059,17457,35516,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_valcea,ro_1899_oltenia,Vâlcea,1899-12,15,19,15-20,9406,9813,19219,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_valcea,ro_1899_oltenia,Vâlcea,1899-12,20,39,20-40,28661,29044,57705,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_valcea,ro_1899_oltenia,Vâlcea,1899-12,40,69,40-70,18879,17614,36493,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_valcea,ro_1899_oltenia,Vâlcea,1899-12,70,79,70-80,1106,628,1734,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_valcea,ro_1899_oltenia,Vâlcea,1899-12,80,89,80-90,188,94,282,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_valcea,ro_1899_oltenia,Vâlcea,1899-12,90,,Peste 90,24,33,57,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_valcea,ro_1899_oltenia,Vâlcea,1899-12,,,Etate necunoscuta,22,17,39,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_vlasca,ro_1899_muntenia,Vlașca,1899-12,0,6,0-7,22682,22865,45547,ro_colescu_1899_census_report,II.A,8,98,printed
+ro_1899_county_vlasca,ro_1899_muntenia,Vlașca,1899-12,7,14,7-15,20840,19844,40684,ro_colescu_1899_census_report,II.A,9,99,printed
+ro_1899_county_vlasca,ro_1899_muntenia,Vlașca,1899-12,15,19,15-20,10181,10700,20881,ro_colescu_1899_census_report,II.A,10,100,printed
+ro_1899_county_vlasca,ro_1899_muntenia,Vlașca,1899-12,20,39,20-40,28396,26538,54934,ro_colescu_1899_census_report,II.A,11,101,printed
+ro_1899_county_vlasca,ro_1899_muntenia,Vlașca,1899-12,40,69,40-70,20322,18037,38359,ro_colescu_1899_census_report,II.A,12,102,printed
+ro_1899_county_vlasca,ro_1899_muntenia,Vlașca,1899-12,70,79,70-80,1094,825,1919,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_vlasca,ro_1899_muntenia,Vlașca,1899-12,80,89,80-90,196,114,310,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_vlasca,ro_1899_muntenia,Vlașca,1899-12,90,,Peste 90,48,31,79,ro_colescu_1899_census_report,II.A,13,103,printed
+ro_1899_county_vlasca,ro_1899_muntenia,Vlașca,1899-12,,,Etate necunoscuta,20,26,46,ro_colescu_1899_census_report,II.A,13,103,printed

@@ -9,8 +9,9 @@ from pathlib import Path
 from opening import (
     AGRA_DISTRICT_SOURCE, DATE, EGYPT_COMPARABLE_PROVINCES, EGYPT_FAIYUM_SOURCES, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE,
     BENGAL_DISTRICT_SOURCE, MADRAS_STATES_REMAINDER, OTTOMAN_REGISTRATION_SOURCE, SPANISH_CIVIL_STATUS_SCOPE,
-    ARGENTINA_CENSUS_SCOPE, ARGENTINA_LOCAL_AGE_UNITS, JAVA_MADOERA, apportion, argentina_unenumerated_residents,
-    egypt_age_sex_controls, java_madoera_opening_registration, opening_fraction,
+    ARGENTINA_CENSUS_SCOPE, ARGENTINA_LOCAL_AGE_UNITS, JAVA_MADOERA, ROMANIA_CENSUS_SOURCE, ROMANIA_ROOT,
+    apportion, argentina_unenumerated_residents, egypt_age_sex_controls, java_madoera_opening_registration,
+    opening_fraction, romanian_county_controls,
 )
 
 HERE=Path(__file__).resolve().parent/"collections"
@@ -373,19 +374,28 @@ def romanian_age_panels():
             ))
         return by_unit
 
-    detail = bands("regional_age_sex_table_ii_a.csv")
+    regional_detail = bands("regional_age_sex_table_ii_a.csv")
+    county_detail = bands("county_age_sex_table_ii_a_reconciled_bands.csv")
     national = bands("national_age_sex_table_12.csv")[country]
+    counties = romanian_county_controls()
     controls = defaultdict(lambda: dict.fromkeys(AGE_COUNTS, 0))
-    for row in read_csv(raw / "county_sex_controls.csv"):
-        for key, column in (("both", "population"), ("male", "male"), ("female", "female")):
-            controls[row["parent_id"]][key] += int(row[column])
-            controls[country][key] += int(row[column])
-    if detail.keys() != scopes.keys() or controls.keys() != scopes.keys():
+    for unit_id, row in counties.items():
+        control = dict(both=row["population"], **{sex: row[sex] for sex in SEX_COUNTS})
+        controls[unit_id] = control
+        for unit in (row["parent_id"], country):
+            for key in AGE_COUNTS:
+                controls[unit][key] += control[key]
+    if regional_detail.keys() != scopes.keys() or county_detail.keys() != counties.keys():
         raise ValueError("Romanian census age and population scopes differ")
-    broad = list(regroup_age_rows(detail[country], national))
+    broad = list(regroup_age_rows(regional_detail[country], national))
     verify_national_age_totals(national, [broad], country)
-    verify_national_age_totals(detail[country], (detail[key] for key in regions), country)
+    verify_national_age_totals(regional_detail[country], (regional_detail[key] for key in regions), country)
 
+    scopes.update({
+        unit_id: dict(name=row["county_name"], population_value=row["population"])
+        for unit_id, row in counties.items()
+    })
+    detail = regional_detail | county_detail
     for unit_id, scope in scopes.items():
         rows = detail[unit_id]
         total = {key: sum(row[key] for row in rows) for key in AGE_COUNTS}
@@ -393,7 +403,7 @@ def romanian_age_panels():
             raise ValueError(f"{unit_id}: Romanian census ages differ from the county controls")
         panel = dict(
             id=f"{unit_id}_1899_age_sex", observed_unit_id=unit_id, observed_date="1899-12",
-            source_id="ro_colescu_1899_census_report", published_scope=f"{scope['name']}, stable residents",
+            source_id=ROMANIA_CENSUS_SOURCE, published_scope=f"{scope['name']}, stable residents",
             locator="Table II.A, printed pp. 8–13; Table 12, p. XXXIV",
             definition="Stable residents by completed age and sex, including soldiers stationed in barracks. "
                        "Temporary visitors are tabulated separately.",
@@ -404,7 +414,13 @@ def romanian_age_panels():
                         "population change between enumeration and opening are unquantified.",
         )
         if unit_id in regions:
-            panel.update(opening_unit_id=unit_id, opening_from_version=35)
+            panel.update(opening_unit_id=unit_id, opening_from_version=35, opening_through_version=35)
+        if unit_id in counties:
+            panel.update(opening_unit_id=unit_id, opening_from_version=36,
+                         locator="Table II.A, printed pp. 8–13; cross-check Table I.A, p. 4")
+            if any(row["age_min"] == 15 and row["age_max"] == 39 for row in rows):
+                panel["definition"] += " The 15–39 band is the county sex total less the other age bands and unknown ages."
+                panel["opening_method"] += " Keep ages 15–39 combined where the printed subtotals disagree."
         yield panel, [dict(label="Stable population", role="total", age_min=None, age_max=None, **total), *rows]
 
 
@@ -1944,6 +1960,11 @@ def opening_structure(opening_groups, observations, *, version=6):
         leaf_age_scopes.add(ARGENTINA_CENSUS_SCOPE)
     if version >= 33:
         leaf_age_scopes.add(JAVA_MADOERA)
+    if version >= 36:
+        leaf_age_scopes.update(
+            unit["unit_id"] for group in opening_groups if group["unit_id"] == ROMANIA_ROOT
+            for unit in group.get("statistical_aggregates", ())
+        )
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
