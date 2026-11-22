@@ -14,4 +14,20 @@ For Buenos Aires Province, IV = 11,880 and VIII = 3,636 are totals of the four p
 
 The 18 Mendoza subtotals close to the 72,367 reported people aged 14 and over, independently reproduced in Cuadro XI. [Mendoza](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=600)
 
-For opening, use each jurisdiction's own 1895 distribution as the same-area time proxy, scaled to its all-age account. The three jurisdictions are disjoint. The separate class distribution includes only the reported Hacendados. Other class assignments remain unknown.
+For opening, use each account's own 1895 distribution as the same-area time proxy, scaled to its all-age total. The separate class distribution includes only the reported Hacendados. Other class assignments remain unknown.
+
+From version 34, `occupation_1895_expansion.csv` adds ten opening accounts. The 18 published group totals for each original region sum to the age-14-and-over count in Cuadro XI. Its national summary reports the age control by sex and nationality. [Cuadro XI](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=176)
+
+| Account or source region | All ages in 1895 | Aged 14+ | Admitted occupations | Unknown | 1900 opening |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Corrientes | 239,618 | 136,132 | 84,831 | 154,787 | 264,014 |
+| Córdoba | 351,223 | 212,572 | 116,958 | 234,265 | |
+| Santa Fé | 397,188 | 249,095 | 158,361 | 238,827 | |
+| Santiago del Estero | 161,502 | 96,884 | 69,708 | 91,794 | |
+| Chaco | 10,422 | 6,366 | 4,098 | 6,324 | |
+| Central and Chaco, combined account | 920,335 | 564,917 | 349,125 | 571,210 | 1,078,542 |
+| Eight separate territory accounts | 92,947 | 56,512 | 36,834 | 56,113 | 112,822 |
+
+Corrientes prints 3,140 for III Comercio. Its four columns sum to 3,240, and the occupational table includes 100 more foreign men than Cuadro XI. Córdoba prints 20,270 for VI Personal de servicio. Its columns sum to 20,240, and the Argentine men's column accounts for the 30-person difference. The extract retains the printed category totals and assigns both disputed categories to unknown through `admitted_iii` and `admitted_vi`. [Corrientes, printed pp. 257–260](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=454) · [Córdoba, printed pp. 297–300](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=494)
+
+For a consistent boundary, pool Córdoba, Santa Fé, Santiago del Estero and Chaco before apportionment. Misiones, Formosa, La Pampa, Neuquén, Río Negro, Chubut, Santa Cruz and Tierra del Fuego use their own accounts. The territories share Cuadros XXVI a–d, with a distinct original column for each territory. [Santa Fé, printed pp. 183–186](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=381) · [Santiago del Estero, printed pp. 365–368](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=562) · [Territories, printed pp. 706–709](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=902)

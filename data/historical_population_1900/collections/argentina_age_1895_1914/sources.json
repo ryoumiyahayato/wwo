@@ -36,8 +36,8 @@
     "title": "Segundo Censo de la República Argentina, Tomo II, Cuadros XXVI a–d",
     "publisher": "Comisión Directiva del Censo, 1898. Biblioteca INDEC.",
     "url": "https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=245",
-    "locator": "Printed pp. 47–50, 139–142 and 402–405, 10 May 1895.",
-    "raw_paths": ["occupation_1895.csv", "OCCUPATION.md"],
+    "locator": "Printed pp. 47–50, 139–142, 183–186, 257–260, 297–300, 365–368, 402–405 and 706–709, 10 May 1895.",
+    "raw_paths": ["occupation_1895.csv", "occupation_1895_expansion.csv", "OCCUPATION.md"],
     "rights": "Published historical numeric facts"
   },
   {
