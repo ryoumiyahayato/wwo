@@ -8,7 +8,7 @@ from pathlib import Path
 
 from opening import (
     AGRA_DISTRICT_SOURCE, DATE, EGYPT_COMPARABLE_PROVINCES, EGYPT_FAIYUM_SOURCES, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE,
-    BENGAL_DISTRICT_SOURCE, MADRAS_STATES_REMAINDER, SPANISH_CIVIL_STATUS_SCOPE,
+    BENGAL_DISTRICT_SOURCE, MADRAS_STATES_REMAINDER, OTTOMAN_REGISTRATION_SOURCE, SPANISH_CIVIL_STATUS_SCOPE,
     ARGENTINA_CENSUS_SCOPE, ARGENTINA_LOCAL_AGE_UNITS, JAVA_MADOERA, apportion, argentina_unenumerated_residents,
     egypt_age_sex_controls, java_madoera_opening_registration, opening_fraction,
 )
@@ -354,6 +354,60 @@ def mexican_age_panels():
         yield panel, [dict(label="Census total", role="total", age_min=None, age_max=None, **totals), *rows]
 
 
+def romanian_age_panels():
+    collection = HERE / "romania"
+    opening = json.loads((collection / "romania_opening.json").read_text(encoding="utf8"))
+    country = opening["unit_id"]
+    regions = {unit["unit_id"]: unit for unit in opening["units"]}
+    scopes = {country: opening | {"name": "Kingdom of Romania"}, **regions}
+    raw = collection / "raw"
+
+    def bands(filename):
+        by_unit = defaultdict(list)
+        for row in read_csv(raw / filename):
+            low, high = (int(row[key]) if row[key] else None for key in ("age_min", "age_max"))
+            by_unit[row["unit_id"]].append(dict(
+                label=row["reported_age_label"], role="unknown" if low is None else "band",
+                age_min=low, age_max=high, both=int(row["population"]),
+                **{sex: int(row[sex]) for sex in SEX_COUNTS},
+            ))
+        return by_unit
+
+    detail = bands("regional_age_sex_table_ii_a.csv")
+    national = bands("national_age_sex_table_12.csv")[country]
+    controls = defaultdict(lambda: dict.fromkeys(AGE_COUNTS, 0))
+    for row in read_csv(raw / "county_sex_controls.csv"):
+        for key, column in (("both", "population"), ("male", "male"), ("female", "female")):
+            controls[row["parent_id"]][key] += int(row[column])
+            controls[country][key] += int(row[column])
+    if detail.keys() != scopes.keys() or controls.keys() != scopes.keys():
+        raise ValueError("Romanian census age and population scopes differ")
+    broad = list(regroup_age_rows(detail[country], national))
+    verify_national_age_totals(national, [broad], country)
+    verify_national_age_totals(detail[country], (detail[key] for key in regions), country)
+
+    for unit_id, scope in scopes.items():
+        rows = detail[unit_id]
+        total = {key: sum(row[key] for row in rows) for key in AGE_COUNTS}
+        if total != controls[unit_id] or total["both"] != scope["population_value"]:
+            raise ValueError(f"{unit_id}: Romanian census ages differ from the county controls")
+        panel = dict(
+            id=f"{unit_id}_1899_age_sex", observed_unit_id=unit_id, observed_date="1899-12",
+            source_id="ro_colescu_1899_census_report", published_scope=f"{scope['name']}, stable residents",
+            locator="Table II.A, printed pp. 8–13; Table 12, p. XXXIV",
+            definition="Stable residents by completed age and sex, including soldiers stationed in barracks. "
+                       "Temporary visitors are tabulated separately.",
+            broad_observation=False, opening_band_roles=["band", "unknown"],
+            opening_method="Carry the local December census counts to January 1 at the same population control. "
+                           "Keep the published age intervals and the sex-specific unknown ages.",
+            uncertainty="Local dates of enumeration varied, including returns after January 1. Age heaping and "
+                        "population change between enumeration and opening are unquantified.",
+        )
+        if unit_id in regions:
+            panel.update(opening_unit_id=unit_id, opening_from_version=35)
+        yield panel, [dict(label="Stable population", role="total", age_min=None, age_max=None, **total), *rows]
+
+
 def age_sex_panels():
     panels = json.loads((AGE_SOURCES / "panels.json").read_text(encoding="utf8"))
     panels.extend(json.loads((AGE_SOURCES / "us_census_1900_panels.json").read_text(encoding="utf8")))
@@ -503,7 +557,8 @@ def age_sex_panels():
                 row[key] = sum(component[key] for component in matched_rows)
             by_panel[panel["id"]].append(row)
     return ([(panel, by_panel[panel["id"]]) for panel in panels]
-            + list(austrian_age_panels()) + list(hungarian_crown_age_panels()) + list(mexican_age_panels()))
+            + list(austrian_age_panels()) + list(hungarian_crown_age_panels()) + list(mexican_age_panels())
+            + list(romanian_age_panels()))
 
 
 def opening_age_group(panel, rows, unit_id, opening_total):
@@ -1847,6 +1902,27 @@ def australian_opening_age_models(panels, balances):
         yield opening_age_group(model, [opening_control, *opening_rows], unit_id, total)
 
 
+def ottoman_registered_sex_models(balances, observations):
+    reviewed_units = {"ottoman_1897_aydin", "ottoman_1897_ankara"}
+    for row in observations:
+        unit = row["unit_id"]
+        if row["source_id"] != OTTOMAN_REGISTRATION_SOURCE or unit not in reviewed_units:
+            continue
+        total = row["population_value"]
+        if total != balances[unit]["population_value"] or sum(row["sex"].values()) != total:
+            raise ValueError(f"{unit}: Ottoman sex totals differ from the represented register population")
+        yield dict(
+            unit_id=unit, opening_total=total, observed_total=total,
+            source_id=row["source_id"], observed_unit_id=unit, observed_date=row["date"], locator=row["locator"],
+            method="Carry the published sex counts for the same registered population to 1900-01-01. Ages are unknown.",
+            uncertainty=("Mutlu, pp. 12–13, compares adult registration sex ratios in Aydın and Ankara. "
+                         "The all-age civil register omits residents, including children. Reporting dates vary by locality. "
+                         "The 1898-03-12 reporting anchor is 660 days before opening. Changes are unquantified."),
+            sex_only=True,
+            bands=[dict(id="unknown", label="Registered sex totals; age unknown", age_min=None, age_max=None, **row["sex"])],
+        )
+
+
 def opening_structure(opening_groups, observations, *, version=6):
     district_pools = {unit["unit_id"]: unit for group in opening_groups for unit in group["units"]
                       if "district_boundary_source" in unit}
@@ -2050,4 +2126,6 @@ def opening_structure(opening_groups, observations, *, version=6):
             sex_only=True,
             bands=[dict(id="unknown", label="Published sex totals; ages unavailable", age_min=None, age_max=None, **row["sex"])],
         ))
+    if version >= 35:
+        groups.extend(ottoman_registered_sex_models(opening_balances, observations))
     return dict(version=1, groups=sorted(groups, key=lambda group: group["unit_id"]))

@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from itertools import chain
 from pathlib import Path
 
-from opening import AGRA_DISTRICT_BALANCE, AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, JAVA_MADOERA, SPANISH_CIVIL_STATUS_SCOPE
+from opening import AGRA_DISTRICT_BALANCE, AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, JAVA_MADOERA, OTTOMAN_REGISTRATION_SOURCE, SPANISH_CIVIL_STATUS_SCOPE
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import cochin_language, india_princely_residence, madras_states_religion, travancore_language
@@ -1508,6 +1508,10 @@ def argentine_occupation(pools, version):
     if version >= 34:
         with (directory / "occupation_1895_expansion.csv").open(encoding="utf8", newline="") as stream:
             rows.extend(csv.DictReader(stream))
+    if version >= 35:
+        for group in ("andes", "north", "tucuman_salta"):
+            with (directory / f"occupation_1895_v35_{group}.csv").open(encoding="utf8", newline="") as stream:
+                rows.extend(csv.DictReader(stream))
     by_source = {}
     consumed = set()
     for row in rows:
@@ -1621,6 +1625,24 @@ def egyptian_urban_literacy(pools):
             total=control, observed_counts=counts, unknown=int(outside["person_count"]),
             definition="Reported literacy of residents aged five and older. Opening shares use the all-age town "
                        "denominator. Literacy under five is unassigned. Changes from 1900 are unquantified.",
+        )
+
+
+def ottoman_registered_religion(pools, observations):
+    for row in observations:
+        unit = row["unit_id"]
+        if row["source_id"] != OTTOMAN_REGISTRATION_SOURCE or unit not in pools:
+            continue
+        total = row["population_value"]
+        if total != pools[unit]["population_value"]:
+            raise ValueError(f"{unit}: Ottoman religion counts require the original register population")
+        yield unit, "religion", distribution(
+            total, classification="ottoman_1897_reported_binary_religion", source=row["source_id"],
+            date=row["date"], observed_unit=unit, scope=row["definition"], locator=row["locator"], total=total,
+            observed_counts=row["registration_religion"], unknown=0,
+            definition=("Muslim and non-Muslim are the two reported register classes. The non-Muslim class "
+                        "combines multiple communities. The register omits residents and dates vary by locality."),
+            method="Carry the two published registration counts at original scale to 1900-01-01.",
         )
 
 
@@ -1777,6 +1799,8 @@ def opening_social(opening_groups, observations, *, version):
     if version >= 33:
         marginals = chain(marginals, argentine_occupation(pools, version), java_residency_registration(pools),
                           egyptian_urban_literacy(pools))
+    if version >= 35:
+        marginals = chain(marginals, ottoman_registered_religion(pools, observations))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

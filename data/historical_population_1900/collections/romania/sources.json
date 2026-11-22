@@ -3,9 +3,10 @@
     "id": "ro_colescu_1899_census_report",
     "title": "Recensământul general al populațiunei României din decembrie 1899: rezultate definitive",
     "publisher": "Serviciul Statisticei Generale, Ministerul Domeniilor (1905)",
-    "url": "https://bibgtkneamt.ebibliophil.ro/mon/recensamantul-general-al-populatiunei-romaniei-din-decembrie-1899-pcx9fwwk",
-    "locator": "Biblioteca Județeană G. T. Kirileanu Neamț, catalogue of the definitive census report",
-    "rights": "Catalogue reference only"
+    "url": "https://archive.org/details/recensamantulgen00serv",
+    "locator": "University of Illinois copy; Table II.A, printed pp. 8–13 (PDF pp. 98–103); Table 12, printed p. XXXIV (PDF p. 54); stable-population county controls, printed p. 4 (PDF p. 94)",
+    "rights": "Numeric facts transcribed from a publicly accessible scan; scan redistribution rights not asserted",
+    "raw_paths": ["raw/regional_age_sex_table_ii_a.csv", "raw/national_age_sex_table_12.csv", "raw/county_sex_controls.csv"]
   },
   {
     "id": "ro_huber_1913_census_comparison",

@@ -23,6 +23,7 @@ ARGENTINA_LOCAL_AGE_UNITS = ("ar_capital_federal", "ar_buenos_aires_province")
 JAVA_MADOERA = "java_madoera_colonial_population"
 MADRAS_STATES_REMAINDER = "raj_madras_states_ex_cochin_travancore"
 MADRAS_STATES_AGE_SOURCE = "india_madras_1901_princely_age_and_religion"
+OTTOMAN_REGISTRATION_SOURCE = "ottoman_1897_official_registration"
 
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
@@ -1443,6 +1444,53 @@ def add_argentine_opening_geography(group):
     )]
 
 
+def ottoman_registered_opening(observations):
+    root = "ottoman_empire"
+    source = OTTOMAN_REGISTRATION_SOURCE
+    source_rows = [row for row in observations if row["source_id"] == source]
+    control_row, = (row for row in source_rows if row["unit_id"] == "ottoman_1897_registration_table_2")
+    districts = [row for row in source_rows if row["parent_id"] == control_row["unit_id"]]
+    if sum(row["population_value"] for row in districts) != control_row["population_value"]:
+        raise ValueError("Non-closing Ottoman Table 2 register")
+    partial_iraq = {"ottoman_1897_bagdat", "ottoman_1897_basra", "ottoman_1897_musul"}
+    date_proxy = "Carry the recorded population at its published scale to 1900-01-01."
+    uncertainty = ("Rumi 1313 fiscal year-end, 1898-03-12, is a reporting anchor 660 days before opening. "
+                   "The local registers refer to different dates. Registration omissions, population change and "
+                   "changes in local boundaries have no quantified interval.")
+    leaves = []
+    for row in districts:
+        unit = row["unit_id"]
+        if unit in partial_iraq:
+            continue
+        leaves.append(dict(
+            unit_id=unit, name=row["name"], population_value=row["population_value"],
+            source_id=source, source_quality=row["quality"], source_dates=[row["date"]],
+            source_unit_ids=[unit], source_observations=[row["record_id"], control_row["record_id"]],
+            locator=row["locator"], method=date_proxy, scope=row["definition"], uncertainty_kind=uncertainty,
+        ))
+        if unit == "ottoman_1897_istanbul":
+            leaves[-1]["place_ids"] = ["place:istanbul"]
+            leaves[-1]["place_evidence"] = {"place:istanbul": {
+                "locator": row["locator"],
+                "url": "https://makale.isam.org.tr/items/3ec91b3b-5c56-404f-abe8-7a6fdae6f470",
+                "scope": "Constantinople locates the Dersaadet and Three Boroughs registration. The place is a point.",
+            }}
+    control = legacy_population_control(root)
+    return dict(
+        unit_id=root, date=DATE, population_value=control, source_id=source,
+        legacy_control_source="data/alpha/historical_world_economy_1900/countries_compact.json: ottoman_empire population_value",
+        legacy_unlocated_balance=control - sum(leaf["population_value"] for leaf in leaves),
+        partition_source="collections/ottoman_registration_1897/observations.jsonl",
+        source_dates=[control_row["date"]], source_observations=[control_row["record_id"]],
+        locator=control_row["locator"], method=date_proxy + " Retain the inherited 1900 total and leave its balance unlocated.",
+        scope=("Thirty disjoint 1897 administrative registration lines. Baghdad, Basra and Mosul have partial "
+               "returns and no allocation. Egypt, Tunisia, Bosnia and Herzegovina, Bulgaria and Cyprus lie "
+               "outside these lines. Crete is separate from the Archipelago vilayet. No foreign-national or "
+               "military estimate is added. The register undercounts women and children and has major territorial gaps."),
+        uncertainty_kind=uncertainty, units=leaves,
+    )
+
+
 def groups(observations, version=1):
     study = {r["unit_id"]: r for r in observations if r["kind"] == "territory" and r["date"] == DATE and r["source_id"].startswith("ft_world_")}
     endpoints = {(r["unit_id"], r["date"]): r["population_value"] for r in observations if r["source_id"].startswith("ft_world_")}
@@ -1595,6 +1643,11 @@ def groups(observations, version=1):
         )
     if version >= 31:
         add_argentine_opening_geography(result["argentina_1900"])
+    if version >= 35:
+        ottoman = ottoman_registered_opening(observations)
+        if ottoman["unit_id"] in result:
+            raise ValueError("Duplicate Ottoman opening control")
+        result[ottoman["unit_id"]] = ottoman
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)
