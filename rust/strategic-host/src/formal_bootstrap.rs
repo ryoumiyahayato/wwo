@@ -2491,8 +2491,13 @@ mod tests {
         assert_eq!(west.structure.unwrap().residents_with_cohort_age_and_sex, 0);
         let islands = world.inspect_population("cshapes_gw_840").unwrap();
         assert_eq!(islands.population_total, Some(6_961_339));
-        assert_eq!(islands.structure.unwrap().unclassified_residents, 6_961_339);
-        assert!(islands.children.is_empty());
+        assert_eq!(islands.direct_residents, Some(6_871_648));
+        assert_eq!(islands.structure.unwrap().unclassified_residents, 6_871_648);
+        assert_eq!(islands.children.len(), 1);
+        assert_eq!(islands.children[0].population_total, 89_691);
+        let surigao = world.inspect_population("ph_1900_surigao_main_population").unwrap();
+        assert_eq!(surigao.structure.unwrap().residents_with_cohort_age_and_sex, 89_691);
+        assert_eq!(surigao.social.unwrap().dimensions["occupation"].assigned_residents, 34_300);
         assert!(old.inspect_population("cshapes_gw_840").unwrap().population_total.is_none());
         assert_eq!(world.population().global_total() - old.population().global_total(), 6_961_339);
         for unit in ["qing_empire", "united_states_1900", "kingdom_of_spain"] {

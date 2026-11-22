@@ -40,6 +40,15 @@
     "rights": "CC BY 4.0. WWO links selected name variants to Reba city records by reported locality and the gazetteer LocID."
   },
   {
+    "id": "de_prussia_1895_occupational_census",
+    "title": "Principal occupations in the 14 June 1895 Census of Prussia",
+    "publisher": "Imperial Statistical Office census returns reproduced in Zeitschrift des Oberschlesischen Berg- und Hüttenmännischen Vereins, 1896",
+    "url": "https://sbc.org.pl/Content/429814/PDF/iii4217-1896-10_11-0001.pdf",
+    "locator": "Table I, printed pp. 364–365, Staat row. Control in Statistisches Jahrbuch für das Deutsche Reich 1900, Table I.11, p. 10.",
+    "raw_paths": ["prussia_1895_occupation.csv", "prussia_1895_occupation_source.md"],
+    "rights": "Historical published numeric facts."
+  },
+  {
     "id": "us_gazetteer_places_2024",
     "title": "2024 Gazetteer Files, national places",
     "publisher": "U.S. Census Bureau",

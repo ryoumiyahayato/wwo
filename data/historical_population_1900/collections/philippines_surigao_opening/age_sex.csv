@@ -1,0 +1,26 @@
+panel,label,role,age_min,age_max,both,male,female
+ph_surigao_1903_age_sex,All ages,total,,,99298,50640,48658
+ph_surigao_1903_age_sex,Under 1 year,band,0,0,1413,725,688
+ph_surigao_1903_age_sex,1 to 4 years,band,1,4,13932,7113,6819
+ph_surigao_1903_age_sex,5 to 9 years,band,5,9,14857,7540,7317
+ph_surigao_1903_age_sex,10 to 14 years,band,10,14,11730,6121,5609
+ph_surigao_1903_age_sex,15 to 17 years,band,15,17,6563,3333,3230
+ph_surigao_1903_age_sex,18 to 19 years,band,18,19,4283,1893,2390
+ph_surigao_1903_age_sex,20 years,band,20,20,2827,1075,1752
+ph_surigao_1903_age_sex,21 to 24 years,band,21,24,5664,2829,2835
+ph_surigao_1903_age_sex,25 to 29 years,band,25,29,8750,4458,4292
+ph_surigao_1903_age_sex,30 to 34 years,band,30,34,6326,3304,3022
+ph_surigao_1903_age_sex,35 to 39 years,band,35,39,5673,3139,2534
+ph_surigao_1903_age_sex,40 to 44 years,band,40,44,4375,2252,2123
+ph_surigao_1903_age_sex,45 to 49 years,band,45,49,3551,1962,1589
+ph_surigao_1903_age_sex,50 to 54 years,band,50,54,2793,1385,1408
+ph_surigao_1903_age_sex,55 to 59 years,band,55,59,2571,1411,1160
+ph_surigao_1903_age_sex,60 to 64 years,band,60,64,2043,1076,967
+ph_surigao_1903_age_sex,65 to 69 years,band,65,69,931,502,429
+ph_surigao_1903_age_sex,70 to 74 years,band,70,74,525,277,248
+ph_surigao_1903_age_sex,75 to 79 years,band,75,79,187,102,85
+ph_surigao_1903_age_sex,80 to 84 years,band,80,84,178,81,97
+ph_surigao_1903_age_sex,85 to 89 years,band,85,89,35,20,15
+ph_surigao_1903_age_sex,90 to 94 years,band,90,94,46,16,30
+ph_surigao_1903_age_sex,95 to 99 years,band,95,99,20,12,8
+ph_surigao_1903_age_sex,100 years and over,band,100,,25,14,11

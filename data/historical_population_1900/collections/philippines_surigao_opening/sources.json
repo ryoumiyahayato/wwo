@@ -1,0 +1,21 @@
+[
+  {
+    "id": "ph_commission_1900_surigao_guide",
+    "title": "Report of the Philippine Commission to the President, Volume III",
+    "publisher": "U.S. Philippine Commission / Government Printing Office (1901)",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Report_of_the_Philippine_commission_to_the_President._-_January_31%2C_1900%28-December_20%2C_1900%29_%28IA_aex9637.0001.003.umich.edu%29.pdf",
+    "locator": "Printed p. 111, Third District or Province of Surigao, Number of Inhabitants, citing the official guide of 1898",
+    "rights": "U.S. federal public domain",
+    "raw_paths": ["observations.jsonl"],
+    "corroboration": {
+      "title": "A Pronouncing Gazetteer and Geographical Dictionary of the Philippine Islands",
+      "publisher": "U.S. War Department / Government Printing Office (1902)",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/A_pronouncing_gazetteer_and_geographical_dictionary_of_the_Philippine_islands_.._%28IA_pronouncinggazet00unit%29.pdf",
+      "locator": "Island and province population table, Surigao footnote"
+    },
+    "boundary_reference": {
+      "establishment": "https://lawphil.net/statutes/acts/act1901/act_127_1901.html",
+      "post_census_change": "https://lawphil.net/statutes/acts/act1903/act_787_1903.html"
+    }
+  }
+]

@@ -1710,6 +1710,59 @@ def romanian_structure(pools, version):
             "Stable residents of urban and rural communes, using the 1899 census administrative classification.",
             counties=counties,
         )
+    if version >= 37:
+        yield from romanian_distribution(
+            pools, "romania_1899_county_marital_status_table_iii.csv", "marital_status", "romania_1899_reported_marital_status",
+            {"single": "Children and never married", "married": "Married", "widowed": "Widowed", "divorced": "Divorced"},
+            "Marital status of stable residents. Children and never-married adults share one source category.",
+            unknown_column="unknown", counties=counties,
+        )
+
+
+def prussian_census_occupation(pools):
+    path = COLLECTIONS / "cities_europe" / "prussia_1895_occupation.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        row, = csv.DictReader(stream)
+    labels = {
+        "a": "Agriculture, forestry, hunting and fishing",
+        "b": "Mining, manufacturing and construction",
+        "c": "Trade, transport and insurance",
+        "d": "Domestic service and intermittent wage labour",
+        "e": "Military, court, civil and religious service and liberal professions",
+        "g": "Domestic servants living in the employer's household",
+    }
+    counts = {label: int(row[f"occupation_{code}"]) for code, label in labels.items()}
+    unknown = int(row["unknown"])
+    if (sum(counts.values()) != int(row["occupation_total"]) or
+            unknown != int(row["without_stated_occupation_f"]) + int(row["dependents_without_primary_occupation_h"])):
+        raise ValueError("Prussian occupational classes differ from the official census controls")
+    unit = row["unit_id"]
+    yield unit, "occupation", distribution(
+        pools[unit]["population_value"], classification="prussia_1895_reported_principal_occupation",
+        source=row["source_id"], date=row["date"], observed_unit=unit,
+        scope="Kingdom of Prussia, all persons present", locator=row["source_table"],
+        total=int(row["population"]), observed_counts=counts, unknown=unknown,
+        definition=("Principal occupations and separately tabulated live-in domestic servants. The census category "
+                    "without a stated occupation and non-working dependents remain unassigned. Changes since June 1895 "
+                    "are unquantified."),
+    )
+
+
+def surigao_occupation(pool):
+    with (COLLECTIONS / "philippines_surigao_opening" / "occupation.csv").open(encoding="utf8", newline="") as source:
+        rows = list(csv.DictReader(source))
+    counts = {row["label"]: int(row["male"]) + int(row["female"])
+              for row in rows if row["role"] == "occupation"}
+    unknown, = (int(row["male"]) + int(row["female"]) for row in rows if row["role"] == "unassigned")
+    yield pool["unit_id"], "occupation", distribution(
+        pool["population_value"], classification="ph_surigao_1903_gainful_occupation",
+        source=pool["source_id"], date=pool["source_dates"][-1], observed_unit="ph_1903_surigao",
+        scope=pool["scope"], locator="Vol. II, Table 53, printed p. 866, Surigao",
+        total=pool["endpoint_values"][-1], observed_counts=counts, unknown=unknown,
+        definition=("Five published groups of gainful occupations. The denominator is the all-age main "
+                    "schedule. The census combines people without gainful occupations and unknown occupation "
+                    "in one column. That column remains unassigned. Change from 1900 is unquantified."),
+    )
 
 
 def opening_social(opening_groups, observations, *, version):
@@ -1867,6 +1920,8 @@ def opening_social(opening_groups, observations, *, version):
                           egyptian_census_literacy(pools, version))
     if version >= 35:
         marginals = chain(marginals, ottoman_registered_religion(pools, observations), romanian_structure(pools, version))
+    if version >= 37:
+        marginals = chain(marginals, prussian_census_occupation(pools), surigao_occupation(pools["ph_1900_surigao_main_population"]))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

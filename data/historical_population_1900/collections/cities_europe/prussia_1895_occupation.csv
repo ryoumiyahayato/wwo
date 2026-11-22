@@ -1,0 +1,2 @@
+unit_id,date,population,occupation_a,occupation_b,occupation_c,occupation_d,occupation_e,occupation_g,without_stated_occupation_f,dependents_without_primary_occupation_h,occupation_total,unknown,source_id,source_table
+administrative_region:germany_preussen,1895-06-14,31490315,4782255,4755855,1355740,304130,822675,835100,1221598,17412962,12855755,18634560,de_prussia_1895_occupational_census,Table I pp. 364–365 Staat row and Statistisches Jahrbuch I.11 p. 10

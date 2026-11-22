@@ -1,0 +1,16 @@
+[
+  {
+    "id": "ph_surigao_1903_age_sex",
+    "observed_unit_id": "ph_1903_surigao",
+    "opening_unit_id": "ph_1900_surigao_main_population",
+    "opening_from_version": 37,
+    "opening_match_population_endpoint": true,
+    "observed_date": "1903-03-02",
+    "source_id": "ph_census_1903_vol2",
+    "locator": "Vol. II, Table 18, pp. 382–383, rows 1211 and 1225; Table 5, p. 210",
+    "published_scope": "Surigao province, main population schedule, including Butuan",
+    "definition": "All ages by sex from the main census schedule. The separately reported village schedule is outside this panel.",
+    "uncertainty": "Hold the 1903 age-by-sex shares at opening. Age misstatement and changes from 1900 are unquantified.",
+    "broad_observation": false
+  }
+]
