@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from itertools import chain
 from pathlib import Path
 
-from opening import ENGLAND_WALES_OCCUPATION_REMAINDER
+from opening import ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import india_princely_residence, madras_states_religion, travancore_language
@@ -766,7 +766,7 @@ def italy_marital_status(pool):
     counts = {row["marital_status"]: int(row["male"]) + int(row["female"]) for row in rows}
     yield pool["unit_id"], "marital_status", distribution(
         pool["population_value"], classification="italy_1901_reported_marital_status",
-        source="it_1901_census_v5_age_and_marital", date="1901-02-10", observed_unit=pool["unit_id"],
+        source="it_1901_census_v5_age_and_marital", date="1901-02-10", observed_unit="kingdom_of_italy",
         scope="Kingdom of Italy, population present", locator="Vol. V, printed pp. LXIV–LXV",
         total=sum(controls.values()), observed_counts=counts, unknown=0,
         definition="Civil status of all persons present. Legally separated persons are included with married persons.",
@@ -822,6 +822,34 @@ def mexico_census_social(pools):
                 unknown=unknown, definition=definition,
                 method=SHARE_METHOD + " The change between January and the October census is unquantified."
                 + (" Durango's original census control was 13 below the revised series endpoint." if difference else ""),
+            )
+
+
+CANADA_ORIGIN_COLUMNS = {
+    "British": "british", "French": "french", "German": "german",
+    "Indian and h. b.": "indigenous_and_mixed_indigenous",
+    "Scandinavian": "scandinavian", "Other specified origins": "other_reported_origins",
+}
+
+
+def canada_reported_origin(pools):
+    path = COLLECTIONS / "canada_origin_1901" / "origin_1901_opening_scopes.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit = row["unit_id"]
+            pool = pools[unit]
+            total = int(row["observed_total"])
+            if pool["endpoint_values"][-1] != total:
+                raise ValueError(f"{unit}: census origin and opening controls differ")
+            yield unit, "culture", distribution(
+                pool["population_value"], classification="canada_1901_reported_ancestral_or_tribal_origin",
+                source=row["source_id"], date=row["observed_date"], observed_unit=unit,
+                scope=f"{row['observed_name']}, population recorded in the 1901 de jure census",
+                locator=row["locator"], total=total, unknown=int(row["observed_unknown"]),
+                observed_counts={key: int(row[column]) for column, key in CANADA_ORIGIN_COLUMNS.items()},
+                definition="Recorded ancestral or tribal origin under historical descent rules. This proxy measures "
+                           "reported origin. Language, self-identification and cultural practices remain unknown. "
+                           "Census omissions and change since January 1900 have no quantified interval.",
             )
 
 
@@ -908,7 +936,10 @@ def opening_social(opening_groups, *, version):
             locator="Table II.A.1d, printed p. 40, all ages",
         ), hungarian_crown_work_status(pools))
     if version >= 21:
-        marginals = chain(marginals, italy_marital_status(pools["kingdom_of_italy"]), mexico_census_social(pools))
+        italian_marital_unit = ITALIAN_CIVIL_STATUS_SCOPE if version >= 22 else "kingdom_of_italy"
+        marginals = chain(marginals, italy_marital_status(pools[italian_marital_unit]), mexico_census_social(pools))
+    if version >= 22:
+        marginals = chain(marginals, canada_reported_origin(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

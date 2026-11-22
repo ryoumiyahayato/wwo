@@ -5,7 +5,10 @@ import re
 from fractions import Fraction
 from pathlib import Path
 
-from opening import DATE, EGYPT_COMPARABLE_PROVINCES, ENGLAND_WALES_OCCUPATION_REMAINDER, apportion, opening_fraction
+from opening import (
+    DATE, EGYPT_COMPARABLE_PROVINCES, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE,
+    apportion, opening_fraction,
+)
 
 HERE=Path(__file__).resolve().parent/"collections"
 AGE_SOURCES = HERE / "age_sex"
@@ -372,7 +375,9 @@ def age_sex_panels():
         "germany_census_1900.csv", "india_census_1901.csv", "india_census_1891.csv", "cape_1904.csv",
         "opening_1900_regional_ages.csv",
     )
-    for path in [*(AGE_SOURCES / name for name in filenames), *(source / "age_sex.csv" for source in regional_sources)]:
+    italian_regions = HERE / "italy_census_1901" / "regional_age_sex.csv"
+    for path in [*(AGE_SOURCES / name for name in filenames), *(source / "age_sex.csv" for source in regional_sources),
+                 italian_regions]:
         for row in read_csv(path):
             for key in ("age_min", "age_max", "both", "male", "female"):
                 row[key] = int(row[key]) if row[key] else None
@@ -760,10 +765,69 @@ def egypt_provincial_sex_models(opening_balances, observations):
         )
 
 
+def check_italian_age_controls(panels, observations):
+    dated_returns = {
+        row["unit_id"]: row for row in observations
+        if row["source_id"] == "it_1901_census_v5_age_and_marital" and row["date"] == "1901-01-01"
+    }
+    national_rows = panels["kingdom_of_italy"][1]
+    by_band = {row["label"]: {sex: 0 for sex in SEX_COUNTS} for row in national_rows}
+    for unit_id, observed in dated_returns.items():
+        if unit_id == "kingdom_of_italy":
+            continue
+        panel, rows = panels[unit_id]
+        control = next(row for row in rows if row["role"] == "total")
+        if control["both"] != observed["population_value"] or any(
+            control[sex] != observed["sex"][sex] for sex in SEX_COUNTS
+        ):
+            raise ValueError(f"{unit_id}: age rows differ from the Italian January 1901 population control")
+        for row, national in zip(rows, national_rows, strict=True):
+            if any(row[key] != national[key] for key in ("label", "role", "age_min", "age_max")):
+                raise ValueError(f"{panel['id']}: regional and national age bands differ")
+            for sex in SEX_COUNTS:
+                by_band[row["label"]][sex] += row[sex]
+    if any(by_band[row["label"]][sex] != row[sex] for row in national_rows for sex in SEX_COUNTS):
+        raise ValueError("Italy: regional age and sex counts do not close to the independent national return")
+
+
+def united_provinces_state_age_models(panels, observations, aggregate, local_balances):
+    dates = aggregate["endpoint_dates"]
+    regional = indian_abstract_opening_age_model(panels, aggregate, dates, "united_provinces_states")
+    sex_totals = {sex: sum(band[sex] for band in regional["bands"]) for sex in SEX_COUNTS}
+    for unit_id, balance in local_balances.items():
+        if balance.get("statistical_parent") != aggregate["unit_id"]:
+            continue
+        endpoints = {row["date"]: row for row in observations
+                     if row["unit_id"] == unit_id and row["source_id"] == balance["source_id"]}
+        fraction = opening_fraction(dates)
+        persons = balance["population_value"]
+        earlier, later = (endpoints[d] for d in dates)
+        if any(sum(row["sex"].values()) != row["population_value"] for row in (earlier, later)):
+            raise ValueError(f"{unit_id}: published sex totals do not close")
+        local_sex = apportion({sex: earlier["sex"][sex] * (1 - fraction) + later["sex"][sex] * fraction
+                               for sex in SEX_COUNTS}, persons)
+        local_age = {
+            sex: apportion({band["id"]: Fraction(local_sex[sex] * band[sex], sex_totals[sex])
+                            for band in regional["bands"]}, local_sex[sex])
+            for sex in SEX_COUNTS
+        }
+        yield regional | dict(
+            unit_id=unit_id, observed_unit_id=unit_id, opening_total=persons, observed_total=persons,
+            source_id=balance["source_id"], locator=f"{balance['locator']}; {regional['locator']}",
+            method="Interpolate local male and female totals. Divide each modeled sex total among ages using "
+                   "the interpolated age profile for that sex across both United Provinces princely states.",
+            uncertainty="Local age variation is unknown. Census error and change caused by migration or famine "
+                        "have no quantified interval.",
+            bands=[band | {sex: local_age[sex][band["id"]] for sex in SEX_COUNTS} for band in regional["bands"]],
+        )
+
+
 def opening_structure(opening_groups, observations, *, version=6):
     district_pools = {unit["unit_id"]: unit for group in opening_groups for unit in group["units"]
                       if "district_boundary_source" in unit}
-    leaf_age_scopes = {unit["statistical_parent"] for unit in district_pools.values()} | {ENGLAND_WALES_OCCUPATION_REMAINDER}
+    leaf_age_scopes = {unit["statistical_parent"] for unit in district_pools.values()} | {
+        ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, "raj_united_provinces_states",
+    }
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -796,6 +860,11 @@ def opening_structure(opening_groups, observations, *, version=6):
             if endpoints[-1] != model["observed_total"] + panel.get("opening_population_endpoint_difference", 0):
                 raise ValueError(f"Census age and population controls differ for {unit_id}")
         groups.append(model)
+    if version >= 22:
+        check_italian_age_controls(panels, observations)
+        groups.extend(united_provinces_state_age_models(
+            panels, observations, statistical_aggregates["raj_united_provinces_states"], opening_balances,
+        ))
     if version >= 20:
         groups.extend(egypt_provincial_sex_models(opening_balances, observations))
     if version >= 18:

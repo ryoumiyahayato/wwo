@@ -253,7 +253,7 @@ impl Panel {
                 "legal_estate" => ("法定身份等级", "Legal estate"),
                 "occupation" => ("职业", "Occupation"),
                 "language" => ("语言", "Language"),
-                "culture" => ("文化", "Culture"),
+                "culture" => ("文化与祖源记录", "Culture and reported ancestry"),
                 "religion" => ("宗教", "Religion"),
                 "literacy" => ("识字", "Literacy"),
                 "residence" => ("城乡居住与聚落规模", "Residence and locality size"),

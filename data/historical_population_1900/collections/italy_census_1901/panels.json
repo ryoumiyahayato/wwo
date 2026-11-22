@@ -15,6 +15,313 @@
       "unknown"
     ],
     "opening_method": "Hold the Kingdom of Italy's January 1901 observed age and sex proportions in its January 1900 opening balance. Use largest remainders. Preserve unreported ages.",
-    "uncertainty": "The opening control and the reconstructed population have different enumeration methods; changes in age and sex composition over one year are unquantified."
+    "uncertainty": "The opening control and the reconstructed population have different enumeration methods; changes in age and sex composition over one year are unquantified.",
+    "opening_through_version": 21
+  },
+  {
+    "id": "it_1901_piemonte",
+    "published_scope": "Piemonte census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_piemonte",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 104",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_piemonte",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_liguria",
+    "published_scope": "Liguria census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_liguria",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 104",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_liguria",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_lombardia",
+    "published_scope": "Lombardia census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_lombardia",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 104",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_lombardia",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_veneto",
+    "published_scope": "Veneto census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_veneto",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 105",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_veneto",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_emilia_ex_ducati",
+    "published_scope": "Emilia ex Ducati census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_emilia_ex_ducati",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 105",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_emilia_ex_ducati",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_emilia_romagne",
+    "published_scope": "Emilia Romagne census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_emilia_romagne",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 105",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_emilia_romagne",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_toscana",
+    "published_scope": "Toscana census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_toscana",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 106",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_toscana",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_marche",
+    "published_scope": "Marche census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_marche",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 106",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_marche",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_umbria",
+    "published_scope": "Umbria census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_umbria",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 106",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_umbria",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_lazio",
+    "published_scope": "Lazio census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_lazio",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 107",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_lazio",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_abruzzi_e_molise",
+    "published_scope": "Abruzzi e Molise census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_abruzzi_e_molise",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 107",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_abruzzi_e_molise",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_campania",
+    "published_scope": "Campania census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_campania",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 107",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_campania",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_puglie",
+    "published_scope": "Puglie census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_puglie",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 108",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_puglie",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_basilicata",
+    "published_scope": "Basilicata census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_basilicata",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 108",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_basilicata",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_calabrie",
+    "published_scope": "Calabrie census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_calabrie",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 108",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_calabrie",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_sicilia",
+    "published_scope": "Sicilia census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_sicilia",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 109",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_sicilia",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
+  },
+  {
+    "id": "it_1901_sardegna",
+    "published_scope": "Sardegna census compartment, present population reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "it_1901_sardegna",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b) printed p. 109",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "it_1901_sardegna",
+    "opening_from_version": 22,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the compartment's January 1901 age and sex shares to its January 1900 opening balance by largest remainders. Retain unspecified ages.",
+    "uncertainty": "The source adjusts births and deaths before the actual census with no emigration adjustment. Changes in local composition by January 1900 and census age misstatement have no quantified interval."
   }
 ]

@@ -860,6 +860,15 @@
     "collection": "cabo_verde"
   },
   {
+    "id": "ca_yearbook_1905_table_i_origin_1901",
+    "title": "The Canada Year Book 1905, Table I",
+    "publisher": "Statistics Canada historical collection",
+    "url": "https://www66.statcan.gc.ca/eng/1905-eng.htm",
+    "locator": "Printed pp. 4–12, 1901 By race or origin rows",
+    "rights": "Historic public census. Numeric facts transcribed.",
+    "collection": "canada_origin_1901"
+  },
+  {
     "id": "ca_fourth_census_table_iv_residence",
     "title": "Fourth Census of Canada, 1901, Volume I: Population, Table IV",
     "publisher": "Census Office, Department of Agriculture, Dominion of Canada",
@@ -1602,6 +1611,35 @@
       }
     ],
     "collection": "india_comparable"
+  },
+  {
+    "id": "india_up_states_census_1901_table_2",
+    "title": "Census of India 1901, vol. I-A, Table II",
+    "publisher": "Census of India",
+    "url": "https://censusindia.gov.in/nada/index.php/catalog/31349/download/34530/140099_1901.pdf#page=10",
+    "locator": "Printed p. 6, rows 49–50",
+    "sex_source_url": "https://censusindia.gov.in/nada/index.php/catalog/32515/download/35696/22421_1941_UNI.pdf",
+    "rights": "Historic public census. Numeric facts transcribed.",
+    "collection": "india_local_areas_1901"
+  },
+  {
+    "id": "india_mysore_census_1901_report",
+    "title": "Census of India, 1901, vol. XXIV, Mysore, Part I, Report",
+    "publisher": "Mysore Government Press",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18854/GIPE-017294.pdf?isAllowed=y&sequence=3",
+    "locator": "Ch. I Appendix A p. 34, Ch. II Appendix A pp. 73–74 and Subsidiary Table D–1",
+    "sex_source_url": "https://censusindia.gov.in/nada/index.php/catalog/32422/download/35603/21325_1941_TAB.pdf",
+    "rights": "Historic public census. Numeric facts transcribed.",
+    "collection": "india_local_areas_1901"
+  },
+  {
+    "id": "india_mysore_census_1901_talukwar_table_2",
+    "title": "Census of India, 1901, Mysore, Part C, Talukwar Tables",
+    "publisher": "Mysore Government Press",
+    "url": "https://censusindia.gov.in/nada/index.php/catalog/32404/download/35585/138949_1901.pdf#page=40",
+    "locator": "Table II, printed p. 24, Hassan, Kadur and Shimoga district totals",
+    "rights": "Historic public census. Numeric facts transcribed.",
+    "collection": "india_local_areas_1901"
   },
   {
     "id": "india_1901_occupation_table_xv_part_iii",

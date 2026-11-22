@@ -1,0 +1,28 @@
+[
+  {
+    "id": "india_up_states_census_1901_table_2",
+    "title": "Census of India 1901, vol. I-A, Table II",
+    "publisher": "Census of India",
+    "url": "https://censusindia.gov.in/nada/index.php/catalog/31349/download/34530/140099_1901.pdf#page=10",
+    "locator": "Printed p. 6, rows 49\u201350",
+    "sex_source_url": "https://censusindia.gov.in/nada/index.php/catalog/32515/download/35696/22421_1941_UNI.pdf",
+    "rights": "Historic public census. Numeric facts transcribed."
+  },
+  {
+    "id": "india_mysore_census_1901_report",
+    "title": "Census of India, 1901, vol. XXIV, Mysore, Part I, Report",
+    "publisher": "Mysore Government Press",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18854/GIPE-017294.pdf?isAllowed=y&sequence=3",
+    "locator": "Ch. I Appendix A p. 34, Ch. II Appendix A pp. 73\u201374 and Subsidiary Table D\u20131",
+    "sex_source_url": "https://censusindia.gov.in/nada/index.php/catalog/32422/download/35603/21325_1941_TAB.pdf",
+    "rights": "Historic public census. Numeric facts transcribed."
+  },
+  {
+    "id": "india_mysore_census_1901_talukwar_table_2",
+    "title": "Census of India, 1901, Mysore, Part C, Talukwar Tables",
+    "publisher": "Mysore Government Press",
+    "url": "https://censusindia.gov.in/nada/index.php/catalog/32404/download/35585/138949_1901.pdf#page=40",
+    "locator": "Table II, printed p. 24, Hassan, Kadur and Shimoga district totals",
+    "rights": "Historic public census. Numeric facts transcribed."
+  }
+]
