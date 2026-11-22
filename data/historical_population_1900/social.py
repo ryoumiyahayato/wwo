@@ -255,11 +255,13 @@ def russian_cells(table, rows):
     raise ValueError(f"Unrecognized Russian social table: {table}")
 
 
-def india_structure(pools):
+def india_structure(pools, version):
     tables = json.loads((COLLECTIONS / "india_social_1901" / "census.json").read_text(encoding="utf8"))
     for table, rows in tables.items():
         dimension, classification, source, labels, definition = INDIA_TABLES[table]
         for row in rows:
+            if version < row.get("opening_from_version", 1):
+                continue
             pool_id = row["unit_id"]
             if table == "1" and pool_id == "raj_central_india_agency" and "raj_gwalior_state" in pools:
                 continue
@@ -1334,12 +1336,21 @@ def canada_reported_origin(pools):
             )
 
 
-def bengal_district_literacy(pools, observations):
+def bengal_district_literacy(pools, observations, version):
     controls = {row["unit_id"]: row for row in observations
                 if row["source_id"] == BENGAL_DISTRICT_SOURCE and row["date"] == INDIA_DATE}
-    path = COLLECTIONS / "india_bengal_districts_1901" / "bengal_literacy_1901.csv"
-    with path.open(encoding="utf-8", newline="") as source:
-        for row in csv.DictReader(source):
+    collection = COLLECTIONS / "india_bengal_districts_1901"
+    paths = [collection / "bengal_literacy_1901.csv"]
+    if version >= 28:
+        paths.extend(collection / file for file in
+                     ("bengal_district_literacy_1901.csv", "bengal_district_literacy_1901_batch2.csv",
+                      "bengal_district_literacy_1901_batch3.csv", "bengal_district_literacy_1901_batch4.csv"))
+    for path in paths:
+        source_id = ("india_bengal_census_1901_literacy" if path == paths[0]
+                     else "india_bengal_census_1901_district_literacy")
+        with path.open(encoding="utf-8", newline="") as source:
+            rows = list(csv.DictReader(source))
+        for row in rows:
             unit_id = row["unit_id"]
             control = controls[unit_id]
             pool = pools[unit_id]
@@ -1357,7 +1368,7 @@ def bengal_district_literacy(pools, observations):
                     raise ValueError(f"{unit_id}: Bengal literacy category {name} does not close")
             yield unit_id, "literacy", distribution(
                 pool["population_value"], classification=INDIA_TABLES["16"][1],
-                source="india_bengal_census_1901_literacy", date=INDIA_DATE, observed_unit=unit_id,
+                source=source_id, date=INDIA_DATE, observed_unit=unit_id,
                 scope=f"{pool['name']}, population on the March 1901 census jurisdiction",
                 locator=row["locator"], total=observed_total, observed_counts=counts, unknown=0,
                 definition="Ability to read and write a letter, all ages. English and vernacular subcolumns may overlap and are excluded. "
@@ -1373,7 +1384,7 @@ def opening_social(opening_groups, observations, *, version):
         for unit in [*(group["units"] or [group]), *group.get("statistical_aggregates", [])]
     }
     regions = {}
-    marginals = chain(russian_structure(pools), india_structure(pools), india_occupation(pools),
+    marginals = chain(russian_structure(pools), india_structure(pools, version), india_occupation(pools),
                       india_princely_residence(pools, distribution), travancore_language(pools, distribution),
                       madras_states_religion(pools, distribution, INDIA_TABLES["7"]), canada_structure(pools),
                       united_states_structure(pools, distribution), netherlands_structure(pools),
@@ -1486,7 +1497,7 @@ def opening_social(opening_groups, observations, *, version):
     if version >= 27:
         marginals = chain(marginals, uk_constituent_occupation(pools),
                           egyptian_provincial_work_and_instruction(pools, observations),
-                          bengal_district_literacy(pools, observations))
+                          bengal_district_literacy(pools, observations, version))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

@@ -87,6 +87,7 @@ impl Population {
         residence_unit: Option<&'a str>,
     ) -> io::Result<PopulationInspection<'a>> {
         let map_id = query_id.strip_prefix("state:").unwrap_or(query_id);
+        let name_alias = name_alias.or_else(|| self.opening.as_ref()?.coextensive_unit_at(map_id));
         let unit = name_alias.unwrap_or(map_id);
         let world = unit == "world";
         let total = if world {

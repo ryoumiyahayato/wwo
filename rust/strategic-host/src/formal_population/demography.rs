@@ -38,6 +38,8 @@ struct SourceGroup {
     uncertainty: String,
     #[serde(default)]
     sex_only: bool,
+    #[serde(default)]
+    unclassified_opening_residents: u64,
     bands: Vec<Band>,
 }
 
@@ -110,6 +112,7 @@ impl OpeningDemography {
                 .map_or(std::slice::from_ref(unit), |scope| scope.members.as_slice());
             if covered.iter().any(|pool| !pools.insert(pool))
                 || opening.estimate(unit).map(|row| row.population_value) != Some(group.opening_total)
+                || group.unclassified_opening_residents >= group.opening_total
                 || opening.partitions.values().any(|part| part.parent == *unit)
                 || [&group.source_id, &group.observed_unit_id, &group.observed_date,
                     &group.locator, &group.method, &group.uncertainty].iter().any(|text| text.trim().is_empty())
@@ -287,17 +290,19 @@ impl Population {
                 Ok((unit.as_str(), capacity))
             }).collect::<io::Result<Vec<_>>>()?;
             let available = pool_capacity.iter().map(|(_, count)| count).sum::<u64>();
+            let classified = available.checked_sub(group.unclassified_opening_residents)
+                .ok_or_else(|| invalid("historical unclassified population exceeds resident pool"))?;
             let denominator = u128::from(group.observed_total);
             let mut cells = Vec::new();
             for (index, band) in group.bands.iter().enumerate() {
                 for (label, sex, observed) in [("f", CohortSex::Female, band.female), ("m", CohortSex::Male, band.male)] {
                     if observed == 0 { continue; }
                     let id = CohortId::new(&group.source_id, format!("{}:{}:{label}", group.unit_id, band.id))?;
-                    let numerator = u128::from(observed) * u128::from(available);
+                    let numerator = u128::from(observed) * u128::from(classified);
                     cells.push((numerator % denominator, id, index, sex, observed, (numerator / denominator) as u64));
                 }
             }
-            let remaining = available - cells.iter().map(|cell| cell.5).sum::<u64>();
+            let remaining = classified - cells.iter().map(|cell| cell.5).sum::<u64>();
             cells.sort_unstable_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.cmp(&b.1)));
             let mut capacity = available;
             for (rank, (_, id, index, sex, observed, rounded)) in cells.into_iter().enumerate() {

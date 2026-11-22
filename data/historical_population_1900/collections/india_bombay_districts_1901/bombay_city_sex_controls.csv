@@ -1,0 +1,3 @@
+unit_id,date,scope,persons,male,female,locator
+raj_bombay_bombay_city,1891-02-26,Bombay City on 1901 census geography,821764,518093,303671,"Vol. IX-A, Part II, Imperial Table II, pp. 6–7, row 3, persons col. 3, males col. 11, females col. 15"
+raj_bombay_bombay_city,1901-03-01,Bombay City on 1901 census geography,776006,479786,296220,"Vol. IX-A, Part II, Imperial Table II, pp. 6–7, row 3, persons col. 2, males col. 10, females col. 14"

@@ -1,0 +1,10 @@
+unit_id,observed_date,observed_total,observed_male,observed_female,literate,illiterate,literate_male,literate_female,illiterate_male,illiterate_female,observed_unknown,locator
+raj_bengal_darjeeling,1901-03-01,249117,133005,116112,17442,231675,15780,1662,117225,114450,0,"Vol. VI-A, Imperial Table VIII, Part B, Darjeeling, All Religions"
+raj_bengal_mymensingh,1901-03-01,3915068,2014805,1900263,146386,3768682,139586,6800,1875219,1893463,0,"Vol. VI-A, Imperial Table VIII, Part B, Mymensingh, All Religions"
+raj_bengal_tippera,1901-03-01,2117991,1085989,1032002,136190,1981801,131250,4940,954739,1027062,0,"Vol. VI-A, Imperial Table VIII, Part B, Tippera district, All Religions"
+raj_bengal_noakhali,1901-03-01,1141728,568777,572951,61678,1080050,59673,2005,509104,570946,0,"Vol. VI-A, Imperial Table VIII, Part B, Noakhali, All Religions"
+raj_bengal_shahabad,1901-03-01,1962696,936544,1026152,83595,1879101,80273,3322,856271,1022830,0,"Vol. VI-A, Imperial Table VIII, Part B, Shahabad, All Religions, p. 78"
+raj_bengal_saran,1901-03-01,2409509,1095288,1314221,83180,2326329,80485,2695,1014803,1311526,0,"Vol. VI-A, Imperial Table VIII, Part B, Saran, All Religions, p. 78"
+raj_bengal_muzaffarpur,1901-03-01,2754790,1318547,1436243,107565,2647225,102815,4750,1215732,1431493,0,"Vol. VI-A, Imperial Table VIII, Part B, Muzaffarpur, All Religions, p. 78"
+raj_bengal_monghyr,1901-03-01,2068804,1011580,1057224,60727,2008077,58570,2157,953010,1055067,0,"Vol. VI-A, Imperial Table VIII, Part B, Monghyr, All Religions, p. 80"
+raj_bengal_malda,1901-03-01,884030,437639,446391,33093,850937,32170,923,405469,445468,0,"Vol. VI-A, Imperial Table VIII, Part B, Malda, All Religions, p. 80"

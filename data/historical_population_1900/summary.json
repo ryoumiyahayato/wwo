@@ -26,6 +26,7 @@
     "honduras_population": 25,
     "india_agra_districts_1901": 74,
     "india_bengal_districts_1901": 96,
+    "india_bombay_districts_1901": 48,
     "india_comparable": 87,
     "india_local_areas_1901": 43,
     "india_princely_1901": 10,
@@ -57,7 +58,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 252,
+  "cited_sources": 257,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -72,7 +73,7 @@
   "legacy_only_people": 127294707,
   "authoritative_total_for_new_game": 1467636413,
   "roots_with_partitions": 27,
-  "disjoint_leaves": 1155,
+  "disjoint_leaves": 1178,
   "people_in_partitions": 1269631115,
   "unlocated_balances_under_research_controls": [
     {
@@ -100,8 +101,8 @@
       "people": 26
     }
   ],
-  "partitions_with_explicit_places": 37,
-  "people_in_partitions_with_explicit_places": 89153272,
+  "partitions_with_explicit_places": 39,
+  "people_in_partitions_with_explicit_places": 90538252,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
   "political_catalogue_members_of_production_groups": 65,
@@ -132,8 +133,8 @@
       "with_opening_partition": 132
     }
   },
-  "city_observation_count": 2271,
-  "city_keys_after_reviewed_matches": 1697,
+  "city_observation_count": 2273,
+  "city_keys_after_reviewed_matches": 1698,
   "nonadditive_city_panels": [
     {
       "source_id": "ar_dge_bulletin_219",
@@ -198,6 +199,20 @@
     },
     {
       "source_id": "india_bengal_census_1901_districts",
+      "date": "1901-03-01",
+      "bands": {
+        "500k+": 1
+      }
+    },
+    {
+      "source_id": "india_bombay_census_1901_districts",
+      "date": "1891-02-26",
+      "bands": {
+        "500k+": 1
+      }
+    },
+    {
+      "source_id": "india_bombay_census_1901_districts",
       "date": "1901-03-01",
       "bands": {
         "500k+": 1
@@ -325,7 +340,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2591,
+  "source_statistical_units": 2614,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 29,
@@ -341,7 +356,7 @@
     }
   },
   "city_index_representative_bands": {
-    "500k+": 43,
+    "500k+": 44,
     "100k–<200k": 143,
     "50k–<100k": 358,
     "200k–<500k": 100
@@ -373,12 +388,12 @@
       "unknown_people": 1335615644
     },
     "literacy": {
-      "assigned_people": 252443085,
-      "unknown_people": 1215193328
+      "assigned_people": 312169329,
+      "unknown_people": 1155467084
     },
     "marital_status": {
-      "assigned_people": 265367237,
-      "unknown_people": 1202269176
+      "assigned_people": 339717927,
+      "unknown_people": 1127918486
     },
     "occupation": {
       "assigned_people": 104206586,
@@ -453,9 +468,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 836827409,
-  "structure_opening_pool_count": 798,
-  "structure_opening_residents_outside_modeled_pools": 630809004,
+  "structure_opening_pool_controls": 839583189,
+  "structure_opening_pool_count": 827,
+  "structure_opening_residents_outside_modeled_pools": 628053224,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -5197,17 +5212,178 @@
       "observed_date": "1901-03-01"
     },
     {
-      "unit_id": "raj_bombay_presidency",
-      "opening_total": 18575361,
-      "observed_unit_id": "raj_bombay_with_aden_1901_census",
-      "observed_total": 18559561,
-      "observed_date": "1901-03-01"
+      "unit_id": "raj_bombay_ahmedabad",
+      "opening_total": 810530,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 810530,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_ahmednagar",
+      "opening_total": 843618,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 843618,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_belgaum",
+      "opening_total": 996213,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 996213,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_bijapur",
+      "opening_total": 742500,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 742500,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_bombay_city",
+      "opening_total": 781314,
+      "observed_unit_id": "raj_bombay_bombay_city",
+      "observed_total": 781314,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_broach",
+      "opening_total": 297532,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 297532,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_dharwar",
+      "opening_total": 1106096,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 1106096,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_hyderabad",
+      "opening_total": 974293,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 974293,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_kaira",
+      "opening_total": 734367,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 734367,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_kanara",
+      "opening_total": 453558,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 453558,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_karachi",
+      "opening_total": 603666,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 603666,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_khandesh",
+      "opening_total": 1428243,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 1428243,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_kolaba",
+      "opening_total": 604325,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 604325,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_nasik",
+      "opening_total": 819635,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 819635,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_panch_mahals",
+      "opening_total": 267098,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 267098,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_poona",
+      "opening_total": 1003737,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 1003737,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_ratnagiri",
+      "opening_total": 1160735,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 1160735,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_satara",
+      "opening_total": 1155773,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 1155773,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_shikarpur",
+      "opening_total": 1005389,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 1005389,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_sholapur",
+      "opening_total": 724424,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 724424,
+      "observed_date": "1900-01-01"
     },
     {
       "unit_id": "raj_bombay_states",
-      "opening_total": 7021967,
+      "opening_total": 7044776,
       "observed_unit_id": "raj_bombay_states_1901_full_census",
-      "observed_total": 7021967,
+      "observed_total": 7044776,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_surat",
+      "opening_total": 638522,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 638522,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_thana",
+      "opening_total": 812378,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 812378,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_thar_and_parkar",
+      "opening_total": 363231,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 363231,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_bombay_upper_sind_frontier",
+      "opening_total": 225375,
+      "observed_unit_id": "raj_bombay_with_aden_without_bombay_city",
+      "observed_total": 225375,
       "observed_date": "1900-01-01"
     },
     {
@@ -5692,6 +5868,48 @@
       "observed_unit_id": "statistical_area:bosnia_herzegovina_1900",
       "observed_total": 1568092,
       "observed_date": "1895-04-22"
+    },
+    {
+      "unit_id": "tw_register_penghu",
+      "opening_total": 52256,
+      "observed_unit_id": "tw_register_penghu",
+      "observed_total": 52256,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "tw_register_taichung",
+      "opening_total": 816079,
+      "observed_unit_id": "tw_register_taichung",
+      "observed_total": 816079,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "tw_register_tainan",
+      "opening_total": 1005179,
+      "observed_unit_id": "tw_register_tainan",
+      "observed_total": 1002798,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "tw_register_taipei",
+      "opening_total": 735922,
+      "observed_unit_id": "tw_register_taipei",
+      "observed_total": 735922,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "tw_register_taitung",
+      "opening_total": 49178,
+      "observed_unit_id": "tw_register_taitung",
+      "observed_total": 49178,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "tw_register_yilan",
+      "opening_total": 99547,
+      "observed_unit_id": "tw_register_yilan",
+      "observed_total": 99547,
+      "observed_date": "1899-12-31"
     },
     {
       "unit_id": "uk_ancient_kent_middlesex_surrey",
@@ -6628,8 +6846,8 @@
         "opening_control": 294000000,
         "in_model_pools": 280227580,
         "outside_model_pools": 13772420,
-        "modeled_age_and_sex": 280177550,
-        "modeled_sex_age_unknown": 50030
+        "modeled_age_and_sex": 280177545,
+        "modeled_sex_age_unknown": 50035
       },
       {
         "opening_unit_id": "cshapes_gw_780",
@@ -7022,10 +7240,10 @@
         "opening_unit_id": "taiwan_under_japan",
         "research_region": "Asia",
         "opening_control": 2796343,
-        "in_model_pools": 0,
-        "outside_model_pools": 2796343,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 2755780,
+        "outside_model_pools": 40563,
+        "modeled_age_and_sex": 2563147,
+        "modeled_sex_age_unknown": 192633
       },
       {
         "opening_unit_id": "united_states_1900",
@@ -7093,18 +7311,18 @@
       },
       "Asia": {
         "opening_control": 805719965,
-        "in_model_pools": 327709490,
-        "outside_model_pools": 478010475,
-        "modeled_age_and_sex": 327659134,
-        "modeled_sex_age_unknown": 50356
+        "in_model_pools": 330465270,
+        "outside_model_pools": 475254695,
+        "modeled_age_and_sex": 330222276,
+        "modeled_sex_age_unknown": 242994
       }
     },
     "world": {
       "opening_control": 1467636413,
-      "in_model_pools": 836827409,
-      "outside_model_pools": 630809004,
-      "modeled_age_and_sex": 829583006,
-      "modeled_sex_age_unknown": 7244403
+      "in_model_pools": 839583189,
+      "outside_model_pools": 628053224,
+      "modeled_age_and_sex": 832146148,
+      "modeled_sex_age_unknown": 7437041
     }
   },
   "opening_count_basis": {

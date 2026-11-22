@@ -19,6 +19,24 @@
     "urban_identity_url": "https://health.gov.taipei/cp.aspx?n=2C1C8F893C0E9275&s=6FECF69D6883EC90"
   },
   {
+    "id": "tw_governor_general_1899_age_sex",
+    "title": "臺灣總督府第三統計書（明治三十二年）",
+    "publisher": "臺灣總督府, 1901. National Diet Library.",
+    "url": "https://dl.ndl.go.jp/pid/805831",
+    "locator": "Tables XVI and XVIII, pp. 43, 57–58; Tables XIX and XX, pp. 63–68.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "taiwan_1899_registration_age_sex.csv"
+  },
+  {
+    "id": "tw_governor_general_1905_census_age_sex",
+    "title": "明治三十八年臨時臺灣戶口調查結果表",
+    "publisher": "臺灣總督府. National Diet Library.",
+    "url": "https://dl.ndl.go.jp/pid/805872/1/22",
+    "locator": "Tables III, IX and XIV, age pp. 26–27. Reference only.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "taiwan_1905_census_age_sex.csv"
+  },
+  {
     "id": "jp_cabinet_1900_yearbook_foreign",
     "title": "日本帝國第十九統計年鑑, 本邦在留外國人",
     "publisher": "内閣統計局, 1900. Facsimile at Hitotsubashi University, Institute of Economic Research.",

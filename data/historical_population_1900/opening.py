@@ -17,6 +17,7 @@ AGRA_DISTRICT_SOURCE = "india_agra_census_1901_districts"
 AGRA_DISTRICT_BALANCE = "raj_agra_unlocated_table_ii_a"
 BENGAL_DISTRICT_SOURCE = "india_bengal_census_1901_districts"
 BENGAL_DISCREPANCY = "raj_bengal_unlocated_comparison"
+BOMBAY_DISTRICT_SOURCE = "india_bombay_census_1901_districts"
 MADRAS_STATES_REMAINDER = "raj_madras_states_ex_cochin_travancore"
 MADRAS_STATES_AGE_SOURCE = "india_madras_1901_princely_age_and_religion"
 
@@ -779,6 +780,47 @@ def add_bengal_districts(group, observations):
     group["statistical_aggregates"].append(province)
 
 
+def add_bombay_districts(group, observations):
+    presidency_id = "raj_bombay_presidency"
+    states_id = "raj_bombay_states"
+    parents = {unit["unit_id"]: unit for unit in group["units"] if unit["unit_id"] in (presidency_id, states_id)}
+    dates = group["endpoint_dates"]
+    collection = HERE / "collections" / "india_bombay_districts_1901"
+    with (collection / "bombay_endpoint_sex_controls.csv").open(encoding="utf8", newline="") as source:
+        controls = {(row["unit_id"], row["date"]): row for row in csv.DictReader(source)}
+    changes = {}
+    for unit_id, parent in parents.items():
+        rows = [controls[(unit_id, when)] for when in dates]
+        endpoints = [int(row["persons"]) for row in rows]
+        changes[unit_id] = [new - old for new, old in zip(endpoints, parent["endpoint_values"], strict=True)]
+        delta, repeated = changes[unit_id]
+        if delta != repeated:
+            raise ValueError(f"{unit_id}: Bombay scope difference varies across census endpoints")
+        parent.update(
+            endpoint_values=endpoints, source_dates=dates, date=DATE,
+            population_value=parent["population_value"] + delta,
+            source_id=BOMBAY_DISTRICT_SOURCE, locator="; ".join(row["locator"] for row in rows),
+            scope=rows[-1]["scope"],
+            method="Interpolate the 1891 and 1901 census counts on the common March 1901 jurisdiction.",
+            uncertainty_kind="Enumeration and interpolation error, including the effects of famine and migration, are unquantified.",
+        )
+    if sum(changes[unit_id][0] for unit_id in (presidency_id, states_id)):
+        raise ValueError("British Bombay and Bombay States scope changes do not cancel")
+    districts = [row for row in observations if row["source_id"] == BOMBAY_DISTRICT_SOURCE
+                 and row["parent_id"] == presidency_id]
+    if len(districts) != 48:
+        raise ValueError("Bombay Presidency requires two census counts in each of 24 districts")
+    presidency = parents[presidency_id]
+    children = interpolate_partition(districts, presidency, dates)
+    places = {row["unit_id"]: row["place_ids"] for row in districts if row.get("place_ids")}
+    for child in children:
+        child.update(statistical_parent=presidency_id, date=DATE, place_ids=places.get(child["unit_id"], []),
+                     uncertainty_kind=presidency["uncertainty_kind"])
+    group["statistical_aggregates"].append(presidency)
+    group["units"] = sorted([unit for unit in group["units"] if unit is not presidency] + children,
+                            key=lambda row: row["unit_id"])
+
+
 def portuguese_opening(previous, observations):
     root = previous["unit_id"]
     dates = ["1890-12-01", "1900-12-01"]
@@ -1320,6 +1362,12 @@ def groups(observations, version=1):
     if version >= 27:
         add_remaining_madras_states(result["cshapes_gw_750"], observations)
         add_bengal_districts(result["cshapes_gw_750"], observations)
+    if version >= 28:
+        india = result["cshapes_gw_750"]
+        add_bombay_districts(india, observations)
+        for unit in india["units"]:
+            if unit["unit_id"] in {"raj_bengal_calcutta", "raj_bombay_bombay_city"}:
+                unit["coextensive_place"] = True
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

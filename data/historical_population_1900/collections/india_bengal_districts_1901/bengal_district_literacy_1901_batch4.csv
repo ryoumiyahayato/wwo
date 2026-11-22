@@ -1,0 +1,8 @@
+unit_id,observed_date,observed_total,observed_male,observed_female,literate,illiterate,literate_male,literate_female,illiterate_male,illiterate_female,observed_unknown,locator
+raj_bengal_nadia,1901-03-01,1667491,827509,839982,93375,1574116,86107,7268,741402,832714,0,"Vol. VI-A, Imperial Table VIII, Part B, Nadia, All Religions, p. 68"
+raj_bengal_murshidabad,1901-03-01,1333184,653346,679838,73476,1259708,69649,3827,583697,676011,0,"Vol. VI-A, Imperial Table VIII, Part B, Murshidabad, All Religions, p. 68"
+raj_bengal_chittagong,1901-03-01,1353250,641392,711858,78319,1274931,76106,2213,565286,709645,0,"Vol. VI-A, Imperial Table VIII, Part B, Chittagong, All Religions, p. 76"
+raj_bengal_chittagong_hill_tracts,1901-03-01,124762,68238,56524,5576,119186,5339,237,62899,56287,0,"Vol. VI-A, Imperial Table VIII, Part B, Chittagong Hill Tracts, All Religions, p. 76"
+raj_bengal_puri,1901-03-01,1017284,506839,510445,72667,944617,70640,2027,436199,508418,0,"Vol. VI-A, Imperial Table VIII, Part B, Puri, All Religions, p. 84"
+raj_bengal_ranchi,1901-03-01,1187925,577180,610745,32531,1155394,29625,2906,547555,607839,0,"Vol. VI-A, Imperial Table VIII, Part B, Ranchi, All Religions, p. 84"
+raj_bengal_palamau,1901-03-01,619600,306203,313397,11851,607749,11434,417,294769,312980,0,"Vol. VI-A, Imperial Table VIII, Part B, Palamau, All Religions, p. 84"
