@@ -2913,13 +2913,15 @@ mod tests {
         assert_eq!(city.account_id, Some("raj_bombay_bombay_city"));
         assert_eq!(city.population_total, Some(781_314));
         assert_eq!(city.structure.unwrap().residents_with_cohort_age_and_sex, 781_295);
-        let social = city.social.unwrap();
+        let v39 = bootstrap.base_opening_version("country_fra", None, Some(39)).unwrap();
+        let city_v39 = v39.inspect_population("place:bombay").unwrap();
+        let social = city_v39.social.unwrap();
         assert_eq!(social.dimensions["religion"].assigned_residents, 780_671);
         assert_eq!(social.dimensions["religion"].unknown_residents, 643);
         assert_eq!(social.dimensions["marital_status"].assigned_residents, 781_314);
         assert_eq!(social.dimensions["literacy"].assigned_residents, 781_314);
-        assert_eq!(city.dietary_norms[0].residents_with_matching_religion, 156_812);
-        assert_eq!(city.dietary_norms[1].residents_with_matching_religion, 5_394);
+        assert_eq!(city_v39.dietary_norms[0].residents_with_matching_religion, 156_812);
+        assert_eq!(city_v39.dietary_norms[1].residents_with_matching_religion, 5_394);
         assert!(world.inspect_population("place:karachi").unwrap().population_total.is_none());
         let states = world.inspect_population("raj_bombay_states").unwrap();
         assert_eq!(states.population_total, Some(7_044_776));

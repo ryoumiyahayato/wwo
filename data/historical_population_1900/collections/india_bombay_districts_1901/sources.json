@@ -27,6 +27,15 @@
     "rights": "Published historical numeric facts"
   },
   {
+    "id": "india_bombay_city_1901_religion_detailed",
+    "title": "Census of India, 1901, Vol. I-A: Bombay and Cantonment by religion",
+    "publisher": "Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n42/mode/2up",
+    "locator": "Table V, pp. 38–39, columns 3–23, Bombay and Cantonment; Gazetteer of Bombay City and Island, Vol. I, Chapter III for Jews.",
+    "raw_paths": ["bombay_city_religion_1901_detailed.csv", "RELIGION.md"],
+    "rights": "Published historical numeric facts"
+  },
+  {
     "id": "india_bombay_city_1901_marital_status",
     "title": "Census of India, 1901, Vol. I-A: Special Tables for Cities",
     "publisher": "Government of India",

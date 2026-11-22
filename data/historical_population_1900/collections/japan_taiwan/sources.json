@@ -4,7 +4,8 @@
     "title": "道府縣現住人口 自明治十七年至同四十年",
     "publisher": "内閣統計局, 1909",
     "url": "https://doi.org/10.11501/805921",
-    "locator": "凡例 一–三, printed pp. 2–12, 乙種道府縣現住人口",
+    "locator": "凡例 一–三, printed pp. 2–12, 乙種道府縣現住人口; pp. 14–19, 乙種道府縣現住人口男女別.",
+    "raw_paths": ["japan_prefectures_otsu_sex.csv", "japan_national_otsu_sex.csv", "PREFECTURE_SEX.md"],
     "rights": "Public-domain historical government statistical publication. Numerical transcription only.",
     "interpretation_url": "https://www.stat.go.jp/english/data/nenkan/1431-02e.html"
   },

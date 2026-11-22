@@ -1901,6 +1901,19 @@
     "collection": "india_bombay_districts_1901"
   },
   {
+    "id": "india_bombay_city_1901_religion_detailed",
+    "title": "Census of India, 1901, Vol. I-A: Bombay and Cantonment by religion",
+    "publisher": "Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n42/mode/2up",
+    "locator": "Table V, pp. 38–39, columns 3–23, Bombay and Cantonment; Gazetteer of Bombay City and Island, Vol. I, Chapter III for Jews.",
+    "raw_paths": [
+      "bombay_city_religion_1901_detailed.csv",
+      "RELIGION.md"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "india_bombay_districts_1901"
+  },
+  {
     "id": "india_bombay_city_1901_marital_status",
     "title": "Census of India, 1901, Vol. I-A: Special Tables for Cities",
     "publisher": "Government of India",
@@ -2278,7 +2291,12 @@
     "title": "道府縣現住人口 自明治十七年至同四十年",
     "publisher": "内閣統計局, 1909",
     "url": "https://doi.org/10.11501/805921",
-    "locator": "凡例 一–三, printed pp. 2–12, 乙種道府縣現住人口",
+    "locator": "凡例 一–三, printed pp. 2–12, 乙種道府縣現住人口; pp. 14–19, 乙種道府縣現住人口男女別.",
+    "raw_paths": [
+      "japan_prefectures_otsu_sex.csv",
+      "japan_national_otsu_sex.csv",
+      "PREFECTURE_SEX.md"
+    ],
     "rights": "Public-domain historical government statistical publication. Numerical transcription only.",
     "interpretation_url": "https://www.stat.go.jp/english/data/nenkan/1431-02e.html",
     "collection": "japan_taiwan"

@@ -1,0 +1,5 @@
+unit_id,label,printed_area,source_date,male,female,printed_total,sex_sum_minus_printed_total,source_id,source_print_page,source_url
+empire_of_japan,Japan,內地總計,1898-12-31,22054200,21662000,43716400,-200,jp_cabinet_1909_resident_prefectures,19,"https://dl.ndl.go.jp/api/iiif/805921/R0000015/full/3800,/0/default.jpg"
+empire_of_japan,Japan,內地總計,1899-12-31,22338100,21931800,44269900,0,jp_cabinet_1909_resident_prefectures,19,"https://dl.ndl.go.jp/api/iiif/805921/R0000015/full/3800,/0/default.jpg"
+empire_of_japan,Japan,內地總計,1900-12-31,22628100,22203200,44831300,0,jp_cabinet_1909_resident_prefectures,19,"https://dl.ndl.go.jp/api/iiif/805921/R0000015/full/3800,/0/default.jpg"
+empire_of_japan,Japan,內地總計,1903-12-31,23535300,23052400,46588000,-300,jp_cabinet_1909_resident_prefectures,19,"https://dl.ndl.go.jp/api/iiif/805921/R0000015/full/3800,/0/default.jpg"
