@@ -1,6 +1,6 @@
 {
   "format_version": 1,
-  "current_version": 33,
+  "current_version": 34,
   "market_calibration_version": 4,
   "versions": {
     "1": {
@@ -157,6 +157,11 @@
       "opening": "opening_v33.json",
       "demography": "opening_structure_v33.json",
       "social": "opening_social_v33.json"
+    },
+    "34": {
+      "opening": "opening_v34.json",
+      "demography": "opening_structure_v34.json",
+      "social": "opening_social_v34.json"
     }
   }
 }

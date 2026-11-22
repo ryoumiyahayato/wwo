@@ -1562,13 +1562,14 @@ def argentine_occupation(pools, version):
                        "ambiguous categories and unresolved subtotal differences remain unassigned.",
             **metadata,
         )
-        yield unit_id, "class", distribution(
-            count, classification="argentina_1895_reported_estate_owners",
-            observed_counts={"Hacendados": owners}, unknown=total - owners,
-            definition="Residents enumerated in the Hacendados (rural estate owner) category. "
-                       "Other forms of ownership and social status remain unassigned.",
-            **metadata,
-        )
+        if owners:
+            yield unit_id, "class", distribution(
+                count, classification="argentina_1895_reported_estate_owners",
+                observed_counts={"Hacendados": owners}, unknown=total - owners,
+                definition="Residents enumerated in the Hacendados (rural estate owner) category. "
+                           "Other forms of ownership and social status remain unassigned.",
+                **metadata,
+            )
     if consumed != by_source.keys():
         raise ValueError("Argentine occupation sources have no exclusive opening account")
 

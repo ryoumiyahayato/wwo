@@ -26,9 +26,9 @@
         "khedivate_of_egypt",
         "sultanate_of_zanzibar"
       ],
-      "production_people": 14566135,
-      "production_pct_of_regional_research_estimate": 11.207,
-      "people_with_opening_subdivision": 6388459,
+      "production_people": 17298327,
+      "production_pct_of_regional_research_estimate": 13.309,
+      "people_with_opening_subdivision": 9120651,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -95,7 +95,7 @@
       ],
       "production_people": 787661987,
       "production_pct_of_regional_research_estimate": 88.068,
-      "people_with_opening_subdivision": 741052131,
+      "people_with_opening_subdivision": 731784726,
       "research_only_units": 25,
       "research_only_people": 79176163
     },
@@ -3223,9 +3223,9 @@
         "Africa"
       ],
       "research_people": 10110129,
-      "documented_opening_people": 5814464,
+      "documented_opening_people": 8546656,
       "opening_people_including_retained_balances": 10000000,
-      "research_minus_documented": 4295665
+      "research_minus_documented": 1563473
     },
     {
       "comparison_id": "france",
@@ -4320,23 +4320,23 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1347312899,
+    "documented_opening_population": 1350045091,
     "untouched_legacy_population": 98080000,
-    "retained_unlocated_population": 29204853,
+    "retained_unlocated_population": 26472661,
     "authoritative_opening_population": 1474597752,
-    "published_minus_documented_opening": 247761349,
+    "published_minus_documented_opening": 245029157,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 210965672,
       "comparisons_by_scope": {
         "scope_unconfirmed": 825196,
         "comparable_extent": 2078531,
-        "partial_extent": 33891522,
+        "partial_extent": 31159330,
         "adopted_research_series": 426
       },
       "opening_without_benchmark_link": 0,
       "untouched_legacy_controls": -98080000,
-      "unlocated_balances_under_retained_controls": -29204853
+      "unlocated_balances_under_retained_controls": -26472661
     },
     "published_minus_authoritative_opening": 120476496
   }
