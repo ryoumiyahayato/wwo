@@ -3,7 +3,7 @@ use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io, sync::OnceLock};
 
-pub(crate) const CURRENT_VERSION: u32 = 27;
+pub(crate) const CURRENT_VERSION: u32 = 28;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct OpeningPopulationEstimate {
@@ -43,6 +43,7 @@ pub(super) struct Partition {
     pub(super) parent: String,
     pub(super) name: String,
     pub(super) statistical_parent: Option<String>,
+    coextensive_place: bool,
 }
 
 pub(super) struct StatisticalAggregate {
@@ -100,6 +101,8 @@ struct Unit {
     context: EstimateContext,
     #[serde(default)]
     place_ids: Vec<String>,
+    #[serde(default)]
+    coextensive_place: bool,
     statistical_parent: Option<String>,
 }
 
@@ -137,7 +140,8 @@ impl HistoricalOpening {
             24 => include_bytes!("../../../../data/historical_population_1900/opening_v24.json"),
             25 => include_bytes!("../../../../data/historical_population_1900/opening_v25.json"),
             26 => include_bytes!("../../../../data/historical_population_1900/opening_v26.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v27.json"),
+            27 => include_bytes!("../../../../data/historical_population_1900/opening_v27.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v28.json"),
             _ => return Err(invalid("unsupported historical population opening version")),
         };
         let manifest: Manifest = serde_json::from_slice(bytes)?;
@@ -179,6 +183,7 @@ impl HistoricalOpening {
                 let id = leaf.unit_id;
                 if id.trim().is_empty() || leaf.name.trim().is_empty() || known_polity(&id)
                     || !occupied_scopes.insert(id.clone()) || leaf.population_value == 0
+                    || leaf.coextensive_place && leaf.place_ids.len() != 1
                 {
                     return Err(invalid(format!("invalid historical population partition {id}")));
                 }
@@ -211,6 +216,7 @@ impl HistoricalOpening {
                 }
                 opening.partitions.insert(id, Partition {
                     parent: root.clone(), name: leaf.name, statistical_parent: leaf.statistical_parent,
+                    coextensive_place: leaf.coextensive_place,
                 });
             }
             for aggregate in group.statistical_aggregates {
@@ -286,7 +292,8 @@ impl HistoricalOpening {
             24 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v24.json"),
             25 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v25.json"),
             26 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v26.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v27.json"),
+            27 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v27.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v28.json"),
             _ => return Ok(opening),
         };
         opening.demography = OpeningDemography::load(&opening, demography)?;
@@ -308,7 +315,8 @@ impl HistoricalOpening {
             24 => include_bytes!("../../../../data/historical_population_1900/opening_social_v24.json"),
             25 => include_bytes!("../../../../data/historical_population_1900/opening_social_v25.json"),
             26 => include_bytes!("../../../../data/historical_population_1900/opening_social_v26.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_social_v27.json"),
+            27 => include_bytes!("../../../../data/historical_population_1900/opening_social_v27.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_social_v28.json"),
             _ => return Ok(opening),
         };
         opening.social = OpeningSocial::load(&opening, social)?;
@@ -350,6 +358,11 @@ impl HistoricalOpening {
 
     pub(crate) fn unit_at(&self, place: &str) -> Option<&str> {
         self.places.get().unwrap_or(&self.declared_places).get(place).map(String::as_str)
+    }
+
+    pub(super) fn coextensive_unit_at(&self, place: &str) -> Option<&str> {
+        let unit = self.declared_places.get(place)?;
+        self.partitions[unit].coextensive_place.then_some(unit.as_str())
     }
 
     pub(crate) fn totals(&self, legacy: &BTreeMap<String, u64>) -> BTreeMap<String, u64> {

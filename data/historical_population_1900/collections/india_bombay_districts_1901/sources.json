@@ -1,0 +1,20 @@
+[
+  {
+    "id": "india_bombay_census_1901_districts",
+    "title": "Census of India, 1901, Vol. IX-A: Bombay, Part II, Imperial Tables",
+    "publisher": "Government Central Press, Bombay",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18874/GIPE-027715.pdf?isAllowed=y&sequence=3",
+    "locator": "Imperial Table II, printed pp. 5–7. Comparable district populations and British Districts and Native States control rows.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "bombay_districts.csv"
+  },
+  {
+    "id": "india_bombay_city_1901_age",
+    "title": "Census of India, 1901, Vol. I-A: Special Tables for Cities",
+    "publisher": "Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n440/mode/1up",
+    "locator": "Table VII, printed p. 438, Bombay City, columns 2–4.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "bombay_city_age_1901.csv"
+  }
+]

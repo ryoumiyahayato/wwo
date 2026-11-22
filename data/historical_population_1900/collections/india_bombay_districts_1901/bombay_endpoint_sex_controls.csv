@@ -1,0 +1,5 @@
+unit_id,date,scope,persons,male,female,locator
+raj_bombay_presidency,1891-02-26,British Districts on 1901 census geography excluding Aden,18834235,9751422,9082813,"Vol. IX-A, Part II, Imperial Table II, pp. 6–7, row 2, persons col. 3, males col. 11, females col. 15"
+raj_bombay_presidency,1901-03-01,British Districts on 1901 census geography excluding Aden,18515587,9552879,8962708,"Vol. IX-A, Part II, Imperial Table II, pp. 6–7, row 2, persons col. 2, males col. 10, females col. 14"
+raj_bombay_states,1891-02-26,Native States and Agencies on 1901 census geography excluding Baroda,8082107,4131770,3950337,"Vol. IX-A, Part II, Imperial Table II, pp. 6–7, row 31, persons col. 3, males col. 11, females col. 15"
+raj_bombay_states,1901-03-01,Native States and Agencies on 1901 census geography excluding Baroda,6908648,3513003,3395645,"Vol. IX-A, Part II, Imperial Table II, pp. 6–7, row 31, persons col. 2, males col. 10, females col. 14"

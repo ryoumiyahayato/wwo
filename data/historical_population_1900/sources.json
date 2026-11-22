@@ -1715,6 +1715,36 @@
     "collection": "india_bengal_districts_1901"
   },
   {
+    "id": "india_bengal_census_1901_district_literacy",
+    "title": "Census of India, 1901, Vol. VI-A: Bengal, Part II, Imperial Tables",
+    "publisher": "Government of Bengal",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18817/GIPE-017256.pdf?isAllowed=y&sequence=3",
+    "locator": "Table VIII, Education, part B, district All Religions rows, checked against Tables I and II.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "README.md",
+    "collection": "india_bengal_districts_1901"
+  },
+  {
+    "id": "india_bombay_census_1901_districts",
+    "title": "Census of India, 1901, Vol. IX-A: Bombay, Part II, Imperial Tables",
+    "publisher": "Government Central Press, Bombay",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18874/GIPE-027715.pdf?isAllowed=y&sequence=3",
+    "locator": "Imperial Table II, printed pp. 5–7. Comparable district populations and British Districts and Native States control rows.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "bombay_districts.csv",
+    "collection": "india_bombay_districts_1901"
+  },
+  {
+    "id": "india_bombay_city_1901_age",
+    "title": "Census of India, 1901, Vol. I-A: Special Tables for Cities",
+    "publisher": "Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n440/mode/1up",
+    "locator": "Table VII, printed p. 438, Bombay City, columns 2–4.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "bombay_city_age_1901.csv",
+    "collection": "india_bombay_districts_1901"
+  },
+  {
     "id": "india_census_1901_comparable_area",
     "title": "Census of India, 1901, Vol. I-A, India, Part II, Tables. Government of India, 1903.",
     "publisher": "Government of India, 1903",
@@ -2048,6 +2078,26 @@
     "rights": "Historical government statistics. Selected numerical facts transcribed from the public archive.",
     "download_url": "https://www.digital.archives.go.jp/content/item/da12/C100048915200/raw/0710.pdf",
     "urban_identity_url": "https://health.gov.taipei/cp.aspx?n=2C1C8F893C0E9275&s=6FECF69D6883EC90",
+    "collection": "japan_taiwan"
+  },
+  {
+    "id": "tw_governor_general_1899_age_sex",
+    "title": "臺灣總督府第三統計書（明治三十二年）",
+    "publisher": "臺灣總督府, 1901. National Diet Library.",
+    "url": "https://dl.ndl.go.jp/pid/805831",
+    "locator": "Tables XVI and XVIII, pp. 43, 57–58; Tables XIX and XX, pp. 63–68.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "taiwan_1899_registration_age_sex.csv",
+    "collection": "japan_taiwan"
+  },
+  {
+    "id": "tw_governor_general_1905_census_age_sex",
+    "title": "明治三十八年臨時臺灣戶口調查結果表",
+    "publisher": "臺灣總督府. National Diet Library.",
+    "url": "https://dl.ndl.go.jp/pid/805872/1/22",
+    "locator": "Tables III, IX and XIV, age pp. 26–27. Reference only.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "taiwan_1905_census_age_sex.csv",
     "collection": "japan_taiwan"
   },
   {

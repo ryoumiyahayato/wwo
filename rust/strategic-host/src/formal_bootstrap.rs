@@ -2399,7 +2399,15 @@ mod tests {
         let tainan = world.inspect_population("tw_register_tainan").unwrap();
         assert_eq!(tainan.parent_id, Some("taiwan_under_japan"));
         assert_eq!(tainan.population_total, Some(1_005_179));
-        assert_eq!(tainan.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        let tainan_structure = tainan.structure.unwrap();
+        assert_eq!(tainan_structure.unclassified_residents, 2_381);
+        assert_eq!(tainan_structure.cohort_residents, 1_002_798);
+        let taiwan_structure = report.structure.unwrap();
+        assert_eq!(taiwan_structure.residents_with_cohort_age_and_sex, 2_563_147);
+        assert_eq!(taiwan_structure.unclassified_residents, 40_563);
+        let yilan = world.inspect_population("tw_register_yilan").unwrap().structure.unwrap();
+        assert_eq!(yilan.cohort_residents, 99_547);
+        assert_eq!(yilan.residents_with_cohort_age_and_sex, 0);
         let old = bootstrap.base_opening_version("country_fra", None, Some(20)).unwrap();
         assert_eq!(old.population().population_total("taiwan_under_japan"), None);
         for scope in ["qing_empire", "empire_of_japan"] {
@@ -2666,7 +2674,7 @@ mod tests {
     #[test]
     fn historical_indian_princely_ages_and_uk_occupations_keep_census_scopes() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(27)).unwrap();
         let old = bootstrap.base_opening_version("country_fra", None, Some(26)).unwrap();
         let bombay = world.inspect_population("raj_bombay_states").unwrap();
         assert_eq!(bombay.population_total, Some(7_021_967));
@@ -2705,6 +2713,28 @@ mod tests {
     }
 
     #[test]
+    fn historical_bombay_common_jurisdiction_preserves_india_and_models_local_ages() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let old = bootstrap.base_opening_version("country_fra", None, Some(27)).unwrap();
+        assert_eq!(world.population().population_total("cshapes_gw_750"),
+                   old.population().population_total("cshapes_gw_750"));
+        let presidency = world.inspect_population("raj_bombay_presidency").unwrap();
+        assert_eq!(presidency.population_total, Some(18_552_552));
+        assert_eq!(presidency.children.len(), 24);
+        assert_eq!(presidency.children.iter().map(|child| child.population_total).sum::<u64>(), 18_552_552);
+        let city = world.inspect_population("place:bombay").unwrap();
+        assert_eq!(city.account_id, Some("raj_bombay_bombay_city"));
+        assert_eq!(city.population_total, Some(781_314));
+        assert_eq!(city.structure.unwrap().residents_with_cohort_age_and_sex, 781_295);
+        assert!(world.inspect_population("place:karachi").unwrap().population_total.is_none());
+        let states = world.inspect_population("raj_bombay_states").unwrap();
+        assert_eq!(states.population_total, Some(7_044_776));
+        assert_eq!(states.structure.unwrap().residents_with_cohort_age_and_sex, 7_039_427);
+        assert_eq!(old.inspect_population("raj_bombay_states").unwrap().population_total, Some(7_021_967));
+    }
+
+    #[test]
     fn historical_bengal_districts_preserve_the_opening_balance_and_local_sex_profiles() {
         use crate::formal_population::CohortSex;
         let bootstrap = WorldBootstrap::load().unwrap();
@@ -2718,13 +2748,15 @@ mod tests {
         assert_eq!(bengal.population_total, Some(74_350_690));
         let bengal_social = bengal.social.unwrap();
         assert_eq!(bengal_social.dimensions["religion"].unknown_residents, 227);
+        assert_eq!(bengal_social.dimensions["marital_status"].assigned_residents, 74_350_690);
         let balance = world.inspect_population("raj_bengal_unlocated_comparison").unwrap();
         assert_eq!(balance.population_total, Some(26));
         assert_eq!(balance.structure.unwrap().residents_with_cohort_age_and_sex, 0);
 
         let calcutta = world.inspect_population("place:kolkata").unwrap();
         assert_eq!(calcutta.account_id, Some("raj_bengal_calcutta"));
-        let city = world.inspect_population("raj_bengal_calcutta").unwrap();
+        let city = world.inspect_population("place:kolkata").unwrap();
+        assert_eq!(city.account_id, Some("raj_bengal_calcutta"));
         assert_eq!(city.population_total, Some(828_598));
         let structure = city.structure.unwrap();
         assert_eq!(structure.residents_with_cohort_age_and_sex + structure.named_residents, 828_598);

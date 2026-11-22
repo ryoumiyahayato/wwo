@@ -17,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 27
+OPENING_VERSION = 28
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -49,7 +49,7 @@ def opening_age_coverage(selection, legacy, structure_opening, comparison_rows):
     for group in structure_opening["groups"]:
         unit = group["unit_id"]
         root = parents.get(unit, unit)
-        total = group["opening_total"]
+        total = group["opening_total"] - group.get("unclassified_opening_residents", 0)
         observed = group["observed_total"]
         cells = []
         for band in group["bands"]:
@@ -294,7 +294,8 @@ def main():
         for dimension, known in sorted(social_coverage.items())
     }
     summary["structural_observations_by_source"]=dict(Counter(r["source_id"] for r in structural))
-    summary["structure_opening_pool_controls"]=sum(g["opening_total"] for g in structure_opening["groups"])
+    summary["structure_opening_pool_controls"]=sum(g["opening_total"] - g.get("unclassified_opening_residents", 0)
+                                                  for g in structure_opening["groups"])
     summary["structure_opening_pool_count"]=len(structure_opening["groups"])
     summary["structure_opening_residents_outside_modeled_pools"]=total+legacy_only-summary["structure_opening_pool_controls"]
     summary["structure_opening_scopes"]=[

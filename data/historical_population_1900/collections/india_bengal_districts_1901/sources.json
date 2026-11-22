@@ -16,5 +16,14 @@
     "locator": "Table VIII, Education, part B, All Religions, Calcutta and Dacca.",
     "rights": "Published historical numeric facts",
     "raw_path": "bengal_literacy_1901.csv"
+  },
+  {
+    "id": "india_bengal_census_1901_district_literacy",
+    "title": "Census of India, 1901, Vol. VI-A: Bengal, Part II, Imperial Tables",
+    "publisher": "Government of Bengal",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18817/GIPE-017256.pdf?isAllowed=y&sequence=3",
+    "locator": "Table VIII, Education, part B, district All Religions rows, checked against Tables I and II.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "README.md"
   }
 ]

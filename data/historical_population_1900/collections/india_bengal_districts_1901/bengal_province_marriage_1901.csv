@@ -1,0 +1,2 @@
+unit_id,observed_date,observed_total,observed_male,observed_female,unmarried,married,widowed,unmarried_male,unmarried_female,married_male,married_female,widowed_male,widowed_female,observed_unknown,locator
+raj_bengal_province,1901-03-01,74744866,37376782,37368084,29448782,36254740,9041344,17747071,11701711,18103648,18151092,1526063,7515281,0,"1905 Statistical Abstract No. 39, Table 11, PROVINCES., Bengal, cells C11:F12"

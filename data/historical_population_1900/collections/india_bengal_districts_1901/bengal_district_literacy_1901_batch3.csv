@@ -1,0 +1,8 @@
+unit_id,observed_date,observed_total,observed_male,observed_female,literate,illiterate,literate_male,literate_female,illiterate_male,illiterate_female,observed_unknown,locator
+raj_bengal_hooghly,1901-03-01,1049282,528279,521003,111630,937652,104310,7320,423969,513683,0,"Vol. VI-A, Imperial Table VIII, Part B, Hooghly, All Religions, p. 66"
+raj_bengal_jessore,1901-03-01,1813155,914025,899130,105102,1708053,100971,4131,813054,894999,0,"Vol. VI-A, Imperial Table VIII, Part B, Jessore, All Religions, p. 68"
+raj_bengal_khulna,1901-03-01,1253043,653470,599573,86385,1166658,81324,5061,572146,594512,0,"Vol. VI-A, Imperial Table VIII, Part B, Khulna, All Religions, p. 68"
+raj_bengal_rajshahi,1901-03-01,1462407,741690,720717,62240,1400167,59652,2588,682038,718129,0,"Vol. VI-A, Imperial Table VIII, Part B, Rajshahi, All Religions, p. 68"
+raj_bengal_purnea,1901-03-01,1874794,958452,916342,55591,1819203,54415,1176,904037,915166,0,"Vol. VI-A, Imperial Table VIII, Part B, Purnea, All Religions, p. 80"
+raj_bengal_sonthal_parganas,1901-03-01,1809737,896373,913364,44516,1765221,42419,2097,853954,911267,0,"Vol. VI-A, Imperial Table VIII, Part B, Sonthal Parganas, All Religions, p. 82"
+raj_bengal_balasore,1901-03-01,1071197,517543,553654,83486,987711,81078,2408,436465,551246,0,"Vol. VI-A, Imperial Table VIII, Part B, Balasore, All Religions, p. 82"

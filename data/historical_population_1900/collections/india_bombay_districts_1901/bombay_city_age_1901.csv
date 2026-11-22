@@ -1,0 +1,10 @@
+panel,label,role,age_min,age_max,both,male,female
+india_census_1901_bombay_city,Total,total,,,776006,479786,296220
+india_census_1901_bombay_city,0–5,band,0,4,53334,26251,27083
+india_census_1901_bombay_city,5–10,band,5,9,65427,33923,31504
+india_census_1901_bombay_city,10–15,band,10,14,71590,42516,29074
+india_census_1901_bombay_city,15–20,band,15,19,77529,45433,32096
+india_census_1901_bombay_city,20–40,band,20,39,359808,240103,119705
+india_census_1901_bombay_city,40–60,band,40,59,123329,78181,45148
+india_census_1901_bombay_city,60 and over,band,60,,24970,13361,11609
+india_census_1901_bombay_city,Unspecified,band,,,19,18,1

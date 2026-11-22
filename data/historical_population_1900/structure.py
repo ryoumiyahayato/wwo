@@ -744,7 +744,7 @@ def age_profile_at_interpolated_sex_totals(panel, rows, unit, controls, *, metho
                         uncertainty=uncertainty, locator=locator)
 
 
-def remaining_indian_states_age_models(panels, balances, observations):
+def remaining_indian_states_age_models(panels, balances, observations, version):
     collection = HERE / "india_remaining_princely_demography"
     model_method = "Interpolate the comparable 1891 and 1901 sex totals to the opening date. "
     madras_rows = defaultdict(list)
@@ -764,9 +764,22 @@ def remaining_indian_states_age_models(panels, balances, observations):
             uncertainty="Intercensal change and enumeration error are unquantified. The historical bands do not resolve single ages.",
             locator=f"{panel['locator']}; Madras 1941, Vol. II, Table II, p. 18 (comparison sex counts)",
         )
-    early, comparable, full = read_csv(collection / "bombay_states_sex_controls.csv")
     panel, rows = panels["india_abstract_bombay_states_1901"]
     observed, = (row for row in rows if row["role"] == "total")
+    if version >= 28:
+        control_path = HERE / "india_bombay_districts_1901" / "bombay_endpoint_sex_controls.csv"
+        early, late = [row for row in read_csv(control_path) if row["unit_id"] == "raj_bombay_states"]
+        if any(observed[sex] != int(late[sex]) for sex in SEX_COUNTS):
+            raise ValueError("Bombay States age table and local sex return differ")
+        yield age_profile_at_interpolated_sex_totals(
+            panel, rows, balances["raj_bombay_states"], [early, late],
+            method=model_method + "Use the 1901 Bombay States ages within each sex on the same reported area.",
+            uncertainty="The 1899–1900 famine may have affected ages and the timing of change. "
+                        "The opening age distribution has no quantified error interval.",
+            locator=f"{panel['locator']}; {early['locator']}; {late['locator']}",
+        )
+        return
+    early, comparable, full = read_csv(collection / "bombay_states_sex_controls.csv")
     if any(observed[sex] != int(full[sex]) for sex in SEX_COUNTS):
         raise ValueError("Bombay States full-scope age and sex returns differ")
     yield age_profile_at_interpolated_sex_totals(
@@ -878,6 +891,172 @@ def egypt_provincial_sex_models(opening_balances, observations):
             sex_only=True,
             bands=[dict(id="unknown", label="Modeled sex totals; age unknown", age_min=None, age_max=None, **allocated)],
         )
+
+
+def taiwan_register_age_models(balances):
+    collection = HERE / "japan_taiwan"
+    date = "1899-12-31"
+    raw_ages = read_csv(collection / "taiwan_1899_registration_age_sex.csv")
+    panel_id = "taiwan_registration_1899_table_xx"
+    raw_total, = (row for row in raw_ages if row["role"] == "total")
+    age_rows = [dict(
+        label=row["age_label"], role="band", age_min=int(row["age_min"]) if row["age_min"] else None,
+        age_max=int(row["age_max"]) if row["age_max"] else None,
+        **{sex: int(row[sex]) for sex in SEX_COUNTS},
+    ) for row in raw_ages if row is not raw_total]
+    totals = {sex: int(raw_total[sex]) for sex in SEX_COUNTS}
+    if (any(row["panel_id"] != panel_id or row["observation_date"] != date
+            or sum(int(row[sex]) for sex in SEX_COUNTS) != int(row["person_count"]) for row in raw_ages)
+            or any(sum(row[sex] for row in age_rows) != totals[sex] for sex in SEX_COUNTS)):
+        raise ValueError("Taiwan Table XX age cells do not close")
+    raw_controls = read_csv(collection / "taiwan_1899_registration_sex_controls.csv")
+    controls = {row["opening_unit_id"]: row for row in raw_controls}
+    units = {unit_id: unit for unit_id, unit in balances.items() if unit_id.startswith("tw_register_")}
+    if (controls.keys() != units.keys() or len(raw_controls) != len(units)
+            or any(sum(int(row[f"age_table_xx_eligible_{sex}"]) for row in controls.values()) != totals[sex]
+                   for sex in SEX_COUNTS)):
+        raise ValueError("Taiwan Table XX coverage does not match the six register accounts")
+
+    # Allocate against remaining sex-specific age cells so every published
+    # five-district age-by-sex count and each district sex control is retained.
+    remaining = {sex: {i: row[sex] for i, row in enumerate(age_rows)} for sex in SEX_COUNTS}
+    for unit_id, control in sorted(controls.items()):
+        population = units[unit_id]["population_value"]
+        sex_totals = {sex: int(control[f"combined_registered_{sex}"]) for sex in SEX_COUNTS}
+        eligible = {sex: int(control[f"age_table_xx_eligible_{sex}"]) for sex in SEX_COUNTS}
+        unknown_sex = int(control["combined_registered_sex_unknown"])
+        if (control["date"] != date or population != int(control["registered_total"])
+                or population != sum(sex_totals.values()) + unknown_sex
+                or any(not 0 <= eligible[sex] <= sex_totals[sex] for sex in SEX_COUNTS)):
+            raise ValueError(f"{unit_id}: inconsistent Taiwan registry population, sex or age coverage")
+        known_sex = sum(sex_totals.values())
+        panel = dict(
+            id=panel_id, source_id="tw_governor_general_1899_age_sex", observed_unit_id=unit_id,
+            observed_date=date, locator="Table XVI p. 43, Table XVIII pp. 57–58 and Table XX pp. 63–68.",
+            opening_method="Keep the local December 31 sex totals. Distribute the pooled ages among eligible "
+                           "district residents within each sex, preserving printed age totals. The other local ages stay unknown.",
+            uncertainty="Local ages are modeled from Table XX and omit Yilan and tribal settlements. "
+                        "Adjacent printed age thresholds define disjoint bands. The age convention is unspecified.",
+        )
+        source_total = dict(role="total", both=known_sex, **sex_totals)
+        if sum(eligible.values()) == 0:
+            rows = [source_total, dict(role="band", label="Age not reported", age_min=None, age_max=None, **sex_totals)]
+            yield opening_age_group(panel, rows, unit_id, population) | dict(sex_only=True)
+            continue
+
+        allocations = {}
+        for sex in SEX_COUNTS:
+            available = sum(remaining[sex].values())
+            allocations[sex] = apportion(
+                {i: Fraction(count * eligible[sex], available) for i, count in remaining[sex].items()},
+                eligible[sex],
+            ) if available else dict.fromkeys(remaining[sex], 0)
+            for i, count in allocations[sex].items():
+                remaining[sex][i] -= count
+        bands = []
+        for i, row in enumerate(age_rows):
+            counts = {sex: allocations[sex][i] for sex in SEX_COUNTS}
+            if row["age_min"] is None:
+                counts = {sex: counts[sex] + sex_totals[sex] - eligible[sex] for sex in SEX_COUNTS}
+            bands.append(row | counts)
+        group = opening_age_group(panel, [source_total, *bands], unit_id, population)
+        if unknown_sex:
+            group["unclassified_opening_residents"] = unknown_sex
+        yield group
+    if any(sum(remaining[sex].values()) for sex in SEX_COUNTS):
+        raise ValueError("Taiwan Table XX leaves unallocated ages")
+
+
+def bombay_district_age_models(panels, balances):
+    collection = HERE / "india_bombay_districts_1901"
+    city_id = "raj_bombay_bombay_city"
+    presidency_id = "raj_bombay_presidency"
+    city_controls = read_csv(collection / "bombay_city_sex_controls.csv")
+    province_controls = [row for row in read_csv(collection / "bombay_endpoint_sex_controls.csv")
+                         if row["unit_id"] == presidency_id]
+    city_rows = [row | {key: int(row[key]) if row[key] else None for key in ("age_min", "age_max", *AGE_COUNTS)}
+                 for row in read_csv(collection / "bombay_city_age_1901.csv")]
+    city_total, = (row for row in city_rows if row["role"] == "total")
+    if any(city_total[sex] != int(city_controls[-1][sex]) for sex in SEX_COUNTS):
+        raise ValueError("Bombay City age table and its local census sex control differ")
+    uncertainty = "Surrounding plague, famine and migration make opening age and sex change uncertain. No interval is available."
+    city_panel = dict(
+        id="india_census_1901_bombay_city", source_id="india_bombay_city_1901_age",
+        observed_unit_id=city_id, observed_date="1901-03-01",
+        locator="Vol. I-A, Special Tables for Cities, Table VII, printed p. 438.",
+        uncertainty=uncertainty,
+    )
+    method = "Interpolate the two comparable census sex totals to January 1900. "
+    yield age_profile_at_interpolated_sex_totals(
+        city_panel, city_rows, balances[city_id], city_controls,
+        method=method + "Use the city's own 1901 age distribution within each sex.",
+        uncertainty=uncertainty, locator=f"{city_panel['locator']} {city_controls[-1]['locator']}",
+    )
+    district_divisions = {row["unit_id"]: row["division"] for row in read_csv(collection / "bombay_districts.csv")
+                          if row["unit_id"] != city_id}
+    districts = defaultdict(list)
+    for unit_id, division in district_divisions.items():
+        districts[division].append(balances[unit_id])
+    division_rows = defaultdict(dict)
+    for row in read_csv(collection / "bombay_division_sex_controls.csv"):
+        division_rows[row["division"]][row["date"]] = row
+    controls = [dict(date=pr["date"], **{key: int(pr[key]) - int(city[key]) for key in ("persons", *SEX_COUNTS)})
+                for pr, city in zip(province_controls, city_controls, strict=True)]
+    if (len(district_divisions) != 23 or districts.keys() != division_rows.keys()
+            or any(sum(int(division[row["date"]][key]) for division in division_rows.values()) != row[key]
+                   for row in controls for key in ("persons", *SEX_COUNTS))):
+        raise ValueError("Bombay Presidency excluding Bombay City does not close to the source controls")
+    panel, rows = panels["india_census_1901_table_vii_bombay_opening"]
+    province = opening_age_group(panel, rows, presidency_id, 0)
+    city_fine = {}
+    for coarse in (row for row in city_rows if row["role"] == "band"):
+        fine = [row for row in province["bands"] if (row["age_min"] is None) == (coarse["age_min"] is None)
+                and (coarse["age_min"] is None or (
+                    row["age_min"] >= coarse["age_min"] and (coarse["age_max"] is None or (
+                        row["age_max"] is not None and row["age_max"] <= coarse["age_max"]))))]
+        city_fine.update({band["id"]: band for band in apportion_local_ages(fine, coarse)})
+    remainder = [row | {sex: row[sex] - city_fine[row["id"]][sex] for sex in SEX_COUNTS}
+                 for row in province["bands"]]
+    # Aden is present in the original fine age table even after subtracting the city.
+    # Keep its published sex counts out of the modeled district sex balances.
+    late = controls[-1]
+    if any(row[sex] < 0 for row in remainder for sex in SEX_COUNTS) or {
+        sex: sum(row[sex] for row in remainder) - late[sex] for sex in SEX_COUNTS
+    } != {"male": 30_530, "female": 13_444}:
+        raise ValueError("Bombay remaining age table does not match the residual census and Aden")
+    dates = [row["date"] for row in controls]
+    fraction = opening_fraction(dates)
+    early = controls[0]
+    male = round(early["male"] * (1 - fraction) + late["male"] * fraction)
+    male_quotas = {
+        division: int(rows[dates[0]]["male"]) * (1 - fraction) + int(rows[dates[1]]["male"]) * fraction
+        for division, rows in division_rows.items()
+    }
+    division_males = apportion(male_quotas, male)
+    for division, units in districts.items():
+        division_male = division_males[division]
+        total = sum(unit["population_value"] for unit in units)
+        division_pair = [division_rows[division][date] for date in dates]
+        for i, row in enumerate(division_pair):
+            if (sum(int(row[sex]) for sex in SEX_COUNTS) != int(row["persons"])
+                    or sum(unit["endpoint_values"][i] for unit in units) != int(row["persons"])):
+                raise ValueError(f"{division}: census sex and district counts do not close")
+        local_males = apportion({unit["unit_id"]: Fraction(unit["population_value"] * division_male, total)
+                                 for unit in units}, division_male)
+        for unit in units:
+            unit_id = unit["unit_id"]
+            population = unit["population_value"]
+            local_male = local_males[unit_id]
+            yield dict(
+                unit_id=unit_id, opening_total=population, observed_total=population,
+                source_id=panel["source_id"], observed_unit_id="raj_bombay_with_aden_without_bombay_city",
+                observed_date=DATE, locator=f"{panel['locator']}; {city_panel['locator']} {division_pair[-1]['locator']}",
+                method=method + f"Apply {division}'s modeled sex ratios. Use the remaining age "
+                       "distribution after subtracting Bombay City using the provincial splits within its broad age bands.",
+                uncertainty=uncertainty + " District profiles are estimates from broader returns. The residual age "
+                            "reference includes Aden's 43,974 people, whose age profile is not separately used.",
+                bands=apportion_local_ages(remainder, {"male": local_male, "female": population - local_male}),
+            )
 
 
 def check_italian_age_controls(panels, observations):
@@ -1203,6 +1382,8 @@ def opening_structure(opening_groups, observations, *, version=6):
     if version >= 27:
         leaf_age_scopes.update(("raj_madras_states", "raj_bengal_province", "administrative_region:uk_constituent_scotland",
                                 "administrative_region:uk_constituent_ireland"))
+    if version >= 28:
+        leaf_age_scopes.add("raj_bombay_presidency")
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -1250,8 +1431,11 @@ def opening_structure(opening_groups, observations, *, version=6):
     if version >= 26:
         groups.extend(portuguese_age_models(panels, observations, opening_balances))
     if version >= 27:
-        groups.extend(remaining_indian_states_age_models(panels, opening_balances, observations))
+        groups.extend(remaining_indian_states_age_models(panels, opening_balances, observations, version))
         groups.extend(bengal_district_age_models(panels, observations, opening_balances))
+    if version >= 28:
+        groups.extend(taiwan_register_age_models(opening_balances))
+        groups.extend(bombay_district_age_models(panels, opening_balances))
     if version >= 23:
         groups.extend(mysore_local_age_models(panels, observations, opening_balances))
         verify_national_age_totals(

@@ -11,3 +11,7 @@ The second CSV row subtracts Calcutta city and Dacca district from the British T
 ## Religion
 
 1905 Statistical Abstract No. 39, Table 7, gives the province in the `Bengal` row under `PROVINCES.` The category sequence printed in the abstract is `Hindus.`, `Sikhs.`, `Jains.`, `Buddhists.`, `Parsis.`, `Muhammadans.`, `Christians.`, `Jews.`, `Animistic.`, `Minor Religions and Religions not returned`. Map the mixed last category to unknown. `Hindus.` is the published aggregate. Provincial Table VI, p. 26, prints a separate `Brahmo` cell of 3,118. Keep the abstract’s grouping when using this CSV. [1905 Table 7](https://dsal.uchicago.edu/statistics/1894_excel/1894.007.XLS). [Provincial Census, Vol. VI-A, Imperial Table VI, pp. 26–28](https://archive.org/details/in.ernet.dli.2015.55931).
+
+## Marriage
+
+1905 Statistical Abstract No. 39, Table 11, `Distribution of Population according to Residence, Sex, and Civil Condition`, gives the all-ages `Unmarried.`, `Married.` and `Widowed.` entries in the `Bengal` row pair under `PROVINCES.` The DSAL transcription has the male counts in C11–E11 and female counts in C12–E12. The two sex totals are 37,376,782 and 37,368,084 in F11–F12. The independent 48-district and city controls match both counts. The abstract lists Bengal States on rows 34–35. [1905 Table 11](https://dsal.uchicago.edu/statistics/1894_excel/1894.011.XLS).
