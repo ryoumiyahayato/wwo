@@ -872,6 +872,16 @@ def fiji_and_rotuma(observations):
         partition_source="collections/eastern/observations.jsonl", units=[])
 
 
+def egypt_age_sex_controls():
+    path = HERE / "collections" / "egypt_age_1907" / "table_5_sex_scope_controls.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    domains = {row["unit_id"]: row for row in rows}
+    if len(rows) != len(domains):
+        raise ValueError("Duplicate Egypt Table V territorial control")
+    return domains
+
+
 def egypt_opening(observations, version):
     root = "khedivate_of_egypt"
     source = "egypt_historical_census_primary_tables"
@@ -914,6 +924,31 @@ def egypt_opening(observations, version):
                                  "The comparison table includes some estimated nomadic populations. "
                                  "Boundary changes below the provincial level are unresolved.",
             ))
+    if version >= 33:
+        urban = egypt_age_sex_controls()
+        for city in leaves[:2]:
+            control = urban[city["unit_id"]]
+            initial = int(control["table_5_person_count_1897"])
+            final = int(control["table_5_person_count"])
+            city.update(
+                population_value=round(initial + (final - initial) * fraction),
+                source_id=EGYPT_COMPARABLE_PROVINCES, source_dates=dates,
+                source_observations=[], endpoint_values=[initial, final],
+                locator=f"1907 Census, Table V p. 30, row {control['table_5_rows']} (both dates).",
+                method="Interpolate the same-city population reported by the census at both dates.",
+            )
+        ramleh = urban["egy_markaz_ramleh"]
+        initial, final = int(ramleh["table_5_person_count_1897"]), int(ramleh["table_5_person_count"])
+        leaves.append(dict(
+            unit_id="egy_markaz_ramleh", name="Ramleh (Buheira)", source_unit_ids=["egy_markaz_ramleh"],
+            population_value=round(initial + (final - initial) * fraction),
+            source_id=EGYPT_COMPARABLE_PROVINCES, source_dates=dates, endpoint_values=[initial, final],
+            locator="1907 Census, Table V p. 30, row 11 (both dates).",
+            method="Interpolate the same markaz population at both dates.",
+            scope="Ramleh markaz under Buheira. It is a separate census district from Alexandria town.",
+            uncertainty_kind="No statistical interval for enumeration or interpolation.",
+            place_ids=[],
+        ))
     control = legacy_population_control(root)
     opening = dict(
         unit_id=root, date=DATE, population_value=control, source_id=source,
@@ -949,6 +984,10 @@ def egypt_opening(observations, version):
         opening["statistical_aggregates"] = [parent | dict(
             date=DATE, method="Sum of the Itsa, Faiyum and Sinuris districts on their comparable census extent.",
         )]
+    if version >= 33:
+        opening["scope"] = ("Cairo and Alexandria towns, Ramleh markaz in Buheira and six provinces have mutually "
+                            "exclusive census territory. The unexplained portion of the legacy national total is "
+                            "unlocated. The census and map extents differ near the western oases and southern frontier.")
     return opening
 
 
@@ -1051,7 +1090,7 @@ def bosnia_herzegovina(observations):
     )
 
 
-def add_java_and_madura(group, observations):
+def add_java_and_madura(group, observations, version):
     unit = JAVA_MADOERA
     first, last = sorted((r for r in observations if r["unit_id"] == unit), key=lambda r: r["date"])
     start, end = (date.fromisoformat(row["date"]) for row in (first, last))
@@ -1072,6 +1111,11 @@ def add_java_and_madura(group, observations):
         uncertainty_kind="The first return is provisional. Private-estate coverage and interpolation error have no quantified interval. No opening polygon or residence point is assigned.",
         place_ids=[],
     )]
+    if version >= 33:
+        java = group["units"][0]
+        group["statistical_aggregates"] = [java]
+        group["units"] = list(java_madoera_residencies(java, observations))
+        group["subdivision_source"] = "collections/java_madoera/residency_census.csv"
 
 
 def java_madoera_opening_registration(total, observations):
@@ -1085,6 +1129,58 @@ def java_madoera_opening_registration(total, observations):
     ):
         raise ValueError("Java and Madura registration classes do not match their source controls")
     return apportion({key: (1 - fraction) * early[key] + fraction * late[key] for key in early}, total)
+
+
+def java_madoera_residencies(java, observations):
+    source_path = HERE / "collections" / "java_madoera" / "residency_census.csv"
+    dates = java["source_dates"]
+    fraction = opening_fraction(dates)
+    registration = java_madoera_opening_registration(java["population_value"], observations)
+    controls = {row["date"]: row["breakdowns"]["historical_colonial_classification"]
+                for row in observations if row["unit_id"] == JAVA_MADOERA}
+    rows_by_unit = defaultdict(lambda: defaultdict(list))
+    with source_path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            row.update({category: int(row[category]) for category in registration})
+            if sum(row[category] for category in registration) != int(row["population"]):
+                raise ValueError(f'{row["residency_id"]}: Java residency population and registration differ')
+            rows_by_unit[row["unit_id"]][row["date"]].append(row)
+    for day, expected_rows in zip(dates, (22, 17), strict=True):
+        rows = [row for unit in rows_by_unit.values() for row in unit[day]]
+        if (len(rows) != expected_rows or len({row["residency_id"] for row in rows}) != len(rows)
+                or any(sum(row[key] for row in rows) != controls[day][key] for key in registration)):
+            raise ValueError(f"{day}: Java residencies overlap or fail to close to the registration totals")
+    units = sorted(rows_by_unit)
+    cells = {}
+    for unit, endpoints in rows_by_unit.items():
+        if set(endpoints) != set(dates) or len(endpoints[dates[0]]) not in (1, 2) or len(endpoints[dates[1]]) != 1:
+            raise ValueError(f"{unit}: incompatible Java residency endpoints")
+        cells[unit] = {day: {category: sum(row[category] for row in endpoints[day])
+                             for category in registration} for day in dates}
+    approximate = {
+        category: apportion({unit: (1 - fraction) * cells[unit][dates[0]][category]
+                                    + fraction * cells[unit][dates[1]][category] for unit in units}, total)
+        for category, total in registration.items()
+    }
+    for unit in units:
+        early, late = [rows_by_unit[unit][day] for day in dates]
+        counts = {category: approximate[category][unit] for category in registration}
+        names = [row["residency_label"] for row in early]
+        yield dict(
+            unit_id=unit, name=" and ".join(names), date=DATE, statistical_parent=JAVA_MADOERA,
+            population_value=sum(counts.values()), source_id=late[0]["source_id"],
+            source_ids=[early[0]["source_id"], late[0]["source_id"]],
+            source_unit_ids=[row["residency_id"] for row in early], source_dates=dates,
+            endpoint_values=[sum(cells[unit][day].values()) for day in dates],
+            locator="1898 and 1900 editions, Oost-Indië, II.I.A, printed p. 2.",
+            method="Interpolate by day for each published registration category. Use largest remainders "
+                   "within each island category control so the 17 areas preserve all five opening totals.",
+            scope=java["scope"] + " Where two names are listed, both opening residencies remain "
+                  "separate administrations. The counts refer to their combined statistical area.",
+            uncertainty_kind=java["uncertainty_kind"], place_ids=[],
+            registration_counts=counts,
+            source_residency_1900=late[0]["residency_label"],
+        )
 
 
 def belgium_opening(previous, observations):
@@ -1404,7 +1500,7 @@ def groups(observations, version=1):
         if cape["unit_id"] in result:
             raise ValueError("duplicate Cape population control")
         result[cape["unit_id"]] = cape
-        add_java_and_madura(result["cshapes_gw_850"], observations)
+        add_java_and_madura(result["cshapes_gw_850"], observations, version)
     if version >= 5:
         zanzibar = zanzibar_protectorate(observations, version)
         if zanzibar["unit_id"] in result:

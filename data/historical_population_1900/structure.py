@@ -10,7 +10,7 @@ from opening import (
     AGRA_DISTRICT_SOURCE, DATE, EGYPT_COMPARABLE_PROVINCES, EGYPT_FAIYUM_SOURCES, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE,
     BENGAL_DISTRICT_SOURCE, MADRAS_STATES_REMAINDER, SPANISH_CIVIL_STATUS_SCOPE,
     ARGENTINA_CENSUS_SCOPE, ARGENTINA_LOCAL_AGE_UNITS, JAVA_MADOERA, apportion, argentina_unenumerated_residents,
-    java_madoera_opening_registration, opening_fraction,
+    egypt_age_sex_controls, java_madoera_opening_registration, opening_fraction,
 )
 
 HERE=Path(__file__).resolve().parent/"collections"
@@ -871,11 +871,11 @@ def princely_state_opening_age_model(panels, unit, state):
     return opening_age_group(model, [control, *rows], unit["unit_id"], total)
 
 
-def egypt_provincial_sex_models(opening_balances, observations):
+def egypt_provincial_sex_models(opening_balances, observations, age_panels, age_controls):
     sources = EGYPT_FAIYUM_SOURCES | {EGYPT_COMPARABLE_PROVINCES}
     records = {row["record_id"]: row for row in observations if row["source_id"] in sources}
     for unit in opening_balances.values():
-        if unit.get("source_id") not in sources:
+        if unit.get("source_id") not in sources or not unit.get("source_observations"):
             continue
         dates = unit["source_dates"]
         first, last = [records[record_id] for record_id in unit["source_observations"]]
@@ -888,6 +888,13 @@ def egypt_provincial_sex_models(opening_balances, observations):
             sex: first["breakdowns"]["sex"][sex] * (1 - fraction) + last["breakdowns"]["sex"][sex] * fraction
             for sex in SEX_COUNTS
         }, total)
+        if age := age_panels.get(unit["unit_id"]):
+            control = age_controls[unit["unit_id"]]
+            if any(int(control[f"table_5_{sex}{suffix}"]) != row["breakdowns"]["sex"][sex]
+                   for suffix, row in (("_1897", first), ("", last)) for sex in SEX_COUNTS):
+                raise ValueError(f'{unit["unit_id"]}: Table V and the opening sex controls differ')
+            yield egypt_opening_age_model(unit, age, control, allocated)
+            continue
         yield dict(
             unit_id=unit["unit_id"], opening_total=total, observed_total=total, source_id=unit["source_id"],
             observed_unit_id=unit["unit_id"], observed_date=DATE, locator=unit["locator"],
@@ -897,6 +904,68 @@ def egypt_provincial_sex_models(opening_balances, observations):
             sex_only=True,
             bands=[dict(id="unknown", label="Modeled sex totals; age unknown", age_min=None, age_max=None, **allocated)],
         )
+
+
+def egypt_age_panels():
+    directory = HERE / "egypt_age_1907"
+    by_unit = defaultdict(list)
+    for row in read_csv(directory / "table_xi_opening_age_sex.csv"):
+        if (row["observation_date"] != "1907-04-29" or
+                int(row["person_count"]) != sum(int(row[sex]) for sex in SEX_COUNTS) or any(
+                    int(row[sex]) != int(row[f"{sex}_reported_literate"]) + int(row[f"{sex}_reported_illiterate"])
+                    for sex in SEX_COUNTS)):
+            raise ValueError(f'{row["unit_id"]}: Egypt Table XI reported literacy and sex columns do not close')
+        by_unit[row["unit_id"]].append(row)
+    return by_unit
+
+
+def egypt_opening_age_model(unit, raw_rows, control, sex_totals=None):
+    unit_id = unit["unit_id"]
+    population = unit["population_value"]
+    total_row, = (row for row in raw_rows if row["age_label"] == "total")
+    ages = [row for row in raw_rows if row != total_row]
+    intervals = [(int(row["age_min"]), int(row["age_max"]) if row["age_max"] else None) for row in ages]
+    represented = {sex: int(total_row[sex]) for sex in SEX_COUNTS}
+    if (intervals != [(0, 4), (5, 9), (10, 14), (15, 19), (20, None)]
+            or any(sum(int(row[sex]) for row in ages) != represented[sex] for sex in SEX_COUNTS)):
+        raise ValueError(f"{unit_id}: Egypt Table XI age bands do not close")
+    earlier = {sex: int(control[f"table_5_{sex}_1897"]) for sex in SEX_COUNTS}
+    source_sex = {sex: int(control[f"table_5_{sex}"]) for sex in SEX_COUNTS}
+    dates = [control["observation_date_1897"], control["observation_date_1907"]]
+    if ([sum(earlier.values()), sum(source_sex.values())] != unit["endpoint_values"] or dates != unit["source_dates"]
+            or any(represented[sex] != int(control[f"table_xi_{sex}"]) or not 0 < represented[sex] <= source_sex[sex]
+                   or source_sex[sex] - represented[sex] != int(control[f"omitted_{sex}"]) for sex in SEX_COUNTS)):
+        raise ValueError(f"{unit_id}: Egypt Table XI exceeds the Table V population")
+    if sex_totals is None:
+        fraction = opening_fraction(dates)
+        sex_totals = apportion({sex: (1 - fraction) * earlier[sex] + fraction * source_sex[sex]
+                               for sex in SEX_COUNTS}, population)
+    method = "Use the opening sex totals from the interpolated 1897 and 1907 controls."
+    by_sex = {}
+    for sex in SEX_COUNTS:
+        quotas = {index: Fraction(sex_totals[sex] * int(row[sex]), source_sex[sex]) for index, row in enumerate(ages)}
+        quotas[len(ages)] = Fraction(sex_totals[sex] * (source_sex[sex] - represented[sex]), source_sex[sex])
+        by_sex[sex] = apportion(quotas, sex_totals[sex])
+    pages = sorted({row["printed_page"] for row in raw_rows})
+    panel = dict(
+        id=unit_id + "_age_1907", source_id="egypt_census_1907_age_and_literacy",
+        observed_unit_id=unit_id, observed_date=total_row["observation_date"],
+        locator=f"Table XI, printed pp. {', '.join(pages)}. {unit['locator']}.",
+        opening_method=method + " Apply the 1907 local age distribution separately to each sex. "
+                       f"Table XI accounts for {sum(represented.values()):,} of {sum(source_sex.values()):,} "
+                       "in the 1907 control. Preserve the difference as an opening age-unknown fraction.",
+        uncertainty="The shares are a local proxy 2,674 days after opening. Enumeration, age misstatement "
+                    "and changes in population composition have no quantified interval.",
+    )
+    bands = [
+        dict(role="band", label=row["age_label"], age_min=low, age_max=high,
+             **{sex: by_sex[sex][index] for sex in SEX_COUNTS})
+        for index, (row, (low, high)) in enumerate(zip(ages, intervals, strict=True))
+    ]
+    if source_sex != represented:
+        bands.append(dict(role="band", label="Age unassigned", age_min=None, age_max=None,
+                          **{sex: by_sex[sex][len(ages)] for sex in SEX_COUNTS}))
+    return opening_age_group(panel, [dict(role="total", both=population, **sex_totals), *bands], unit_id, population)
 
 
 def taiwan_register_age_models(balances):
@@ -1540,7 +1609,7 @@ def argentina_exclusive_local_age_models(panels, units):
         verify_national_age_totals(target, rows, f"Argentina {year}")
 
 
-def java_madoera_age_bands(indigenous_sex, assigned_sex):
+def java_madoera_residency_demography():
     directory = HERE / "java_madoera"
     controls = read_csv(directory / "java_madoera_1900_indigenous_regional_controls.csv")
     observed = read_csv(directory / "java_madoera_1905_indigenous_age_sex_matched.csv")
@@ -1553,6 +1622,19 @@ def java_madoera_age_bands(indigenous_sex, assigned_sex):
     for row in controls:
         if sum(int(row[f"{sex}_1900"]) for sex in SEX_COUNTS) != int(row["total_1900"]):
             raise ValueError(f'{row["region"]}: 1900 sex totals do not match regional control')
+    for row in observed:
+        region = row["region"]
+        for sex in SEX_COUNTS:
+            younger, older = int(row[f"under16_{sex}"]), int(row[f"16_plus_{sex}"])
+            middle, oldest = int(row[f"printed_16_to_50_{sex}"]), int(row[f"printed_50_plus_{sex}"])
+            if (middle + oldest != older or younger + older != int(row[f"{sex}_total"])
+                    or int(row["male_total"]) + int(row["female_total"]) != int(regions[region]["total_1905"])):
+                raise ValueError(f"{region}: 1905 age counts do not match the census controls")
+    return regions, {row["region"]: row for row in observed}
+
+
+def java_madoera_age_bands(indigenous_sex, assigned_sex):
+    regions, observed = java_madoera_residency_demography()
     children = dict.fromkeys(SEX_COUNTS, 0)
     adults = dict.fromkeys(SEX_COUNTS, 0)
     for sex in SEX_COUNTS:
@@ -1563,14 +1645,9 @@ def java_madoera_age_bands(indigenous_sex, assigned_sex):
             raise ValueError(f"Java regional {sex} returns do not match the island control")
         local = apportion({region: Fraction(opening_count * count, source_sex_total) for region, count in counts.items()},
                          opening_count)
-        for row in observed:
-            region = row["region"]
+        for region, row in observed.items():
             count = local[region]
             younger, older = int(row[f"under16_{sex}"]), int(row[f"16_plus_{sex}"])
-            middle, oldest = int(row[f"printed_16_to_50_{sex}"]), int(row[f"printed_50_plus_{sex}"])
-            if (middle + oldest != older or younger + older != int(row[f"{sex}_total"])
-                    or int(row["male_total"]) + int(row["female_total"]) != int(regions[region]["total_1905"])):
-                raise ValueError(f"{region}: 1905 age counts do not match the census controls")
             below_16 = int(Fraction(count * younger, younger + older) + Fraction(1, 2))
             children[sex] += below_16
             adults[sex] += count - below_16
@@ -1632,6 +1709,71 @@ def java_madoera_demographic_model(total, observations, version):
     group = opening_age_group(panel, [dict(role="total", both=represented, **assigned),
                                       *java_madoera_age_bands(indigenous_sex, assigned)], JAVA_MADOERA, total)
     return group | dict(unclassified_opening_residents=total - represented)
+
+
+def java_madoera_residency_models(balances):
+    units = {unit["source_residency_1900"]: unit for unit in balances.values()
+             if unit.get("statistical_parent") == JAVA_MADOERA}
+    geography, age = java_madoera_residency_demography()
+    if units.keys() != geography.keys():
+        raise ValueError("Java registration population has a different residency partition from the age tables")
+    sex_table = {row["registration"]: row for row in read_csv(HERE / "java_madoera" / "civilian_sex_1900.csv")}
+    if any(sum(int(row[sex]) for sex in SEX_COUNTS) != int(row["printed_total"]) for row in sex_table.values()):
+        raise ValueError("Java island sex columns do not close to their printed population")
+    males = {}
+    for key in ("inlanders", "europeanen"):
+        control = sex_table[key]
+        observed = int(control["printed_total"])
+        if key == "inlanders" and any(sum(int(row[f"{sex}_1900"]) for row in geography.values())
+                                      != int(control[sex]) for sex in SEX_COUNTS):
+            raise ValueError("Java residency sex controls do not close to their revised island totals")
+        population = sum(unit["registration_counts"][key] for unit in units.values())
+        male = apportion({sex: population * Fraction(int(control[sex]), observed) for sex in SEX_COUNTS},
+                         population)["male"]
+        unscaled = {
+            region: unit["registration_counts"][key] * (
+                Fraction(int(geography[region]["male_1900"]), int(geography[region]["total_1900"]))
+                if key == "inlanders" else Fraction(int(control["male"]), observed))
+            for region, unit in units.items()
+        }
+        scale = male / sum(unscaled.values())
+        males[key] = apportion({region: count * scale for region, count in unscaled.items()}, male)
+    for region, unit in units.items():
+        unit_id = unit["unit_id"]
+        population = unit["population_value"]
+        counts = unit["registration_counts"]
+        local = {key: {"male": values[region], "female": counts[key] - values[region]} for key, values in males.items()}
+        sex_counts = {sex: sum(row[sex] for row in local.values()) for sex in SEX_COUNTS}
+        covered = sum(sex_counts.values())
+        residual = sex_counts.copy()
+        rows = [dict(role="total", both=covered, **sex_counts)]
+        source = "nl_cbs_java_population_1904"
+        locator = "1904 edition, III.III p. 4 and III.V p. 5."
+        method = ("Use the December 1900 revised local indigenous and island-wide European-assimilated "
+                  "male fractions. Normalize within each island registration and preserve the opening residency totals.")
+        if region in age:
+            source = "nl_cbs_java_population_1906_demography"
+            locator += " 1906 edition, III.I.A p. 2 and III.IX pp. 8–9."
+            method += " Apply the December 1905 same-sex under-16 shares to the indigenous registration."
+            younger = {sex: int(Fraction(local["inlanders"][sex] * int(age[region][f"under16_{sex}"]),
+                                         int(age[region][f"{sex}_total"])) + Fraction(1, 2))
+                       for sex in SEX_COUNTS}
+            older = {sex: local["inlanders"][sex] - younger[sex] for sex in SEX_COUNTS}
+            rows.extend((dict(role="band", label="Under 16", age_min=0, age_max=15, **younger),
+                         dict(role="band", label="16 and older", age_min=16, age_max=None, **older)))
+            residual = local["europeanen"]
+        rows.append(dict(role="band", label="Age unassigned", age_min=None, age_max=None, **residual))
+        panel = dict(
+            id=unit_id + "_demography", source_id=source, observed_unit_id=unit_id,
+            observed_date="1905-12-31" if region in age else "1900-12-31",
+            locator=locator, opening_method=method,
+            uncertainty="Private-estate coverage and changes in sex and age shares have no quantified interval. "
+                        "The European-assimilated registration uses an island-wide sex proxy and has no age data. "
+                        "The other civilian registrations are unassigned.",
+        )
+        yield opening_age_group(panel, rows, unit_id, population) | dict(
+            sex_only=region not in age, unclassified_opening_residents=population - covered,
+        )
 
 
 def australian_opening_age_models(panels, balances):
@@ -1722,6 +1864,8 @@ def opening_structure(opening_groups, observations, *, version=6):
         leaf_age_scopes.add("raj_bombay_presidency")
     if version >= 32:
         leaf_age_scopes.add(ARGENTINA_CENSUS_SCOPE)
+    if version >= 33:
+        leaf_age_scopes.add(JAVA_MADOERA)
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -1781,7 +1925,9 @@ def opening_structure(opening_groups, observations, *, version=6):
                 groups.extend(argentina_regional_age_models(panels, age, opening_totals))
             else:
                 groups.append(age)
-        if version >= 31:
+        if version >= 33:
+            groups.extend(java_madoera_residency_models(opening_balances))
+        elif version >= 31:
             groups.append(java_madoera_demographic_model(opening_totals[JAVA_MADOERA], observations, version))
         groups.extend(australian_opening_age_models(panels, opening_balances))
     if version >= 28:
@@ -1801,7 +1947,12 @@ def opening_structure(opening_groups, observations, *, version=6):
             panels, observations, statistical_aggregates["raj_united_provinces_states"], opening_balances,
         ))
     if version >= 20:
-        groups.extend(egypt_provincial_sex_models(opening_balances, observations))
+        egypt_age = egypt_age_panels() if version >= 33 else {}
+        egypt_controls = egypt_age_sex_controls() if version >= 33 else {}
+        for unit_id in ("egy_madina_cairo", "egy_madina_alexandria", "egy_markaz_ramleh"):
+            if unit_id in egypt_age:
+                groups.append(egypt_opening_age_model(opening_balances[unit_id], egypt_age[unit_id], egypt_controls[unit_id]))
+        groups.extend(egypt_provincial_sex_models(opening_balances, observations, egypt_age, egypt_controls))
     if version >= 18:
         groups.extend(hungarian_opening_age_models(panels, opening_balances))
     if version >= 13:

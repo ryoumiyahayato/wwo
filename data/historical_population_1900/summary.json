@@ -61,23 +61,23 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 273,
+  "cited_sources": 276,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
   "production_roots": 57,
   "partially_located_legacy_roots": 3,
-  "documented_people_under_legacy_controls": 674785293,
+  "documented_people_under_legacy_controls": 674795147,
   "replaced_legacy_roots": 31,
   "new_roots": 26,
-  "production_people": 1347303045,
-  "production_people_pct_world_estimate": 84.466,
-  "population_outside_evidence_opening_estimate": 247771203,
-  "legacy_only_people": 127294707,
+  "production_people": 1347312899,
+  "production_people_pct_world_estimate": 84.467,
+  "population_outside_evidence_opening_estimate": 247761349,
+  "legacy_only_people": 127284853,
   "authoritative_total_for_new_game": 1474597752,
   "roots_with_partitions": 28,
-  "disjoint_leaves": 1216,
-  "people_in_partitions": 1271363816,
+  "disjoint_leaves": 1233,
+  "people_in_partitions": 1271373670,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -117,7 +117,7 @@
     }
   ],
   "partitions_with_explicit_places": 41,
-  "people_in_partitions_with_explicit_places": 92388967,
+  "people_in_partitions_with_explicit_places": 92374486,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
   "political_catalogue_members_of_production_groups": 66,
@@ -374,7 +374,7 @@
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
-      "people": 674785293
+      "people": 674795147
     }
   },
   "city_index_representative_bands": {
@@ -386,8 +386,8 @@
   "city_index_unresolved": 31,
   "opening_social_coverage": {
     "class": {
-      "assigned_people": 11197505,
-      "unknown_people": 1463400247
+      "assigned_people": 11217121,
+      "unknown_people": 1463380631
     },
     "culture": {
       "assigned_people": 5273225,
@@ -406,20 +406,20 @@
       "unknown_people": 1053089996
     },
     "legal_estate": {
-      "assigned_people": 132020769,
-      "unknown_people": 1342576983
+      "assigned_people": 160113101,
+      "unknown_people": 1314484651
     },
     "literacy": {
-      "assigned_people": 315883286,
-      "unknown_people": 1158714466
+      "assigned_people": 316665623,
+      "unknown_people": 1157932129
     },
     "marital_status": {
       "assigned_people": 339717927,
       "unknown_people": 1134879825
     },
     "occupation": {
-      "assigned_people": 205681966,
-      "unknown_people": 1268915786
+      "assigned_people": 206421755,
+      "unknown_people": 1268175997
     },
     "property_declaration": {
       "assigned_people": 32296914,
@@ -495,9 +495,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 875621536,
-  "structure_opening_pool_count": 855,
-  "structure_opening_residents_outside_modeled_pools": 598976216,
+  "structure_opening_pool_controls": 876546499,
+  "structure_opening_pool_count": 874,
+  "structure_opening_residents_outside_modeled_pools": 598051253,
   "structure_opening_scopes": [
     {
       "unit_id": "abs_new_south_wales",
@@ -3230,60 +3230,81 @@
       "observed_date": "1901-03-31"
     },
     {
+      "unit_id": "egy_madina_alexandria",
+      "opening_total": 308541,
+      "observed_unit_id": "egy_madina_alexandria",
+      "observed_total": 308541,
+      "observed_date": "1907-04-29"
+    },
+    {
+      "unit_id": "egy_madina_cairo",
+      "opening_total": 592087,
+      "observed_unit_id": "egy_madina_cairo",
+      "observed_total": 592087,
+      "observed_date": "1907-04-29"
+    },
+    {
       "unit_id": "egy_markaz_faiyum",
       "opening_total": 132375,
       "observed_unit_id": "egy_markaz_faiyum",
       "observed_total": 132375,
-      "observed_date": "1900-01-01"
+      "observed_date": "1907-04-29"
     },
     {
       "unit_id": "egy_markaz_itsa",
       "opening_total": 124623,
       "observed_unit_id": "egy_markaz_itsa",
       "observed_total": 124623,
-      "observed_date": "1900-01-01"
+      "observed_date": "1907-04-29"
+    },
+    {
+      "unit_id": "egy_markaz_ramleh",
+      "opening_total": 24335,
+      "observed_unit_id": "egy_markaz_ramleh",
+      "observed_total": 24335,
+      "observed_date": "1907-04-29"
     },
     {
       "unit_id": "egy_markaz_sinuris",
       "opening_total": 132423,
       "observed_unit_id": "egy_markaz_sinuris",
       "observed_total": 132423,
-      "observed_date": "1900-01-01"
+      "observed_date": "1907-04-29"
     },
     {
       "unit_id": "egy_mudiriya_asyut",
       "opening_total": 815260,
       "observed_unit_id": "egy_mudiriya_asyut",
       "observed_total": 815260,
-      "observed_date": "1900-01-01"
+      "observed_date": "1907-04-29"
     },
     {
       "unit_id": "egy_mudiriya_gharbiya",
       "opening_total": 1346489,
       "observed_unit_id": "egy_mudiriya_gharbiya",
       "observed_total": 1346489,
-      "observed_date": "1900-01-01"
+      "observed_date": "1907-04-29"
     },
     {
       "unit_id": "egy_mudiriya_jirja",
       "opening_total": 716693,
       "observed_unit_id": "egy_mudiriya_jirja",
       "observed_total": 716693,
-      "observed_date": "1900-01-01"
+      "observed_date": "1907-04-29"
     },
     {
       "unit_id": "egy_mudiriya_menufiya",
       "opening_total": 892075,
       "observed_unit_id": "egy_mudiriya_menufiya",
       "observed_total": 892075,
-      "observed_date": "1900-01-01"
+      "observed_date": "1907-04-29"
     },
     {
       "unit_id": "egy_mudiriya_qena",
       "opening_total": 729563,
       "observed_unit_id": "egy_mudiriya_qena",
       "observed_total": 729563,
-      "observed_date": "1900-01-01"
+      "observed_date": "1907-04-29"
     },
     {
       "unit_id": "es_census_1900_province_01",
@@ -4035,11 +4056,123 @@
       "observed_date": "1901-01-01"
     },
     {
-      "unit_id": "java_madoera_colonial_population",
-      "opening_total": 28092332,
-      "observed_unit_id": "java_madoera_colonial_population",
-      "observed_total": 27798112,
-      "observed_date": "1900-01-01"
+      "unit_id": "java_madoera_banjoemas",
+      "opening_total": 1343934,
+      "observed_unit_id": "java_madoera_banjoemas",
+      "observed_total": 1338009,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "java_madoera_bantam",
+      "opening_total": 786534,
+      "observed_unit_id": "java_madoera_bantam",
+      "observed_total": 784140,
+      "observed_date": "1905-12-31"
+    },
+    {
+      "unit_id": "java_madoera_batavia_krawang",
+      "opening_total": 1893007,
+      "observed_unit_id": "java_madoera_batavia_krawang",
+      "observed_total": 1800991,
+      "observed_date": "1905-12-31"
+    },
+    {
+      "unit_id": "java_madoera_besoeki",
+      "opening_total": 817594,
+      "observed_unit_id": "java_madoera_besoeki",
+      "observed_total": 812527,
+      "observed_date": "1905-12-31"
+    },
+    {
+      "unit_id": "java_madoera_cheribon",
+      "opening_total": 1639947,
+      "observed_unit_id": "java_madoera_cheribon",
+      "observed_total": 1615479,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "java_madoera_djokjakarta",
+      "opening_total": 1027998,
+      "observed_unit_id": "java_madoera_djokjakarta",
+      "observed_total": 1023090,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "java_madoera_kediri",
+      "opening_total": 1459811,
+      "observed_unit_id": "java_madoera_kediri",
+      "observed_total": 1448530,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "java_madoera_kedoe_bagelen",
+      "opening_total": 2327038,
+      "observed_unit_id": "java_madoera_kedoe_bagelen",
+      "observed_total": 2315033,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "java_madoera_madioen",
+      "opening_total": 1209947,
+      "observed_unit_id": "java_madoera_madioen",
+      "observed_total": 1205544,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "java_madoera_madoera",
+      "opening_total": 1732100,
+      "observed_unit_id": "java_madoera_madoera",
+      "observed_total": 1725913,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "java_madoera_pasoeroean_probolinggo",
+      "opening_total": 1779932,
+      "observed_unit_id": "java_madoera_pasoeroean_probolinggo",
+      "observed_total": 1767623,
+      "observed_date": "1905-12-31"
+    },
+    {
+      "unit_id": "java_madoera_pekalongan_tegal",
+      "opening_total": 1863904,
+      "observed_unit_id": "java_madoera_pekalongan_tegal",
+      "observed_total": 1847120,
+      "observed_date": "1905-12-31"
+    },
+    {
+      "unit_id": "java_madoera_preanger_regentschappen",
+      "opening_total": 2370402,
+      "observed_unit_id": "java_madoera_preanger_regentschappen",
+      "observed_total": 2363752,
+      "observed_date": "1905-12-31"
+    },
+    {
+      "unit_id": "java_madoera_rembang",
+      "opening_total": 1440971,
+      "observed_unit_id": "java_madoera_rembang",
+      "observed_total": 1423473,
+      "observed_date": "1905-12-31"
+    },
+    {
+      "unit_id": "java_madoera_semarang_japara",
+      "opening_total": 2632785,
+      "observed_unit_id": "java_madoera_semarang_japara",
+      "observed_total": 2598183,
+      "observed_date": "1905-12-31"
+    },
+    {
+      "unit_id": "java_madoera_soerabaja",
+      "opening_total": 2325061,
+      "observed_unit_id": "java_madoera_soerabaja",
+      "observed_total": 2296776,
+      "observed_date": "1905-12-31"
+    },
+    {
+      "unit_id": "java_madoera_soerakarta",
+      "opening_total": 1441367,
+      "observed_unit_id": "java_madoera_soerakarta",
+      "observed_total": 1431929,
+      "observed_date": "1905-12-31"
     },
     {
       "unit_id": "jp_otsu_pref_aichi",
@@ -6683,9 +6816,9 @@
         "khedivate_of_egypt",
         "sultanate_of_zanzibar"
       ],
-      "production_people": 14556281,
-      "production_pct_of_regional_research_estimate": 11.199,
-      "people_with_opening_subdivision": 6378605,
+      "production_people": 14566135,
+      "production_pct_of_regional_research_estimate": 11.207,
+      "people_with_opening_subdivision": 6388459,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -7106,8 +7239,8 @@
         "opening_control": 44363679,
         "in_model_pools": 27798112,
         "outside_model_pools": 16565567,
-        "modeled_age_and_sex": 17092483,
-        "modeled_sex_age_unknown": 10705629
+        "modeled_age_and_sex": 17078108,
+        "modeled_sex_age_unknown": 10720004
       },
       {
         "opening_unit_id": "cshapes_gw_920",
@@ -7194,10 +7327,10 @@
         "opening_unit_id": "khedivate_of_egypt",
         "research_region": "Africa",
         "opening_control": 10000000,
-        "in_model_pools": 4889501,
-        "outside_model_pools": 5110499,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 4889501
+        "in_model_pools": 5814464,
+        "outside_model_pools": 4185536,
+        "modeled_age_and_sex": 5798089,
+        "modeled_sex_age_unknown": 16375
       },
       {
         "opening_unit_id": "kingdom_of_belgium",
@@ -7530,10 +7663,10 @@
       },
       "Africa": {
         "opening_control": 18751671,
-        "in_model_pools": 7155057,
-        "outside_model_pools": 11596614,
-        "modeled_age_and_sex": 2264636,
-        "modeled_sex_age_unknown": 4890421
+        "in_model_pools": 8080020,
+        "outside_model_pools": 10671651,
+        "modeled_age_and_sex": 8062725,
+        "modeled_sex_age_unknown": 17295
       },
       "no_reviewed_research_region": {
         "opening_control": 98080000,
@@ -7546,16 +7679,16 @@
         "opening_control": 812681304,
         "in_model_pools": 358263382,
         "outside_model_pools": 454417922,
-        "modeled_age_and_sex": 347314759,
-        "modeled_sex_age_unknown": 10948623
+        "modeled_age_and_sex": 347300384,
+        "modeled_sex_age_unknown": 10962998
       }
     },
     "world": {
       "opening_control": 1474597752,
-      "in_model_pools": 875621536,
-      "outside_model_pools": 598976216,
-      "modeled_age_and_sex": 857443748,
-      "modeled_sex_age_unknown": 18177788
+      "in_model_pools": 876546499,
+      "outside_model_pools": 598051253,
+      "modeled_age_and_sex": 863227462,
+      "modeled_sex_age_unknown": 13319037
     }
   },
   "opening_count_basis": {
@@ -7569,11 +7702,11 @@
         "pct_of_research_reference": 43.867
       },
       "date_models_from_territorial_returns": {
-        "people": 642480938,
-        "pct_of_research_reference": 40.279
+        "people": 642490792,
+        "pct_of_research_reference": 40.28
       },
       "retained_legacy_estimates": {
-        "people": 127294707,
+        "people": 127284853,
         "pct_of_research_reference": 7.98
       }
     },
@@ -7914,9 +8047,137 @@
         "retained_legacy_people": 0
       },
       {
-        "unit_id": "java_madoera_colonial_population",
+        "unit_id": "java_madoera_banjoemas",
         "source_id": "dutch_jaarcijfers_colonien_1900",
-        "sourced_people": 28092332,
+        "sourced_people": 1343934,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_bantam",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 786534,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_batavia_krawang",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1893007,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_besoeki",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 817594,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_cheribon",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1639947,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_djokjakarta",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1027998,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_kediri",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1459811,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_kedoe_bagelen",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 2327038,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_madioen",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1209947,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_madoera",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1732100,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_pasoeroean_probolinggo",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1779932,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_pekalongan_tegal",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1863904,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_preanger_regentschappen",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 2370402,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_rembang",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1440971,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_semarang_japara",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 2632785,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_soerabaja",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 2325061,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
+      },
+      {
+        "unit_id": "java_madoera_soerakarta",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 1441367,
         "sourced_basis": "date_models_from_territorial_returns",
         "retained_legacy_people": 0,
         "parent_id": "cshapes_gw_850"
@@ -7924,9 +8185,9 @@
       {
         "unit_id": "khedivate_of_egypt",
         "source_id": "egypt_historical_census_primary_tables",
-        "sourced_people": 5804610,
+        "sourced_people": 5814464,
         "sourced_basis": "date_models_from_territorial_returns",
-        "retained_legacy_people": 4195390
+        "retained_legacy_people": 4185536
       },
       {
         "unit_id": "kingdom_of_belgium",

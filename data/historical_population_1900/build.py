@@ -1,6 +1,7 @@
 """Rebuild the single research release, catalogue, accounts and Rust input offline."""
 import csv
 import gzip
+import io
 import json
 from collections import Counter, defaultdict
 
@@ -17,16 +18,28 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 32
+OPENING_VERSION = 33
+
+def write_changed(name, data):
+    path = HERE / name
+    if path.is_file() and path.read_bytes() == data:
+        return
+    pending = path.with_suffix(path.suffix + ".pending")
+    pending.write_bytes(data)
+    pending.replace(path)
+
 
 def json_file(name, value):
-    (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
+    write_changed(name, (json.dumps(value, indent=2, ensure_ascii=False) + "\n").encode("utf8"))
 
 def records(name, rows):
     # No timestamp or platform-specific filename in the portable compressed records.
-    with (HERE/name).open("wb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as out:
+    raw = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as out:
         for row in rows:
             out.write((json.dumps(row, ensure_ascii=False, separators=(",",":"))+"\n").encode())
+
+    write_changed(name, raw.getvalue())
 
 def bucket(n):
     if n is None or n < 50000:

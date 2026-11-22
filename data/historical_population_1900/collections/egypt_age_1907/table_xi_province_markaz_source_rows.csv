@@ -1,0 +1,223 @@
+parent_unit_id,source_row,source_markaz,observation_date,age_label,age_min,age_max,male,female,person_count,male_reported_literate,female_reported_literate,male_reported_illiterate,female_reported_illiterate,printed_page,source_url,printed_person_count
+egy_mudiriya_gharbiya,31,Burullus,1907-04-29,0-4,0,4,1518,1626,3144,0,0,1518,1626,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",3144
+egy_mudiriya_gharbiya,31,Burullus,1907-04-29,5-9,5,9,1450,1363,2813,13,0,1437,1363,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",2813
+egy_mudiriya_gharbiya,31,Burullus,1907-04-29,10-14,10,14,1006,766,1772,25,0,981,766,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",1772
+egy_mudiriya_gharbiya,31,Burullus,1907-04-29,15-19,15,19,767,560,1327,38,0,729,560,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",1327
+egy_mudiriya_gharbiya,31,Burullus,1907-04-29,20+,20,,4579,5215,9794,226,0,4353,5215,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",9794
+egy_mudiriya_gharbiya,31,Burullus,1907-04-29,total,,,9320,9530,18850,302,0,9018,9530,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",18850
+egy_mudiriya_gharbiya,32,Santa,1907-04-29,0-4,0,4,9802,9968,19770,0,0,9802,9968,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",19770
+egy_mudiriya_gharbiya,32,Santa,1907-04-29,5-9,5,9,9398,9275,18673,343,7,9055,9268,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",18673
+egy_mudiriya_gharbiya,32,Santa,1907-04-29,10-14,10,14,8727,7314,16041,893,15,7834,7299,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",16041
+egy_mudiriya_gharbiya,32,Santa,1907-04-29,15-19,15,19,6741,5409,12150,799,8,5942,5401,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",12150
+egy_mudiriya_gharbiya,32,Santa,1907-04-29,20+,20,,31392,34444,65836,3607,46,27785,34398,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",65836
+egy_mudiriya_gharbiya,32,Santa,1907-04-29,total,,,66060,66410,132470,5642,76,60418,66334,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",132470
+egy_mudiriya_gharbiya,33,Mahalla al-Kubra,1907-04-29,0-4,0,4,14963,15525,30488,1,0,14962,15525,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",30488
+egy_mudiriya_gharbiya,33,Mahalla al-Kubra,1907-04-29,5-9,5,9,12198,11786,23984,302,36,11896,11750,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",23984
+egy_mudiriya_gharbiya,33,Mahalla al-Kubra,1907-04-29,10-14,10,14,10894,8916,19810,867,28,10027,8888,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",19810
+egy_mudiriya_gharbiya,33,Mahalla al-Kubra,1907-04-29,15-19,15,19,8271,7015,15286,685,40,7586,6975,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",15286
+egy_mudiriya_gharbiya,33,Mahalla al-Kubra,1907-04-29,20+,20,,44017,51430,95447,4682,97,39335,51333,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",95447
+egy_mudiriya_gharbiya,33,Mahalla al-Kubra,1907-04-29,total,,,90343,94672,185015,6537,201,83806,94471,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",185015
+egy_mudiriya_gharbiya,34,Desuq,1907-04-29,0-4,0,4,10692,11116,21808,0,0,10692,11116,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",21808
+egy_mudiriya_gharbiya,34,Desuq,1907-04-29,5-9,5,9,9275,9202,18477,285,7,8990,9195,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",18477
+egy_mudiriya_gharbiya,34,Desuq,1907-04-29,10-14,10,14,7696,6303,13999,670,12,7026,6291,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",13999
+egy_mudiriya_gharbiya,34,Desuq,1907-04-29,15-19,15,19,5944,4968,10912,525,9,5419,4959,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",10912
+egy_mudiriya_gharbiya,34,Desuq,1907-04-29,20+,20,,27912,31560,59472,3009,31,24903,31529,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",59472
+egy_mudiriya_gharbiya,34,Desuq,1907-04-29,total,,,61519,63149,124668,4489,59,57030,63090,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",124668
+egy_mudiriya_gharbiya,35,Zifta,1907-04-29,0-4,0,4,12002,12768,24770,1,3,12001,12765,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",24770
+egy_mudiriya_gharbiya,35,Zifta,1907-04-29,5-9,5,9,10803,11018,21821,615,26,10188,10992,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",21821
+egy_mudiriya_gharbiya,35,Zifta,1907-04-29,10-14,10,14,9867,7864,17731,1294,44,8573,7820,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",17731
+egy_mudiriya_gharbiya,35,Zifta,1907-04-29,15-19,15,19,7450,6119,13569,856,16,6594,6103,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",13569
+egy_mudiriya_gharbiya,35,Zifta,1907-04-29,20+,20,,36078,39894,75972,3979,113,32099,39781,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",75972
+egy_mudiriya_gharbiya,35,Zifta,1907-04-29,total,,,76200,77663,153863,6745,202,69455,77461,129,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/157/full/1600,/0/default.jpg",153863
+egy_mudiriya_gharbiya,36,Shirbin,1907-04-29,0-4,0,4,11066,11341,22407,0,0,11066,11341,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",22407
+egy_mudiriya_gharbiya,36,Shirbin,1907-04-29,5-9,5,9,8815,8364,17179,281,6,8534,8358,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",17179
+egy_mudiriya_gharbiya,36,Shirbin,1907-04-29,10-14,10,14,7396,5850,13246,658,20,6738,5830,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",13246
+egy_mudiriya_gharbiya,36,Shirbin,1907-04-29,15-19,15,19,5878,4865,10743,550,9,5328,4856,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",10743
+egy_mudiriya_gharbiya,36,Shirbin,1907-04-29,20+,20,,26930,29527,56457,2756,40,24174,29487,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",56457
+egy_mudiriya_gharbiya,36,Shirbin,1907-04-29,total,,,60085,59947,120032,4245,75,55840,59872,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",120032
+egy_mudiriya_gharbiya,37,Talkha,1907-04-29,0-4,0,4,9367,9921,19288,1,0,9366,9921,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",19288
+egy_mudiriya_gharbiya,37,Talkha,1907-04-29,5-9,5,9,7423,7227,14650,205,10,7218,7217,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",14650
+egy_mudiriya_gharbiya,37,Talkha,1907-04-29,10-14,10,14,6968,5664,12632,556,7,6412,5657,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",12632
+egy_mudiriya_gharbiya,37,Talkha,1907-04-29,15-19,15,19,5408,4267,9675,481,5,4927,4262,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",9675
+egy_mudiriya_gharbiya,37,Talkha,1907-04-29,20+,20,,25481,29654,55135,2747,11,22734,29643,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",55135
+egy_mudiriya_gharbiya,37,Talkha,1907-04-29,total,,,54647,56733,111380,3990,33,50657,56700,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",111380
+egy_mudiriya_gharbiya,38,Tanta,1907-04-29,0-4,0,4,19116,19570,38686,0,0,19116,19570,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",38686
+egy_mudiriya_gharbiya,38,Tanta,1907-04-29,5-9,5,9,16826,16781,33607,1010,112,15816,16669,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",33607
+egy_mudiriya_gharbiya,38,Tanta,1907-04-29,10-14,10,14,16257,13013,29270,2490,202,13767,12811,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",29270
+egy_mudiriya_gharbiya,38,Tanta,1907-04-29,15-19,15,19,12647,10218,22865,2020,145,10627,10073,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",22865
+egy_mudiriya_gharbiya,38,Tanta,1907-04-29,20+,20,,62562,68475,131037,10424,449,52138,68026,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",131037
+egy_mudiriya_gharbiya,38,Tanta,1907-04-29,total,,,127408,128057,255465,15944,908,111464,127149,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",255465
+egy_mudiriya_gharbiya,39,Fuwwa,1907-04-29,0-4,0,4,5233,5617,10850,0,0,5233,5617,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",10850
+egy_mudiriya_gharbiya,39,Fuwwa,1907-04-29,5-9,5,9,4525,4426,8951,138,5,4387,4421,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",8951
+egy_mudiriya_gharbiya,39,Fuwwa,1907-04-29,10-14,10,14,3646,3065,6711,345,14,3301,3051,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",6711
+egy_mudiriya_gharbiya,39,Fuwwa,1907-04-29,15-19,15,19,2702,2387,5089,232,5,2470,2382,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",5089
+egy_mudiriya_gharbiya,39,Fuwwa,1907-04-29,20+,20,,13104,15889,28993,1446,7,11658,15882,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",28993
+egy_mudiriya_gharbiya,39,Fuwwa,1907-04-29,total,,,29210,31384,60594,2161,31,27049,31353,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",60594
+egy_mudiriya_gharbiya,40,Kafr al-Zayyat,1907-04-29,0-4,0,4,13089,13536,26625,1,1,13088,13535,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",26625
+egy_mudiriya_gharbiya,40,Kafr al-Zayyat,1907-04-29,5-9,5,9,11398,11457,22855,204,36,11194,11421,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",22855
+egy_mudiriya_gharbiya,40,Kafr al-Zayyat,1907-04-29,10-14,10,14,11186,9226,20412,702,40,10484,9186,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",20412
+egy_mudiriya_gharbiya,40,Kafr al-Zayyat,1907-04-29,15-19,15,19,8605,6816,15421,772,27,7833,6789,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",15421
+egy_mudiriya_gharbiya,40,Kafr al-Zayyat,1907-04-29,20+,20,,39758,45005,84763,4413,122,35345,44883,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",84763
+egy_mudiriya_gharbiya,40,Kafr al-Zayyat,1907-04-29,total,,,84036,86040,170076,6092,226,77944,85814,130,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/158/full/1600,/0/default.jpg",170076
+egy_mudiriya_gharbiya,41,Kafr al-Sheikh,1907-04-29,0-4,0,4,12856,13345,26201,0,0,12856,13345,131,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/159/full/1600,/0/default.jpg",26201
+egy_mudiriya_gharbiya,41,Kafr al-Sheikh,1907-04-29,5-9,5,9,10739,10365,21104,194,6,10545,10359,131,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/159/full/1600,/0/default.jpg",21104
+egy_mudiriya_gharbiya,41,Kafr al-Sheikh,1907-04-29,10-14,10,14,9273,7505,16778,485,11,8788,7494,131,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/159/full/1600,/0/default.jpg",16778
+egy_mudiriya_gharbiya,41,Kafr al-Sheikh,1907-04-29,15-19,15,19,7734,6044,13778,496,12,7238,6032,131,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/159/full/1600,/0/default.jpg",13778
+egy_mudiriya_gharbiya,41,Kafr al-Sheikh,1907-04-29,20+,20,,35153,39387,74540,3043,36,32110,39351,131,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/159/full/1600,/0/default.jpg",74540
+egy_mudiriya_gharbiya,41,Kafr al-Sheikh,1907-04-29,total,,,75755,76646,152401,4218,65,71537,76581,131,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/159/full/1600,/0/default.jpg",152401
+egy_mudiriya_menufiya,46,Ashmun,1907-04-29,0-4,0,4,11538,12507,24045,4,3,11534,12504,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",24045
+egy_mudiriya_menufiya,46,Ashmun,1907-04-29,5-9,5,9,11237,10923,22160,263,4,10974,10919,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",22160
+egy_mudiriya_menufiya,46,Ashmun,1907-04-29,10-14,10,14,9430,7317,16747,811,8,8619,7309,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",16747
+egy_mudiriya_menufiya,46,Ashmun,1907-04-29,15-19,15,19,7818,6100,13918,681,5,7137,6095,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",13918
+egy_mudiriya_menufiya,46,Ashmun,1907-04-29,20+,20,,39002,40922,79924,3759,33,35243,40889,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",79924
+egy_mudiriya_menufiya,46,Ashmun,1907-04-29,total,,,79025,77769,156794,5518,53,73507,77716,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",156794
+egy_mudiriya_menufiya,47,Tala,1907-04-29,0-4,0,4,14737,15606,30343,0,0,14737,15606,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",30343
+egy_mudiriya_menufiya,47,Tala,1907-04-29,5-9,5,9,14467,14646,29113,529,20,13938,14626,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",29113
+egy_mudiriya_menufiya,47,Tala,1907-04-29,10-14,10,14,13218,10535,23753,1416,23,11802,10512,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",23753
+egy_mudiriya_menufiya,47,Tala,1907-04-29,15-19,15,19,10335,8130,18465,1296,11,9039,8119,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",18465
+egy_mudiriya_menufiya,47,Tala,1907-04-29,20+,20,,48460,52752,101212,5935,30,42525,52722,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",101212
+egy_mudiriya_menufiya,47,Tala,1907-04-29,total,,,101217,101669,202886,9176,84,92041,101585,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",202886
+egy_mudiriya_menufiya,48,Shibin al-Kum,1907-04-29,0-4,0,4,16029,16694,32723,1,0,16028,16694,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",32723
+egy_mudiriya_menufiya,48,Shibin al-Kum,1907-04-29,5-9,5,9,14906,14836,29742,708,19,14198,14817,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",29742
+egy_mudiriya_menufiya,48,Shibin al-Kum,1907-04-29,10-14,10,14,13243,10927,24170,1918,55,11325,10872,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",24170
+egy_mudiriya_menufiya,48,Shibin al-Kum,1907-04-29,15-19,15,19,10907,8389,19296,1413,34,9494,8355,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",19296
+egy_mudiriya_menufiya,48,Shibin al-Kum,1907-04-29,20+,20,,51987,55836,107823,6386,79,45601,55757,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",107823
+egy_mudiriya_menufiya,48,Shibin al-Kum,1907-04-29,total,,,107072,106682,213754,10426,187,96646,106495,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",213754
+egy_mudiriya_menufiya,49,Quweisna,1907-04-29,0-4,0,4,12630,13622,26252,1,0,12629,13622,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",26252
+egy_mudiriya_menufiya,49,Quweisna,1907-04-29,5-9,5,9,11961,12209,24170,521,10,11440,12199,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",24170
+egy_mudiriya_menufiya,49,Quweisna,1907-04-29,10-14,10,14,10791,8769,19560,1289,11,9502,8758,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",19560
+egy_mudiriya_menufiya,49,Quweisna,1907-04-29,15-19,15,19,8140,6405,14545,864,10,7276,6395,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",14545
+egy_mudiriya_menufiya,49,Quweisna,1907-04-29,20+,20,,38065,42194,80259,4028,35,34037,42159,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",80259
+egy_mudiriya_menufiya,49,Quweisna,1907-04-29,total,,,81587,83199,164786,6703,66,74884,83133,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",164786
+egy_mudiriya_menufiya,50,Menuf,1907-04-29,0-4,0,4,18418,18584,37002,0,0,18418,18584,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",37002
+egy_mudiriya_menufiya,50,Menuf,1907-04-29,5-9,5,9,14758,16022,30780,502,26,14256,15996,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",30780
+egy_mudiriya_menufiya,50,Menuf,1907-04-29,10-14,10,14,13433,11204,24637,1496,21,11937,11183,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",24637
+egy_mudiriya_menufiya,50,Menuf,1907-04-29,15-19,15,19,11724,8758,20482,1278,22,10446,8736,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",20482
+egy_mudiriya_menufiya,50,Menuf,1907-04-29,20+,20,,57849,61611,119460,5897,60,51952,61551,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",119460
+egy_mudiriya_menufiya,50,Menuf,1907-04-29,total,,,116182,116179,232361,9173,129,107009,116050,132,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/160/full/1600,/0/default.jpg",232361
+egy_mudiriya_asyut,51,Abnub,1907-04-29,0-4,0,4,7418,7302,14720,5,0,7413,7302,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",14720
+egy_mudiriya_asyut,51,Abnub,1907-04-29,5-9,5,9,7198,6785,13983,157,5,7041,6780,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",13983
+egy_mudiriya_asyut,51,Abnub,1907-04-29,10-14,10,14,5892,4340,10232,468,23,5424,4317,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",10232
+egy_mudiriya_asyut,51,Abnub,1907-04-29,15-19,15,19,4010,3214,7224,289,24,3721,3190,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",7224
+egy_mudiriya_asyut,51,Abnub,1907-04-29,20+,20,,22908,25651,48559,1579,21,21329,25630,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",48559
+egy_mudiriya_asyut,51,Abnub,1907-04-29,total,,,47426,47292,94718,2498,73,44928,47219,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",94718
+egy_mudiriya_asyut,52,Abu Tig,1907-04-29,0-4,0,4,10771,11144,21915,0,0,10771,11144,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",21915
+egy_mudiriya_asyut,52,Abu Tig,1907-04-29,5-9,5,9,9664,9347,19011,269,2,9395,9345,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",19011
+egy_mudiriya_asyut,52,Abu Tig,1907-04-29,10-14,10,14,8015,5852,13867,871,9,7144,5843,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",13867
+egy_mudiriya_asyut,52,Abu Tig,1907-04-29,15-19,15,19,5931,4601,10532,661,22,5270,4579,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",10532
+egy_mudiriya_asyut,52,Abu Tig,1907-04-29,20+,20,,32285,36869,69154,3421,37,28864,36832,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",69154
+egy_mudiriya_asyut,52,Abu Tig,1907-04-29,total,,,66666,67813,134479,5222,70,61444,67743,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",134479
+egy_mudiriya_asyut,53,Asyut,1907-04-29,0-4,0,4,9915,10365,20280,1,0,9914,10365,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",20280
+egy_mudiriya_asyut,53,Asyut,1907-04-29,5-9,5,9,9043,8594,17637,446,115,8597,8479,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",17637
+egy_mudiriya_asyut,53,Asyut,1907-04-29,10-14,10,14,7531,5856,13387,1335,294,6196,5562,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",13387
+egy_mudiriya_asyut,53,Asyut,1907-04-29,15-19,15,19,5631,4893,10524,1126,134,4505,4759,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",10524
+egy_mudiriya_asyut,53,Asyut,1907-04-29,20+,20,,31719,35724,67443,3993,397,27726,35327,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",67443
+egy_mudiriya_asyut,53,Asyut,1907-04-29,total,,,63839,65432,129271,6901,940,56938,64492,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",129271
+egy_mudiriya_asyut,54,Badari,1907-04-29,0-4,0,4,4815,5352,10167,0,0,4815,5352,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",10167
+egy_mudiriya_asyut,54,Badari,1907-04-29,5-9,5,9,5421,4848,10269,178,12,5243,4836,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",10269
+egy_mudiriya_asyut,54,Badari,1907-04-29,10-14,10,14,4122,2755,6877,347,3,3775,2752,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",6877
+egy_mudiriya_asyut,54,Badari,1907-04-29,15-19,15,19,2986,2114,5100,224,5,2762,2109,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",5100
+egy_mudiriya_asyut,54,Badari,1907-04-29,20+,20,,15210,17332,32542,1321,29,13889,17303,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",32542
+egy_mudiriya_asyut,54,Badari,1907-04-29,total,,,32554,32401,64955,2070,49,30484,32352,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",64955
+egy_mudiriya_asyut,55,Kharga Oases,1907-04-29,0-4,0,4,613,581,1194,0,0,613,581,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",1194
+egy_mudiriya_asyut,55,Kharga Oases,1907-04-29,5-9,5,9,586,561,1147,26,0,560,561,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",1147
+egy_mudiriya_asyut,55,Kharga Oases,1907-04-29,10-14,10,14,507,335,842,47,0,460,335,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",842
+egy_mudiriya_asyut,55,Kharga Oases,1907-04-29,15-19,15,19,403,346,749,28,0,375,346,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",749
+egy_mudiriya_asyut,55,Kharga Oases,1907-04-29,20+,20,,2247,2204,4451,251,1,1996,2203,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",4451
+egy_mudiriya_asyut,55,Kharga Oases,1907-04-29,total,,,4356,4027,8383,352,1,4004,4026,133,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/161/full/1600,/0/default.jpg",8383
+egy_mudiriya_asyut,56,Dakhla Oases,1907-04-29,0-4,0,4,1261,1404,2665,0,0,1261,1404,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",2665
+egy_mudiriya_asyut,56,Dakhla Oases,1907-04-29,5-9,5,9,1553,1452,3005,14,0,1539,1452,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",3005
+egy_mudiriya_asyut,56,Dakhla Oases,1907-04-29,10-14,10,14,1064,718,1782,19,0,1045,718,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",1782
+egy_mudiriya_asyut,56,Dakhla Oases,1907-04-29,15-19,15,19,689,688,1377,21,0,668,688,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",1377
+egy_mudiriya_asyut,56,Dakhla Oases,1907-04-29,20+,20,,4116,5423,9539,275,0,3841,5423,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",9539
+egy_mudiriya_asyut,56,Dakhla Oases,1907-04-29,total,,,8683,9685,18368,329,0,8354,9685,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",18368
+egy_mudiriya_asyut,57,Dirut,1907-04-29,0-4,0,4,11373,12212,23585,0,0,11373,12212,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",23585
+egy_mudiriya_asyut,57,Dirut,1907-04-29,5-9,5,9,11498,10296,21794,532,23,10966,10273,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",21794
+egy_mudiriya_asyut,57,Dirut,1907-04-29,10-14,10,14,8987,6066,15053,1148,18,7839,6048,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",15053
+egy_mudiriya_asyut,57,Dirut,1907-04-29,15-19,15,19,7054,4817,11871,736,13,6318,4804,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",11871
+egy_mudiriya_asyut,57,Dirut,1907-04-29,20+,20,,35989,39850,75839,3114,54,32875,39796,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",75839
+egy_mudiriya_asyut,57,Dirut,1907-04-29,total,,,74901,73241,148142,5530,108,69371,73133,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",148142
+egy_mudiriya_asyut,58,Mallawi,1907-04-29,0-4,0,4,12971,14037,27008,0,1,12971,14036,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",27008
+egy_mudiriya_asyut,58,Mallawi,1907-04-29,5-9,5,9,12521,11791,24312,348,27,12173,11764,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",24312
+egy_mudiriya_asyut,58,Mallawi,1907-04-29,10-14,10,14,10729,7733,18462,928,46,9801,7687,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",18462
+egy_mudiriya_asyut,58,Mallawi,1907-04-29,15-19,15,19,8108,6227,14335,623,28,7485,6199,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",14335
+egy_mudiriya_asyut,58,Mallawi,1907-04-29,20+,20,,42666,46072,88738,3805,104,38861,45968,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",88738
+egy_mudiriya_asyut,58,Mallawi,1907-04-29,total,,,86995,85860,172855,5704,206,81291,85654,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",172855
+egy_mudiriya_asyut,59,Manfalut,1907-04-29,0-4,0,4,10485,11214,21699,1,0,10484,11214,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",21699
+egy_mudiriya_asyut,59,Manfalut,1907-04-29,5-9,5,9,9733,9247,18980,188,2,9545,9245,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",18980
+egy_mudiriya_asyut,59,Manfalut,1907-04-29,10-14,10,14,7932,5852,13784,601,10,7331,5842,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",13784
+egy_mudiriya_asyut,59,Manfalut,1907-04-29,15-19,15,19,5744,4623,10367,517,7,5227,4616,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",10367
+egy_mudiriya_asyut,59,Manfalut,1907-04-29,20+,20,,31685,35649,67334,2901,24,28784,35625,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",67334
+egy_mudiriya_asyut,59,Manfalut,1907-04-29,total,,,65579,66585,132164,4208,43,61371,66542,134,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/162/full/1600,/0/default.jpg",132164
+egy_mudiriya_jirja,80,Akhmim,1907-04-29,0-4,0,4,7189,7621,14810,0,0,7189,7621,138,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/166/full/1600,/0/default.jpg",14810
+egy_mudiriya_jirja,80,Akhmim,1907-04-29,5-9,5,9,6973,6157,13130,136,4,6837,6153,138,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/166/full/1600,/0/default.jpg",13130
+egy_mudiriya_jirja,80,Akhmim,1907-04-29,10-14,10,14,5263,3568,8831,357,2,4906,3566,138,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/166/full/1600,/0/default.jpg",8831
+egy_mudiriya_jirja,80,Akhmim,1907-04-29,15-19,15,19,4128,3105,7233,237,5,3891,3100,138,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/166/full/1600,/0/default.jpg",7233
+egy_mudiriya_jirja,80,Akhmim,1907-04-29,20+,20,,20724,23486,44210,1101,19,19623,23467,138,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/166/full/1600,/0/default.jpg",44210
+egy_mudiriya_jirja,80,Akhmim,1907-04-29,total,,,44277,43937,88214,1831,30,42446,43907,138,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/166/full/1600,/0/default.jpg",88214
+egy_mudiriya_jirja,81,Balyana,1907-04-29,0-4,0,4,10082,10651,20733,0,0,10082,10651,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",20733
+egy_mudiriya_jirja,81,Balyana,1907-04-29,5-9,5,9,10514,9227,19741,194,6,10320,9221,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",19741
+egy_mudiriya_jirja,81,Balyana,1907-04-29,10-14,10,14,7762,5132,12894,487,6,7275,5126,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",12894
+egy_mudiriya_jirja,81,Balyana,1907-04-29,15-19,15,19,6349,4152,10501,458,14,5891,4138,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",10501
+egy_mudiriya_jirja,81,Balyana,1907-04-29,20+,20,,30029,32391,62420,1938,36,28091,32355,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",62420
+egy_mudiriya_jirja,81,Balyana,1907-04-29,total,,,64736,61553,126289,3077,62,61659,61491,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",126289
+egy_mudiriya_jirja,82,Jirja,1907-04-29,0-4,0,4,17198,18060,35258,1,1,17197,18059,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",35258
+egy_mudiriya_jirja,82,Jirja,1907-04-29,5-9,5,9,16887,14648,31535,193,4,16694,14644,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",31535
+egy_mudiriya_jirja,82,Jirja,1907-04-29,10-14,10,14,12612,8735,21347,669,6,11943,8729,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",21347
+egy_mudiriya_jirja,82,Jirja,1907-04-29,15-19,15,19,9779,8229,18008,670,4,9109,8225,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",18008
+egy_mudiriya_jirja,82,Jirja,1907-04-29,20+,20,,45565,53712,99277,3053,21,42512,53691,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",99277
+egy_mudiriya_jirja,82,Jirja,1907-04-29,total,,,102041,103384,205425,4586,36,97455,103348,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",205425
+egy_mudiriya_jirja,83,Sohag,1907-04-29,0-4,0,4,11752,12539,24291,0,0,11752,12539,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",24291
+egy_mudiriya_jirja,83,Sohag,1907-04-29,5-9,5,9,11749,11160,22909,473,53,11276,11107,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",22909
+egy_mudiriya_jirja,83,Sohag,1907-04-29,10-14,10,14,9504,6897,16401,1306,72,8198,6825,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",16401
+egy_mudiriya_jirja,83,Sohag,1907-04-29,15-19,15,19,7475,5732,13207,1031,54,6444,5678,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",13207
+egy_mudiriya_jirja,83,Sohag,1907-04-29,20+,20,,35214,39254,74468,3657,105,31557,39149,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",74468
+egy_mudiriya_jirja,83,Sohag,1907-04-29,total,,,75694,75582,151276,6467,284,69227,75298,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",151276
+egy_mudiriya_jirja,84,Tahta,1907-04-29,0-4,0,4,16893,18749,35642,0,1,16893,18748,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",35642
+egy_mudiriya_jirja,84,Tahta,1907-04-29,5-9,5,9,17033,15961,32994,576,24,16457,15937,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",32994
+egy_mudiriya_jirja,84,Tahta,1907-04-29,10-14,10,14,13940,9803,23743,1234,23,12706,9780,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",23743
+egy_mudiriya_jirja,84,Tahta,1907-04-29,15-19,15,19,10248,8092,18340,1004,20,9244,8072,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",18340
+egy_mudiriya_jirja,84,Tahta,1907-04-29,20+,20,,50754,60294,111048,4347,62,46407,60232,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",111048
+egy_mudiriya_jirja,84,Tahta,1907-04-29,total,,,108868,112899,221767,7161,130,101707,112769,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",221767
+egy_mudiriya_qena,85,Esna,1907-04-29,0-4,0,4,7166,7452,14618,0,0,7166,7452,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",14618
+egy_mudiriya_qena,85,Esna,1907-04-29,5-9,5,9,7325,6640,13965,250,14,7075,6626,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",13965
+egy_mudiriya_qena,85,Esna,1907-04-29,10-14,10,14,5516,3756,9272,569,34,4947,3722,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",9272
+egy_mudiriya_qena,85,Esna,1907-04-29,15-19,15,19,4269,3381,7650,386,21,3883,3360,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",7650
+egy_mudiriya_qena,85,Esna,1907-04-29,20+,20,,24846,24845,49691,2141,33,22705,24812,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",49691
+egy_mudiriya_qena,85,Esna,1907-04-29,total,,,49122,46074,95196,3346,102,45776,45972,139,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/167/full/1600,/0/default.jpg",95196
+egy_mudiriya_qena,86,Luxor,1907-04-29,0-4,0,4,10339,10859,21198,21,0,10318,10859,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",21198
+egy_mudiriya_qena,86,Luxor,1907-04-29,5-9,5,9,10751,9390,20141,291,27,10460,9363,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",20141
+egy_mudiriya_qena,86,Luxor,1907-04-29,10-14,10,14,7458,5436,12894,680,57,6778,5379,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",12894
+egy_mudiriya_qena,86,Luxor,1907-04-29,15-19,15,19,5814,4596,10410,562,43,5252,4553,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",10410
+egy_mudiriya_qena,86,Luxor,1907-04-29,20+,20,,32098,34271,66369,3105,85,28993,34186,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",66369
+egy_mudiriya_qena,86,Luxor,1907-04-29,total,,,66460,64552,131012,4659,212,61801,64340,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",131012
+egy_mudiriya_qena,87,Quseir,1907-04-29,0-4,0,4,100,106,206,0,0,100,106,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",206
+egy_mudiriya_qena,87,Quseir,1907-04-29,5-9,5,9,115,114,229,1,1,114,113,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",229
+egy_mudiriya_qena,87,Quseir,1907-04-29,10-14,10,14,96,74,170,7,1,89,73,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",170
+egy_mudiriya_qena,87,Quseir,1907-04-29,15-19,15,19,59,32,91,8,0,51,32,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",91
+egy_mudiriya_qena,87,Quseir,1907-04-29,20+,20,,448,468,916,95,4,353,464,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",916
+egy_mudiriya_qena,87,Quseir,1907-04-29,total,,,818,794,1612,111,6,707,788,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",1612
+egy_mudiriya_qena,88,Dishna,1907-04-29,0-4,0,4,8170,8695,16865,0,0,8170,8695,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",16865
+egy_mudiriya_qena,88,Dishna,1907-04-29,5-9,5,9,9125,8350,17475,140,0,8985,8350,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",17475
+egy_mudiriya_qena,88,Dishna,1907-04-29,10-14,10,14,6775,4514,11289,404,3,6371,4511,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",11289
+egy_mudiriya_qena,88,Dishna,1907-04-29,15-19,15,19,5148,3823,8971,271,4,4877,3819,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",8971
+egy_mudiriya_qena,88,Dishna,1907-04-29,20+,20,,26806,28121,54927,1588,11,25218,28110,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",54927
+egy_mudiriya_qena,88,Dishna,1907-04-29,total,,,56024,53503,109527,2403,18,53621,53485,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",109527
+egy_mudiriya_qena,89,Qena,1907-04-29,0-4,0,4,9243,10291,19534,0,0,9243,10291,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",19534
+egy_mudiriya_qena,89,Qena,1907-04-29,5-9,5,9,10469,9823,20292,171,24,10298,9799,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",20292
+egy_mudiriya_qena,89,Qena,1907-04-29,10-14,10,14,7538,5296,12834,625,67,6913,5229,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",12834
+egy_mudiriya_qena,89,Qena,1907-04-29,15-19,15,19,5672,4947,10619,512,42,5160,4905,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",10619
+egy_mudiriya_qena,89,Qena,1907-04-29,20+,20,,30584,32679,63263,2363,74,28221,32605,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",63263
+egy_mudiriya_qena,89,Qena,1907-04-29,total,,,63506,63036,126542,3671,207,59835,62829,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",126542
+egy_mudiriya_qena,90,Qus,1907-04-29,0-4,0,4,9419,10081,19500,0,0,9419,10081,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",19500
+egy_mudiriya_qena,90,Qus,1907-04-29,5-9,5,9,9833,8707,18540,130,7,9703,8700,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",18540
+egy_mudiriya_qena,90,Qus,1907-04-29,10-14,10,14,6556,4651,11207,407,5,6149,4646,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",11207
+egy_mudiriya_qena,90,Qus,1907-04-29,15-19,15,19,5222,4149,9371,353,6,4869,4143,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",9371
+egy_mudiriya_qena,90,Qus,1907-04-29,20+,20,,29355,32583,61938,1744,17,27611,32566,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",61938
+egy_mudiriya_qena,90,Qus,1907-04-29,total,,,60385,60171,120556,2634,35,57751,60136,140,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/168/full/1600,/0/default.jpg",120556
+egy_mudiriya_qena,91,Nag Hammadi,1907-04-29,0-4,0,4,14397,15149,29546,0,1,14397,15148,141,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/169/full/1600,/0/default.jpg",29546
+egy_mudiriya_qena,91,Nag Hammadi,1907-04-29,5-9,5,9,15250,13726,28976,136,3,15114,13723,141,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/169/full/1600,/0/default.jpg",28978
+egy_mudiriya_qena,91,Nag Hammadi,1907-04-29,10-14,10,14,11189,7538,18727,586,10,10603,7528,141,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/169/full/1600,/0/default.jpg",18726
+egy_mudiriya_qena,91,Nag Hammadi,1907-04-29,15-19,15,19,8383,6037,14420,563,11,7820,6026,141,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/169/full/1600,/0/default.jpg",14420
+egy_mudiriya_qena,91,Nag Hammadi,1907-04-29,20+,20,,46378,50000,96378,2816,43,43562,49957,141,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/169/full/1600,/0/default.jpg",96378
+egy_mudiriya_qena,91,Nag Hammadi,1907-04-29,total,,,95597,92450,188047,4101,68,91496,92382,141,"https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/169/full/1600,/0/default.jpg",188047
