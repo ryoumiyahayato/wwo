@@ -2317,6 +2317,10 @@ mod tests {
         let religion = &social.dimensions["religion"];
         assert_eq!(religion.direct_opening_distribution.unwrap().observed_total, 3_100_493);
         assert_eq!(religion.by_classification["austria_1900_reported_religion"]["Jewish"], 155_054);
+        let jewish_norm = report.dietary_norms.iter()
+            .find(|norm| norm.trait_id == "leviticus_11_7_12_food_restrictions").unwrap();
+        assert_eq!(jewish_norm.residents_with_matching_religion, 155_054);
+        assert!(jewish_norm.observed_adherents.is_none());
         assert_eq!(social.dimensions["marital_status"].unknown_residents, 0);
         let language = &social.dimensions["language"];
         assert_eq!(language.direct_opening_distribution.unwrap().observed_unknown, 243_792);
@@ -2333,6 +2337,30 @@ mod tests {
         assert_eq!(previous.population_total, report.population_total);
         assert_eq!(previous.structure.unwrap().residents_with_cohort_age_and_sex, 0);
         assert_eq!(previous.social.unwrap().dimensions["religion"].assigned_residents, 0);
+    }
+
+    #[test]
+    fn historical_sichuan_and_philippines_keep_separate_scope_balances() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let old = bootstrap.base_opening_version("country_fra", None, Some(28)).unwrap();
+        let sichuan = world.inspect_population("qing_hist_sichuan").unwrap();
+        assert_eq!(sichuan.population_total, old.inspect_population("qing_hist_sichuan").unwrap().population_total);
+        assert_eq!(sichuan.population_total, Some(42_424_139));
+        assert_eq!(sichuan.children.len(), 19);
+        assert_eq!(sichuan.children.iter().map(|unit| unit.population_total).sum::<u64>(), 42_424_139);
+        let west = world.inspect_population("qing_hist_sichuan_unlocated").unwrap();
+        assert_eq!(west.population_total, Some(2_791_411));
+        assert_eq!(west.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        let islands = world.inspect_population("cshapes_gw_840").unwrap();
+        assert_eq!(islands.population_total, Some(6_961_339));
+        assert_eq!(islands.structure.unwrap().unclassified_residents, 6_961_339);
+        assert!(islands.children.is_empty());
+        assert!(old.inspect_population("cshapes_gw_840").unwrap().population_total.is_none());
+        assert_eq!(world.population().global_total() - old.population().global_total(), 6_961_339);
+        for unit in ["qing_empire", "united_states_1900", "kingdom_of_spain"] {
+            assert_eq!(world.population().population_total(unit), old.population().population_total(unit));
+        }
     }
 
     #[test]
@@ -2749,6 +2777,13 @@ mod tests {
         let bengal_social = bengal.social.unwrap();
         assert_eq!(bengal_social.dimensions["religion"].unknown_residents, 227);
         assert_eq!(bengal_social.dimensions["marital_status"].assigned_residents, 74_350_690);
+        let language = &bengal_social.dimensions["language"];
+        assert_eq!(language.assigned_residents, 74_350_690);
+        assert_eq!(language.direct_opening_distribution.as_ref().unwrap().observed_total, 74_744_866);
+        let united = world.inspect_population("raj_agra_oudh").unwrap().social.unwrap();
+        let language = &united.dimensions["language"];
+        assert!(language.unknown_residents > 294);
+        assert_eq!(language.direct_opening_distribution.as_ref().unwrap().observed_unknown, 6_791);
         let balance = world.inspect_population("raj_bengal_unlocated_comparison").unwrap();
         assert_eq!(balance.population_total, Some(26));
         assert_eq!(balance.structure.unwrap().residents_with_cohort_age_and_sex, 0);
@@ -2768,6 +2803,7 @@ mod tests {
         assert_eq!(literacy.assigned_residents, 828_598);
         assert_eq!(literacy.by_classification["india_1901_reported_literacy"]["Literate"], 205_678);
         assert_eq!(city_social.dimensions["religion"].unknown_residents, 828_598);
+        assert_eq!(city_social.dimensions["language"].unknown_residents, 828_598);
         let dacca = world.inspect_population("raj_bengal_dacca").unwrap();
         assert_eq!(dacca.social.unwrap().dimensions["literacy"].assigned_residents, 2_620_046);
         assert_eq!(old.residence_unit_at("place:kolkata"), Some("raj_bengal_province"));

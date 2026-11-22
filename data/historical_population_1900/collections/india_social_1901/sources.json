@@ -22,5 +22,14 @@
     "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.016.XLS",
     "locator": "1901 census literacy by sex; add the cited rows in census.json",
     "rights": "Numeric facts from the 1905 statistical publication."
+  },
+  {
+    "id": "india_1901_abstract_language",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39, Table 21",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.021.XLS",
+    "locator": "1901 census of languages ordinarily used. See the territorial cell ranges in india_province_language_1901.csv.",
+    "raw_paths": ["india_province_language_1901.csv", "india_province_language_1901.md"],
+    "rights": "Numeric facts from the 1905 statistical publication."
   }
 ]

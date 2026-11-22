@@ -3,7 +3,7 @@ use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io, sync::OnceLock};
 
-pub(crate) const CURRENT_VERSION: u32 = 28;
+pub(crate) const CURRENT_VERSION: u32 = 29;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct OpeningPopulationEstimate {
@@ -141,7 +141,8 @@ impl HistoricalOpening {
             25 => include_bytes!("../../../../data/historical_population_1900/opening_v25.json"),
             26 => include_bytes!("../../../../data/historical_population_1900/opening_v26.json"),
             27 => include_bytes!("../../../../data/historical_population_1900/opening_v27.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v28.json"),
+            28 => include_bytes!("../../../../data/historical_population_1900/opening_v28.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v29.json"),
             _ => return Err(invalid("unsupported historical population opening version")),
         };
         let manifest: Manifest = serde_json::from_slice(bytes)?;
@@ -293,7 +294,8 @@ impl HistoricalOpening {
             25 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v25.json"),
             26 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v26.json"),
             27 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v27.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v28.json"),
+            28 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v28.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v29.json"),
             _ => return Ok(opening),
         };
         opening.demography = OpeningDemography::load(&opening, demography)?;
@@ -316,7 +318,8 @@ impl HistoricalOpening {
             25 => include_bytes!("../../../../data/historical_population_1900/opening_social_v25.json"),
             26 => include_bytes!("../../../../data/historical_population_1900/opening_social_v26.json"),
             27 => include_bytes!("../../../../data/historical_population_1900/opening_social_v27.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_social_v28.json"),
+            28 => include_bytes!("../../../../data/historical_population_1900/opening_social_v28.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_social_v29.json"),
             _ => return Ok(opening),
         };
         opening.social = OpeningSocial::load(&opening, social)?;

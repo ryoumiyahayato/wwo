@@ -1,0 +1,37 @@
+[
+  {
+    "id": "ph_us_census_1900_plehn",
+    "title": "Twelfth Census Bulletin 149: Methods and results, area and population",
+    "publisher": "United States Census Office, 1902",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/bulletins/operations/149-methods-results-area-population.pdf",
+    "locator": "Printed p. 16, discussion following Table 13, and Table 17",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "raw/national_controls.csv"
+    ]
+  },
+  {
+    "id": "ph_us_war_gazetteer_1902",
+    "title": "A Pronouncing Gazetteer and Geographical Dictionary of the Philippine Islands",
+    "publisher": "United States War Department, Bureau of Insular Affairs, 1902",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/A_pronouncing_gazetteer_and_geographical_dictionary_of_the_Philippine_islands_.._%28IA_pronouncinggazet00unit%29.pdf",
+    "locator": "Printed pp. 25–31 and pp. 31–49, town tables",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "raw/national_controls.csv",
+      "raw/gazetteer_island_groups.csv"
+    ]
+  },
+  {
+    "id": "ph_philippine_commission_atlas_1900",
+    "title": "Atlas of the Philippine Islands",
+    "publisher": "José Algué; United States Coast and Geodetic Survey and Government Printing Office, English edition 1900",
+    "url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~34713~1180326%3AStatistics-and-Description--Atlas-o",
+    "locator": "Introduction, Population, printed pp. 4–5, table attributed to the Philippine Commission",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "raw/atlas_provinces_and_districts.csv"
+    ],
+    "transcription_url": "https://en.wikisource.org/wiki/Atlas_of_the_Philippine_Islands/Introduction#POPULATION."
+  }
+]

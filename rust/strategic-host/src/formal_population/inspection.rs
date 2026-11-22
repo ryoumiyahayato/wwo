@@ -37,6 +37,28 @@ pub struct DietaryNormApplicability {
     pub observed_adherents: Option<u64>,
 }
 
+const DIETARY_NORMS: &[(u32, &str, &[(&str, &str)])] = &[
+    (10, "quran_al_maidah_5_3_food_restrictions", &[
+        ("russia_1897_reported_confession", "Магометане"),
+        ("india_1901_reported_religion", "Muhammadans"),
+        ("austria_1900_reported_religion", "Muslim"),
+        ("mexico_1900_reported_religion", "Mahometanos"),
+        ("egypt_1897_reported_religion", "Muslim"),
+        ("portugal_1900_reported_religion", "Muslim"),
+    ]),
+    (29, "leviticus_11_7_12_food_restrictions", &[
+        ("russia_1897_reported_confession", "Иудеи"),
+        ("india_1901_reported_religion", "Jews"),
+        ("austria_1900_reported_religion", "Jewish"),
+        ("hungarian_crown_1900_religion", "Jewish"),
+        ("netherlands_1899_census_denomination", "Dutch Israelite"),
+        ("netherlands_1899_census_denomination", "Portuguese Israelite"),
+        ("mexico_1900_reported_religion", "Israelitas"),
+        ("egypt_1897_reported_religion", "Jewish"),
+        ("portugal_1900_reported_religion", "Jewish"),
+    ]),
+];
+
 /// A captured view of this world. Dated references retain their own dates and
 /// denominators. A map place can locate an account without enumerating the place.
 #[derive(Serialize)]
@@ -122,26 +144,21 @@ impl Population {
         let social = (world || live).then(|| self.social_distribution(scope)).flatten();
         let mut dietary_norms = Vec::new();
         if let Some(religion) = social.as_ref().and_then(|report| report.dimensions.get("religion")) {
-            let matching = [
-                ("russia_1897_reported_confession", "Магометане"),
-                ("india_1901_reported_religion", "Muhammadans"),
-                ("austria_1900_reported_religion", "Muslim"),
-                ("mexico_1900_reported_religion", "Mahometanos"),
-                ("egypt_1897_reported_religion", "Muslim"),
-                ("portugal_1900_reported_religion", "Muslim"),
-            ].iter().filter_map(|(classification, category)| {
-                religion.by_classification.get(classification)?.get(category)
-            }).sum();
-            if matching > 0 {
-                const TRAIT_ID: &str = "quran_al_maidah_5_3_food_restrictions";
+            let version = self.opening_version().unwrap_or(0);
+            for &(first_version, trait_id, categories) in DIETARY_NORMS {
+                if version < first_version { continue; }
+                let matching = categories.iter().filter_map(|(classification, category)| {
+                    religion.by_classification.get(classification)?.get(category)
+                }).sum();
+                if matching == 0 { continue; }
                 dietary_norms.push(DietaryNormApplicability {
-                    trait_id: TRAIT_ID,
+                    trait_id,
                     residents_with_matching_religion: matching,
                     residents_with_unassigned_religion: religion.unknown_residents,
                     observed_adherents: None,
                 });
-                if !traits.iter().any(|row| row["id"] == TRAIT_ID) {
-                    let (rows, sources) = traits_for_scope("trait:quran_al_maidah_5_3_food_restrictions")?;
+                if !traits.iter().any(|row| row["id"] == trait_id) {
+                    let (rows, sources) = traits_for_scope(&format!("trait:{trait_id}"))?;
                     traits.extend(rows);
                     trait_sources.extend(sources);
                 }

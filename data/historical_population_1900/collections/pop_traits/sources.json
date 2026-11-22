@@ -30,5 +30,15 @@
     "rights": "Ancient source text. The collection paraphrases the passage and reproduces no editorial text or translation.",
     "historical_edition_url": "https://religion.antropo.es/_libros/biblioteca/Coran.Ingles.1734.George.Sale.pdf",
     "note": "The norm is attested before 1900. The source has no local practice survey or dated population observation."
+  },
+  {
+    "id": "torah_leviticus_11_7_12",
+    "title": "Torah, Leviticus 11:7–12",
+    "publisher": "Mechon Mamre Hebrew Bible",
+    "publication_year": null,
+    "url": "https://mechon-mamre.org/p/pt/pt0311.htm#7",
+    "locator": "Chapter 11, verses 7–12.",
+    "rights": "Ancient source text. The collection paraphrases the passage.",
+    "note": "The passage supplies a prescription. The source contains no local count of adherence or observed consumption."
   }
 ]

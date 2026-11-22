@@ -86,17 +86,18 @@
       "production_root_ids": [
         "cshapes_gw_750",
         "cshapes_gw_780",
+        "cshapes_gw_840",
         "cshapes_gw_850",
         "empire_of_japan",
         "korean_empire",
         "qing_empire",
         "taiwan_under_japan"
       ],
-      "production_people": 780700648,
-      "production_pct_of_regional_research_estimate": 87.29,
-      "people_with_opening_subdivision": 743843542,
-      "research_only_units": 26,
-      "research_only_people": 86662194
+      "production_people": 787661987,
+      "production_pct_of_regional_research_estimate": 88.068,
+      "people_with_opening_subdivision": 741052131,
+      "research_only_units": 25,
+      "research_only_people": 79176163
     },
     "Europe": {
       "statistical_units": 29,
@@ -2253,9 +2254,9 @@
       "candidate_polity_ids": [
         "cshapes_gw_840"
       ],
-      "comparison_id": null,
-      "opening_disposition": "research_only",
-      "note": "The March 1903 census includes Cagayan de Jolo and Sibutu, named in the November 1900 treaty effective March 1901. Bulletin 1 tables 2 pp. 15, 18 count 2,000 and 280 respectively. Opening-date counts for those islands and dependencies are unresolved."
+      "comparison_id": "philippines",
+      "opening_disposition": "scope_unconfirmed",
+      "note": "The contemporaneous Philippine archipelago estimate is separate from the continental US, Guam and Spain. The 1903 census anchor in Federico–Tena covers additional islands. Their 1900 populations and the original estimate's precise reach are unknown."
     },
     {
       "unit_id": "ft_portuguese_india",
@@ -3444,6 +3445,24 @@
       "research_minus_documented": 11285911
     },
     {
+      "comparison_id": "philippines",
+      "opening_root_ids": [
+        "cshapes_gw_840"
+      ],
+      "research_unit_ids": [
+        "ft_philippines"
+      ],
+      "scope_relation": "scope_unconfirmed",
+      "note": "The contemporaneous Philippine archipelago estimate is separate from the continental US, Guam and Spain. The 1903 census anchor in Federico–Tena covers additional islands. Their 1900 populations and the original estimate's precise reach are unknown.",
+      "research_regions": [
+        "Asia"
+      ],
+      "research_people": 7486031,
+      "documented_opening_people": 6961339,
+      "opening_people_including_retained_balances": 6961339,
+      "research_minus_documented": 524692
+    },
+    {
       "comparison_id": "reunion",
       "opening_root_ids": [
         "cshapes_gw_585"
@@ -4236,6 +4255,10 @@
         "people": 36671
       },
       {
+        "unit_id": "cshapes_gw_840",
+        "people": 6961339
+      },
+      {
         "unit_id": "cshapes_gw_850",
         "people": 44363679
       },
@@ -4256,8 +4279,8 @@
         "people": 2796343
       }
     ],
-    "net_additions": 64129118,
-    "authoritative_opening_population": 1467636413,
+    "net_additions": 71090457,
+    "authoritative_opening_population": 1474597752,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4297,16 +4320,16 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1340341706,
+    "documented_opening_population": 1347303045,
     "untouched_legacy_population": 98080000,
     "retained_unlocated_population": 29214707,
-    "authoritative_opening_population": 1467636413,
-    "published_minus_documented_opening": 254732542,
+    "authoritative_opening_population": 1474597752,
+    "published_minus_documented_opening": 247771203,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
-      "research_only_component_people": 218451703,
+      "research_only_component_people": 210965672,
       "comparisons_by_scope": {
-        "scope_unconfirmed": 300504,
+        "scope_unconfirmed": 825196,
         "comparable_extent": 2078531,
         "partial_extent": 33901376,
         "adopted_research_series": 426
@@ -4315,6 +4338,6 @@
       "untouched_legacy_controls": -98080000,
       "unlocated_balances_under_retained_controls": -29214707
     },
-    "published_minus_authoritative_opening": 127437835
+    "published_minus_authoritative_opening": 120476496
   }
 }

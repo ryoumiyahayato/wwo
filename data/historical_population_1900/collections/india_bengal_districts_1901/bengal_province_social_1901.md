@@ -15,3 +15,7 @@ The second CSV row subtracts Calcutta city and Dacca district from the British T
 ## Marriage
 
 1905 Statistical Abstract No. 39, Table 11, `Distribution of Population according to Residence, Sex, and Civil Condition`, gives the all-ages `Unmarried.`, `Married.` and `Widowed.` entries in the `Bengal` row pair under `PROVINCES.` The DSAL transcription has the male counts in C11–E11 and female counts in C12–E12. The two sex totals are 37,376,782 and 37,368,084 in F11–F12. The independent 48-district and city controls match both counts. The abstract lists Bengal States on rows 34–35. [1905 Table 11](https://dsal.uchicago.edu/statistics/1894_excel/1894.011.XLS).
+
+## Language
+
+Table 21 lists the language ordinarily used. The 11 published Bengal categories in cells A36–B47 sum to 74,744,866. The table prints `Others` as a combined category. Bengal's published categories exhaust the independently confirmed territorial denominator. The game assigns the 1901 shares to the January 1900 provincial account. District language remains unassigned. [1905 Table 21](https://dsal.uchicago.edu/statistics/1894_excel/1894.021.XLS).

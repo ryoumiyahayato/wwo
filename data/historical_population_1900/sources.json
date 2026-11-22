@@ -1960,6 +1960,19 @@
     "collection": "india_social_1901"
   },
   {
+    "id": "india_1901_abstract_language",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39, Table 21",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.021.XLS",
+    "locator": "1901 census of languages ordinarily used. See the territorial cell ranges in india_province_language_1901.csv.",
+    "raw_paths": [
+      "india_province_language_1901.csv",
+      "india_province_language_1901.md"
+    ],
+    "rights": "Numeric facts from the 1905 statistical publication.",
+    "collection": "india_social_1901"
+  },
+  {
     "id": "india_statistical_abstract_1896_age_sex",
     "title": "Statistical abstract relating to British India from 1885-86 to 1894-95. Thirtieth number.",
     "publisher": "Her Majesty’s Stationery Office, London, 1896",
@@ -2612,6 +2625,44 @@
     "collection": "philippines"
   },
   {
+    "id": "ph_us_census_1900_plehn",
+    "title": "Twelfth Census Bulletin 149: Methods and results, area and population",
+    "publisher": "United States Census Office, 1902",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/bulletins/operations/149-methods-results-area-population.pdf",
+    "locator": "Printed p. 16, discussion following Table 13, and Table 17",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "raw/national_controls.csv"
+    ],
+    "collection": "philippines_opening_1900"
+  },
+  {
+    "id": "ph_us_war_gazetteer_1902",
+    "title": "A Pronouncing Gazetteer and Geographical Dictionary of the Philippine Islands",
+    "publisher": "United States War Department, Bureau of Insular Affairs, 1902",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/A_pronouncing_gazetteer_and_geographical_dictionary_of_the_Philippine_islands_.._%28IA_pronouncinggazet00unit%29.pdf",
+    "locator": "Printed pp. 25–31 and pp. 31–49, town tables",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "raw/national_controls.csv",
+      "raw/gazetteer_island_groups.csv"
+    ],
+    "collection": "philippines_opening_1900"
+  },
+  {
+    "id": "ph_philippine_commission_atlas_1900",
+    "title": "Atlas of the Philippine Islands",
+    "publisher": "José Algué; United States Coast and Geodetic Survey and Government Printing Office, English edition 1900",
+    "url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~34713~1180326%3AStatistics-and-Description--Atlas-o",
+    "locator": "Introduction, Population, printed pp. 4–5, table attributed to the Philippine Commission",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "raw/atlas_provinces_and_districts.csv"
+    ],
+    "transcription_url": "https://en.wikisource.org/wiki/Atlas_of_the_Philippine_Islands/Introduction#POPULATION.",
+    "collection": "philippines_opening_1900"
+  },
+  {
     "id": "borchgrevink_southern_cross_expedition",
     "title": "First on the Antarctic Continent: Being an Account of the British Antarctic Expedition, 1898–1900",
     "publisher": "Carsten E. Borchgrevink, George Newnes, London, 1901",
@@ -2662,6 +2713,17 @@
     "collection": "pop_traits"
   },
   {
+    "id": "torah_leviticus_11_7_12",
+    "title": "Torah, Leviticus 11:7–12",
+    "publisher": "Mechon Mamre Hebrew Bible",
+    "publication_year": null,
+    "url": "https://mechon-mamre.org/p/pt/pt0311.htm#7",
+    "locator": "Chapter 11, verses 7–12.",
+    "rights": "Ancient source text. The collection paraphrases the passage.",
+    "note": "The passage supplies a prescription. The source contains no local count of adherence or observed consumption.",
+    "collection": "pop_traits"
+  },
+  {
     "id": "pt_census_1890",
     "title": "Censo da população do Reino de Portugal no 1.º de Dezembro de 1890",
     "publisher": "Direcção Geral de Estatística",
@@ -2704,6 +2766,20 @@
     "raw_path": "lu_shaangan_table_2.csv",
     "publisher_bibliography": "https://yugong.fudan.edu.cn/info/1451/12401.htm",
     "collection": "qing_shaangan_prefectures"
+  },
+  {
+    "id": "cao_qing_sichuan_prefecture_reconstruction",
+    "title": "The Population History of China (1368–1953), Appendix 7",
+    "publisher": "Cao Shuji, Brill, 2024",
+    "url": "https://doi.org/10.1163/9789004688933_025",
+    "locator": "Printed p. 560, Sichuan rows, 1880 and 1910 columns. See p. 219 on incomplete western coverage.",
+    "rights": "Published numeric facts",
+    "raw_paths": [
+      "cao_sichuan_appendix_7.csv",
+      "sichuan_opening_groups.csv",
+      "README.md"
+    ],
+    "collection": "qing_sichuan_prefectures"
   },
   {
     "id": "ro_colescu_1899_census_report",
