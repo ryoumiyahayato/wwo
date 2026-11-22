@@ -27,6 +27,15 @@
     "rights": "Published historical numeric facts"
   },
   {
+    "id": "india_bombay_sind_1901_religion",
+    "title": "Census of India, 1901, Vol. IX-A: Bombay and Sind religions",
+    "publisher": "Government Central Press, Bombay",
+    "url": "https://www.jstor.org/stable/saoa.crl.25366895",
+    "locator": "Imperial Table VI, printed pp. 50–51, Sind subtotal and district rows 25–30.",
+    "raw_paths": ["bombay_sind_district_religion_1901.csv", "SIND_RELIGION.md"],
+    "rights": "Numerical facts transcribed from the historical government publication. The scan remains with its archive."
+  },
+  {
     "id": "india_bombay_city_1901_religion_detailed",
     "title": "Census of India, 1901, Vol. I-A: Bombay and Cantonment by religion",
     "publisher": "Government of India",

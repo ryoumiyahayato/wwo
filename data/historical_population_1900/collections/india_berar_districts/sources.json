@@ -1,0 +1,20 @@
+[
+  {
+    "id": "india_berar_census_1901_districts",
+    "title": "Census of India 1901, Vol. VIII: Berar, Part I Report",
+    "publisher": "Government of India",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18870/GIPE-027711.pdf?isAllowed=y&sequence=3",
+    "locator": "Printed pp. 11, 24–25, 28, 35 and 93, comparable district population, residence and sex controls.",
+    "raw_paths": ["observations.jsonl", "berar_district_residence_1901.csv", "README.md"],
+    "rights": "Public-domain government report. Numerical transcription and derived counts."
+  },
+  {
+    "id": "india_berar_census_1891_railway",
+    "title": "Census of India 1891, General Report, Berar railway passengers",
+    "publisher": "Government of India",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Census_of_India%2C_1891_-_General_report_%28IA_cu31924023177268%29.pdf",
+    "locator": "Table E, printed p. 34, Berar Railway Passengers row.",
+    "raw_paths": ["observations.jsonl", "README.md"],
+    "rights": "Public-domain government report. Numerical transcription."
+  }
+]

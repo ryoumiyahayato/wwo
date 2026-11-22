@@ -1,0 +1,38 @@
+# Berar districts, 1891 and 1901
+
+The 1901 Berar return used six districts. Its report gives their 1901 persons in printed p. 11, para. 31, the signed changes since 1891 in p. 35, para. 82, and the published provincial controls in p. 28, para. 68. Subtract the signed changes from 1901 to recover the comparison counts for 1891. [Census of India, 1901, Vol. VIII, Part I, Berar Report](https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18870/GIPE-027711.pdf?isAllowed=y&sequence=3).
+
+| Area | 1891-02-26 | 1901-03-01 | Opening 1900-01-01 |
+|---|---:|---:|---:|
+| Amraoti | 655,645 | 630,118 | 633,079 |
+| Akola | 574,964 | 582,540 | 581,661 |
+| Ellichpur | 315,616 | 297,403 | 299,516 |
+| Buldana | 481,021 | 423,616 | 430,275 |
+| Wun | 471,613 | 466,929 | 467,473 |
+| Basim | 398,181 | 353,410 | 358,604 |
+| Assigned to a district | 2,897,040 | 2,754,016 | 2,770,608 |
+| Railway passengers without district | 451 | 0 | 52 |
+| Province including passengers | 2,897,491 | 2,754,016 | 2,770,660 |
+
+The 1891 General Report prints 451 railway passengers below the six-district subtotal. The province-minus-district balance in 1901 is zero. Travellers placed in local accounts are already included. Use the existing provincial linear interpolation for the seven rows, with elapsed fraction 3231/3655 and largest-remainder rounding to 2,770,660. Keep the 52 as the modeled province balance with no local site. The census report attributes much of the decrease to the famines of 1896–97 and 1899–1900, so the straight line does not resolve the timing of losses. [Census of India, 1891, General Report, p. 34, Table E, Berar](https://upload.wikimedia.org/wikipedia/commons/d/d6/Census_of_India%2C_1891_-_General_report_%28IA_cu31924023177268%29.pdf), [1901 Berar Report, pp. 28–29, paras. 68–70](https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18870/GIPE-027711.pdf?isAllowed=y&sequence=3).
+
+The province boundary stayed fixed. The 1901 report records one district transfer, of five villages and about 18 square miles from Melghat taluq in Ellichpur to Jalgaon taluq in Akola. The 1901 comparison increases the original Akola count by 182 and decreases the original Ellichpur count by 182. The Maharashtra gazetteer records a revenue transfer in the same direction in 1891, with a different village count. The dataset uses the published 1901 comparison geography for the interval and does not identify the individual villages or their residents. Transfers in 1903 and district redistribution in 1905 fall after opening. Hyderabad State, Central Provinces and Bombay are separate historical census accounts. No district map or site ID was confirmed in the project. [Berar Report, p. 11, paras. 27–31](https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18870/GIPE-027711.pdf?isAllowed=y&sequence=3), [Royal Commission on Opium, 1894, Berar population table](https://upload.wikimedia.org/wikipedia/commons/7/78/First_report_of_the_Royal_Commission_on_Opium_-_with_Minutes_of_evidence_and_appendices_%28IA_cu31924073053880%29.pdf), [Maharashtra State Gazetteers, Buldana, Land Revenue Administration](https://www.gazetteers.maharashtra.gov.in/cultural.maharashtra.gov.in/english/gazetteer/Buldhana%20District/land_rev_admin.html), [Imperial Gazetteer of India, Vol. VII, Berar](https://upload.wikimedia.org/wikipedia/commons/0/03/Imperial_gazetteer_of_India_.._%28IA_imperialgazettee07grea%29.pdf).
+
+## Age and sex
+
+The 1901 district sex columns are reconstructed from reported population and the signed female-minus-male differences in Chapter V Subsidiary Table IV, printed p. 93. The six differences are −15,730, −9,294, −4,237, +138, −4,317 and −1,144 in the order in the table above. The Basim difference closes against the provincial total and agrees with the p. 90 published truncation of 993 females per 1,000 males. The resulting county totals sum to 1,394,300 males and 1,359,716 females. The province-wide 1891 values are 1,491,826 males and 1,405,665 females. County sex counts for 1891 are left blank because the source reading and the sex of the population transferred between Akola and Ellichpur are unresolved. [1901 Berar Report, p. 11 note, p. 28 para. 68, pp. 90 and 93](https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18870/GIPE-027711.pdf?isAllowed=y&sequence=3), [1941 Census, Central Provinces and Berar, retrospective (province sex totals)](https://censusindia.gov.in/nada/index.php/catalog/28375/download/31557/20765_1941_CPB.pdf).
+
+The opening holds each district's 1901 sex totals as a share of its reconstructed population. Within each sex it uses the provincial age profile `india_census_1901_table_vii_berar` (Vol. I-A, Imperial Table VII Part II, p. 75). The separate railway population has no age or sex assignment. The 1901 Berar Report p. 71, para. 126 identifies Imperial Table VII in the local volume as the district counts by age, sex and marital status. Subsidiary Table V, p. 82, has seven age bands per 10,000 by district and sex. The available text extraction has damaged digits. [1901 Berar Report, Chapter IV](https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18870/GIPE-027711.pdf?isAllowed=y&sequence=3), [Berar Imperial Tables catalogue, Vol. VIII-A](https://censusindia.gov.in/nada/index.php/catalog/28218), [Asiatic Society of Mumbai scan catalogue, listed as Behar](https://granthsanjeevani.com/jspui/handle/123456789/153127).
+
+## Social counts
+
+| Dimension | Existing 1901 provincial evidence | Route to local counts |
+|---|---|---|
+| Residence | 419,451 urban and 2,334,565 rural | Six district counts in `berar_district_residence_1901.csv`. Reconstructed using town averages in Chapter I Subsidiary Table IV, pp. 24–25, and the census town counts in paras. 42 and 52, with the provincial total in para. 53. See also the Gazetteer table, whose indexed extraction has digit errors. |
+| Religion | Hindus 2,388,016, Sikhs 1,449, Jains 19,639, Buddhists 0, Parsis 530, Muslims 212,040, Christians 2,375, Jews 3, Animistic 129,964 | Local Imperial Table VI and Provincial Table VI. The provincial report discusses and reproduces some categories and rounded district shares. |
+| Language | Marathi 2,194,620, Western Hindi 273,003, Gond 83,217, Gipsy Languages 68,879, Others 134,297 | Local Imperial and Provincial Table X. |
+| Literacy | 123,316 literate and 2,630,700 illiterate | Local Imperial Tables VIII–IX for exact denominators. The provincial report has district rates and selected counts. |
+| Marital status | 897,929 unmarried, 1,508,454 married, 347,633 widowed | Local Imperial Table VII. |
+| Occupation | Existing modeled opening coverage 1,814,678 | Local Table XV for occupation with actual-worker columns. The report's occupational-class totals by district may include dependants. |
+
+The first five provincial dimensions each total 2,754,016 in the source. The six reconstructed residence rows close to the same urban/rural controls and replace the province-wide residence assignment. The railway balance has no residence classification. Religion, language, literacy, marital status and occupation remain at the common province scope. They are unassigned in individual districts. [1901 Berar Report, Chapters I, III, VI–VIII and occupation discussion](https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18870/GIPE-027711.pdf?isAllowed=y&sequence=3), [Imperial Gazetteer of India, Vol. VII, p. 18](https://upload.wikimedia.org/wikipedia/commons/0/03/Imperial_gazetteer_of_India_.._%28IA_imperialgazettee07grea%29.pdf), [Berar Imperial Tables](https://censusindia.gov.in/nada/index.php/catalog/28218), [Berar Provincial Tables](https://censusindia.gov.in/nada/index.php/catalog/28216).

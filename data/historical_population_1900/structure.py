@@ -7,7 +7,7 @@ from fractions import Fraction
 from pathlib import Path
 
 from opening import (
-    AGRA_DISTRICT_SOURCE, DATE, EGYPT_COMPARABLE_PROVINCES, EGYPT_FAIYUM_SOURCES, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE,
+    AGRA_DISTRICT_SOURCE, BERAR_DISTRICT_SOURCE, BERAR_RAILWAY_BALANCE, DATE, EGYPT_COMPARABLE_PROVINCES, EGYPT_FAIYUM_SOURCES, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE,
     BENGAL_DISTRICT_SOURCE, MADRAS_STATES_REMAINDER, OTTOMAN_REGISTRATION_SOURCE, SPANISH_CIVIL_STATUS_SCOPE,
     ARGENTINA_CENSUS_SCOPE, ARGENTINA_LOCAL_AGE_UNITS, JAVA_MADOERA, ROMANIA_CENSUS_SOURCE, ROMANIA_ROOT,
     apportion, argentina_unenumerated_residents, egypt_age_sex_controls, java_madoera_opening_registration,
@@ -33,6 +33,43 @@ RUSSIAN_CENSUS_REGIONS = (
 def read_csv(path):
     with path.open(encoding="utf8",newline="") as f:
         return list(csv.DictReader(f))
+
+
+def tottori_age_panels():
+    by_year = defaultdict(list)
+    for raw in read_csv(HERE / "japan_taiwan" / "tottori_1902_1903_age_sex.csv"):
+        low, high = (int(raw[key]) if raw[key] else None for key in ("age_min", "age_max"))
+        role = "total" if raw["row_role"] == "total" else "band"
+        if role == "total":
+            label = "All residents in scope"
+        elif low is None:
+            label = "Age unreported"
+        elif high == low:
+            label = f"Age {low}"
+        elif high is None:
+            label = f"Ages {low}+"
+        else:
+            label = f"Ages {low}–{high}"
+        by_year[raw["date"]].append(dict(
+            role=role, label=label, age_min=low, age_max=high, both=int(raw["population_total"]),
+            **{sex: int(raw[sex]) for sex in SEX_COUNTS},
+        ))
+    for year, scope, locator in (
+        (1902, "Tottori local residents", "Tables 34–35, printed pp. 48–51"),
+        (1903, "Tottori main resident population, separately enumerated foreigners excluded",
+         "Tables 37–38, printed pp. 50–53"),
+    ):
+        date = f"{year}-12-31"
+        panel = dict(
+            id=f"tottori_resident_age_{year}", observed_unit_id="jp_otsu_pref_tottori",
+            source_id=f"jp_tottori_{year}_resident_ages", observed_date=date, locator=locator,
+            published_scope=scope, broad_observation=False,
+            definition="Year-end counted age minus one approximates completed age. The original age-unknown counts are retained.",
+            uncertainty="Local register coverage is unquantified.",
+        )
+        rows = by_year[date]
+        opening_age_group(panel, rows, panel["observed_unit_id"], 0)
+        yield panel, rows
 
 def austrian_age_panels():
     directory = HERE / "austrian_crown_1900"
@@ -575,7 +612,7 @@ def age_sex_panels():
             by_panel[panel["id"]].append(row)
     return ([(panel, by_panel[panel["id"]]) for panel in panels]
             + list(austrian_age_panels()) + list(hungarian_crown_age_panels()) + list(mexican_age_panels())
-            + list(romanian_age_panels()))
+            + list(romanian_age_panels()) + list(tottori_age_panels()))
 
 
 def opening_age_group(panel, rows, unit_id, opening_total):
@@ -646,7 +683,19 @@ def england_wales_remaining_ages(panels):
     return panel, rows
 
 
-def japanese_prefecture_age_models(national_panel, national_rows, balances):
+def reweight_age_within_sex(rows, totals):
+    source_total, = (row for row in rows if row["role"] == "total")
+    reference = [row for row in rows if row["role"] == "band"]
+    ages = {
+        sex: apportion({i: Fraction(totals[sex] * band[sex], source_total[sex])
+                        for i, band in enumerate(reference)}, totals[sex])
+        for sex in SEX_COUNTS
+    }
+    bands = [band | {sex: ages[sex][i] for sex in SEX_COUNTS} for i, band in enumerate(reference)]
+    return [dict(role="total", both=sum(totals.values()), **totals), *bands]
+
+
+def japanese_prefecture_age_models(national_panel, national_rows, balances, tottori=None):
     directory = HERE / "japan_taiwan"
     date = "1899-12-31"
     dated_rows = [row for row in read_csv(directory / "japan_prefectures_otsu_sex.csv") if row["date"] == date]
@@ -657,8 +706,6 @@ def japanese_prefecture_age_models(national_panel, national_rows, balances):
             or sum(int(national[sex]) for sex in SEX_COUNTS) != int(national["printed_total"])
             or any(sum(int(row[sex]) for row in rows.values()) != int(national[sex]) for sex in SEX_COUNTS)):
         raise ValueError("Japanese prefecture sex counts do not match the independent 1899 register controls")
-    national_total = next(row for row in national_rows if row["role"] == "total")
-    reference = [row for row in national_rows if row["role"] == "band"]
     models = {}
     for unit_id, unit in prefectures.items():
         row = rows[unit_id]
@@ -666,12 +713,7 @@ def japanese_prefecture_age_models(national_panel, national_rows, balances):
         population = sum(totals.values())
         if population != int(row["source_population"]) or population != unit["observed_value"]:
             raise ValueError(f"{unit_id}: sex counts differ from the published prefectural population")
-        ages = {
-            sex: apportion({i: Fraction(totals[sex] * band[sex], national_total[sex])
-                            for i, band in enumerate(reference)}, totals[sex])
-            for sex in SEX_COUNTS
-        }
-        bands = [band | {sex: ages[sex][i] for sex in SEX_COUNTS} for i, band in enumerate(reference)]
+        reference = national_rows
         panel = national_panel | dict(
             source_id="jp_cabinet_1909_resident_prefectures", observed_unit_id=unit_id,
             locator=f"道府縣現住人口, printed p. {row['printed_page']}, 1899 Otsu sex columns; "
@@ -683,8 +725,46 @@ def japanese_prefecture_age_models(national_panel, national_rows, balances):
                         "sex uses national resident shares. Prefectural age variation and the impact of "
                         "foreign residents outside the register are unquantified.",
         )
-        models[unit_id] = panel, [dict(role="total", both=population, **totals), *bands]
+        if unit_id == "jp_otsu_pref_tottori" and tottori is not None:
+            local_panel, reference = tottori
+            panel.update(
+                locator=f"道府縣現住人口, printed p. {row['printed_page']}, 1899 Otsu sex columns; "
+                        f"Tottori Prefectural Statistical Yearbook, {local_panel['observed_date']}, {local_panel['locator']}.",
+                opening_method="Use the corrected 1899 prefectural male and female controls. Within each sex, hold "
+                               "the later Tottori local register's age shares at opening, including unreported age. "
+                               "Use integer largest remainders. The local traditional age at year-end minus one approximates completed age.",
+                uncertainty="The local return and corrected cabinet counts have different residence definitions. "
+                            "The later year is a proxy for January 1900. Changes in births, deaths and migration, "
+                            "and the effect of the reporting difference are unquantified.",
+            )
+        models[unit_id] = panel, reweight_age_within_sex(reference, totals)
     return models
+
+
+def berar_district_age_models(panel, rows, balances, observations):
+    date = panel["observed_date"]
+    accounts = {unit: balance for unit, balance in balances.items()
+                if balance.get("statistical_parent") == "raj_berar" and unit != BERAR_RAILWAY_BALANCE}
+    controls = [row for row in observations if row["unit_id"] in accounts and row["date"] == date
+                and row["source_id"] == BERAR_DISTRICT_SOURCE]
+    control = next(row for row in rows if row["role"] == "total")
+    if (len(controls) != len(accounts) or {row["unit_id"] for row in controls} != accounts.keys()
+            or any(sum(row["sex"][sex] for row in controls) != control[sex] for sex in SEX_COUNTS)):
+        raise ValueError("Berar district sex counts do not match the provincial census")
+    for row in controls:
+        unit = row["unit_id"]
+        account = accounts[unit]
+        if sum(row["sex"].values()) != row["population_value"] or row["population_value"] != account["endpoint_values"][-1]:
+            raise ValueError(f"{unit}: Berar age and population scopes differ")
+        model = panel | dict(
+            source_id=BERAR_DISTRICT_SOURCE, observed_unit_id=unit,
+            locator=row["locator"] + "; age shares from India Vol. I-A, Table VII, Part II, printed p. 75.",
+            opening_method="Hold the March 1901 district sex totals and the same-sex provincial age shares "
+                           "in the reconstructed January 1900 district balance. Use integer largest remainders.",
+            uncertainty="Age varies within Berar and the district age table has not been verified. "
+                        "The famine, migration and age reporting effects between opening and census are unquantified.",
+        )
+        yield opening_age_group(model, reweight_age_within_sex(rows, row["sex"]), unit, account["population_value"])
 
 
 def russian_regional_age_models(panels, observations, district_pools):
@@ -2071,6 +2151,8 @@ def opening_structure(opening_groups, observations, *, version=6):
             unit["unit_id"] for group in opening_groups if group["unit_id"] == ROMANIA_ROOT
             for unit in group.get("statistical_aggregates", ())
         )
+    if version >= 41:
+        leaf_age_scopes.add("raj_berar")
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -2138,6 +2220,8 @@ def opening_structure(opening_groups, observations, *, version=6):
     if version >= 28:
         groups.extend(taiwan_register_age_models(opening_balances))
         groups.extend(bombay_district_age_models(panels, opening_balances))
+    if version >= 41:
+        groups.extend(berar_district_age_models(*panels["india_census_1901_table_vii_berar"], opening_balances, observations))
     if version >= 23:
         groups.extend(mysore_local_age_models(panels, observations, opening_balances))
         verify_national_age_totals(
@@ -2207,7 +2291,11 @@ def opening_structure(opening_groups, observations, *, version=6):
         ), ireland_rows
         japan_panel, japan_rows = panels["japan_1899_resident_reconstruction"]
         japan = japan_panel, regroup_single_years(japan_rows)
-        japan_prefectures = japanese_prefecture_age_models(*japan, opening_balances) if version >= 40 else {}
+        tottori = None
+        if version >= 41:
+            tottori_panel, tottori_rows = panels["tottori_resident_age_1902"]
+            tottori = tottori_panel, regroup_single_years(tottori_rows)
+        japan_prefectures = japanese_prefecture_age_models(*japan, opening_balances, tottori) if version >= 40 else {}
         france_panel, france_rows = panels["france_1901"]
         france = france_panel | dict(
             opening_band_roles=["band", "mixed_age_band"],

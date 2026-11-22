@@ -18,6 +18,8 @@ AGRA_DISTRICT_BALANCE = "raj_agra_unlocated_table_ii_a"
 BENGAL_DISTRICT_SOURCE = "india_bengal_census_1901_districts"
 BENGAL_DISCREPANCY = "raj_bengal_unlocated_comparison"
 BOMBAY_DISTRICT_SOURCE = "india_bombay_census_1901_districts"
+BERAR_DISTRICT_SOURCE = "india_berar_census_1901_districts"
+BERAR_RAILWAY_BALANCE = "raj_berar_railway_passengers"
 ARGENTINA_CENSUS_SCOPE = "ar_census_represented_opening"
 ARGENTINA_LOCAL_AGE_UNITS = ("ar_capital_federal", "ar_buenos_aires_province")
 JAVA_MADOERA = "java_madoera_colonial_population"
@@ -825,6 +827,32 @@ def add_bombay_districts(group, observations):
                      uncertainty_kind=presidency["uncertainty_kind"])
     group["statistical_aggregates"].append(presidency)
     group["units"] = sorted([unit for unit in group["units"] if unit is not presidency] + children,
+                            key=lambda row: row["unit_id"])
+
+
+def add_berar_districts(group, observations):
+    parent_id = "raj_berar"
+    parent = next(unit for unit in group["units"] if unit["unit_id"] == parent_id)
+    dates = group["endpoint_dates"]
+    rows = [row for row in observations if row["parent_id"] == parent_id and (
+        row["source_id"] == BERAR_DISTRICT_SOURCE or row["unit_id"] == BERAR_RAILWAY_BALANCE
+    )]
+    children = interpolate_partition(rows, parent, dates)
+    if len(children) != 7:
+        raise ValueError("Berar requires six comparable districts and the railway passenger balance")
+    uncertainty = ("The 1901 comparison places five transferred villages in Akola. Linear interpolation "
+                   "does not resolve the timing of the 1896–97 and 1899–1900 famines. Other census and "
+                   "interpolation errors have no measured interval.")
+    for child in children:
+        child.update(statistical_parent=parent_id, date=DATE, uncertainty_kind=uncertainty)
+        if child["unit_id"] == BERAR_RAILWAY_BALANCE:
+            child["geographically_unlocated"] = True
+    group["statistical_aggregates"].append(parent | dict(
+        source_id=group["source_id"], date=DATE, source_dates=dates,
+        method="Use the previously reconstructed province control and sum the disjoint district and railway accounts.",
+        uncertainty_kind=uncertainty,
+    ))
+    group["units"] = sorted([unit for unit in group["units"] if unit is not parent] + children,
                             key=lambda row: row["unit_id"])
 
 
@@ -1769,6 +1797,8 @@ def groups(observations, version=1):
         add_romanian_counties(result[ROMANIA_ROOT])
     if version >= 37:
         add_philippine_surigao(result["cshapes_gw_840"], observations)
+    if version >= 41:
+        add_berar_districts(result["cshapes_gw_750"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

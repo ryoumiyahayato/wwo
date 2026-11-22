@@ -28,6 +28,7 @@
     "honduras_population": 25,
     "india_agra_districts_1901": 74,
     "india_bengal_districts_1901": 96,
+    "india_berar_districts": 14,
     "india_bombay_districts_1901": 48,
     "india_comparable": 87,
     "india_local_areas_1901": 43,
@@ -66,7 +67,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 288,
+  "cited_sources": 293,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -81,8 +82,8 @@
   "legacy_only_people": 104724793,
   "authoritative_total_for_new_game": 1474597752,
   "roots_with_partitions": 30,
-  "disjoint_leaves": 1338,
-  "people_in_partitions": 1284756016,
+  "disjoint_leaves": 1343,
+  "people_in_partitions": 1284755964,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -119,6 +120,10 @@
     {
       "unit_id": "raj_bengal_unlocated_comparison",
       "people": 26
+    },
+    {
+      "unit_id": "raj_berar_railway_passengers",
+      "people": 52
     },
     {
       "unit_id": "qing_hist_sichuan_unlocated",
@@ -375,7 +380,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2805,
+  "source_statistical_units": 2812,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 30,
@@ -439,12 +444,12 @@
       "unknown_people": 1442300838
     },
     "religion": {
-      "assigned_people": 472000827,
-      "unknown_people": 1002596925
+      "assigned_people": 475170801,
+      "unknown_people": 999426951
     },
     "residence": {
-      "assigned_people": 412274162,
-      "unknown_people": 1062323590
+      "assigned_people": 412274110,
+      "unknown_people": 1062323642
     }
   },
   "structural_observations_by_source": {
@@ -504,15 +509,17 @@
     "ksh_hungarian_statistical_yearbook_1908": 42,
     "mx_census_1900_dge_1901": 341,
     "ro_colescu_1899_census_report": 485,
+    "jp_tottori_1902_resident_ages": 103,
+    "jp_tottori_1903_resident_ages": 104,
     "ah_hungarian_census_1900_part10": 18,
     "jp_cabinet_population_1898_original": 23,
     "jp_cabinet_local_occupations_1913_tokyo": 8,
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 889065441,
-  "structure_opening_pool_count": 923,
-  "structure_opening_residents_outside_modeled_pools": 585532311,
+  "structure_opening_pool_controls": 889065389,
+  "structure_opening_pool_count": 928,
+  "structure_opening_residents_outside_modeled_pools": 585532363,
   "structure_opening_scopes": [
     {
       "unit_id": "abs_new_south_wales",
@@ -5695,10 +5702,45 @@
       "observed_date": "1901-03-01"
     },
     {
-      "unit_id": "raj_berar",
-      "opening_total": 2770660,
-      "observed_unit_id": "raj_berar_1901_census",
-      "observed_total": 2754016,
+      "unit_id": "raj_berar_akola",
+      "opening_total": 581661,
+      "observed_unit_id": "raj_berar_akola",
+      "observed_total": 582540,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_berar_amraoti",
+      "opening_total": 633079,
+      "observed_unit_id": "raj_berar_amraoti",
+      "observed_total": 630118,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_berar_basim",
+      "opening_total": 358604,
+      "observed_unit_id": "raj_berar_basim",
+      "observed_total": 353410,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_berar_buldana",
+      "opening_total": 430275,
+      "observed_unit_id": "raj_berar_buldana",
+      "observed_total": 423616,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_berar_ellichpur",
+      "opening_total": 299516,
+      "observed_unit_id": "raj_berar_ellichpur",
+      "observed_total": 297403,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_berar_wun",
+      "opening_total": 467473,
+      "observed_unit_id": "raj_berar_wun",
+      "observed_total": 466929,
       "observed_date": "1901-03-01"
     },
     {
@@ -7243,7 +7285,7 @@
       ],
       "production_people": 787661987,
       "production_pct_of_regional_research_estimate": 88.068,
-      "people_with_opening_subdivision": 731874417,
+      "people_with_opening_subdivision": 731874365,
       "research_only_units": 25,
       "research_only_people": 79176163
     },
@@ -7559,9 +7601,9 @@
         "opening_unit_id": "cshapes_gw_750",
         "research_region": "Asia",
         "opening_control": 294000000,
-        "in_model_pools": 280227580,
-        "outside_model_pools": 13772420,
-        "modeled_age_and_sex": 280177545,
+        "in_model_pools": 280227528,
+        "outside_model_pools": 13772472,
+        "modeled_age_and_sex": 280177493,
         "modeled_sex_age_unknown": 50035
       },
       {
@@ -7651,8 +7693,8 @@
         "opening_control": 44012686,
         "in_model_pools": 44012686,
         "outside_model_pools": 0,
-        "modeled_age_and_sex": 44012686,
-        "modeled_sex_age_unknown": 0
+        "modeled_age_and_sex": 44012541,
+        "modeled_sex_age_unknown": 145
       },
       {
         "opening_unit_id": "ethiopian_empire",
@@ -8035,18 +8077,18 @@
       },
       "Asia": {
         "opening_control": 812681304,
-        "in_model_pools": 358353073,
-        "outside_model_pools": 454328231,
-        "modeled_age_and_sex": 354848045,
-        "modeled_sex_age_unknown": 3505028
+        "in_model_pools": 358353021,
+        "outside_model_pools": 454328283,
+        "modeled_age_and_sex": 354847848,
+        "modeled_sex_age_unknown": 3505173
       }
     },
     "world": {
       "opening_control": 1474597752,
-      "in_model_pools": 889065441,
-      "outside_model_pools": 585532311,
-      "modeled_age_and_sex": 880693783,
-      "modeled_sex_age_unknown": 8371658
+      "in_model_pools": 889065389,
+      "outside_model_pools": 585532363,
+      "modeled_age_and_sex": 880693586,
+      "modeled_sex_age_unknown": 8371803
     }
   },
   "opening_count_basis": {
