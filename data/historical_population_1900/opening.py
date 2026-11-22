@@ -10,6 +10,7 @@ HERE = Path(__file__).resolve().parent
 DATE = "1900-01-01"
 ENGLAND_WALES_OCCUPATION_REMAINDER = "uk_england_wales_except_anglesey"
 EGYPT_COMPARABLE_PROVINCES = "egypt_census_1907_comparable_provinces"
+ITALIAN_CIVIL_STATUS_SCOPE = "it_1901_civil_status_scope"
 
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
@@ -55,7 +56,7 @@ def opening_fraction(dates):
     return Fraction((date.fromisoformat(DATE) - first).days, (last - first).days)
 
 
-def interpolate_partition(rows, parent, dates):
+def interpolate_partition(rows, parent, dates, *, normalize=False):
     partition = defaultdict(dict)
     for row in rows:
         if row["date"] in dates:
@@ -69,16 +70,19 @@ def interpolate_partition(rows, parent, dates):
     fraction = opening_fraction(dates)
     observed = {unit: [series[d] for d in dates] for unit, series in partition.items()}
     values = {unit: [row["population_value"] for row in rows] for unit, rows in observed.items()}
-    allocations = apportion(
-        {unit: a + (b - a) * fraction for unit, (a, b) in values.items()},
-        parent["population_value"],
-    )
+    quotas = {unit: a + (b - a) * fraction for unit, (a, b) in values.items()}
+    method = f"Linear daily interpolation, elapsed fraction {fraction}."
+    if normalize:
+        scaling = Fraction(parent["population_value"], sum(quotas.values()))
+        quotas = {unit: quota * scaling for unit, quota in quotas.items()}
+        method += " Normalize interpolated regional shares to the independent national opening control."
+    allocations = apportion(quotas, parent["population_value"])
     return [dict(
         unit_id=unit, name=rows[0]["name"], population_value=allocations[unit],
         subdivision_of=parent["unit_id"], source_id=rows[0]["source_id"], source_unit_ids=[unit],
         source_dates=dates, source_observations=[row["record_id"] for row in rows],
         endpoint_values=values[unit], locator=rows[0]["locator"], scope=rows[0]["definition"],
-        method=f"Linear daily interpolation, elapsed fraction {fraction}. Integer people use largest remainders within {parent['name']}.",
+        method=f"{method} Integer people use largest remainders within {parent['name']}.",
         uncertainty_kind="Enumeration coverage and interpolation error have no quantified interval.",
         place_ids=[],
     ) for unit, rows in observed.items()]
@@ -595,6 +599,62 @@ def add_india_princely_states(group, observations):
     group["statistical_aggregates"] = aggregates
 
 
+def add_italian_regions(group, observations):
+    source = "it_1901_census_v5_age_and_marital"
+    root = group["unit_id"]
+    dates = ["1882-01-01", "1901-02-10"]
+    rows = [row for row in observations if row["source_id"] == source and row["date"] in dates]
+    totals = {row["date"]: row["population_value"] for row in rows if row["unit_id"] == root}
+    parent = group | dict(endpoint_values=[totals[day] for day in dates], name="Kingdom of Italy")
+    leaves = interpolate_partition([row for row in rows if row["parent_id"] == root], parent, dates, normalize=True)
+    places = {"it_1901_lazio": ["place:rome"], "it_1901_lombardia": ["place:milan"],
+              "it_1901_piemonte": ["place:turin"]}
+    uncertainty = ("The 1882 count is published on the 1901 comparison geography. The long interval, "
+                   "regional migration and the independent national control have no quantified regional error interval.")
+    for leaf in leaves:
+        leaf.update(statistical_parent=ITALIAN_CIVIL_STATUS_SCOPE, date=DATE,
+                    place_ids=places.get(leaf["unit_id"], []), uncertainty_kind=uncertainty)
+    group["units"] = sorted(leaves, key=lambda row: row["unit_id"])
+    group["statistical_aggregates"] = [dict(
+        unit_id=ITALIAN_CIVIL_STATUS_SCOPE, name="Kingdom of Italy (census civil status scope)",
+        population_value=group["population_value"], date=DATE, source_id=source,
+        locator="Vol. V, Table IV p. 24 and civil status pp. LXIV–LXV",
+        method="Sum of the 17 disjoint census compartments at the January 1900 opening.",
+        scope="Kingdom-wide census civil status; no separate compartment marriage counts are assigned.",
+        uncertainty_kind=uncertainty,
+    )]
+
+
+def add_indian_local_areas(group, observations):
+    sources = {
+        "raj_united_provinces_states": {"india_up_states_census_1901_table_2"},
+        "raj_mysore_state": {"india_mysore_census_1901_report", "india_mysore_census_1901_talukwar_table_2"},
+    }
+    rows = defaultdict(list)
+    for observation in observations:
+        parent_id = observation["parent_id"]
+        if observation["source_id"] in sources.get(parent_id, ()) and observation["unit_id"] != "raj_mysore_western_division":
+            rows[parent_id].append(observation)
+    units = []
+    dates = group["endpoint_dates"]
+    uncertainty = "Enumeration coverage, famine, migration and interpolation error have no quantified interval."
+    for parent in group["units"]:
+        parent_id = parent["unit_id"]
+        if parent_id not in sources:
+            units.append(parent)
+            continue
+        children = interpolate_partition(rows[parent_id], parent, dates)
+        for child in children:
+            child.update(statistical_parent=parent_id, date=DATE, uncertainty_kind=uncertainty)
+        units.extend(children)
+        group["statistical_aggregates"].append(parent | dict(
+            source_id=group["source_id"], date=DATE, endpoint_dates=dates,
+            method="Sum of the disjoint local returns reconciled to the existing comparable-area opening control.",
+            uncertainty_kind=uncertainty,
+        ))
+    group["units"] = sorted(units, key=lambda row: row["unit_id"])
+
+
 def legacy_population_control(unit_id):
     legacy = json.loads((HERE.parent/"alpha/historical_world_economy_1900/countries_compact.json").read_text(encoding="utf8"))
     controls = (dict(zip(legacy["field_order"], data)) for data in legacy["rows"])
@@ -1078,6 +1138,9 @@ def groups(observations, version=1):
         if taiwan["unit_id"] in result:
             raise ValueError("Duplicate Taiwan opening control")
         result[taiwan["unit_id"]] = taiwan
+    if version >= 22:
+        add_italian_regions(result["kingdom_of_italy"], observations)
+        add_indian_local_areas(result["cshapes_gw_750"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

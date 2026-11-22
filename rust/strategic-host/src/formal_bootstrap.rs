@@ -2409,7 +2409,7 @@ mod tests {
 
     #[test]
     fn historical_italian_and_mexican_age_and_social_tables_preserve_census_scope() {
-        let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+        let world = WorldBootstrap::load().unwrap().base_opening_version("country_fra", None, Some(21)).unwrap();
         for (scope, total, known_age) in [
             ("kingdom_of_italy", 32_296_914, 32_295_479),
             ("mexican_republic", 13_447_810, 13_423_676),
@@ -2433,6 +2433,46 @@ mod tests {
         let coahuila = world.inspect_population("mx_coahuila").unwrap().social.unwrap();
         assert_eq!(coahuila.dimensions["occupation"].unknown_residents, 287_792);
         assert_eq!(coahuila.dimensions["religion"].assigned_residents, 287_792);
+    }
+
+    #[test]
+    fn historical_local_italy_india_and_canadian_ancestry_preserve_their_sources() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let italy = world.inspect_population("kingdom_of_italy").unwrap();
+        assert_eq!(italy.population_total, Some(32_296_914));
+        assert_eq!(italy.social.unwrap().dimensions["marital_status"].assigned_residents, 32_296_914);
+        let civil_status = world.inspect_population("it_1901_civil_status_scope").unwrap();
+        assert_eq!(civil_status.children.len(), 17);
+        assert_eq!(civil_status.children.iter().map(|child| child.population_total).sum::<u64>(), 32_296_914);
+        let site = world.inspect_population("place:milan").unwrap();
+        assert_eq!(site.account_id, Some("it_1901_lombardia"));
+        assert_eq!(site.population_total, None);
+        let lombardy = world.inspect_population("it_1901_lombardia").unwrap();
+        assert_eq!(lombardy.population_total, Some(4_254_990));
+        assert_eq!(lombardy.structure.unwrap().cohort_residents, 4_254_990);
+        assert_eq!(lombardy.social.unwrap().dimensions["marital_status"].unknown_residents, 4_254_990);
+
+        let mysore = world.inspect_population("raj_mysore_state").unwrap();
+        assert_eq!(mysore.children.len(), 5);
+        assert_eq!(mysore.children.iter().map(|child| child.population_total).sum::<u64>(), 5_470_284);
+        let states = world.inspect_population("raj_united_provinces_states").unwrap();
+        assert_eq!(states.children.len(), 2);
+        assert_eq!(states.children.iter().map(|child| child.population_total).sum::<u64>(), 800_983);
+        let rampur = world.inspect_population("raj_rampur_state").unwrap();
+        assert_eq!(rampur.population_total, Some(535_305));
+        let structure = rampur.structure.unwrap();
+        assert_eq!(structure.residents_with_cohort_age_and_sex, 535_107);
+
+        let canada = world.inspect_population("dominion_of_canada").unwrap();
+        let ancestry = &canada.social.unwrap().dimensions["culture"];
+        assert_eq!(ancestry.assigned_residents, 5_273_225);
+        assert_eq!(ancestry.unknown_residents, 31_089);
+        let before = bootstrap.base_opening_version("country_fra", None, Some(21)).unwrap();
+        assert_eq!(before.population().population_total("it_1901_lombardia"), None);
+        assert_eq!(before.population().population_total("raj_rampur_state"), None);
+        assert_eq!(before.inspect_population("dominion_of_canada").unwrap().social.unwrap()
+                   .dimensions["culture"].assigned_residents, 0);
     }
 
     #[test]
