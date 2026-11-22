@@ -540,11 +540,12 @@ impl ViewportTransition {
     fn update(&mut self,pages:&HashMap<Key,Page>,level:u32,target:bool,lod:f64,now:Instant) {
         let seconds=self.previous.replace(now).map_or(0.,|then|now.saturating_duration_since(then).as_secs_f32());
         self.missing=self.visible.iter().filter(|key|!pages.contains_key(key)).count();
-        // Zoom determines layer opacity. Page readiness is applied at the sampled
-        // location, so a missing neighbour cannot retire the whole layer.
-        let exit=f64::from(level)-0.5-LOD_HYSTERESIS;
-        let exit_span=if level<=4 {0.05} else {0.37};
-        let t=((lod-exit)/exit_span).clamp(0.,1.) as f32;
+        // Detail appears at the same scale in both directions. Selection can
+        // keep pages inside the hysteresis interval without displaying them.
+        let midpoint=f64::from(level)-0.5;
+        let (start,span)=if level<=4 {(midpoint-LOD_HYSTERESIS,0.05)}
+            else {(midpoint+LOD_HYSTERESIS,0.37)};
+        let t=((lod-start)/span).clamp(0.,1.) as f32;
         self.goal=if target {t*t*(3.-2.*t)} else {0.};
         let step=seconds.min(1./30.)/PAGE_FADE_SECONDS;
         self.mix+=(self.goal-self.mix).clamp(-step,step);
@@ -948,10 +949,10 @@ impl Terrain {
                         else {u8::from(retreat_detail)};
                     let score=if in_view {proximity}else{dot(ahead,tile.axis)};
                     near.push((tile.key,score,priority));
-                } else if in_view && self.pages.contains_key(&tile.key)
+                } else if (in_view || (near_view && tile.key.0>=5)) && self.pages.contains_key(&tile.key)
                     && grouped_lod(tile.key.0).is_some_and(|index|needed[index]) {
-                    // Keep already visible pages through the outgoing zoom fade.
-                    near.push((tile.key,proximity,4));
+                    // The shared edge fade also samples resident neighbours.
+                    near.push((tile.key,proximity,if in_view {4} else {3}));
                 }
             }
         }

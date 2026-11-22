@@ -2,7 +2,7 @@
 
 import argparse
 import os
-from collections import Counter
+from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager, ExitStack, nullcontext
 from datetime import datetime
@@ -32,6 +32,7 @@ import shapefile
 from shapely import clip_by_rect, intersects_xy, linestrings, make_valid, prepare, transform, union_all
 from shapely.affinity import translate
 from shapely.geometry import LineString, Polygon, box, shape
+from shapely.ops import polygonize
 from shapely.strtree import STRtree
 
 
@@ -1615,6 +1616,10 @@ def water_cell(parts, bits, origin, cell_y):
                 segment = (int(a[0]) | int(a[1])<<16, int(b[0]) | int(b[1])<<16, level)
                 for band in range(first,last+1):
                     bands[band].extend(segment)
+    return encode_water_cell(bits,bands)
+
+
+def encode_water_cell(bits, bands):
     result = [bits]+[0]*(WATER_BANDS+1)
     for band,edges in enumerate(bands,1):
         result[band] = len(result)
@@ -1746,15 +1751,156 @@ def audit_water_page(before, after):
     ]}
 
 
+def shoreline_correction(path):
+    """Read a surveyed marine boundary and the extent where it is authoritative."""
+    with path.open(encoding="utf-8-sig") as source:
+        data = json.load(source)
+    if data.get("type") != "FeatureCollection":
+        raise ValueError("Shoreline correction requires a GeoJSON FeatureCollection")
+    roles = {"coverage": [], "land": []}
+    world = box(-180,-90,180,90)
+    for feature in data.get("features",[]):
+        properties = feature.get("properties") or {}
+        geometry = feature.get("geometry") or {}
+        role = properties.get("role")
+        if (feature.get("type") != "Feature" or role not in roles or not properties.get("sources")
+                or geometry.get("type") not in ("Polygon","MultiPolygon")):
+            raise ValueError("Shoreline features require polygon geometry, role and sources")
+        polygon = shape(geometry)
+        if polygon.is_empty or not polygon.is_valid or not world.covers(polygon):
+            raise ValueError("Shoreline features require valid WGS84 polygons")
+        roles[role].append(polygon)
+    coverage, land = (union_all(roles[role]) for role in ("coverage","land"))
+    # Intersections of projected survey edges can leave floating-point slivers.
+    if coverage.is_empty or land.difference(coverage).area > 1e-10:
+        raise ValueError("Survey land must be inside a nonempty coverage polygon")
+    return coverage,land.intersection(coverage)
+
+
+def water_cell_flag_area(bits, bands, flag, bounds):
+    """Recover one parity layer in the QWG integer grid."""
+    edges = set()
+    for band in bands:
+        crossings = set()
+        for a,b,layer in band.tolist():
+            if layer == flag:
+                crossings.symmetric_difference_update(((a,b),))
+        edges.update(crossings)
+    if not edges:
+        return bounds if bits & flag else Polygon()
+    segments = [((a & 65535,a >> 16),(b & 65535,b >> 16)) for a,b in sorted(edges)]
+    ends = defaultdict(set)
+    for (x1,y1),(x2,y2) in segments:
+        ends[y1].symmetric_difference_update((x1,))
+        ends[y2].symmetric_difference_update((x2,))
+    # The stored crossing bands omit horizontal edges. Restore parity along
+    # each scanline, including coincident endpoints after quantization.
+    lines = [LineString(segment) for segment in segments]
+    for y,odd in ends.items():
+        xs = sorted(odd)
+        if len(xs)%2:
+            raise ValueError("Open shoreline parity ring in the base QWG")
+        lines.extend(LineString(((a,y),(b,y))) for a,b in zip(xs[::2],xs[1::2]))
+    linework = union_all([bounds.boundary,*lines])
+    land = []
+    for face in polygonize(linework.geoms):
+        p = face.representative_point()
+        band = int(p.y*64/WATER_QUANTIZATION)%WATER_BANDS
+        state = bool(bits & flag)
+        for a,b,layer in bands[band].tolist():
+            if layer != flag:
+                continue
+            ay,by = a >> 16,b >> 16
+            ax,bx = a & 65535,b & 65535
+            if ay <= p.y < by and p.x < ax+(bx-ax)*(p.y-ay)/(by-ay):
+                state = not state
+        if state:
+            land.append(face)
+    return union_all(land)
+
+
+def correct_shoreline_page(x, y, existing, coverage, land):
+    w,s,e,n = water_page_bounds(x,y)
+    page = box(w,s,e,n)
+    extent = coverage.intersection(page)
+    if not extent.area:
+        return existing
+    origin = np.array([w,s])
+    units = WATER_QUANTIZATION/WATER_STEP
+    survey = transform(extent,lambda xy: (xy-origin)*units)
+    corrected_land = transform(land.intersection(page),lambda xy: (xy-origin)*units)
+    ocean = survey.difference(corrected_land)
+    step = WATER_QUANTIZATION//WATER_GRID
+    words = [0]*(WATER_GRID**2)
+    for at,cell in enumerate(water_payload_cells(*existing)):
+        row,col = divmod(at,WATER_GRID)
+        bounds = box(col*step,row*step,(col+1)*step,(row+1)*step)
+        if not survey.intersection(bounds).area:
+            if isinstance(cell,int):
+                words[at] = cell
+                continue
+            bits,bands = cell
+            bands = [band.ravel().tolist() for band in bands]
+        else:
+            if isinstance(cell,int):
+                # Uniform inland water has an underlying coastal land layer.
+                bits = {1:1,2:0,3:3}[cell]
+                bands = tuple(np.empty((0,3),dtype="<u4") for _ in range(WATER_BANDS))
+            else:
+                bits,bands = cell
+            flags = int(bits)
+            for band in bands:
+                flags |= int(np.bitwise_or.reduce(band[:,2],initial=0))
+            edited = 1 | (flags & 14 if ocean.intersection(bounds).area else 0)
+            polygons = []
+            for flag in (1,2,4,8):
+                if not edited & flag:
+                    continue
+                replaced = survey if flag == 1 else ocean
+                area = Polygon()
+                if not replaced.covers(bounds):
+                    area = water_cell_flag_area(bits,bands,flag,bounds).difference(replaced)
+                if flag == 1:
+                    area = area.union(corrected_land.intersection(bounds))
+                polygons.extend((flag,part) for part in polygon_parts(area))
+            residual,parts = clipped_water(polygons,bounds.bounds,bits & ~edited)
+            geographic = [(flag,transform(part,lambda xy: xy/units+origin)) for flag,part in parts]
+            rebuilt = water_cell(geographic,residual,origin,row)
+            bits = rebuilt[0]
+            offsets = rebuilt[1:WATER_BANDS+2]
+            bands = [
+                [word for a,b,flag in old.tolist() if not flag & edited for word in (a,b,flag)] +
+                rebuilt[start:end]
+                for old,start,end in zip(bands,offsets,offsets[1:])
+            ]
+        if any(bands):
+            words[at] = len(words)+4
+            words.extend(encode_water_cell(bits,bands))
+        else:
+            words[at] = water_class(bits)
+    if words[0] <= 3 and all(word == words[0] for word in words):
+        return words[0],b""
+    return 0,np.asarray(words,dtype="<u4").tobytes()
+
+
+def write_shoreline_candidate(original, correction, destination, *, scratch=None, audit=None):
+    coverage,land = shoreline_correction(correction)
+    w,s,e,n = coverage.bounds
+    pages = [(x,y) for y in range(WATER_ROWS) for x in range(WATER_COLUMNS)
+             if (bounds := water_page_bounds(x,y))[0] < e and bounds[2] > w
+             and bounds[1] < n and bounds[3] > s and coverage.intersection(box(*bounds)).area]
+    build_page = partial(correct_shoreline_page,coverage=coverage,land=land)
+    write_water_pack(destination,build_page,scratch,original,pages,audit)
+
+
 def write_water_geometry(shoreline, destination, *, measured_rivers=None, documented_widths=None,
                          scratch=None, original=None, replace_pages=(), audit=None, shoreline_ponds=None,
                          confirmed_grounded_ice=None, measured_land_islands=None):
     """Use nested water/land polygons; centreline strokes have a separate pack."""
     if destination.exists():
         raise ValueError(f"Output already exists: {destination}")
-    selected = {y*WATER_COLUMNS+x for x,y in replace_pages}
     rectangles = [water_page_bounds(x,y) for x,y in replace_pages]
-    domain = union_all([box(*rect) for rect in rectangles]) if selected else None
+    domain = union_all([box(*rect) for rect in rectangles]) if rectangles else None
     bounds = domain.bounds if domain is not None else None
     pieces,flags = [],[]
     ice = (STRtree(sourced_water_polygons(confirmed_grounded_ice, "Confirmed grounded ice"))
@@ -1815,6 +1961,14 @@ def write_water_geometry(shoreline, destination, *, measured_rivers=None, docume
             add(clip_water_polygon(corridor,(-180,-90,180,90)),next_source)
             next_source += 1
     tree = STRtree(pieces)
+    write_water_pack(destination,lambda x,y,_: water_page(tree,flags,x,y),
+                     scratch,original,replace_pages,audit)
+
+
+def write_water_pack(destination, build_page, scratch, original, replace_pages, audit):
+    if destination.exists():
+        raise ValueError(f"Output already exists: {destination}")
+    selected = {y*WATER_COLUMNS+x for x,y in replace_pages}
     source_file = original.open("rb") if original is not None else nullcontext()
     with source_file as source, staging_directory(destination.parent,scratch) as folder:
         source_offsets,source_classes = water_pack_index(source) if source is not None else (None,None)
@@ -1840,8 +1994,8 @@ def write_water_geometry(shoreline, destination, *, measured_rivers=None, docume
                         if len(payload) != end-begin:
                             raise ValueError(f"Truncated source water page 7/{x}/{y}")
                         classes[page] = source_classes[page]
-                    if source is None or page in selected or changes is not None:
-                        kind,replacement = water_page(tree,flags,x,y)
+                    if source is None or page in selected or (changes is not None and not selected):
+                        kind,replacement = build_page(x,y,(classes[page],payload) if source is not None else None)
                         if changes is not None:
                             difference = audit_water_page((classes[page],payload),(kind,replacement))
                             if difference is not None:
@@ -1855,7 +2009,7 @@ def write_water_geometry(shoreline, destination, *, measured_rivers=None, docume
                 if (source is None or changes is not None) and y%16==15:
                     print(f"WGS84 water rows {y+1}/{WATER_ROWS}",flush=True)
             if changes is not None:
-                changes.write(json.dumps(dict(reviewed_pages=pages,replaced_pages=changed))+"\n")
+                changes.write(json.dumps(dict(reviewed_pages=len(selected) or pages,replaced_pages=changed))+"\n")
             offsets[-1] = target.tell()
             target.seek(8)
             target.write(offsets.tobytes())
@@ -2434,6 +2588,9 @@ def main():
     terrain_candidate.add_argument("--water-geometry", type=Path, nargs=2,
                         metavar=("GSHHG_ARCHIVE", "WATER_PACK"),
                         help="Build a viewport-streamed WGS84 water pack from full GSHHG polygons")
+    terrain_candidate.add_argument("--shoreline-candidate", type=Path, nargs=3,
+                        metavar=("EXISTING_QWG", "SURVEY_GEOJSON", "CANDIDATE_QWG"),
+                        help="Replace surveyed marine shorelines in the affected pages of an existing QWG")
     parser.add_argument("--measured-river-mask",type=Path,metavar="GRWL_MASK_ZIP",
                         help="Add WGS84 Landsat GRWL water polygons and tidal channels to --water-geometry")
     parser.add_argument("--confirmed-grounded-ice",type=Path,metavar="ICE_GEOJSON",
@@ -2493,16 +2650,26 @@ def main():
         parser.error("--measured-land-islands requires --water-geometry")
     if args.documented_river_widths is not None and args.water_geometry is None:
         parser.error("--documented-river-widths requires --water-geometry")
+    if args.shoreline_candidate is not None and (args.water_page is not None or args.water_pages_from is not None):
+        parser.error("--shoreline-candidate selects pages from the survey coverage")
     if args.audit_water_pages is not None:
-        if args.water_geometry is None or args.water_pages_from is None or args.water_page is not None:
-            parser.error("--audit-water-pages requires --water-geometry and --water-pages-from")
-        if args.audit_water_pages.exists() or args.audit_water_pages.resolve() == args.water_geometry[-1].resolve():
+        if args.shoreline_candidate is None and (
+            args.water_geometry is None or args.water_pages_from is None or args.water_page is not None
+        ):
+            parser.error("--audit-water-pages requires --shoreline-candidate or --water-geometry with --water-pages-from")
+        water_output = (args.shoreline_candidate or args.water_geometry)[-1]
+        if args.audit_water_pages.exists() or args.audit_water_pages.resolve() == water_output.resolve():
             parser.error("The water audit log needs its own new path")
     elif args.water_page is not None or args.water_pages_from is not None:
         if args.water_geometry is None or not args.water_page or args.water_pages_from is None:
             parser.error("--water-page and --water-pages-from require each other and --water-geometry")
         if any(not (0 <= x < WATER_COLUMNS and 0 <= y < WATER_ROWS) for x,y in args.water_page):
             parser.error("Water page coordinates are outside Z7")
+    if args.shoreline_candidate is not None:
+        original, survey, output = args.shoreline_candidate
+        with generation_disk_usage(output,original.stat().st_size+100_000_000) as (scratch, _):
+            write_shoreline_candidate(original,survey,output,scratch=scratch,audit=args.audit_water_pages)
+        return
     if args.water_geometry is not None:
         with generation_disk_usage(args.water_geometry[-1], 1_500_000_000) as (scratch, _):
             write_water_geometry(*args.water_geometry, measured_rivers=args.measured_river_mask,

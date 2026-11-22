@@ -34,7 +34,7 @@
 
 `--confirmed-grounded-ice <GeoJSON>` 从 GRWL 水域叠加中扣除已确认接地的冰川轮廓。GSHHG 各层继续按原水陆嵌套计算。`--measured-land-islands <GeoJSON>` 将海岸测绘中位于原 GSHHG 第一层之外的岛屿部分加入陆地层。两个输入均使用 WGS84 FeatureCollection，每个 Polygon 或 MultiPolygon 要素包含 `properties.sources`。
 
-本次修正使用 GLIMS 冰川 `G089717E35617N` 在 2002-07-10 和 2006-09-14 两期观测轮廓的交集，以及英国南极调查局地图组 Gerrish 2020 的 Lynn Ø 海岸记录 148。GLIMS 分析编号为 912784 和 252610。岛西侧 GSHHG 已有误判陆地仍待基于岸线位置修正。[GLIMS 冰川数据库](https://doi.org/10.7265/N5V98602) · [GLIMS 引用与使用条款](https://nsidc.org/data/nsidc-0272/versions/1) · [Gerrish 2020，开放政府许可 3.0](https://doi.org/10.5285/8cecde06-8474-4b58-a9cb-b820fa4c9429)
+本次修正使用 GLIMS 冰川 `G089717E35617N` 在 2002-07-10 和 2006-09-14 两期观测轮廓的交集，以及英国南极调查局地图组 Gerrish 2020 的 Lynn Ø 海岸记录 148。GLIMS 分析编号为 912784 和 252610。该候选沿用后文的岛西侧海陆校正。[GLIMS 冰川数据库](https://doi.org/10.7265/N5V98602) · [GLIMS 引用与使用条款](https://nsidc.org/data/nsidc-0272/versions/1) · [Gerrish 2020，开放政府许可 3.0](https://doi.org/10.5285/8cecde06-8474-4b58-a9cb-b820fa4c9429)
 
 从[全球岸线阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-shoreline-audit-20261120)恢复 `water-geometry.qwg`。准备 [Basemap 2.0.0 全精度数据 wheel](https://pypi.org/project/basemap-data-hires/2.0.0/)、[GRWL v01.01](https://doi.org/10.5281/zenodo.1297434)及 [GSHHG 2.3.7 Shapefile 压缩包](https://www.soest.hawaii.edu/pwessel/gshhg/)。在 `rust/strategic-host` 下用 PowerShell 重算 4 页。`$baseline`、`$sources`、`$candidate` 分别指向恢复的库、源压缩包目录和独立候选数据根下的 `worldcrs84quad-15s-v2-hydrology` 目录。
 
@@ -50,6 +50,18 @@ python tools/build_natural_terrain.py --water-geometry `
 ```
 
 候选数据根使用同一恢复批次的其余地图资源。用 `wwo-map-lab --play --background --data <候选数据根> --observe <请求路径>` 复核。取景中心为青藏冰川 `(89.74677, 35.61502)` 和 Lynn Ø `(-19.17091, 80.11888)`，两处使用 48 米/像素。
+
+Lynn Ø 西侧校正使用 [BAS 格陵兰海岸测绘](https://doi.org/10.5285/8cecde06-8474-4b58-a9cb-b820fa4c9429) 的 WGS84 [调查覆盖与陆地多边形](../../docs/terrain-z7-visual/bas-gerrish-2020-lynn-shoreline.geojson)。按 OGL 3.0 使用，版权归 BAS。调查范围包含冻结机位确认的六处连续岸线差异，并在测绘坐标中向相邻一致区域延伸约 80 米。覆盖外沿用原 QWG。
+
+从已有正式 QWG 生成候选。在 `rust/strategic-host` 下运行命令。输入为当前已安装的阶段 QWG，Lynn Ø 对照使用 1,386,732,480 字节版本。
+
+```powershell
+python tools/build_natural_terrain.py --shoreline-candidate `
+  "$baseline/water-geometry.qwg" ../../docs/terrain-z7-visual/bas-gerrish-2020-lynn-shoreline.geojson `
+  "$candidate/water-geometry.qwg"
+```
+
+调查陆地按覆盖多边形写入第一层岸线。调查海域清除原岛屿、湖泊和湖中岛的冲突标记。其余嵌套层及 GRWL 水面沿用原值。Lynn Ø 候选改动七页。48 米/像素固定机位为 `(-19.19, 80.119)`。
 
 候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
 

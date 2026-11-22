@@ -196,11 +196,24 @@ fn natural_global(uv:vec2f) -> vec4f {
     let local=vec2f(fract(uv.x*2.),uv.y);
     return textureSampleLevel(terrain_world,linear,(local*256.+4.)/264.,half,0.);
 }
-struct NaturalPage { color:vec4f, coverage:f32 }
+struct NaturalPage { texel:vec2f, slot:i32, coverage:f32 }
+fn natural_uv(ll:vec2f) -> vec2f {
+    // A rounded longitude at the antimeridian must stay in the last column.
+    return vec2f(min(fract(ll.x/360.+.5),.99999994),clamp(.5-ll.y/180.,0.,.99999994));
+}
+fn natural_lod_weight(zoom:u32) -> f32 {
+    if f32(zoom)>view.map_style.z {return 0.;}
+    if view.chart_origin.w>.5 {return select(0.,1.,f32(zoom)==view.map_style.z);}
+    let opacity=view.natural_lod[zoom/4u][zoom%4u];
+    return select(opacity,1.,opacity<0.);
+}
 fn page_readiness(cell:vec2i, columns:i32, rows:i32, shift:u32) -> f32 {
     let x=(cell.x+columns)%columns;
     let y=clamp(cell.y,0,rows-1)+rows-1;
-    return f32((textureLoad(terrain_index,vec2i(x,y),0).r>>shift)&255u)/255.;
+    let index=textureLoad(terrain_index,vec2i(x,y),0).r;
+    let fade=(index>>shift)&255u;
+    // A landscape page can be decoded before its color is visible.
+    return f32(select(fade,min(fade,(index>>16u)&255u),shift==24u))/255.;
 }
 fn page_coverage(cell:vec2i, q:vec2f, rows:i32, shift:u32, fade:f32) -> f32 {
     if fade<=0. {return 0.;}
@@ -219,37 +232,38 @@ fn page_coverage(cell:vec2i, q:vec2f, rows:i32, shift:u32, fade:f32) -> f32 {
     let t=smoothstep(vec2f(0.),vec2f(collar),rim);
     return mix(mix(corner,edge_y,t.x),mix(edge_x,fade,t.x),t.y);
 }
-fn page_surface(uv:vec2f, zoom:i32, exact:bool) -> NaturalPage {
-    let rows=1i<<u32(zoom);
+fn natural_page(uv:vec2f, zoom:u32, exact:bool) -> NaturalPage {
+    let rows=1i<<zoom;
     let position=uv*vec2f(f32(rows*2),f32(rows));
     let cell=vec2i(position);
     let index=textureLoad(terrain_index,cell+vec2i(0,rows-1),0).r;
     let slot=i32(index&65535u)-1;
-    if slot<0 {return NaturalPage(vec4f(0.),0.);}
     let q=fract(position);
+    let texel=q*256.+4.;
+    if slot<0 {return NaturalPage(texel,slot,0.);}
+    if exact {return NaturalPage(texel,slot,1.);}
     let fade=f32((index>>16u)&255u)/255.;
-    if fade<=0. && !exact {return NaturalPage(vec4f(0.),0.);}
-    let refined=textureSampleLevel(terrain_detail,linear,(q*256.+4.)/264.,slot,0.);
-    if exact {return NaturalPage(refined,1.);}
-    return NaturalPage(refined,page_coverage(cell,q,rows,16u,fade));
+    return NaturalPage(texel,slot,page_coverage(cell,q,rows,16u,fade));
+}
+fn natural_page_sample(page:NaturalPage, offset:vec2f) -> vec4f {
+    return textureSampleLevel(terrain_detail,linear,(page.texel+offset)/264.,page.slot,0.);
 }
 fn natural_surface(ll:vec2f) -> vec4f {
-    // Keep a rounded-up longitude fraction inside the last column at the antimeridian.
-    let u=min(fract(ll.x/360.+.5),.99999994);
-    let uv=vec2f(u,clamp(.5-ll.y/180.,0.,.99999994));
+    let uv=natural_uv(ll);
     if view.chart_origin.w>.5 && view.map_style.z>0. {
-        let page=page_surface(uv,i32(view.map_style.z),true);
-        return mix(vec4f(1.,0.,1.,0.),page.color,page.coverage);
+        let page=natural_page(uv,u32(view.map_style.z),true);
+        if page.coverage<=0. {return vec4f(1.,0.,1.,0.);}
+        return natural_page_sample(page,vec2f(0.));
     }
     var color=vec4f(0.);
     var remaining=1.;
-    for(var z=i32(view.map_style.z);z>0;z-=1) {
-        let opacity=view.natural_lod[u32(z)/4u][u32(z)%4u];
-        let grouped=opacity>=0.;
-        if opacity==0. {continue;}
-        let page=page_surface(uv,z,false);
-        let weight=remaining*page.coverage*select(1.,opacity,grouped);
-        color+=page.color*weight;
+    for(var z=u32(view.map_style.z);z>0u;z-=1u) {
+        let opacity=natural_lod_weight(z);
+        if opacity<=0. {continue;}
+        let page=natural_page(uv,z,false);
+        let weight=remaining*page.coverage*opacity;
+        if weight<=0. {continue;}
+        color+=natural_page_sample(page,vec2f(0.))*weight;
         remaining-=weight;
         if remaining<.0001 {return color;}
     }
@@ -323,18 +337,10 @@ fn water_coverage(sample:u32, fallback:f32) -> f32 {
     return mix(fallback,select(0.,1.,(sample&3u)>1u),water_weight(sample));
 }
 
-fn exposed_ground(ll:vec2f, fallback:vec3f) -> vec3f {
-    let uv=vec2f(min(fract(ll.x/360.+.5),.99999994),clamp(.5-ll.y/180.,0.,.99999994));
-    let z=min(7u,u32(view.map_style.z));
-    let rows=1i<<z;
-    let local=uv*vec2f(f32(rows*2),f32(rows));
-    let index=textureLoad(terrain_index,vec2i(local)+vec2i(0,rows-1),0).r;
-    let slot=i32(index&65535u)-1;
-    let lod=f32((index>>16u)&255u)/255.;
-    let ready=page_coverage(vec2i(local),fract(local),rows,16u,lod);
-    if slot<0 || ready<=.01 {return geographic_ground_tint(ll,fallback);}
+fn exposed_page_ground(page:NaturalPage) -> vec4f {
     // Use the shared gutters and samples where the base map observes land.
-    let texel=fract(local)*256.+4.;
+    let center=natural_page_sample(page,vec2f(0.));
+    if center.a<=0. {return vec4f(center.rgb,1.);}
     let offsets=array<vec2f,4>(vec2f(-1.,0.),vec2f(1.,0.),vec2f(0.,-1.),vec2f(0.,1.));
     var sum=vec3f(0.);
     var total=0.;
@@ -343,15 +349,35 @@ fn exposed_ground(ll:vec2f, fallback:vec3f) -> vec3f {
         let reach=select(1.,1.-smoothstep(.35,.80,total),ring==1u);
         if reach<=0. {break;}
         for (var i=0u;i<4u;i++) {
-            let sample=textureSampleLevel(terrain_detail,linear,(texel+offsets[i]*distance)/264.,slot,0.);
+            let sample=natural_page_sample(page,offsets[i]*distance);
             let dry=(1.-smoothstep(.015,.15,sample.a))*reach;
             sum+=sample.rgb*dry;
             total+=dry;
         }
     }
-    let support=ready*smoothstep(.02,1.3,total);
-    if support>=.999 {return sum/total;}
-    return mix(geographic_ground_tint(ll,fallback),sum/max(.001,total),support);
+    return vec4f(sum/max(.001,total),smoothstep(.02,1.3,total));
+}
+
+fn exposed_ground(ll:vec2f, fallback:vec3f) -> vec3f {
+    let uv=natural_uv(ll);
+    var ground=vec3f(0.);
+    var remaining=1.;
+    var observed=0.;
+    for(var z=u32(view.map_style.z);z>0u;z-=1u) {
+        let opacity=natural_lod_weight(z);
+        if opacity<=0. {continue;}
+        let page=natural_page(uv,z,false);
+        let visible=remaining*page.coverage*opacity;
+        if visible<=0. {continue;}
+        let dry=exposed_page_ground(page);
+        let weight=visible*dry.a;
+        ground+=dry.rgb*weight;
+        observed+=weight;
+        remaining-=visible;
+        if remaining<.0001 {break;}
+    }
+    if observed>=.9999 {return ground;}
+    return ground+geographic_ground_tint(ll,fallback)*(1.-observed);
 }
 
 fn water_surface(ll:vec2f, sample:u32, base:vec4f, ground:vec3f, depth:f32) -> vec4f {

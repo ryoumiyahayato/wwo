@@ -6,7 +6,7 @@ struct LandscapePage {
 };
 
 fn landscape_page(ll: vec2f, level: u32, at_surface: bool) -> LandscapePage {
-    let uv = vec2f(min(fract(ll.x / 360. + .5), .99999994), clamp(.5 - ll.y / 180., 0., .99999994));
+    let uv = natural_uv(ll);
     let rows = 1i << level;
     let position = uv * vec2f(f32(rows*2), f32(rows));
     let cell = vec2i(position);
@@ -14,9 +14,10 @@ fn landscape_page(ll: vec2f, level: u32, at_surface: bool) -> LandscapePage {
     let q = fract(position);
     var fade = f32(index >> 24u) / 255.;
     if at_surface && view.chart_origin.w <= .5 {
-        // A decoded height page can seed build work before color is visible.
-        if fade <= 1./255. {fade=0.;}
-        else {fade=page_coverage(cell,q,rows,24u,fade);}
+        // Instance preparation can see a decoded page early. At the surface,
+        // both the color and relief must be visible at this point.
+        let color_fade=f32((index>>16u)&255u)/255.;
+        fade=page_coverage(cell,q,rows,24u,min(fade,color_fade));
     }
     return LandscapePage(q * 256. + 4., i32(index & 65535u) - 1, fade);
 }
@@ -31,9 +32,8 @@ fn landscape_coverage(page: LandscapePage) -> f32 {
 }
 
 fn landscape_surface_weight(level: u32) -> f32 {
-    if view.map_style.z < f32(level) || view.settings.y >= .5 { return 0.; }
-    if view.chart_origin.w > .5 { return select(0.,1.,view.map_style.z == f32(level)); }
-    return clamp(view.natural_lod[1][level-4u], 0., 1.);
+    if view.settings.y >= .5 { return 0.; }
+    return natural_lod_weight(level);
 }
 
 fn landscape_slope(page: LandscapePage, latitude: f32, radius: f32, level: u32) -> vec2f {
@@ -346,23 +346,30 @@ fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) 
         || view.map_style.z < 5. || all(base==vec3f(1.,0.,1.)) { return base; }
     let strength = ground_material_weight(water,mpp);
     if strength <= .001 { return base; }
-    if view.map_style.z < 6. { return mix(base,natural_land_material(vec4f(base,water),world,mpp),strength); }
+    let coarse=select(natural_lod_weight(5u),1.,view.chart_origin.w>.5);
+    let regional_weight=landscape_surface_weight(6u);
+    let fine_weight=landscape_surface_weight(7u);
     let modern = 1. - landscape_survey_mask(ll,mpp);
-    if modern <= .001 { return mix(base,natural_land_material(vec4f(base,water),world,mpp),strength); }
-    let child = landscape_page(ll,7u,true);
-    let fine = landscape_surface_weight(7u)*child.fade;
-    var surface = vec3f(0.);
-    var regional = 0.;
-    if fine < .999 {
-        let parent = landscape_page(ll,6u,true);
-        regional = landscape_surface_weight(6u)*parent.fade;
-        if regional > .001 { surface = ground_motif(base,ll,world,parent,6u,water,mpp)*regional; }
+    if modern <= .001 || max(regional_weight,fine_weight)<=0. {
+        return mix(base,natural_land_material(vec4f(base,water),world,mpp),strength*coarse);
     }
-    if fine > .001 { surface = surface*(1.-fine)+ground_motif(base,ll,world,child,7u,water,mpp)*fine; }
+    var surface = vec3f(0.);
+    var fine = 0.;
+    if fine_weight>0. {
+        let child = landscape_page(ll,7u,true);
+        fine=fine_weight*child.fade;
+        if fine>.001 {surface=ground_motif(base,ll,world,child,7u,water,mpp)*fine;}
+    }
+    var regional = 0.;
+    if fine < .999 && regional_weight>0. {
+        let parent = landscape_page(ll,6u,true);
+        regional = regional_weight*parent.fade*(1.-fine);
+        if regional > .001 { surface += ground_motif(base,ll,world,parent,6u,water,mpp)*regional; }
+    }
     surface *= modern;
-    let uncovered = 1.-modern*(fine+regional*(1.-fine));
+    let uncovered = 1.-modern*(fine+regional);
     if uncovered > .001 {
-        surface += natural_land_material(vec4f(base,water),world,mpp)*uncovered;
+        surface += mix(base,natural_land_material(vec4f(base,water),world,mpp),coarse)*uncovered;
     }
     return mix(base,surface,strength);
 }
