@@ -18,7 +18,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 35
+OPENING_VERSION = 36
 
 def write_changed(name, data):
     path = HERE / name

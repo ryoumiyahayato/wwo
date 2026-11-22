@@ -2780,7 +2780,9 @@ mod tests {
         assert_eq!(itsa_social.dimensions["literacy"].assigned_residents, 124_623);
         let district = world.inspect_population("egy_markaz_faiyum").unwrap().social.unwrap();
         assert_eq!(district.dimensions["occupation"].assigned_residents, 132_375);
-        assert_eq!(district.dimensions["literacy"].unknown_residents, 132_375);
+        let literacy = &district.dimensions["literacy"];
+        assert_eq!(literacy.assigned_residents, 109_228);
+        assert_eq!(literacy.unknown_residents, 23_147);
 
         let sao_paulo = world.inspect_population("br_sao_paulo").unwrap().social.unwrap();
         assert_eq!(sao_paulo.dimensions["marital_status"].assigned_residents, 2_192_821);

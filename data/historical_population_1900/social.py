@@ -8,6 +8,7 @@ from itertools import chain
 from pathlib import Path
 
 from opening import AGRA_DISTRICT_BALANCE, AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, JAVA_MADOERA, OTTOMAN_REGISTRATION_SOURCE, SPANISH_CIVIL_STATUS_SCOPE
+from opening import ROMANIA_CENSUS_SOURCE, egypt_age_sex_controls, romanian_county_controls
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import cochin_language, india_princely_residence, madras_states_religion, travancore_language
@@ -1600,13 +1601,19 @@ def java_residency_registration(pools):
         )
 
 
-def egyptian_urban_literacy(pools):
+def egyptian_census_literacy(pools, version):
     source = "egypt_census_1907_age_and_literacy"
-    towns = {"egy_madina_cairo", "egy_madina_alexandria"}
+    units = {"egy_madina_cairo", "egy_madina_alexandria"}
+    controls = egypt_age_sex_controls()
+    if version >= 36:
+        earlier_literacy = {"egy_markaz_itsa", "egy_markaz_sinuris", "egy_mudiriya_jirja"}
+        units.update((controls.keys() & pools.keys()) - earlier_literacy)
     with (COLLECTIONS / "egypt_age_1907" / "table_xi_opening_age_sex.csv").open(encoding="utf8", newline="") as stream:
-        table = list(csv.DictReader(stream))
-    for unit_id in sorted(towns):
-        rows = [row for row in table if row["unit_id"] == unit_id]
+        table = defaultdict(list)
+        for row in csv.DictReader(stream):
+            table[row["unit_id"]].append(row)
+    for unit_id in sorted(units):
+        rows = table[unit_id]
         total, = (row for row in rows if row["age_label"] == "total")
         outside, = (row for row in rows if row["age_label"] == "0-4")
         eligible = [row for row in rows if row["age_label"] not in ("total", "0-4")]
@@ -1614,17 +1621,19 @@ def egyptian_urban_literacy(pools):
             label: sum(int(row[f"{sex}_reported_{label.lower()}"]) for row in eligible for sex in ("male", "female"))
             for label in ("Literate", "Illiterate")
         }
-        control = int(total["person_count"])
-        town = pools[unit_id]
-        if control != town["endpoint_values"][-1]:
+        control = int(controls[unit_id]["table_5_person_count"])
+        omitted = control - int(total["person_count"])
+        pool = pools[unit_id]
+        if control != pool["endpoint_values"][-1] or omitted != int(controls[unit_id]["omitted_person_count"]):
             raise ValueError(f"{unit_id}: the Egypt literacy and population controls differ")
         yield unit_id, "literacy", distribution(
-            town["population_value"], classification="egypt_1907_reported_literacy_age_five_and_older",
-            source=source, date=total["observation_date"], observed_unit=unit_id, scope=town["scope"],
+            pool["population_value"], classification="egypt_1907_reported_literacy_age_five_and_older",
+            source=source, date=total["observation_date"], observed_unit=unit_id, scope=pool["scope"],
             locator=f"1907 census, Table XI, printed p. {total['printed_page']}.",
-            total=control, observed_counts=counts, unknown=int(outside["person_count"]),
-            definition="Reported literacy of residents aged five and older. Opening shares use the all-age town "
-                       "denominator. Literacy under five is unassigned. Changes from 1900 are unquantified.",
+            total=control, observed_counts=counts, unknown=int(outside["person_count"]) + omitted,
+            definition=("Reported literacy of residents aged five and older. People under five and people omitted "
+                        "from Table XI are unassigned. Shares use each area's same-scope all-age Table V denominator. "
+                        "Changes between the opening date and the 1907 census are unquantified."),
         )
 
 
@@ -1646,27 +1655,61 @@ def ottoman_registered_religion(pools, observations):
         )
 
 
-def romanian_religion(pools):
-    columns = {
-        "ortodoxa": "Orthodox", "mozaica": "Jewish", "catolica": "Catholic",
-        "protestanta": "Protestant", "mahometana": "Muslim", "armeana": "Armenian", "lipovana": "Lipovan",
-    }
-    path = COLLECTIONS / "romania" / "raw" / "romania_1899_religion_table_iva.csv"
+def romanian_distribution(pools, filename, dimension, classification, columns, definition,
+                          *, unknown_column=None, counties=None):
+    path = COLLECTIONS / "romania" / "raw" / filename
+    units = set()
     with path.open(encoding="utf8", newline="") as stream:
         for row in csv.DictReader(stream):
             unit = row["unit_id"]
             total = int(row["observed_total"])
-            if total != pools[unit]["population_value"] or total != int(row["male_total"]) + int(row["female_total"]):
-                raise ValueError(f"{unit}: Romanian religion accounts differ from the stable population controls")
-            yield unit, "religion", distribution(
-                total, classification="romania_1899_reported_religion", source="ro_colescu_1899_census_report",
+            pool = pools[unit]
+            if unit in units or row["observed_month"] != "1899-12" or total != pool["population_value"]:
+                raise ValueError(f"{unit}: Romanian {dimension} differs from the stable population control")
+            if counties is not None:
+                control = counties[unit]
+                if row["parent_id"] != control["parent_id"] or pool["statistical_parent"] != control["parent_id"]:
+                    raise ValueError(f"{unit}: Romanian {dimension} differs from the census county scope")
+            if "male_total" in row and total != int(row["male_total"]) + int(row["female_total"]):
+                raise ValueError(f"{unit}: Romanian {dimension} differs from the census sex controls")
+            units.add(unit)
+            yield unit, dimension, distribution(
+                total, classification=classification, source=ROMANIA_CENSUS_SOURCE,
                 date=row["observed_month"], observed_unit=unit, scope=f"{row['source_name']}, stable population",
                 locator=row["locator"], total=total,
                 observed_counts={label: int(row[column]) for column, label in columns.items()},
-                unknown=int(row["alta_si_necunoscuta"]),
-                definition="Seven named census religions. The joint other-or-unknown column remains unassigned.",
+                unknown=int(row[unknown_column]) if unknown_column else 0, definition=definition,
                 method="Carry December census counts at original scale to January 1. Census dates varied locally.",
             )
+    if counties is not None and units != counties.keys():
+        raise ValueError(f"Romanian {dimension} does not cover the census counties")
+
+
+def romanian_structure(pools, version):
+    counties = romanian_county_controls() if version >= 36 else None
+    religion_file = ("romania_1899_county_religion_table_iva.csv" if counties is not None
+                     else "romania_1899_religion_table_iva.csv")
+    yield from romanian_distribution(
+        pools, religion_file, "religion", "romania_1899_reported_religion",
+        {"ortodoxa": "Orthodox", "mozaica": "Jewish", "catolica": "Catholic", "protestanta": "Protestant",
+         "mahometana": "Muslim", "armeana": "Armenian", "lipovana": "Lipovan"},
+        "Seven named census religions. The joint other-or-unknown column remains unassigned.",
+        unknown_column="alta_si_necunoscuta", counties=counties,
+    )
+    if counties is not None:
+        yield from romanian_distribution(
+            pools, "romania_1899_county_literacy_table_va.csv", "literacy", "romania_1899_reported_literacy_age_7_plus",
+            {"read_and_write_7_and_over": "Can read and write",
+             "neither_read_nor_write_7_and_over": "Can neither read nor write"},
+            "Published literacy status of stable residents aged seven and over. People outside the table remain unassigned.",
+            unknown_column="outside_tabulated_scope", counties=counties,
+        )
+        yield from romanian_distribution(
+            pools, "romania_1899_county_residence_table_i.csv", "residence", "romania_1899_administrative_residence",
+            {"urban": "Urban", "rural": "Rural"},
+            "Stable residents of urban and rural communes, using the 1899 census administrative classification.",
+            counties=counties,
+        )
 
 
 def opening_social(opening_groups, observations, *, version):
@@ -1821,9 +1864,9 @@ def opening_social(opening_groups, observations, *, version):
         ))
     if version >= 33:
         marginals = chain(marginals, argentine_occupation(pools, version), java_residency_registration(pools),
-                          egyptian_urban_literacy(pools))
+                          egyptian_census_literacy(pools, version))
     if version >= 35:
-        marginals = chain(marginals, ottoman_registered_religion(pools, observations), romanian_religion(pools))
+        marginals = chain(marginals, ottoman_registered_religion(pools, observations), romanian_structure(pools, version))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

@@ -999,8 +999,8 @@ def egypt_opening(observations, version):
             "collections/egypt_age_1907/observations.jsonl",
         ]
         opening["scope"] = (
-            "Cairo and Alexandria towns, Ramleh markaz in Buheira and eleven provinces have mutually "
-            "exclusive census territory. The rest of the national control remains geographically unlocated. "
+            "Cairo and Alexandria towns, Ramleh markaz in Buheira and the listed provincial accounts cover "
+            "mutually exclusive census territory. The rest of the national control remains geographically unlocated. "
             "The comparison uses 1897 counts restated for the 1907 territorial definitions."
         )
     return opening

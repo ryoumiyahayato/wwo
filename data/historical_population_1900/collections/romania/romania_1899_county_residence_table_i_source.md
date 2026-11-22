@@ -1,0 +1,5 @@
+# Romanian Old Kingdom county urban and rural residence, December 1899
+
+Colescu's Table I.A and I.D give the stable all-age resident count in all communes and rural communes for each county. Table IV.A and IV.D reproduce these counts independently. The two urban compartments are county seats and other towns. County urban residents are the difference between the county all-commune and rural counts. The country and four regional urban totals agree with the sum of the two published urban compartments in Table IV.B and IV.C. [Table I.A and I.D](https://archive.org/details/recensamantulgen00serv/page/n94/mode/2up) · [Table IV.A–D](https://archive.org/details/recensamantulgen00serv/page/n162/mode/2up)
+
+`In comunele urbane` refers to the historical administrative classification of urban communes in the census. `In comunele rurale` refers to rural communes. The complementary county counts sum to 1,119,786 urban and 4,836,904 rural stable residents. Temporary enumerations are outside the stable resident denominator. Source ID `ro_colescu_1899_census_report`.

@@ -26,9 +26,9 @@
         "khedivate_of_egypt",
         "sultanate_of_zanzibar"
       ],
-      "production_people": 17298327,
-      "production_pct_of_regional_research_estimate": 13.309,
-      "people_with_opening_subdivision": 9120651,
+      "production_people": 17878566,
+      "production_pct_of_regional_research_estimate": 13.755,
+      "people_with_opening_subdivision": 9700890,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -3223,9 +3223,9 @@
         "Africa"
       ],
       "research_people": 10110129,
-      "documented_opening_people": 8546656,
+      "documented_opening_people": 9126895,
       "opening_people_including_retained_balances": 10000000,
-      "research_minus_documented": 1563473
+      "research_minus_documented": 983234
     },
     {
       "comparison_id": "france",
@@ -4336,23 +4336,23 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1368629758,
+    "documented_opening_population": 1369209997,
     "untouched_legacy_population": 74080000,
-    "retained_unlocated_population": 31887994,
+    "retained_unlocated_population": 31307755,
     "authoritative_opening_population": 1474597752,
-    "published_minus_documented_opening": 226444490,
+    "published_minus_documented_opening": 225864251,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 210965672,
       "comparisons_by_scope": {
         "scope_unconfirmed": 825196,
         "comparable_extent": 2078531,
-        "partial_extent": 31159330,
+        "partial_extent": 30579091,
         "adopted_research_series": 426
       },
       "opening_without_benchmark_link": -18584667,
       "untouched_legacy_controls": -74080000,
-      "unlocated_balances_under_retained_controls": -31887994
+      "unlocated_balances_under_retained_controls": -31307755
     },
     "published_minus_authoritative_opening": 120476496
   }

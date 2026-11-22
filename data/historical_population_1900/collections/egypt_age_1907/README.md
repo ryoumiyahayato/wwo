@@ -28,7 +28,11 @@ The age census is 2,674 days after the opening. This model assumes stable local 
 | v33 | 11 | 5,814,464 | 5,798,089 | 16,375 | 4,185,536 |
 | v34 | 16 | 8,546,656 | 8,524,349 | 22,307 | 1,453,344 |
 
-Cairo and Alexandria also have a separate literacy distribution from age five. The under-five share remains unknown for literacy.
+Cairo and Alexandria have a separate literacy distribution from age five. In v36 the same procedure applies to eleven additional accounts and Minya. Use each local Table V all-age denominator. People younger than five and people omitted from Table XI remain unknown for literacy. Itsa, Sinuris and Jirja retain their 1897 figures. The 1907 literacy shares are modeled at opening. Literacy change between 1900 and 1907 has no quantified interval.
+
+## Minya province in v36
+
+Table V p. 32 gives 550,971 inhabitants in the adjusted 1897 area and 663,144 in 1907. Minya includes the Bahariya Oases in this comparison geography. Page 29 records a net 2,339-person transfer from Beni Suef in the adjusted 1897 figures. Table XI pp. 136–138 covers 659,967 people in rows 70–76. Table V adds 1,844 men and 1,333 women from estimated nomadic populations in El Fashn, Minya and Samalut. The opening model leaves their age and literacy shares unknown. [Table V](https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/58/full/1600,/0/default.jpg) · [Table XI](https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/164/full/1600,/0/default.jpg)
 
 ## Provinces added in v34
 
@@ -52,4 +56,4 @@ Table V p. 30 separates Alexandria row 2 from Ramleh row 11 in Beheira. Preserve
 | Alexandria | 158,390 | 141,782 | 300,172 | 175,862 | 156,384 | 332,246 |
 | Ramleh | 10,209 | 9,385 | 19,594 | 19,461 | 18,302 | 37,763 |
 
-`table_xi_opening_age_sex.csv` includes the census age and literacy profile for Ramleh. Ramleh literacy remains in the research table. Both sex totals close to Table V. Its common statistical entry is available in both returns. A geometric boundary crosswalk has not been verified. [Table V p. 30](https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/56/full/1600,/0/default.jpg) [Table XI p. 125](https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/153/full/1600,/0/default.jpg)
+`table_xi_opening_age_sex.csv` includes the census age and literacy profile for Ramleh. Formal literacy starts in v36. Both sex totals close to Table V. Its common statistical entry is available in both returns. A geometric boundary crosswalk has not been verified. [Table V p. 30](https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/56/full/1600,/0/default.jpg) [Table XI p. 125](https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/153/full/1600,/0/default.jpg)
