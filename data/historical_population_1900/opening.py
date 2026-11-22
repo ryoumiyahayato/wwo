@@ -1323,6 +1323,8 @@ def qing_interior(observations, version):
         group["v11_territorial_source"] = coastal_and_frontier.relative_to(HERE).as_posix()
     if version >= 19:
         add_qing_prefectures(group, observations, version)
+    if version >= 38:
+        add_jiangxi_prefectures(group, observations)
     return group
 
 
@@ -1371,6 +1373,41 @@ def add_qing_prefectures(group, observations, version):
     if prefectures or {parent["unit_id"] for parent in aggregates} != parents:
         raise ValueError("The prefectural data must close to the selected provincial controls")
     group.update(units=units, statistical_aggregates=aggregates)
+
+
+def add_jiangxi_prefectures(group, observations):
+    parent_id = "qing_hist_jiangxi"
+    source = "cao_qing_jiangxi_prefecture_reconstruction"
+    parent = next(unit for unit in group["units"] if unit["unit_id"] == parent_id)
+    returns = [row for row in observations if row["source_id"] == source]
+    controls = {row["date"]: row for row in returns if row["unit_id"] == parent_id}
+    if controls["1910"]["population_value"] != parent["endpoint_values"][1] or parent["place_ids"]:
+        raise ValueError("Jiangxi differs from the historical provincial control")
+    allocations = {
+        year: allocate_census_shares(
+            returns, source_id=source, observed_date=year, observed_root=control,
+            control_source=parent["source_id"], control_value=parent["population_value"],
+            scope="Thirteen Jiangxi prefectures and Ningdu directly administered zhou, using the historical statistical areas.",
+            uncertainty="Published reconstruction, rounded to thousands. Local boundary and growth errors are unquantified.",
+            places={},
+        ) for year, control in controls.items()
+    }
+    early = {child["unit_id"]: child["population_value"] for child in allocations["1865"]}
+    children = allocations["1910"]
+    if len(early) != 14 or early.keys() != {child["unit_id"] for child in children}:
+        raise ValueError("Jiangxi does not have matching historical prefectures at both source dates")
+    for child in children:
+        child.update(
+            date=DATE, statistical_parent=parent_id,
+            uncertainty_kind=(child["uncertainty_kind"] + f" The 1865 share gives {early[child['unit_id']]:,} "
+                              "people at the same provincial control as a sensitivity scenario."),
+        )
+    group["units"] = [unit for unit in group["units"] if unit["unit_id"] != parent_id] + children
+    group["statistical_aggregates"].append(parent | dict(
+        date=DATE, endpoint_dates=group["endpoint_dates"],
+        interpolation_reference_dates=group["interpolation_reference_dates"],
+        method="Preserve the interpolated Jiangxi provincial control as the sum of its non-overlapping prefectural accounts.",
+    ))
 
 
 def argentina_unenumerated_residents(total, dates, controls):

@@ -1,0 +1,8 @@
+unit_id,date,group_code,source_label,male,female,persons,source_id,source_table
+administrative_region:germany_preussen,1895-06-14,a,"Selbständige, Geschäftsleiter",855453,271661,1127114,de_prussia_1895_occupational_census,printed p. 361 Berufsabtheilung B Spalte 2
+administrative_region:germany_preussen,1895-06-14,b1,"Betriebs-Inspektoren, Ingenieure, Chemiker",32292,26,32318,de_prussia_1895_occupational_census,printed p. 361 Berufsabtheilung B Spalte 2
+administrative_region:germany_preussen,1895-06-14,b2,"Aufseher, Werkmeister, Obersteiger",62870,2425,65295,de_prussia_1895_occupational_census,printed p. 361 Berufsabtheilung B Spalte 2
+administrative_region:germany_preussen,1895-06-14,b3,"Prokuristen, Disponenten, Justitiäre, Buchhalter, Korrespondenten, Rechner, Schreiber",50617,2318,52935,de_prussia_1895_occupational_census,printed p. 361 Berufsabtheilung B Spalte 2
+administrative_region:germany_preussen,1895-06-14,c1,Im Gewerbebetriebe des Haushaltungsvorstands thätige Familienangehörige,7225,21105,28330,de_prussia_1895_occupational_census,printed p. 361 Berufsabtheilung B Spalte 2
+administrative_region:germany_preussen,1895-06-14,c2,"Gesellen, Lehrlinge und sonstige Arbeiter mit gewerblicher Vorbildung",1898811,233678,2132489,de_prussia_1895_occupational_census,printed p. 361 Berufsabtheilung B Spalte 2
+administrative_region:germany_preussen,1895-06-14,c3,"Handlanger, Heizer, Geschäftskutscher, Hausdiener u. s. w.",1087139,230235,1317374,de_prussia_1895_occupational_census,printed p. 361 Berufsabtheilung B Spalte 2

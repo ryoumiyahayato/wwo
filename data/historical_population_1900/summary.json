@@ -51,6 +51,7 @@
     "polar_presence": 1,
     "portugal_census_1900": 44,
     "qing_hubei_shandong_prefectures": 44,
+    "qing_jiangxi_prefectures": 30,
     "qing_shaangan_prefectures": 42,
     "qing_sichuan_prefectures": 38,
     "romania": 6,
@@ -65,7 +66,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 281,
+  "cited_sources": 282,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -80,7 +81,7 @@
   "legacy_only_people": 104724793,
   "authoritative_total_for_new_game": 1474597752,
   "roots_with_partitions": 30,
-  "disjoint_leaves": 1325,
+  "disjoint_leaves": 1338,
   "people_in_partitions": 1284756016,
   "unlocated_balances_under_research_controls": [
     {
@@ -374,7 +375,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2791,
+  "source_statistical_units": 2805,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 30,
@@ -430,8 +431,8 @@
       "unknown_people": 1128923135
     },
     "occupation": {
-      "assigned_people": 221170126,
-      "unknown_people": 1253427626
+      "assigned_people": 240807991,
+      "unknown_people": 1233789761
     },
     "property_declaration": {
       "assigned_people": 32296914,
@@ -442,8 +443,8 @@
       "unknown_people": 1003378085
     },
     "residence": {
-      "assigned_people": 373421414,
-      "unknown_people": 1101176338
+      "assigned_people": 412274162,
+      "unknown_people": 1062323590
     }
   },
   "structural_observations_by_source": {
@@ -4207,7 +4208,7 @@
       "opening_total": 1027998,
       "observed_unit_id": "java_madoera_djokjakarta",
       "observed_total": 1023090,
-      "observed_date": "1900-12-31"
+      "observed_date": "1905-12-31"
     },
     {
       "unit_id": "java_madoera_kediri",
@@ -4228,7 +4229,7 @@
       "opening_total": 1209947,
       "observed_unit_id": "java_madoera_madioen",
       "observed_total": 1205544,
-      "observed_date": "1900-12-31"
+      "observed_date": "1905-12-31"
     },
     {
       "unit_id": "java_madoera_madoera",
@@ -7146,8 +7147,8 @@
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 528,
-  "dated_parent_controls_arithmetic_closure": 491,
+  "dated_parent_controls": 530,
+  "dated_parent_controls_arithmetic_closure": 493,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -7596,8 +7597,8 @@
         "opening_control": 44363679,
         "in_model_pools": 27798112,
         "outside_model_pools": 16565567,
-        "modeled_age_and_sex": 17078108,
-        "modeled_sex_age_unknown": 10720004
+        "modeled_age_and_sex": 19303037,
+        "modeled_sex_age_unknown": 8495075
       },
       {
         "opening_unit_id": "cshapes_gw_920",
@@ -8036,16 +8037,16 @@
         "opening_control": 812681304,
         "in_model_pools": 358353073,
         "outside_model_pools": 454328231,
-        "modeled_age_and_sex": 347390075,
-        "modeled_sex_age_unknown": 10962998
+        "modeled_age_and_sex": 349615004,
+        "modeled_sex_age_unknown": 8738069
       }
     },
     "world": {
       "opening_control": 1474597752,
       "in_model_pools": 889065441,
       "outside_model_pools": 585532311,
-      "modeled_age_and_sex": 873235813,
-      "modeled_sex_age_unknown": 15829628
+      "modeled_age_and_sex": 875460742,
+      "modeled_sex_age_unknown": 13604699
     }
   },
   "opening_count_basis": {

@@ -125,22 +125,19 @@ def catalogue(rows, groups):
             group_at[link].append(group["unit_id"])
             if scope:
                 local[link].add(group["unit_id"])
-        for aggregate in group.get("statistical_aggregates", []):
-            key = aggregate["unit_id"]
+        aggregates = group.get("statistical_aggregates", [])
+        statistical_aggregates.update(aggregate["unit_id"] for aggregate in aggregates)
+        for unit in [*group["units"], *aggregates]:
+            key = unit["unit_id"]
             group_at[key].append(key)
-            statistical_aggregates.add(key)
-        for leaf in group["units"]:
-            key = leaf["unit_id"]
-            group_at[key].append(key)
-            if leaf.get("wwo_admin_label"):
-                label = leaf["wwo_admin_label"]
+            if label := unit.get("wwo_admin_label"):
                 if label in label_openings:
                     raise ValueError(f"repeated opening link for historical place label {label}")
                 label_openings[label] = key
-            for member in leaf.get("member_region_ids", []):
+            for member in unit.get("member_region_ids", []):
                 if member != key:
                     shared_openings[member].add(key)
-            for source_unit in leaf.get("source_unit_ids", []):
+            for source_unit in unit.get("source_unit_ids", []):
                 source_openings[source_unit].add(key)
     for r in rows:
         if r.get("wwo_id"):
@@ -202,7 +199,8 @@ def catalogue(rows, groups):
             parent_ids=sorted({r["parent_id"] for r in observed if r["parent_id"]}),
             wwo_identity_links=sorted({r["wwo_id"] for r in observed if r.get("wwo_id")}),
             opening_partition_links=sorted(source_openings[key]),
-            status="opening_unit" if key in opening_ids else "linked_to_opening_partition" if source_openings[key] else "dated_evidence_only",
+            status="opening_statistical_aggregate" if key in statistical_aggregates else
+            "opening_unit" if key in opening_ids else "linked_to_opening_partition" if source_openings[key] else "dated_evidence_only",
             observation_ids=[r["record_id"] for r in observed]))
     study = [r for r in rows if r["date"] == DATE and r["source_id"].startswith("ft_world_") and r["kind"] == "territory"]
     scope_links = {k: link for link in opening_scope_links(groups, study) for k in link["research_unit_ids"]}

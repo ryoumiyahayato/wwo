@@ -2460,7 +2460,7 @@ mod tests {
         assert_eq!(java.children.len(), 17);
         assert_eq!(java.children.iter().map(|child| child.population_total).sum::<u64>(), 28_092_332);
         let demographic = java.structure.unwrap();
-        assert_eq!(demographic.residents_with_cohort_age_and_sex, 17_078_108);
+        assert_eq!(demographic.residents_with_cohort_age_and_sex, 19_303_037);
         assert_eq!(demographic.unclassified_residents, 294_220);
         let java_status = &java.social.unwrap().dimensions["legal_estate"];
         assert_eq!(java_status.assigned_residents, 28_092_332);
@@ -2471,6 +2471,11 @@ mod tests {
         let cheribon = current.inspect_population("java_madoera_cheribon").unwrap();
         assert_eq!(cheribon.population_total, Some(1_639_947));
         assert_eq!(cheribon.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        let djokjakarta = current.inspect_population("java_madoera_djokjakarta").unwrap();
+        assert_eq!(djokjakarta.structure.unwrap().residents_with_cohort_age_and_sex, 1_020_879);
+        let v37 = bootstrap.base_opening_version("country_fra", None, Some(37)).unwrap();
+        let previous_java = v37.inspect_population("java_madoera_colonial_population").unwrap();
+        assert_eq!(previous_java.structure.unwrap().residents_with_cohort_age_and_sex, 17_078_108);
         let mendoza = current.inspect_population("ar_mendoza").unwrap().social.unwrap();
         assert_eq!(mendoza.dimensions["occupation"].assigned_residents, 55_383);
         assert_eq!(mendoza.dimensions["class"].assigned_residents, 506);
@@ -2506,11 +2511,12 @@ mod tests {
     }
 
     #[test]
-    fn historical_shaangan_prefectures_preserve_provinces_and_unknown_attributes() {
+    fn historical_qing_prefectures_preserve_provinces_and_unknown_attributes() {
         let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
         for (unit, population, count) in [
             ("qing_hist_shaanxi", 8_680_861, 11),
             ("qing_hist_gansu", 6_389_222, 10),
+            ("qing_hist_jiangxi", 14_385_490, 14),
         ] {
             let report = world.inspect_population(unit).unwrap();
             assert_eq!(report.population_total, Some(population));
@@ -3207,9 +3213,13 @@ mod tests {
         assert_eq!(division.population_total, Some(329_951));
         assert_eq!(division.children.len(), 4);
         assert_eq!(division.children.iter().map(|child| child.population_total).sum::<u64>(), 329_951);
+        assert_eq!(world.population().social_distribution(Some(destination)).unwrap()
+            .dimensions["occupation"].assigned_residents, 19_637_865);
+        assert!(division.social.unwrap().dimensions["occupation"].assigned_residents > 0);
         let county = world.inspect_population(argentan).unwrap();
         assert_eq!(county.population_total, Some(76_124));
         assert_eq!(county.parent_id, Some(orne));
+        assert_eq!(county.social.unwrap().dimensions["occupation"].unknown_residents, 76_124);
         assert_eq!(world.residence_unit_at("place:rouen"), Some("administrative_region:france_arrondissement_763"));
         assert_eq!(world.market_unit_for_population(argentan), Some(destination));
         let (french_cohort, _, _) = world.population().cohorts_in(argentan).next().unwrap();

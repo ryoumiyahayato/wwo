@@ -1785,12 +1785,27 @@ def java_madoera_demographic_model(total, observations, version):
     return group | dict(unclassified_opening_residents=total - represented)
 
 
-def java_madoera_residency_models(balances):
+def java_madoera_residency_models(balances, version):
     units = {unit["source_residency_1900"]: unit for unit in balances.values()
              if unit.get("statistical_parent") == JAVA_MADOERA}
     geography, age = java_madoera_residency_demography()
     if units.keys() != geography.keys():
         raise ValueError("Java registration population has a different residency partition from the age tables")
+    age_margins = {}
+    if version >= 38:
+        path = HERE / "java_madoera" / "java_madoera_1905_indigenous_age_margins.csv"
+        for row in read_csv(path):
+            if row["status"] != "opening_candidate":
+                continue
+            region = row["region"]
+            total = int(row["total_1905"])
+            younger = int(row["under16_both"])
+            if (region in age or region in age_margins or row["unit_id"] != units[region]["unit_id"]
+                    or row["registration"] != "inlanders" or row["date"] != "1905-12-31"
+                    or total != int(geography[region]["total_1905"])
+                    or total != younger + int(row["printed_16_to_50_both"]) + int(row["printed_50_plus_both"])):
+                raise ValueError(f"{region}: Java age margins do not match the opening residency")
+            age_margins[region] = Fraction(younger, total)
     sex_table = {row["registration"]: row for row in read_csv(HERE / "java_madoera" / "civilian_sex_1900.csv")}
     if any(sum(int(row[sex]) for sex in SEX_COUNTS) != int(row["printed_total"]) for row in sex_table.values()):
         raise ValueError("Java island sex columns do not close to their printed population")
@@ -1825,13 +1840,24 @@ def java_madoera_residency_models(balances):
         locator = "1904 edition, III.III p. 4 and III.V p. 5."
         method = ("Use the December 1900 revised local indigenous and island-wide European-assimilated "
                   "male fractions. Normalize within each island registration and preserve the opening residency totals.")
-        if region in age:
+        has_ages = region in age or region in age_margins
+        if has_ages:
             source = "nl_cbs_java_population_1906_demography"
             locator += " 1906 edition, III.I.A p. 2 and III.IX pp. 8–9."
-            method += " Apply the December 1905 same-sex under-16 shares to the indigenous registration."
-            younger = {sex: int(Fraction(local["inlanders"][sex] * int(age[region][f"under16_{sex}"]),
-                                         int(age[region][f"{sex}_total"])) + Fraction(1, 2))
-                       for sex in SEX_COUNTS}
+            if region in age:
+                method += " Apply the December 1905 same-sex under-16 shares to the indigenous registration."
+                younger = {sex: int(Fraction(local["inlanders"][sex] * int(age[region][f"under16_{sex}"]),
+                                             int(age[region][f"{sex}_total"])) + Fraction(1, 2))
+                           for sex in SEX_COUNTS}
+            else:
+                locator += " Cross-check: 1911 edition, IX pp. 8–9."
+                method += (" Apply the published local under-16 share to the indigenous opening population. "
+                           "Allocate that count by the established local sex proportions. The age-by-sex "
+                           "distribution is modeled within both margins because the table pools the sexes.")
+                count = counts["inlanders"]
+                younger_total = int(count * age_margins[region] + Fraction(1, 2))
+                younger = apportion({sex: Fraction(younger_total * local["inlanders"][sex], count)
+                                     for sex in SEX_COUNTS}, younger_total)
             older = {sex: local["inlanders"][sex] - younger[sex] for sex in SEX_COUNTS}
             rows.extend((dict(role="band", label="Under 16", age_min=0, age_max=15, **younger),
                          dict(role="band", label="16 and older", age_min=16, age_max=None, **older)))
@@ -1839,14 +1865,14 @@ def java_madoera_residency_models(balances):
         rows.append(dict(role="band", label="Age unassigned", age_min=None, age_max=None, **residual))
         panel = dict(
             id=unit_id + "_demography", source_id=source, observed_unit_id=unit_id,
-            observed_date="1905-12-31" if region in age else "1900-12-31",
+            observed_date="1905-12-31" if has_ages else "1900-12-31",
             locator=locator, opening_method=method,
             uncertainty="Private-estate coverage and changes in sex and age shares have no quantified interval. "
                         "The European-assimilated registration uses an island-wide sex proxy and has no age data. "
                         "The other civilian registrations are unassigned.",
         )
         yield opening_age_group(panel, rows, unit_id, population) | dict(
-            sex_only=region not in age, unclassified_opening_residents=population - covered,
+            sex_only=not has_ages, unclassified_opening_residents=population - covered,
         )
 
 
@@ -2026,7 +2052,7 @@ def opening_structure(opening_groups, observations, *, version=6):
             else:
                 groups.append(age)
         if version >= 33:
-            groups.extend(java_madoera_residency_models(opening_balances))
+            groups.extend(java_madoera_residency_models(opening_balances, version))
         elif version >= 31:
             groups.append(java_madoera_demographic_model(opening_totals[JAVA_MADOERA], observations, version))
         groups.extend(australian_opening_age_models(panels, opening_balances))

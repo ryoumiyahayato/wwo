@@ -8,7 +8,7 @@ from itertools import chain
 from pathlib import Path
 
 from opening import AGRA_DISTRICT_BALANCE, AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, JAVA_MADOERA, OTTOMAN_REGISTRATION_SOURCE, SPANISH_CIVIL_STATUS_SCOPE
-from opening import ROMANIA_CENSUS_SOURCE, egypt_age_sex_controls, romanian_county_controls
+from opening import ROMANIA_CENSUS_SOURCE, apportion, egypt_age_sex_controls, opening_fraction, romanian_county_controls
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import cochin_language, india_princely_residence, madras_states_religion, travancore_language
@@ -1719,7 +1719,7 @@ def romanian_structure(pools, version):
         )
 
 
-def prussian_census_occupation(pools):
+def prussian_census_occupation(pools, version):
     path = COLLECTIONS / "cities_europe" / "prussia_1895_occupation.csv"
     with path.open(encoding="utf8", newline="") as stream:
         row, = csv.DictReader(stream)
@@ -1737,7 +1737,7 @@ def prussian_census_occupation(pools):
             unknown != int(row["without_stated_occupation_f"]) + int(row["dependents_without_primary_occupation_h"])):
         raise ValueError("Prussian occupational classes differ from the official census controls")
     unit = row["unit_id"]
-    yield unit, "occupation", distribution(
+    marginal = distribution(
         pools[unit]["population_value"], classification="prussia_1895_reported_principal_occupation",
         source=row["source_id"], date=row["date"], observed_unit=unit,
         scope="Kingdom of Prussia, all persons present", locator=row["source_table"],
@@ -1746,6 +1746,37 @@ def prussian_census_occupation(pools):
                     "without a stated occupation and non-working dependents remain unassigned. Changes since June 1895 "
                     "are unquantified."),
     )
+    if version >= 38:
+        industry = labels["b"]
+        path = path.with_name("prussia_1895_industrial_employment_position.csv")
+        detailed_labels = {
+            "a": "Industry: independent operators and managers",
+            "b1": "Industry: inspectors, engineers and chemists",
+            "b2": "Industry: supervisors and foremen",
+            "b3": "Industry: clerical and commercial staff",
+            "c1": "Industry: participating family members",
+            "c2": "Industry: trained workers and apprentices",
+            "c3": "Industry: assistants, stokers, drivers and attendants",
+        }
+        with path.open(encoding="utf8", newline="") as stream:
+            detail = list(csv.DictReader(stream))
+        if (len(detail) != len(detailed_labels) or {cell["group_code"] for cell in detail} != detailed_labels.keys()
+                or any(cell["unit_id"] != unit or cell["date"] != row["date"] or cell["source_id"] != row["source_id"]
+                       or int(cell["male"]) + int(cell["female"]) != int(cell["persons"]) for cell in detail)):
+            raise ValueError("Prussian industrial occupations have different dates, scopes or controls")
+        industry_counts = {detailed_labels[cell["group_code"]]: int(cell["persons"]) for cell in detail}
+        if sum(industry_counts.values()) != counts[industry]:
+            raise ValueError("Prussian industrial occupations do not close to category B")
+        industrial_opening = marginal["counts"].pop(industry)
+        marginal["counts"].update(distribution(
+            industrial_opening, classification=marginal["classification_id"], source=row["source_id"],
+            date=row["date"], observed_unit=unit, scope=marginal["observed_scope"], locator=detail[0]["source_table"],
+            total=counts[industry], observed_counts=industry_counts, unknown=0, definition=marginal["definition"],
+        )["counts"])
+        marginal["locator"] += f"; {detail[0]['source_table']}"
+        marginal["method"] += " Divide the resulting industry category using its seven independently tabulated roles."
+        marginal["definition"] += " Industrial managers and independent operators share one published role."
+    yield unit, "occupation", marginal
 
 
 def surigao_occupation(pool):
@@ -1763,6 +1794,66 @@ def surigao_occupation(pool):
                     "schedule. The census combines people without gainful occupations and unknown occupation "
                     "in one column. That column remains unassigned. Change from 1900 is unquantified."),
     )
+
+
+def french_department_social(pools):
+    folder = COLLECTIONS / "cities_europe"
+    columns = ("Pêches, forêts et agriculture", "Industrie", "Commerce", "Service domestique", "Professions libérales")
+    with (folder / "france_1901_department_occupation.csv").open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    with (folder / "france_1896_1901_department_residence.csv").open(encoding="utf8", newline="") as stream:
+        residences = list(csv.DictReader(stream))
+    residence_by_unit = {row["unit_id"]: row for row in residences}
+    expected = {unit for unit in pools if unit.startswith("administrative_region:france_")
+                and not unit.startswith("administrative_region:france_arrondissement_")}
+    if (len(rows) != 87 or len(residences) != 87 or {row["unit_id"] for row in rows} != expected
+            or residence_by_unit.keys() != expected):
+        raise ValueError("The French returns must match all 87 historical departments")
+    for row in rows:
+        unit = row["unit_id"]
+        pool = pools[unit]
+        counts = {label: int(row[label]) for label in columns}
+        total = int(row["legal_population_1901"])
+        reported = sum(counts.values())
+        endpoints = [int(row["legal_population_1896"]), total]
+        active = reported + int(row["occupation_unspecified"]) + int(row["active_unreconciled"])
+        if (pool["endpoint_values"] != endpoints or reported != int(row["occupation_total"])
+                or active != int(row["active_population"]) or row["source_id"] != "insee_sgf_censuses"):
+            raise ValueError(f"French occupational return differs from the local census control: {unit}")
+        yield unit, "occupation", distribution(
+            pool["population_value"], classification="france_1901_department_reported_occupation",
+            source=row["source_id"], date=row["observed_date"], observed_unit=row["department_code"],
+            scope=row["department"], locator=row["source_locator"], total=total, observed_counts=counts,
+            unknown=int(row["unknown_legal_proxy"]),
+            definition=("Five reported occupational groups, including people temporarily out of work with a recorded "
+                        "sector. The liberal professions group includes public services. Dependants, occupation not "
+                        "reported, and unreconciled active census cells remain unassigned."),
+            method=SHARE_METHOD + " Use each department's legal population as the proxy denominator for its occupational "
+                                  "counts. No allocation is made within split departments. Coverage and change since "
+                                  "1 January 1900 are unquantified.",
+        )
+        residence = residence_by_unit[unit]
+        dates = [residence["date_1896"], residence["date_1901"]]
+        early = {label: int(residence[f"{label.lower()}_population_1896"]) for label in ("Urban", "Rural")}
+        late = {label: int(residence[f"{label.lower()}_population_1901"]) for label in early}
+        if ([sum(early.values()), sum(late.values())] != endpoints
+                or [int(residence[f"legal_population_{year}"]) for year in (1896, 1901)] != endpoints
+                or dates[1] != row["observed_date"] or residence["source_id"] != row["source_id"]):
+            raise ValueError(f"French residence return differs from the local census control: {unit}")
+        fraction = opening_fraction(dates)
+        quotas = {label: early[label] * (1 - fraction) + late[label] * fraction for label in early}
+        opening = pool["population_value"]
+        modeled = apportion({label: value * opening / sum(quotas.values()) for label, value in quotas.items()}, opening)
+        yield unit, "residence", dict(
+            classification_id="france_1896_1901_department_census_residence", source_ids=[residence["source_id"]],
+            observed_date=dates[1], observed_unit_id=residence["department_code"], observed_scope=residence["department"],
+            locator=residence["source_locator"], observed_total=total, observed_unknown=0,
+            method=f"Interpolate each department's urban and rural totals from {dates[0]} to {dates[1]}. "
+                   "Use largest remainders within the opening department. Constituent districts are unassigned.",
+            definition="The entire population of each commune is urban if its administrative seat has over 2,000 "
+                       "people living in a concentrated settlement. Seine is entirely urban by the census exception.",
+            counts={label: count for label, count in modeled.items() if count}, unknown=0,
+        )
 
 
 def opening_social(opening_groups, observations, *, version):
@@ -1921,7 +2012,9 @@ def opening_social(opening_groups, observations, *, version):
     if version >= 35:
         marginals = chain(marginals, ottoman_registered_religion(pools, observations), romanian_structure(pools, version))
     if version >= 37:
-        marginals = chain(marginals, prussian_census_occupation(pools), surigao_occupation(pools["ph_1900_surigao_main_population"]))
+        marginals = chain(marginals, prussian_census_occupation(pools, version), surigao_occupation(pools["ph_1900_surigao_main_population"]))
+    if version >= 38:
+        marginals = chain(marginals, french_department_social(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))
