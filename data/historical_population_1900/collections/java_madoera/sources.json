@@ -1,5 +1,14 @@
 [
   {
+    "id": "dutch_jaarcijfers_colonien_1898",
+    "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1898",
+    "publisher": "Centraal Bureau voor de Statistiek, The Hague",
+    "url": "https://seadelt.net/Asset/Source/Document_ID-113_No-01.pdf",
+    "locator": "Oost-Indië, II.I.A, printed p. 2. The 22 Java and Madura residency lines, 31 December 1896.",
+    "raw_paths": ["residency_census.csv", "GEOGRAPHY.md"],
+    "rights": "Published historical numeric facts"
+  },
+  {
     "id": "dutch_jaarcijfers_colonien_1899",
     "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1899",
     "publisher": "Centraal Bureau voor de Statistiek, Gebr. Belinfante, The Hague, 1901. Scan hosted by SEADELT.",
@@ -14,6 +23,7 @@
     "publisher": "Centraal Bureau voor de Statistiek, Gebr. Belinfante, The Hague, 1902. Scan hosted by SEADELT.",
     "url": "https://seadelt.net/Asset/Source/Document_ID-111_No-01.pdf#page=23",
     "locator": "Oost-Indië, printed pp. 2–3 (PDF pp. 23–24), II.I.A–B. A is Java en Madoera, 31 Dec. 1900. B covers the Outer Possessions separately.",
+    "raw_paths": ["residency_census.csv", "GEOGRAPHY.md"],
     "rights": "Numerical facts transcribed from the official printed table. Source scans remain with their archives.",
     "note": "The aggregate row is a five-year colonial enumeration with incomplete returns for private estates and excludes army and navy personnel. The 1901 consolidation of five residencies changes the table's internal areas. It leaves the Java and Madura aggregate intact.",
     "contemporary_cross_check": {

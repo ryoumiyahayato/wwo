@@ -1,6 +1,7 @@
 """Rebuild the single research release, catalogue, accounts and Rust input offline."""
 import csv
 import gzip
+import io
 import json
 from collections import Counter, defaultdict
 
@@ -17,16 +18,44 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 32
+OPENING_VERSION = 33
+
+def write_changed(name, data):
+    path = HERE / name
+    if path.is_file():
+        existing = path.read_bytes()
+        if path.suffix == ".json":
+            existing = existing.replace(b"\r\n", b"\n")
+        if existing == data:
+            return
+    pending = path.with_suffix(path.suffix + ".pending")
+    pending.write_bytes(data)
+    pending.replace(path)
+
 
 def json_file(name, value):
-    (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
+    write_changed(name, (json.dumps(value, indent=2, ensure_ascii=False) + "\n").encode("utf8"))
+
+def publish_opening_manifest():
+    name = "runtime-manifest.json"
+    manifest = json.loads((HERE / name).read_text(encoding="utf8"))
+    manifest["current_version"] = OPENING_VERSION
+    manifest["versions"][str(OPENING_VERSION)] = {
+        "opening": f"opening_v{OPENING_VERSION}.json",
+        "demography": f"opening_structure_v{OPENING_VERSION}.json",
+        "social": f"opening_social_v{OPENING_VERSION}.json",
+    }
+    json_file(name, manifest)
+
 
 def records(name, rows):
     # No timestamp or platform-specific filename in the portable compressed records.
-    with (HERE/name).open("wb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as out:
+    raw = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as out:
         for row in rows:
             out.write((json.dumps(row, ensure_ascii=False, separators=(",",":"))+"\n").encode())
+
+    write_changed(name, raw.getvalue())
 
 def bucket(n):
     if n is None or n < 50000:
@@ -331,6 +360,7 @@ def main():
     records("population_1900.jsonl.gz",observations)
     records("geography_1900.jsonl.gz",geography)
     records("city_remainders.jsonl.gz",rem)
+    publish_opening_manifest()
 
 if __name__=="__main__":
     import argparse

@@ -1310,14 +1310,7 @@ impl WorldBootstrap {
     }
 
     pub fn load() -> io::Result<Self> {
-        if let Some(data) = std::env::var_os("WWO_DATA_DIR") {
-            return Self::load_from(std::path::Path::new(&data));
-        }
-        #[cfg(test)]
-        let data = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data");
-        #[cfg(not(test))]
-        let data = std::env::current_exe()?.with_file_name("data");
-        Self::load_from(&data)
+        Self::load_from(&crate::formal_population::default_data_directory()?)
     }
 
     pub fn load_from(data: &std::path::Path) -> io::Result<Self> {
@@ -2439,8 +2432,8 @@ mod tests {
         let old_bengal = old.inspect_population("raj_bengal_province").unwrap().social.unwrap();
         assert_eq!(old_bengal.dimensions["occupation"].assigned_residents, 0);
 
-        let latest = bootstrap.create("country_fra").unwrap();
-        let argentina = latest.inspect_population("argentina_1900").unwrap();
+        let v32 = bootstrap.base_opening_version("country_fra", None, Some(32)).unwrap();
+        let argentina = v32.inspect_population("argentina_1900").unwrap();
         assert_eq!(argentina.population_total, Some(4_624_686));
         let profile = argentina.structure.unwrap();
         assert_eq!(profile.residents_with_cohort_age_and_sex, 4_502_031);
@@ -2449,17 +2442,38 @@ mod tests {
         let literacy = &argentina.social.unwrap().dimensions["literacy"];
         assert_eq!(literacy.assigned_residents, 3_713_957);
         assert_eq!(literacy.unknown_residents, 910_729);
-        let chaco = latest.inspect_population("ar_central_chaco_comparable").unwrap();
+        let chaco = v32.inspect_population("ar_central_chaco_comparable").unwrap();
         assert_eq!(chaco.structure.unwrap().residents_with_cohort_age_and_sex, 1_072_009);
-        let puna = latest.inspect_population("ar_puna_1899_geography_unlocated").unwrap();
+        let puna = v32.inspect_population("ar_puna_1899_geography_unlocated").unwrap();
         assert_eq!(puna.structure.unwrap().unclassified_residents, 749);
 
-        let java = latest.inspect_population("java_madoera_colonial_population").unwrap();
+        let java = v32.inspect_population("java_madoera_colonial_population").unwrap();
         assert_eq!(java.population_total, Some(28_092_332));
         let profile = java.structure.unwrap();
         assert_eq!(profile.cohort_residents, 27_798_112);
         assert_eq!(profile.residents_with_cohort_age_and_sex, 17_092_483);
         assert_eq!(profile.unclassified_residents, 294_220);
+
+        let current = bootstrap.create("country_fra").unwrap();
+        let java = current.inspect_population("java_madoera_colonial_population").unwrap();
+        assert_eq!(java.population_total, Some(28_092_332));
+        assert_eq!(java.children.len(), 17);
+        assert_eq!(java.children.iter().map(|child| child.population_total).sum::<u64>(), 28_092_332);
+        let demographic = java.structure.unwrap();
+        assert_eq!(demographic.residents_with_cohort_age_and_sex, 17_078_108);
+        assert_eq!(demographic.unclassified_residents, 294_220);
+        let java_status = &java.social.unwrap().dimensions["legal_estate"];
+        assert_eq!(java_status.assigned_residents, 28_092_332);
+        assert_eq!(java_status.unknown_residents, 0);
+        let batavia = current.inspect_population("java_madoera_batavia_krawang").unwrap();
+        assert_eq!(batavia.population_total, Some(1_893_007));
+        assert_eq!(batavia.structure.unwrap().residents_with_cohort_age_and_sex, 1_787_592);
+        let cheribon = current.inspect_population("java_madoera_cheribon").unwrap();
+        assert_eq!(cheribon.population_total, Some(1_639_947));
+        assert_eq!(cheribon.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        let mendoza = current.inspect_population("ar_mendoza").unwrap().social.unwrap();
+        assert_eq!(mendoza.dimensions["occupation"].assigned_residents, 55_383);
+        assert_eq!(mendoza.dimensions["class"].assigned_residents, 506);
     }
 
     #[test]
@@ -2760,7 +2774,7 @@ mod tests {
         let itsa = world.inspect_population("egy_markaz_itsa").unwrap();
         let structure = itsa.structure.unwrap();
         assert_eq!(structure.cohort_residents, 124_623);
-        assert_eq!(structure.residents_with_cohort_age_and_sex, 0);
+        assert_eq!(structure.residents_with_cohort_age_and_sex, 124_623);
         let itsa_social = itsa.social.unwrap();
         assert_eq!(itsa_social.dimensions["religion"].assigned_residents, 124_623);
         assert_eq!(itsa_social.dimensions["literacy"].assigned_residents, 124_623);
@@ -2995,6 +3009,32 @@ mod tests {
         let previous = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
         assert_eq!(previous.inspect_population(unit).unwrap().population_total, None);
         assert_eq!(previous.inspect_population("khedivate_of_egypt").unwrap().direct_residents, Some(9_084_891));
+        let current = bootstrap.create("country_fra").unwrap();
+        for (unit, population) in [
+            ("place:cairo", 592_087),
+            ("place:alexandria", 308_541),
+            ("egy_markaz_ramleh", 24_335),
+            ("egy_mudiriya_gharbiya", 1_346_489),
+            ("egy_markaz_itsa", 124_623),
+            ("egy_markaz_faiyum", 132_375),
+            ("egy_markaz_sinuris", 132_423),
+        ] {
+            let report = current.inspect_population(unit).unwrap();
+            assert_eq!(report.population_total, Some(population));
+            assert_eq!(report.structure.unwrap().residents_with_cohort_age_and_sex, population);
+        }
+        for (unit, total, age_unknown) in [
+            ("egy_mudiriya_menufiya", 892_075, 400),
+            ("egy_mudiriya_asyut", 815_260, 3_687),
+            ("egy_mudiriya_jirja", 716_693, 4_471),
+            ("egy_mudiriya_qena", 729_563, 7_817),
+        ] {
+            let demographic = current.inspect_population(unit).unwrap().structure.unwrap();
+            assert_eq!(demographic.cohort_residents, total);
+            assert_eq!(demographic.residents_with_cohort_age_and_sex, total - age_unknown);
+        }
+        let cairo = current.inspect_population("place:cairo").unwrap().social.unwrap();
+        assert!(cairo.dimensions["literacy"].assigned_residents > 500_000);
     }
 
     #[test]

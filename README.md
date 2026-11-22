@@ -27,7 +27,7 @@ cargo build --release --locked --manifest-path rust/strategic-host/Cargo.toml --
 ./rust/strategic-host/tools/package_population.ps1 -DataDirectory <运行目录>
 ```
 
-运行 `wwo-map-lab.exe --play`。状态工具默认也读取 EXE 旁的 `data/`，可用 `WWO_DATA_DIR` 指定同一目录。人口清单 `data/historical_population_1900/runtime-manifest.json` 声明新开局版本、市场校准版本和各版所需文件。更新人口数据时新增版本并更新清单，保留旧版文件及绑定。旧存档按人口版本读取对应文件，缺少历史资源时启动或读档会给出具体路径与版本。该目录可随游戏离线使用。
+运行 `wwo-map-lab.exe --play`。状态工具默认也读取 EXE 旁的 `data/`。地图另有 `--data` 目录时，可用 `WWO_DATA_DIR` 单独指定开局人口和 F7 资料所在目录。共享本地构建命令默认使用固定工作树的 `data/`。人口清单 `data/historical_population_1900/runtime-manifest.json` 声明新开局版本、市场校准版本和各版所需文件。生成新版人口资料时同步更新清单，旧存档按保存的版本读取对应文件。版本化开局数据和 F7 参考表均随人口包离线使用。
 
 私有 [Rust Windows 阶段资源包](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115) 保存实跑的预览 EXE、运行数据、压缩地貌和训练高程。Release 标签固定阶段源码版本。附件说明登记来源、恢复目录及回读状态。
 

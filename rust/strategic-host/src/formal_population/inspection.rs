@@ -1,8 +1,5 @@
 use super::{
-    historical::{
-        historical_source, population_archive_scope, structural_coverage_reference,
-        traits_for_scope,
-    },
+    historical::PopulationCatalogue,
     living_conditions::{living_conditions_references, LivingConditionsReferences},
     CohortId, HistoricalPopulationEstimate, OpeningPopulationEstimate, Population,
     PopulationArchive, PopulationStructure, SocialDistribution,
@@ -109,6 +106,13 @@ impl Population {
         name_alias: Option<&'a str>,
         residence_unit: Option<&'a str>,
     ) -> io::Result<PopulationInspection<'a>> {
+        let fallback;
+        let catalogue = if let Some(opening) = &self.opening {
+            &opening.catalogue
+        } else {
+            fallback = PopulationCatalogue::default_location()?;
+            &fallback
+        };
         let map_id = query_id.strip_prefix("state:").unwrap_or(query_id);
         let name_alias = name_alias.or_else(|| self.opening.as_ref()?.coextensive_unit_at(map_id));
         let unit = name_alias.unwrap_or(map_id);
@@ -136,9 +140,9 @@ impl Population {
         let (mut archive, city_reference) = if world || unit.starts_with("trait:") {
             (None, None)
         } else {
-            population_archive_scope(map_id)?
+            catalogue.archive(map_id)?
         };
-        let (mut traits, mut trait_sources) = traits_for_scope(unit)?;
+        let (mut traits, mut trait_sources) = catalogue.traits_for_scope(unit)?;
         let opening = self.admitted_opening(unit);
         let scope = (!world).then_some(unit);
         let structure = (world || live).then(|| self.structure(scope, clock)).flatten();
@@ -159,7 +163,7 @@ impl Population {
                     observed_adherents: None,
                 });
                 if !traits.iter().any(|row| row["id"] == trait_id) {
-                    let (rows, sources) = traits_for_scope(&format!("trait:{trait_id}"))?;
+                    let (rows, sources) = catalogue.traits_for_scope(&format!("trait:{trait_id}"))?;
                     traits.extend(rows);
                     trait_sources.extend(sources);
                 }
@@ -173,7 +177,7 @@ impl Population {
                 .flat_map(|dimension| dimension.source_ids.iter().copied()))
             .collect();
         for source in source_ids {
-            extra_sources.extend(historical_source(source)?);
+            extra_sources.extend(catalogue.source(source)?);
         }
         if !extra_sources.is_empty() {
             let sources = &mut archive
@@ -266,7 +270,7 @@ impl Population {
             social,
             dietary_norms,
             archive,
-            structural_coverage: structural_coverage_reference(unit)?,
+            structural_coverage: catalogue.structural_coverage(unit)?,
             city_reference,
             traits,
             living_conditions: living_conditions_references(),

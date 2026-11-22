@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from itertools import chain
 from pathlib import Path
 
-from opening import AGRA_DISTRICT_BALANCE, AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, SPANISH_CIVIL_STATUS_SCOPE
+from opening import AGRA_DISTRICT_BALANCE, AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, JAVA_MADOERA, SPANISH_CIVIL_STATUS_SCOPE
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import cochin_language, india_princely_residence, madras_states_religion, travancore_language
@@ -1476,6 +1476,144 @@ def argentine_local_distribution(pools, dimension, fields, unknown_field, *, sou
         raise ValueError(f"Argentina {dimension} allocation does not cover the disjoint source jurisdictions")
 
 
+def argentine_occupation(pools):
+    directory = COLLECTIONS / "argentina_age_1895_1914"
+    fields = {
+        "i_produccion_de_la_materia_prima": "Producción de la materia prima",
+        "ii_producciones_industriales": "Producciones industriales",
+        "iii_comercio": "Comercio",
+        "iv_transportes": "Transportes",
+        "vi_personal_de_servicio": "Personal de servicio",
+        "vii_defensa_del_pais": "Defensa del país",
+        "viii_administracion_publica": "Administración pública",
+        "ix_cultos": "Cultos",
+        "x_jurisprudencia": "Jurisprudencia",
+        "xi_profesiones_sanitarias": "Profesiones sanitarias",
+        "maestros_de_escuela_xii": "Maestros de escuela",
+        "xiii_bellas_artes": "Bellas artes",
+        "xiv_letras_y_ciencias": "Letras y ciencias",
+        "admitted_xv": "Profesiones ambulantes",
+        "admitted_xvi": "Personal de fatiga sin trabajo fijo",
+    }
+    with (directory / "census_geography.csv").open(encoding="utf8", newline="") as stream:
+        controls = {row["unit_id"]: int(row["enumerated_1895_05_10"]) for row in csv.DictReader(stream)}
+    with (directory / "occupation_1895.csv").open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    by_source = {}
+    consumed = set()
+    for row in rows:
+        unit_id = row["source_unit_id"]
+        total = int(row["observed_total"])
+        eligible = int(row["population_14_and_over"])
+        if unit_id in by_source or total != controls[unit_id] or not row["locator"]:
+            raise ValueError(f"{unit_id}: occupation scope differs from the individually enumerated region")
+        if (row["observed_date"] != "1895-05-10" or eligible + int(row["outside_tabulated_scope"]) != total
+                or sum(int(value) for field, value in row.items()
+                       if field.partition("_")[0] in {"i", "ii", "iii", "iv", "v", "vi", "vii", "viii",
+                                                        "ix", "x", "xi", "xii", "xiii", "xiv", "xv", "xvi", "xvii", "xviii"})
+                + int(row["subtotal_shortfall"]) != eligible
+                or int(row["maestros_de_escuela_xii"]) + int(row["estudiantes_xii"]) != int(row["xii_instruccion_y_educacion"])
+                or int(row["admitted_xv"]) > int(row["xv_profesiones_ambulantes"])
+                or int(row["admitted_xvi"]) > int(row["xvi_personal_de_fatiga_que_no_tienen_trabajo_fijo"])):
+            raise ValueError(f"{unit_id}: original census professions and eligibility controls differ")
+        owners = int(row["hacendados_i"])
+        occupations = {label: int(row[field]) for field, label in fields.items()}
+        occupations[fields["i_produccion_de_la_materia_prima"]] -= owners
+        unknown = int(row["observed_unknown"])
+        if sum(occupations.values()) + unknown != total or any(count < 0 for count in occupations.values()):
+            raise ValueError(f"{unit_id}: admitted principal occupations do not close")
+        by_source[unit_id] = dict(total=total, occupations=occupations, owners=owners, unknown=unknown,
+                                  locator=row["locator"])
+    for unit_id, scope in pools.items():
+        members = scope.get("source_unit_ids", ())
+        if not members or not any(member in by_source for member in members) or "endpoint_values" not in scope:
+            continue
+        if not all(member in by_source for member in members) or consumed.intersection(members):
+            raise ValueError(f"{unit_id}: Argentine occupational data leave an unmatched or overlapping scope")
+        consumed.update(members)
+        source = [by_source[member] for member in members]
+        total = sum(row["total"] for row in source)
+        if total != scope["endpoint_values"][0]:
+            raise ValueError(f"{unit_id}: combined occupation denominator differs from the 1895 opening endpoint")
+        occupations = {label: sum(row["occupations"][label] for row in source) for label in fields.values()}
+        owners = sum(row["owners"] for row in source)
+        count = scope["population_value"]
+        metadata = dict(
+            source="ar_census_1895_principal_occupation", date="1895-05-10",
+            observed_unit=unit_id, scope="Present persons aged 14 or older in the matched jurisdiction. "
+                                         "The all-age census population is the denominator for opening shares.",
+            locator=" / ".join(row["locator"] for row in source), total=total,
+            method=SHARE_METHOD + " These are same-area 1895 proxies. Changes by January 1900 are unquantified.",
+        )
+        yield unit_id, "occupation", distribution(
+            count, classification="argentina_1895_reported_principal_occupation",
+            observed_counts=occupations, unknown=sum(row["unknown"] for row in source),
+            definition="One enumerated principal earning activity per person. Under-14s, property "
+                       "owners, rentiers, students, unpaid work without a reported occupation, "
+                       "ambiguous categories and unresolved subtotal differences remain unassigned.",
+            **metadata,
+        )
+        yield unit_id, "class", distribution(
+            count, classification="argentina_1895_reported_estate_owners",
+            observed_counts={"Hacendados": owners}, unknown=total - owners,
+            definition="Residents enumerated in the Hacendados (rural estate owner) category. "
+                       "Other forms of ownership and social status remain unassigned.",
+            **metadata,
+        )
+    if consumed != by_source.keys():
+        raise ValueError("Argentine occupation sources have no exclusive opening account")
+
+
+def java_residency_registration(pools):
+    labels = {
+        "europeanen": "Europeans and legally assimilated",
+        "chineezen": "Chinese registration",
+        "arabieren": "Arab registration",
+        "andere_vreemde_oosterlingen": "Other Foreign Oriental registration",
+        "inlanders": "Indigenous registration",
+    }
+    for unit_id, unit in pools.items():
+        if unit.get("statistical_parent") != JAVA_MADOERA:
+            continue
+        yield unit_id, "legal_estate", dict(
+            classification_id="java_madoera_colonial_registration",
+            source_ids=unit["source_ids"], observed_date=unit["source_dates"][-1],
+            observed_unit_id=unit_id, observed_scope=unit["scope"], locator=unit["locator"],
+            observed_total=unit["endpoint_values"][-1], observed_unknown=0, method=unit["method"],
+            definition="Contemporary colonial legal registration. The labels do not establish language, "
+                       "ethnic identity, religion, occupation or socioeconomic status.",
+            counts={labels[key]: value for key, value in unit["registration_counts"].items() if value}, unknown=0,
+        )
+
+
+def egyptian_urban_literacy(pools):
+    source = "egypt_census_1907_age_and_literacy"
+    towns = {"egy_madina_cairo", "egy_madina_alexandria"}
+    with (COLLECTIONS / "egypt_age_1907" / "table_xi_opening_age_sex.csv").open(encoding="utf8", newline="") as stream:
+        table = list(csv.DictReader(stream))
+    for unit_id in sorted(towns):
+        rows = [row for row in table if row["unit_id"] == unit_id]
+        total, = (row for row in rows if row["age_label"] == "total")
+        outside, = (row for row in rows if row["age_label"] == "0-4")
+        eligible = [row for row in rows if row["age_label"] not in ("total", "0-4")]
+        counts = {
+            label: sum(int(row[f"{sex}_reported_{label.lower()}"]) for row in eligible for sex in ("male", "female"))
+            for label in ("Literate", "Illiterate")
+        }
+        control = int(total["person_count"])
+        town = pools[unit_id]
+        if control != town["endpoint_values"][-1]:
+            raise ValueError(f"{unit_id}: the Egypt literacy and population controls differ")
+        yield unit_id, "literacy", distribution(
+            town["population_value"], classification="egypt_1907_reported_literacy_age_five_and_older",
+            source=source, date=total["observation_date"], observed_unit=unit_id, scope=town["scope"],
+            locator=f"1907 census, Table XI, printed p. {total['printed_page']}.",
+            total=control, observed_counts=counts, unknown=int(outside["person_count"]),
+            definition="Reported literacy of residents aged five and older. Opening shares use the all-age town "
+                       "denominator. Literacy under five is unassigned. Changes from 1900 are unquantified.",
+        )
+
+
 def opening_social(opening_groups, observations, *, version):
     """Return independent person distributions at each source's published scope."""
     pools = {
@@ -1626,6 +1764,9 @@ def opening_social(opening_groups, observations, *, version):
                        "People outside the eligible age scope are unassigned.",
             method=SHARE_METHOD + " Changes in age composition and literacy from 1895 are unquantified.",
         ))
+    if version >= 33:
+        marginals = chain(marginals, argentine_occupation(pools), java_residency_registration(pools),
+                          egyptian_urban_literacy(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

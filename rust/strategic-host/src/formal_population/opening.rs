@@ -1,4 +1,4 @@
-use super::{demography::OpeningDemography, social::OpeningSocial, MAX_POPULATION};
+use super::{demography::OpeningDemography, historical::PopulationCatalogue, social::OpeningSocial, MAX_POPULATION};
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -99,6 +99,7 @@ struct EstimateContext {
 
 pub(crate) struct HistoricalOpening {
     version: u32,
+    pub(super) catalogue: PopulationCatalogue,
     pub(super) demography: OpeningDemography,
     pub(super) social: OpeningSocial,
     estimates: BTreeMap<String, OpeningPopulationEstimate>,
@@ -196,6 +197,7 @@ impl HistoricalOpening {
         }
         let mut opening = Self {
             version, demography: OpeningDemography::default(), social: OpeningSocial::default(),
+            catalogue: PopulationCatalogue::new(assets.root.clone()),
             estimates: BTreeMap::new(), partitions: BTreeMap::new(), statistical_aggregates: BTreeMap::new(),
             standalone: BTreeMap::new(),
             collective_scopes: BTreeMap::new(), declared_places: BTreeMap::new(), places: OnceLock::new(),

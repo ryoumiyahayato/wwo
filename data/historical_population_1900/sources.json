@@ -620,6 +620,19 @@
     "collection": "argentina_age_1895_1914"
   },
   {
+    "id": "ar_census_1895_principal_occupation",
+    "title": "Segundo Censo de la República Argentina, Tomo II, Cuadros XXVI a–d",
+    "publisher": "Comisión Directiva del Censo, 1898. Biblioteca INDEC.",
+    "url": "https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=245",
+    "locator": "Printed pp. 47–50, 139–142 and 402–405, 10 May 1895.",
+    "raw_paths": [
+      "occupation_1895.csv",
+      "OCCUPATION.md"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "argentina_age_1895_1914"
+  },
+  {
     "id": "ar_capital_federal_1895_age_sex",
     "title": "Capital Federal, 1895 census population by sex and age",
     "publisher": "Dirección General de Estadística y Censos, Ciudad de Buenos Aires",
@@ -1462,14 +1475,31 @@
     "collection": "ecuador_population"
   },
   {
+    "id": "egypt_census_1907_age_and_literacy",
+    "title": "The Census of Egypt Taken in 1907, Arabic edition",
+    "publisher": "Egyptian Ministry of Finance, Census Department, Cairo, 1909",
+    "url": "https://sites.dlib.nyu.edu/viewer/books/princeton_aco003741/display",
+    "locator": "Table XI, printed p. 123 onward, age and sex by reported literacy, 29 April 1907. National comparison in Table VIII, printed p. 116.",
+    "raw_paths": [
+      "table_xi_opening_age_sex.csv",
+      "table_xi_province_markaz_source_rows.csv",
+      "table_5_sex_scope_controls.csv",
+      "table_viii_national_age_sex.csv",
+      "README.md"
+    ],
+    "rights": "Published historical numeric facts. Digital facsimile held by Arabic Collections Online.",
+    "collection": "egypt_age_1907"
+  },
+  {
     "id": "egypt_census_1907_comparable_provinces",
     "title": "The Census of Egypt Taken in 1907, Arabic edition",
     "publisher": "Ministry of Finance, National Printing Department, 1909; Princeton University Library digitization",
     "url": "https://hdl.handle.net/2333.1/jq2bw0q4",
-    "locator": "Table 5, printed pp. 29–32. Page 29 compares the original 1897 counts and the 1897 counts restated for comparison with 1907. Pages 31–32 report both populations and their male and female counts.",
+    "locator": "Table 5, printed pp. 29–32. Page 29 compares the original 1897 counts and the 1897 counts restated for comparison with 1907. Pages 30–32 report both populations and their male and female counts.",
     "rights": "Historical official publication. Numeric facts transcribed.",
     "files": {
       "page_29": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/55/full/1600,/0/default.jpg",
+      "page_30": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/56/full/1600,/0/default.jpg",
       "page_31": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/57/full/1600,/0/default.jpg",
       "page_32": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/58/full/1600,/0/default.jpg"
     },
@@ -2230,6 +2260,19 @@
     "collection": "japan_taiwan"
   },
   {
+    "id": "dutch_jaarcijfers_colonien_1898",
+    "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1898",
+    "publisher": "Centraal Bureau voor de Statistiek, The Hague",
+    "url": "https://seadelt.net/Asset/Source/Document_ID-113_No-01.pdf",
+    "locator": "Oost-Indië, II.I.A, printed p. 2. The 22 Java and Madura residency lines, 31 December 1896.",
+    "raw_paths": [
+      "residency_census.csv",
+      "GEOGRAPHY.md"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "java_madoera"
+  },
+  {
     "id": "dutch_jaarcijfers_colonien_1899",
     "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1899",
     "publisher": "Centraal Bureau voor de Statistiek, Gebr. Belinfante, The Hague, 1901. Scan hosted by SEADELT.",
@@ -2245,6 +2288,10 @@
     "publisher": "Centraal Bureau voor de Statistiek, Gebr. Belinfante, The Hague, 1902. Scan hosted by SEADELT.",
     "url": "https://seadelt.net/Asset/Source/Document_ID-111_No-01.pdf#page=23",
     "locator": "Oost-Indië, printed pp. 2–3 (PDF pp. 23–24), II.I.A–B. A is Java en Madoera, 31 Dec. 1900. B covers the Outer Possessions separately.",
+    "raw_paths": [
+      "residency_census.csv",
+      "GEOGRAPHY.md"
+    ],
     "rights": "Numerical facts transcribed from the official printed table. Source scans remain with their archives.",
     "note": "The aggregate row is a five-year colonial enumeration with incomplete returns for private estates and excludes army and navy personnel. The 1901 consolidation of five residencies changes the table's internal areas. It leaves the Java and Madura aggregate intact.",
     "contemporary_cross_check": {
