@@ -43,7 +43,8 @@
 ## 构建产物保留
 
 - 在固定正式工作树切换日常分支，切换前提交或保留未提交成果。后续人口版本直接更新分支与人口运行清单。
-- 本机通过 `rust/strategic-host/tools/wwo-cargo.ps1` 复用指定的 `CARGO_TARGET_DIR`，构建加锁串行执行。dev/test 共用 10 GiB 容量，`-DebugSymbols` 配置使用 6 GiB。超过容量时，在下次使用该配置前清理此配置的可重建输出。保留正式发布、运行资源和存档。普通验证只做所需局部检查，Windows 正式构建用 GitHub CI。
+- 本机通过 `rust/strategic-host/tools/wwo-cargo.ps1` 复用指定的 `CARGO_TARGET_DIR`，构建加锁串行执行。dev/test 共用 10 GiB 阈值，`-DebugSymbols` 使用 6 GiB。每次超限期间仅清理一次该配置的工作区构建产物，保留第三方依赖。构建结束且配置大小至少低于阈值 1 GiB 后，才重新启用自动清理。持续超限时按实际增长来源排查。
+- 常规 `check`、`build`、`test` 将耗时、配置大小、所在卷写入量和剩余空间写入共享 target 的 `wwo-build-usage.jsonl`。卷写入量包含同卷并发活动。复用实际开发记录，避免为测量重复全量构建。普通验证只做所需局部检查，Windows 正式构建用 GitHub CI。
 
 - 历史 Godot 内部预览在归档工作树使用`tools/build_preview.ps1 build --version R数字`。禁止另建手工导出候选目录；该入口完成技术校验、候选登记和自动清退。没有正式运行输入变化时不重导出。
 - 用户明确通过实机验收后，使用同入口的`promote R数字 --acceptance "用户确认内容" --execute`提升版本并清退旧普通回退。不得把技术导出成功当作实机验收。

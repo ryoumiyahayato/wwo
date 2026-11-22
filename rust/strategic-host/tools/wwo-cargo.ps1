@@ -52,7 +52,35 @@ function Get-OutputBytes([string] $Path) {
     return $bytes
 }
 
+function Get-VolumeWrites([string] $Volume) {
+    try {
+        $counter = Get-CimInstance Win32_PerfRawData_PerfDisk_LogicalDisk -Filter "Name='$Volume'" -ErrorAction Stop
+        if ($null -ne $counter.DiskWriteBytesPersec) {
+            return [long] $counter.DiskWriteBytesPersec
+        }
+    } catch {
+        Write-Verbose "Volume write counter unavailable: $_"
+    }
+}
+
+function Write-BuildUsage([string] $Directory, [hashtable] $Usage) {
+    try {
+        $log = Join-Path $Directory 'wwo-build-usage.jsonl'
+        if ((Test-Path -LiteralPath $log -PathType Leaf) -and
+            ((Get-Item -LiteralPath $log).Length -ge 512KB)) {
+            Move-Item -LiteralPath $log -Destination (Join-Path $Directory 'wwo-build-usage.previous.jsonl') -Force
+        }
+        Add-Content -LiteralPath $log -Encoding utf8 -Value ($Usage | ConvertTo-Json -Compress)
+    } catch {
+        Write-Warning "Could not record local Cargo build usage: $_"
+    }
+}
+
 $profileDirectory = Join-Path $target.FullName $output
+$retirementMarker = Join-Path $target.FullName ".wwo-$profile-retired"
+$rearmAt = $budget - 1GB
+$drive = [IO.DriveInfo]::new([IO.Path]::GetPathRoot($target.FullName))
+$volume = $drive.Name.TrimEnd('\')
 $previousTarget = $env:CARGO_TARGET_DIR
 $previousData = $env:WWO_DATA_DIR
 $previousRustFlags = $env:RUSTFLAGS
@@ -78,8 +106,14 @@ try {
             $env:RUSTFLAGS = "$previousRustFlags $linkFlag".Trim()
         }
     }
-    $bytes = Get-OutputBytes $profileDirectory
-    if ($bytes -gt $budget) {
+    $bytesBefore = Get-OutputBytes $profileDirectory
+    $retired = Test-Path -LiteralPath $retirementMarker
+    $retirement = 'none'
+    if ($Command -ne 'run') {
+        $freeBefore = $drive.AvailableFreeSpace
+        $writesBefore = Get-VolumeWrites $volume
+    }
+    if ($bytesBefore -gt $budget -and !$retired) {
         $directory = Get-Item -LiteralPath $profileDirectory
         $expected = Join-Path $target.FullName $output
         if ($directory.FullName -ne $expected -or
@@ -90,17 +124,56 @@ try {
         $running = Get-Process -ErrorAction SilentlyContinue |
             Where-Object { $_.Path -like "$expected\*" }
         if ($running) {
-            throw "Close the development program in $expected before refreshing its Cargo profile."
+            $retirement = 'deferred-in-use'
+            Write-Warning "Cargo $profile workspace cleanup deferred while its program is running."
+        } else {
+            Write-Host "Cargo $profile cache exceeded $budget bytes ($bytesBefore). Removing workspace outputs in this profile once."
+            & cargo clean --workspace --offline --locked --manifest-path $manifest --profile $profile
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            Set-Content -LiteralPath $retirementMarker -Value ([DateTime]::UtcNow.ToString('o'))
+            $retired = $true
+            $retirement = 'workspace'
         }
-        Write-Host "Cargo $profile cache exceeded $budget bytes ($bytes). Removing project outputs in this profile."
-        & cargo clean --workspace --offline --locked --manifest-path $manifest --profile $profile
-        if ($LASTEXITCODE) { exit $LASTEXITCODE }
+    } elseif ($bytesBefore -gt $budget) {
+        $retirement = 'already-retired'
     }
+
+    $timer = [Diagnostics.Stopwatch]::StartNew()
     & cargo $Command --locked --manifest-path $manifest @profileArguments @CargoArguments
     $code = $LASTEXITCODE
-    $bytes = Get-OutputBytes $profileDirectory
-    if ($bytes -gt $budget) {
-        Write-Warning "Cargo $profile cache is $bytes bytes. Only workspace outputs are eligible for automatic retirement."
+    $timer.Stop()
+    if ($Command -ne 'run') {
+        $writesAfter = Get-VolumeWrites $volume
+        $freeAfter = $drive.AvailableFreeSpace
+        $writeBytes = $null
+        if ($null -ne $writesBefore -and $null -ne $writesAfter -and $writesAfter -ge $writesBefore) {
+            $writeBytes = $writesAfter - $writesBefore
+        }
+    }
+    $bytesAfter = Get-OutputBytes $profileDirectory
+    if ($retired -and $bytesAfter -le $rearmAt) {
+        Remove-Item -LiteralPath $retirementMarker
+    }
+    if ($Command -ne 'run') {
+        $commit = & git -C $worktree rev-parse --verify HEAD
+        Write-BuildUsage $target.FullName @{
+            utc = [DateTime]::UtcNow.ToString('o')
+            commit = $commit
+            command = $Command
+            profile = $profile
+            cargo_ms = $timer.ElapsedMilliseconds
+            exit_code = $code
+            workspace_retirement = $retirement
+            profile_bytes_before = $bytesBefore
+            profile_bytes_after = $bytesAfter
+            volume = $volume
+            volume_free_before = $freeBefore
+            volume_free_after = $freeAfter
+            volume_write_bytes = $writeBytes
+        }
+    }
+    if ($bytesAfter -gt $budget) {
+        Write-Warning "Cargo $profile cache is $bytesAfter bytes. Dependency outputs are retained. Automatic workspace cleanup rearms at $rearmAt bytes."
     }
     exit $code
 } finally {
