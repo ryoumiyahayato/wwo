@@ -374,6 +374,40 @@ def add_russian_districts(group, observations):
     group["statistical_aggregates"] = aggregates
 
 
+
+def add_hungarian_crown_counties(group, observations):
+    dates = dict(zip(group["census_date_labels"], group["endpoint_dates"]))
+    counties_by_parent = defaultdict(list)
+    for row in observations:
+        if row["source_id"] == "ah_hungarian_counties_1900":
+            counties_by_parent[row["parent_id"]].append(row | dict(date=dates[row["date"]]))
+
+    units = []
+    aggregates = []
+    for parent in group["units"]:
+        parent_id = parent["unit_id"]
+        if parent_id not in counties_by_parent:
+            units.append(parent)
+            continue
+        if parent["place_ids"]:
+            raise ValueError(f"County split requires explicit places for {parent_id}")
+
+        children = interpolate_partition(counties_by_parent.pop(parent_id), parent, group["endpoint_dates"])
+        for county in children:
+            county.update(statistical_parent=parent_id, date=DATE)
+        units.extend(children)
+        aggregates.append(parent | dict(
+            date=DATE, endpoint_dates=group["endpoint_dates"],
+            method="Sum the non-overlapping historical county and municipal opening balances.",
+            scope=children[0]["scope"],
+        ))
+
+    if counties_by_parent or not aggregates:
+        raise ValueError(f"Unmatched or missing Hungarian county opening controls: {sorted(counties_by_parent)}")
+    group["units"] = units
+    group["statistical_aggregates"] = aggregates
+
+
 def add_japanese_prefectures(group, observations):
     source_id = "jp_cabinet_1909_resident_prefectures"
     prior_night = "1899-12-31"
@@ -926,6 +960,8 @@ def groups(observations, version=1):
         add_russian_districts(result["russian_empire"], observations)
     if version >= 17:
         add_england_wales_statistical_scope(result["british_isles_1900"], observations)
+    if version >= 18:
+        add_hungarian_crown_counties(result["austria_hungary"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

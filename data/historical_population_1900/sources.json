@@ -609,6 +609,51 @@
     "collection": "austria_hungary"
   },
   {
+    "id": "ah_hungarian_counties_1900",
+    "title": "Magyar statisztikai évkönyv 1901, új folyam IX",
+    "publisher": "Magyar Királyi Központi Statisztikai Hivatal, Budapest",
+    "url": "https://www.kshkonyvtar.hu/file-download/L2hvbWUvc2lsaW5mby9hcHBsaWNhdGlvbi93b3JrZGlyL2NrZWRpdG9yQ3VzdG9tRmlsZXMvRsOpbnllcyBFbGVrIGRpZ2l0w6FsaXMgc3RhdGlzenRpa2FpIGvDtm55dnTDoXIvTWFneWFyIFN0YXRpc3p0aWthaSDDiXZrw7ZueXYg4oCTIMOaaiBmb2x5YW0vTVNFMl8xOTAxLnBkZg%3D%3D#page=15",
+    "locator": "Section II.A, Table 1, printed p. 12 (PDF p. 15); Tisza-Maros szöge and Horvát-Szlavonországok; total civilian and military populations of counties and separately tabulated municipalities in 1890 and 1900.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "austria_hungary"
+  },
+  {
+    "id": "ksh_hungarian_statistical_yearbook_1902",
+    "title": "Magyar statisztikai évkönyv 1902",
+    "publisher": "Magyar Királyi Központi Statisztikai Hivatal, Budapest",
+    "url": "https://www.kshkonyvtar.hu/file-download/L2hvbWUvc2lsaW5mby9hcHBsaWNhdGlvbi93b3JrZGlyL2NrZWRpdG9yQ3VzdG9tRmlsZXMvRsOpbnllcyBFbGVrIGRpZ2l0w6FsaXMgc3RhdGlzenRpa2FpIGvDtm55dnTDoXIvTWFneWFyIFN0YXRpc3p0aWthaSDDiXZrw7ZueXYg4oCTIMOaaiBmb2x5YW0vTVNFMl8xOTAyLnBkZg%3D%3D",
+    "locator": "1900 census, Table 15a, printed pp. 40–43. Regional occupational groups with independent-livelihood and dependant columns.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "austria_hungary"
+  },
+  {
+    "id": "ksh_hungarian_statistical_yearbook_1903",
+    "title": "Magyar statisztikai évkönyv 1903",
+    "publisher": "Magyar Királyi Központi Statisztikai Hivatal, Budapest",
+    "url": "https://www.kshkonyvtar.hu/file-download/L2hvbWUvc2lsaW5mby9hcHBsaWNhdGlvbi93b3JrZGlyL2NrZWRpdG9yQ3VzdG9tRmlsZXMvRsOpbnllcyBFbGVrIGRpZ2l0w6FsaXMgc3RhdGlzenRpa2FpIGvDtm55dnTDoXIvTWFneWFyIFN0YXRpc3p0aWthaSDDiXZrw7ZueXYg4oCTIMOaaiBmb2x5YW0vTVNFMl8xOTAzLnBkZg%3D%3D",
+    "locator": "1900 census. Table 9a, printed pp. 18–19, religion. Table 10, printed pp. 22–25, mother tongue. Regional civilian rows.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "austria_hungary"
+  },
+  {
+    "id": "ksh_hungarian_statistical_yearbook_1908",
+    "title": "Magyar statisztikai évkönyv 1908",
+    "publisher": "Magyar Királyi Központi Statisztikai Hivatal, Budapest",
+    "url": "https://www.kshkonyvtar.hu/file-download/L2hvbWUvc2lsaW5mby9hcHBsaWNhdGlvbi93b3JrZGlyL2NrZWRpdG9yQ3VzdG9tRmlsZXMvRsOpbnllcyBFbGVrIGRpZ2l0w6FsaXMgc3RhdGlzenRpa2FpIGvDtm55dnTDoXIvTWFneWFyIFN0YXRpc3p0aWthaSDDiXZrw7ZueXYg4oCTIMOaaiBmb2x5YW0vTVNFMl8xOTA4LnBkZg%3D%3D",
+    "locator": "Section II.A, Table 7, printed p. 17, and Table 5, printed p. 16, census population by sex.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "austria_hungary"
+  },
+  {
+    "id": "ah_hungarian_census_1900_part10",
+    "title": "A Magyar Korona országainak 1900. évi népszámlálása, Part X, Table 15",
+    "publisher": "Magyar Királyi Központi Statisztikai Hivatal, Budapest",
+    "url": "https://www.kshkonyvtar.hu/file-download/L2hvbWUvc2lsaW5mby9hcHBsaWNhdGlvbi93b3JrZGlyL2NrZWRpdG9yQ3VzdG9tRmlsZXMvRsOpbnllcyBFbGVrIGRpZ2l0w6FsaXMgc3RhdGlzenRpa2FpIGvDtm55dnTDoXIvTWFneWFyIFN0YXRpc3p0aWthaSBLw7Z6bGVtw6lueWVrL01TS18wMjcucGRm",
+    "locator": "Part X, Table 15, printed pp. 66–67. Regional sex totals for the 1890 and 1900 census nights, including civilians and military.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "austria_hungary"
+  },
+  {
     "id": "ah_cisleithania_census_1900_ages",
     "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Alters- und Familienstandsgliederung",
     "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",

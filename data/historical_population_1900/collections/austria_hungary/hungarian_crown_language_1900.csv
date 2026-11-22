@@ -1,0 +1,10 @@
+unit_id,observed_name,observed_date,source_id,locator,observed_total,census_total,unknown,Magyar,Német,Tót,Oláh,Ruthén,Horvát,Szerb,Egyéb
+ah_danube_left,Duna bal partja,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 10 pp22-23 a,2038263,2049611,11348,596158,153718,1269032,412,147,2752,168,15876
+ah_danube_right,Duna jobb partja,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 10 pp22-23 b,2902866,2923401,20535,2031620,572510,17511,918,42,168616,14687,96962
+ah_danube_tisza,Duna-Tisza köze,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 10 pp22-23 c,3257508,3284233,26725,2517261,394839,90328,2161,10254,3210,144983,94472
+ah_tisza_right,Tisza jobb partja,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 10 pp22-23 d,1660728,1674241,13513,815551,102033,490529,485,233586,473,45,18026
+ah_tisza_left,Tisza bal partja,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 10 pp24-25 e,2325099,2336104,11005,1415149,77138,77494,572549,176697,499,87,5486
+ah_tisza_maros,Tisza-Maros szöge,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 10 pp24-25 f,2042215,2054712,12497,403877,448410,44272,818875,1168,5415,274439,45759
+ah_transylvania,Királyhágón túl,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 10 pp24-25 g,2456838,2476998,20160,806406,229889,2209,1389303,1265,789,183,26794
+ah_fiume,Fiume város és ker.,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 10 pp24-25 h,38057,38955,898,2812,1886,27,23,0,6798,49,26462
+ah_croatia_slavonia,Horvát-Szlavonországok,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 10 pp24-25 II,2400766,2416304,15538,90180,134000,17342,539,4666,1482353,607381,64305

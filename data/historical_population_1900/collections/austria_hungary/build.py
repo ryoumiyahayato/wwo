@@ -1,5 +1,6 @@
 """Reproduce the reported census populations and 23 opening divisions offline."""
 
+import csv
 from datetime import date, timedelta
 from fractions import Fraction
 import json
@@ -84,6 +85,20 @@ for parent, rows, source in [
 ]:
     for row in rows:
         record(*row, source, parent)
+
+
+counties_source = "ah_hungarian_counties_1900"
+date_counts = [f"population_{census_date.isoformat().replace('-', '_')}" for census_date in CENSUS_DATES]
+with (OUT / "hungarian_counties_1890_1900.csv").open(encoding="utf8", newline="") as table:
+    for county in csv.DictReader(table):
+        geography = "county" if county["kind"] == "county" else "municipality"
+        name = f"{county['hungarian_name']} ({geography})"
+        record(county["unit_id"], name, *(int(county[column]) for column in date_counts),
+               counties_source, county["parent_unit_id"])
+        for row in observations[-len(CENSUS_DATES):]:
+            row.update(administrative_level=2, jurisdiction=county["kind"],
+                       alternate_name=county["alternate_name"])
+
 
 units = []
 division_controls = []

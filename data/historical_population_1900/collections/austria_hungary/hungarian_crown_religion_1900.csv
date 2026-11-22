@@ -1,0 +1,10 @@
+unit_id,observed_name,observed_date,source_id,locator,observed_total,census_total,unknown,Római kath.,Görög kath.,Görög keleti,Ágostai evang.,Evang. reform.,Unitárius,Izraelita,Egyéb
+ah_danube_left,Duna bal partja,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 9a p18 a,2038263,2049611,11348,1590325,995,515,299666,56899,95,89569,199
+ah_danube_right,Duna jobb partja,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 9a p18 b,2902866,2923401,20535,2209259,891,15598,249260,331821,598,94050,1389
+ah_danube_tisza,Duna-Tisza köze,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 9a p18 c,3257508,3284233,26725,2174487,18661,147392,172554,488323,1889,249101,5101
+ah_tisza_right,Tisza jobb partja,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 9a p18 d,1660728,1674241,13513,709119,397543,655,122667,298544,125,131969,106
+ah_tisza_left,Tisza bal partja,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 9a p19 e,2325099,2336104,11005,336464,671359,222908,121409,795750,928,173956,2325
+ah_tisza_maros,Tisza-Maros szöge,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 9a p19 f,2042215,2054712,12497,754564,53705,1054987,64185,77351,335,33825,3263
+ah_transylvania,Királyhágón túl,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 9a p19 g,2456838,2476998,20160,326336,687595,744804,220289,360873,64008,52585,348
+ah_fiume,Fiume város és ker.,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 9a p19 h,38057,38955,898,35554,66,383,255,414,10,1167,208
+ah_croatia_slavonia,Horvát-Szlavonországok,1900-12-31,ksh_hungarian_statistical_yearbook_1903,Table 9a p19 II,2400766,2416304,15538,1710425,12819,612604,29785,13843,17,20032,1241
