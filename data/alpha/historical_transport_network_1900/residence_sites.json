@@ -4,7 +4,7 @@
     "br": "1908 Brazil DGE, População do Brazil por Estados, pp. 73–74, Distrito Federal (Rio de Janeiro), in WWO historical_population_1900/collections/americas/brazil_opening.json. Distinct from the surrounding State of Rio de Janeiro.",
     "ca": "Fourth Census of Canada, 1901, volume I, tables of districts by province. Ontario district 100, Ottawa City. https://www.bac-lac.gc.ca/eng/census/1901/Documents/1901-Ontario-Schedule-2.pdf ; https://publications.gc.ca/collections/collection_2018/parl/x12-3/X12-3-A-1903-eng.pdf",
     "mx": "Dirección General de Estadística, División territorial, censo de 28 octubre 1900: Distrito Federal and Estado de Veracruz. Ciudad de México and the municipality of Veracruz. https://www.inegi.org.mx/app/biblioteca/ficha.html?upc=702825010007 ; https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/historicos/1329/702825010027/702825010027_1.pdf",
-    "ro": "București, December 1899, contemporary enumeration printed in Transilvania, July 1900, pp. 186–188. Its location is in Muntenia east of the Olt, north of the Danube. Regional limits: Antipa Museum, Travaux 54 (2011), geographical account. https://www.bcucluj.ro/synfilebibdigit/periodice/transilvania/1900/BCUCLUJ_FP_279996_1900_031_007.pdf ; https://archive.sciendo.com/TRAVMU/travmu.2011.54.issue-2/v10191-011-0028-9/v10191-011-0028-9.pdf",
+    "ro": "December 1899 definitive census, Table IV.B, lists București as the county seat of Ilfov in Muntenia. https://archive.org/details/recensamantulgen00serv/page/n164/mode/2up",
     "se": "Stockholm municipal statistical yearbook, table 4.1, 1900 city, county and Sweden totals. https://start.stockholm/globalassets/start/om-stockholms-stad/utredningar-statistik-och-fakta/statistik/arsbok/statistisk-arsbok-for-stockholm-2025.pdf",
     "mu": "Mauritius national archives, foundation of Port Louis on the island of Mauritius; Mauritius 1911 Census, Table I, retrospective district and Rodrigues population counts for 1891 and 1901. https://nationalarchives.govmu.org/nationalarchives/?cool_timeline=1721",
     "de": "Statistisches Jahrbuch für das Deutsche Reich 1902, printed p. 1, Bremen and Hamburg separately listed as Freie Hansestadt / Freie und Hansestadt; WWO historical_population_1900/collections/cities_europe/germany_opening.json.",
@@ -12,7 +12,8 @@
     "swiss_federal_census_comparison_1911": "WWO historical_population_1900/cities_1900.jsonl.gz, source_id swiss_federal_census_comparison_1911, source_parent_id from the original census tabulation. The row locator follows the source key."
   },
   "partition_successors": {
-    "mu_main_island": "mu_district_port_louis"
+    "mu_main_island": "mu_district_port_louis",
+    "ro_1899_muntenia": "ro_1899_county_ilfov"
   },
   "fields": [
     "population_partition",

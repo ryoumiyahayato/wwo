@@ -1273,6 +1273,15 @@ mod tests {
         let world = WorldBootstrap::load().unwrap();
         let sources = world.sources();
         let mut net = super::super::map_data::load_world_network(sources, 8).unwrap();
+        let opening = sources.historical_population.as_ref().unwrap();
+        let bucharest_partition = if opening.version() >= 36 {
+            "ro_1899_county_ilfov"
+        } else {
+            "ro_1899_muntenia"
+        };
+        let bucharest = net.capital_node("kingdom_of_romania").unwrap();
+        assert_eq!(opening.unit_at(bucharest), Some(bucharest_partition));
+        assert_eq!(net.population_at(bucharest), Some(bucharest_partition));
         let table: Table = serde_json::from_slice(COMPACT).unwrap();
         for unit in sources.population_units() {
             let node = net.area_node(unit).unwrap();
@@ -1420,7 +1429,6 @@ mod tests {
             ("mexican_republic", "mx_distrito_federal"),
             ("brazil_1900", "br_federal_district_1900"),
             ("dominion_of_canada", "ca_ontario"),
-            ("kingdom_of_romania", "ro_1899_muntenia"),
             ("sweden_norway_union", "ft_sweden"),
             ("swiss_confederation", "ch_canton_be"),
             ("cshapes_gw_590", "mu_district_port_louis"),

@@ -3009,7 +3009,9 @@
     "raw_paths": [
       "raw/regional_age_sex_table_ii_a.csv",
       "raw/national_age_sex_table_12.csv",
-      "raw/county_sex_controls.csv"
+      "raw/county_sex_controls.csv",
+      "raw/county_age_sex_table_ii_a_published_bands.csv",
+      "raw/county_age_sex_table_ii_a_reconciled_bands.csv"
     ],
     "collection": "romania"
   },

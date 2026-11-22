@@ -1,0 +1,7 @@
+# Romanian Old Kingdom county literacy, December 1899
+
+Colescu's Table V.A, pp. 80–81, gives the 32 county rows for stable residents of both types of communes, ages seven and over. See the regional transcription for the source categories, census timing and scope. All-age denominators agree with Table I.A and the county opening controls. The table combines `Știu carte` (able to read and write) and `Nu știu carte` (unable to read and write) across age bands. The all-age remainder stays unknown. [Table V.A](https://archive.org/details/recensamantulgen00serv/page/n170/mode/2up)
+
+Three printed both-sex subtotals for ages 7–15 disagree with their own sex columns. Covurlui prints 14,407 literate, and the two sex columns give 7,479 + 3,928 = 11,407. Suceava prints 5,690 literate, and the columns give 4,407 + 1,553 = 5,960. Teleorman prints 38,788 illiterate, and the columns give 17,699 + 21,079 = 38,778. Their sex-column sums and age-band totals agree with the corresponding published age-seven-and-over counts and both regional subtotals. The CSV preserves both printed youth subtotals and corrected counts. The published literacy marginal for ages seven and over needs no adjustment.
+
+Each of the four regional rows equals the sum of its counties across both literacy classes and age bands. The 32 rows together cover 4,694,288 enumerated residents, with 1,262,402 residents outside the table. Use the county rows as the exclusive partition once those accounts open. Source ID `ro_colescu_1899_census_report`.

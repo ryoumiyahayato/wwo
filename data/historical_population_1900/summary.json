@@ -18,7 +18,7 @@
     "danish": 56,
     "eastern": 1105,
     "ecuador_population": 35,
-    "egypt_age_1907": 10,
+    "egypt_age_1907": 12,
     "egypt_comparable_provinces": 12,
     "egypt_faiyum_1900": 6,
     "egypt_religion_1897": 3,
@@ -70,17 +70,17 @@
   "research_component_sum_jan1": 1595074246,
   "production_roots": 57,
   "partially_located_legacy_roots": 4,
-  "documented_people_under_legacy_controls": 696112006,
+  "documented_people_under_legacy_controls": 696692245,
   "replaced_legacy_roots": 31,
   "new_roots": 26,
-  "production_people": 1368629758,
-  "production_people_pct_world_estimate": 85.804,
-  "population_outside_evidence_opening_estimate": 226444490,
-  "legacy_only_people": 105967994,
+  "production_people": 1369209997,
+  "production_people_pct_world_estimate": 85.84,
+  "population_outside_evidence_opening_estimate": 225864251,
+  "legacy_only_people": 105387755,
   "authoritative_total_for_new_game": 1474597752,
   "roots_with_partitions": 29,
-  "disjoint_leaves": 1287,
-  "people_in_partitions": 1283423124,
+  "disjoint_leaves": 1316,
+  "people_in_partitions": 1284003363,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -369,7 +369,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2781,
+  "source_statistical_units": 2782,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 29,
@@ -381,7 +381,7 @@
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 4,
-      "people": 696112006
+      "people": 696692245
     }
   },
   "city_index_representative_bands": {
@@ -417,8 +417,8 @@
       "unknown_people": 1314484651
     },
     "literacy": {
-      "assigned_people": 316665623,
-      "unknown_people": 1157932129
+      "assigned_people": 327429224,
+      "unknown_people": 1147168528
     },
     "marital_status": {
       "assigned_people": 339717927,
@@ -437,8 +437,8 @@
       "unknown_people": 1003378085
     },
     "residence": {
-      "assigned_people": 367464724,
-      "unknown_people": 1107133028
+      "assigned_people": 373421414,
+      "unknown_people": 1101176338
     }
   },
   "structural_observations_by_source": {
@@ -496,16 +496,16 @@
     "ah_cisleithania_census_1900_ages": 168,
     "ksh_hungarian_statistical_yearbook_1908": 42,
     "mx_census_1900_dge_1901": 341,
-    "ro_colescu_1899_census_report": 170,
+    "ro_colescu_1899_census_report": 485,
     "ah_hungarian_census_1900_part10": 18,
     "jp_cabinet_population_1898_original": 23,
     "jp_cabinet_local_occupations_1913_tokyo": 8,
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 887732549,
-  "structure_opening_pool_count": 885,
-  "structure_opening_residents_outside_modeled_pools": 586865203,
+  "structure_opening_pool_controls": 888312788,
+  "structure_opening_pool_count": 914,
+  "structure_opening_residents_outside_modeled_pools": 586284964,
   "structure_opening_scopes": [
     {
       "unit_id": "abs_new_south_wales",
@@ -3329,6 +3329,13 @@
       "observed_date": "1907-04-29"
     },
     {
+      "unit_id": "egy_mudiriya_minya",
+      "opening_total": 580239,
+      "observed_unit_id": "egy_mudiriya_minya",
+      "observed_total": 580239,
+      "observed_date": "1907-04-29"
+    },
+    {
       "unit_id": "egy_mudiriya_qalyubiya",
       "opening_total": 388033,
       "observed_unit_id": "egy_mudiriya_qalyubiya",
@@ -6024,31 +6031,227 @@
       "observed_date": "1900-01-01"
     },
     {
-      "unit_id": "ro_1899_moldova",
-      "opening_total": 1848122,
-      "observed_unit_id": "ro_1899_moldova",
-      "observed_total": 1848122,
+      "unit_id": "ro_1899_county_arges",
+      "opening_total": 207605,
+      "observed_unit_id": "ro_1899_county_arges",
+      "observed_total": 207605,
       "observed_date": "1899-12"
     },
     {
-      "unit_id": "ro_1899_muntenia",
-      "opening_total": 2659517,
-      "observed_unit_id": "ro_1899_muntenia",
-      "observed_total": 2659517,
+      "unit_id": "ro_1899_county_bacau",
+      "opening_total": 195194,
+      "observed_unit_id": "ro_1899_county_bacau",
+      "observed_total": 195194,
       "observed_date": "1899-12"
     },
     {
-      "unit_id": "ro_1899_northern_dobruja",
-      "opening_total": 267808,
-      "observed_unit_id": "ro_1899_northern_dobruja",
-      "observed_total": 267808,
+      "unit_id": "ro_1899_county_botosani",
+      "opening_total": 171437,
+      "observed_unit_id": "ro_1899_county_botosani",
+      "observed_total": 171437,
       "observed_date": "1899-12"
     },
     {
-      "unit_id": "ro_1899_oltenia",
-      "opening_total": 1181243,
-      "observed_unit_id": "ro_1899_oltenia",
-      "observed_total": 1181243,
+      "unit_id": "ro_1899_county_braila",
+      "opening_total": 145284,
+      "observed_unit_id": "ro_1899_county_braila",
+      "observed_total": 145284,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_buzau",
+      "opening_total": 221263,
+      "observed_unit_id": "ro_1899_county_buzau",
+      "observed_total": 221263,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_constanta",
+      "opening_total": 141056,
+      "observed_unit_id": "ro_1899_county_constanta",
+      "observed_total": 141056,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_covurlui",
+      "opening_total": 143784,
+      "observed_unit_id": "ro_1899_county_covurlui",
+      "observed_total": 143784,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_dambovita",
+      "opening_total": 211666,
+      "observed_unit_id": "ro_1899_county_dambovita",
+      "observed_total": 211666,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_doljiu",
+      "opening_total": 365579,
+      "observed_unit_id": "ro_1899_county_doljiu",
+      "observed_total": 365579,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_dorohoi",
+      "opening_total": 159461,
+      "observed_unit_id": "ro_1899_county_dorohoi",
+      "observed_total": 159461,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_falciu",
+      "opening_total": 93831,
+      "observed_unit_id": "ro_1899_county_falciu",
+      "observed_total": 93831,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_gorjiu",
+      "opening_total": 171300,
+      "observed_unit_id": "ro_1899_county_gorjiu",
+      "observed_total": 171300,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_ialomita",
+      "opening_total": 187889,
+      "observed_unit_id": "ro_1899_county_ialomita",
+      "observed_total": 187889,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_iasi",
+      "opening_total": 192531,
+      "observed_unit_id": "ro_1899_county_iasi",
+      "observed_total": 192531,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_ilfov",
+      "opening_total": 541180,
+      "observed_unit_id": "ro_1899_county_ilfov",
+      "observed_total": 541180,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_mehedinti",
+      "opening_total": 249688,
+      "observed_unit_id": "ro_1899_county_mehedinti",
+      "observed_total": 249688,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_muscel",
+      "opening_total": 115180,
+      "observed_unit_id": "ro_1899_county_muscel",
+      "observed_total": 115180,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_neamtu",
+      "opening_total": 149711,
+      "observed_unit_id": "ro_1899_county_neamtu",
+      "observed_total": 149711,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_olt",
+      "opening_total": 143843,
+      "observed_unit_id": "ro_1899_county_olt",
+      "observed_total": 143843,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_prahova",
+      "opening_total": 307302,
+      "observed_unit_id": "ro_1899_county_prahova",
+      "observed_total": 307302,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_putna",
+      "opening_total": 151249,
+      "observed_unit_id": "ro_1899_county_putna",
+      "observed_total": 151249,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_ramnicu_sarat",
+      "opening_total": 136918,
+      "observed_unit_id": "ro_1899_county_ramnicu_sarat",
+      "observed_total": 136918,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_roman",
+      "opening_total": 111588,
+      "observed_unit_id": "ro_1899_county_roman",
+      "observed_total": 111588,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_romanati",
+      "opening_total": 203773,
+      "observed_unit_id": "ro_1899_county_romanati",
+      "observed_total": 203773,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_suceava",
+      "opening_total": 131596,
+      "observed_unit_id": "ro_1899_county_suceava",
+      "observed_total": 131596,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_tecuci",
+      "opening_total": 121179,
+      "observed_unit_id": "ro_1899_county_tecuci",
+      "observed_total": 121179,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_teleorman",
+      "opening_total": 238628,
+      "observed_unit_id": "ro_1899_county_teleorman",
+      "observed_total": 238628,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_tulcea",
+      "opening_total": 126752,
+      "observed_unit_id": "ro_1899_county_tulcea",
+      "observed_total": 126752,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_tutova",
+      "opening_total": 116377,
+      "observed_unit_id": "ro_1899_county_tutova",
+      "observed_total": 116377,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_valcea",
+      "opening_total": 190903,
+      "observed_unit_id": "ro_1899_county_valcea",
+      "observed_total": 190903,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_vaslui",
+      "opening_total": 110184,
+      "observed_unit_id": "ro_1899_county_vaslui",
+      "observed_total": 110184,
+      "observed_date": "1899-12"
+    },
+    {
+      "unit_id": "ro_1899_county_vlasca",
+      "opening_total": 202759,
+      "observed_unit_id": "ro_1899_county_vlasca",
+      "observed_total": 202759,
       "observed_date": "1899-12"
     },
     {
@@ -6901,9 +7104,9 @@
         "khedivate_of_egypt",
         "sultanate_of_zanzibar"
       ],
-      "production_people": 17298327,
-      "production_pct_of_regional_research_estimate": 13.309,
-      "people_with_opening_subdivision": 9120651,
+      "production_people": 17878566,
+      "production_pct_of_regional_research_estimate": 13.755,
+      "people_with_opening_subdivision": 9700890,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -7412,10 +7615,10 @@
         "opening_unit_id": "khedivate_of_egypt",
         "research_region": "Africa",
         "opening_control": 10000000,
-        "in_model_pools": 8546656,
-        "outside_model_pools": 1453344,
-        "modeled_age_and_sex": 8524349,
-        "modeled_sex_age_unknown": 22307
+        "in_model_pools": 9126895,
+        "outside_model_pools": 873105,
+        "modeled_age_and_sex": 9101804,
+        "modeled_sex_age_unknown": 25091
       },
       {
         "opening_unit_id": "kingdom_of_belgium",
@@ -7748,10 +7951,10 @@
       },
       "Africa": {
         "opening_control": 18751671,
-        "in_model_pools": 10812212,
-        "outside_model_pools": 7939459,
-        "modeled_age_and_sex": 10788985,
-        "modeled_sex_age_unknown": 23227
+        "in_model_pools": 11392451,
+        "outside_model_pools": 7359220,
+        "modeled_age_and_sex": 11366440,
+        "modeled_sex_age_unknown": 26011
       },
       "no_reviewed_research_region": {
         "opening_control": 98080000,
@@ -7770,10 +7973,10 @@
     },
     "world": {
       "opening_control": 1474597752,
-      "in_model_pools": 887732549,
-      "outside_model_pools": 586865203,
-      "modeled_age_and_sex": 871908867,
-      "modeled_sex_age_unknown": 15823682
+      "in_model_pools": 888312788,
+      "outside_model_pools": 586284964,
+      "modeled_age_and_sex": 872486322,
+      "modeled_sex_age_unknown": 15826466
     }
   },
   "opening_count_basis": {
@@ -7787,12 +7990,12 @@
         "pct_of_research_reference": 43.867
       },
       "date_models_from_territorial_returns": {
-        "people": 663807651,
-        "pct_of_research_reference": 41.616
+        "people": 664387890,
+        "pct_of_research_reference": 41.652
       },
       "retained_legacy_estimates": {
-        "people": 105967994,
-        "pct_of_research_reference": 6.643
+        "people": 105387755,
+        "pct_of_research_reference": 6.607
       }
     },
     "scopes": [
@@ -8270,9 +8473,9 @@
       {
         "unit_id": "khedivate_of_egypt",
         "source_id": "egypt_historical_census_primary_tables",
-        "sourced_people": 8546656,
+        "sourced_people": 9126895,
         "sourced_basis": "date_models_from_territorial_returns",
-        "retained_legacy_people": 1453344
+        "retained_legacy_people": 873105
       },
       {
         "unit_id": "kingdom_of_belgium",
