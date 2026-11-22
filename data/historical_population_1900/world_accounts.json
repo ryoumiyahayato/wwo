@@ -3950,6 +3950,20 @@
       "research_minus_documented": 0
     },
     {
+      "comparison_id": "ottoman_empire",
+      "opening_root_ids": [
+        "ottoman_empire"
+      ],
+      "research_unit_ids": [],
+      "scope_relation": "opening_without_benchmark_link",
+      "note": "Thirty disjoint 1897 administrative registration lines. Baghdad, Basra and Mosul have partial returns and no allocation. Egypt, Tunisia, Bosnia and Herzegovina, Bulgaria and Cyprus lie outside these lines. Crete is separate from the Archipelago vilayet. No foreign-national or military estimate is added. The register undercounts women and children and has major territorial gaps.",
+      "research_regions": [],
+      "research_people": null,
+      "documented_opening_people": 18584667,
+      "opening_people_including_retained_balances": 24000000,
+      "research_minus_documented": null
+    },
+    {
       "comparison_id": "principality_of_bulgaria",
       "opening_root_ids": [
         "principality_of_bulgaria"
@@ -4042,7 +4056,9 @@
       "research_minus_documented": 0
     }
   ],
-  "opening_comparisons_without_single_region": [],
+  "opening_comparisons_without_single_region": [
+    "ottoman_empire"
+  ],
   "legacy_to_opening": {
     "legacy_economic_accounts": 50,
     "legacy_economic_population": 1411020000,
@@ -4320,11 +4336,11 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1350045091,
-    "untouched_legacy_population": 98080000,
-    "retained_unlocated_population": 26472661,
+    "documented_opening_population": 1368629758,
+    "untouched_legacy_population": 74080000,
+    "retained_unlocated_population": 31887994,
     "authoritative_opening_population": 1474597752,
-    "published_minus_documented_opening": 245029157,
+    "published_minus_documented_opening": 226444490,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 210965672,
@@ -4334,9 +4350,9 @@
         "partial_extent": 31159330,
         "adopted_research_series": 426
       },
-      "opening_without_benchmark_link": 0,
-      "untouched_legacy_controls": -98080000,
-      "unlocated_balances_under_retained_controls": -26472661
+      "opening_without_benchmark_link": -18584667,
+      "untouched_legacy_controls": -74080000,
+      "unlocated_balances_under_retained_controls": -31887994
     },
     "published_minus_authoritative_opening": 120476496
   }

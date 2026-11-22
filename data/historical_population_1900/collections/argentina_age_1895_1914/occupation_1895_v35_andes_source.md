@@ -1,0 +1,7 @@
+# Argentine occupational census, San Luis and San Juan, 1895
+
+Source is the Argentine census of 10 May 1895, Tomo II, published by the Comisión Directiva. The printed heading for Cuadros XXVI a–d is *Población argentina y extranjera de 14 años arriba, por sexos, según profesiones*. San Luis is on [printed pp. 326–329, PDF pp. 523–526](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=523), and San Juan on [printed pp. 439–442, PDF pp. 635–638](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=635).
+
+The 18 top-level printed census classes close to the independent [Cuadro XI, PDF p. 176](https://biblioteca.indec.gob.ar/bases/minde/1c1895t2.pdf#page=176) four-column controls. In Argentine men, Argentine women, foreign men, foreign women order, the totals are 19,129 / 24,585 / 1,361 / 507 for San Luis and 20,255 / 25,898 / 2,861 / 1,655 for San Juan. Their respective age-14-and-over totals are 45,582 and 50,669. All-age provincial census totals are 81,450 and 84,251. These leave 35,868 and 33,582 residents outside the table's age scope.
+
+Admission follows the existing Argentine occupation classification. The establishment-status item *Hacendados*, Class V, Class XVII, Class XVIII, students within Class XII, and residents outside the age scope remain occupationally unknown. San Juan lists 2 Hacendados and separately 453 Estancieros. Its Class XII is 237 teachers and 115 students. San Luis lists 313 Hacendados, 232 teachers, and 190 students. The 1895 known occupational counts are 28,111 in San Luis and 42,089 in San Juan.

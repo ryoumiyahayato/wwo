@@ -1,0 +1,5 @@
+unit_id,source_name,observed_month,observed_total,male_total,female_total,ortodoxa,mozaica,catolica,protestanta,mahometana,armeana,lipovana,alta_si_necunoscuta,locator
+ro_1899_moldova,Moldova,1899-12,1848122,933729,914393,1555544,196752,88803,2169,346,3181,1228,99,Table IV.A pp. 72–73 (PDF pp. 162–163)
+ro_1899_muntenia,Muntenia,1899-12,2659517,1351444,1308073,2536158,60760,44093,13570,2186,972,1701,77,Table IV.A pp. 72–73 (PDF pp. 162–163)
+ro_1899_oltenia,Oltenia,1899-12,1181243,600332,580911,1163460,4906,10874,1454,523,4,0,22,Table IV.A pp. 72–73 (PDF pp. 162–163)
+ro_1899_northern_dobruja,Dobrogea,1899-12,267808,141134,126674,196625,4234,5897,5556,41677,1630,12165,24,Table IV.A pp. 72–73 (PDF pp. 162–163)

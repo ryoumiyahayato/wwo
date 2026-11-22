@@ -1,0 +1,18 @@
+unit_id,date,age_min,age_max,reported_age_label,male,female,population,source_id,source_table,printed_page,pdf_page
+kingdom_of_romania,1899-12,0,4,0-5,475218,473752,948970,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,5,9,6-10,369453,368752,738205,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,10,14,11-15,355352,343653,699005,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,15,19,16-20,292886,316336,609222,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,20,24,21-25,244278,205970,450248,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,25,29,26-30,220047,240714,460761,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,30,34,31-35,161052,155086,316138,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,35,39,36-40,233015,229036,462051,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,40,44,41-45,142996,118395,261391,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,45,49,46-50,160625,151096,311721,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,50,54,51-55,77652,67620,145272,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,55,59,56-60,114445,123151,237596,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,60,69,61-70,124926,99530,224456,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,70,79,71-80,42855,28938,71793,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,80,89,81-90,8930,5587,14517,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,90,,Peste 90,2138,1661,3799,ro_colescu_1899_census_report,12,XXXIV,54
+kingdom_of_romania,1899-12,,,Etate necunoscuta,771,774,1545,ro_colescu_1899_census_report,12,XXXIV,54

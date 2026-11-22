@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ottoman_1897_official_registration",
+    "title": "1897 Tarihli İlk İstatistik Yıllığı",
+    "publisher": "Tevfik Güran, editor; Turkish State Institute of Statistics (2000), reproducing the Ottoman General Statistical Administration's first statistical yearbook",
+    "url": "https://makale.isam.org.tr/items/3ec91b3b-5c56-404f-abe8-7a6fdae6f470",
+    "locator": "Printed pp. 173–174, Tables 2–4. The administrative population comes from Table 2. The original Rumi 1313 yearbook lists population material in Tables 5–13, pp. 19–29.",
+    "rights": "Numeric facts and historical labels transcribed from the official editor's published tables",
+    "raw_paths": [
+      "registered_population_by_administration_1897.csv",
+      "registered_communities_1897.csv",
+      "registered_age_sex_1897.csv"
+    ]
+  },
+  {
+    "id": "ottoman_population_mutlu_2003",
+    "title": "Late Ottoman Population and Its Ethnic Distribution",
+    "publisher": "Servet Mutlu, Turkish Journal of Population Studies 25 (2003), pp. 3–38",
+    "url": "https://dergipark.org.tr/tr/download/article-file/213586",
+    "locator": "Printed pp. 12–13, coverage of the 1897 register and sex ratios in Aydın and Ankara; Table III, territorial exclusions",
+    "rights": "Reference only"
+  }
+]
