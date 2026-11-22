@@ -15,6 +15,10 @@ ITALIAN_CIVIL_STATUS_SCOPE = "it_1901_civil_status_scope"
 SPANISH_CIVIL_STATUS_SCOPE = "es_1900_civil_status_scope"
 AGRA_DISTRICT_SOURCE = "india_agra_census_1901_districts"
 AGRA_DISTRICT_BALANCE = "raj_agra_unlocated_table_ii_a"
+BENGAL_DISTRICT_SOURCE = "india_bengal_census_1901_districts"
+BENGAL_DISCREPANCY = "raj_bengal_unlocated_comparison"
+MADRAS_STATES_REMAINDER = "raj_madras_states_ex_cochin_travancore"
+MADRAS_STATES_AGE_SOURCE = "india_madras_1901_princely_age_and_religion"
 
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
@@ -186,7 +190,7 @@ def add_french_arrondissements(group, observations):
     )
 
 
-def add_british_county_partitions(group, observations):
+def add_british_county_partitions(group, observations, *, version):
     scotland_id = "administrative_region:uk_constituent_scotland"
     ireland_id = "administrative_region:uk_constituent_ireland"
     controls = {row["unit_id"]: row for row in group["units"] if row["unit_id"] in (scotland_id, ireland_id)}
@@ -220,6 +224,17 @@ def add_british_county_partitions(group, observations):
         counties.extend(children)
     group["units"] = [row for row in group["units"] if row["unit_id"] not in controls] + counties
     group["subdivision_controls"] = list(controls.values())
+    if version >= 27:
+        for county in counties:
+            county["statistical_parent"] = county["subdivision_of"]
+        group.setdefault("statistical_aggregates", []).extend(
+            control | dict(
+                date=DATE, source_id=group["source_id"], endpoint_dates=dates,
+                method="Sum of the disjoint historical county and borough opening balances.",
+                uncertainty_kind="Within-constituent population change and census coverage are unquantified.",
+            )
+            for control in controls.values()
+        )
     group["subdivision_sources"] = ["collections/scotland_civil_counties/observations.jsonl",
                                     "collections/britain/observations.jsonl"]
     group["method"] += (" Scottish civil counties use both census endpoints. The Irish administrative "
@@ -607,6 +622,17 @@ def add_india_princely_states(group, observations):
     group["statistical_aggregates"] = aggregates
 
 
+def add_remaining_madras_states(group, observations):
+    parent = next(unit for unit in group["units"] if unit["unit_id"] == MADRAS_STATES_REMAINDER)
+    rows = [row for row in observations if row["parent_id"] == MADRAS_STATES_REMAINDER]
+    children = interpolate_partition(rows, parent, group["endpoint_dates"])
+    for child in children:
+        child.update(statistical_parent="raj_madras_states", date=DATE,
+                     source_ids=["india_madras_1941_princely_sex_comparison", MADRAS_STATES_AGE_SOURCE])
+    group["units"] = sorted([unit for unit in group["units"] if unit is not parent] + children,
+                            key=lambda row: row["unit_id"])
+
+
 def add_italian_regions(group, observations):
     source = "it_1901_census_v5_age_and_marital"
     root = group["unit_id"]
@@ -714,6 +740,43 @@ def add_agra_districts(group, observations):
             child["geographically_unlocated"] = True
     group["units"] = sorted([unit for unit in group["units"] if unit is not parent] + children,
                             key=lambda row: row["unit_id"])
+
+
+def add_bengal_districts(group, observations):
+    parent_id = "raj_bengal_province"
+    parent = next(unit for unit in group["units"] if unit["unit_id"] == parent_id)
+    dates = group["endpoint_dates"]
+    rows = [row for row in observations if row["source_id"] == BENGAL_DISTRICT_SOURCE and row["parent_id"] == parent_id]
+    endpoints = [71_346_961, 74_744_866]
+    discrepancy = 26
+    if (len(rows) != 96 or [value + discrepancy for value in endpoints] != parent["endpoint_values"]):
+        raise ValueError("Bengal province and district census controls differ")
+    province = parent | dict(
+        population_value=parent["population_value"] - discrepancy,
+        endpoint_values=endpoints, endpoint_dates=dates, date=DATE,
+        source_id=BENGAL_DISTRICT_SOURCE, locator="Vol. VI-A, Table II, pp. 5–6, British Territory",
+        method="Sum of the disjoint districts and city on March 1901 boundaries; the comparison discrepancy remains separate.",
+        uncertainty_kind="Within-district movement and enumeration or interpolation errors have no quantified interval.",
+    )
+    children = interpolate_partition(rows, province, dates)
+    places = {row["unit_id"]: row["place_ids"] for row in rows if row.get("place_ids")}
+    for child in children:
+        child.update(statistical_parent=parent_id, date=DATE, place_ids=places.get(child["unit_id"], []),
+                     uncertainty_kind="January 1900 is estimated on March 1901 district jurisdiction. "
+                                      "Other boundary, migration and enumeration changes are unquantified.")
+    balance = dict(
+        unit_id=BENGAL_DISCREPANCY, name="Bengal census comparison discrepancy",
+        population_value=discrepancy, endpoint_values=[discrepancy, discrepancy], source_dates=dates,
+        source_id=group["source_id"], source_ids=[group["source_id"], BENGAL_DISTRICT_SOURCE],
+        locator="Vol. I-A, Table II-A, p. 10 and Bengal Vol. VI-A, Table II, pp. 5–6",
+        scope="Net difference after transfers between Bengal, Agra and Assam in the comparable returns.",
+        date=DATE, geographically_unlocated=True, place_ids=[],
+        method="Retain the difference in the existing India opening control outside all provincial and local census profiles.",
+        uncertainty_kind="This net accounting discrepancy has no independently identified inhabitants or age and sex distribution.",
+    )
+    group["units"] = sorted([unit for unit in group["units"] if unit is not parent] + children + [balance],
+                            key=lambda row: row["unit_id"])
+    group["statistical_aggregates"].append(province)
 
 
 def portuguese_opening(previous, observations):
@@ -1209,7 +1272,7 @@ def groups(observations, version=1):
         result[bosnia["unit_id"]] = bosnia
     if version >= 10:
         add_australian_colonies(result["australia_colonies_1900"], observations)
-        add_british_county_partitions(result["british_isles_1900"], observations)
+        add_british_county_partitions(result["british_isles_1900"], observations, version=version)
         add_russian_provinces(result["russian_empire"], observations)
         add_japanese_prefectures(result["empire_of_japan"], observations)
         add_india_comparable_areas(result["cshapes_gw_750"], observations)
@@ -1254,6 +1317,9 @@ def groups(observations, version=1):
             uncertainty_kind="The reference day, population basis, frontier treatment, estimation method and error interval are unpublished.",
             units=[],
         )
+    if version >= 27:
+        add_remaining_madras_states(result["cshapes_gw_750"], observations)
+        add_bengal_districts(result["cshapes_gw_750"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

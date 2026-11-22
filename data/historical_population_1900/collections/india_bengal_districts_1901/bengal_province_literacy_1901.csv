@@ -1,0 +1,3 @@
+unit_id,row_role,observed_date,observed_total,observed_male,observed_female,literate,illiterate,literate_male,literate_female,illiterate_male,illiterate_female,observed_unknown,locator
+raj_bengal_province,province_control,1901-03-01,74744866,37376782,37368084,4194335,70550531,3988593,205742,33388189,37162342,0,"1905 Statistical Abstract No. 39, Table 16, Bengal rows B8:D8 and B36:D36; 1901 Census Vol. I-A, Imperial Table VIII, Part II(a), 4. Bengal, pp. 108–109"
+raj_bengal_province_except_calcutta_dacca,derived_remainder,1901-03-01,71247548,35501769,35745779,3810547,67437001,3651517,159030,31850252,35586749,0,"1905 Statistical Abstract No. 39, Table 16, Bengal; less Calcutta city and Dacca district from 1901 Census Vol. VI-A Imperial Table VIII, Part B, All Religions"

@@ -8,7 +8,7 @@ from pathlib import Path
 
 from opening import (
     AGRA_DISTRICT_SOURCE, DATE, EGYPT_COMPARABLE_PROVINCES, EGYPT_FAIYUM_SOURCES, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE,
-    SPANISH_CIVIL_STATUS_SCOPE,
+    BENGAL_DISTRICT_SOURCE, MADRAS_STATES_REMAINDER, SPANISH_CIVIL_STATUS_SCOPE,
     apportion, opening_fraction,
 )
 
@@ -368,7 +368,7 @@ def age_sex_panels():
         HERE / "andaman_census_demography", HERE / "india_princely_age", HERE / "india_statistical_abstract_ages",
         HERE / "prussia_census_1900", HERE / "saxony_census_1900", HERE / "wuerttemberg_census_1900",
         HERE / "us_territorial_ages_1900", HERE / "baden_census_1900", HERE / "italy_census_1901",
-        HERE / "brazil_census_1900_age", HERE / "spain_census_1900",
+        HERE / "brazil_census_1900_age", HERE / "spain_census_1900", HERE / "india_remaining_princely_demography",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -719,6 +719,64 @@ def indian_abstract_opening_age_model(panels, unit, dates, area):
         "Census age reporting and intercensal change have no quantified error interval.",
     )
     return opening_age_group(model, rows, unit["unit_id"], total)
+
+
+def age_profile_at_interpolated_sex_totals(panel, rows, unit, controls, *, method, uncertainty, locator):
+    dates = [row["date"] for row in controls]
+    opening_dates = unit.get("source_dates") or ["1891-02-26", "1901-03-01"]
+    if (dates != opening_dates or panel["observed_date"] != dates[-1]
+            or [int(row["persons"]) for row in controls] != unit["endpoint_values"]
+            or any(sum(int(row[sex]) for sex in SEX_COUNTS) != int(row["persons"]) for row in controls)):
+        raise ValueError(f"{unit['unit_id']}: census sex and opening population controls differ")
+    population = unit["population_value"]
+    fraction = opening_fraction(dates)
+    earlier, later = controls
+    sex_totals = apportion({sex: int(earlier[sex]) * (1 - fraction) + int(later[sex]) * fraction
+                            for sex in SEX_COUNTS}, population)
+    model = opening_age_group(panel, rows, unit["unit_id"], population)
+    observed, = (row for row in rows if row["role"] == "total")
+    for sex in SEX_COUNTS:
+        counts = apportion({band["id"]: Fraction(sex_totals[sex] * band[sex], observed[sex])
+                            for band in model["bands"]}, sex_totals[sex])
+        for band in model["bands"]:
+            band[sex] = counts[band["id"]]
+    return model | dict(observed_total=population, observed_date=DATE, method=method,
+                        uncertainty=uncertainty, locator=locator)
+
+
+def remaining_indian_states_age_models(panels, balances, observations):
+    collection = HERE / "india_remaining_princely_demography"
+    model_method = "Interpolate the comparable 1891 and 1901 sex totals to the opening date. "
+    madras_rows = defaultdict(list)
+    for row in observations:
+        if row["parent_id"] == MADRAS_STATES_REMAINDER:
+            madras_rows[row["unit_id"]].append(row)
+    for unit_id, endpoints in madras_rows.items():
+        early, late = sorted(endpoints, key=lambda row: row["date"])
+        panel, rows = panels[f"india_census_madras_states_ex_cochin_travancore_1901_{unit_id.removeprefix('raj_madras_')}"]
+        observed, = (row for row in rows if row["role"] == "total")
+        if any(late["sex"][sex] != observed[sex] for sex in SEX_COUNTS):
+            raise ValueError(f"{unit_id}: original Madras age and sex counts differ")
+        yield age_profile_at_interpolated_sex_totals(
+            panel, rows, balances[unit_id],
+            [dict(date=row["date"], persons=row["population_value"], **row["sex"]) for row in (early, late)],
+            method=model_method + "Hold the state's own 1901 age shares within each sex.",
+            uncertainty="Intercensal change and enumeration error are unquantified. The historical bands do not resolve single ages.",
+            locator=f"{panel['locator']}; Madras 1941, Vol. II, Table II, p. 18 (comparison sex counts)",
+        )
+    early, comparable, full = read_csv(collection / "bombay_states_sex_controls.csv")
+    panel, rows = panels["india_abstract_bombay_states_1901"]
+    observed, = (row for row in rows if row["role"] == "total")
+    if any(observed[sex] != int(full[sex]) for sex in SEX_COUNTS):
+        raise ValueError("Bombay States full-scope age and sex returns differ")
+    yield age_profile_at_interpolated_sex_totals(
+        panel, rows, balances["raj_bombay_states"], [early, comparable],
+        method=model_method + "Hold the wider 1901 Bombay States age shares within each sex. Keep unspecified ages unknown.",
+        uncertainty="The age return includes 8,645 males and 14,164 females beyond the comparable 1901 area. "
+                    "Their age composition is unknown. The 1899–1900 famine may have affected ages and timing of change. "
+                    "These are modeled opening ages; there is no quantified opening error interval.",
+        locator=f"{panel['locator']}; Census of India 1901, Vol. I-A, Table II-A, p. 10, row 15 (comparable sex)",
+    )
 
 
 def central_provinces_states_opening_age_model(panels, unit, dates):
@@ -1103,6 +1161,33 @@ def agra_oudh_local_age_models(panels, observations, local_balances, version):
         )
 
 
+def bengal_district_age_models(panels, observations, balances):
+    parent = "raj_bengal_province"
+    panel, rows = panels["india_census_1901_table_vii_bengal"]
+    provincial = opening_age_group(panel, rows, parent, 0)
+    districts = [row for row in observations if row["source_id"] == BENGAL_DISTRICT_SOURCE
+                 and row["parent_id"] == parent and row["date"] == panel["observed_date"]]
+    if (len(districts) != 48 or any(sum(row["sex"][sex] for row in districts)
+            != sum(band[sex] for band in provincial["bands"]) for sex in SEX_COUNTS)):
+        raise ValueError("Bengal district census sex counts do not close to the provincial age return")
+    for row in districts:
+        unit_id = row["unit_id"]
+        balance = balances[unit_id]
+        observed = row["population_value"]
+        if observed != sum(row["sex"].values()) or observed != balance["endpoint_values"][-1]:
+            raise ValueError(f"{unit_id}: district population and sex counts do not close")
+        yield provincial | dict(
+            unit_id=unit_id, observed_unit_id=unit_id, opening_total=balance["population_value"],
+            observed_total=observed, source_id=BENGAL_DISTRICT_SOURCE,
+            locator=f"{row['sex_locator']}; all-India {panel['locator']}",
+            method="Apply the district's 1901 census sex distribution and Bengal's provincial ages "
+                   "within each sex to the district's opening population.",
+            uncertainty="Age within each sex uses the provincial distribution. Local variation, migration "
+                        "and changes from March 1901 have no quantified interval.",
+            bands=apportion_local_ages(provincial["bands"], row["sex"]),
+        )
+
+
 def opening_structure(opening_groups, observations, *, version=6):
     district_pools = {unit["unit_id"]: unit for group in opening_groups for unit in group["units"]
                       if "district_boundary_source" in unit}
@@ -1115,6 +1200,9 @@ def opening_structure(opening_groups, observations, *, version=6):
         leaf_age_scopes.add("raj_agra_oudh")
     if version >= 25:
         leaf_age_scopes.update((SPANISH_CIVIL_STATUS_SCOPE, "egy_mudiriya_faiyum"))
+    if version >= 27:
+        leaf_age_scopes.update(("raj_madras_states", "raj_bengal_province", "administrative_region:uk_constituent_scotland",
+                                "administrative_region:uk_constituent_ireland"))
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -1140,6 +1228,8 @@ def opening_structure(opening_groups, observations, *, version=6):
             "administrative_region:uk_constituent_ireland",
         ) and unit_id not in opening_totals:
             continue
+        if version >= 27 and unit_id == "raj_bengal_province":
+            continue
         model = opening_age_group(panel, rows, unit_id, opening_totals[unit_id])
         if panel.get("opening_match_population_endpoint"):
             balance = opening_balances[unit_id]
@@ -1159,6 +1249,9 @@ def opening_structure(opening_groups, observations, *, version=6):
         )
     if version >= 26:
         groups.extend(portuguese_age_models(panels, observations, opening_balances))
+    if version >= 27:
+        groups.extend(remaining_indian_states_age_models(panels, opening_balances, observations))
+        groups.extend(bengal_district_age_models(panels, observations, opening_balances))
     if version >= 23:
         groups.extend(mysore_local_age_models(panels, observations, opening_balances))
         verify_national_age_totals(

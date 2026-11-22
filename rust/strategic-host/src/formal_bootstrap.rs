@@ -2664,6 +2664,84 @@ mod tests {
     }
 
     #[test]
+    fn historical_indian_princely_ages_and_uk_occupations_keep_census_scopes() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let old = bootstrap.base_opening_version("country_fra", None, Some(26)).unwrap();
+        let bombay = world.inspect_population("raj_bombay_states").unwrap();
+        assert_eq!(bombay.population_total, Some(7_021_967));
+        assert_eq!(bombay.structure.unwrap().residents_with_cohort_age_and_sex, 7_016_635);
+        assert_eq!(old.inspect_population("raj_bombay_states").unwrap()
+            .structure.unwrap().residents_with_cohort_age_and_sex, 0);
+
+        let state = world.inspect_population("raj_madras_banganapalle").unwrap();
+        assert_eq!(state.population_total, Some(32_639));
+        assert_eq!(state.structure.unwrap().residents_with_cohort_age_and_sex, 32_639);
+        assert_eq!(state.social.unwrap().dimensions["religion"].unknown_residents, 96);
+        let madras = world.inspect_population("raj_madras_states").unwrap();
+        assert_eq!(madras.children.len(), 5);
+        assert_eq!(madras.population_total, old.inspect_population("raj_madras_states").unwrap().population_total);
+
+        for (unit, census_total, assigned, unknown, agriculture) in [
+            ("administrative_region:uk_constituent_scotland", 4_472_103, 1_958_171, 2_458_355, 202_459),
+            ("administrative_region:uk_constituent_ireland", 4_458_775, 1_962_996, 2_526_399, 865_428),
+        ] {
+            let report = world.inspect_population(unit).unwrap();
+            assert!(report.children.len() > 30);
+            let child = world.inspect_population(&report.children[0].unit_id).unwrap();
+            assert_eq!(child.social.unwrap().dimensions["occupation"].assigned_residents, 0);
+            let occupation = &report.social.as_ref().unwrap().dimensions["occupation"];
+            assert_eq!((occupation.assigned_residents, occupation.unknown_residents), (assigned, unknown));
+            assert_eq!(occupation.direct_opening_distribution.as_ref().unwrap().observed_total, census_total);
+            assert_eq!(occupation.by_classification["uk_1901_general_report_occupation_orders"]["Agriculture"], agriculture);
+        }
+
+        let gharbiya = world.inspect_population("egy_mudiriya_gharbiya").unwrap().social.unwrap();
+        assert_eq!(gharbiya.dimensions["occupation"]
+            .by_classification["egypt_1897_reported_occupation_status"]["With occupation"], 450_890);
+        let jirja = world.inspect_population("egy_mudiriya_jirja").unwrap().social.unwrap();
+        assert_eq!(jirja.dimensions["literacy"]
+            .by_classification["egypt_1897_reported_instruction"]["Read and write"], 16_745);
+    }
+
+    #[test]
+    fn historical_bengal_districts_preserve_the_opening_balance_and_local_sex_profiles() {
+        use crate::formal_population::CohortSex;
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let old = bootstrap.base_opening_version("country_fra", None, Some(26)).unwrap();
+        assert_eq!(world.population().population_total("cshapes_gw_750"),
+                   old.population().population_total("cshapes_gw_750"));
+        let bengal = world.inspect_population("raj_bengal_province").unwrap();
+        assert_eq!(bengal.children.len(), 48);
+        assert_eq!(bengal.children.iter().map(|child| child.population_total).sum::<u64>(), 74_350_690);
+        assert_eq!(bengal.population_total, Some(74_350_690));
+        let bengal_social = bengal.social.unwrap();
+        assert_eq!(bengal_social.dimensions["religion"].unknown_residents, 227);
+        let balance = world.inspect_population("raj_bengal_unlocated_comparison").unwrap();
+        assert_eq!(balance.population_total, Some(26));
+        assert_eq!(balance.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+
+        let calcutta = world.inspect_population("place:kolkata").unwrap();
+        assert_eq!(calcutta.account_id, Some("raj_bengal_calcutta"));
+        let city = world.inspect_population("raj_bengal_calcutta").unwrap();
+        assert_eq!(city.population_total, Some(828_598));
+        let structure = city.structure.unwrap();
+        assert_eq!(structure.residents_with_cohort_age_and_sex + structure.named_residents, 828_598);
+        let male = structure.cohorts.iter().filter(|cohort| cohort.sex == Some(CohortSex::Male))
+            .map(|cohort| cohort.members).sum::<u64>();
+        assert!((549_850..549_862).contains(&male), "{male}");
+        let city_social = city.social.unwrap();
+        let literacy = &city_social.dimensions["literacy"];
+        assert_eq!(literacy.assigned_residents, 828_598);
+        assert_eq!(literacy.by_classification["india_1901_reported_literacy"]["Literate"], 205_678);
+        assert_eq!(city_social.dimensions["religion"].unknown_residents, 828_598);
+        let dacca = world.inspect_population("raj_bengal_dacca").unwrap();
+        assert_eq!(dacca.social.unwrap().dimensions["literacy"].assigned_residents, 2_620_046);
+        assert_eq!(old.residence_unit_at("place:kolkata"), Some("raj_bengal_province"));
+    }
+
+    #[test]
     fn historical_baden_survey_adds_age_and_civil_status_without_changing_the_balance() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let unit = "administrative_region:germany_baden";
@@ -3189,11 +3267,11 @@ mod tests {
         assert_eq!(sources.places()["place:london"].parent_country_id, "british_empire");
         assert_eq!(sources.population_unit_at("place:london"), Some("british_isles_1900"));
         assert_eq!(sources.population_unit_at("place:kolkata"), Some("cshapes_gw_750"));
-        assert_eq!(world.residence_unit_at("place:kolkata"), Some("raj_bengal_province"));
+        assert_eq!(world.residence_unit_at("place:kolkata"), Some("raj_bengal_calcutta"));
         assert_eq!(sources.places()["place:tokyo"].parent_country_id, "japanese_empire");
         assert_eq!(sources.population_unit_at("place:tokyo"), Some("empire_of_japan"));
         let tokyo = world.inspect_population("place:tokyo").unwrap();
-        assert_eq!(tokyo.account_id, Some("empire_of_japan"));
+        assert_eq!(tokyo.account_id, Some("jp_otsu_pref_tokyo"));
         assert_eq!(tokyo.population_total, None);
         let tokyo_archive = tokyo.archive.unwrap();
         assert!(tokyo_archive.dated_structure.iter().any(|row| row["unit_id"] == "tokyo_city_1900_occupational_persons"));

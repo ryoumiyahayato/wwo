@@ -1,0 +1,20 @@
+[
+  {
+    "id": "india_madras_1941_princely_sex_comparison",
+    "title": "Census of India, 1941, Madras, Vol. II: Tables",
+    "publisher": "Census of India",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/37348/GIPE-020589.pdf?isAllowed=y&sequence=3",
+    "locator": "Table II, printed p. 18, 1891 and 1901 sex totals for Pudukkottai, Banganapalle and Sandur.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "madras_states_sex_controls.csv"
+  },
+  {
+    "id": "india_madras_1901_princely_age_and_religion",
+    "title": "Census of India, 1901, Madras, Vol. XV-A, Part II: Tables",
+    "publisher": "Government of India",
+    "url": "https://ignca.gov.in/Asi_data/31014.pdf",
+    "locator": "Table VII, printed pp. 61–63, age by sex and religion for Pudukkottai, Banganapalle and Sandur.",
+    "rights": "Published historical numeric facts",
+    "raw_path": "age_sex.csv"
+  }
+]

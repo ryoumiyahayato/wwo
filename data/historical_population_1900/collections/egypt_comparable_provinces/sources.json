@@ -11,5 +11,14 @@
       "page_31": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/57/full/1600,/0/default.jpg",
       "page_32": "https://sites.dlib.nyu.edu/viewer/api/image/books/princeton_aco003741/58/full/1600,/0/default.jpg"
     }
+  },
+  {
+    "id": "egypt_1897_markaz_occupation_and_instruction",
+    "title": "Census of Egypt 1897, provincial subtotals transcribed in Demographic Change in Rural Egypt, 1882–1917",
+    "publisher": "Hirofumi Tanada, Institute of Economic Research, Hitotsubashi University",
+    "url": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap2-1.htm",
+    "locator": "Appendix 2-1 (MARKAZ), Gharbiya and Jirja provincial totals for occupation and instruction",
+    "rights": "Published historical numeric facts",
+    "raw_path": "egypt_1897_province_social.csv"
   }
 ]
