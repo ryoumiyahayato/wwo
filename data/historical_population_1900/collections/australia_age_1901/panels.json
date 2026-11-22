@@ -1,0 +1,72 @@
+[
+  {
+    "id": "australia_1901_census_new_south_wales_age_sex",
+    "observed_unit_id": "abs_new_south_wales",
+    "observed_date": "1901-03-31",
+    "source_id": "abs_yearbook_1908_census_ages",
+    "locator": "Year Book Australia 1908 §9, pp. 164–165",
+    "published_scope": "New South Wales. Includes the later Australian Capital Territory; excludes British New Guinea.",
+    "definition": "Completed ages by sex and the three published age-not-stated categories. Coverage of Indigenous residents was incomplete.",
+    "broad_observation": false
+  },
+  {
+    "id": "australia_1901_census_victoria_age_sex",
+    "observed_unit_id": "abs_victoria",
+    "observed_date": "1901-03-31",
+    "source_id": "abs_yearbook_1908_census_ages",
+    "locator": "Year Book Australia 1908 §9, pp. 164–165",
+    "published_scope": "Victoria. Colony of Victoria.",
+    "definition": "Completed ages by sex and the three published age-not-stated categories. Coverage of Indigenous residents was incomplete.",
+    "broad_observation": false
+  },
+  {
+    "id": "australia_1901_census_queensland_age_sex",
+    "observed_unit_id": "abs_queensland",
+    "observed_date": "1901-03-31",
+    "source_id": "abs_yearbook_1908_census_ages",
+    "locator": "Year Book Australia 1908 §9, pp. 164–165",
+    "published_scope": "Queensland. Colony of Queensland; excludes British New Guinea.",
+    "definition": "Completed ages by sex and the three published age-not-stated categories. Coverage of Indigenous residents was incomplete.",
+    "broad_observation": false
+  },
+  {
+    "id": "australia_1901_census_south_australia_age_sex",
+    "observed_unit_id": "abs_south_australia",
+    "observed_date": "1901-03-31",
+    "source_id": "abs_yearbook_1908_census_ages",
+    "locator": "Year Book Australia 1908 §9, pp. 164–165",
+    "published_scope": "South Australia. Contemporaneous South Australia including Northern Territory.",
+    "definition": "Completed ages by sex and the three published age-not-stated categories. Coverage of Indigenous residents was incomplete.",
+    "broad_observation": false
+  },
+  {
+    "id": "australia_1901_census_western_australia_age_sex",
+    "observed_unit_id": "abs_western_australia",
+    "observed_date": "1901-03-31",
+    "source_id": "abs_yearbook_1908_census_ages",
+    "locator": "Year Book Australia 1908 §9, pp. 164–165",
+    "published_scope": "Western Australia. Colony of Western Australia.",
+    "definition": "Completed ages by sex and the three published age-not-stated categories. Coverage of Indigenous residents was incomplete.",
+    "broad_observation": false
+  },
+  {
+    "id": "australia_1901_census_tasmania_age_sex",
+    "observed_unit_id": "abs_tasmania",
+    "observed_date": "1901-03-31",
+    "source_id": "abs_yearbook_1908_census_ages",
+    "locator": "Year Book Australia 1908 §9, pp. 164–165",
+    "published_scope": "Tasmania. Colony of Tasmania with census dependencies.",
+    "definition": "Completed ages by sex and the three published age-not-stated categories. Coverage of Indigenous residents was incomplete.",
+    "broad_observation": false
+  },
+  {
+    "id": "australia_1901_census_australia_age_sex",
+    "observed_unit_id": "abs_australia",
+    "observed_date": "1901-03-31",
+    "source_id": "abs_yearbook_1908_census_ages",
+    "locator": "Year Book Australia 1908 §9, pp. 164–165",
+    "published_scope": "Six Australian colonies. Sum of the six colonies in the Year Book census table.",
+    "definition": "Completed ages by sex and the three published age-not-stated categories. Coverage of Indigenous residents was incomplete.",
+    "broad_observation": false
+  }
+]

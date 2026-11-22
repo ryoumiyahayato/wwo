@@ -1,0 +1,24 @@
+[
+  {
+    "id": "ar_census_1895_national_age_sex",
+    "observed_unit_id": "argentina_1900",
+    "observed_date": "1895-05-10",
+    "source_id": "ar_censo_1947_retrospective",
+    "locator": "IV Censo General de la Nación, Tomo I, Cuadro 3, p. 6, 1895 column",
+    "published_scope": "Argentina, persons individually enumerated, country-wide census total",
+    "definition": "Reported age in years by sex, retaining the published unknown-age band.",
+    "broad_observation": false,
+    "uncertainty": "Official estimates for coverage gaps were published separately and have no age or sex counts. The 1900 composition is modeled using both endpoints."
+  },
+  {
+    "id": "ar_census_1914_national_age_sex",
+    "observed_unit_id": "argentina_1900",
+    "observed_date": "1914-06-01",
+    "source_id": "ar_censo_1947_retrospective",
+    "locator": "IV Censo General de la Nación, Tomo I, Cuadro 3, p. 6, 1914 column",
+    "published_scope": "Argentina, persons individually enumerated, country-wide census total",
+    "definition": "Reported age in years by sex, retaining the published unknown-age band.",
+    "broad_observation": false,
+    "uncertainty": "Official estimates for coverage gaps were published separately and have no age or sex counts. The 1900 composition is modeled using both endpoints."
+  }
+]

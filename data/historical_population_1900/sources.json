@@ -579,6 +579,19 @@
     "collection": "andaman_census_demography"
   },
   {
+    "id": "abs_yearbook_1908_census_ages",
+    "title": "Official Year Book of the Commonwealth of Australia 1908",
+    "publisher": "Commonwealth Bureau of Census and Statistics",
+    "url": "https://www.ausstats.abs.gov.au/ausstats/free.nsf/0/5775EAABAC019C27CA257AC2007A66FB/$File/13010_1901_1907%20section%204.pdf#page=24",
+    "locator": "Section IV, §9, printed pp. 164–165",
+    "raw_paths": [
+      "age_sex.csv",
+      "australian_colonies_population_1899_1901.csv"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "australia_age_1901"
+  },
+  {
     "id": "ah_galician_statistical_bureau_1913",
     "title": "Podręcznik Statystyki Galicyi, tom IX, część pierwsza",
     "publisher": "Krajowe Biuro Statystyczne, edited by Tadeusz Piłat, Lwów, 1913",
@@ -1814,9 +1827,8 @@
     "title": "Census of India, 1901, Vol. I-A, India, Part II: Tables",
     "publisher": "Office of the Superintendent of Government Printing, India, 1903",
     "url": "https://archive.org/details/in.ernet.dli.2015.55924",
-    "locator": "Table XV, p. 367 notes and Part III, pp. 396–397 and 400–401, Actual Workers. Table II-A, p. 10 supplies the resident totals, cross-referenced to Table I.",
+    "locator": "Table XV, Part II p. 382 and Part III Actual Workers; each region has exact page and column locators.",
     "rights": "Historical government publication. Numeric transcription and derived counts. Original scans linked.",
-    "raw_path": "occupation_orders.json",
     "table_urls": [
       "https://southasiacommons.net/artifacts/2336476/census-of-india-1901/3112330/",
       "https://archive.org/details/in.ernet.dli.2015.55924/page/n14/mode/1up",
@@ -1824,7 +1836,12 @@
       "https://archive.org/details/in.ernet.dli.2015.55924/page/n405/mode/1up",
       "https://www.scribd.com/document/765937813/Census-India-1901-India-Tables"
     ],
-    "notes": "Selected printed order totals from the national volume's public OCR, supported by the visible corresponding sub-order counts. The national Central India Agency aggregate includes Gwalior. Rajputana Agency excludes the separate Ajmer-Merwara row. The Part III column for subsidiary agriculture and the Part II count of dependents are outside the admitted partition.",
+    "notes": "Occupation uses workers in orders I–XXII. Dependants and orders XXIII and XXIV remain occupationally unassigned. The original category counts and independent population checks are retained.",
+    "raw_paths": [
+      "occupation_orders.json",
+      "occupation_orders_complete.json",
+      "README.md"
+    ],
     "collection": "india_occupation_1901"
   },
   {
@@ -1970,6 +1987,16 @@
       "india_province_language_1901.md"
     ],
     "rights": "Numeric facts from the 1905 statistical publication.",
+    "collection": "india_social_1901"
+  },
+  {
+    "id": "india_1901_census_cochin_language",
+    "title": "Census of India 1901, Vol. I-A, India, Tables",
+    "publisher": "Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924",
+    "locator": "Table X, Part IV, printed p. 198, Cochin State",
+    "raw_path": "cochin_language_1901.csv",
+    "rights": "Published historical numeric facts",
     "collection": "india_social_1901"
   },
   {

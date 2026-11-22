@@ -1,0 +1,3 @@
+census_date,unit_id,individual_enumeration,male,female,age_unknown,estimated_omissions,indigenous_unenumerated_individually,remote_areas_outside_enumeration,population_including_adjustments,foreign_male,foreign_female,source_id,locator
+1895-05-10,argentina_1900,3954911,2088919,1865992,21637,60000,30000,0,4044911,638081,368757,ar_censo_1947_retrospective,Censos Nacionales p. XXVIII; Cuadro 25; Cuadro 3 p. 6
+1914-06-01,argentina_1900,7885237,4227023,3658214,6318,118582,18425,20000,8042244,1507028,884143,ar_censo_1947_retrospective,Censos Nacionales p. XXVIII; Cuadro 25; Cuadro 3 p. 6

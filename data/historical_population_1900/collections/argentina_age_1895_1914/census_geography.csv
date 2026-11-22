@@ -1,0 +1,25 @@
+unit_id,source_area,geographic_role,enumerated_1895_05_10,enumerated_1914_06_01,source_id,locator,scope_note
+ar_capital_federal,Capital Federal,capital,663854,1576597,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_buenos_aires_province,Buenos Aires Province,province,921168,2066165,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_catamarca,Catamarca,province,90161,100769,ar_censo_1947_retrospective,Cuadro 1 p. 1,"1914 includes 378 in Antofagasta de la Sierra, formerly Los Andes."
+ar_cordoba,Córdoba,province,351223,735472,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_corrientes,Corrientes,province,239618,347055,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_entre_rios,Entre Ríos,province,292019,425373,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_jujuy,Jujuy,province,49713,77511,ar_censo_1947_retrospective,Cuadro 1 p. 1,"1914 includes 880 in Susques, formerly Los Andes."
+ar_la_rioja,La Rioja,province,69502,79754,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_mendoza,Mendoza,province,116136,277535,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_salta,Salta,province,118015,142156,ar_censo_1947_retrospective,Cuadro 1 p. 1,"1914 includes 1229 in Pastos Grandes and San Antonio de los Cobres, formerly Los Andes."
+ar_san_juan,San Juan,province,84251,119252,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_san_luis,San Luis,province,81450,116266,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_santa_fe,Santa Fe,province,397188,899640,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_santiago_del_estero,Santiago del Estero,province,161502,261678,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_tucuman,Tucumán,province,215742,332933,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_chaco,Chaco,territory,10422,46274,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_chubut,Chubut,territory,3748,23065,ar_censo_1947_retrospective,Cuadro 1 p. 1,1914 includes 6063 in the area later assigned to Comodoro Rivadavia.
+ar_formosa,Formosa,territory,4829,19281,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_la_pampa,La Pampa,territory,25914,101338,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_misiones,Misiones,territory,33163,53563,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_neuquen,Neuquén,territory,14517,28866,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_rio_negro,Río Negro,territory,9241,42242,ar_censo_1947_retrospective,Cuadro 1 p. 1,Published nationwide historical crosswalk; provincial boundary review required before regional allocation.
+ar_santa_cruz,Santa Cruz,territory,1058,9948,ar_censo_1947_retrospective,Cuadro 1 p. 1,1914 includes 2580 in the area later assigned to Comodoro Rivadavia.
+ar_tierra_del_fuego,Tierra del Fuego,territory,477,2504,ar_censo_1947_retrospective,Cuadro 1 p. 1,1914 includes 16 persons from offshore observatories per note 15; provincial opening would require removing or accounting for them.

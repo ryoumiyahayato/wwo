@@ -10,7 +10,7 @@ from pathlib import Path
 from opening import AGRA_DISTRICT_BALANCE, AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, SPANISH_CIVIL_STATUS_SCOPE
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
-from social_india_princely import india_princely_residence, madras_states_religion, travancore_language
+from social_india_princely import cochin_language, india_princely_residence, madras_states_religion, travancore_language
 
 
 COLLECTIONS = Path(__file__).resolve().parent / "collections"
@@ -315,21 +315,42 @@ def india_language(pools):
         yield pool_id, "language", result
 
 
-def india_occupation(pools):
-    path = COLLECTIONS / "india_occupation_1901" / "occupation_orders.json"
+def india_occupation(pools, version):
+    filename = "occupation_orders_complete.json" if version >= 30 else "occupation_orders.json"
+    path = COLLECTIONS / "india_occupation_1901" / filename
     for row in json.loads(path.read_text(encoding="utf8")):
         pool_id = row["unit_id"]
         pool = pools[pool_id]
         total = row["observed_total"]
-        if pool["endpoint_values"][-1] != total:
+        mismatch = row.get("opening_endpoint_scope_unknown", 0)
+        if (pool["endpoint_values"][-1] != total + mismatch or row["observed_date"] != INDIA_DATE
+                or pool.get("source_dates", [INDIA_DATE])[-1] != INDIA_DATE):
             raise ValueError(f"{pool_id}: the occupation and opening population controls use different census scopes")
+        balance = 0
+        method = SHARE_METHOD
+        if mismatch:
+            discrepancy = pools[AGRA_DISTRICT_BALANCE]
+            if discrepancy["statistical_parent"] != pool_id or discrepancy["endpoint_values"][-1] != mismatch:
+                raise ValueError(f"{pool_id}: unmatched geography in the occupation denominator")
+            balance = discrepancy["population_value"]
+            method += f" Keep the {balance} people of the separate boundary comparison unassigned."
+        if "census_table_controls" in row:
+            controls = row["census_table_controls"]
+            workers = controls["actual_workers_column_total"]
+            if (total != controls["total_supported"] or workers + controls["dependents"] != total
+                    or sum(row["observed_counts"].values())
+                    + controls["XXIII_Indefinite_and_Disreputable_Occupations"]
+                    + controls["XXIV_Independent"] != workers):
+                raise ValueError(f"{pool_id}: occupation orders, dependants and residents do not reconcile")
         source, = row["source_ids"]
-        yield pool_id, "occupation", distribution(
-            pool["population_value"], classification=row["classification_id"], source=source,
+        result = distribution(
+            pool["population_value"] - balance, classification=row["classification_id"], source=source,
             date=row["observed_date"], observed_unit=row["observed_unit_id"], scope=row["observed_scope"],
             locator=row["locator"], total=total, observed_counts=row["observed_counts"],
-            unknown=row["observed_unknown"], definition=row["definition"],
+            unknown=row["observed_unknown"], definition=row["definition"], method=method,
         )
+        result["unknown"] += balance
+        yield pool_id, "occupation", result
 
 
 def canada_structure(pools):
@@ -1420,7 +1441,7 @@ def opening_social(opening_groups, observations, *, version):
         for unit in [*(group["units"] or [group]), *group.get("statistical_aggregates", [])]
     }
     regions = {}
-    marginals = chain(russian_structure(pools), india_structure(pools, version), india_occupation(pools),
+    marginals = chain(russian_structure(pools), india_structure(pools, version), india_occupation(pools, version),
                       india_princely_residence(pools, distribution), travancore_language(pools, distribution),
                       madras_states_religion(pools, distribution, INDIA_TABLES["7"]), canada_structure(pools),
                       united_states_structure(pools, distribution), netherlands_structure(pools),
@@ -1536,6 +1557,8 @@ def opening_social(opening_groups, observations, *, version):
                           bengal_district_literacy(pools, observations, version))
     if version >= 29:
         marginals = chain(marginals, india_language(pools))
+    if version >= 30:
+        marginals = chain(marginals, cochin_language(pools, distribution))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

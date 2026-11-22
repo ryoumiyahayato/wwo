@@ -1,0 +1,23 @@
+panel,label,role,age_min,age_max,both,male,female
+ar_census_1895_national_age_sex,Total del país,total,,,3954911,2088919,1865992
+ar_census_1895_national_age_sex,0 - 9,band,0,9,1142148,580951,561197
+ar_census_1895_national_age_sex,10 - 19,band,10,19,836231,423283,412948
+ar_census_1895_national_age_sex,20 - 29,band,20,29,695993,363504,332489
+ar_census_1895_national_age_sex,30 - 39,band,30,39,563381,319115,244266
+ar_census_1895_national_age_sex,40 - 49,band,40,49,362940,209975,152965
+ar_census_1895_national_age_sex,50 - 59,band,50,59,191660,109766,81894
+ar_census_1895_national_age_sex,60 - 69,band,60,69,91631,47890,43741
+ar_census_1895_national_age_sex,70 - 79,band,70,79,34130,16357,17773
+ar_census_1895_national_age_sex,80 y más,band,80,,15160,6098,9062
+ar_census_1895_national_age_sex,Desconocida,band,,,21637,11980,9657
+ar_census_1914_national_age_sex,Total del país,total,,,7885237,4227023,3658214
+ar_census_1914_national_age_sex,0 - 9,band,0,9,2169343,1099122,1070221
+ar_census_1914_national_age_sex,10 - 19,band,10,19,1699157,872115,827042
+ar_census_1914_national_age_sex,20 - 29,band,20,29,1583866,878062,705804
+ar_census_1914_national_age_sex,30 - 39,band,30,39,1038807,596783,442024
+ar_census_1914_national_age_sex,40 - 49,band,40,49,658925,378547,280378
+ar_census_1914_national_age_sex,50 - 59,band,50,59,411734,234599,177135
+ar_census_1914_national_age_sex,60 - 69,band,60,69,208675,112274,96401
+ar_census_1914_national_age_sex,70 - 79,band,70,79,78941,39538,39403
+ar_census_1914_national_age_sex,80 y más,band,80,,29471,12141,17330
+ar_census_1914_national_age_sex,Desconocida,band,,,6318,3842,2476
