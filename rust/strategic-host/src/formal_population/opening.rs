@@ -88,6 +88,11 @@ pub struct OpeningPopulationEstimate {
     context: EstimateContext,
 }
 
+impl OpeningPopulationEstimate {
+    pub fn reference_date(&self) -> Option<&str> { self.context.date.as_deref() }
+    pub fn uncertainty_kind(&self) -> Option<&str> { self.context.uncertainty_kind.as_deref() }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 struct EstimateContext {
     date: Option<String>,

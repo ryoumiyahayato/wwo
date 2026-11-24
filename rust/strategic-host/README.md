@@ -122,9 +122,9 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 
 宏观贸易、实物货运、人物出行和背景迁移使用同一全球路网。地点卡显示可用连接或资料缺口，旅行页按地点查价，国际市场的运输记录显示货值、运费、停运与交割。参见[全球交通覆盖与实测](../../docs/RUST_GLOBAL_TRANSPORT.md)及[原有交通操作](../../docs/RUST_TRANSPORT_PHASE_2.md)。
 
-`--play` 新档读取运行清单选择的历史人口开局。当前版本为 v41。已拆分的统计区通过下级居住账户汇总，市场归属沿用开局统计根。部分属性只在原普查范围汇总，子地域缺少独立分配时显示未知。部分国家仍采用旧总数，已定位分区从该总数扣除。原生旧档按保存的版本读取冻结开局输入。[运行清单](../../data/historical_population_1900/runtime-manifest.json) · [全球覆盖与缺口](../../data/historical_population_1900/README.md)
+`--play` 新档读取运行清单选择的历史人口开局。当前版本为 v42。已拆分的统计区通过下级居住账户汇总，市场归属沿用开局统计根。部分属性只在原统计范围汇总，子地域缺少独立分配时显示未知。部分国家仍采用旧总数，已定位分区从该总数扣除。原生旧档按保存的版本读取冻结开局输入。[运行清单](../../data/historical_population_1900/runtime-manifest.json) · [全球覆盖与缺口](../../data/historical_population_1900/README.md)
 
-进入正式世界后按 **F7** 打开人口 Debug。点选面板外的历史地图地点或地域，也可输入统计 ID、`world`、`city:<key>` 或 `trait:<id>` 后回车。空输入回车刷新。左右键切换分节，滚轮查看分类与原表。正式账户显示当前人数、年龄性别、社会属性、条件需要、潜在劳动年龄、未知人数、来源和推算方法。仅有档案的地点显示历史观测和未分配状态。`wwo-formal-state inspect-pop <id> [<native-save>]` 读取同一份只读结果。
+进入正式世界后按 **F7**。左击城市或行政区，右击国家。概况、结构、需求和变动可用标签或 Tab 切换。输入统计 ID、`world` 或 `city:<key>` 后按回车也可查询。城市独立人口、覆盖它的统计账户和未分配的历史人口分别显示。需求表使用游戏商品及服务单位。缺少阶层交叉数据或家庭实际消费统计时，相应单元留空。变动图按底账时间和已记录的人口事件还原近期总量。史料和推算口径保留在数据和正式查询接口中。[需求口径](../../data/historical_population_1900/PHYSIOLOGICAL_NEEDS.md#家庭需求与职业参考)
 
 `wwo-formal-state inspect-population-structure <world|region:Asia|unit-id>` 查询历史结构资料台账。`inspect-age-range <world|unit-id> <min> <max> [<native-save>]` 查询年龄范围和正式服役扣减。`inspect-market-livelihood <unit-id> [<native-save>]` 并列报告人口需要、宏观食品现货、模型供需和实扣库存。v5 起使用 v4 的经济校准基数计算开局库存和模拟产量。米和马铃薯的实扣库存另附条件热值。群体支付能力和实际摄入保持未知。`inspect-intake <native-save> <person-id>` 查询自动购粮的报价与成交、实际扣库和可换算的能量。`inspect-food-history [<case-id>]` 查询历史住户食品账本。岗位、企业配方、现有生计系统的每日 1 千克主食阈值、客运速度及名额属于模拟假设。[能量参数](../../data/historical_population_1900/PHYSIOLOGICAL_NEEDS.md)
 

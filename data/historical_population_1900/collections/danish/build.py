@@ -9,6 +9,7 @@ TABLES = {
     "B": ("179", "1890-11-01", "1901-11-01", "Europe"),
     "C": ("182", "1890-10-01", "1901-10-01", "North America"),
     "D": ("183", "1890-10-09", "1901-02-01", "North America"),
+    "Mainland": ("11", "1890-02-01", "1901-02-01", "Europe"),
 }
 
 # Source terminology and counts. In 1890 the southern row excludes East Greenland.
@@ -40,8 +41,15 @@ def observations():
                            source_id="dk_yearbook_1903_dependencies", locator=f"Tabel C, {table}.1, p. {page}, {raw['source_row']}, {date}",
                            definition=definition, method="published_census_count", mapping_status="historical_statistical_unit",
                            quality="official_census", region=region)
-                if unit == "iceland_under_denmark":
-                    row["wwo_id"] = "state:iceland_under_denmark"
+                if table == "Mainland":
+                    row.update(
+                        source_id="dk_statistics_population_1905_table3",
+                        locator=f"Tabel 3, p. {page}, {raw['source_row']}, {date}",
+                        definition=("Population enumerated in the named domestic Danish census area. "
+                                    "Denmark proper uses the post-1864 boundaries and excludes the dependencies."),
+                    )
+                if unit in {"iceland_under_denmark", "kingdom_of_denmark"}:
+                    row["wwo_id"] = f"state:{unit}"
                     row["mapping_status"] = "historical_identity"
                 if index and raw["later_male"]:
                     row["sex"] = {"male": int(raw["later_male"]), "female": int(raw["later_female"])}

@@ -1,13 +1,16 @@
 mod demography;
 mod historical;
 pub mod historical_food;
+pub mod households;
 mod inspection;
 pub mod living_conditions;
 mod native;
+pub use native::RecordedPopulationDay;
 mod opening;
 pub mod needs;
 pub mod reproductive_needs;
 mod social;
+pub mod workforce;
 #[cfg(test)]
 mod tests;
 

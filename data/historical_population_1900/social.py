@@ -1896,6 +1896,23 @@ def prussian_census_occupation(pools, version):
         marginal["locator"] += f"; {detail[0]['source_table']}"
         marginal["method"] += " Divide the resulting industry category using its seven independently tabulated roles."
         marginal["definition"] += " Industrial managers and independent operators share one published role."
+        if version >= 42:
+            positions = {cell["group_code"]: int(cell["persons"]) for cell in detail}
+            yield unit, "class", distribution(
+                pools[unit]["population_value"], classification="prussia_1895_industrial_employment_position",
+                source=row["source_id"], date=row["date"], observed_unit=unit,
+                scope=marginal["observed_scope"], locator=detail[0]["source_table"],
+                total=int(row["population"]), unknown=int(row["population"]) - counts[industry],
+                observed_counts={
+                    "Independent operators and managers": positions["a"],
+                    "Technical, supervisory and commercial staff": positions["b1"] + positions["b2"] + positions["b3"],
+                    "Participating family workers": positions["c1"],
+                    "Trained workers and apprentices": positions["c2"],
+                    "Other industrial workers and service staff": positions["c3"],
+                },
+                definition="Employment position among people principally occupied in Prussian industry. "
+                           "This is a partial social-position measure. It provides no income, wealth or ownership data.",
+            )
     yield unit, "occupation", marginal
 
 
@@ -1974,6 +1991,108 @@ def french_department_social(pools):
                        "people living in a concentrated settlement. Seine is entirely urban by the census exception.",
             counts={label: count for label, count in modeled.items() if count}, unknown=0,
         )
+
+
+def swiss_mother_tongue(pools):
+    columns = {
+        "german": "German", "french": "French", "italian": "Italian",
+        "romansh": "Romansh", "other": "Other reported mother tongue",
+    }
+    with (COLLECTIONS / "swiss" / "mother_tongue_1900.csv").open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit = row["unit_id"]
+            pool = pools[unit]
+            yield unit, "language", distribution(
+                pool["population_value"], classification="swiss_1900_reported_mother_tongue",
+                source="swiss_yearbook_1914_mother_tongue", date="1900-12-01", observed_unit=unit,
+                scope="Resident population of the contemporary canton or half-canton.",
+                locator="Statistisches Jahrbuch der Schweiz 1914, printed p. 16, table 8, 1900 columns.",
+                total=pool["endpoint_values"][-1], observed_counts={label: int(row[key]) for key, label in columns.items()},
+                unknown=0, definition="One reported mother tongue per resident. Other is a reported combined category. "
+                                      "The figures do not measure multilingualism or cultural affiliation.",
+            )
+
+
+def japan_principal_occupation(pools):
+    unit = "jp_home_islands"
+    with (COLLECTIONS / "japan_taiwan" / "occupation_1900.csv").open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    employed = 24516000  # Aggregate worker-equivalent model redistributes one weight per person.
+    basis_points = [int(row["principal_occupation_basis_points"]) for row in rows]
+    if sum(basis_points) != 10000 or sum(int(row["worker_equivalents"]) for row in rows) != employed:
+        raise ValueError("Japan occupation shares or sectoral labor equivalents do not close")
+    population = pools[unit]["population_value"]
+    yield unit, "occupation", distribution(
+        population, classification="japan_1900_estimated_principal_occupation_sector",
+        source="jp_saito_settsu_2010_principal_occupation", date="1900", observed_unit=unit,
+        scope="Japanese home islands. The independently modelled home-island opening population is the denominator.",
+        locator="Saito and Settsu, Table 3 and Appendix B, Table B.1, 1900 rows.",
+        total=population, observed_counts={
+            row["sector"]: employed * share // 10000 for row, share in zip(rows, basis_points, strict=True)
+        }, unknown=population - employed,
+        definition="Estimated gainfully occupied population by principal sector. The historical secondary-sector "
+                   "category includes transport, communication, gas, water supply and construction.",
+        method="Model estimate from published LTES secondary and tertiary employment shares. The primary share "
+               "is the residual. Apply these principal-sector shares to the published total gainfully occupied. "
+               "The source redistributes workers with subsidiary occupations only within that total. "
+               "Unassigned residents include people outside the study's gainfully occupied population.",
+    )
+
+
+def ireland_religion_and_language(pools):
+    unit = "administrative_region:uk_constituent_ireland"
+    pool = pools[unit]
+    total = 4458775
+    if pool["endpoint_values"][-1] != total:
+        raise ValueError("Irish religion and language denominator differs from the 1901 population")
+    source = "ie_census_1911_retro_religion_language"
+    religion = {
+        "Roman Catholic": 3308661, "Protestant Episcopalian": 581089,
+        "Presbyterian": 443276, "Methodist": 62006,
+    }
+    yield unit, "religion", distribution(
+        pool["population_value"], classification="ireland_1901_four_principal_religious_professions",
+        source=source, date="1901-03-31", observed_unit=unit,
+        scope="All-Ireland census population on the census night.",
+        locator="Census of Ireland 1911, Table 29a, 1901 Ireland row.",
+        total=total, observed_counts=religion, unknown=63743,
+        definition="Four main stated religious professions. The census combined remainder stays unassigned. "
+                   "Church profession does not establish adherence to a particular practice.",
+    )
+    languages = {"Irish only": 20953, "Irish and English": 620189}
+    yield unit, "language", distribution(
+        pool["population_value"], classification="ireland_1901_reported_irish_language",
+        source=source, date="1901-03-31", observed_unit=unit,
+        scope="Reported Irish speakers in the All-Ireland census; the denominator includes all ages.",
+        locator="Census of Ireland 1911, Table 37, 1901 total of Ireland.",
+        total=total, observed_counts=languages, unknown=total - sum(languages.values()),
+        definition="Mutually exclusive reported Irish-speaking groups. The remaining persons have no "
+                   "complete language profile in this table.",
+    )
+
+
+def australian_colony_religion(pools):
+    columns = {
+        "anglican": "Church of England or Episcopalian", "presbyterian": "Presbyterian",
+        "methodist": "Methodist", "catholic": "Roman Catholic", "jewish": "Jewish",
+        "buddhist": "Buddhist",
+    }
+    with (COLLECTIONS / "australia_age_1901" / "religion_1901.csv").open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit = row["unit_id"]
+            total = int(row["colony_census_total"]) - int(row["separately_counted_unrecorded"])
+            counts = {label: int(row[key]) for key, label in columns.items()}
+            yield unit, "religion", distribution(
+                pools[unit]["population_value"], classification="australia_1901_selected_religious_denominations",
+                source="au_british_empire_census_1901_religion", date="1901-03-31", observed_unit=unit,
+                scope=row["scope"],
+                locator="Census of the British Empire 1901, Table 8, p. 67 and colony footnotes.",
+                total=total, observed_counts=counts, unknown=total - sum(counts.values()),
+                definition="Six separately named religion groups. Other returns and the religion not stated "
+                           "balance remain unassigned. Indigenous religious practice is not inferred.",
+                method=SHARE_METHOD + " Colony census shares approximate the earlier ABS opening accounts. "
+                       "Different census coverage, enumeration rules and changes from 1900 are unquantified.",
+            )
 
 
 def opening_social(opening_groups, observations, *, version):
@@ -2139,6 +2258,9 @@ def opening_social(opening_groups, observations, *, version):
         marginals = chain(marginals, bombay_city_social(pools, version))
     if version >= 41:
         marginals = chain(marginals, bombay_sind_religion(pools))
+    if version >= 42:
+        marginals = chain(marginals, swiss_mother_tongue(pools), japan_principal_occupation(pools),
+                          ireland_religion_and_language(pools), australian_colony_religion(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

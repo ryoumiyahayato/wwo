@@ -1,5 +1,14 @@
 [
   {
+    "id": "jp_saito_settsu_2010_principal_occupation",
+    "title": "Unveiling rural by-employment patterns and its implications for national income estimates in early phases of Japan’s industrialisation",
+    "publisher": "Osamu Saito and Tokihiko Settsu, Institute of Economic Research, Hitotsubashi University, 2010",
+    "url": "https://ahes.ier.hit-u.ac.jp/ahec_beijing/papers/may19_no8.pdf",
+    "locator": "Table 3 and Appendix B, Table B.1, 1900 rows.",
+    "raw_paths": ["occupation_1900.csv", "OCCUPATION.md"],
+    "rights": "Published numerical estimates and model derivation."
+  },
+  {
     "id": "jp_cabinet_1909_resident_prefectures",
     "title": "道府縣現住人口 自明治十七年至同四十年",
     "publisher": "内閣統計局, 1909",

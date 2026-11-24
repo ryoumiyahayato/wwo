@@ -1,0 +1,51 @@
+panel,label,role,age_min,age_max,both,male,female
+chiao_farm_north_1929_1931,0,band,0,0,979,538,441
+chiao_farm_north_1929_1931,1,band,1,1,781,409,372
+chiao_farm_north_1929_1931,2,band,2,2,717,381,336
+chiao_farm_north_1929_1931,3,band,3,3,852,463,389
+chiao_farm_north_1929_1931,4,band,4,4,692,351,341
+chiao_farm_north_1929_1931,0-4,subtotal,0,4,4021,2142,1879
+chiao_farm_north_1929_1931,5-9,band,5,9,3240,1787,1453
+chiao_farm_north_1929_1931,10-14,band,10,14,2817,1546,1271
+chiao_farm_north_1929_1931,15-19,band,15,19,2653,1395,1258
+chiao_farm_north_1929_1931,20-24,band,20,24,2656,1375,1281
+chiao_farm_north_1929_1931,25-29,band,25,29,2386,1227,1159
+chiao_farm_north_1929_1931,30-34,band,30,34,1918,1039,879
+chiao_farm_north_1929_1931,35-39,band,35,39,2022,1067,955
+chiao_farm_north_1929_1931,40-44,band,40,44,1813,971,842
+chiao_farm_north_1929_1931,45-49,band,45,49,1847,915,932
+chiao_farm_north_1929_1931,50-54,band,50,54,1248,665,583
+chiao_farm_north_1929_1931,55-59,band,55,59,1101,505,596
+chiao_farm_north_1929_1931,60-64,band,60,64,798,394,404
+chiao_farm_north_1929_1931,65-69,band,65,69,645,283,362
+chiao_farm_north_1929_1931,70-74,band,70,74,397,163,234
+chiao_farm_north_1929_1931,75-79,band,75,79,214,85,129
+chiao_farm_north_1929_1931,80-84,band,80,84,79,35,44
+chiao_farm_north_1929_1931,85 and over,band,85,,31,6,25
+chiao_farm_north_1929_1931,Age unknown,band,,,23,17,6
+chiao_farm_north_1929_1931,Total,total,,,29909,15617,14292
+chiao_farm_south_1929_1931,0,band,0,0,1200,621,579
+chiao_farm_south_1929_1931,1,band,1,1,829,408,421
+chiao_farm_south_1929_1931,2,band,2,2,853,456,397
+chiao_farm_south_1929_1931,3,band,3,3,1246,620,626
+chiao_farm_south_1929_1931,4,band,4,4,982,505,477
+chiao_farm_south_1929_1931,0-4,subtotal,0,4,5110,2610,2500
+chiao_farm_south_1929_1931,5-9,band,5,9,4797,2532,2265
+chiao_farm_south_1929_1931,10-14,band,10,14,3845,2195,1650
+chiao_farm_south_1929_1931,15-19,band,15,19,3586,1978,1608
+chiao_farm_south_1929_1931,20-24,band,20,24,3293,1709,1584
+chiao_farm_south_1929_1931,25-29,band,25,29,3280,1700,1580
+chiao_farm_south_1929_1931,30-34,band,30,34,2750,1445,1305
+chiao_farm_south_1929_1931,35-39,band,35,39,2619,1390,1229
+chiao_farm_south_1929_1931,40-44,band,40,44,1939,970,969
+chiao_farm_south_1929_1931,45-49,band,45,49,1927,972,955
+chiao_farm_south_1929_1931,50-54,band,50,54,1472,742,730
+chiao_farm_south_1929_1931,55-59,band,55,59,1340,625,715
+chiao_farm_south_1929_1931,60-64,band,60,64,915,424,491
+chiao_farm_south_1929_1931,65-69,band,65,69,434,190,244
+chiao_farm_south_1929_1931,70-74,band,70,74,209,79,130
+chiao_farm_south_1929_1931,75-79,band,75,79,124,49,75
+chiao_farm_south_1929_1931,80-84,band,80,84,54,17,37
+chiao_farm_south_1929_1931,85 and over,band,85,,19,4,15
+chiao_farm_south_1929_1931,Age unknown,band,,,21,14,7
+chiao_farm_south_1929_1931,Total,total,,,37734,19645,18089

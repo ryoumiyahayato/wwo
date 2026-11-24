@@ -72,6 +72,8 @@ pub struct PopulationInspection<'a> {
     pub basis: &'static str,
     pub account_id: Option<&'a str>,
     pub parent_id: Option<&'a str>,
+    pub account_name: Option<&'a str>,
+    pub child_residents: Option<u64>,
     pub children: Vec<PopulationChild<'a>>,
     pub map_place_ids: Vec<&'a str>,
     pub population_total: Option<u64>,
@@ -100,7 +102,7 @@ impl Population {
         query_id: &'a str,
         clock: GameClock,
     ) -> io::Result<PopulationInspection<'a>> {
-        self.inspect_with_mapping(query_id, clock, None, None)
+        self.inspect_with_mapping(query_id, clock, None, None, true)
     }
 
     pub(crate) fn inspect_with_mapping<'a>(
@@ -109,6 +111,7 @@ impl Population {
         clock: GameClock,
         name_alias: Option<&'a str>,
         residence_unit: Option<&'a str>,
+        detailed: bool,
     ) -> io::Result<PopulationInspection<'a>> {
         let fallback;
         let catalogue = if let Some(opening) = &self.opening {
@@ -127,30 +130,46 @@ impl Population {
             self.population_total(unit)
         };
         let live = total.is_some() && !world;
-        let site_account = if unit.starts_with("place:") {
+        let mut site_account = if unit.starts_with("place:") {
             self.partition_at(unit)
                 .or(residence_unit)
-                .filter(|account| self.resident_pool(account).is_some())
+                .filter(|account| self.population_total(account).is_some())
         } else {
             None
         };
-        let account_id = if live { Some(unit) } else { site_account };
         let parent_id = if live {
             self.statistical_parent(unit).or_else(|| self.parent_unit(unit))
                 .map(|parent| if parent == unit { "world" } else { parent })
         } else {
             None
         };
-        let (mut archive, city_reference) = if world || unit.starts_with("trait:") {
+        let opening = self.admitted_opening(unit);
+        let (mut archive, city_reference) = if world || unit.starts_with("trait:") || (!detailed && live) {
             (None, None)
         } else {
             catalogue.archive(map_id)?
         };
-        let (mut traits, mut trait_sources) = catalogue.traits_for_scope(unit)?;
-        let opening = self.admitted_opening(unit);
+        if !live && site_account.is_none() {
+            site_account = archive.as_ref().and_then(|archive| {
+                let row = archive.geographies.iter().find(|row| row["catalogue"] == "administrative_identity")?;
+                let shared = row["shared_opening_ids"].as_array().filter(|ids| ids.len() == 1)
+                    .and_then(|ids| ids.first()?.as_str());
+                [shared, row["parent"].as_str()].into_iter().flatten()
+                    .find_map(|id| {
+                        self.pools.get_key_value(id).or_else(|| self.totals.get_key_value(id))
+                            .or_else(|| self.standalone.get_key_value(id)).map(|(key, _)| key.as_str())
+                            .or_else(|| {
+                                self.opening.as_ref()?.statistical_aggregates.get_key_value(id)
+                                    .map(|(key, _)| key.as_str())
+                            })
+                    })
+            });
+        }
+        let account_id = if live { Some(unit) } else { site_account };
+        let (mut traits, mut trait_sources) = if detailed { catalogue.traits_for_scope(unit)? } else { Default::default() };
         let scope = (!world).then_some(unit);
-        let structure = (world || live).then(|| self.structure(scope, clock)).flatten();
-        let social = (world || live).then(|| self.social_distribution(scope)).flatten();
+        let structure = (world || live).then(|| self.structure_for_inspection(scope, clock, detailed)).flatten();
+        let social = (detailed && (world || live)).then(|| self.social_distribution(scope)).flatten();
         let mut dietary_norms = Vec::new();
         if let Some(religion) = social.as_ref().and_then(|report| report.dimensions.get("religion")) {
             let version = self.opening_version().unwrap_or(0);
@@ -175,8 +194,9 @@ impl Population {
             }
         }
         let mut extra_sources = trait_sources;
-        let source_ids: BTreeSet<_> = opening.into_iter().map(|row| row.source_id.as_str())
+        let source_ids: BTreeSet<_> = opening.into_iter().filter(|_| detailed).map(|row| row.source_id.as_str())
             .chain(structure.iter().flat_map(|report| &report.cohorts)
+                .filter(|_| detailed)
                 .filter_map(|row| row.evidence.as_ref().map(|evidence| evidence.source_id)))
             .chain(social.iter().flat_map(|report| report.dimensions.values())
                 .flat_map(|dimension| dimension.source_ids.iter().copied()))
@@ -222,7 +242,10 @@ impl Population {
         } else {
             ("unknown", "no_coextensive_population_evidence")
         };
-        let children = if world {
+        let child_residents = if world { total } else if live {
+            Some(self.statistical_children(unit).map(|(_, _, count)| count).sum())
+        } else { None };
+        let children = if !detailed { Vec::new() } else if world {
             self.totals()
                 .iter()
                 .chain(self.standalone_totals())
@@ -247,6 +270,7 @@ impl Population {
             .opening
             .iter()
             .flat_map(|opening| opening.residence_places())
+            .filter(|_| detailed)
             .filter(|&(place, account)| {
                 if site_account.is_some() {
                     place == unit
@@ -264,10 +288,16 @@ impl Population {
             basis,
             account_id,
             parent_id,
+            account_name: account_id.and_then(|id| {
+                let opening = self.opening.as_ref()?;
+                opening.partitions.get(id).map(|row| row.name.as_str())
+                    .or_else(|| opening.statistical_aggregates.get(id).map(|row| row.name.as_str()))
+            }),
+            child_residents,
             children,
             map_place_ids,
             population_total: total,
-            direct_residents: self.resident_pool(unit),
+            direct_residents: live.then(|| self.resident_pool(unit).unwrap_or(0)),
             opening_version: self.opening_version(),
             opening,
             legacy_estimate: self.opening_estimate(unit)?,
@@ -275,11 +305,11 @@ impl Population {
             social,
             dietary_norms,
             archive,
-            structural_coverage: catalogue.structural_coverage(unit)?,
+            structural_coverage: if detailed { catalogue.structural_coverage(unit)? } else { None },
             city_reference,
             traits,
             living_conditions: living_conditions_references(),
-            recent_changes: if world || live {
+            recent_changes: if detailed && (world || live) {
                 self.recent_changes((!world).then_some(unit))
             } else {
                 Vec::new()

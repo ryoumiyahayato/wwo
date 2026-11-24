@@ -95,7 +95,7 @@
       ],
       "production_people": 787661987,
       "production_pct_of_regional_research_estimate": 88.068,
-      "people_with_opening_subdivision": 731874365,
+      "people_with_opening_subdivision": 733620602,
       "research_only_units": 25,
       "research_only_people": 79176163
     },
@@ -3860,6 +3860,20 @@
       "research_minus_documented": 0
     },
     {
+      "comparison_id": "kingdom_of_denmark",
+      "opening_root_ids": [
+        "kingdom_of_denmark"
+      ],
+      "research_unit_ids": [],
+      "scope_relation": "opening_without_benchmark_link",
+      "note": "Population enumerated in the named domestic Danish census area. Denmark proper uses the post-1864 boundaries and excludes the dependencies.",
+      "research_regions": [],
+      "research_people": null,
+      "documented_opening_people": 2422217,
+      "opening_people_including_retained_balances": 2422217,
+      "research_minus_documented": null
+    },
+    {
       "comparison_id": "kingdom_of_italy",
       "opening_root_ids": [
         "kingdom_of_italy"
@@ -4057,6 +4071,7 @@
     }
   ],
   "opening_comparisons_without_single_region": [
+    "kingdom_of_denmark",
     "ottoman_empire"
   ],
   "legacy_to_opening": {
@@ -4144,6 +4159,10 @@
         "people": 15205
       },
       {
+        "unit_id": "kingdom_of_denmark",
+        "people": -27783
+      },
+      {
         "unit_id": "swiss_confederation",
         "people": -14869
       },
@@ -4188,7 +4207,7 @@
         "people": -8679
       }
     ],
-    "net_replacements": -7512705,
+    "net_replacements": -7540488,
     "added_opening_accounts": [
       {
         "unit_id": "beylicate_of_tunis",
@@ -4296,7 +4315,7 @@
       }
     ],
     "net_additions": 71090457,
-    "authoritative_opening_population": 1474597752,
+    "authoritative_opening_population": 1474569969,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4336,11 +4355,11 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1369872959,
-    "untouched_legacy_population": 74080000,
+    "documented_opening_population": 1372295176,
+    "untouched_legacy_population": 71630000,
     "retained_unlocated_population": 30644793,
-    "authoritative_opening_population": 1474597752,
-    "published_minus_documented_opening": 225201289,
+    "authoritative_opening_population": 1474569969,
+    "published_minus_documented_opening": 222779072,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 210965672,
@@ -4350,10 +4369,10 @@
         "partial_extent": 29916129,
         "adopted_research_series": 426
       },
-      "opening_without_benchmark_link": -18584667,
-      "untouched_legacy_controls": -74080000,
+      "opening_without_benchmark_link": -21006884,
+      "untouched_legacy_controls": -71630000,
       "unlocated_balances_under_retained_controls": -30644793
     },
-    "published_minus_authoritative_opening": 120476496
+    "published_minus_authoritative_opening": 120504279
   }
 }

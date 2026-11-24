@@ -464,6 +464,25 @@ def add_japanese_prefectures(group, observations):
     )
 
 
+def add_japan_home_islands_scope(group):
+    scope_id = "jp_home_islands"
+    prefectures = group["units"]
+    if len(prefectures) != 47 or any(unit.get("statistical_parent") for unit in prefectures):
+        raise ValueError("Invalid Japan home-island statistical members")
+    total = sum(unit["population_value"] for unit in prefectures)
+    if total != group["population_value"]:
+        raise ValueError("Japan prefectures do not close to the home-island population")
+    for unit in prefectures:
+        unit["statistical_parent"] = scope_id
+    group.setdefault("statistical_aggregates", []).append(dict(
+        unit_id=scope_id, name="Japan, home islands", population_value=total,
+        source_id=group["source_id"], locator=group["locator"], date=DATE, scope=group["scope"],
+        method="Statistical sum of the 47 prefecture opening accounts.",
+        population_lower=group["population_lower"], population_upper=group["population_upper"],
+        uncertainty_kind=group["uncertainty_kind"],
+    ))
+
+
 def taiwan_opening(study, observations, endpoints):
     root = "taiwan_under_japan"
     source = "tw_governor_general_1900"
@@ -1636,6 +1655,60 @@ def add_philippine_surigao(group, observations):
     )]
 
 
+def add_philippine_atlas_provinces(group, observations):
+    # Pre-1901 provincial extents with documented continuity in the Commission
+    # acts. Manila, Albay, Cavite, Mindoro and Tayabas need boundary adjustment.
+    districts = {
+        "antique", "batangas", "bohol", "cebu", "leyte", "negros_occidental",
+    }
+    source = "ph_philippine_commission_atlas_1900"
+    expected = {"ph_atlas_1900_" + district for district in districts}
+    rows = [row for row in observations
+            if row["source_id"] == source and row["unit_id"] in expected]
+    if len(rows) != len(expected) or {row["unit_id"] for row in rows} != expected:
+        raise ValueError("Philippine Atlas province selection does not match the documented crosswalk")
+    balance = group["research_unlocated_balance"] - sum(row["population_value"] for row in rows)
+    if balance <= 0:
+        raise ValueError("Philippine Atlas provinces exceed the unlocated archipelago balance")
+    group["research_unlocated_balance"] = balance
+    group["partition_source"] = "collections/philippines_opening_1900/geography_crosswalk.csv"
+    group["units"].extend(dict(
+        unit_id=row["unit_id"], name=row["name"], date=DATE,
+        population_value=row["population_value"], source_id=source,
+        source_unit_ids=[row["unit_id"]], source_dates=[row["date"]],
+        source_observations=[row["record_id"]], locator=row["locator"],
+        method="Use the provincial population printed in the 1900 Atlas as an opening estimate.",
+        scope=row["definition"] + " Island list: " + row["source_geography"]["islands"] + ".",
+        uncertainty_kind=("The Atlas gives no enumeration date or coverage by province. "
+                          "The six non-overlapping provinces debit the existing archipelago control. "
+                          "The later 1903 census remains a separate observation."),
+    ) for row in rows)
+
+
+def denmark_domestic_opening(observations):
+    unit_id = "kingdom_of_denmark"
+    source_id = "dk_statistics_population_1905_table3"
+    dates = ["1890-02-01", "1901-02-01"]
+    rows = [row for row in observations if row["source_id"] == source_id]
+    anchors = sorted((row for row in rows if row["unit_id"] == unit_id), key=lambda row: row["date"])
+    if [row["date"] for row in anchors] != dates:
+        raise ValueError("Denmark proper needs both domestic census controls")
+    first, last = (row["population_value"] for row in anchors)
+    fraction = opening_fraction(dates)
+    group = dict(
+        unit_id=unit_id, name=anchors[0]["name"], date=DATE,
+        population_value=round(first + (last - first) * fraction),
+        source_id=source_id, source_quality="official_census", source_dates=dates,
+        source_observations=[row["record_id"] for row in anchors], endpoint_values=[first, last],
+        locator="Tabel 3, p. 11, Hele Landet, 1890 and 1901", scope=anchors[0]["definition"],
+        method=f"Linearly interpolate the two domestic census totals, elapsed fraction {fraction}.",
+        partition_source="collections/danish/observations.jsonl",
+    )
+    children = [row for row in rows if row["parent_id"] == unit_id]
+    group["units"] = interpolate_partition(children, group, dates)
+    return group
+
+
 def groups(observations, version=1):
     study = {r["unit_id"]: r for r in observations if r["kind"] == "territory" and r["date"] == DATE and r["source_id"].startswith("ft_world_")}
     endpoints = {(r["unit_id"], r["date"]): r["population_value"] for r in observations if r["source_id"].startswith("ft_world_")}
@@ -1721,6 +1794,8 @@ def groups(observations, version=1):
         add_british_county_partitions(result["british_isles_1900"], observations, version=version)
         add_russian_provinces(result["russian_empire"], observations)
         add_japanese_prefectures(result["empire_of_japan"], observations)
+        if version >= 42:
+            add_japan_home_islands_scope(result["empire_of_japan"])
         add_india_comparable_areas(result["cshapes_gw_750"], observations)
     if version >= 11:
         add_mauritius_districts(result["cshapes_gw_590"], observations)
@@ -1799,6 +1874,12 @@ def groups(observations, version=1):
         add_philippine_surigao(result["cshapes_gw_840"], observations)
     if version >= 41:
         add_berar_districts(result["cshapes_gw_750"], observations)
+    if version >= 42:
+        add_philippine_atlas_provinces(result["cshapes_gw_840"], observations)
+        denmark = denmark_domestic_opening(observations)
+        if denmark["unit_id"] in result:
+            raise ValueError("Duplicate Denmark proper opening control")
+        result[denmark["unit_id"]] = denmark
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

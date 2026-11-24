@@ -55,7 +55,80 @@ enum Change {
     AnonymousDeaths { unit: String, cohort: Option<CohortId>, members: u64 },
 }
 
+pub struct RecordedPopulationDay {
+    pub date: crate::formal_clock::CalendarTime,
+    pub population: Option<u64>,
+    pub births: u64,
+    pub deaths: u64,
+    pub immigration: u64,
+    pub emigration: u64,
+}
+
+impl RecordedPopulationDay {
+    pub fn net(&self) -> i64 {
+        self.births as i64 + self.immigration as i64 - self.deaths as i64 - self.emigration as i64
+    }
+}
+
 impl Population {
+    pub fn journal_revision(&self) -> usize { self.history.journal.len() }
+
+    /// Reconstruct recent ledger totals from the active population and recorded changes.
+    /// The counters cover only recorded events. Claims and internal moves preserve the scope total.
+    pub fn recorded_population_days(
+        &self, unit: Option<&str>, clock: GameClock, days: i64,
+    ) -> Vec<RecordedPopulationDay> {
+        let Some(total) = unit.map_or_else(|| Some(self.global_total()), |id| self.population_total(id))
+            else { return Vec::new(); };
+        let today = clock.current_day();
+        let earliest = (today + 1 - days.clamp(1, 31)).max(0);
+        // The pre-journal migration has no dates. Keep the series within the journal period.
+        let first = if self.has_migrated_population_baseline() {
+            self.history.journal.first().map_or(today, |event| event.minute / MINUTES_PER_DAY).max(earliest)
+        } else { earliest };
+        let mut rows: Vec<_> = (first..=today).map(|day| {
+            let mut date = GameClock::default();
+            date.advance_minutes(day * MINUTES_PER_DAY).expect("current ledger day");
+            RecordedPopulationDay { date: date.current_date(), population: None,
+                births: 0, deaths: 0, immigration: 0, emigration: 0 }
+        }).collect();
+        let in_scope = |place: &str| unit.is_none_or(|scope| self.pool_in_scope(place, scope));
+        for (index, event) in self.history.journal.iter().enumerate().rev() {
+            let offset = event.minute / MINUTES_PER_DAY - first;
+            if offset < 0 { break; }
+            let Some(row) = rows.get_mut(offset as usize) else { continue; };
+            let origin = || self.history.named_event_origins.get(&index).is_some_and(|place| in_scope(place));
+            match &event.change {
+                Change::NamedBirth { unit, .. } if in_scope(unit) => row.births += 1,
+                Change::AnonymousBirths { unit, members } if in_scope(unit) => row.births += members,
+                Change::NamedDeath { .. } if origin() => row.deaths += 1,
+                Change::AnonymousDeaths { unit, members, .. } if in_scope(unit) => row.deaths += members,
+                Change::Arrival { unit, .. } if in_scope(unit) => row.immigration += 1,
+                Change::Transfer { source, destination, members, .. } => {
+                    match (in_scope(source), in_scope(destination)) {
+                        (true, false) => row.emigration += members,
+                        (false, true) => row.immigration += members,
+                        _ => {}
+                    }
+                }
+                Change::Move { destination, .. } => {
+                    match (origin(), in_scope(destination)) {
+                        (true, false) => row.emigration += 1,
+                        (false, true) => row.immigration += 1,
+                        _ => {}
+                    }
+                }
+                _ => {}
+            }
+        }
+        let mut population = Some(total);
+        for row in rows.iter_mut().rev() {
+            row.population = population;
+            population = population.and_then(|total| total.checked_add_signed(-row.net()));
+        }
+        rows
+    }
+
     pub(super) fn recent_changes<'a>(&'a self, unit: Option<&str>) -> Vec<super::PopulationChange<'a>> {
         self.history.journal.iter().enumerate().rev().filter_map(|(index, event)| {
             let origin = || self.history.named_event_origins.get(&index).map(String::as_str);

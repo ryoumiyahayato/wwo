@@ -670,6 +670,18 @@
     "collection": "argentina_age_1895_1914"
   },
   {
+    "id": "au_british_empire_census_1901_religion",
+    "title": "Census of the British Empire, 1901",
+    "publisher": "Census Office, HMSO, 1906",
+    "url": "https://www.tradeshouselibrary.org/uploads/4/7/7/2/47723681/census_of_the_british_empire._1901.pdf",
+    "locator": "Table 8, printed p. 67 and notes, with Table 9 for colony population controls.",
+    "raw_paths": [
+      "religion_1901.csv"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "australia_age_1901"
+  },
+  {
     "id": "abs_yearbook_1908_census_ages",
     "title": "Official Year Book of the Commonwealth of Australia 1908",
     "publisher": "Commonwealth Bureau of Census and Statistics",
@@ -960,6 +972,15 @@
     "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/68/cd_1960_v1_t15_p1_sc.pdf#page=26",
     "rights": "Historic public statistical return. Numeric facts transcribed.",
     "collection": "brazil_census_1900_age"
+  },
+  {
+    "id": "ie_census_1911_retro_religion_language",
+    "title": "Census of Ireland 1911, General Report with Tables",
+    "publisher": "Census of Ireland Commissioners",
+    "url": "https://www.cso.ie/en/media/csoie/releasespublications/documents/ep/storiesfromcensus1911/census1911originalreports/459-General_report%2C_Ireland%2C_1911.pdf",
+    "locator": "Table 29a and Table 37, retrospective 1901 Ireland totals.",
+    "rights": "Published historical numeric facts",
+    "collection": "britain"
   },
   {
     "id": "uk_general_census_report_1901",
@@ -1286,12 +1307,30 @@
     "collection": "crown_islands"
   },
   {
+    "id": "cu_census_1899_table_ix",
+    "title": "Report on the Census of Cuba, 1899",
+    "publisher": "U.S. War Department, Cuban Census Office",
+    "url": "https://www2.census.gov/library/publications/decennial/island-areas/1899/1899-census-cuba.pdf",
+    "locator": "Table IX, printed p. 206, Cuba, all classes; p. 93, oldest-age notation",
+    "rights": "U.S. federal public domain",
+    "collection": "cuba_age_1899"
+  },
+  {
     "id": "dk_yearbook_1903_dependencies",
     "title": "Statistisk Aarbog 1903, Tabel C. Statistiske Oversigter vedrørende Færøerne, Island, Grønland og de dansk-vestindiske Øer",
     "publisher": "Statens Statistiske Bureau, Copenhagen; digital edition, Danmarks Statistik",
     "url": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=12689&sid=oversigter",
     "locator": "Tables A.1 p. 177, B.1 p. 179, C.1 p. 182, D.1 p. 183 and p. 184 table 2 note 1. Population figures by census date.",
     "rights": "Numerical facts manually transcribed from the 1903 statistical yearbook. Scanned pages are available at the publisher.",
+    "collection": "danish"
+  },
+  {
+    "id": "dk_statistics_population_1905_table3",
+    "title": "Befolkningsforholdene i Danmark i det 19. Aarhundrede, Tabel 3",
+    "publisher": "Statens Statistiske Bureau, Copenhagen, 1905, digital edition by Danmarks Statistik",
+    "url": "https://www.dst.dk/pubfile/19256/Befolk1905",
+    "locator": "Table 3, p. 11, Hele Landet and seven geographic regions, 1890 and 1901.",
+    "rights": "Numerical facts transcribed from the published census compilation. Scanned pages are available at the publisher.",
     "collection": "danish"
   },
   {
@@ -2327,6 +2366,19 @@
     "collection": "japan_population_structure"
   },
   {
+    "id": "jp_saito_settsu_2010_principal_occupation",
+    "title": "Unveiling rural by-employment patterns and its implications for national income estimates in early phases of Japan’s industrialisation",
+    "publisher": "Osamu Saito and Tokihiko Settsu, Institute of Economic Research, Hitotsubashi University, 2010",
+    "url": "https://ahes.ier.hit-u.ac.jp/ahec_beijing/papers/may19_no8.pdf",
+    "locator": "Table 3 and Appendix B, Table B.1, 1900 rows.",
+    "raw_paths": [
+      "occupation_1900.csv",
+      "OCCUPATION.md"
+    ],
+    "rights": "Published numerical estimates and model derivation.",
+    "collection": "japan_taiwan"
+  },
+  {
     "id": "jp_cabinet_1909_resident_prefectures",
     "title": "道府縣現住人口 自明治十七年至同四十年",
     "publisher": "内閣統計局, 1909",
@@ -2493,6 +2545,15 @@
     ],
     "rights": "Published historical numeric facts",
     "collection": "java_madoera"
+  },
+  {
+    "id": "kr_kihasa_report_2010_30_6",
+    "title": "Research report 2010-30-6, statistical appendix on the demographic effects of low fertility",
+    "publisher": "Korea Institute for Health and Social Affairs",
+    "url": "https://repository.kihasa.re.kr/bitstream/201002/6100/1/%EC%97%B0%EA%B5%AC_2010-30-6.pdf",
+    "locator": "Appendix Table 5, printed p. 96, published 1925 census values",
+    "rights": "Published statistical values only",
+    "collection": "korea_age_1925"
   },
   {
     "id": "li_statistisches_tabellenwerk_1960",
@@ -3174,6 +3235,23 @@
     "collection": "qing_jiangxi_prefectures"
   },
   {
+    "id": "chiao_china_farm_age_1929_1931",
+    "title": "Chi-ming Chiao, A Study of the Chinese Population, Chapter III",
+    "publisher": "The Milbank Memorial Fund Quarterly Bulletin 12(1), 1934, pp. 85–96",
+    "url": "https://www.milbank.org/wp-content/uploads/mq/volume-12/issue-01/12-1-A-Study-of-the-Chinese-Population-Chapter-III.pdf",
+    "locator": "Table 9, printed p. 91, North and South age-by-sex counts",
+    "rights": "Numerical data transcribed from the cited table",
+    "raw_paths": [
+      "age_sex.csv"
+    ],
+    "corroboration": {
+      "title": "A Study of the Chinese Population, Chapter I",
+      "url": "https://www.milbank.org/wp-content/uploads/mq/volume-11/issue-04/11-4-A-Study-of-the-Chinese-Population.pdf",
+      "locator": "Table 1, printed p. 331, survey scope"
+    },
+    "collection": "qing_opening_age"
+  },
+  {
     "id": "lu_qing_shaangan_prefecture_reconstruction",
     "title": "GIS支撑下的长时段区域人口变动规律分析——以1776至1953年陕甘地区人口为例",
     "publisher": "路伟东，《历史地理》第30辑，上海人民出版社，2014年，第314–324页",
@@ -3589,6 +3667,18 @@
     "locator": "Definitions p. 101; Table I p. 104; Table IV pp. 142–143, retrospective 1888 and 1900 census columns",
     "rights": "Numeric facts transcribed from 1911 publication; no reproduction of its layout. Canton totals cross-checked against Statistisches Jahrbuch der Schweiz 1919, III.a.3.",
     "independent_url": "https://istmat.org/files/uploads/53038/statistisches_jahrbuch_der_schweiz_1919.pdf",
+    "collection": "swiss"
+  },
+  {
+    "id": "swiss_yearbook_1914_mother_tongue",
+    "title": "Statistisches Jahrbuch der Schweiz 1914, III.8",
+    "publisher": "Eidgenössisches Statistisches Bureau",
+    "url": "https://istmat.org/files/uploads/53033/statistisches_jahrbuch_der_schweiz_1914.pdf",
+    "locator": "Printed p. 16, table 8, 1900 columns.",
+    "raw_paths": [
+      "mother_tongue_1900.csv"
+    ],
+    "rights": "Published historical numeric facts",
     "collection": "swiss"
   },
   {

@@ -152,7 +152,7 @@ impl Session {
 }
 pub(crate) const HUD_TYPE_WIDTH: u32 = 2048;
 pub(crate) const HUD_TYPE_BASE_HEIGHT: u32 = 2048;
-pub(crate) const HUD_TYPE_HEIGHT: u32 = HUD_TYPE_BASE_HEIGHT + 112;
+pub(crate) const HUD_TYPE_HEIGHT: u32 = HUD_TYPE_BASE_HEIGHT + 135;
 
 pub struct Skin {
     art:HashMap<String,[f32;4]>,
@@ -402,6 +402,7 @@ pub struct Display<'a> {
     pub written_world: Option<&'a wwo_map_lab::formal_bootstrap::InitialWorld>,
     pub managed:bool,
     pub debug:Option<&'a crate::Diagnostics>,
+    pub population_debug:bool,
 }
 impl Display<'_> {
     pub(crate) fn can_read_world(&self) -> bool {

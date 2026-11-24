@@ -1,0 +1,16 @@
+[
+  {
+    "id": "korea_census_age_1925",
+    "observed_unit_id": "korean_peninsula_korean_residents_1925",
+    "opening_unit_id": "korean_empire",
+    "opening_from_version": 42,
+    "observed_date": "1925-10-01",
+    "source_id": "kr_kihasa_report_2010_30_6",
+    "locator": "Appendix Table 5, printed p. 96, 1925 population by age and sex",
+    "published_scope": "Koreans in the 1925 census of the whole Korean peninsula, 19,020,030 people",
+    "definition": "Reported age by sex, using the most detailed mutually exclusive rows. The national age table excludes 502,915 non-Koreans.",
+    "opening_method": "Use the 1925 joint age and sex distribution of the peninsula's predominant population as a proxy for the existing Korean Empire opening pool. Allocate integer counts by largest remainders. Retain the original opening total.",
+    "uncertainty": "The census is 25 years after opening. The age shares of smaller resident groups, registration omissions, migration and the demographic change between opening and the census are unquantified.",
+    "broad_observation": false
+  }
+]

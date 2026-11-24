@@ -220,6 +220,7 @@ pub struct WorldSources {
     places: BTreeMap<String, Place>,
     routes: BTreeMap<String, Route>,
     place_population_units: BTreeMap<String, String>,
+    dated_place_jurisdictions: BTreeMap<String, String>,
     polity_population_bindings: BTreeMap<String, String>,
     population_name_aliases: BTreeMap<String, String>,
     population_income: BTreeMap<String, u64>,
@@ -842,13 +843,32 @@ impl InitialWorld {
 
     pub fn population(&self) -> &Population { &self.population }
 
-    /// Resolve exact historical name aliases and the residence binding that a
-    /// settled move uses. A residence binding does not enumerate the site.
     pub fn inspect_population<'a>(&'a self, query: &'a str) -> io::Result<crate::formal_population::PopulationInspection<'a>> {
-        let residence = query.starts_with("place:").then(|| self.residence_unit_at(query)).flatten();
+        self.inspect_population_view(query, true)
+    }
+
+    pub fn inspect_population_brief<'a>(&'a self, query: &'a str) -> io::Result<crate::formal_population::PopulationInspection<'a>> {
+        self.inspect_population_view(query, false)
+    }
+
+    fn inspect_population_view<'a>(
+        &'a self, query: &'a str, detailed: bool,
+    ) -> io::Result<crate::formal_population::PopulationInspection<'a>> {
         let map_id = query.strip_prefix("state:").unwrap_or(query);
         let alias = self.sources.population_name_aliases.get(map_id).map(String::as_str);
-        self.population.inspect_with_mapping(query, self.clock, alias, residence)
+        // A containing account locates the site. Only an exact alias can
+        // expose an account's total as the population of a map point.
+        let containing_account = if map_id.starts_with("place:") {
+            [
+                self.population.partition_at(map_id),
+                self.sources.opening_parent_at(map_id),
+                self.sources.dated_place_jurisdiction(map_id),
+                self.transport.network().unit_at(map_id),
+            ].into_iter().flatten().find(|account| self.population.population_total(account).is_some())
+        } else {
+            None
+        };
+        self.population.inspect_with_mapping(query, self.clock, alias, containing_account, detailed)
     }
 
     pub fn person(&self, person: &str) -> Option<&OpeningPerson> {
@@ -1038,6 +1058,10 @@ impl WorldSources {
             (_, id) => self.polities.contains_key(id).then_some(id),
         })
     }
+
+    fn dated_place_jurisdiction(&self, place_id: &str) -> Option<&str> {
+        self.dated_place_jurisdictions.get(place_id).map(String::as_str)
+    }
 }
 
 impl WorldBootstrap {
@@ -1079,13 +1103,12 @@ impl WorldBootstrap {
         }).collect();
         let mut world = WorldSources {
             polities, places, routes, place_population_units, polity_population_bindings: polity_units,
-            population_name_aliases,
+            population_name_aliases, dated_place_jurisdictions: crate::transport::opening_place_jurisdictions()?,
             population_income, historical_population: None, people: BTreeMap::new(), regimental_opening_stations,
         };
-        let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
         let load_opening = |version| {
             HistoricalOpening::load(&population_assets, version, &populations, |id| world.polities.contains_key(id), |place| {
-                world.opening_parent_at(place).or_else(|| dated_jurisdictions.get(place).map(String::as_str))
+                world.opening_parent_at(place).or_else(|| world.dated_place_jurisdiction(place))
             })
         };
         // Freeze the existing market asset calibration when the census ledger changes.
@@ -1219,10 +1242,9 @@ impl WorldBootstrap {
             if let Some(sources) = archived.get() {
                 sources
             } else {
-                let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
                 let opening = HistoricalOpening::load(&self.population_assets, requested, &self.populations,
                     |id| self.world.polities.contains_key(id), |place| {
-                        self.world.opening_parent_at(place).or_else(|| dated_jurisdictions.get(place).map(String::as_str))
+                        self.world.opening_parent_at(place).or_else(|| self.world.dated_place_jurisdiction(place))
                     })?;
                 archived.get_or_init(|| Arc::new(WorldSources {
                     historical_population: Some(Arc::new(opening)),
@@ -2087,7 +2109,7 @@ mod tests {
     #[test]
     fn historical_sichuan_and_philippines_keep_separate_scope_balances() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(41)).unwrap();
         let old = bootstrap.base_opening_version("country_fra", None, Some(28)).unwrap();
         let sichuan = world.inspect_population("qing_hist_sichuan").unwrap();
         assert_eq!(sichuan.population_total, old.inspect_population("qing_hist_sichuan").unwrap().population_total);
@@ -2111,6 +2133,47 @@ mod tests {
         for unit in ["qing_empire", "united_states_1900", "kingdom_of_spain"] {
             assert_eq!(world.population().population_total(unit), old.population().population_total(unit));
         }
+    }
+
+    #[test]
+    fn opening_v42_philippine_provinces_debit_existing_archipelago() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(42)).unwrap();
+        let old = bootstrap.base_opening_version("country_fra", None, Some(41)).unwrap();
+        let islands = world.inspect_population_brief("cshapes_gw_840").unwrap();
+        let cebu = world.inspect_population_brief("ph_atlas_1900_cebu").unwrap();
+        assert_eq!(islands.population_total, old.population().population_total("cshapes_gw_840"));
+        assert_eq!(islands.population_total, Some(6_961_339));
+        assert_eq!(islands.direct_residents, Some(5_125_411));
+        assert_eq!(islands.child_residents, Some(1_835_928));
+        assert_eq!(cebu.parent_id, Some("cshapes_gw_840"));
+        assert_eq!(cebu.population_total, Some(504_076));
+        assert_eq!(cebu.opening.unwrap().source_id, "ph_philippine_commission_atlas_1900");
+        assert!(old.population().population_total("ph_atlas_1900_cebu").is_none());
+    }
+
+    #[test]
+    fn opening_v42_danish_regions_close_to_the_domestic_census_control() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(42)).unwrap();
+        let denmark = world.inspect_population("state:kingdom_of_denmark").unwrap();
+        assert_eq!(denmark.population_total, Some(2_422_217));
+        assert_eq!(denmark.children.len(), 7);
+        assert_eq!(denmark.child_residents, Some(2_422_217));
+        assert_eq!(denmark.children.iter().map(|child| child.population_total).sum::<u64>(), 2_422_217);
+        assert_eq!(denmark.opening.unwrap().source_id, "dk_statistics_population_1905_table3");
+    }
+
+    #[test]
+    fn city_lookup_preserves_dated_census_with_separate_live_parent() {
+        let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+        let new_york = world.inspect_population_brief("place:new_york").unwrap();
+        assert_eq!(new_york.account_id, Some("us_state_new_york"));
+        assert_eq!(new_york.population_total, None);
+        assert_eq!(new_york.city_reference.unwrap()["population_value"].as_u64(), Some(3_437_202));
+        let manchester = world.inspect_population_brief("place:manchester").unwrap();
+        assert_eq!(manchester.population_total, None);
+        assert!(manchester.city_reference.is_some());
     }
 
     #[test]

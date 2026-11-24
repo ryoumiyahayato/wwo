@@ -1,1030 +1,777 @@
 use crate::{formal_ui::Skin, overlay::Mesh};
 use serde_json::Value;
-use std::cell::{Cell, RefCell};
-use wwo_map_lab::formal_population::{
-    needs::QuantityRange, CohortSex, PopulationInspection, PopulationStructure, SocialDistribution,
+use std::{cell::Cell, cmp::Reverse, collections::BTreeMap};
+use wwo_map_lab::{
+    formal_macro::MacroEconomy,
+    formal_population::{
+        households::{HouseholdNeeds, NeedPeriod},
+        CohortSex, PopulationInspection, PopulationStructure, RecordedPopulationDay, SocialDistribution,
+    },
 };
 
-const INK: [u8; 4] = [243, 236, 221, 255];
-const MUTED: [u8; 4] = [183, 193, 195, 255];
-const GOLD: [u8; 4] = [221, 185, 123, 255];
-const ROW_HEIGHT: f32 = 23.;
-const BODY_TOP: f32 = 105.;
-const FOOTER_HEIGHT: f32 = 33.;
+type Words = (&'static str, &'static str);
+type Color = [u8; 4];
 
-struct Row {
-    label: (&'static str, &'static str),
-    value: String,
-    heading: bool,
+const PANEL: Color = [15, 25, 32, 255];
+const ROW: Color = [23, 35, 43, 255];
+const LINE: Color = [54, 73, 81, 255];
+const INK: Color = [241, 234, 217, 255];
+const MUTED: Color = [172, 188, 192, 255];
+const GOLD: Color = [222, 189, 123, 255];
+const TEAL: Color = [98, 185, 170, 255];
+const BLUE: Color = [106, 155, 201, 255];
+const MISSING: Color = [91, 106, 116, 255];
+const PALETTE: [Color; 4] = [TEAL, GOLD, BLUE, [189, 132, 154, 255]];
+const ROW_H: f32 = 25.;
+const TOP: f32 = 78.;
+const FOOTER: f32 = 27.;
+const PYRAMID_ROWS: usize = 6;
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum Page {
+    #[default]
+    Overview,
+    Structure,
+    Needs,
+    Changes,
+}
+
+const PAGES: [(Page, Words); 4] = [
+    (Page::Overview, ("概况", "Overview")),
+    (Page::Structure, ("结构", "Structure")),
+    (Page::Needs, ("需求", "Needs")),
+    (Page::Changes, ("变动", "Changes")),
+];
+
+const DIMENSIONS: [(&str, Words); 10] = [
+    ("age", ("年龄", "Age")), ("sex", ("性别", "Sex")),
+    ("class", ("阶层", "Class")), ("occupation", ("职业", "Occupation")),
+    ("religion", ("宗教", "Religion")), ("culture", ("文化", "Culture")),
+    ("language", ("语言", "Language")), ("literacy", ("识字", "Literacy")),
+    ("residence", ("城乡", "Residence")), ("legal_estate", ("法律身份", "Legal status")),
+];
+
+#[derive(Default)]
+struct Overview {
+    name: String,
+    current: Option<u64>,
+    named: Option<u64>,
+    direct: Option<u64>,
+    children: Option<u64>,
+    unlocated: Option<u64>,
+    dated: Option<(u64, String)>,
+    account: Option<String>,
+    state_account: bool,
+    parent: Option<String>,
+    version: Option<u32>,
+    relation: &'static str,
+}
+
+struct Group {
+    name: String,
+    count: u64,
     unknown: bool,
 }
 
-struct Layout {
-    width: f32,
-    english: bool,
-    lines: Vec<(String, [u8; 4])>,
-    sections: Vec<usize>,
+impl Group {
+    fn label<'a>(&'a self, skin: &Skin) -> &'a str {
+        if self.unknown { return skin.choose("未分配", "Unassigned"); }
+        match self.name.as_str() {
+            "male" => skin.choose("男性", "Male"),
+            "female" => skin.choose("女性", "Female"),
+            "Urban" => skin.choose("城市", "Urban"),
+            "Rural" => skin.choose("农村", "Rural"),
+            name => name,
+        }
+    }
+}
+
+#[derive(Default)]
+struct Structure {
+    // Sex columns are male, female and unassigned.
+    age: Vec<(String, [u64; 3])>,
+    pyramid: Vec<usize>,
+    pyramid_max: u64,
+    age_unassigned: [u64; 3],
+    by_dimension: BTreeMap<&'static str, Distribution>,
+}
+
+impl Structure {
+    fn from_report(structure: &PopulationStructure<'_>, social: Option<&SocialDistribution<'_>>) -> Self {
+        let mut result = Self::default();
+        let mut sex = [0_u64; 2];
+        let mut age_groups = BTreeMap::<(u16, Option<u16>), [u64; 3]>::new();
+        for cohort in &structure.cohorts {
+            let column = match cohort.sex {
+                Some(CohortSex::Male) => 0,
+                Some(CohortSex::Female) => 1,
+                None => 2,
+            };
+            if column < 2 { sex[column] += cohort.members; }
+            let Some(age) = cohort.age_years else { continue; };
+            age_groups.entry((age.youngest, age.oldest)).or_default()[column] += cohort.members;
+        }
+        result.age = age_groups.into_iter().map(|((youngest, oldest), counts)| {
+            let label = match oldest {
+                Some(oldest) if youngest == oldest => youngest.to_string(),
+                Some(oldest) => format!("{youngest}–{oldest}"),
+                None => format!("{youngest}+"),
+            };
+            (label, counts)
+        }).collect();
+        result.pyramid = (0..result.age.len()).collect();
+        result.pyramid.sort_by_key(|&i| Reverse(result.age[i].1.iter().sum::<u64>()));
+        result.pyramid.truncate(PYRAMID_ROWS);
+        result.pyramid.sort_unstable();
+        result.pyramid_max = result.pyramid.iter().flat_map(|&i| &result.age[i].1[..2]).copied().max().unwrap_or(0);
+        let total = structure.population_total;
+        let sex_totals = [sex[0], sex[1], total - sex[0] - sex[1]];
+        result.age_unassigned = std::array::from_fn(|column| {
+            sex_totals[column] - result.age.iter().map(|(_, counts)| counts[column]).sum::<u64>()
+        });
+        result.by_dimension.insert("sex", Distribution::new(vec![
+            Group { name: "male".into(), count: sex[0], unknown: false },
+            Group { name: "female".into(), count: sex[1], unknown: false },
+            Group { name: String::new(), count: total - sex[0] - sex[1], unknown: true },
+        ]));
+        for (dimension, _) in DIMENSIONS.into_iter().skip(2) {
+            result.by_dimension.insert(dimension, Distribution::new(groups_for(social, dimension, total)));
+        }
+        result
+    }
+}
+
+struct Distribution {
+    groups: Vec<Group>,
+    other: u64,
+}
+
+impl Distribution {
+    fn new(groups: Vec<Group>) -> Self {
+        let other = groups.iter().filter(|group| !group.unknown).skip(3).map(|group| group.count).sum();
+        Self { groups, other }
+    }
+}
+
+fn groups_for(social: Option<&SocialDistribution<'_>>, dimension: &str, total: u64) -> Vec<Group> {
+    let mut counts = BTreeMap::<&str, u64>::new();
+    let unknown = social.and_then(|social| social.dimensions.get(dimension)).map_or(total, |data| {
+        for group in data.by_classification.values() {
+            for (&category, &count) in group {
+                *counts.entry(category).or_default() += count;
+            }
+        }
+        data.unknown_residents
+    });
+    let mut groups: Vec<_> = counts.into_iter()
+        .map(|(name, count)| Group { name: name.into(), count, unknown: false }).collect();
+    groups.sort_by_key(|group| Reverse(group.count));
+    if unknown > 0 {
+        groups.push(Group { name: String::new(), count: unknown, unknown: true });
+    }
+    groups
+}
+
+struct Need {
+    label: String,
+    service: Option<Words>,
+    unit: String,
+    period: NeedPeriod,
+    quantity: f64,
+    eligible: u64,
+}
+
+#[derive(Default)]
+struct Needs {
+    rows: Vec<Need>,
+    classes: Vec<Group>,
+}
+
+impl Needs {
+    fn from_report(needs: &HouseholdNeeds, social: Option<&SocialDistribution<'_>>, market: &MacroEconomy) -> Self {
+        let rows = needs.needs.iter().map(|row| Need {
+            label: row.commodity_id.and_then(|id| market.commodity_info(id))
+                .map_or(row.id, |(name, _, _)| name).into(),
+            service: match row.id {
+                "domestic_water" => Some(("生活用水", "Domestic water")),
+                "occupied_housing_space" => Some(("居住面积", "Housing area")),
+                "occupied_dwellings" => Some(("住房", "Dwellings")),
+                "basic_care" => Some(("基础医疗", "Basic care")),
+                "primary_school_places" => Some(("小学学位", "Primary places")),
+                "local_passenger_trips" => Some(("地方出行", "Local trips")),
+                _ => None,
+            },
+            unit: row.unit.clone(),
+            period: row.period,
+            quantity: row.quantity,
+            eligible: row.eligible_people,
+        }).collect();
+        Self { rows, classes: groups_for(social, "class", needs.residents) }
+    }
 }
 
 pub struct Panel {
     pub input: String,
     pub query: String,
     pub scroll: usize,
-    report: Vec<Row>,
-    reported_query: String,
-    scope_relation: Option<&'static str>,
-    population_total: Option<u64>,
-    layout: RefCell<Option<Layout>>,
+    pub page: Page,
+    pub place_name: Option<String>,
+    pub revision: Option<(i64, usize)>,
+    overview: Overview,
+    structure: Structure,
+    needs: Needs,
+    days: Vec<RecordedPopulationDay>,
+    population_range: Option<(u64, u64)>,
+    dimension: usize,
+    class: usize,
+    mobility_open: bool,
+    failed: bool,
     max_scroll: Cell<usize>,
 }
 
 impl Default for Panel {
     fn default() -> Self {
         Self {
-            input: "world".into(),
-            query: "world".into(),
-            scroll: 0,
-            report: Vec::new(),
-            reported_query: String::new(),
-            scope_relation: None,
-            population_total: None,
-            layout: RefCell::new(None),
-            max_scroll: Cell::new(0),
+            input: String::new(), query: "world".into(), scroll: 0, page: Page::Overview,
+            place_name: None, revision: None, overview: Overview::default(),
+            structure: Structure::default(), needs: Needs::default(), days: Vec::new(),
+            population_range: None,
+            dimension: 0, class: 0, mobility_open: false, failed: false, max_scroll: Cell::new(0),
         }
     }
 }
 
 impl Panel {
-    pub fn set_report(&mut self, inspection: &PopulationInspection<'_>) {
-        if self.reported_query != inspection.query_id {
-            self.scroll = 0;
-            self.reported_query = inspection.query_id.into();
-        }
-        self.report.clear();
-        self.layout.get_mut().take();
-        self.scope_relation = Some(inspection.scope_relation);
-        self.population_total = inspection.population_total;
-
-        self.heading("当前人口", "Current population");
-        self.field("查询对象", "Query", Some(inspection.query_id));
-        let date = inspection.date;
-        self.field(
-            "游戏时间",
-            "Game time",
-            Some(format!(
-                "{:04}-{:02}-{:02} {:02}:{:02}  /  #{}",
-                date.year, date.month, date.day, date.hour, date.minute, inspection.minute,
-            )),
-        );
-        let (zh, en) = match inspection.scope_relation {
-            "world" => ("全球账户", "World accounts"),
-            "statistical_account" => ("正式人口账户", "Population account"),
-            "historical_name_alias_of_account" => (
-                "人口账户的历史地名",
-                "Historical name for this population account",
-            ),
-            "residence_site_in_account" => (
-                "账户内的居住地点，地点人数未知",
-                "Residence site in an account. Site population unknown.",
-            ),
-            "dated_city_reference" => ("历史城市资料", "Dated city evidence"),
-            "dated_evidence_only" => (
-                "历史资料，当前人数未知",
-                "Dated evidence. Current population unknown.",
-            ),
-            _ => ("人口范围未知", "Population scope unknown"),
+    pub fn set_report(
+        &mut self, report: &PopulationInspection<'_>, social: Option<&SocialDistribution<'_>>,
+        needs: Option<&HouseholdNeeds>, market: &MacroEconomy, days: Vec<RecordedPopulationDay>,
+    ) {
+        let city_without_account = report.population_total.is_none() && report.query_id.starts_with("place:");
+        let account = report.account_name.or(report.account_id).map(str::to_owned);
+        let dated = report.city_reference.as_ref().or_else(|| report.archive.as_ref()?.dated_population.first());
+        self.overview = Overview {
+            name: self.place_name.clone().or_else(|| {
+                (!city_without_account).then(|| report.account_name.map(str::to_owned)).flatten()
+            }).unwrap_or_else(|| report.query_id.to_owned()),
+            current: report.population_total,
+            named: report.structure.as_ref().map(|structure| structure.named_residents),
+            direct: report.direct_residents,
+            children: report.child_residents,
+            unlocated: report.opening.and_then(|opening| opening.research_unlocated_balance),
+            dated: dated.and_then(|row| Some((row["population_value"].as_u64()?,
+                row["source_date"].as_str().or(row["date"].as_str()).unwrap_or_default().into()))),
+            account,
+            state_account: report.account_id.is_some_and(|id| id.starts_with("us_state_")),
+            parent: report.parent_id.map(str::to_owned),
+            version: report.opening_version,
+            relation: report.scope_relation,
         };
-        self.field(zh, en, Some(""));
-        let (zh, en) = if inspection.scope_relation == "world" {
-            ("全球人口", "World population")
-        } else {
-            ("账户总人口", "Account population")
-        };
-        self.number(zh, en, inspection.population_total);
-        self.number("直属人数", "Direct residents", inspection.direct_residents);
-        self.field("统计账户", "Account", inspection.account_id);
-        self.field("上级账户", "Parent account", inspection.parent_id);
-        self.field(
-            "地图地点",
-            "Explicit map sites",
-            joined(&inspection.map_place_ids),
-        );
-        self.show_structure(inspection.structure.as_ref());
-        self.show_cohorts(inspection.structure.as_ref());
-        self.show_social(inspection.social.as_ref());
-        self.show_living(inspection);
-        self.show_coverage(inspection.structural_coverage.as_ref());
-        self.show_opening(inspection);
-        self.show_changes(inspection);
-        self.show_history(inspection);
-
-        if !inspection.children.is_empty() {
-            self.heading("下级人口账户", "Child accounts");
-            for child in &inspection.children {
-                self.line(format!(
-                    "{}  |  {}  |  {}",
-                    child.name,
-                    child.unit_id,
-                    number(child.population_total)
-                ));
-            }
+        if self.page == Page::Structure {
+            self.structure = report.structure.as_ref()
+                .map(|structure| Structure::from_report(structure, social)).unwrap_or_default();
         }
+        if self.page == Page::Needs {
+            self.needs = needs.map(|needs| Needs::from_report(needs, social, market)).unwrap_or_default();
+            self.class = self.class.min(self.needs.classes.len());
+        }
+        self.population_range = days.iter().filter_map(|day| day.population).fold(None, |range, value| {
+            Some(range.map_or((value, value), |(min, max): (u64, u64)| (min.min(value), max.max(value))))
+        });
+        self.days = days;
+        self.failed = false;
     }
 
-    fn show_opening(&mut self, inspection: &PopulationInspection<'_>) {
-        self.heading("开局依据", "Opening basis");
-        self.field("账户口径", "Basis", Some(inspection.basis));
-        self.field(
-            "开局版本",
-            "Opening version",
-            inspection.opening_version.map(|v| v.to_string()),
-        );
-        if let Some(opening) = inspection.opening {
-            self.number(
-                "开局人数",
-                "Opening population",
-                Some(opening.population_value),
-            );
-            self.field("资料", "Source", Some(opening.source_id.as_str()));
-            self.field("原表位置", "Locator", Some(opening.locator.as_str()));
-            self.field("方法", "Method", Some(opening.method.as_str()));
-            self.number(
-                "未定位人口",
-                "Unlocated population",
-                opening.research_unlocated_balance,
-            );
-            if let Ok(context) = serde_json::to_value(opening) {
-                self.field("统计日期", "Reference date", value_text(&context["date"]));
-                self.field("统计范围", "Scope", value_text(&context["scope"]));
-                self.field("区间", "Interval", interval(&context));
-                self.field(
-                    "不确定性",
-                    "Uncertainty",
-                    value_text(&context["uncertainty_kind"]),
-                );
-            }
-        } else if let Some(estimate) = inspection.legacy_estimate {
-            self.number(
-                "旧估计人数",
-                "Legacy population estimate",
-                Some(estimate.value),
-            );
-            self.field(
-                "区间",
-                "Interval",
-                Some(format!(
-                    "{}–{}",
-                    number(estimate.lower),
-                    number(estimate.upper)
-                )),
-            );
-            self.field(
-                "统计日期",
-                "Reference date",
-                Some(estimate.calibration_date),
-            );
-            self.field("资料", "Source", Some(estimate.source_table));
-            self.field("方法", "Method", Some(estimate.source_method));
-        } else {
-            self.number("开局人数", "Opening population", None);
-        }
-    }
-
-    fn show_structure(&mut self, structure: Option<&PopulationStructure<'_>>) {
-        self.heading("人口结构", "Population structure");
-        if let Some(structure) = structure {
-            self.number(
-                "有姓名的居民",
-                "Named residents",
-                Some(structure.named_residents),
-            );
-            self.number(
-                "年龄和性别已分组",
-                "Residents in age and sex cohorts",
-                Some(structure.residents_with_cohort_age_and_sex),
-            );
-            self.number(
-                "匿名居民未分配年龄或性别",
-                "Anonymous residents with age or sex unassigned",
-                Some(structure.population_total - structure.named_residents - structure.residents_with_cohort_age_and_sex),
-            );
-            self.number(
-                "分组人口",
-                "Cohort residents",
-                Some(structure.cohort_residents),
-            );
-            self.number(
-                "未分类人口",
-                "Unclassified residents",
-                Some(structure.unclassified_residents),
-            );
-            if let Some(ages) = structure.count_ages(15, 64) {
-                self.heading("潜在劳动年龄（匿名居民 15–64 岁）", "Potential working age (anonymous residents aged 15–64)");
-                self.number("确定在范围内", "Within range", Some(ages.definitely_in_range));
-                self.number("年龄段与范围相交", "Age band overlaps range", Some(ages.possibly_in_range_with_known_age));
-                self.number("年龄未知", "Age unknown", Some(ages.age_unknown));
-            }
-        } else {
-            self.field("结构覆盖", "Structure coverage", None::<String>);
-        }
-    }
-
-    fn show_social(&mut self, social: Option<&SocialDistribution<'_>>) {
-        self.heading("社会属性分配", "Social attributes");
-        let Some(social) = social else {
-            self.field("分配状态", "Allocation status", Some("未分配 / Unassigned"));
-            return;
-        };
-        if social.affected_resident_pools > 0 {
-            self.field(
-                "人口变动后保守下界",
-                "Conservative counts after population changes",
-                Some(""),
-            );
-        }
-        self.field(
-            "各维度分别计数，交叉属性人数未知",
-            "Counts are independent by dimension. Intersections are unknown.",
-            Some(""),
-        );
-        for (key, dimension) in &social.dimensions {
-            let (zh, en) = match *key {
-                "class" => ("社会阶层", "Social class"),
-                "legal_estate" => ("法定身份等级", "Legal estate"),
-                "occupation" => ("职业", "Occupation"),
-                "language" => ("语言", "Language"),
-                "culture" => ("文化与祖源记录", "Culture and reported ancestry"),
-                "religion" => ("宗教", "Religion"),
-                "literacy" => ("识字", "Literacy"),
-                "residence" => ("城乡居住与聚落规模", "Residence and locality size"),
-                "marital_status" => ("婚姻状态", "Marital status"),
-                "household" => ("家庭居住类型", "Household type"),
-                "housing" => ("住房", "Housing"),
-                "property_declaration" => ("登记地产申报", "Registered real property declaration"),
-                _ => continue,
-            };
-            self.heading(zh, en);
-            if dimension.assigned_residents == 0 {
-                self.field("未分配", "Unassigned", Some(""));
-            }
-            self.number("已分配人数", "Assigned residents", Some(dimension.assigned_residents));
-            self.number("未知人数", "Unknown residents", Some(dimension.unknown_residents));
-            for (classification, categories) in &dimension.by_classification {
-                if !categories.is_empty() {
-                    self.field("原表分类", "Census classification", Some(*classification));
-                    for (category, count) in categories {
-                        self.line(format!("{category}  |  {}", number(*count)));
-                    }
-                }
-            }
-            if !dimension.source_ids.is_empty() {
-                self.field("资料", "Sources", Some(dimension.source_ids.iter().copied().collect::<Vec<_>>().join("  |  ")));
-            }
-            if let Some(source) = dimension.direct_opening_distribution {
-                self.field("观测日期", "Observation date", Some(source.observed_date.as_str()));
-                self.field("观测范围", "Observed scope", Some(source.observed_scope.as_str()));
-                self.number("原表统计适用人数", "Census denominator", Some(source.observed_total));
-                self.field("原表位置", "Locator", Some(source.locator.as_str()));
-                self.field("分配方法", "Allocation method", Some(source.method.as_str()));
-                self.field("原表定义", "Source definition", Some(source.definition.as_str()));
-            }
-        }
-    }
-
-    fn show_cohorts(&mut self, structure: Option<&PopulationStructure<'_>>) {
-        let Some(structure) = structure.filter(|structure| !structure.cohorts.is_empty()) else {
-            return;
-        };
-        self.heading("年龄与性别分组", "Age and sex cohorts");
-        for cohort in &structure.cohorts {
-            let age = cohort.age_years.map(|age| match age.oldest {
-                Some(oldest) if oldest != age.youngest => format!("{}–{oldest}", age.youngest),
-                Some(_) => age.youngest.to_string(),
-                None => format!("{}+", age.youngest),
-            });
-            let (zh, en) = match cohort.sex {
-                Some(CohortSex::Male) => ("M", "Male"),
-                Some(CohortSex::Female) => ("F", "Female"),
-                None => ("性别未知", "Sex unknown"),
-            };
-            let mut value = format!(
-                "{}  |  {}  |  {:?}",
-                number(cohort.members),
-                cohort.unit_id,
-                cohort.provenance
-            );
-            if let Some(evidence) = &cohort.evidence {
-                value.push_str(&format!(
-                    "  |  {} ({})",
-                    evidence.observed_date, evidence.source_id
-                ));
-            }
-            self.field(zh, en, Some(value));
-            self.field("年龄", "Age", age);
-            if let Some(evidence) = &cohort.evidence {
-                self.field("原表位置", "Locator", Some(evidence.locator));
-                self.field("分配方法", "Allocation method", Some(evidence.method));
-                self.field("不确定性", "Uncertainty", Some(evidence.uncertainty));
-            }
-        }
-    }
-
-    fn show_living(&mut self, inspection: &PopulationInspection<'_>) {
-        self.heading("生活条件与需要", "Living conditions and needs");
-        if let Some(structure) = &inspection.structure {
-            let energy = &structure.published_energy_reference;
-            let protein = &structure.published_protein_reference;
-            let water = &structure.published_efsa_water_reference;
-            self.heading("按人口属性计算的条件需求", "Conditional needs by population attributes");
-            for ((zh, en), known, unknown, quantity, unit) in [
-                (("膳食能量", "Food energy"), energy.people_with_reference, energy.people_without_reference,
-                    energy.conditional_kcal_per_day, "kcal/day"),
-                (("蛋白质", "Protein"), protein.people_with_reference, protein.people_without_reference,
-                    protein.conditional_grams_per_day, "g/day"),
-                (("食物及饮品水量", "Water from food and beverages"), water.people_with_reference, water.people_without_reference,
-                    water.moderate_environment_pal_1_6_total_ingested_litres_per_day, "L/day"),
-            ] {
-                self.field(zh, en, quantity.map(|range| daily_quantity(range, unit)));
-                self.number("可计算人数", "Residents with a reference", Some(known));
-                self.number("未知人数", "Unknown residents", Some(unknown));
-            }
-        }
-        self.heading("历史饮食习惯及禁忌", "Historical dietary customs and restrictions");
-        if inspection.dietary_norms.is_empty() {
-            self.field("适用人群未分配", "Applicable population unassigned", Some(""));
-        }
-        for norm in &inspection.dietary_norms {
-            self.field("饮食规范", "Dietary norm", Some(norm.trait_id));
-            self.number("登记宗教可能适用人数", "Residents with matching recorded religion", Some(norm.residents_with_matching_religion));
-            self.number("宗教未分配人数", "Residents with religion unassigned", Some(norm.residents_with_unassigned_religion));
-            self.number("实际遵行人数", "Observed adherents", norm.observed_adherents);
-        }
-        let Ok(living) = serde_json::to_value(&inspection.living_conditions) else {
-            return;
-        };
-        self.field(
-            "历史观测覆盖",
-            "Historical observation coverage",
-            living["historical_actual_coverage"]
-                .as_str()
-                .filter(|&value| value != "unknown"),
-        );
-        if let Some(gaps) = living["historical_quantity_gaps"]
-            .as_array()
-            .filter(|gaps| !gaps.is_empty())
-        {
-            self.heading("历史数量缺项", "Missing historical quantities");
-            for gap in gaps {
-                self.record(gap, &["category", "missing_inputs"]);
-            }
-        }
-        if let Some(references) = living["references"]
-            .as_array()
-            .filter(|entries| !entries.is_empty())
-        {
-            self.heading(
-                "现代与临时安置条件参照",
-                "Conditional modern and emergency references",
-            );
-            for entry in references {
-                self.record(
-                    entry,
-                    &[
-                        "category",
-                        "context",
-                        "quantity",
-                        "unit",
-                        "conditions",
-                        "source",
-                    ],
-                );
-            }
-        }
-    }
-
-    fn show_changes(&mut self, inspection: &PopulationInspection<'_>) {
-        self.heading("近期人口变化", "Recent population changes");
-        for change in &inspection.recent_changes {
-            let mut value = format!("#{}  |  {}", change.minute, change.kind);
-            if let Some(unit) = change.unit_id {
-                value.push_str(&format!("  |  {unit}"));
-            }
-            if let Some(destination) = change.destination {
-                value.push_str(&format!(" → {destination}"));
-            }
-            match change.members {
-                Some(members) => self.line(format!("{value}  |  {}", number(members))),
-                None => self.field("人数未知", "Count unknown", Some(value)),
-            }
-        }
-        if inspection.archived_change_details_unknown {
-            self.field("更早的变化明细", "Earlier change details", None::<String>);
-        } else if inspection.recent_changes.is_empty() {
-            self.field("无近期变动记录", "No recent entries", Some(""));
-        }
-    }
-
-    fn show_history(&mut self, inspection: &PopulationInspection<'_>) {
-        if let Some(city) = &inspection.city_reference {
-            self.heading("城市历史统计", "Dated city evidence");
-            self.record(
-                city,
-                &[
-                    "city_key",
-                    "representative_record",
-                    "source_date",
-                    "source_parent_id",
-                    "source_id",
-                    "definition",
-                    "evidence",
-                    "status",
-                ],
-            );
-            self.number(
-                "历史城市人口",
-                "Dated city population",
-                city["population_value"].as_u64(),
-            );
-        }
-        if let Some(archive) = &inspection.archive {
-            for (labels, records, fields) in [
-                (
-                    ("地图与统计地区", "Map and statistical identities"),
-                    &archive.geographies,
-                    &[
-                        "catalogue",
-                        "status",
-                        "geometry_status",
-                        "parent",
-                        "parent_ids",
-                        "opening_ids",
-                        "opening_id",
-                        "shared_opening_ids",
-                        "historical_observation_ids",
-                        "study_candidates",
-                        "note",
-                    ][..],
-                ),
-                (
-                    ("下级历史统计范围", "Child historical scopes"),
-                    &archive.geography_children,
-                    &[
-                        "catalogue",
-                        "status",
-                        "geometry_status",
-                        "parent",
-                        "historical_observation_ids",
-                        "note",
-                    ][..],
-                ),
-                (
-                    ("历史人口观测", "Dated population observations"),
-                    &archive.dated_population,
-                    &[
-                        "date",
-                        "date_precision",
-                        "enumeration_date",
-                        "kind",
-                        "population_value",
-                        "population_lower",
-                        "population_upper",
-                        "parent_id",
-                        "wwo_id",
-                        "source_id",
-                        "locator",
-                        "definition",
-                        "method",
-                        "quality",
-                        "mapping_status",
-                        "breakdowns",
-                        "component_population_value",
-                        "published_total_minus_components",
-                    ][..],
-                ),
-                (
-                    ("历史人口结构", "Dated demographic observations"),
-                    &archive.dated_structure,
-                    &[
-                        "date",
-                        "dimension",
-                        "subcategory",
-                        "dialect",
-                        "measure",
-                        "category",
-                        "values",
-                        "source_id",
-                        "locator",
-                        "published_scope",
-                        "definition",
-                    ][..],
-                ),
-                (
-                    ("研究候选统计", "Candidate research statistics"),
-                    &archive.candidate_research_population,
-                    &[
-                        "date",
-                        "kind",
-                        "population_value",
-                        "population_lower",
-                        "population_upper",
-                        "source_id",
-                        "locator",
-                        "method",
-                        "quality",
-                        "parent_id",
-                        "wwo_id",
-                        "mapping_status",
-                        "scope_note",
-                        "definition",
-                    ][..],
-                ),
-                (
-                    ("原始资料", "Sources"),
-                    &archive.sources,
-                    &[
-                        "publisher",
-                        "url",
-                        "locator",
-                        "rights",
-                        "date_note",
-                        "boundary_note",
-                        "references",
-                        "reference_date",
-                        "license",
-                        "contemporary_cross_check",
-                        "boundary_sources",
-                    ][..],
-                ),
-            ] {
-                if !records.is_empty() {
-                    self.heading(labels.0, labels.1);
-                    for record in records {
-                        self.record(record, fields);
-                    }
-                }
-            }
-        }
-        if !inspection.traits.is_empty() {
-            self.heading("相关历史统计", "Other historical observations");
-            for record in &inspection.traits {
-                self.record(
-                    record,
-                    &[
-                        "category",
-                        "evidence_kind",
-                        "observed_unit_id",
-                        "place_id",
-                        "region",
-                        "scope",
-                        "observation",
-                        "opening_links",
-                        "aggregation",
-                        "source_id",
-                        "locator",
-                    ],
-                );
-                self.field(
-                    "观测日期",
-                    "Observation date",
-                    value_text(&record["observed_date"]),
-                );
-                self.number(
-                    "按此方式的人数",
-                    "Observed adherents",
-                    record["adherence"]["count"].as_u64(),
-                );
-                self.number(
-                    "适用人数",
-                    "Population to which it applies",
-                    record["adherence"]["denominator"].as_u64(),
-                );
-            }
-        }
-    }
-
-    fn show_coverage(&mut self, coverage: Option<&Value>) {
-        self.heading("历史结构资料覆盖", "Historical structure coverage");
-        let Some(coverage) = coverage else {
-            self.field("覆盖范围", "Coverage scope", None::<String>);
-            return;
-        };
-        if let Some(dimensions) = coverage["scope"]["dimensions"].as_object() {
-            for (dimension, row) in dimensions {
-                self.line(dimension.replace('_', " "));
-                self.number(
-                    "已复核资料表",
-                    "Reviewed panels",
-                    row["reviewed_panels"]
-                        .as_array()
-                        .map(|items| items.len() as u64),
-                );
-                self.number(
-                    "候选资料表",
-                    "Candidate panels",
-                    row["candidate_panels"]
-                        .as_array()
-                        .map(|items| items.len() as u64),
-                );
-            }
-        }
-        if let Some(panels) = coverage["panels"]
-            .as_object()
-            .filter(|panels| !panels.is_empty())
-        {
-            self.heading("历史结构资料表", "Dated demographic panels");
-            for panel in panels.values() {
-                self.record(
-                    panel,
-                    &[
-                        "dimension",
-                        "status",
-                        "observed_unit_id",
-                        "observed_date",
-                        "source_id",
-                        "locator",
-                        "classification_id",
-                        "eligible_universe",
-                        "measure_unit",
-                        "directly_classified_count",
-                        "category_relationship",
-                        "categories",
-                    ],
-                );
-                self.number(
-                    "统计适用人数",
-                    "Eligible denominator",
-                    panel["eligible_denominator"].as_u64(),
-                );
-            }
-        }
-    }
-
-    pub fn set_error(&mut self, message: impl Into<String>) {
-        self.report.clear();
-        self.layout.get_mut().take();
+    pub fn set_error(&mut self) {
+        self.failed = true;
+        self.overview = Overview::default();
         self.scroll = 0;
-        self.reported_query.clear();
-        self.scope_relation = None;
-        self.population_total = None;
-        self.field("查询失败", "Query failed", Some(message.into()));
     }
 
-    pub(crate) fn status(&self) -> Value {
-        let layout = self.layout.borrow();
-        let first = self.scroll.min(self.max_scroll.get());
-        let visible_preview: Vec<_> = layout
-            .as_ref()
-            .into_iter()
-            .flat_map(|layout| {
-                layout
-                    .lines
-                    .iter()
-                    .skip(first)
-                    .take(4)
-                    .map(|(line, _)| line)
-            })
-            .collect();
-        serde_json::json!({
-            "query": self.query,
-            "input": self.input,
-            "scroll": first,
-            "scope_relation": self.scope_relation,
-            "population_total": self.population_total,
-            "visible_preview": visible_preview,
-        })
+    pub fn contains(&self, size: [u32; 2], point: [f64; 2]) -> bool {
+        inside(bounds(size), point)
     }
 
-    fn heading(&mut self, zh: &'static str, en: &'static str) {
-        self.report.push(Row {
-            label: (zh, en),
-            value: String::new(),
-            heading: true,
-            unknown: false,
-        });
+    pub fn page_at(&self, size: [u32; 2], point: [f64; 2]) -> Option<Page> {
+        let [x, y, w, _] = bounds(size);
+        let width = (w - 24.) / PAGES.len() as f32;
+        PAGES.iter().enumerate().find_map(|(i, &(page, _))|
+            inside([x + 12. + i as f32 * width, y + 42., width, 31.], point).then_some(page))
     }
 
-    fn field<S: Into<String>>(&mut self, zh: &'static str, en: &'static str, value: Option<S>) {
-        self.report.push(Row {
-            label: (zh, en),
-            heading: false,
-            unknown: value.is_none(),
-            value: value.map(Into::into).unwrap_or_default(),
-        });
+    pub fn next_page(&self) -> Page {
+        let index = PAGES.iter().position(|&(page, _)| page == self.page).unwrap_or(0);
+        PAGES[(index + 1) % PAGES.len()].0
     }
 
-    fn number(&mut self, zh: &'static str, en: &'static str, value: Option<u64>) {
-        self.field(zh, en, value.map(number));
+    pub fn reset_location(&mut self) {
+        self.scroll = 0;
+        self.class = 0;
     }
 
-    fn line(&mut self, value: String) {
-        self.field("", "", Some(value));
-    }
-
-    fn record(&mut self, record: &Value, fields: &[&str]) {
-        let identity = ["id", "panel_id", "record_id", "unit_id"]
-            .into_iter()
-            .find_map(|key| record[key].as_str());
-        let title = ["title", "name"]
-            .into_iter()
-            .find_map(|key| record[key].as_str());
-        let caption = match (title, identity) {
-            (Some(title), Some(id)) if title != id => format!("{title}  |  {id}"),
-            _ => title.or(identity).unwrap_or_default().into(),
-        };
-        if !caption.is_empty() {
-            self.line(caption);
-        }
-        for key in fields {
-            if *key == "population_value" {
-                let (zh, en) = match record["kind"].as_str() {
-                    Some("city") => ("历史城市人口", "Dated city population"),
-                    Some("province") => ("历史省人口", "Dated province population"),
-                    Some("admin") => ("历史行政区总人口", "Dated administrative total"),
-                    Some("district") => ("历史地区人口", "Dated district population"),
-                    _ => ("历史统计人口", "Dated population"),
-                };
-                self.number(zh, en, record[*key].as_u64());
-                continue;
+    pub fn click_control(&mut self, size: [u32; 2], point: [f64; 2]) {
+        let [x, y, w, _] = self.body(size);
+        match self.page {
+            Page::Structure => {
+                if let Some(index) = (0..DIMENSIONS.len()).find(|&i| inside(dimension_rect(x, y, w, i), point)) {
+                    self.dimension = index;
+                    self.scroll = 0;
+                }
             }
-            if let Some(value) = value_text(&record[*key]) {
-                self.line(format!("  {}  {value}", key.replace('_', " ")));
+            Page::Needs if !self.needs.classes.is_empty() => {
+                let count = self.needs.classes.len() + 1;
+                if inside([x + w - 63., y, 30., 28.], point) {
+                    self.class = (self.class + count - 1) % count;
+                    self.scroll = 0;
+                } else if inside([x + w - 30., y, 30., 28.], point) {
+                    self.class = (self.class + 1) % count;
+                    self.scroll = 0;
+                }
             }
+            Page::Changes if inside([x, y + 112., w, 28.], point) => {
+                self.mobility_open = !self.mobility_open;
+                self.scroll = 0;
+            }
+            _ => {}
         }
     }
 
     pub(crate) fn scroll_by(&mut self, step: isize) {
-        let limit = self.max_scroll.get();
-        self.scroll = self
-            .scroll
-            .min(limit)
-            .saturating_add_signed(step)
-            .min(limit);
+        self.scroll = self.scroll.min(self.max_scroll.get()).saturating_add_signed(step).min(self.max_scroll.get());
     }
 
-    pub(crate) fn jump_section(&mut self, direction: isize) {
-        let Some(layout) = self.layout.get_mut().as_ref() else {
-            return;
-        };
-        let limit = self.max_scroll.get();
-        let first = self.scroll.min(limit);
-        let target = match direction.signum() {
-            1 => layout
-                .sections
-                .iter()
-                .copied()
-                .find(|&row| row > first)
-                .unwrap_or(limit),
-            -1 => layout
-                .sections
-                .iter()
-                .rev()
-                .copied()
-                .find(|&row| row < first)
-                .unwrap_or(0),
-            _ => first,
-        };
-        self.scroll = target.min(limit);
+    pub(crate) fn status(&self) -> Value {
+        serde_json::json!({
+            "query": self.query, "input": self.input, "scroll": self.scroll,
+            "scope_relation": self.overview.relation, "page": format!("{:?}", self.page),
+            "population_total": self.overview.current, "dimension": DIMENSIONS[self.dimension].0,
+            "class_selection": self.class, "recorded_days": self.days.len(),
+        })
     }
 
-    pub fn contains(&self, size: [u32; 2], [px, py]: [f64; 2]) -> bool {
-        let [x, y, w, h] = bounds(size).map(f64::from);
-        w >= 70. && h >= 98. && px >= x && py >= y && px < x + w && py < y + h
+    fn body(&self, size: [u32; 2]) -> [f32; 4] {
+        let [x, y, w, h] = bounds(size);
+        [x + 12., y + TOP, w - 24., (h - TOP - FOOTER).max(0.)]
     }
 
     pub fn draw(&self, size: [u32; 2], skin: &Skin, background: &mut Mesh, text: &mut Mesh) {
         let [x, y, w, h] = bounds(size);
-        if w < 70. || h < 98. {
-            return;
-        }
-        background.rect(x, y, w, h, [13, 22, 29, 250]);
-        background.rect(x, y, w, 2., GOLD);
-        background.rect(x + 15., y + 41., w - 30., 33., [24, 38, 44, 255]);
-        background.rect(x + 15., y + 97., w - 30., 1., [83, 95, 95, 255]);
-        let left = x + 19.;
-        let text_width = w - 43.;
-        skin.text(
-            text,
-            skin.choose("人口调试", "Population Debug"),
-            1,
-            [left, y + 10.],
-            text_width,
-            GOLD,
-        );
-        let (query_text, query_color) = if self.input.is_empty() {
-            (&self.query, MUTED)
-        } else {
-            (&self.input, INK)
+        if w < 240. || h < 150. { return; }
+        let mut ui = Surface { skin, fill: background, text };
+        ui.fill.rect(x, y, w, h, PANEL);
+        ui.fill.rect(x, y, w, 2., GOLD);
+        let title = match self.overview.name.as_str() {
+            "world" => skin.choose("全球", "World"),
+            "unmapped" | "" => skin.choose("未选地区", "No area selected"),
+            name => name,
         };
-        let query = format!("{}  {query_text}", skin.choose("查询", "Query"));
-        skin.text(text, &query, 0, [left, y + 47.], text_width, query_color);
-        let help = skin.choose(
-            "回车查询 · 地图选择 · 滚轮查看 · 左右键切换 · F7 关闭",
-            "Enter to query · Select on map · Scroll · Left/Right sections · F7 to close",
-        );
-        skin.text(text, help, 0, [left, y + 75.], text_width, MUTED);
-        let visible = ((h - BODY_TOP - FOOTER_HEIGHT) / ROW_HEIGHT)
-            .floor()
-            .max(0.) as usize;
-        if visible == 0 {
+        ui.label(("人口", "Population"), [x + 13., y + 11., 80., 19.], GOLD);
+        ui.text(title, [x + 95., y + 11., w - 108., 19.], INK);
+        let tab_w = (w - 24.) / PAGES.len() as f32;
+        for (index, &(page, label)) in PAGES.iter().enumerate() {
+            ui.button(label, [x + 12. + tab_w * index as f32, y + 42., tab_w - 2., 30.], page == self.page);
+        }
+        if self.failed {
+            ui.label(("查询失败", "Query failed"), self.body(size), MUTED);
+        } else {
+            let body = self.body(size);
+            match self.page {
+                Page::Overview => self.draw_overview(&mut ui, body),
+                Page::Structure => self.draw_structure(&mut ui, body),
+                Page::Needs => self.draw_needs(&mut ui, body),
+                Page::Changes => self.draw_changes(&mut ui, body),
+            }
+        }
+        let footer = [x + 12., y + h - FOOTER + 3., w - 24., 20.];
+        if self.input.is_empty() {
+            ui.label(("点击地图切换地区  ·  右击国家  ·  F7 关闭",
+                "Select an area  ·  Right-click a country  ·  F7 closes"), footer, MUTED);
+        } else {
+            ui.text(&self.input, footer, GOLD);
+        }
+    }
+
+    fn draw_overview(&self, ui: &mut Surface<'_>, [x, y, w, h]: [f32; 4]) {
+        self.max_scroll.set(0);
+        let data = &self.overview;
+        let present = data.current.is_some();
+        let local_label = if data.relation == "world" { ("全球总人口", "World population") }
+            else { ("当地总人口", "Local population") };
+        ui.fill.rect(x, y, w, 68., ROW);
+        ui.label(local_label, [x + 11., y + 7., w - 22., 17.], MUTED);
+        ui.text(&data.current.map(number).unwrap_or_else(|| ui.word(("未知", "Unknown")).into()),
+            [x + 11., y + 28., w - 22., 22.], INK);
+        if !present {
+            let mut top = y + 80.;
+            if let Some((population, date)) = &data.dated {
+                ui.pair(("历史人口 · 未分配", "Dated population · unallocated"), &number(*population), [x, top, w, 24.]);
+                top += 25.;
+                ui.pair(("统计日期", "Census date"), date, [x, top, w, 24.]);
+                top += 25.;
+            }
+            if let Some(account) = &data.account {
+                let label = if data.state_account { ("所属州统计账户", "Containing U.S. state account") }
+                    else { ("所属统计账户", "Containing statistical account") };
+                ui.label(label, [x + 4., top, w - 8., 19.], MUTED);
+                ui.text(account, [x + 4., top + 22., w - 8., 20.], INK);
+            }
             return;
         }
-
-        let mut cache = self.layout.borrow_mut();
-        let layout = cache.get_or_insert_with(|| self.layout(skin, text_width));
-        if layout.width != text_width || layout.english != skin.english() {
-            *layout = self.layout(skin, text_width);
+        let half = w / 2.;
+        let rows = [
+            (("具名人口", "Named"), data.named),
+            (("未具名人口", "Unnamed"), data.current.zip(data.named).map(|(total, named)| total - named)),
+            (("直属人口", "Direct residents"), data.direct),
+            (("下级地区", "Child accounts"), data.children),
+            (("未定位余额", "Unlocated balance"), data.unlocated),
+            (("底账版本", "Opening version"), data.version.map(u64::from)),
+        ];
+        for (i, (label, count)) in rows.into_iter().enumerate() {
+            let left = x + (i % 2) as f32 * half;
+            let top = y + 80. + (i / 2) as f32 * 62.;
+            if top + 54. > y + h { break; }
+            ui.fill.rect(left, top, half - 5., 54., ROW);
+            ui.label(label, [left + 9., top + 5., half - 21., 16.], MUTED);
+            ui.text(&option_number(count), [left + 9., top + 24., half - 21., 19.], INK);
         }
-        let limit = layout.lines.len().saturating_sub(visible);
+        if y + 305. <= y + h {
+            if let Some(parent) = &data.parent {
+                ui.pair(("上级账户", "Parent account"), parent, [x, y + 271., w, 24.]);
+            }
+        }
+    }
+
+    fn draw_structure(&self, ui: &mut Surface<'_>, [x, y, w, h]: [f32; 4]) {
+        for (i, &(_, label)) in DIMENSIONS.iter().enumerate() {
+            ui.button(label, dimension_rect(x, y, w, i), self.dimension == i);
+        }
+        let Some(total) = self.overview.current else {
+            self.max_scroll.set(0);
+            ui.label(("当地人口未分配", "Local population unallocated"), [x, y + 63., w, 22.], MUTED);
+            return;
+        };
+        let start = y + 56.;
+        let skin = ui.skin;
+        let chart = (h - 180.).clamp(72., 150.);
+        let table_y = start + chart + 6.;
+        let table_h = (y + h - table_y).max(0.);
+        if self.dimension == 0 {
+            self.draw_pyramid(ui, [x, start, w, chart]);
+            let widths = [0.18, 0.205, 0.205, 0.205, 0.205];
+            let headers = [("年龄", "Age"), ("男性", "Male"), ("女性", "Female"),
+                ("未知性别", "Sex unknown"), ("人口比例", "Share")];
+            let rows = std::iter::once((skin.choose("年龄未分组", "Unclassified age"), &self.structure.age_unassigned))
+                .chain(self.structure.age.iter().map(|(label, counts)| (label.as_str(), counts)))
+                .map(|(label, counts)| vec![label.into(), number(counts[0]), number(counts[1]),
+                    number(counts[2]), share(counts.iter().sum(), total)]);
+            self.table(ui, [x, table_y, w, table_h], &headers, &widths, self.structure.age.len() + 1, rows);
+        } else if let Some(distribution) = self.structure.by_dimension.get(DIMENSIONS[self.dimension].0) {
+            self.draw_pie(ui, [x, start, w, chart], distribution, total);
+            let headers = [("类别", "Category"), ("人数", "Residents"), ("比例", "Share")];
+            let widths = [0.58, 0.25, 0.17];
+            let groups = &distribution.groups;
+            let rows = groups.iter().map(|group| vec![group.label(skin).into(), number(group.count), share(group.count, total)]);
+            self.table(ui, [x, table_y, w, table_h], &headers, &widths, groups.len(), rows);
+        }
+    }
+
+    fn draw_pyramid(&self, ui: &mut Surface<'_>, [x, y, w, h]: [f32; 4]) {
+        ui.fill.rect(x, y, w, h, ROW);
+        let axis = x + w / 2.;
+        let pad = 28.;
+        let bar = (w / 2. - pad).max(0.);
+        let max = self.structure.pyramid_max;
+        ui.label(("男性", "Male"), [x + 11., y + 3., 75., 16.], TEAL);
+        ui.right(ui.word(("女性", "Female")), [x + w - 85., y + 3., 72., 16.], GOLD);
+        if max == 0 {
+            ui.center(ui.word(("没有年龄与性别联合数据", "No joint age and sex data")), [x, y + h / 2. - 9., w, 20.], MUTED);
+            return;
+        }
+        let label = if self.structure.age.len() > PYRAMID_ROWS {
+            ("人数最多的六个年龄组", "Six largest age groups")
+        } else {
+            ("底账年龄组", "Ledger age groups")
+        };
+        ui.center(ui.word(label), [x, y + 3., w, 16.], MUTED);
+        let span = ((h - 26.) / self.structure.pyramid.len() as f32).min(30.);
+        for (i, &index) in self.structure.pyramid.iter().rev().enumerate() {
+            let (label, values) = &self.structure.age[index];
+            let top = y + 23. + i as f32 * span;
+            let width = |value| bar * value as f32 / max as f32;
+            ui.fill.rect(axis - pad - width(values[0]), top, width(values[0]), (span - 2.).max(1.), TEAL);
+            ui.fill.rect(axis + pad, top, width(values[1]), (span - 2.).max(1.), GOLD);
+            ui.center(label, [axis - pad, top - 2., 2. * pad, span], MUTED);
+        }
+    }
+
+    fn draw_pie(&self, ui: &mut Surface<'_>, [x, y, w, h]: [f32; 4], distribution: &Distribution, total: u64) {
+        ui.fill.rect(x, y, w, h, ROW);
+        if total == 0 { return; }
+        let groups = &distribution.groups;
+        let known = groups.iter().filter(|group| !group.unknown && group.count > 0);
+        let mut slices: Vec<_> = known.take(3).enumerate()
+            .map(|(i, group)| (group.label(ui.skin), group.count, PALETTE[i])).collect();
+        if distribution.other > 0 { slices.push((ui.word(("其他", "Other")), distribution.other, PALETTE[3])); }
+        if let Some(group) = groups.iter().find(|group| group.unknown && group.count > 0) {
+            slices.push((group.label(ui.skin), group.count, MISSING));
+        }
+        let r = (h / 2. - 8.).max(1.);
+        let center = [x + r + 16., y + h / 2.];
+        let mut angle = -std::f32::consts::FRAC_PI_2;
+        let spacing = (h / slices.len().max(1) as f32).min(22.);
+        for (i, (name, count, color)) in slices.into_iter().enumerate() {
+            let sweep = std::f32::consts::TAU * count as f32 / total as f32;
+            let steps = ((sweep * 10.).ceil() as usize).max(2);
+            let mut points = Vec::with_capacity(steps + 2);
+            points.push(center);
+            points.extend((0..=steps).map(|j| {
+                let a = angle + sweep * j as f32 / steps as f32;
+                [center[0] + r * a.cos(), center[1] + r * a.sin()]
+            }));
+            ui.fill.shape(&points, color);
+            angle += sweep;
+            let left = x + 2. * r + 30.;
+            let top = y + 5. + i as f32 * spacing;
+            ui.fill.rect(left, top + 7., 8., 8., color);
+            ui.text(name, [left + 13., top, w - (left - x) - 78., spacing], INK);
+            ui.right(&share(count, total), [x + w - 66., top, 55., spacing], MUTED);
+        }
+    }
+
+    fn draw_needs(&self, ui: &mut Surface<'_>, [x, y, w, h]: [f32; 4]) {
+        let classes = &self.needs.classes;
+        let group = self.class.checked_sub(1).and_then(|i| classes.get(i));
+        let filter = group.map_or(ui.word(("全部人口", "All residents")), |group| group.label(ui.skin));
+        ui.fill.rect(x, y, w, 28., ROW);
+        ui.label(("阶层", "Class"), [x + 7., y + 3., 65., 20.], MUTED);
+        ui.text(filter, [x + 72., y + 3., w - 220., 20.], INK);
+        if let Some(group) = group {
+            ui.right(&number(group.count), [x + w - 149., y + 3., 77., 20.], MUTED);
+        }
+        if !classes.is_empty() {
+            ui.button(("‹", "‹"), [x + w - 63., y, 30., 28.], false);
+            ui.button(("›", "›"), [x + w - 30., y, 30., 28.], false);
+        }
+        let note = if group.is_some() {
+            ("该阶层需求未计算", "Requirements for this class have not been calculated")
+        } else if self.needs.rows.is_empty() {
+            ("当地人口未分配", "Local population unallocated")
+        } else {
+            ("需求为参考量  ·  实际消费与满足率未统计", "Reference needs  ·  Actual consumption and fulfilment unmeasured")
+        };
+        ui.label(note, [x + 2., y + 33., w - 4., 22.], MUTED);
+        let headers = [("商品或服务", "Good or service"), ("人均需求", "Per person"),
+            ("总需求", "Total need"), ("实际消费", "Actual use"), ("满足率", "Fulfilled")];
+        let widths = [0.245, 0.218, 0.247, 0.166, 0.124];
+        let skin = ui.skin;
+        let rows = self.needs.rows.iter().map(|need| {
+            let allowed = group.is_none();
+            let individual = (allowed && need.eligible != 0).then(|| need.quantity / need.eligible as f64);
+            vec![need.service.map_or(need.label.as_str(), |label| skin.choose(label.0, label.1)).into(),
+                quantity(individual, &need.unit, need.period, true, skin),
+                quantity(allowed.then_some(need.quantity), &need.unit, need.period, false, skin),
+                "—".into(), "—".into()]
+        });
+        self.table(ui, [x, y + 58., w, (h - 58.).max(0.)], &headers, &widths, self.needs.rows.len(), rows);
+    }
+
+    fn draw_changes(&self, ui: &mut Surface<'_>, [x, y, w, h]: [f32; 4]) {
+        ui.fill.rect(x, y, w, 106., ROW);
+        ui.label(("总人口 · 最近 14 日", "Total population · last 14 days"), [x + 8., y + 3., w - 16., 17.], MUTED);
+        if let Some((min, max)) = self.population_range {
+            let plot = [x + 112., y + 25., (w - 126.).max(0.), 56.];
+            ui.label(("日期", "Date"), [x + 8., y + 86., 68., 17.], MUTED);
+            ui.right(&number(max), [x + 3., y + 21., 101., 17.], MUTED);
+            if min != max { ui.right(&number(min), [x + 3., y + 65., 101., 17.], MUTED); }
+            for offset in [0., 28., 56.] {
+                ui.fill.line([plot[0], plot[1] + offset], [plot[0] + plot[2], plot[1] + offset], 1., LINE);
+            }
+            let position = |i: usize, value: u64| [
+                plot[0] + if self.days.len() == 1 { plot[2] / 2. }
+                    else { plot[2] * i as f32 / (self.days.len() - 1) as f32 },
+                plot[1] + if max == min { plot[3] / 2. }
+                    else { plot[3] * (max - value) as f32 / (max - min) as f32 },
+            ];
+            let mut previous = None;
+            for (i, day) in self.days.iter().enumerate() {
+                let current = day.population.map(|value| position(i, value));
+                if let Some(point) = current {
+                    if let Some(before) = previous { ui.fill.line(before, point, 2.0, TEAL); }
+                    ui.fill.rect(point[0] - 2., point[1] - 2., 4., 4., TEAL);
+                }
+                previous = current;
+            }
+            if let Some(first) = self.days.first() {
+                ui.text(&short_date(first), [plot[0], y + 86., 55., 17.], MUTED);
+            }
+            if let Some(last) = self.days.last().filter(|_| self.days.len() > 1) {
+                ui.right(&short_date(last), [x + w - 65., y + 86., 55., 17.], MUTED);
+            }
+        } else {
+            ui.label(("当地人口未分配", "Local population unallocated"), [x + 9., y + 42., w - 18., 20.], MUTED);
+        }
+        ui.button(if self.mobility_open { ("−  阶层流动", "−  Class mobility") }
+            else { ("+  阶层流动", "+  Class mobility") }, [x, y + 112., w, 28.], false);
+        let mut top = y + 145.;
+        if self.mobility_open {
+            let headers = [("原阶层", "From class"), ("新阶层", "To class"), ("人数", "Residents")];
+            ui.row(&headers.map(|label| ui.word(label).to_owned()), &[0.38, 0.38, 0.24], [x, top, w, 23.], true);
+            top += 24.;
+            ui.label(("阶层流动未统计", "Class mobility unmeasured"), [x + 7., top, w - 14., 23.], MUTED);
+            top += 28.;
+        }
+        ui.label(("底账已记录事件  ·  — 无可用统计", "Ledger events  ·  — unavailable"), [x + 4., top, w - 8., 20.], MUTED);
+        top += 23.;
+        let headers = [("日期", "Date"), ("出生", "Births"), ("死亡", "Deaths"), ("迁入", "In"),
+            ("迁出", "Out"), ("净变化", "Net")];
+        let widths = [0.20, 0.16, 0.16, 0.16, 0.16, 0.16];
+        let rows = self.days.iter().rev().map(|day| {
+            let any = day.births > 0 || day.deaths > 0 || day.immigration > 0 || day.emigration > 0;
+            vec![short_date(day), event_count(day.births), event_count(day.deaths),
+                event_count(day.immigration), event_count(day.emigration),
+                if any { format!("{:+}", day.net()) } else { "—".into() }]
+        });
+        self.table(ui, [x, top, w, (y + h - top).max(0.)], &headers, &widths, self.days.len(), rows);
+    }
+
+    fn table<const N: usize>(
+        &self, ui: &mut Surface<'_>, [x, y, w, h]: [f32; 4],
+        headers: &[Words; N], widths: &[f32; N], len: usize, rows: impl Iterator<Item = Vec<String>>,
+    ) {
+        let visible = ((h - ROW_H) / ROW_H).floor().max(0.) as usize;
+        let limit = len.saturating_sub(visible);
         self.max_scroll.set(limit);
+        if h < ROW_H { return; }
+        let row_w = if limit > 0 { w - 7. } else { w };
+        let header = headers.map(|label| ui.word(label).to_owned());
+        ui.row(&header, widths, [x, y, row_w, ROW_H], true);
         let first = self.scroll.min(limit);
-        let last = (first + visible).min(layout.lines.len());
-        for (index, (line, color)) in layout.lines[first..last].iter().enumerate() {
-            skin.text(
-                text,
-                line,
-                0,
-                [left, y + BODY_TOP + index as f32 * ROW_HEIGHT],
-                text_width,
-                *color,
-            );
+        for (i, cells) in rows.skip(first).take(visible).enumerate() {
+            ui.row(&cells, widths, [x, y + (i + 1) as f32 * ROW_H, row_w, ROW_H], false);
         }
-        if limit > 0 {
-            let track = visible as f32 * ROW_HEIGHT;
-            let thumb = (track * visible as f32 / layout.lines.len() as f32).max(10.);
-            let offset = (track - thumb) * first as f32 / limit as f32;
-            background.rect(x + w - 11., y + BODY_TOP, 3., track, [54, 68, 74, 255]);
-            background.rect(x + w - 11., y + BODY_TOP + offset, 3., thumb, GOLD);
-        }
-        if !layout.lines.is_empty() {
-            skin.text(
-                text,
-                &format!("{}–{} / {}", first + 1, last, layout.lines.len()),
-                0,
-                [left, y + h - 27.],
-                text_width,
-                MUTED,
-            );
-        }
-    }
-
-    fn layout(&self, skin: &Skin, width: f32) -> Layout {
-        let mut lines = Vec::new();
-        let mut sections = Vec::new();
-        for row in &self.report {
-            if row.heading {
-                sections.push(lines.len());
-            }
-            let label = skin.choose(row.label.0, row.label.1);
-            let value = if row.unknown {
-                skin.choose("未知", "Unknown")
-            } else {
-                &row.value
-            };
-            let text = if row.heading || value.is_empty() {
-                label.to_owned()
-            } else if label.is_empty() {
-                value.to_owned()
-            } else {
-                format!("{label}  {value}")
-            };
-            let color = if row.heading {
-                GOLD
-            } else if row.unknown {
-                MUTED
-            } else {
-                INK
-            };
-            let text = romanize_russian(&text);
-            wrap(skin, &text, width, &mut lines, color);
-        }
-        Layout {
-            width,
-            english: skin.english(),
-            lines,
-            sections,
+        if limit > 0 && visible > 0 {
+            let track = visible as f32 * ROW_H;
+            let thumb = (track * visible as f32 / len as f32).max(13.);
+            ui.fill.rect(x + w - 4., y + ROW_H, 3., track, LINE);
+            ui.fill.rect(x + w - 4., y + ROW_H + (track - thumb) * first as f32 / limit as f32, 3., thumb, GOLD);
         }
     }
 }
 
-// The HUD atlas has Latin glyphs. Source records still retain the census spelling.
-fn romanize_russian(text: &str) -> std::borrow::Cow<'_, str> {
-    const LETTERS: [&str; 32] = [
-        "a", "b", "v", "g", "d", "e", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p",
-        "r", "s", "t", "u", "f", "kh", "ts", "ch", "sh", "shch", "\"", "y", "'", "e", "yu", "ya",
-    ];
-    if !text.chars().any(|ch| matches!(ch, 'А'..='я' | 'Ё' | 'ё')) {
-        return text.into();
+struct Surface<'a> {
+    skin: &'a Skin,
+    fill: &'a mut Mesh,
+    text: &'a mut Mesh,
+}
+
+impl Surface<'_> {
+    fn word(&self, label: Words) -> &'static str { self.skin.choose(label.0, label.1) }
+
+    fn text(&mut self, text: &str, [x, y, w, _]: [f32; 4], color: Color) {
+        if w > 0. { self.skin.text(self.text, text, 0, [x + 2., y], w - 2., color); }
     }
-    let mut result = String::with_capacity(text.len());
-    for ch in text.chars() {
-        let romanized = match ch {
-            'А'..='Я' => LETTERS[(ch as u32 - 'А' as u32) as usize],
-            'а'..='я' => LETTERS[(ch as u32 - 'а' as u32) as usize],
-            'Ё' | 'ё' => "yo",
-            _ => {
-                result.push(ch);
-                continue;
-            }
-        };
-        if ch.is_uppercase() {
-            result.push((romanized.as_bytes()[0] as char).to_ascii_uppercase());
-            result.push_str(&romanized[1..]);
-        } else {
-            result.push_str(romanized);
+
+    fn label(&mut self, label: Words, area: [f32; 4], color: Color) {
+        self.text(self.word(label), area, color);
+    }
+
+    fn right(&mut self, value: &str, [x, y, w, h]: [f32; 4], color: Color) {
+        let offset = (w - self.skin.width(value, 0)).max(0.);
+        self.text(value, [x + offset, y, w - offset + 2., h], color);
+    }
+
+    fn center(&mut self, value: &str, [x, y, w, h]: [f32; 4], color: Color) {
+        let offset = ((w - self.skin.width(value, 0)) / 2.).max(0.);
+        self.text(value, [x + offset, y, w - offset, h], color);
+    }
+
+    fn button(&mut self, label: Words, [x, y, w, h]: [f32; 4], active: bool) {
+        self.button_text(self.word(label), [x, y, w, h], active);
+    }
+
+    fn button_text(&mut self, label: &str, [x, y, w, h]: [f32; 4], active: bool) {
+        self.fill.rect(x, y, w, h, if active { [47, 62, 67, 255] } else { ROW });
+        if active { self.fill.rect(x, y + h - 2., w, 2., GOLD); }
+        self.center(label, [x, y + (h - 18.).max(0.) * 0.5, w, h], if active { GOLD } else { INK });
+    }
+
+    fn pair(&mut self, label: Words, value: &str, [x, y, w, h]: [f32; 4]) {
+        self.label(label, [x + 4., y, w * 0.45, h], MUTED);
+        self.right(value, [x + w * 0.45, y, w * 0.55 - 5., h], INK);
+    }
+
+    fn row(&mut self, cells: &[String], widths: &[f32], [x, y, w, h]: [f32; 4], header: bool) {
+        self.fill.rect(x, y, w, h - 1., if header { [33, 51, 56, 255] } else { ROW });
+        let mut left = x;
+        for (i, (value, fraction)) in cells.iter().zip(widths).enumerate() {
+            let width = w * fraction;
+            let area = [left + 5., y + 3., width - 10., h];
+            let color = if header || value == "—" { MUTED } else { INK };
+            if i == 0 || header { self.text(value, area, color); }
+            else { self.right(value, area, color); }
+            left += width;
         }
     }
-    result.into()
 }
 
-fn bounds([width, height]: [u32; 2]) -> [f32; 4] {
-    let (width, height) = (width as f32, height as f32);
-    let w = if width >= 900. {
-        (width * 0.62).min(860.)
-    } else {
-        (width - 32.).max(0.)
-    };
-    let h = (height - 90.).clamp(0., 805.);
-    [(width - w - 16.).max(0.), (height - h) / 2. + 16., w, h]
+pub(crate) fn bounds([w, h]: [u32; 2]) -> [f32; 4] {
+    let (w, h) = (w as f32, h as f32);
+    let width = if w > 1050. { (w * 0.44).clamp(520., 630.) } else { (w * 0.59).min(520.) };
+    let top = if h >= 630. { 103. } else { 65. };
+    [(w - width - 41.).max(0.), top, width, (h - top - 115.).max(0.)]
 }
 
-fn joined(ids: &[&str]) -> Option<String> {
-    (!ids.is_empty()).then(|| ids.join("  |  "))
+fn inside([x, y, w, h]: [f32; 4], [px, py]: [f64; 2]) -> bool {
+    w > 0. && h > 0. && px >= f64::from(x) && px < f64::from(x + w)
+        && py >= f64::from(y) && py < f64::from(y + h)
 }
 
-fn daily_quantity(range: QuantityRange, unit: &str) -> String {
-    format!("{}–{} {unit}", number(range.lower.round() as u64), number(range.upper.round() as u64))
+fn dimension_rect(x: f32, y: f32, w: f32, index: usize) -> [f32; 4] {
+    let width = w / 5.;
+    [x + (index % 5) as f32 * width, y + (index / 5) as f32 * 25., width - 3., 23.]
 }
 
-fn interval(value: &Value) -> Option<String> {
-    Some(format!(
-        "{}–{}",
-        number(value["population_lower"].as_u64()?),
-        number(value["population_upper"].as_u64()?)
-    ))
-}
-
-fn value_text(value: &Value) -> Option<String> {
-    match value {
-        Value::Null => None,
-        Value::String(s) => (!s.is_empty()).then(|| s.clone()),
-        Value::Number(n) => Some(n.as_u64().map_or_else(|| n.to_string(), number)),
-        Value::Array(a) => {
-            let values: Vec<_> = a.iter().filter_map(value_text).collect();
-            (!values.is_empty()).then(|| values.join("  |  "))
-        }
-        Value::Object(o) => {
-            let values: Vec<_> = o
-                .iter()
-                .filter_map(|(key, value)| {
-                    Some(format!("{} {}", key.replace('_', " "), value_text(value)?))
-                })
-                .collect();
-            (!values.is_empty()).then(|| values.join(", "))
-        }
-        _ => Some(value.to_string()),
-    }
+fn short_date(day: &RecordedPopulationDay) -> String {
+    format!("{:02}-{:02}", day.date.month, day.date.day)
 }
 
 fn number(value: u64) -> String {
-    let digits = value.to_string();
-    let mut formatted = String::new();
-    for (i, digit) in digits.chars().enumerate() {
-        if i != 0 && (digits.len() - i) % 3 == 0 {
-            formatted.push(',');
-        }
-        formatted.push(digit);
+    let raw = value.to_string();
+    let mut result = String::with_capacity(raw.len() + raw.len() / 3);
+    for (i, digit) in raw.chars().enumerate() {
+        if i > 0 && (raw.len() - i) % 3 == 0 { result.push(','); }
+        result.push(digit);
     }
-    formatted
+    result
 }
 
-fn wrap(skin: &Skin, text: &str, width: f32, lines: &mut Vec<(String, [u8; 4])>, color: [u8; 4]) {
-    let mut rest = text.trim_end();
-    while !rest.is_empty() {
-        if skin.width(rest, 0) <= width {
-            lines.push((rest.to_owned(), color));
-            break;
-        }
-        let mut filled = 0.;
-        let mut end = 0;
-        let mut word_end = 0;
-        for (offset, ch) in rest.char_indices() {
-            filled += skin.width(&rest[offset..offset + ch.len_utf8()], 0);
-            if filled > width {
-                break;
-            }
-            end = offset + ch.len_utf8();
-            if ch.is_whitespace() {
-                word_end = offset;
-            }
-        }
-        let cut = if word_end > 2 {
-            word_end
-        } else if end > 0 {
-            end
-        } else {
-            rest.chars().next().expect("non-empty line").len_utf8()
-        };
-        lines.push((rest[..cut].trim_end().to_owned(), color));
-        rest = rest[cut..].trim_start();
-    }
+fn option_number(count: Option<u64>) -> String { count.map(number).unwrap_or_else(|| "—".into()) }
+
+fn event_count(count: u64) -> String { option_number((count > 0).then_some(count)) }
+
+fn share(count: u64, total: u64) -> String {
+    if total == 0 { "—".into() } else { format!("{:.1}%", count as f64 / total as f64 * 100.) }
+}
+
+fn quantity(value: Option<f64>, unit: &str, period: NeedPeriod, per_person: bool, skin: &Skin) -> String {
+    let Some(mut value) = value else { return "—".into(); };
+    let unit = match (unit, per_person, value.abs()) {
+        ("吨", true, _) if value >= 0.001 => { value *= 1_000.; "kg" }
+        ("吨", true, _) => { value *= 1_000_000.; "g" }
+        ("吨", false, _) => "t",
+        ("dwellings", _, _) => skin.choose("户", "homes"),
+        ("visits" | "trips", _, _) => skin.choose("次", "trips"),
+        ("places", _, _) => skin.choose("位", "seats"),
+        _ => unit,
+    };
+    let suffix = match period {
+        NeedPeriod::Day => skin.choose("/日", "/d"),
+        NeedPeriod::Year => skin.choose("/年", "/yr"),
+        NeedPeriod::Occupancy => "",
+    };
+    let magnitude = if value == 0. { "0".into() }
+        else if value >= 100_000. { format!("{:.2e}", value) }
+        else if value >= 100. { format!("{:.1}", value) }
+        else if value >= 0.01 { format!("{:.3}", value) }
+        else { format!("{:.2e}", value) };
+    format!("{magnitude} {unit}{suffix}")
 }

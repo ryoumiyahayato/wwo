@@ -478,7 +478,8 @@ def age_sex_panels():
         HERE / "us_territorial_ages_1900", HERE / "baden_census_1900", HERE / "italy_census_1901",
         HERE / "brazil_census_1900_age", HERE / "spain_census_1900", HERE / "india_remaining_princely_demography",
         HERE / "argentina_age_1895_1914", HERE / "australia_age_1901",
-        HERE / "philippines_surigao_opening",
+        HERE / "philippines_surigao_opening", HERE / "qing_opening_age", HERE / "cuba_age_1899",
+        HERE / "korea_age_1925",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -2125,6 +2126,39 @@ def ottoman_registered_sex_models(balances, observations):
         )
 
 
+def qing_opening_age_models(panels, units):
+    # Chapter I, Table 1 names sampled provinces. Anhui contributed to both panels.
+    province_profiles = {
+        "qing_hist_zhili": "north",
+        "qing_hist_shandong": "north",
+        "qing_hist_shanxi": "north",
+        "qing_hist_henan": "north",
+        "qing_hist_anhui": "north_south",
+        "qing_hist_hubei": "south",
+        "qing_hist_jiangsu": "south",
+        "qing_hist_zhejiang": "south",
+        "qing_hist_fujian": "south",
+        "qing_hist_guangdong": "south",
+    }
+    for unit in units:
+        unit_id = unit["unit_id"]
+        opening_province = unit.get("statistical_parent") or unit_id
+        if opening_province not in province_profiles:
+            continue
+        profile = province_profiles[opening_province]
+        panel, rows = panels[f"chiao_farm_{profile}_1929_1931"]
+        model = panel | dict(
+            opening_method=(
+                f"Transfer the survey's {profile.replace('_', ' and ')} age-by-sex shares to the "
+                f"exclusive 1900 balance within {opening_province}. Allocate integer residents by "
+                "largest remainders. Preserve the survey's unknown-age share."
+            ),
+            uncertainty=panel["uncertainty"] + " This is a regional rural proxy for the whole opening "
+                        "pool. Differences between districts, towns and the survey villages are unmeasured.",
+        )
+        yield opening_age_group(model, rows, unit_id, unit["population_value"])
+
+
 def opening_structure(opening_groups, observations, *, version=6):
     district_pools = {unit["unit_id"]: unit for group in opening_groups for unit in group["units"]
                       if "district_boundary_source" in unit}
@@ -2151,6 +2185,8 @@ def opening_structure(opening_groups, observations, *, version=6):
             unit["unit_id"] for group in opening_groups if group["unit_id"] == ROMANIA_ROOT
             for unit in group.get("statistical_aggregates", ())
         )
+    if version >= 42:
+        leaf_age_scopes.add("jp_home_islands")
     if version >= 41:
         leaf_age_scopes.add("raj_berar")
     statistical_aggregates = {
@@ -2344,4 +2380,7 @@ def opening_structure(opening_groups, observations, *, version=6):
         ))
     if version >= 35:
         groups.extend(ottoman_registered_sex_models(opening_balances, observations))
+    if version >= 42:
+        qing = next(group for group in opening_groups if group["unit_id"] == "qing_empire")
+        groups.extend(qing_opening_age_models(panels, qing["units"]))
     return dict(version=1, groups=sorted(groups, key=lambda group: group["unit_id"]))

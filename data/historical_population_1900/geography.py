@@ -1,6 +1,8 @@
 """Reconcile statistical scopes with dated WWO catalogues without spatial allocations."""
 import csv
 import json
+import math
+import unicodedata
 from collections import defaultdict
 from pathlib import Path
 
@@ -107,6 +109,83 @@ def link_dated_identities(rows):
         if unit:
             r.update(wwo_id=unit["id"],mapping_status="dated_statistical_identity_boundary_not_certified")
 
+
+# The city compilation uses other spellings for these historical map names.
+CITY_LOCATOR_NAMES = {
+    "place:newcastle": "Newcastle upon Tyne",
+    "place:frankfurt": "Frankfurt am Main",
+    "place:nizhny_novgorod": "Nizhniy Novgorod",
+    "place:canton": "Guangzhou",
+    "place:nanking": "Nanjing",
+    "place:hankow": "Wuhan",
+    "place:singan": "Xian",
+    "place:moukden": "Shenyang",
+    "place:saigon": "Ho Chi Minh",
+    "place:bombay": "Mumbai",
+    "place:benares": "Varanasi",
+    "place:poona": "Pune",
+    "place:sao_paulo": "Sao Paolo",
+}
+
+# These named census units lack coordinates, so the links use the cited returns.
+REVIEWED_CITY_UNITS = {
+    "place:irkutsk": "ru1897_75_city_r7",
+    "place:oakland": "us_city_california_oakland",
+    "place:samara": "ru1897_36_city_r7",
+}
+
+
+def city_name_key(name):
+    normalized = unicodedata.normalize("NFKD", name.casefold())
+    return "".join(letter for letter in normalized if letter.isascii() and letter.isalnum())
+
+
+def nearby_city_locator(place, row):
+    latitude, longitude = row.get("latitude"), row.get("longitude")
+    if latitude is None or longitude is None or row["quality"] == "disputed_geocode":
+        return False
+    lng, lat = place
+    longitude_delta = (longitude - lng + 180) % 360 - 180
+    return math.hypot(latitude - lat, longitude_delta * math.cos(math.radians(lat))) * 111.195 <= 20
+
+
+def city_map_catalogue(rows, local):
+    identities = read(DATA / "alpha/historical_transport_network_1900/map_identities.json")
+    places = {row["id"]: row for values in identities["places"]
+              if (row := dict(zip(identities["place_fields"], values)))["id"].startswith("place:")
+              and row["from_date"] <= DATE < row["to_date_exclusive"]}
+    for place in read(DATA / "world_map/cities.json")["cities"]:
+        key = "place:" + place["id"]
+        places.setdefault(key, dict(name=place["name"], label=place.get("native_name", place["name"]),
+                                    lon_lat=place["lon_lat"], historical_polity=None))
+    by_unit, by_name = defaultdict(list), defaultdict(list)
+    for row in rows:
+        if row["kind"] == "city":
+            by_unit[row["unit_id"]].append(row)
+            by_name[city_name_key(row["name"])].append(row)
+    for key, place in sorted(places.items()):
+        cited_units = set(local[key])
+        if key in REVIEWED_CITY_UNITS:
+            cited_units.add(REVIEWED_CITY_UNITS[key])
+        city_keys = {row["city_key"] for unit in cited_units for row in by_unit[unit]}
+        method = "source_or_reviewed_identity" if city_keys else None
+        if not city_keys:
+            names = {city_name_key(name) for name in (place["name"], place["label"],
+                       key.removeprefix("place:"), CITY_LOCATOR_NAMES.get(key, "")) if name}
+            nearby = [row for name in names for row in by_name[name]
+                      if nearby_city_locator(place["lon_lat"], row)]
+            city_keys = {row["city_key"] for row in nearby}
+            if len(city_keys) == 1:
+                method = "name_and_nearby_locator"
+                cited_units.update(row["unit_id"] for row in nearby)
+        city_key = next(iter(city_keys)) if len(city_keys) == 1 else None
+        yield dict(catalogue="map_place", id=key, name=place["name"],
+                   historical_polity=place["historical_polity"],
+                   historical_observation_ids=sorted(cited_units), city_key=city_key,
+                   city_link_method=method if city_key else None,
+                   status="place_identity" if city_key or cited_units else "no_linked_city_observation")
+
+
 def catalogue(rows, groups):
     link_dated_identities(rows)
     local = defaultdict(set)
@@ -183,10 +262,7 @@ def catalogue(rows, groups):
             for u in read(MAP/file)[field]:
                 out.append(dict(catalogue="arabian_authority_or_display",file=file,id=u.get("id",f"unresolved:{u.get('component_index')}"),
                      name=u.get("name_zh"),kind=field,status="no_population_geometry_allocation"))
-    for p in read(DATA/"world_map"/"cities.json")["cities"]:
-        key="place:"+p["id"]
-        out.append(dict(catalogue="prototype_place",id=key,name=p["name"],prototype_parent=p["parent_country_id"],
-                     historical_observation_ids=sorted(local[key]),status="place_identity" if local[key] else "no_linked_city_observation"))
+    out.extend(city_map_catalogue(rows, local))
     # Source-only statistical territories remain searchable when no dated WWO polygon exists.
     identities=defaultdict(list)
     for r in rows:

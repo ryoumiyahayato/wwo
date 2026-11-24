@@ -1,0 +1,16 @@
+[
+  {
+    "id": "cuba_census_age_1899",
+    "observed_unit_id": "cuba_census_age_1899",
+    "opening_unit_id": "cuba_occupation_1900",
+    "opening_from_version": 42,
+    "observed_date": "1899-10-16",
+    "source_id": "cu_census_1899_table_ix",
+    "locator": "Table IX, printed p. 206, Cuba, all classes; p. 93, oldest-age notation",
+    "published_scope": "Entire reported Cuban census population, 1,572,797 people",
+    "broad_observation": true,
+    "definition": "Reported age by sex, with single ages under five, split school and military ages, and unknown age.",
+    "opening_method": "Transfer the 1899 census age-by-sex shares to Cuba's existing interpolated opening total using largest remainders. Keep the unknown-age share.",
+    "uncertainty": "The census preceded opening by 77 days. The date shift, age heaping and census omissions have no estimated error interval."
+  }
+]

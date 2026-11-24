@@ -115,8 +115,10 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
     let regional=ui.camera.level!=crate::camera::Level::World;
     let mut candidates=Vec::new();
     for (index,place) in world.places.iter().enumerate() {
-        if !ui.labels || !place.display_symbol || !place_visible(ui.mode,place)
-            || !active(ui.date,&place.from_date,&place.to_date) {continue;}
+        let ordinary_marker=ui.labels && place.display_symbol && place_visible(ui.mode,place);
+        let population_marker=ui.formal.population_debug && place.selectable &&
+            matches!(place.symbol.as_str(),"capital"|"admin_primary"|"city"|"town"|"settlement"|"village");
+        if !(ordinary_marker || population_marker) || !active(ui.date,&place.from_date,&place.to_date) {continue;}
         let chosen=ui.selected==Some(Object::Place(index));
         let Some(spec)=skin.map_symbols.get(&place.symbol) else {continue;};
         let mut limit=if regional {spec.region_max_mpp} else {spec.world_max_mpp};
@@ -217,6 +219,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             (marker_art,Ink::HudArt),(marker_type,Ink::HudText),(panels,Ink::Solid),(text,Ink::Text),(flags,Ink::Flag),(ui.formal.clock_gears(),Ink::ClockGears),(hud_art,if ui.formal.hud.mechanical.hidden {Ink::HudArt}else{Ink::HudArtGlass}),(clock,Ink::Solid),(hud_type,Ink::HudText)],hits);
     }
     let mut occupied=vec![[0.,0.,w,55.],[0.,h-51.,w,51.]];
+    if ui.formal.population_debug {occupied.push(crate::pop_debug_ui::bounds(ui.size));}
     if matches!(ui.selected,Some(Object::Place(_)|Object::Administration(_))){occupied.push([17.,73.,300.,213.]);}
     if let Some(rect)=ui.formal.page_rect(){occupied.push(rect);}
     let opening_stations = match ui.selected {
@@ -418,7 +421,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     }
     if ui.formal.hud.page==crate::formal_ui::Page::Map {
         let y=h-45.;
-        if ui.sea_relation_visible && !ui.formal.hud.market_map && ui.formal.hud.menu==crate::formal_ui::Menu::None {
+        if !ui.formal.population_debug && ui.sea_relation_visible && !ui.formal.hud.market_map && ui.formal.hud.menu==crate::formal_ui::Menu::None {
             let x = w - 249.;
             let legend_y = h - 136.;
             panels.rect(x, legend_y, 223., 21., [15, 25, 34, 220]);
@@ -447,7 +450,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     if let Some(detail)=ui.transport_detail {
         ui.formal.transport_detail(detail,&mut panels,&mut hud_type,&mut hits);
     }
-    if readable && !ui.formal.hud.messages && ui.country.is_none() && ui.search.is_none() && !ui.details && ui.transport_detail.is_none() {
+    if readable && !ui.formal.population_debug && !ui.formal.hud.messages && ui.country.is_none() && ui.search.is_none() && !ui.details && ui.transport_detail.is_none() {
         let left=match ui.selected{Some(Object::Polity(_))=>359.,Some(_)=>293.,None=>145.};
         ui.formal.diagnostics(&mut panels,&mut hud_type,left,debug_right);
     }
