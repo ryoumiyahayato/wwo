@@ -1554,7 +1554,7 @@
   "source": "https://doi.org/10.5281/zenodo.19497435",
   "creator": "Rémi Petitpierre, Isabella di Lenardo, Polly Hudson, Hendrik Herold, Katherine McDonough, Beatrice Vaienti, Robert Hecht and Christopher Fleet",
   "license": "CC-BY-4.0",
-  "processing": "Building footprints rasterized to coverage. No road or bridge geometry is inferred.",
+  "processing": "Building footprints rasterized to coverage. London roads have a separate source.",
   "paris_1900": {
     "creator": "Institut Paris Region",
     "land_use": "https://data.iledefrance.fr/explore/dataset/occupation-du-sol-en-5-postes-vers-1900-carte-de-france-type-1900-dile-de-franc1/",
@@ -1562,5 +1562,29 @@
     "license": "Licence Ouverte",
     "scale": "1:50000",
     "processing": "Rasterized urban area class and published road centre lines. Line width is a display style."
+  },
+  "london_roads_1900": {
+    "creator": "OpenHistoricalMap contributors",
+    "source": "https://wiki.openstreetmap.org/wiki/OpenHistoricalMap/Projects/London",
+    "license": "https://www.openhistoricalmap.org/copyright",
+    "source_snapshot": "2026-11-24T21:28:09Z",
+    "map_date": "1900-01-01",
+    "selection": "Dated ways with an 1893–1896 Ordnance Survey source, plus selected dated Thames crossings.",
+    "way_count": 1801,
+    "thames_crossing_way_ids": [
+      198525304,
+      198530164,
+      198563793,
+      198563796,
+      198568410,
+      198571974,
+      198571975,
+      198576925,
+      198582281,
+      198582846,
+      198586037,
+      198586260
+    ],
+    "processing": "Display coverage of selected centre lines. Width is cartographic. Coverage is incomplete."
   }
 }
