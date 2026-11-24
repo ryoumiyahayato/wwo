@@ -261,7 +261,6 @@ impl Landmarks {
             row.project(*place, *asset, date, camera, pitch, size)
         }).collect();
         for (&place, city) in &self.cities {
-            if camera.precision_enabled() && camera.has_city_ground(city.center) { continue; }
             let opacity=city.opacity(date,camera.mpp);
             if opacity <= 0. { continue; }
             let far=camera::smooth(city.lod_mpp*0.8,city.lod_mpp*1.2,camera.mpp);
@@ -287,13 +286,11 @@ impl Landmarks {
         visible
     }
 
-    pub fn focus(&self, place: usize, camera: &Camera) -> Option<([f64; 2], f64)> {
+    pub fn focus(&self, place: usize) -> Option<([f64; 2], f64)> {
         if let Some(city) = self.cities.get(&place) {
-            let mpp=if camera.precision_enabled() {camera::CONTEXT_MPP} else {city.search_mpp};
-            return Some((city.center,mpp));
+            return Some((city.center,city.search_mpp));
         }
-        let (_, asset, row) = self.landmarks.iter().find(|(i, _, _)| *i == place)?;
-        if !row.has_ground(*asset,camera) {return Some((row.anchor(),camera::CONTEXT_MPP));}
+        let (_, _, row) = self.landmarks.iter().find(|(i, _, _)| *i == place)?;
         let size = row.model_height_m.max(row.model_base_width_m);
         // Leave context around the authored footprint when jumping to a landmark.
         let mpp=(size/84.).clamp(1.8,8.).min(row.model_lod_switch_mpp.unwrap_or(8.));
@@ -343,14 +340,10 @@ impl CityLayout {
 impl Landmark {
     fn anchor(&self) -> [f64; 2] { self.display_lon_lat.unwrap_or(self.geometry.coordinates) }
 
-    fn has_ground(&self,asset:usize,camera:&Camera)->bool {
-        camera.has_city_ground(self.anchor()) || ASSETS[asset].symbol=="pyramids"
-    }
-
     fn project(&self, place: usize, asset: usize, date: &str, camera: &Camera, pitch: f64, size: [u32; 2]) -> Option<VisibleModel> {
-        let limit=if camera.precision_enabled() {self.model_max_mpp}
+        let limit=if camera.precision_enabled() && camera.has_city_ground(self.anchor()) {self.model_max_mpp}
             else {self.model_admission_mpp.unwrap_or(self.model_max_mpp)};
-        if camera.mpp > limit || !self.has_ground(asset,camera)
+        if camera.mpp > limit
             || !crate::ui::active(date, &self.valid_from, &self.valid_to) {
             return None;
         }

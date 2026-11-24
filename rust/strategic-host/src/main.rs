@@ -362,7 +362,7 @@ impl Host {
             state.timeline=Some(model);
         }
         let connected=state.session.is_some();
-        let labels=!connected&&!config.managed&&!config.terrain_review;
+        let labels=(formal_map||!connected&&!config.managed)&&!config.terrain_review;
         let lobby_country=world.polities.iter().position(|p|p.id=="country_fra").unwrap_or(0);
         let mode=if config.terrain_review {Mode::Geographic} else {Mode::Political};
         let preferences=config.preferences.as_deref().map(interface::Preferences::load).unwrap_or_default();
@@ -507,7 +507,7 @@ impl Host {
     }
     fn locate_object(&mut self,object:Object) {
         let landmark=match object {
-            Object::Place(index)=>self.landmarks.as_ref().and_then(|models|models.focus(index,&self.camera)),
+            Object::Place(index)=>self.landmarks.as_ref().and_then(|models|models.focus(index)),
             _=>None,
         };
         let (target,mpp)=match object {
@@ -1925,7 +1925,7 @@ impl Host {
         for id in &self.candidate {if let Some(p)=self.cached.get_mut(id){p.used=now;}}
         self.cached.retain(|_,p|now.duration_since(p.used)<=CACHE_TTL);
         if self.reader.inflight.is_some(){return;}
-        let city_first=self.mode==Mode::Geographic && self.camera.mpp<66.
+        let city_first=self.mode==Mode::Geographic && self.camera.mpp<camera::CITY_INK_MPP
             && self.renderer.as_ref().is_some_and(|r|r.terrain_max_level()>0);
         let city=self.visible.iter().filter(|&&id|city_first&&self.world.tiles[id].city
             && self.index.scissor(id,&self.camera,self.size).is_some());
@@ -2398,7 +2398,7 @@ impl Host {
             self.hud=Hud{fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,..Hud::default()};
             self.selected=None;self.details=false;self.country=None;self.country_click=None;
             self.search=None;self.history.clear();self.focus=None;self.velocity=[0.;2];self.hits.clear();
-            self.mode=Mode::Political;self.labels=false;
+            self.mode=Mode::Political;
             self.camera.reset(self.size);
             self.camera.local_models=self.landmarks.is_some();
             if let Some(point)=self.state.session.as_ref().and_then(|s| <[f64;2]>::try_from(s.coordinates.as_slice()).ok()) {
