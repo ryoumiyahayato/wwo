@@ -152,7 +152,7 @@ impl Session {
 }
 pub(crate) const HUD_TYPE_WIDTH: u32 = 2048;
 pub(crate) const HUD_TYPE_BASE_HEIGHT: u32 = 2048;
-pub(crate) const HUD_TYPE_HEIGHT: u32 = HUD_TYPE_BASE_HEIGHT + 112;
+pub(crate) const HUD_TYPE_HEIGHT: u32 = HUD_TYPE_BASE_HEIGHT + 135;
 
 pub struct Skin {
     art:HashMap<String,[f32;4]>,
