@@ -1696,7 +1696,11 @@ impl Host {
         if key==Key::Named(NamedKey::F7) && !self.in_lobby() && self.written_world().is_some() && !self.hud.menu.modal() {
             if self.population_debug.take().is_none() {
                 self.population_debug=Some(pop_debug_ui::Panel::default());
-                let id=self.selected.map_or_else(||"world".into(), |object|self.id(object));
+                let id = self.selected.map(|object| self.id(object)).or_else(|| {
+                    let world = self.written_world()?;
+                    let place = world.player_current_place().unwrap_or_else(|| world.last_station());
+                    world.residence_unit_at(place).or_else(|| world.population_unit_at(place)).map(str::to_owned)
+                }).unwrap_or_else(|| "world".into());
                 self.inspect_population(id.strip_prefix("state:").unwrap_or(&id).to_owned());
             }
             self.dirty=true;
