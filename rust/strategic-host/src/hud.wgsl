@@ -175,22 +175,22 @@ fn clock_menu_wheel(o:Output)->vec4f {
  return vec4f(color,alpha*o.color.a);
 }
 
-// Exact R68 lancet outline, in its 143-unit local coordinates. Coverage smoothing
-// restores its fine outline/highlight without changing the hand's proportions.
+// Lancet outline extended to the outer end of the speed marks.
 fn clock_original_hand(o:Output)->vec4f {
  let scale=min(116.,camera.view.x*.22)/184.;
  let q=(o.pos.xy-vec2f(camera.view.x,0.))/scale;
  let direction=vec2f(cos(o.uv.x),sin(o.uv.x));
  let p=vec2f(dot(q,direction),dot(q,vec2f(-direction.y,direction.x)));
+ let tip=165.;
  var half_width=3.5;
- if p.x>110.11 {half_width=mix(1.5,0.,clamp((p.x-110.11)/32.89,0.,1.));}
+ if p.x>110.11 {half_width=mix(1.5,0.,clamp((p.x-110.11)/(tip-110.11),0.,1.));}
  else if p.x>50.05 {half_width=mix(2.3,1.5,(p.x-50.05)/60.06);}
  else if p.x>31.46 {half_width=mix(3.5,2.3,(p.x-31.46)/18.59);}
- let sd=max(abs(p.y)-half_width,max(-p.x,p.x-143.));let aa=.65/scale;
+ let sd=max(abs(p.y)-half_width,max(-p.x,p.x-tip));let aa=.65/scale;
  let edge=1.-smoothstep(1.4-aa,1.4+aa,sd);
  let fill=1.-smoothstep(-aa,aa,sd);
  var color=mix(vec3f(3.,5.,6.)/255.,o.color.rgb,fill);
- let line=length(p-vec2f(clamp(p.x,31.46,128.7),0.));
+ let line=length(p-vec2f(clamp(p.x,31.46,tip-14.3),0.));
  let light=(1.-smoothstep(max(.6/scale,1.)*.5-aa,max(.6/scale,1.)*.5+aa,line))*.9;
  color=mix(color,vec3f(209.,184.,125.)/255.,light);
  return vec4f(color,edge*.96);
