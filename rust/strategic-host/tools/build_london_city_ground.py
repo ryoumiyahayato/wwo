@@ -1,4 +1,4 @@
-"""Rasterize the late-Victorian London building survey into existing WCM city pages."""
+"""Rasterize late-Victorian London footprints before applying dated roads."""
 
 import argparse
 import json
@@ -79,6 +79,7 @@ def build(source, output):
                     group=GROUP, source=SOURCE, size=list(coverage.shape[:2]), cover=False, city=True, ids=False,
                 ))
                 print(name, flush=True)
+    catalogue.pop("london_roads_1900", None)
     catalogue.update({
         "tiles": tiles,
         "source": "https://doi.org/10.5281/zenodo.19497435",
