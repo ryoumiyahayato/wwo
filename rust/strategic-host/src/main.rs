@@ -2005,12 +2005,16 @@ impl Host {
         let loading=self.loading();
         let transport_world=written_world.filter(|_|!loading&&!self.in_lobby()&&!self.hud.menu.modal());
         let planning_transport = self.planning_transport();
+        #[cfg(windows)]
+        let transport_route = self.config.native.as_ref().and_then(native_start::NativeSession::selected_transport_route);
+        #[cfg(not(windows))]
+        let transport_route = None;
         if let Some(world)=transport_world {
             if self.transport_scene.is_none() {
                 self.transport_scene=Some(transport_scene::TransportScene::new(world.transport())?);
             }
             self.transport_scene.as_mut().unwrap().update_map(&self.camera,self.size,&date,self.mode,world,
-                self.transport_selection.as_ref(), planning_transport)?;
+                self.transport_selection.as_ref(), transport_route, planning_transport)?;
         }
         let show_transport_detail=self.transport_detail_visible();
         if let (Some(world),Some(scene),Some(selected))=(transport_world,self.transport_scene.as_ref(),
