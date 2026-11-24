@@ -1,8 +1,10 @@
 use crate::{
-    formal_ui::{self, Display, IVORY, MUTED},
-    lobby::{self, Command, Opening, Selection},
+    formal_ui::{self, Display},
+    lobby::{self, Command, Opening},
     overlay::Mesh,
     ui::Hit,
+    compact::Raster,
+    world::World,
 };
 use std::time::Instant;
 use wwo_character_core::{
@@ -125,7 +127,6 @@ impl Draft {
 
 struct Scene {
     polity: &'static str,
-    city: (&'static str, &'static str),
     setting: (&'static str, &'static str),
     school: (&'static str, &'static str),
     work: (&'static str, &'static str),
@@ -134,7 +135,6 @@ struct Scene {
 const SCENES: [Scene; 6] = [
     Scene {
         polity: "state:country_fra",
-        city: ("巴黎，里沃利街", "Rue de Rivoli, Paris"),
         setting: (
             "石砌公寓楼下，店铺在天亮时打开木百叶。赶集的人穿过街道。",
             "Shopkeepers opened their wooden shutters beneath stone apartments as people headed to market.",
@@ -150,7 +150,6 @@ const SCENES: [Scene; 6] = [
     },
     Scene {
         polity: "state:british_isles_1900",
-        city: ("伦敦，皮卡迪利广场", "Piccadilly Circus, London"),
         setting: (
             "砖房的窗台覆着煤灰。出门做活的人在街角等马拉公共车。",
             "Coal dust settled on brick windowsills. Workers waited at street corners for horse buses.",
@@ -166,10 +165,6 @@ const SCENES: [Scene; 6] = [
     },
     Scene {
         polity: "state:german_empire",
-        city: (
-            "柏林，国会大厦与胜利纪念柱",
-            "Reichstag and Victory Column, Berlin",
-        ),
         setting: (
             "石铺街道通向新建的车站。工人在上工时换下外套，围上围裙。",
             "Paved streets led to new stations. Workers changed from coats into aprons at the workshop.",
@@ -185,7 +180,6 @@ const SCENES: [Scene; 6] = [
     },
     Scene {
         polity: "state:russian_empire",
-        city: ("圣彼得堡，涅瓦大街", "Nevsky Prospect, Saint Petersburg"),
         setting: (
             "冬天的长外衣和柴火要早作打算。赶车的人沿着大道来到集市。",
             "Long winter coats and firewood had to be arranged early. Carriages came down the avenue toward market.",
@@ -201,7 +195,6 @@ const SCENES: [Scene; 6] = [
     },
     Scene {
         polity: "state:qing_empire",
-        city: ("北京，皇城街道", "Street in the Imperial City, Beijing"),
         setting: (
             "灰砖院墙外是摆摊的街面。挑担的人把蔬菜和日用品送到铺前。",
             "Stalls lined the street outside gray brick courtyards. Porters carried vegetables and household goods to the shops.",
@@ -217,7 +210,6 @@ const SCENES: [Scene; 6] = [
     },
     Scene {
         polity: "state:empire_of_japan",
-        city: ("东京，银座街道", "Ginza Street, Tokyo"),
         setting: (
             "木铺仍在营业，别处已有砖楼。街上木屐声和人力车铃声交错。",
             "Wooden shops still did business where brick buildings were spreading. Wooden clogs sounded alongside rickshaw bells.",
@@ -233,159 +225,135 @@ const SCENES: [Scene; 6] = [
     },
 ];
 
+pub const SCENE_SIZE: [u32; 2] = [1672, 941];
+const INK: [u8; 4] = [54, 33, 22, 255];
+const FAINT_INK: [u8; 4] = [94, 67, 48, 255];
+
+struct Art {
+    data: &'static [u8],
+    places: &'static [&'static str],
+    anchor: [f32; 2],
+    safe_width: f32,
+}
+
+const ART: [Art; 8] = [
+    Art { data: include_bytes!("../../../data/character/prologue/paris.png"),
+        places: &["place:paris"],
+        anchor: [0.96, 0.40], safe_width: 0.40 },
+    Art { data: include_bytes!("../../../data/character/prologue/london.png"),
+        places: &["place:london"],
+        anchor: [0.965, 0.42], safe_width: 0.41 },
+    Art { data: include_bytes!("../../../data/character/prologue/berlin.png"),
+        places: &["place:berlin"],
+        anchor: [0.965, 0.48], safe_width: 0.42 },
+    Art { data: include_bytes!("../../../data/character/prologue/petersburg.png"),
+        places: &["place:st_petersburg", "place:saint_petersburg"],
+        anchor: [0.96, 0.48], safe_width: 0.39 },
+    Art { data: include_bytes!("../../../data/character/prologue/beijing.png"),
+        places: &["place:beijing", "place:peking"],
+        anchor: [0.04, 0.42], safe_width: 0.40 },
+    Art { data: include_bytes!("../../../data/character/prologue/tokyo.png"),
+        places: &["place:tokyo"],
+        anchor: [0.045, 0.61], safe_width: 0.40 },
+    Art { data: include_bytes!("../../../data/character/prologue/marseille.png"),
+        places: &["place:marseille"],
+        anchor: [0.044, 0.43], safe_width: 0.41 },
+    Art { data: include_bytes!("../../../data/character/prologue/period.png"),
+        places: &[],
+        anchor: [0.96, 0.43], safe_width: 0.41 },
+];
+
+pub(crate) fn scene_index(opening: &Opening, place: &str) -> usize {
+    ART.iter().position(|art| art.places.contains(&place))
+        .or_else(|| SCENES.iter().position(|scene| scene.polity == opening.id)).unwrap_or(ART.len() - 1)
+}
+
+pub(crate) fn scene_raster(index: usize) -> std::io::Result<Raster> {
+    let mut decoder = png::Decoder::new(ART[index].data);
+    decoder.set_transformations(png::Transformations::EXPAND | png::Transformations::STRIP_16);
+    let mut reader = decoder.read_info()?;
+    let mut bytes = vec![0; reader.output_buffer_size()];
+    let info = reader.next_frame(&mut bytes)?;
+    bytes.truncate(info.buffer_size());
+    let pixels = match info.color_type {
+        png::ColorType::Rgb => bytes.chunks_exact(3).flat_map(|p| [p[0], p[1], p[2], 255]).collect(),
+        png::ColorType::Rgba => bytes,
+        _ => return Err(std::io::Error::other("invalid opening scene pixels")),
+    };
+    Ok(Raster { size: [info.width, info.height], pixels })
+}
+
+fn paper_choice(
+    skin: &formal_ui::Skin, surface: &mut Mesh, text: &mut Mesh, hits: &mut Vec<Hit>,
+    area: [f32; 4], label: &str, command: Option<Command>, selected: bool, scale: f32,
+) {
+    let [x, y, w, h] = area;
+    let fill = if selected { [190, 133, 70, 98] }
+        else if command.is_some() { [245, 222, 177, 59] }
+        else { [235, 219, 190, 45] };
+    surface.rect(x, y, w, h, fill);
+    if selected { surface.rect(x, y, 3., h, [112, 63, 31, 148]); }
+    skin.paragraph(text, label, 0, [x + 9., y + 3., w - 18., h - 3.],
+        if command.is_some() { INK } else { FAINT_INK }, scale);
+    if let Some(command) = command { hits.push(Hit { area, action: lobby::action(command) }); }
+}
+
 impl Display<'_> {
     pub(crate) fn draw_prologue(
         &self,
         art: &mut Mesh,
+        paper: &mut Mesh,
         surface: &mut Mesh,
         text: &mut Mesh,
         hits: &mut Vec<Hit>,
         draft: &Draft,
         country: &Opening,
-        navigation: &Selection,
+        world: &World,
     ) {
         let [width, height] = self.size.map(|n| n as f32);
-        surface.rect(0., 0., width, height, [6, 14, 23, 255]);
-        let compact = width < 740.;
-        let margin = (width * 0.037).clamp(13., 52.);
-        let frame_w = width - 2. * margin;
-        let top = (height * 0.06).clamp(10., 42.);
-        let bottom = height - top;
-        let image_w = if compact {
-            frame_w
-        } else {
-            (frame_w * 0.48).min(620.)
-        };
-        let image_h = if compact {
-            (height * 0.23)
-                .min(154.)
-                .min((bottom - top - 318.).max(62.))
-        } else {
-            (image_w * 0.75).min(bottom - top - 73.)
-        };
-        let image_rect = [margin, top, image_w, image_h];
-        let card_x = if compact {
-            margin
-        } else {
-            margin + image_w + 19.
-        };
-        let card_y = if compact { top + image_h + 23. } else { top };
-        let card_w = width - margin - card_x;
-        let card_h = (bottom - card_y).max(184.);
-        let scale = (card_h / 535.).clamp(0.52, 1.).min((card_h - 42.) / 366.);
-        let selection = country.sites.iter().find(|site| site.id == draft.place);
-        let place = selection.map_or(country.label.as_str(), |site| site.label.as_str());
         let skin = self.skin;
         let say = |zh, en| skin.choose(zh, en);
+        let selection = country.sites.iter().find(|site| site.id == draft.place);
+        let place = selection.map_or(country.label.as_str(), |site| skin.opening_name(world, &site.id, &site.label));
         let chosen = &draft.opening;
-        let scene = SCENES
-            .iter()
-            .enumerate()
-            .find(|(_, scene)| scene.polity == country.id);
-        let alpha = if navigation.motion {
-            let t = (draft.changed.elapsed().as_secs_f32() / 0.32).clamp(0., 1.);
-            (100. + 155. * t) as u8
-        } else {
-            255
-        };
-        let ink = [IVORY[0], IVORY[1], IVORY[2], alpha];
+        let scene = SCENES.iter().find(|scene| scene.polity == country.id);
+        let image = &ART[scene_index(country, &draft.place)];
+        let aspect = width * SCENE_SIZE[1] as f32 / (height * SCENE_SIZE[0] as f32);
+        let [u, v] = [0.5 * aspect.min(1.), 0.5 / aspect.max(1.)];
+        art.image([0., 0., width, height], [0.5 - u, 0.5 - v, 0.5 + u, 0.5 + v], [255; 4]);
 
-        if let Some((index, scene)) = scene {
-            let x = (index % 3) as f32 * 384.;
-            let y = (index / 3) as f32 * 288.;
-            let ratio = (image_w / image_h.max(1.)) * 0.75;
-            let du = 191. * ratio.min(1.);
-            let dv = 143. / ratio.max(1.);
-            let [cx, cy] = [x + 192., y + 144.];
-            art.image(
-                image_rect,
-                [
-                    (cx - du) / 1152.,
-                    (cy - dv) / 576.,
-                    (cx + du) / 1152.,
-                    (cy + dv) / 576.,
-                ],
-                [255, 255, 255, alpha],
-            );
-            let caption = format!(
-                "{} · {}",
-                say(scene.city.0, scene.city.1),
-                say("同期影像参考", "Period reference")
-            );
-            skin.text(
-                text,
-                &caption,
-                0,
-                [margin + 1., top + image_h + 2.],
-                image_w,
-                MUTED,
-            );
-        } else {
-            formal_ui::panel(surface, image_rect, [13, 26, 37, 255]);
-            let metadata = format!("1880–1900  ·  {place}");
-            skin.paragraph(
-                text,
-                &metadata,
-                1,
-                [margin + 18., top + image_h * 0.38, image_w - 36., 77.],
-                ink,
-                0.95,
-            );
-        }
-        formal_ui::panel(surface, [card_x, card_y, card_w, card_h], [10, 20, 31, 255]);
-        let left = card_x + 16.;
-        let inner = card_w - 32.;
+        let margin = (width * 0.028).clamp(14., 55.);
+        let card_w = (width * image.safe_width).clamp(340., 635.).min(width - 2. * margin);
+        let inner = card_w - 42.;
+        let scale = (height / 635.).clamp(0.83, 1.10);
+        let [horizontal, vertical] = image.anchor;
+        let card_x = (width * horizontal - if horizontal >= 0.5 { card_w } else { 0. })
+            .clamp(margin, width - margin - card_w);
+        let text_width = inner;
+        let context = format!("{place}  ·  1880–1900");
+        let context_lines = skin.wrapped_lines(&context, 0, text_width, scale).len().max(1);
+        let header_height = (57. + context_lines as f32 * 23.) * scale;
+        let prompt_height = if draft.stage == 4 { 53. } else { 70. } * scale;
+        let stride = if width < 1040. || skin.english() { 48. } else { 40. } * scale;
+        let option_count = [3, 2, 4, 4, 3][draft.stage];
+        let health_height = if draft.stage == 3 { 62. * scale } else { 0. };
+        let card_h = header_height + prompt_height + option_count as f32 * stride + health_height + 57. * scale;
+        let card_y = (height * vertical - card_h * 0.5).clamp(12., (height - card_h - 28.).max(12.));
+        paper.image([card_x, card_y, card_w, card_h], [0., 0., 1., 1.], [255, 255, 255, 148]);
+        surface.rect(card_x + 7., card_y + 4., card_w - 14., 1., [120, 82, 51, 73]);
+        surface.rect(card_x + 7., card_y + card_h - 5., card_w - 14., 1., [120, 82, 51, 73]);
+        let left = card_x + 21.;
         let (zh, en) = STAGES[draft.stage];
-        skin.text(
-            text,
-            say(zh, en),
-            1,
-            [left, card_y + 10. * scale],
-            inner,
-            ink,
-        );
-        let context = if compact {
-            format!("{place} · 1880–1900")
-        } else {
-            format!("{} / {place} · 1880–1900", country.label)
-        };
-        skin.paragraph(
-            text,
-            &context,
-            0,
-            [left, card_y + 42. * scale, inner, 33. * scale],
-            MUTED,
-            scale,
-        );
-
-        let paragraph_top = card_y + 76. * scale;
-        let menu_top = card_y + 154. * scale;
-        let stride = 39. * scale;
+        skin.paragraph(text, say(zh, en), 1, [left, card_y + 16. * scale, text_width, 36. * scale], INK, 1.08 * scale);
+        skin.paragraph(text, &context, 0, [left, card_y + 51. * scale, text_width, 23. * context_lines as f32 * scale],
+            FAINT_INK, scale);
+        let paragraph_top = card_y + header_height;
+        let menu_top = paragraph_top + prompt_height;
+        let ink = INK;
         let mut choice = |index, title: &str, enabled: bool, selected| {
-            self.row(
-                surface,
-                text,
-                hits,
-                [left, menu_top + stride * index as f32, inner, stride - 4.],
-                "",
-                enabled.then_some(lobby::action(Command::PrologueChoice(index))),
-                selected,
-            );
-            skin.paragraph(
-                text,
-                title,
-                0,
-                [
-                    left + 7.,
-                    menu_top + stride * index as f32 + 3.,
-                    inner - 14.,
-                    stride - 4.,
-                ],
-                if enabled { ink } else { MUTED },
-                scale,
-            );
+            paper_choice(skin, surface, text, hits, [left, menu_top + stride * index as f32, inner, stride - 5.],
+                title, enabled.then_some(Command::PrologueChoice(index)), selected, scale);
         };
-
         let prompt = match draft.stage {
             0 => {
                 let choices = [
@@ -410,7 +378,7 @@ impl Display<'_> {
                         "家里的生计，决定了你小时候可以把时间花在哪里。",
                         "Your household’s livelihood shaped how you spent your childhood.",
                     ),
-                    |(_, scene)| say(scene.setting.0, scene.setting.1),
+                    |scene| say(scene.setting.0, scene.setting.1),
                 )
             }
             1 => {
@@ -454,7 +422,7 @@ impl Display<'_> {
                             "到了上学的年纪，家里要决定怎样安排你的白天。",
                             "At school age, your family had to arrange how you spent your days.",
                         ),
-                        |(_, scene)| say(scene.school.0, scene.school.1),
+                        |scene| say(scene.school.0, scene.school.1),
                     )
                 }
             }
@@ -487,7 +455,7 @@ impl Display<'_> {
                     choice(i, &label, enabled, chosen.youth == youth);
                 }
                 scene.map_or(say("接近成年时，你得决定先谋生，还是继续学习。", "As adulthood approached, you had to choose between earning a living and studying."),
-                    |(_, scene)| say(scene.work.0, scene.work.1))
+                    |scene| say(scene.work.0, scene.work.1))
             }
             3 => {
                 let labels = [
@@ -518,7 +486,7 @@ impl Display<'_> {
                     0,
                     [left, y],
                     inner,
-                    MUTED,
+                    FAINT_INK,
                 );
                 let health = [
                     say("平常", "Typical"),
@@ -528,15 +496,9 @@ impl Display<'_> {
                 ];
                 for (i, label) in health.into_iter().enumerate() {
                     let w = inner / 4.;
-                    self.row(
-                        surface,
-                        text,
-                        hits,
-                        [left + w * i as f32, y + 23. * scale, w - 3., 28. * scale],
-                        label,
-                        Some(lobby::action(Command::PrologueHealth(i))),
-                        HEALTH[i] == draft.health,
-                    );
+                    paper_choice(skin, surface, text, hits,
+                        [left + w * i as f32, y + 24. * scale, w - 3., 31. * scale],
+                        label, Some(Command::PrologueHealth(i)), HEALTH[i] == draft.health, 0.92 * scale);
                 }
                 match chosen.youth {
                     Youth::Labor => say(
@@ -600,7 +562,7 @@ impl Display<'_> {
                             text,
                             label,
                             0,
-                            [left, menu_top + i as f32 * 42. * scale, inner, 40. * scale],
+                            [left, menu_top + i as f32 * stride, inner, stride - 5.],
                             ink,
                             scale,
                         );
@@ -621,40 +583,18 @@ impl Display<'_> {
             scale,
         );
 
-        let foot = card_y + card_h - 38.;
-        let back = [left, foot, 83., 29.];
-        let next = [card_x + card_w - 114., foot, 98., 29.];
-        self.row(
-            surface,
-            text,
-            hits,
-            back,
-            say("返回", "Back"),
-            Some(lobby::action(Command::PrologueBack)),
-            false,
-        );
-        let next_label = if draft.confirm() {
-            say("进入世界", "Enter world")
-        } else {
-            say("继续", "Continue")
-        };
-        self.row(
-            surface,
-            text,
-            hits,
-            next,
-            next_label,
-            Some(lobby::action(Command::PrologueNext)),
-            true,
-        );
+        let foot = card_y + card_h - 44. * scale;
+        let back = [left, foot, 86., 30. * scale];
+        let next = [card_x + card_w - 134., foot, 113., 30. * scale];
+        paper_choice(skin, surface, text, hits, back, say("返回", "Back"),
+            Some(Command::PrologueBack), false, scale);
+        let next_label = if draft.confirm() { say("进入世界", "Enter world") } else { say("继续", "Continue") };
+        paper_choice(skin, surface, text, hits, next, next_label,
+            Some(Command::PrologueNext), true, scale);
         let progress_x = (back[0] + back[2] + next[0]) * 0.5 - 29.;
         for i in 0..STAGES.len() {
-            let color = if i <= draft.stage {
-                formal_ui::BRASS
-            } else {
-                [74, 82, 83, 255]
-            };
-            surface.rect(progress_x + i as f32 * 13., foot + 13., 8., 3., color);
+            let color = if i <= draft.stage { [107, 65, 31, 255] } else { [152, 125, 92, 141] };
+            surface.rect(progress_x + i as f32 * 13., foot + 13. * scale, 8., 3., color);
         }
     }
 }

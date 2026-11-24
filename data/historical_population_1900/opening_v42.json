@@ -6659,7 +6659,12 @@
           "unit_id": "administrative_region:france_aisne",
           "name": "Aisne",
           "population_value": 537039,
-          "place_ids": [],
+          "place_ids": [
+            "place:saint_quentin",
+            "place:laon",
+            "place:soissons",
+            "place:chateau_thierry"
+          ],
           "locator": "REC_T256.dbf record 3, V3=02 V4=00 V6=AISNE, V21 + REC_T256.dbf record 3, V3=02 V4=00 V6=AISNE, V22",
           "endpoint_values": [
             541513,
@@ -7653,7 +7658,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Aube.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:troyes"
+          ],
           "statistical_parent": "administrative_region:france_aube",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1778",
@@ -8104,7 +8111,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Calvados.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:caen"
+          ],
           "statistical_parent": "administrative_region:france_calvados",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1792",
@@ -8168,7 +8177,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Calvados.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:lisieux"
+          ],
           "statistical_parent": "administrative_region:france_calvados",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1794",
@@ -8776,7 +8787,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Cher.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:bourges"
+          ],
           "statistical_parent": "administrative_region:france_cher",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1813",
@@ -9960,7 +9973,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Eure.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:bernay"
+          ],
           "statistical_parent": "administrative_region:france_eure",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1850",
@@ -9992,7 +10007,10 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Eure.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:vernon",
+            "place:evreux"
+          ],
           "statistical_parent": "administrative_region:france_eure",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1851",
@@ -10088,7 +10106,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Eure-et-Loir.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:chartres"
+          ],
           "statistical_parent": "administrative_region:france_eure_et_loir",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1854",
@@ -10152,7 +10172,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Eure-et-Loir.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:dreux"
+          ],
           "statistical_parent": "administrative_region:france_eure_et_loir",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1856",
@@ -11504,7 +11526,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Indre-et-Loire.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:tours"
+          ],
           "statistical_parent": "administrative_region:france_indre_et_loire",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1898",
@@ -11888,7 +11912,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Loir-et-Cher.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:blois"
+          ],
           "statistical_parent": "administrative_region:france_loir_et_cher",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1910",
@@ -12370,7 +12396,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Loiret.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:montargis"
+          ],
           "statistical_parent": "administrative_region:france_loiret",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1925",
@@ -12402,7 +12430,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Loiret.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:orleans"
+          ],
           "statistical_parent": "administrative_region:france_loiret",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1926",
@@ -13138,7 +13168,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Marne.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:chalons_sur_marne"
+          ],
           "statistical_parent": "administrative_region:france_marne",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1949",
@@ -13170,7 +13202,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Marne.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:epernay"
+          ],
           "statistical_parent": "administrative_region:france_marne",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1950",
@@ -13234,7 +13268,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Marne.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:reims"
+          ],
           "statistical_parent": "administrative_region:france_marne",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1952",
@@ -13982,7 +14018,11 @@
           "name": "Nord",
           "population_value": 1853446,
           "place_ids": [
-            "place:lille"
+            "place:lille",
+            "place:douai",
+            "place:dunkerque",
+            "place:valenciennes",
+            "place:cambrai"
           ],
           "locator": "REC_T256.dbf record 60, V3=59 V4=00 V6=NORD, V21 + REC_T256.dbf record 60, V3=59 V4=00 V6=NORD, V22",
           "endpoint_values": [
@@ -14017,7 +14057,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Oise.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:beauvais"
+          ],
           "statistical_parent": "administrative_region:france_oise",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1976",
@@ -14081,7 +14123,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Oise.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:compiegne"
+          ],
           "statistical_parent": "administrative_region:france_oise",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1978",
@@ -14113,7 +14157,10 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Oise.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:chantilly",
+            "place:creil"
+          ],
           "statistical_parent": "administrative_region:france_oise",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1979",
@@ -14177,7 +14224,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Orne.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:argentan"
+          ],
           "statistical_parent": "administrative_region:france_orne",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1981",
@@ -14273,7 +14322,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Pas-de-Calais.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:arras"
+          ],
           "statistical_parent": "administrative_region:france_pas_de_calais",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:1984",
@@ -15315,7 +15366,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Sarthe.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:le_mans"
+          ],
           "statistical_parent": "administrative_region:france_sarthe",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2016",
@@ -15637,7 +15690,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:saint_denis"
+          ],
           "statistical_parent": "administrative_region:france_seine",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2026",
@@ -15701,7 +15756,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine-Inférieure.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:dieppe"
+          ],
           "statistical_parent": "administrative_region:france_seine_inferieure",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2028",
@@ -15735,7 +15792,8 @@
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
           "place_ids": [
             "place:le_havre",
-            "place:port_le_havre"
+            "place:port_le_havre",
+            "place:fecamp"
           ],
           "statistical_parent": "administrative_region:france_seine_inferieure",
           "date": "1900-01-01",
@@ -15898,7 +15956,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine-et-Marne.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:fontainebleau"
+          ],
           "statistical_parent": "administrative_region:france_seine_et_marne",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2034",
@@ -15930,7 +15990,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine-et-Marne.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:meaux"
+          ],
           "statistical_parent": "administrative_region:france_seine_et_marne",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2035",
@@ -15962,7 +16024,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine-et-Marne.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:melun"
+          ],
           "statistical_parent": "administrative_region:france_seine_et_marne",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2036",
@@ -16058,7 +16122,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine-et-Oise.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:etampes"
+          ],
           "statistical_parent": "administrative_region:france_seine_et_oise",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2039",
@@ -16090,7 +16156,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine-et-Oise.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:mantes"
+          ],
           "statistical_parent": "administrative_region:france_seine_et_oise",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2040",
@@ -16122,7 +16190,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine-et-Oise.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:pontoise"
+          ],
           "statistical_parent": "administrative_region:france_seine_et_oise",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2041",
@@ -16154,7 +16224,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine-et-Oise.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:rambouillet"
+          ],
           "statistical_parent": "administrative_region:france_seine_et_oise",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2042",
@@ -16186,7 +16258,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Seine-et-Oise.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:versailles"
+          ],
           "statistical_parent": "administrative_region:france_seine_et_oise",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2043",
@@ -16325,7 +16399,11 @@
           "unit_id": "administrative_region:france_somme",
           "name": "Somme",
           "population_value": 539182,
-          "place_ids": [],
+          "place_ids": [
+            "place:amiens",
+            "place:longueau",
+            "place:abbeville"
+          ],
           "locator": "REC_T256.dbf record 81, V3=80 V4=00 V6=SOMME, V21 + REC_T256.dbf record 81, V3=80 V4=00 V6=SOMME, V22",
           "endpoint_values": [
             543279,
@@ -17153,7 +17231,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Yonne.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:auxerre"
+          ],
           "statistical_parent": "administrative_region:france_yonne",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2072",
@@ -17249,7 +17329,9 @@
           "scope": "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately.",
           "method": "Linear daily interpolation, elapsed fraction 1373/1820. Integer people use largest remainders within Yonne.",
           "uncertainty_kind": "The two source partitions close to the published department totals. Largest remainders reconcile to the department opening estimate. Timing of boundary changes and interpolation error have no quantified interval.",
-          "place_ids": [],
+          "place_ids": [
+            "place:sens"
+          ],
           "statistical_parent": "administrative_region:france_yonne",
           "date": "1900-01-01",
           "reconstruction_observation": "cities_europe:2075",

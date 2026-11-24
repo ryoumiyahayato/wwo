@@ -598,7 +598,7 @@ impl NativeSession {
                 Some(lobby) => lobby,
                 None => Lobby {
                     ready: true, selection_ready: true, busy: false, loading: false, native: true,
-                    status: String::new(), slots: Vec::new(),
+                    status: String::new(), slots: Vec::new(), map_bound: false,
                     choices: self.bootstrap.sources().polities().iter().map(|(id, polity)| crate::lobby::Opening {
                         id: polity.runtime_id(), label: polity.name_zh.clone(),
                         language: self.bootstrap.opening_language(id),

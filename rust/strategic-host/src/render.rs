@@ -166,6 +166,10 @@ pub struct Renderer {
     hud_type:wgpu::BindGroup,
     menu_art:wgpu::BindGroup,
     prologue_art:wgpu::BindGroup,
+    prologue_texture:wgpu::Texture,
+    prologue_scene:Option<usize>,
+    prologue_paper:wgpu::BindGroup,
+    opening_cloud:wgpu::BindGroup,
     instrument:wgpu::RenderPipeline,
     instrument_view:wgpu::BindGroup,
     screen:wgpu::BindGroup,
@@ -680,16 +684,28 @@ impl Renderer {
         self.water_pages.as_ref().map(|pages| pages.upload)
     }
 
-    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;4], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
+    pub(crate) fn show_prologue_scene(&mut self, index: usize) -> std::io::Result<()> {
+        if self.prologue_scene == Some(index) { return Ok(()); }
+        let raster = crate::prologue_ui::scene_raster(index)?;
+        let [width, height] = raster.size;
+        if raster.size != crate::prologue_ui::SCENE_SIZE {
+            return Err(std::io::Error::other("invalid opening scene size"));
+        }
+        write_texture(&self.queue, &self.prologue_texture, [width, height, 1], 4, &raster.pixels);
+        self.prologue_scene = Some(index);
+        Ok(())
+    }
+
+    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;5], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
         let size=window.inner_size().into();
         Self::with_target(Some(window),size,atlas,flags,hud,globe_art,layout_bytes,natural,None,detail,events,observe).await
     }
 
-    pub async fn new_offscreen(size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;4], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
+    pub async fn new_offscreen(size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;5], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
         Self::with_target(None,size,atlas,flags,hud,globe_art,layout_bytes,natural,close,detail,events,false).await
     }
 
-    async fn with_target(window:Option<Arc<Window>>, size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;4], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
+    async fn with_target(window:Option<Arc<Window>>, size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;5], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
         let instance=wgpu::Instance::new(&wgpu::InstanceDescriptor {backends:wgpu::Backends::VULKAN,..Default::default()});
         let surface=window.map(|window|instance.create_surface(window)).transpose().map_err(|e|e.to_string())?;
         let adapter=instance.request_adapter(&wgpu::RequestAdapterOptions {
@@ -807,12 +823,17 @@ impl Renderer {
         let font=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
         write_texture(&queue,&font,[w,h,1],4,&atlas.pixels);
         let font=bind(&device,&font_layout,&[tex_resource(0,&font.create_view(&Default::default())),sampler_resource(1,&linear)]);
-        let [hud_art,hud_type,menu_art,prologue_art]=hud.map(|image|{
+        let [hud_art,hud_type,menu_art,prologue_paper,opening_cloud]=hud.map(|image|{
             let [w,h]=image.size;
             let texture=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
             write_texture(&queue,&texture,[w,h,1],4,&image.pixels);
             bind(&device,&font_layout,&[tex_resource(0,&texture.create_view(&Default::default())),sampler_resource(1,&linear)])
         });
+        let [width, height] = crate::prologue_ui::SCENE_SIZE;
+        let prologue_texture = create_texture(&device, [width, height, 1], wgpu::TextureFormat::Rgba8Unorm);
+        let prologue_art = bind(&device, &font_layout, &[
+            tex_resource(0, &prologue_texture.create_view(&Default::default())), sampler_resource(1, &linear)
+        ]);
         let fallback=[wgpu::TextureFormat::Rgba8Unorm,wgpu::TextureFormat::Rg8Unorm,wgpu::TextureFormat::Rg8Uint].map(|format|{
             let tex=create_texture(&device,[1,1,1],format);
             let n=format.block_copy_size(None).unwrap();
@@ -872,7 +893,7 @@ impl Renderer {
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),
                 frame_timer:None,frame_acquire_ms:0.,view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
-                solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,prologue_art,instrument,instrument_view,screen,screen_size,meshes,models,
+                solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,prologue_art,prologue_texture,prologue_scene:None,prologue_paper,opening_cloud,instrument,instrument_view,screen,screen_size,meshes,models,
                 battle:None,landscape:None,landscape_pipeline,surface,transport_network:None,
                 transport_economy:None,transport_vehicles:None})
     }
@@ -1275,9 +1296,9 @@ impl Renderer {
                         pass.set_bind_group(1,&self.hud_art,&[]);
                         pass.set_bind_group(2,&self.instrument_view,&[]);
                     }
-                    Ink::Text|Ink::Flag|Ink::HudArtGlass|Ink::HudArt|Ink::HudText|Ink::MenuArt|Ink::PrologueArt=>{
+                    Ink::Text|Ink::Flag|Ink::HudArtGlass|Ink::HudArt|Ink::HudText|Ink::MenuArt|Ink::PrologueArt|Ink::ProloguePaper|Ink::OpeningCloud=>{
                         pass.set_pipeline(if matches!(ink,Ink::Flag){&self.flag}else if matches!(ink,Ink::HudArtGlass){&self.clock_face}else{&self.text});
-                        let texture=match ink{Ink::Flag=>&self.flag_art,Ink::HudArt|Ink::HudArtGlass=>&self.hud_art,Ink::HudText=>&self.hud_type,Ink::MenuArt=>&self.menu_art,Ink::PrologueArt=>&self.prologue_art,_=>&self.font};
+                        let texture=match ink{Ink::Flag=>&self.flag_art,Ink::HudArt|Ink::HudArtGlass=>&self.hud_art,Ink::HudText=>&self.hud_type,Ink::MenuArt=>&self.menu_art,Ink::PrologueArt=>&self.prologue_art,Ink::ProloguePaper=>&self.prologue_paper,Ink::OpeningCloud=>&self.opening_cloud,_=>&self.font};
                         pass.set_bind_group(1,texture,&[]);
                     }
                 }

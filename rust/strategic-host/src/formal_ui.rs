@@ -179,6 +179,13 @@ pub struct MapSymbol {
     pub world:bool,
     pub world_max_mpp:f64,
 }
+fn opening_names() -> &'static HashMap<String, String> {
+    static NAMES: std::sync::LazyLock<HashMap<String, String>> = std::sync::LazyLock::new(|| {
+        serde_json::from_str(include_str!("../../../data/character/prologue/place-names-zh.json"))
+            .expect("invalid opening place translations")
+    });
+    &NAMES
+}
 impl Skin {
     pub fn open(root:&Path)->io::Result<Self>{
         let messages:HashMap<String,String>=match File::open(root.join("messages-en-r68.json")){
@@ -220,6 +227,38 @@ impl Skin {
     pub fn division_name<'a>(&'a self,admin:&'a Admin)->&'a str {
         self.geographic_name(&admin.id).unwrap_or(&admin.name)
     }
+    pub(crate) fn opening_name<'a>(&'a self, world: &'a World, id: &str, fallback: &'a str) -> &'a str {
+        if let Some(name) = self.geographic_name(id) { return name; }
+        if self.english { return fallback; }
+        opening_names().get(id).map(String::as_str)
+            .or_else(|| world.places.iter().find(|place| place.id == id && !place.name_zh.is_empty())
+                .map(|place| place.name_zh.as_str()))
+            .unwrap_or(fallback)
+    }
+
+    pub(crate) fn wrapped_lines(&self, text: &str, font: usize, width: f32, scale: f32) -> Vec<String> {
+        let text = self.localized(text);
+        let mut rest = text.trim();
+        let mut lines = Vec::new();
+        while !rest.is_empty() {
+            let mut used = 0.;
+            let mut end = 0;
+            let mut word_end = 0;
+            for (start, ch) in rest.char_indices() {
+                let advance = self.glyph(font, ch)[4] * scale;
+                if ch.is_whitespace() { word_end = end; }
+                if end > 0 && (ch == '\n' || used + advance > width) { break; }
+                used += advance;
+                end = start + ch.len_utf8();
+                if !ch.is_ascii() { word_end = end; }
+            }
+            if end < rest.len() && word_end > 0 && !rest[end..].starts_with('\n') { end = word_end; }
+            lines.push(rest[..end].trim().to_owned());
+            rest = rest[end..].trim_start();
+        }
+        lines
+    }
+
     pub fn admin_count(&self,world:&World,p:&Polity)->usize{
         if p.id=="country_fra" {world.admin.len()}
         else {self.geography.directories.get(&p.id).map_or(0,Vec::len)}

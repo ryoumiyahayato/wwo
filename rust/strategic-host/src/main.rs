@@ -362,6 +362,7 @@ impl Host {
             state.date=model.date;
             state.timeline=Some(model);
         }
+        if let Some(lobby) = &mut state.lobby { lobby.bind_map_areas(&world); }
         let connected=state.session.is_some();
         let labels=(formal_map||!connected&&!config.managed)&&!config.terrain_review;
         let lobby_country=world.polities.iter().position(|p|p.id=="country_fra").unwrap_or(0);
@@ -414,7 +415,10 @@ impl Host {
             self.exit_requested|=native.exit;
             let loaded=native.revision!=revision;
             match updated {
-                Ok(())=>self.world_view_changed(had_session, loaded, Instant::now()),
+                Ok(())=>{
+                    if let Some(lobby) = &mut self.state.lobby { lobby.bind_map_areas(&self.world); }
+                    self.world_view_changed(had_session, loaded, Instant::now());
+                }
                 Err(error)=>self.feedback=error.to_string(),
             }
             if let Err(error)=dispatched {self.feedback=error.to_string();}
@@ -836,8 +840,8 @@ impl Host {
             || self.state.lobby.is_none()&&self.state.session.is_none()&&self.feedback.is_empty())
     }
     fn animate_opening(&mut self, now: Instant) {
-        use lobby::{Command, Page, SelectionStage};
-        if !self.in_lobby() || !self.opening_nav.motion
+        use lobby::{Page, SelectionStage};
+        if !self.in_lobby()
             || self.window.as_ref().is_some_and(|window| window.is_minimized() == Some(true)) { return; }
         let elapsed = now.saturating_duration_since(self.opening_nav.last_animation);
         if let Some((start, from, to)) = self.opening_nav.shift {
@@ -848,9 +852,19 @@ impl Host {
         }
         match self.lobby_page {
             Page::Cloud => {
-                if self.opening_nav.cloud.is_some_and(|start| now.saturating_duration_since(start) >= Duration::from_millis(1800)) {
-                    self.lobby_action(Command::SkipCloud);
-                } else { self.dirty = true; }
+                if self.opening_nav.cloud.is_some_and(|start| now.saturating_duration_since(start).as_secs_f32() >= lobby::CLOUD_SCENE_CUT) {
+                    self.lobby_page = Page::Prologue;
+                }
+                self.dirty = true;
+            }
+            Page::Prologue if self.opening_nav.cloud.is_some() || self.opening_nav.departure_cloud.is_some() => {
+                if self.opening_nav.cloud.is_some_and(|start| start.elapsed().as_secs_f32() >= lobby::CLOUD_OPEN_TIME) {
+                    self.opening_nav.cloud = None;
+                }
+                if self.opening_nav.departure_cloud.is_some_and(|start| start.elapsed().as_secs_f32() >= lobby::CLOUD_DEPART_TIME) {
+                    self.enter_prologue_world();
+                }
+                self.dirty = true;
             }
             Page::Selection if elapsed >= Duration::from_millis(125) => {
                 self.opening_nav.last_animation = now;
@@ -877,33 +891,77 @@ impl Host {
     }
 
     fn opening_shift(&mut self, target: f64) {
-        if self.opening_nav.motion {
-            self.opening_nav.shift = Some((Instant::now(), self.camera.screen_offset_x, target));
-        } else {
-            self.opening_nav.shift = None;
-            self.camera.screen_offset_x = target;
-        }
+        self.opening_nav.shift = Some((Instant::now(), self.camera.screen_offset_x, target));
     }
 
     fn opening_focus(&mut self, target: [f64; 2], mpp: f64) {
         self.velocity = [0.; 2];
-        if self.opening_nav.motion {
-            self.focus = Some(Focus { start: Instant::now(), camera: self.camera.clone(), target, mpp });
-        } else {
-            self.focus = None;
-            self.camera.focus(target, mpp, self.size);
-        }
+        self.focus = Some(Focus { start: Instant::now(), camera: self.camera.clone(), target, mpp });
         self.dirty = true;
     }
 
-    fn opening_area(&mut self, path: Vec<String>, target: Option<([f64; 2], f64)>) {
+    fn opening_layout(&self) -> Option<lobby::ProfileLayout> {
+        let polity = self.world.polities.get(self.lobby_country)?;
+        Some(lobby::ProfileLayout::new(self.size, &self.world, &self.skin, polity,
+            self.opening_choice(), &self.country_directory, &self.opening_nav))
+    }
+
+    fn opening_area(&mut self, path: Vec<String>) {
+        self.opening_nav.map_area = path.iter().rev()
+            .find_map(|id| self.world.admin.iter().position(|admin| &admin.id == id));
+        if !self.opening_nav.site.and_then(|i| self.opening_choice()?.sites.get(i)).is_some_and(|site|
+            site.path.iter().map(|area| &area.id).take(path.len()).eq(path.iter())) {
+            self.opening_nav.site = None;
+        }
         self.opening_nav.path = path;
         self.opening_nav.drawer = true;
+        self.opening_nav.drawer_drag = None;
         self.opening_nav.offset = 0;
         self.country_directory.query.clear();
         self.country_directory.search_active = false;
-        if let Some((point, mpp)) = target { self.opening_focus(point, mpp); }
+        let focus = self.opening_nav.path.last().and_then(|id| {
+            if let Some(admin) = self.opening_nav.map_area.and_then(|i| self.world.admin.get(i)).filter(|admin| &admin.id == id) {
+                return camera::fit_bounds(admin.bounds, self.size);
+            }
+            let mut points = self.opening_choice()?.sites.iter()
+                .filter(|site| site.path.iter().any(|area| &area.id == id)).map(|site| site.coordinates);
+            let [lon, lat] = points.next()?;
+            let bounds = points.fold([lon, lat, lon, lat], |[w, s, e, n], [x, y]| [w.min(x), s.min(y), e.max(x), n.max(y)]);
+            camera::fit_bounds(bounds, self.size).or(Some(([lon, lat], self.camera.mpp.min(2200.))))
+        }).or_else(|| {
+            let polity = self.world.polities.get(self.lobby_country)?;
+            self.visuals.record(self.lobby_country).focus(self.size).or(Some((polity.coordinates, 3000.)))
+        });
+        if let Some((point, mpp)) = focus { self.opening_focus(point, mpp); }
         self.dirty = true;
+    }
+
+    fn enter_prologue_world(&mut self) {
+        let Some(polity) = self.opening_choice().map(|opening| opening.id.clone()) else { return; };
+        let Some(draft) = self.prologue.as_ref().filter(|draft| draft.confirm()) else { return; };
+        let place = draft.place.clone();
+        let prologue = draft.opening;
+        let health = draft.health;
+        self.opening_nav.departure_cloud = None;
+        self.lobby_request = true;
+        self.emit(Request::NewPlayer { polity: &polity, place: &place, prologue, health });
+    }
+
+    fn skip_opening_transition(&mut self) -> bool {
+        use lobby::Page;
+        if self.opening_nav.cloud.take().is_some() {
+            self.lobby_page = Page::Prologue;
+            self.opening_nav.shift = None;
+            self.focus = None;
+            self.camera.screen_offset_x = -0.11;
+        } else if self.opening_nav.departure_cloud.take().is_some() {
+            self.enter_prologue_world();
+            self.opening_nav.arrival_cloud = None;
+        } else if self.opening_nav.arrival_cloud.take().is_none() {
+            return false;
+        }
+        self.dirty = true;
+        true
     }
 
     fn lobby_action(&mut self, command: lobby::Command) {
@@ -920,7 +978,7 @@ impl Host {
                 match page {
                     Page::Selection => {
                         self.country_directory = lobby::Directory::default();
-                        self.opening_nav = lobby::Selection { motion: self.opening_nav.motion, ..lobby::Selection::default() };
+                        self.opening_nav = lobby::Selection::default();
                         self.prologue = None;
                         self.mode = Mode::Political;
                         self.focus = None;
@@ -965,21 +1023,13 @@ impl Host {
                     }
                 }
             }
-            Command::Motion => {
-                self.opening_nav.motion = !self.opening_nav.motion;
-                if !self.opening_nav.motion {
-                    if let Some((_, _, target)) = self.opening_nav.shift.take() { self.camera.screen_offset_x = target; }
-                    if let Some(focus) = self.focus.take() { self.camera.focus(focus.target, focus.mpp, self.size); }
-                    self.opening_nav.previous_country = None;
-                }
-            }
             Command::Country(index) if self.lobby_page == Page::Selection => {
                 if self.opening_nav.stage == SelectionStage::Globe { return; }
                 if self.world.polities.get(index).is_some() && self.available(Object::Polity(index)) {
                     self.country_directory.search_active = false;
                     self.country_directory.query.clear();
                     self.country_directory.drag = None;
-                    self.opening_nav.previous_country = (self.opening_nav.motion && self.lobby_country != index)
+                    self.opening_nav.previous_country = (self.lobby_country != index)
                         .then_some((self.lobby_country, Instant::now()));
                     self.opening_nav.reset_place();
                     self.lobby_country = index;
@@ -990,30 +1040,27 @@ impl Host {
                     self.opening_focus(target, mpp);
                 }
             }
-            Command::Brief => {
-                self.opening_nav.brief = !self.opening_nav.brief;
-                if self.opening_nav.brief { self.opening_nav.drawer = false; }
-                self.opening_nav.brief_scroll = 0;
-            }
             Command::Drawer => {
                 self.opening_nav.drawer = !self.opening_nav.drawer;
-                if self.opening_nav.drawer { self.opening_nav.brief = false; }
+                self.opening_nav.drawer_drag = None;
                 self.country_directory.search_active = false;
                 self.country_directory.query.clear();
                 self.opening_nav.offset = 0;
             }
             Command::Up => {
-                self.opening_nav.path.pop();
-                self.opening_nav.offset = 0;
-                self.country_directory.query.clear();
+                let mut path = self.opening_nav.path.clone();
+                path.pop();
+                self.opening_area(path);
             }
             Command::Area(index, depth) => {
                 if let Some(site) = self.opening_choice().and_then(|opening| opening.sites.get(index)) {
-                    let path: Vec<_> = site.path.iter().take(depth + 1).map(|area| area.id.clone()).collect();
-                    let target = path.last().and_then(|id| self.world.admin.iter().find(|area| &area.id == id))
-                        .and_then(|area| camera::fit_bounds(area.bounds, self.size))
-                        .or_else(|| Some((site.coordinates, self.camera.mpp.min(2500.))));
-                    self.opening_area(path, target);
+                    let path = site.path.iter().take(depth + 1).map(|area| area.id.clone()).collect();
+                    self.opening_area(path);
+                }
+            }
+            Command::MapArea(index) => {
+                if let Some(admin) = self.world.admin.get(index) {
+                    self.opening_area(vec![admin.id.clone()]);
                 }
             }
             Command::Site(index) => {
@@ -1021,8 +1068,10 @@ impl Host {
                     .filter(|site| site.unavailable.is_none())
                 {
                     let point = site.coordinates;
-                    let path = site.path.iter().map(|area| area.id.clone()).collect();
+                    let path: Vec<_> = site.path.iter().map(|area| area.id.clone()).collect();
                     self.opening_nav.site = Some(index);
+                    self.opening_nav.map_area = path.iter().rev().find_map(|id|
+                        self.world.admin.iter().position(|area| &area.id == id));
                     self.opening_nav.path = path;
                     self.opening_nav.drawer = false;
                     self.country_directory.search_active = false;
@@ -1050,12 +1099,10 @@ impl Host {
                         {
                             let point = site.coordinates;
                             self.prologue = Some(prologue_ui::Draft::new(self.lobby_country, site.id.clone(), opening.language));
-                            if self.opening_nav.motion {
-                                self.opening_nav.cloud = Some(Instant::now());
-                                self.lobby_page = Page::Cloud;
-                                self.opening_shift(0.);
-                                self.opening_focus(point, self.camera.mpp.min(125.));
-                            } else { self.lobby_page = Page::Prologue; }
+                            self.opening_nav.cloud = Some(Instant::now());
+                            self.lobby_page = Page::Cloud;
+                            self.opening_shift(0.);
+                            self.opening_focus(point, self.camera.mpp.min(125.));
                         }
                     } else {
                         let id = opening.id.clone();
@@ -1066,14 +1113,7 @@ impl Host {
                     }
                 }
             }
-            Command::SkipCloud if self.lobby_page == Page::Cloud => {
-                self.opening_nav.cloud = None;
-                self.opening_nav.shift = None;
-                self.focus = None;
-                self.camera.screen_offset_x = -0.11;
-                self.lobby_page = Page::Prologue;
-                if let Some(draft) = &mut self.prologue { draft.changed = Instant::now(); }
-            }
+            Command::SkipCloud => { self.skip_opening_transition(); }
             Command::PrologueChoice(index) if self.lobby_page == Page::Prologue => {
                 if let Some(draft) = &mut self.prologue { draft.choose(index); }
             }
@@ -1095,16 +1135,9 @@ impl Host {
                 }
             }
             Command::PrologueNext if self.lobby_page == Page::Prologue && !self.lobby_request => {
-                let polity = self.opening_choice().map(|opening| opening.id.clone());
                 if let Some(draft) = &mut self.prologue {
                     if !draft.confirm() { draft.advance(); }
-                    else if let Some(polity) = polity {
-                        let place = draft.place.clone();
-                        let prologue = draft.opening;
-                        let health = draft.health;
-                        self.lobby_request = true;
-                        self.emit(Request::NewPlayer { polity: &polity, place: &place, prologue, health });
-                    }
+                    else { self.opening_nav.departure_cloud = Some(Instant::now()); }
                 }
             }
             Command::Load(slot) => {
@@ -1137,16 +1170,21 @@ impl Host {
                 self.country_directory.scroll(self.size, steps as f32);
                 true
             }
-            SelectionStage::Profile if self.opening_nav.drawer && lobby::contains(self.opening_nav.drawer_rect(self.size), point) => {
-                let max = self.opening_choice().map_or(0, |opening| self.opening_nav.max_scroll(opening, &self.country_directory.query, self.size));
-                self.opening_nav.offset = self.opening_nav.offset.min(max).saturating_add_signed((-steps * 3.).round() as isize).min(max);
-                true
-            }
-            SelectionStage::Profile if self.opening_nav.brief && lobby::contains(self.opening_nav.brief_rect(self.size), point) => {
-                self.opening_nav.brief_scroll = self.opening_nav.brief_scroll
-                    .saturating_add_signed((-steps).round() as isize).min(24);
-                true
-            }
+            SelectionStage::Profile => self.opening_layout().is_some_and(|layout| {
+                if self.opening_nav.drawer && lobby::contains(layout.drawer, point) {
+                    let max = layout.max_scroll();
+                    self.opening_nav.offset = self.opening_nav.offset.min(max)
+                        .saturating_add_signed((-steps * 3.).round() as isize).min(max);
+                    return true;
+                }
+                let max = layout.summary_lines.saturating_sub((layout.summary[3] / 21.).floor() as usize);
+                if max > 0 && lobby::contains(layout.summary, point) {
+                    self.opening_nav.profile_scroll = self.opening_nav.profile_scroll.min(max)
+                        .saturating_add_signed((-steps).round() as isize).min(max);
+                    return true;
+                }
+                false
+            }),
             _ => false,
         };
         self.dirty |= moved;
@@ -1788,6 +1826,10 @@ impl Host {
         self.base.as_ref().map_or([0,0],|p|dated(p.ids_at(&self.world.tiles[0],q)))
     }
     fn click(&mut self,p:[f64;2]) {
+        if self.opening_nav.cloud.is_some() || self.opening_nav.departure_cloud.is_some() || self.opening_nav.arrival_cloud.is_some() {
+            if lobby::contains(lobby::cloud_skip_rect(self.size), p) { self.skip_opening_transition(); }
+            return;
+        }
         if let (Some(view),Some((_,terrain)))=(&mut self.battle_view,&self.battle_terrain){
             let command=view.left_button(true,p,self.size,terrain);
             view.left_button(false,p,self.size,terrain);
@@ -1882,22 +1924,15 @@ impl Host {
                 if let Some(index) = index { self.lobby_action(lobby::Command::Country(index)); }
                 return;
             }
-            if index == Some(self.lobby_country) {
-                let admin = map_hit.and_then(|owner| owner[1].checked_sub(1)).map(usize::from)
-                    .and_then(|i| self.world.admin.get(i));
-                if let Some(admin) = admin {
-                    let normalized = |id: &str| id.split(':').next_back().unwrap_or(id).to_owned();
-                    let path = self.opening_choice().and_then(|opening| opening.sites.iter().find_map(|site| {
-                        let depth = site.path.iter().position(|area| normalized(&area.id) == normalized(&admin.id) || area.label == admin.name)?;
-                        Some(site.path.iter().take(depth + 1).map(|area| area.id.clone()).collect())
-                    }));
-                    if let Some(path) = path {
-                        self.opening_area(path, camera::fit_bounds(admin.bounds, self.size));
-                        return;
-                    }
-                }
+            if self.world.polities[self.lobby_country].id == "country_fra" {
+                let admin = map_hit.and_then(|owner| {
+                    (index == Some(self.lobby_country)).then_some(owner[1])?.checked_sub(1).map(usize::from)
+                }).or_else(|| {
+                    let point = coordinates?;
+                    self.world.admin.iter().position(|admin| admin.contains(point))
+                });
+                if let Some(admin) = admin { self.lobby_action(lobby::Command::MapArea(admin)); }
             }
-            if self.opening_nav.drawer { self.lobby_action(lobby::Command::Drawer); }
             return;
         }
         let polity=hit.and_then(|v|v.checked_sub(1)).map(usize::from);
@@ -1922,7 +1957,11 @@ impl Host {
         let [w,h]=self.size.map(|v|v as f32);
         if self.in_lobby(){
             return self.lobby_request||match self.lobby_page {
-                lobby::Page::Selection => self.opening_nav.contains(self.size, p)
+                lobby::Page::Selection => (match self.opening_nav.stage {
+                    lobby::SelectionStage::Globe => false,
+                    lobby::SelectionStage::Directory => lobby::contains(lobby::directory_rect(self.size), p),
+                    lobby::SelectionStage::Profile => self.opening_layout().is_some_and(|layout| layout.contains(&self.opening_nav, p)),
+                })
                     || lobby::contains([12., 14., 67., 30.], p)
                     || lobby::contains([12., h - 44., 124., 30.], p),
                 _=>true,
@@ -2039,6 +2078,12 @@ impl Host {
                 _=>{}
             }
             self.dirty=true;
+            return;
+        }
+        if self.opening_nav.cloud.is_some() || self.opening_nav.departure_cloud.is_some() || self.opening_nav.arrival_cloud.is_some() {
+            if matches!(key, Key::Named(NamedKey::Escape | NamedKey::Enter | NamedKey::Space)) {
+                self.skip_opening_transition();
+            }
             return;
         }
         if self.in_lobby(){
@@ -2360,7 +2405,7 @@ impl Host {
             (formal.loading(status,seconds),Vec::new())
         }else if self.in_lobby(){
             formal.lobby(&self.world,self.state.lobby.as_ref(),self.lobby_page,self.lobby_country,self.lobby_request,&self.country_directory,self.prologue.as_ref(),
-                lobby::SelectionView { navigation: &self.opening_nav, camera: &self.camera, visuals: &self.visuals })
+                lobby::SelectionView { navigation: &self.opening_nav, camera: &self.camera, visuals: &self.visuals, world: &self.world })
         }else{ui::compose(&self.world,&self.atlas,Ui{
             mode:self.mode,date:&date,camera:&self.camera,size:self.size,selected:self.selected,admin:&admin,details:self.details,country:self.country,
             search:self.search.as_deref(),search_results:&search,econ_label:&econ_label,econ_legend:&econ_legend,
@@ -2388,15 +2433,21 @@ impl Host {
                 fade=Some(old);
             }
         }
-        if let Some(start) = self.opening_nav.arrival_cloud {
-            let elapsed = start.elapsed().as_secs_f32() / 0.62;
-            if elapsed < 1. {
-                let mut layers = std::array::from_fn(|_| (overlay::Mesh::default(), ui::Ink::Solid));
-                lobby::cloud_cover(&mut layers[0].0, self.size, 0.52 + elapsed * 0.48);
-                fade = Some(layers);
-            } else {
-                self.opening_nav.arrival_cloud = None;
-            }
+        let cloud = if let Some(start) = self.opening_nav.cloud {
+            let time = start.elapsed().as_secs_f32();
+            let opacity = lobby::ease_cloud(time / 0.74) *
+                (1. - lobby::ease_cloud((time - 1.55) / (lobby::CLOUD_OPEN_TIME - 1.55)));
+            Some((opacity, time / lobby::CLOUD_OPEN_TIME))
+        } else if let Some(start) = self.opening_nav.departure_cloud {
+            let time = start.elapsed().as_secs_f32();
+            Some((lobby::ease_cloud(time / 0.70), time / lobby::CLOUD_DEPART_TIME * 0.45))
+        } else if let Some(start) = self.opening_nav.arrival_cloud {
+            let t = start.elapsed().as_secs_f32() / lobby::CLOUD_ARRIVE_TIME;
+            if t < 1. { Some((1. - lobby::ease_cloud(t), 0.45 + 0.55 * t)) }
+            else { self.opening_nav.arrival_cloud = None; None }
+        } else { None };
+        if let Some((opacity, travel)) = cloud {
+            fade = Some(lobby::cloud_cover(self.size, opacity, travel, &self.skin));
         }
         let needs_overlay=matches!(self.mode,Mode::Political|Mode::Economic)
             ||self.mode==Mode::Military&&view.map_style[3]>0.;
@@ -2412,7 +2463,11 @@ impl Host {
         let mut models=if loading||self.in_lobby() {Vec::new()} else {
             self.landmarks.as_ref().map_or_else(Vec::new,|catalogue|catalogue.visible(&date,&self.camera,self.size))
         };
+        let scene = self.prologue.as_ref().zip(self.opening_choice())
+            .filter(|_| self.lobby_page == lobby::Page::Prologue)
+            .map(|(draft, opening)| prologue_ui::scene_index(opening, &draft.place));
         let renderer=self.renderer.as_mut().unwrap();
+        if let Some(index) = scene { renderer.show_prologue_scene(index)?; }
         self.hits=models.iter().filter_map(|model| {
             let place=model.place?;
             renderer.has_model(model).then_some(Hit {
@@ -2547,6 +2602,7 @@ impl Host {
             "opening_stage": format!("{:?}", self.opening_nav.stage),
             "opening_polity": self.opening_choice().map(|row| &row.id),
             "birthplace_drawer": self.opening_nav.drawer,
+            "opening_area": self.opening_nav.path.last(),
             "birthplace": self.opening_choice().and_then(|row| row.sites.get(self.opening_nav.site?)).map(|site| &site.id),
             "prologue_chapter": self.prologue.as_ref().map(|draft| draft.stage + 1),
             "globe_center": 0.5 + self.camera.screen_offset_x,
@@ -2729,7 +2785,7 @@ impl Host {
                 self.battle_terrain_timing = None;
                 if let Some(renderer) = &mut self.renderer { renderer.clear_battle(); }
             }
-            if connected && self.lobby_page == lobby::Page::Prologue && self.opening_nav.motion {
+            if connected && self.lobby_page == lobby::Page::Prologue {
                 self.opening_nav.arrival_cloud = Some(now);
             } else if connected {
                 self.loading_fade = Some(now);
@@ -2899,10 +2955,14 @@ impl ApplicationHandler<HostEvent> for Host {
                 flate2::read::ZlibDecoder::new(file).take(524289).read_to_end(&mut layouts)?;
                 if layouts.len()!=524288{return Err(io::Error::other("invalid simulation layout").into());}
             }
+            let blank = || Raster { size: [1, 1], pixels: vec![0; 4] };
+            let opening_asset = |data: &[u8]| {
+                if self.config.managed { decode_rgba(data) } else { Ok(blank()) }
+            };
             let hud=[font(&self.config.root.join("hud-art.png"))?,hud_type_atlas(&self.config.root.join("hud-type.png"))?,
-                if self.config.managed{font(&self.config.root.join("menu-painting.png"))?}else{Raster{size:[1,1],pixels:vec![0;4]}},
-                if self.config.managed { decode_rgba(&include_bytes!("../../../data/character/prologue/historical-scenes.png")[..])? }
-                else { Raster { size: [1, 1], pixels: vec![0; 4] } }];
+                if self.config.managed{font(&self.config.root.join("menu-painting.png"))?}else{blank()},
+                opening_asset(include_bytes!("../../../data/character/prologue/parchment.png"))?,
+                opening_asset(include_bytes!("../../../data/character/prologue/cloud.png"))?];
 
             let art=|name| {
                 if self.map_signature.is_some() {decode_rgba(map_release::open_art(&self.map_root,name)?)}
@@ -3059,6 +3119,13 @@ impl ApplicationHandler<HostEvent> for Host {
                     view.aim(next, self.size, terrain);
                     return;
                 }
+                if self.opening_nav.drawer_drag.is_some() {
+                    if let Some(layout) = self.opening_layout() {
+                        self.opening_nav.slide_drawer(&layout, next[1]);
+                    }
+                    self.dirty = true;
+                    return;
+                }
                 if self.country_directory.drag.is_some(){
                     self.country_directory.slide(self.size,next[1]);self.dirty=true;return;
                 }
@@ -3107,6 +3174,14 @@ impl ApplicationHandler<HostEvent> for Host {
                     if self.lobby_page != lobby::Page::Cloud { self.focus = None; }
                     self.opening_nav.last_input = Instant::now();
                     self.velocity=[0.;2];
+                    if button == MouseButton::Left && self.in_lobby() && self.lobby_page == lobby::Page::Selection
+                        && self.opening_nav.stage == lobby::SelectionStage::Profile && self.opening_nav.drawer && !self.loading()
+                        && self.opening_layout().is_some_and(|layout| self.opening_nav.grab_drawer(&layout, self.cursor))
+                    {
+                        self.drag = None;
+                        self.dirty = true;
+                        return;
+                    }
                     if button==MouseButton::Left&&self.in_lobby()&&self.lobby_page==lobby::Page::Selection
                         &&self.opening_nav.stage == lobby::SelectionStage::Directory
                         &&!self.loading()&&self.country_directory.grab(self.size,self.cursor)
@@ -3132,6 +3207,8 @@ impl ApplicationHandler<HostEvent> for Host {
                     } else if drag.is_some() {
                         self.population_polity_at(self.cursor);
                     }
+                } else if button == MouseButton::Left && self.opening_nav.drawer_drag.take().is_some() {
+                    self.dirty = true;
                 } else if button==MouseButton::Left&&self.country_directory.drag.take().is_some() {
                     self.dirty=true;
                 } else if button==MouseButton::Left&&self.hud.volume_drag {
@@ -3178,7 +3255,8 @@ impl ApplicationHandler<HostEvent> for Host {
             WindowEvent::KeyboardInput{event,..} if event.state==ElementState::Pressed && !event.repeat=>self.key(event.logical_key),
             WindowEvent::Focused(false)=>{if let Some(view) = &mut self.battle_view {view.clear_controls();}
                 self.drag=None;self.country_click=None;self.hud.volume_drag=false;self.dirty|=self.hud.clock_drag.take().is_some();
-                self.dirty|=self.country_directory.drag.take().is_some();self.velocity=[0.;2];}
+                self.dirty|=self.country_directory.drag.take().is_some();
+                self.dirty |= self.opening_nav.drawer_drag.take().is_some();self.velocity=[0.;2];}
             _=>(),
         }
     }
@@ -3205,7 +3283,7 @@ impl ApplicationHandler<HostEvent> for Host {
             !self.hud.mechanical.hidden && (!s.paused || self.hud.mechanical.moving()));
         let animated=self.loading() || clock_animating;
         let transitioning = self.loading_fade.is_some_and(|t| t.elapsed() < Duration::from_millis(320))
-            || self.opening_nav.arrival_cloud.is_some();
+            || self.opening_nav.cloud.is_some() || self.opening_nav.departure_cloud.is_some() || self.opening_nav.arrival_cloud.is_some();
         if let Some(window)=&self.window {
             let periodic=(animated||transitioning||fading)&&now.saturating_duration_since(self.last_present)>=Duration::from_millis(if fading||transitioning{16}else{100});
             if self.dirty||expiry||periodic||(self.trial.timing&&!self.trial.passive_timing)||!self.trial.captures.is_empty()||self.screenshot.is_some(){window.request_redraw();}
@@ -3216,7 +3294,7 @@ impl ApplicationHandler<HostEvent> for Host {
                 if let Err(error)=self.draw(){self.fatal_error=Some(error.to_string());event_loop.exit();}
             }
         }
-        let opening_animation = self.in_lobby() && self.opening_nav.motion
+        let opening_animation = self.in_lobby()
             && (self.opening_nav.shift.is_some() || self.lobby_page == lobby::Page::Cloud
                 || self.lobby_page == lobby::Page::Prologue && self.prologue.as_ref().is_some_and(|draft| draft.changed.elapsed().as_millis() < 340));
         let fast=opening_animation||self.focus.is_some()||self.animate||(self.trial.timing&&!self.trial.passive_timing)||self.trial.movement.is_some()||self.velocity[0].hypot(self.velocity[1])>9.||fading;

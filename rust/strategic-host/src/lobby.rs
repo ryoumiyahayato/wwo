@@ -11,6 +11,7 @@ pub struct Lobby {
     #[serde(default)] pub loading:bool,
     #[serde(default)] pub native:bool,
     pub choices:Vec<Opening>,pub slots:Vec<Slot>,
+    #[serde(skip)] pub map_bound: bool,
 }
 #[derive(Deserialize)]
 pub struct Opening {
@@ -22,6 +23,25 @@ pub struct Opening {
 }
 
 impl Lobby {
+    pub(crate) fn bind_map_areas(&mut self, world: &World) {
+        if self.map_bound || !self.native { return; }
+        // The installed administrative outlines currently cover 1900 metropolitan France.
+        if let Some(france) = self.choices.iter_mut().find(|opening| opening.id == "state:country_fra") {
+            for site in &mut france.sites {
+                if let Some(depth) = site.path.iter().position(|area| world.admin.iter().any(|admin| admin.id == area.id)) {
+                    let area = site.path.remove(depth);
+                    site.path.insert(0, area);
+                    continue;
+                }
+                let Some(admin) = world.admin.iter().find(|admin| admin.contains(site.coordinates)) else { continue; };
+                site.path.insert(0, wwo_map_lab::formal_bootstrap::OpeningArea {
+                    id: admin.id.clone(), label: admin.name.clone(),
+                });
+            }
+        }
+        self.map_bound = true;
+    }
+
     pub fn can_open(&self, opening: &Opening) -> bool {
         !self.native || opening.sites.iter().any(|site| site.unavailable.is_none())
     }
@@ -35,8 +55,14 @@ impl Lobby {
 pub enum Page {#[default] Home,Selection,Cloud,Prologue,Load,Settings,Themes,Migration(Status,usize)}
 #[derive(Clone,Copy)]
 pub enum Command {
-    Page(Page), Country(usize), Back, Motion, Drawer, Brief, Area(usize, usize), Site(usize),
+    Page(Page), Country(usize), Back, Drawer, Area(usize, usize), MapArea(usize), Site(usize),
     Up, Search, ClearSearch, Enter, SkipCloud, PrologueChoice(usize), PrologueHealth(usize), PrologueNext, PrologueBack, Load(u8), Exit,
+}
+
+struct BirthplaceRow<'a> {
+    command: Command,
+    label: &'a str,
+    status: &'a str,
 }
 
 pub type Rect = [f32;4];
@@ -57,16 +83,18 @@ pub enum SelectionStage {
 pub struct Selection {
     pub stage: SelectionStage,
     pub drawer: bool,
-    pub brief: bool,
-    pub brief_scroll: usize,
+    pub profile_scroll: usize,
+    pub map_area: Option<usize>,
     pub path: Vec<String>,
     pub site: Option<usize>,
     pub offset: usize,
-    pub motion: bool,
+    pub drawer_rows: usize,
+    pub drawer_drag: Option<DrawerDrag>,
     pub last_input: Instant,
     pub last_animation: Instant,
     pub shift: Option<(Instant, f64, f64)>,
     pub cloud: Option<Instant>,
+    pub departure_cloud: Option<Instant>,
     pub arrival_cloud: Option<Instant>,
     pub previous_country: Option<(usize, Instant)>,
 }
@@ -75,95 +103,193 @@ impl Default for Selection {
     fn default() -> Self {
         let now = Instant::now();
         Self {
-            stage: SelectionStage::Globe, drawer: false, brief: false, brief_scroll: 0, path: Vec::new(),
-            site: None, offset: 0, motion: true, last_input: now, last_animation: now,
-            shift: None, cloud: None, arrival_cloud: None, previous_country: None,
+            stage: SelectionStage::Globe, drawer: false, profile_scroll: 0, map_area: None, path: Vec::new(),
+            site: None, offset: 0, drawer_rows: 5, drawer_drag: None, last_input: now, last_animation: now,
+            shift: None, cloud: None, departure_cloud: None, arrival_cloud: None, previous_country: None,
         }
     }
 }
 
 impl Selection {
-    fn rects(&self, size: [u32; 2]) -> (Rect, Rect) {
-        let [w, h] = size.map(|value| value as f32);
-        let compact = w < 790. || h < 540.;
-        let width = (w * 0.36).clamp(290., 410.).min((w - 24.).max(160.));
-        let card_height: f32 = if self.brief { 339. } else { 236. };
-        let right = w - width - 12.;
-        let card = [right, 14., width, card_height.min((h - 72.).max(162.))];
-        let drawer = if compact || card[3] + 230. > h {
-            let width = (w - 24.).min(530.);
-            let available = h - card[1] - card[3] - 20.;
-            let height = (h * 0.49).min(available).max(100.);
-            [(w - width) * 0.5, h - height - 10., width, height]
-        } else {
-            [right, card[1] + card[3] + 9., width, (h - card[3] - 35.).min(348.)]
-        };
-        (card, drawer)
-    }
-
-    pub fn drawer_rect(&self, size: [u32; 2]) -> Rect { self.rects(size).1 }
-
-    pub fn brief_rect(&self, size: [u32; 2]) -> Rect {
-        let [x, y, w, h] = self.rects(size).0;
-        [x + 17., y + 112., w - 34., (h - 209.).max(19.)]
-    }
-
-    pub fn contains(&self, size: [u32; 2], point: [f64; 2]) -> bool {
-        match self.stage {
-            SelectionStage::Globe => false,
-            SelectionStage::Directory => contains(directory_rect(size), point),
-            SelectionStage::Profile => {
-                let (card, drawer) = self.rects(size);
-                contains(card, point) || self.drawer && contains(drawer, point)
-            }
-        }
-    }
-
     pub fn reset_place(&mut self) {
         self.drawer = false;
-        self.brief = false;
-        self.brief_scroll = 0;
+        self.profile_scroll = 0;
+        self.map_area = None;
         self.path.clear();
         self.site = None;
         self.offset = 0;
+        self.drawer_drag = None;
     }
 
-    pub fn path_label(&self, opening: &Opening) -> String {
-        let mut names = vec![opening.label.as_str()];
-        if let Some(site) = self.site.and_then(|index| opening.sites.get(index)) {
-            names.extend(site.path.iter().map(|area| area.label.as_str()));
-            names.push(&site.label);
-        }
-        names.join(" / ")
+    pub fn path_label(&self, opening: &Opening, world: &World, skin: &formal_ui::Skin) -> Option<String> {
+        let site = opening.sites.get(self.site?)?;
+        Some(site.path.iter().map(|area| skin.opening_name(world, &area.id, &area.label))
+            .chain(std::iter::once(skin.opening_name(world, &site.id, &site.label)))
+            .collect::<Vec<_>>().join(" / "))
     }
 
-    pub fn max_scroll(&self, opening: &Opening, query: &str, size: [u32; 2]) -> usize {
-        let visible = ((self.drawer_rect(size)[3] - 91.) / 30.).max(1.) as usize;
-        self.rows(opening, query).len().saturating_sub(visible)
-    }
-
-    fn rows<'a>(&self, opening: &'a Opening, query: &str) -> Vec<(usize, Option<usize>, &'a str)> {
+    fn rows<'a>(&self, opening: &'a Opening, query: &str, world: &'a World, skin: &'a formal_ui::Skin)
+        -> Vec<BirthplaceRow<'a>>
+    {
         let query = query.trim().to_lowercase();
+        let matches = |id: &str, original: &str| {
+            id.contains(&query) || original.to_lowercase().contains(&query)
+                || skin.opening_name(world, id, original).to_lowercase().contains(&query)
+        };
+        let matching = || opening.sites.iter().enumerate().filter(|(_, site)|
+            site.path.iter().map(|area| &area.id).take(self.path.len()).eq(self.path.iter()));
+        let flat = !self.path.is_empty() && (matching().filter(|(_, site)| site.unavailable.is_none()).count() <= 1
+            || opening.id == "state:country_fra" && self.path.len() == 1);
         let mut areas = BTreeMap::new();
         let mut sites = Vec::new();
-        for (index, site) in opening.sites.iter().enumerate() {
-            if !site.path.iter().map(|area| &area.id).take(self.path.len()).eq(self.path.iter()) { continue; }
+        if opening.id == "state:country_fra" && self.path.is_empty() {
+            for (index, division) in world.admin.iter().enumerate() {
+                if query.is_empty() || matches(&division.id, &division.name) {
+                    areas.insert(division.id.as_str(), BirthplaceRow {
+                        command: Command::MapArea(index), label: skin.division_name(division), status: "›",
+                    });
+                }
+            }
+        }
+        for (index, site) in matching() {
+            let label = skin.opening_name(world, &site.id, &site.label);
+            let area_row = |area: &'a wwo_map_lab::formal_bootstrap::OpeningArea, depth| BirthplaceRow {
+                command: Command::Area(index, depth),
+                label: skin.opening_name(world, &area.id, &area.label),
+                status: "›",
+            };
             if query.is_empty() {
-                if let Some(area) = site.path.get(self.path.len()) {
-                    areas.entry(&area.label).or_insert((index, Some(self.path.len()), area.label.as_str()));
+                if let Some(area) = site.path.get(self.path.len()).filter(|_| !flat) {
+                    areas.entry(area.id.as_str()).or_insert_with(|| area_row(area, self.path.len()));
                     continue;
                 }
-            } else if !site.label.to_lowercase().contains(&query) && !site.id.contains(&query) {
+            } else if !matches(&site.id, &site.label) {
                 for (depth, area) in site.path.iter().enumerate().skip(self.path.len()) {
-                    if area.label.to_lowercase().contains(&query) {
-                        areas.entry(&area.label).or_insert((index, Some(depth), area.label.as_str()));
+                    if matches(&area.id, &area.label) {
+                        areas.entry(area.id.as_str()).or_insert_with(|| area_row(area, depth));
                     }
                 }
                 continue;
             }
-            sites.push((index, None, site.label.as_str()));
+            sites.push(BirthplaceRow {
+                command: Command::Site(index), label, status: site.unavailable.as_deref().unwrap_or(""),
+            });
         }
-        areas.into_values().chain(sites).collect()
+        let mut regions: Vec<_> = areas.into_values().collect();
+        regions.sort_by_key(|row| row.label);
+        regions.extend(sites);
+        regions
+    }
+}
+
+pub struct ProfileLayout {
+    pub card: Rect,
+    pub summary: Rect,
+    pub field: Rect,
+    pub drawer: Rect,
+    pub visible: usize,
+    pub rows: usize,
+    pub summary_lines: usize,
+    pub title: Rect,
+}
+
+#[derive(Clone, Copy)]
+pub enum DrawerDrag {
+    Resize { top: f64, rows: usize },
+    Scroll { grab: f32 },
+}
+
+const DRAWER_HEADER: f32 = 73.;
+const DRAWER_FOOTER: f32 = 23.;
+const DRAWER_ROW: f32 = 30.;
+
+impl ProfileLayout {
+    pub fn new(size: [u32; 2], world: &World, skin: &formal_ui::Skin, p: &Polity, opening: Option<&Opening>,
+        directory: &Directory, nav: &Selection) -> Self
+    {
+        let [width, height] = size.map(|value| value as f32);
+        let w = (width * 0.34).clamp(305., 440.).min(width - 24.);
+        let x = width - w - 12.;
+        let y = 14.;
+        let title = polity_label(p, opening, skin.english());
+        let title_width = w - 108.;
+        let title_height = skin.wrapped_lines(title, 1, title_width, 0.92).len().max(1) as f32 * 27.;
+        let summary_y = y + (title_height + 24.).max(58.);
+        let summary_width = w - 32.;
+        let summary_lines = skin.wrapped_lines(opening_brief(p), 0, summary_width, 0.92).len();
+        let field_label = opening.and_then(|o| nav.path_label(o, world, skin));
+        let field_height = field_label.as_deref().map_or(30., |label|
+            (skin.wrapped_lines(label, 0, w - 64., 0.9).len() as f32 * 20. + 10.).max(30.));
+        let reserve = if nav.drawer && width < 790. { 147. } else { 15. };
+        let visible_lines = ((height - summary_y - field_height - 82. - reserve) / 21.).floor().max(1.) as usize;
+        let summary_height = summary_lines.min(visible_lines) as f32 * 21.;
+        let field_y = summary_y + summary_height + if summary_lines > 0 { 10. } else { 0. };
+        let card = [x, y, w, field_y - y + field_height + if nav.site.is_some() { 42. } else { 72. }];
+        let rows = opening.filter(|_| nav.drawer).map_or_else(Vec::new, |o| nav.rows(o, &directory.query, world, skin));
+        let below = height - card[1] - card[3] - 20.;
+        let side = nav.drawer && below < 172. && width >= 790.;
+        let drawer_width = if side { (width * 0.39).clamp(310., 500.) } else { w };
+        let max_height = if side { height - 64. } else { below };
+        let max_visible = ((max_height - DRAWER_HEADER - DRAWER_FOOTER) / DRAWER_ROW).floor().max(1.) as usize;
+        let visible = rows.len().max(1).min(nav.drawer_rows).min(max_visible);
+        let height = DRAWER_HEADER + DRAWER_FOOTER + visible as f32 * DRAWER_ROW;
+        let drawer = if side { [12., 53., drawer_width, height] }
+            else { [x, card[1] + card[3] + 8., drawer_width, height] };
+        Self { card, summary: [x + 16., summary_y, summary_width, summary_height],
+            field: [x + 14., field_y, w - 28., field_height], drawer, visible,
+            rows: rows.len(), summary_lines, title: [x + 94., y + 11., title_width, title_height] }
+    }
+
+    pub fn contains(&self, nav: &Selection, point: [f64; 2]) -> bool {
+        contains(self.card, point) || nav.drawer && contains(self.drawer, point)
+    }
+
+    pub fn max_scroll(&self) -> usize { self.rows.saturating_sub(self.visible) }
+
+    fn handle(&self) -> Rect {
+        let [x, y, w, h] = self.drawer;
+        [x + 12., y + h - DRAWER_FOOTER, w - 24., DRAWER_FOOTER - 4.]
+    }
+
+    fn scrollbar(&self, offset: usize) -> Option<(Rect, Rect)> {
+        let max = self.max_scroll();
+        if max == 0 { return None; }
+        let [x, y, w, _] = self.drawer;
+        let height = self.visible as f32 * DRAWER_ROW - 4.;
+        let track = [x + w - 23., y + DRAWER_HEADER, 15., height];
+        let thumb_height = (height * self.visible as f32 / self.rows as f32).max(16.);
+        let thumb_y = (height - thumb_height) * offset.min(max) as f32 / max as f32;
+        Some((track, [track[0], track[1] + thumb_y, track[2], thumb_height]))
+    }
+}
+
+impl Selection {
+    pub fn grab_drawer(&mut self, layout: &ProfileLayout, point: [f64; 2]) -> bool {
+        if !self.drawer { return false; }
+        if layout.rows > 1 && contains(layout.handle(), point) {
+            self.drawer_drag = Some(DrawerDrag::Resize { top: point[1], rows: layout.visible });
+        } else if let Some((_, thumb)) = layout.scrollbar(self.offset).filter(|(track, _)| contains(*track, point)) {
+            let grab = if contains(thumb, point) { point[1] as f32 - thumb[1] } else { thumb[3] * 0.5 };
+            self.drawer_drag = Some(DrawerDrag::Scroll { grab });
+            self.slide_drawer(layout, point[1]);
+        } else { return false; }
+        true
+    }
+
+    pub fn slide_drawer(&mut self, layout: &ProfileLayout, y: f64) {
+        match self.drawer_drag {
+            Some(DrawerDrag::Resize { top, rows }) => {
+                let change = ((y - top) / f64::from(DRAWER_ROW)).round() as isize;
+                self.drawer_rows = rows.saturating_add_signed(change).clamp(1, layout.rows.max(1));
+            }
+            Some(DrawerDrag::Scroll { grab }) => {
+                if let Some((track, thumb)) = layout.scrollbar(self.offset) {
+                    let position = ((y as f32 - track[1] - grab) / (track[3] - thumb[3])).clamp(0., 1.);
+                    self.offset = (position * layout.max_scroll() as f32).round() as usize;
+                }
+            }
+            None => {}
+        }
     }
 }
 
@@ -179,6 +305,7 @@ pub struct SelectionView<'a> {
     pub navigation: &'a Selection,
     pub camera: &'a Camera,
     pub visuals: &'a PoliticalVisuals,
+    pub world: &'a World,
 }
 
 #[derive(Deserialize)]
@@ -198,6 +325,11 @@ static COUNTRY_PROFILES: LazyLock<Vec<HistoricalProfile>> = LazyLock::new(|| {
     serde_json::from_str::<Profiles>(data)
         .expect("invalid 1900 historical state profiles").profiles
 });
+
+fn opening_brief(polity: &Polity) -> &str {
+    COUNTRY_PROFILES.iter().find(|row| row.entity_id == polity.id)
+        .map_or("", |row| if row.opening_brief_zh.is_empty() { &row.brief_zh } else { &row.opening_brief_zh })
+}
 
 fn polity_label<'a>(p: &'a Polity, opening: Option<&'a Opening>, english: bool) -> &'a str {
     if english {
@@ -346,6 +478,7 @@ impl Display<'_> {
         let mut panels=Mesh::default();
         let art=Mesh::default();
         let mut scenes=Mesh::default();
+        let mut paper=Mesh::default();
         let mut text=Mesh::default();
         let mut flags=Mesh::default();
         let mut hits=Vec::new();
@@ -375,12 +508,6 @@ impl Display<'_> {
                 let back = [12., 14., 67., 30.];
                 self.row(&mut panels, &mut text, &mut hits, back, self.skin.choose("返回", "Back"),
                     (!busy).then_some(action(Command::Back)), false);
-                let motion = self.skin.choose(
-                    if navigation.motion { "减少动效" } else { "恢复动效" },
-                    if navigation.motion { "Reduce motion" } else { "Enable motion" },
-                );
-                self.row(&mut panels, &mut text, &mut hits, [12., h - 44., 124., 30.], motion,
-                    Some(action(Command::Motion)), !navigation.motion);
                 match navigation.stage {
                     SelectionStage::Globe => {
                         let hint = self.skin.choose("点击地球，选择国家", "Click the globe to choose a country");
@@ -397,17 +524,12 @@ impl Display<'_> {
                     }
                 }
             }
-            Page::Cloud => {
-                let phase = view.navigation.cloud.map_or(1., |at| (at.elapsed().as_secs_f32() / 1.8).min(1.));
-                cloud_cover(&mut panels, self.size, phase);
-                self.row(&mut panels, &mut text, &mut hits, [w - 135., h - 55., 112., 31.],
-                    self.skin.choose("跳过", "Skip"), Some(action(Command::SkipCloud)), false);
-            }
+            Page::Cloud => (),
             Page::Prologue => {
                 if let Some((draft, opening)) = draft.and_then(|draft| {
                     world.polities.get(draft.country).and_then(|polity| state?.opening(polity)).map(|opening| (draft, opening))
                 }) {
-                    self.draw_prologue(&mut scenes, &mut panels, &mut text, &mut hits, draft, opening, view.navigation);
+                    self.draw_prologue(&mut scenes, &mut paper, &mut panels, &mut text, &mut hits, draft, opening, world);
                 }
             }
             Page::Load=>{
@@ -440,7 +562,7 @@ impl Display<'_> {
             }
             Page::Migration(status,page)=>self.migration_status(&mut panels,&mut text,&mut hits,status,page,state.is_some_and(|s|s.native)),
         }
-        if !matches!(page,Page::Migration(_, _)) {
+        if !matches!(page,Page::Migration(_, _) | Page::Cloud) && view.navigation.departure_cloud.is_none() {
             let status=state.map(|s|s.status.as_str()).filter(|s|!s.is_empty()).unwrap_or(if busy{"正在进入世界。"}else if !ready{"正在连接 R68 正式规则。"}else{""});
             let status=if self.feedback.is_empty(){status}else{self.feedback};
             if !status.is_empty(){
@@ -448,9 +570,15 @@ impl Display<'_> {
                 self.skin.text(&mut text,status,0,[(w-515.)*0.5,h-45.],515.,IVORY);
             }
         }
+        let panel_layers = if page == Page::Prologue {
+            [(paper, Ink::ProloguePaper), (panels, Ink::Solid), (flags, Ink::Flag)]
+        } else {
+            [(panels, Ink::Solid), (flags, Ink::Flag), (paper, Ink::ProloguePaper)]
+        };
+        let [panel_base, panel_content, panel_finish] = panel_layers;
         ([(Mesh::default(),Ink::Solid),(Mesh::default(),Ink::Text),(Mesh::default(),Ink::Instrument),(Mesh::default(),Ink::ClockGears),
           (Mesh::default(),Ink::HudArt),(Mesh::default(),Ink::HudText),
-          (background,Ink::MenuArt),(panels,Ink::Solid),(scenes,Ink::PrologueArt),(flags,Ink::Flag),(art,Ink::HudArt),(Mesh::default(),Ink::Solid),(text,Ink::HudText)],hits)
+          (background,Ink::MenuArt),(scenes,Ink::PrologueArt),panel_base,panel_content,panel_finish,(art,Ink::HudArt),(text,Ink::HudText)],hits)
     }
 
     fn opening_card(
@@ -458,17 +586,24 @@ impl Display<'_> {
         polity: &Polity, opening: Option<&Opening>, directory: &Directory, view: &SelectionView<'_>, busy: bool,
     ) {
         let nav = view.navigation;
-        let (card, drawer) = nav.rects(self.size);
-        let [x, y, w, h] = card;
+        let layout = ProfileLayout::new(self.size, view.world, self.skin, polity, opening, directory, nav);
+        let [x, y, w, h] = layout.card;
         if let Some(opening) = opening {
-            let drawer_open = nav.drawer;
-            let mark_limit = view.camera.mpp * 9.;
-            if mark_limit < 100_000. {
+            if let Some(admin) = nav.map_area.and_then(|i| view.world.admin.get(i)) {
+                for outline in &admin.outlines {
+                    for edge in outline.windows(2) {
+                        if let (Some(a), Some(b)) = (view.camera.project(edge[0], self.size), view.camera.project(edge[1], self.size)) {
+                            panels.line(a.map(|p| p as f32), b.map(|p| p as f32), 2., formal_ui::BRASS);
+                        }
+                    }
+                }
+            }
+            if view.camera.mpp < 11_000. {
                 let mut painted = Vec::<[f64; 2]>::new();
                 for (i, site) in opening.sites.iter().enumerate() {
                     if !site.path.iter().map(|area| &area.id).take(nav.path.len()).eq(nav.path.iter()) { continue; }
                     let Some(point) = view.camera.project(site.coordinates, self.size) else { continue; };
-                    if nav.contains(self.size, point) || point[0] < 0. || point[1] < 0.
+                    if layout.contains(nav, point) || point[0] < 0. || point[1] < 0.
                         || point[0] >= f64::from(self.size[0]) || point[1] >= f64::from(self.size[1]) { continue; }
                     if nav.site != Some(i) && painted.iter().any(|prior| (point[0] - prior[0]).hypot(point[1] - prior[1]) < 12.) { continue; }
                     painted.push(point);
@@ -478,106 +613,114 @@ impl Display<'_> {
                     let color = if nav.site == Some(i) { IVORY } else if enabled { formal_ui::BRASS } else { MUTED };
                     panels.shape(&[[px, py - 4.], [px + 4., py], [px, py + 4.], [px - 4., py]], color);
                     if enabled && !busy { hits.push(Hit { area, action: action(Command::Site(i)) }); }
-                    if contains(area, self.cursor) || nav.site == Some(i) {
-                        self.skin.text(text, &site.label, 0, [px + 9., py - 12.], 160., IVORY);
+                    if contains(area, self.cursor) || nav.site == Some(i) || enabled && nav.map_area.is_some() {
+                        let label = self.skin.opening_name(view.world, &site.id, &site.label);
+                        self.skin.text(text, label, 0, [px + 9., py - 12.], 184., IVORY);
                     }
                 }
             }
-            if drawer_open {
-                formal_ui::panel(panels, drawer, [12, 22, 33, 253]);
-                self.birthplace_drawer(panels, text, hits, opening, directory, nav, drawer, busy);
+            if nav.drawer {
+                formal_ui::panel(panels, layout.drawer, [12, 22, 33, 252]);
+                self.birthplace_drawer(panels, text, hits, opening, directory, view, &layout, busy);
             }
         }
-        formal_ui::panel(panels, card, [9, 19, 30, 251]);
+        formal_ui::panel(panels, layout.card, [9, 19, 30, 251]);
         if let Some(slot) = self.flags {
-            let elapsed = if nav.motion { nav.last_animation.saturating_duration_since(nav.last_input).as_secs_f32() } else { 0. };
-            let flag_area = [x + 17., y + 15., 62., 33.];
+            let elapsed = nav.last_animation.saturating_duration_since(nav.last_input).as_secs_f32();
+            let flag_area = [x + 16., y + 13., 60., 33.];
             let fade = nav.previous_country.map_or(1., |(_, at)| (at.elapsed().as_secs_f32() / 0.3).clamp(0., 1.));
             if let Some((index, _)) = nav.previous_country.filter(|_| fade < 1.) {
                 flags.flag_wave(flag_area, view.visuals.record(index).flag, 0., (1. - fade) * 255.);
             }
             flags.flag_wave(flag_area, slot, elapsed, fade * 255.);
         }
+        let say = |zh, en| self.skin.choose(zh, en);
         let title = polity_label(polity, opening, self.skin.english());
-        self.skin.paragraph(text, title, 1, [x + 17., y + 57., w - 34., 58.], IVORY, 0.93);
-        let profile = COUNTRY_PROFILES.iter().find(|row| row.entity_id == polity.id);
-        let summary = profile.map(|row| if row.opening_brief_zh.is_empty() { &row.brief_zh } else { &row.opening_brief_zh });
-        let brief = if nav.brief {
-            profile.map(|row| [&row.opening_brief_zh, &row.brief_zh].into_iter()
-                .filter(|content| !content.is_empty()).map(String::as_str).collect::<Vec<_>>().join("  "))
-        } else { summary.cloned() };
-        if let Some(brief) = brief.filter(|value| !value.is_empty()) {
-            let [left, top, width, height] = nav.brief_rect(self.size);
-            let mut lines = Vec::new();
-            let mut line = String::new();
-            let mut used = 0.;
-            for ch in brief.chars() {
-                let mut encoded = [0; 4];
-                let advance = self.skin.width(ch.encode_utf8(&mut encoded), 0) * 0.88;
-                if used + advance > width && !line.is_empty() {
-                    lines.push(std::mem::take(&mut line));
-                    used = 0.;
-                }
-                line.push(ch);
-                used += advance;
-            }
-            if !line.is_empty() { lines.push(line); }
-            let visible = (height / 20.).floor().max(1.) as usize;
-            let offset = if nav.brief { nav.brief_scroll.min(lines.len().saturating_sub(visible)) } else { 0 };
-            for (i, line) in lines.iter().skip(offset).take(visible).enumerate() {
-                self.skin.paragraph(text, line, 0, [left, top + i as f32 * 20., width, 21.], MUTED, 0.88);
-            }
-            let label = if nav.brief { self.skin.choose("收起简介", "Show less") } else { self.skin.choose("展开简介", "Read profile") };
-            self.row(panels, text, hits, [x + 14., y + h - 93., 115., 23.], label, Some(action(Command::Brief)), false);
+        self.skin.paragraph(text, title, 1, layout.title, IVORY, 0.92);
+        let [left, top, width, height] = layout.summary;
+        let lines = self.skin.wrapped_lines(opening_brief(polity), 0, width, 0.92);
+        let visible = (height / 21.).floor() as usize;
+        let offset = nav.profile_scroll.min(lines.len().saturating_sub(visible));
+        for (i, line) in lines.iter().skip(offset).take(visible).enumerate() {
+            self.skin.paragraph(text, line, 0, [left, top + i as f32 * 21., width, 22.], IVORY, 0.92);
         }
         let has_sites = opening.is_some_and(|row| !row.sites.is_empty());
         let legacy = opening.is_some_and(|row| !row.native);
-        let label = self.skin.choose("出生地选择", "Choose birthplace");
-        self.row(panels, text, hits, [x + 14., y + h - 64., w - 28., 27.], label,
+        let field = opening.and_then(|o| nav.path_label(o, view.world, self.skin));
+        self.row(panels, text, hits, layout.field, "",
             (has_sites && !busy).then_some(action(Command::Drawer)), nav.drawer);
-        let label = opening.filter(|_| nav.site.is_some()).map(|opening| nav.path_label(opening));
-        if let Some(label) = label {
-            self.skin.paragraph(text, &label, 0, [x + 18., y + h - 33., w - 125., 32.], IVORY, 0.75);
-        } else {
-            self.skin.text(text, if has_sites { self.skin.choose("请选择地点", "Select a place") }
-                else { self.skin.choose("没有已登记的地点", "No registered places") }, 0,
-                [x + 18., y + h - 30.], w - 130., MUTED);
-        }
+        let [fx, fy, fw, fh] = layout.field;
+        let field_text = field.as_deref().unwrap_or(say("出生地：点击地图或选择行政区", "Birthplace: click the map or choose a district"));
+        self.skin.paragraph(text, field_text, 0, [fx + 8., fy + 4., fw - 36., fh - 4.], IVORY, 0.9);
+        if has_sites { self.skin.text(text, if nav.drawer { "−" } else { "+" }, 0, [fx + fw - 19., fy + 4.], 14., MUTED); }
         let can_enter = !busy && (nav.site.is_some() || legacy);
-        self.row(panels, text, hits, [x + w - 106., y + h - 33., 92., 25.],
-            self.skin.choose("确认", "Confirm"), can_enter.then_some(action(Command::Enter)), can_enter);
+        let begin = say("开始", "Start");
+        let button_width = self.skin.width(begin, 0) + 30.;
+        self.row(panels, text, hits, [x + w - 14. - button_width, y + h - 40., button_width, 29.],
+            begin, can_enter.then_some(action(Command::Enter)), can_enter);
+        if !can_enter {
+            let status = if !has_sites { say("没有已登记的地点", "No places in the opening directory") }
+                else if opening.is_some_and(|row| row.sites.iter().all(|site| site.unavailable.is_some())) {
+                    say("尚无符合居住条件的地点", "No place has eligible residents")
+                } else { say("请选择可登记居民的城镇", "Choose a town with eligible residents") };
+            self.skin.text(text, status, 0, [x + 17., y + h - 64.], w - 34., MUTED);
+        }
     }
 
     fn birthplace_drawer(&self, panels: &mut Mesh, text: &mut Mesh, hits: &mut Vec<Hit>,
-        opening: &Opening, directory: &Directory, nav: &Selection, [x, y, w, h]: Rect, busy: bool,
+        opening: &Opening, directory: &Directory, view: &SelectionView<'_>, layout: &ProfileLayout, busy: bool,
     ) {
-        let rows = nav.rows(opening, &directory.query);
-        let visible = ((h - 91.) / 30.).max(1.) as usize;
-        let start = nav.offset.min(rows.len().saturating_sub(visible));
-        let path = nav.path.last().and_then(|id| opening.sites.iter().flat_map(|site| &site.path).find(|area| &area.id == id))
-            .map_or(opening.label.as_str(), |area| area.label.as_str());
-        self.skin.paragraph(text, path, 0, [x + 13., y + 9., w - 90., 36.], IVORY, 0.9);
+        let [x, y, w, _] = layout.drawer;
+        let nav = view.navigation;
+        let rows = nav.rows(opening, &directory.query, view.world, self.skin);
+        let start = nav.offset.min(layout.max_scroll());
+        let path = nav.path.last().and_then(|id| {
+            if let Some(admin) = nav.map_area.and_then(|i| view.world.admin.get(i)).filter(|a| a.id == *id) {
+                return Some(self.skin.division_name(admin));
+            }
+            opening.sites.iter().flat_map(|site| &site.path).find(|area| area.id == *id)
+                .map(|area| self.skin.opening_name(view.world, &area.id, &area.label))
+        }).unwrap_or(&opening.label);
+        self.skin.paragraph(text, path, 0, [x + 13., y + 7., w - 90., 35.], IVORY, 0.9);
         self.row(panels, text, hits, [x + w - 76., y + 7., 64., 25.], self.skin.choose("上一级", "Up"),
             (!nav.path.is_empty()).then_some(action(Command::Up)), false);
-        self.row(panels, text, hits, [x + 12., y + 43., w - 74., 27.],
+        self.row(panels, text, hits, [x + 12., y + 38., w - 90., 27.],
             if directory.query.is_empty() { self.skin.choose("搜索地点或行政区", "Search places or areas") } else { &directory.query },
             Some(action(Command::Search)), directory.search_active);
-        self.row(panels, text, hits, [x + w - 55., y + 43., 43., 27.], self.skin.choose("清除", "Clear"),
+        self.row(panels, text, hits, [x + w - 71., y + 38., 59., 27.], self.skin.choose("清除", "Clear"),
             (!directory.query.is_empty()).then_some(action(Command::ClearSearch)), false);
-        for (row, &(index, area, label)) in rows.iter().skip(start).take(visible).enumerate() {
-            let site = &opening.sites[index];
-            let enabled = !busy && (area.is_some() || site.unavailable.is_none());
-            let top = y + 77. + row as f32 * 30.;
-            let command = area.map_or(Command::Site(index), |depth| Command::Area(index, depth));
-            self.row(panels, text, hits, [x + 12., top, w - 24., 26.], "",
-                enabled.then_some(action(command)), nav.site == Some(index) && area.is_none());
-            let status = if area.is_some() { "›" } else { site.unavailable.as_deref().unwrap_or("") };
-            let status_width = self.skin.width(status, 0).min(w * 0.52);
-            self.skin.text(text, label, 0, [x + 20., top + 2.], w - 48. - status_width, if enabled { IVORY } else { MUTED });
-            self.skin.text(text, status, 0, [x + w - status_width - 17., top + 2.], status_width + 2., MUTED);
+        let row_width = w - if layout.max_scroll() > 0 { 38. } else { 24. };
+        for (row, entry) in rows.iter().skip(start).take(layout.visible).enumerate() {
+            let is_location = matches!(entry.command, Command::Site(_));
+            let enabled = !busy && (!is_location || entry.status.is_empty());
+            let selected = matches!(entry.command, Command::Site(index) if nav.site == Some(index));
+            let left = x + 12.;
+            let top = y + DRAWER_HEADER + row as f32 * DRAWER_ROW;
+            let area = [left, top, row_width, DRAWER_ROW];
+            if selected || enabled && contains(area, self.cursor) {
+                panels.rect(left, top, row_width, DRAWER_ROW - 1., [51, 59, 60, 255]);
+            }
+            panels.rect(left, top + DRAWER_ROW - 1., row_width, 1., [55, 66, 70, 255]);
+            if enabled { hits.push(Hit { area, action: action(entry.command) }); }
+            let status_width = self.skin.width(entry.status, 0).min(row_width * 0.48);
+            self.skin.text(text, entry.label, 0, [left + 8., top + 4.], row_width - 22. - status_width, if enabled { IVORY } else { MUTED });
+            self.skin.text(text, entry.status, 0, [left + row_width - status_width - 9., top + 4.], status_width + 2., MUTED);
+        }
+        if let Some((track, thumb)) = layout.scrollbar(nav.offset) {
+            panels.rect(track[0] + 5., track[1], 4., track[3], [47, 61, 73, 255]);
+            panels.rect(thumb[0] + 4., thumb[1], 6., thumb[3], formal_ui::BRASS);
+        }
+        if rows.len() > 1 {
+            let [gx, gy, gw, gh] = layout.handle();
+            let color = if contains(layout.handle(), self.cursor) { IVORY } else { MUTED };
+            panels.rect(gx + gw / 2. - 14., gy + gh / 2. - 2., 28., 2., color);
+            panels.rect(gx + gw / 2. - 14., gy + gh / 2. + 2., 28., 2., color);
         }
         if rows.is_empty() {
-            self.skin.text(text, self.skin.choose("没有匹配地点", "No matching places"), 0, [x + 15., y + 79.], w - 30., MUTED);
+            let label = if directory.query.is_empty() && !nav.path.is_empty() {
+                self.skin.choose("该行政区暂无已登记的开局城镇", "No opening town is registered in this district")
+            } else { self.skin.choose("没有匹配地点", "No matching places") };
+            self.skin.paragraph(text, label, 0, [x + 15., y + 74., w - 30., 33.], MUTED, 0.9);
         }
     }
 
@@ -624,19 +767,43 @@ impl Display<'_> {
     }
 }
 
-pub fn cloud_cover(mesh: &mut Mesh, size: [u32; 2], phase: f32) {
+pub const CLOUD_OPEN_TIME: f32 = 2.75;
+pub const CLOUD_SCENE_CUT: f32 = 1.16;
+pub const CLOUD_DEPART_TIME: f32 = 0.81;
+pub const CLOUD_ARRIVE_TIME: f32 = 1.24;
+
+pub fn ease_cloud(t: f32) -> f32 {
+    let t = t.clamp(0., 1.);
+    t * t * (3. - 2. * t)
+}
+
+pub fn cloud_cover(size: [u32; 2], coverage: f32, travel: f32, skin: &formal_ui::Skin) -> crate::ui::Layers {
+    use crate::ui::Ink;
+    let mut layers = std::array::from_fn(|_| (Mesh::default(), Ink::Solid));
     let [w, h] = size.map(|value| value as f32);
-    let opacity = phase.sin().max(0.);
-    mesh.rect(0., 0., w, h, [171, 179, 182, (opacity * 246.).min(255.) as u8]);
-    for index in 0..9 {
-        let f = index as f32;
-        let center = [(f * 0.286 + phase * 0.37).fract() * w, (f * 0.41).fract() * h];
-        let points: Vec<_> = (0..20).map(|step| {
-            let a = step as f32 / 20. * std::f32::consts::TAU;
-            [center[0] + a.cos() * w * 0.29, center[1] + a.sin() * h * 0.11]
-        }).collect();
-        mesh.shape(&points, [217, 222, 219, (opacity * 32.) as u8]);
+    layers[0].0.rect(0., 0., w, h, [174, 182, 188, (255. * coverage.powi(3)).round() as u8]);
+    layers[1].1 = Ink::OpeningCloud;
+    for (index, (scale, velocity, drift, tint, strength)) in [
+        (1.42, -0.23, 0.05, [228, 237, 250], 0.85),
+        (1.58, 0.47, -0.14, [242, 241, 235], 0.95),
+        (1.91, -0.88, 0.29, [255, 251, 243], 0.95),
+    ].into_iter().enumerate() {
+        let span = (w.max(h * 1.5) * scale, h.max(w / 1.5) * scale);
+        let x = (w - span.0) * 0.5 + w * (travel - 0.48) * velocity;
+        let y = (h - span.1) * 0.5 + h * (travel - 0.48) * drift;
+        let uv = if index == 1 { [1., 0., 0., 1.] } else { [0., 0., 1., 1.] };
+        let alpha = (coverage.powf(1. + index as f32 * 0.35) * 255. * strength) as u8;
+        layers[1].0.image([x, y, span.0, span.1], uv, [tint[0], tint[1], tint[2], alpha]);
     }
+    let [x, y, sw, sh] = cloud_skip_rect(size);
+    layers[2].0.rect(x, y, sw, sh, [20, 29, 35, 205]);
+    layers[3].1 = Ink::HudText;
+    skin.text(&mut layers[3].0, skin.choose("跳过过渡", "Skip transition"), 0, [x + 9., y + 4.], sw - 18., IVORY);
+    layers
+}
+
+pub fn cloud_skip_rect(size: [u32; 2]) -> Rect {
+    [size[0] as f32 - 151., size[1] as f32 - 49., 134., 29.]
 }
 
 pub(crate) fn action(command:Command)->Action {Action::Hud(formal_ui::Command::Lobby(command))}
