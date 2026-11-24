@@ -45,7 +45,8 @@ impl Tile {
             return (1.-smooth(self.surface_fade_mpp,self.surface_max_mpp,mpp)) as f32;
         }
         if self.city_ink_only {
-            return (1. - smooth(if self.city_area {600.} else {460.}, self.city_ink_limit(), mpp)) as f32;
+            // The overview shows surveyed built density at the 50 km scale.
+            return (1. - smooth(650., self.city_ink_limit(), mpp)) as f32;
         }
         match self.level {
             1 => (1.-smooth(2900.,5900.,mpp)) as f32,
