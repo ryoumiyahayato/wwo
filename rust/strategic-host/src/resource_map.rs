@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use wwo_map_lab::resource_geography::{
+    agriculture::{self, CellId, Field},
     Bounds, Category, Development, Directory, EntityKind, Evidence, GridCell, LandGrid,
     Resource, ResourceType,
 };
@@ -24,6 +25,7 @@ pub enum Command {
     Categories,
     Category(Category),
     Kind(ResourceType),
+    Agriculture(Field),
     Site(&'static str),
 }
 
@@ -32,12 +34,14 @@ pub struct State {
     pub open: bool,
     category: Option<Category>,
     kind: Option<ResourceType>,
+    agriculture: Option<Field>,
     selected: Option<Selection>,
 }
 
 enum Selection {
     Site(&'static Resource, Option<usize>),
     Grid(GridCell, Option<usize>),
+    Agricultural(CellId),
     Unknown,
 }
 
@@ -48,17 +52,25 @@ impl State {
             Command::Categories => {
                 self.category = None;
                 self.kind = None;
+                self.agriculture = None;
                 self.selected = None;
             }
             Command::Category(category) => {
                 self.category = Some(category);
                 self.kind = None;
+                self.agriculture = None;
                 self.selected = None;
             }
             Command::Kind(kind) => {
                 self.kind = Some(kind);
+                self.agriculture = match kind {
+                    ResourceType::AgriculturalLand => Some(Field::Cropland),
+                    ResourceType::Pasture => Some(Field::Pasture),
+                    _ => None,
+                };
                 self.selected = None;
             }
+            Command::Agriculture(field) => self.agriculture = Some(field),
             Command::Site(id) => {
                 self.selected = Directory::opening().by_id(id).map(|record| Selection::Site(record, polity));
             }
@@ -72,6 +84,10 @@ impl State {
 
     pub fn pick(&mut self, point: [f64; 2], polity: Option<usize>) -> bool {
         let Some(kind) = self.kind else { return false; };
+        if self.agriculture.is_some() {
+            self.selected = CellId::at(point).map(Selection::Agricultural);
+            return true;
+        }
         self.selected = Some(LandGrid::opening(kind).and_then(|grid| grid.at(point))
             .map_or(Selection::Unknown, |cell| Selection::Grid(cell, polity)));
         true
@@ -104,6 +120,40 @@ fn view(camera: &Camera, size: [u32; 2]) -> Bounds {
 
 fn project(camera: &Camera, point: [f64; 2], size: [u32; 2]) -> Option<[f32; 2]> {
     camera.project(point, size).map(|point| point.map(|component| component as f32))
+}
+
+fn project_cell(camera: &Camera, size: [u32; 2], bounds: Bounds) -> Option<[[f32; 2]; 4]> {
+    let Bounds { west, south, east, north } = bounds;
+    let corners = [[west, north], [east, north], [east, south], [west, south]];
+    let [Some(a), Some(b), Some(c), Some(d)] = corners.map(|point| project(camera, point, size)) else { return None; };
+    Some([a, b, c, d])
+}
+
+fn agriculture_color(field: Field) -> [u8; 4] {
+    match field {
+        Field::Grazing | Field::Pasture => [171, 218, 119, 255],
+        Field::Irrigated => [93, 202, 241, 255],
+        Field::Rice => [104, 228, 184, 255],
+        _ => grid_color(ResourceType::AgriculturalLand),
+    }
+}
+
+fn draw_agriculture(state: &State, field: Field, camera: &Camera, size: [u32; 2], map: &mut Mesh) {
+    let level = if camera.mpp > 8_000. { 2 } else if camera.mpp > 1_200. { 1 } else { 0 };
+    for (bounds, fraction) in agriculture::in_view(field, view(camera, size), level) {
+        let Some(corners) = project_cell(camera, size, bounds) else { continue; };
+        let mut ink = agriculture_color(field);
+        ink[3] = (26. + 183. * fraction.sqrt()) as u8;
+        if fraction == 0. { ink = [39, 55, 62, 85]; }
+        map.shape(&corners, ink);
+    }
+    if let Some(Selection::Agricultural(id)) = state.selected {
+        if let Some(corners) = project_cell(camera, size, id.bounds()) {
+            for (a, b) in corners.iter().zip(corners.iter().cycle().skip(1)) {
+                map.line(*a, *b, 2., INK);
+            }
+        }
+    }
 }
 
 fn grid_color(kind: ResourceType) -> [u8; 4] {
@@ -143,6 +193,10 @@ fn diamond([x, y]: [f32; 2], radius: f32) -> [[f32; 2]; 4] {
 
 pub fn draw_layer(state: &State, camera: &Camera, size: [u32; 2], year: i32, map: &mut Mesh, hits: &mut Vec<Hit>) {
     let Some(kind) = state.kind else { return; };
+    if let Some(field) = state.agriculture {
+        draw_agriculture(state, field, camera, size, map);
+        return;
+    }
     if let Some(grid) = LandGrid::opening(kind) {
         draw_grid(map, camera, size, grid, kind);
         if let Some(Selection::Grid(cell, _)) = state.selected {
@@ -213,6 +267,31 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
         }
         return;
     };
+    if let Some(field) = state.agriculture {
+        let column = (w - 29.) * 0.5;
+        command([x + 12., y + 41., 105., 25.], &title(category.name()), Command::Category(category), false, panel, text, hits);
+        skin.text(text, skin.choose("农业资源", "Agriculture"), 0, [x + 127., y + 43.], w - 139., INK);
+        let fields = [Field::Cropland, Field::Grazing, Field::Pasture, Field::Irrigated, Field::Rainfed, Field::Rice];
+        for (i, choice) in fields.into_iter().enumerate() {
+            command([x + 12. + (column + 5.) * (i % 2) as f32, y + 73. + (i / 2) as f32 * 29., column, 25.],
+                &title(choice.name()), Command::Agriculture(choice), field == choice, panel, text, hits);
+        }
+        label(text, skin.choose("1900 年估算 · 5 角分网格", "1900 estimates · 5 arc-minute cells"), 163., SUBTLE);
+        label(text, skin.choose("深灰 · 零   透明 · 无资料", "Gray · zero   Clear · no data"), 185., SUBTLE);
+        if let Some(Selection::Agricultural(id)) = state.selected {
+            let amount = |value: Option<f32>| value.map_or_else(
+                || skin.choose("无资料", "No data").to_owned(),
+                |area| format!("{area:.2} ha"),
+            );
+            label(text, &format!("{}  {}", title(field.name()), amount(id.hectares(field))), 208., INK);
+            label(text, &format!("{}  {}", skin.choose("陆地", "Land"), amount(id.hectares(Field::Land))), 230., SUBTLE);
+            if h >= 284. {
+                label(text, &format!("{}  {:.2} ha", skin.choose("网格总面积", "Cell area"), id.area_ha()), 252., SUBTLE);
+                label(text, &id.to_string(), 274., SUBTLE);
+            }
+        }
+        return;
+    }
     command([x + 12., y + 41., 83., 25.], skin.choose("类别", "Categories"), Command::Categories, false, panel, text, hits);
     skin.text(text, &title(category.name()), 0, [x + 106., y + 43.], w - 117., INK);
     let column = (w - 29.) * 0.5;

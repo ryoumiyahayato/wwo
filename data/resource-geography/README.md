@@ -29,3 +29,12 @@
 `tools/import_resource_mrds.py` 读取发现年、最早开采年和最后开采年，按资料标明的重复关联去重。1900 年及以前发现但未确认当时已经开采的地点按发现记录显示。此前已经开采而缺少 1900 年实际作业证据的矿点，状态为未知。最后一次开采早于 1900 年的状态为已停采。矿种相同的近邻记录也可能是不同矿井，保留各自源 ID。字段见 [MRDS 数据手册](https://pubs.usgs.gov/of/2014/1123/pdf/AppendixB_MRDS_Database_User_Manual_Explanation.pdf)。
 
 具边界的矿区面、农业适宜性、历史渔场、淡水与河段水力资源、设施模型及第三批资源暂缺。
+# HYDE 1900 agricultural grid
+
+The economy map opens the 5 arc-minute agricultural grid under Renewables → Agricultural land or Pasture. Its bands are compressed separately and decoded on first use. The Rust API is `resource_geography::agriculture` and identifies a source cell by `agri:wgs84-5m:<row>:<column>`. Rows start at 90°N and columns at 180°W, both zero-based. Cell area comes from the WGS84 ellipsoid. Land area comes from the original HYDE land-availability grid.
+
+[HYDE 3.2.1 baseline and supplementary grids](https://doi.org/10.17026/DANS-25G-GEZ3) by Kees Klein Goldewijk and colleagues supply the 1900 modeled physical area per cell. The distribution README states CC BY 3.0. Each band has 2,215,829 known cells. The original 5′ boundaries are preserved. `import_hyde_1900.py` converts km² to hectares, retaining source zero and treating `-9999` as missing. Each .zst contains 2160 × 4320 little-endian float32 values in row order, with `-1` for missing. The importer can read local archives or use bounded HTTP requests for the selected files.
+
+Cropland includes irrigated and rainfed cropland. Rice is a subset of cropland, split into irrigated and rainfed rice. Grazing includes pasture, converted rangeland and unconverted rangeland. These are sources for physical land occupation. Harvested area accounting and modeled yield are separate. Overview shading divides summed hectares by the area of known source cells. Clicking the map always queries the original 5′ cell.
+
+The existing LUH2 forest and land-use API remains available at its original 0.25° resolution for cross-reference. Historical crop area comes from HYDE for rice. GAEZ suitability, irrigated suitability scenarios and actual distributions for other crops are pending.
