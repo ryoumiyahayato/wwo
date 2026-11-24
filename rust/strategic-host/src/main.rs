@@ -555,6 +555,7 @@ impl Host {
             Action::Search=>{
                 self.details=false;self.country=None;
                 self.search=if self.search.is_some(){None}else{Some(String::new())};
+                if self.search.is_some() { self.population_debug=None; }
             }
             Action::Close=>self.select(None),
             Action::Details=>self.details=!self.details,
@@ -601,6 +602,7 @@ impl Host {
     fn hud_action(&mut self,command:HudCommand) {
         match command {
             HudCommand::Page(page)=>{
+                if page!=HudPage::Map { self.population_debug=None; }
                 if let (true,Some(window))=(self.hud.market_search.is_some() || self.hud.transport_directory.is_some(),&self.window) {
                     window.set_ime_allowed(false);
                 }
