@@ -61,7 +61,7 @@ pub(super) fn details(world: &InitialWorld, org: &Organization) -> Vec<Value> {
             "我的劳动合同",
             vec![
                 format!(
-                    "每班 {} 小时 · 时薪 {} · {} 日后发薪",
+                    "每班 {} 小时 · 时薪 {} · 日结后 {} 日发薪",
                     job.hours, job.wage_per_hour, job.wage_delay
                 ),
                 if booked {
@@ -81,7 +81,7 @@ pub(super) fn details(world: &InitialWorld, org: &Organization) -> Vec<Value> {
             rows.push(section(
                 "招聘岗位",
                 vec![format!(
-                    "空缺 {vacancies} · 每班 {} 小时 · 时薪 {} · {} 日后发薪",
+                    "空缺 {vacancies} · 每班 {} 小时 · 时薪 {} · 日结后 {} 日发薪",
                     job.hours, job.wage_per_hour, job.wage_delay
                 )],
                 vec![work_action(

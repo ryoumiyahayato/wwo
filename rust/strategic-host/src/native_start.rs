@@ -783,7 +783,7 @@ impl NativeSession {
                 else if can_book { "可登记本日工作" }
                 else { "劳动合同有效 · 本日无法登记" };
             work.push(json!({"label":job.label.as_deref().unwrap_or_else(|| employer_label(world, &job.employer)),
-                "details":[format!("每班 {} 小时 · 时薪 {} · {} 日后发薪",job.hours,job.wage_per_hour,job.wage_delay),
+                "details":[format!("每班 {} 小时 · 时薪 {} · 日结后 {} 日发薪",job.hours,job.wage_per_hour,job.wage_delay),
                            format!("工作地点 {}", place_label(world, &job.place)),
                            status],
                 "actions":[work_action("登记工作", "native:work", can_book),
