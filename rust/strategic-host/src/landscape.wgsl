@@ -383,11 +383,14 @@ fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) 
 
 const LANDSCAPE_INSTANCES: u32 = 65536u;
 const LANDSCAPE_VISIBLE: u32 = 1728u;
+const LANDSCAPE_INSTANCE_FADE_SECONDS: f32 = 0.18;
 
 struct LandscapeInstance {
-    cell: vec2u,
+    cell_x: u32,
+    cell_y: u32,
     style: u32,    // longitude count, mesh kind, lattice step, cover weight
     terrain: u32,  // signed metres and two quantized surface gradients
+    appeared: f32, // elapsed real seconds when the site was first built
 };
 
 struct LandscapeDraw {
@@ -461,10 +464,12 @@ fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     let world = landscape_world(ll);
     let level = select(6u,7u,step == 1u || (view.chart_origin.w > .5 && view.map_style.z == 7.));
     let page = landscape_page(ll,level,false);
+    let keep_sites = (chunk.w & 0x80000000u) != 0u;
     if page.fade <= 0. {
-        if (chunk.w & 0x80000000u) == 0u {landscape_cache[cache_index].style = 0u;}
+        if !keep_sites {landscape_cache[cache_index].style = 0u;}
         return;
     }
+    let previous = landscape_cache[cache_index];
     landscape_cache[cache_index].style = 0u;
     if landscape_coverage(page) >= .20 { return; }
     let cover = textureLoad(landscape_data,vec2i(page.texel),page.slot,0);
@@ -503,7 +508,9 @@ fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     let strength = u32(round(clamp(density,0.,1.)*127.));
     let packed_style = columns | (kind<<18u) | (u32(firstTrailingBit(step))<<21u)
         | (strength<<24u) | (select(0u,1u,bush)<<31u);
-    landscape_cache[cache_index] = LandscapeInstance(cell,packed_style,packed_terrain);
+    // Another page can rebuild this chunk without changing its existing sites.
+    let appeared = select(view.chart_east.w,previous.appeared,keep_sites && previous.style != 0u);
+    landscape_cache[cache_index] = LandscapeInstance(cell.x,cell.y,packed_style,packed_terrain,appeared);
 }
 
 @compute @workgroup_size(8,8,1)
@@ -537,7 +544,7 @@ struct LandscapeVertex {
 @vertex
 fn landscape_vertex(
     @location(0) offset: vec3f, @location(1) normal: vec3f, @location(2) tone: f32, @location(3) edge: f32,
-    @location(4) crown: f32, @location(5) item: vec4u,
+    @location(4) crown: f32, @location(5) item: vec4u, @location(6) appeared: f32,
 ) -> LandscapeVertex {
     let columns = item.z & 262143u;
     let kind = (item.z>>18u)&7u;
@@ -551,7 +558,8 @@ fn landscape_vertex(
     let stand_mix = smoothstep(9.,21.,mpp);
     let lower_cover = smoothstep(.36,.82,density)*.36;
     let structure = select(stand_mix,mix(lower_cover,1.,stand_mix),understory);
-    let representation = select(1.,select(structure,1.-stand_mix,tree),stand);
+    let arrival = smoothstep(0.,LANDSCAPE_INSTANCE_FADE_SECONDS,view.chart_east.w-appeared);
+    let representation = select(1.,select(structure,1.-stand_mix,tree),stand)*arrival;
     if representation <= .012 {
         return LandscapeVertex(vec4f(2.,2.,0.,1.),vec3f(0.),vec4f(0.),0.,kind,vec2f(0.),0u,0.);
     }

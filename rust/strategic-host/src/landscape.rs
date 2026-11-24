@@ -10,12 +10,13 @@ const KINDS: u64 = 5;
 const CHUNK_SIDE: i32 = 16;
 const LATITUDE_CELLS: i32 = 98_304;
 const CAPACITY: u64 = 65_536;
-const INSTANCE_BYTES: u64 = 16;
+const INSTANCE_BYTES: u64 = 20;
 const DRAW_BYTES: u64 = 20;
 const MAX_CHUNKS: usize = 1_728;
 const CACHE_CHUNKS: usize = 2_560;
 const BUILDS_PER_FRAME: usize = 32;
 const KEEP_SITES: u32 = 1 << 31;
+const INSTANCE_FADE_SECONDS: f32 = 0.18;
 // End of the individual crown blend in landscape_vertex.
 const STAND_ONLY_MPP: f64 = 21.;
 
@@ -71,6 +72,7 @@ pub struct Landscape {
     built_total: u64,
     collect_needed: bool,
     pending: bool,
+    fade_until: f32,
     awaiting_pages: HashSet<Key>,
     timestamps: Option<wgpu::QuerySet>,
     statistics: Option<wgpu::QuerySet>,
@@ -207,7 +209,7 @@ impl Landscape {
                     },
                     wgpu::VertexBufferLayout {
                         array_stride: INSTANCE_BYTES, step_mode: wgpu::VertexStepMode::Instance,
-                        attributes: &wgpu::vertex_attr_array![5=>Uint32x4],
+                        attributes: &wgpu::vertex_attr_array![5=>Uint32x4,6=>Float32],
                     },
                 ],
             },
@@ -250,6 +252,7 @@ impl Landscape {
             built_total: 0,
             collect_needed: false,
             pending: false,
+            fade_until: 0.,
             awaiting_pages: HashSet::new(),
             timestamps,
             statistics,
@@ -264,6 +267,7 @@ impl Landscape {
         size: [u32; 2],
         terrain: &Terrain,
         enabled: bool,
+        seconds: f32,
     ) {
         let scale = (f64::from(size[0]) * f64::from(size[1]) / 2_073_600.)
             .sqrt()
@@ -276,6 +280,9 @@ impl Landscape {
             self.previous = None;
             self.pending = false;
             return;
+        }
+        if seconds >= self.fade_until {
+            self.fade_until = 0.;
         }
         let stand_only = camera.mpp >= STAND_ONLY_MPP;
         if stand_only != self.stand_only {
@@ -376,6 +383,8 @@ impl Landscape {
         }
         if !dirty.is_empty() {
             queue.write_buffer(&self.chunks, (size_of::<Chunk>()*MAX_CHUNKS) as u64, bytemuck::cast_slice(&dirty));
+            // Keep drawing while new instances fade, including at a stationary camera.
+            self.fade_until = seconds + INSTANCE_FADE_SECONDS;
         }
         self.active = active;
     }
@@ -384,6 +393,7 @@ impl Landscape {
     pub fn cached_chunks(&self) -> usize {self.cache.len()}
     pub fn built_chunks(&self) -> u64 {self.built_total}
     pub fn pending(&self) -> bool {self.pending}
+    pub fn needs_redraw(&self) -> bool {self.pending || (!self.active.is_empty() && self.fade_until > 0.)}
     pub fn awaiting_pages(&self) -> &HashSet<Key> {&self.awaiting_pages}
 
     pub fn counts(&self, device:&wgpu::Device, queue:&wgpu::Queue) -> std::io::Result<LandscapeCounts> {
