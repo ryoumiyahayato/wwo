@@ -65,9 +65,9 @@ impl State {
         }
     }
 
-    pub fn anchor(command: Command) -> Option<[f64; 2]> {
+    pub fn site(command: Command) -> Option<&'static Resource> {
         let Command::Site(id) = command else { return None; };
-        Some(Directory::opening().by_id(id)?.geometry.anchor())
+        Directory::opening().by_id(id)
     }
 
     pub fn pick(&mut self, point: [f64; 2], polity: Option<usize>) -> bool {
@@ -292,6 +292,8 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
     }
     if let Some(polity) = owner.and_then(|index| world.polities.get(index)) {
         lines.push(skin.country_name(polity).into());
+    } else if matches!(state.selected, Some(Selection::Site(..))) {
+        lines.push(skin.choose("地图归属待核实", "Map jurisdiction unverified").into());
     }
     for line in lines {
         if dy + 20. > h { break; }

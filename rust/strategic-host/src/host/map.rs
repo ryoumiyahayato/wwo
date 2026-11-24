@@ -171,8 +171,8 @@ impl Host {
             Action::Hud(command)=>self.hud_action(command),
             Action::Resources(command)=>{
                 if self.resources_available() {
-                    let polity=crate::resource_map::State::anchor(command)
-                        .and_then(|point|self.object_at(point)[0].checked_sub(1)).map(usize::from);
+                    let polity = crate::resource_map::State::site(command)
+                        .and_then(|site| self.resource_owner(site));
                     if matches!(command,crate::resource_map::Command::Toggle) && !self.resources.open {
                         self.select(None);
                     }
@@ -222,6 +222,28 @@ impl Host {
             }
         }
         self.base.as_ref().map_or([0,0],|p|dated(p.ids_at(&self.world.tiles[0],q)))
+    }
+    fn resource_owner(&self, site: &wwo_map_lab::resource_geography::Resource) -> Option<usize> {
+        let [lon, lat] = site.geometry.anchor();
+        let owner = self.object_at([lon, lat])[0];
+        let polity = usize::from(owner.checked_sub(1)?);
+        let tile = self.visible.iter().rev().find_map(|&i| {
+            let tile = &self.world.tiles[i];
+            (self.cached.contains_key(&i) && camera::inside([lon, lat], tile.core)).then_some(tile)
+        }).unwrap_or(&self.world.tiles[0]);
+        let [west, south, east, north] = tile.bounds;
+        let uncertainty = (f64::from(site.spatial_accuracy_m.unwrap_or(0)) / camera::EARTH).to_degrees();
+        // Rasterized boundary pixels can straddle even a precisely located site.
+        let dx = uncertainty / lat.to_radians().cos().max(0.01)
+            + 2. * (east - west) / f64::from(tile.size[0]);
+        let dy = uncertainty + 2. * (north - south) / f64::from(tile.size[1]);
+        let agrees = [-dx, 0., dx].into_iter().all(|x| {
+            [-dy, 0., dy].into_iter().all(|y| {
+                let longitude = (lon + x + 180.).rem_euclid(360.) - 180.;
+                self.object_at([longitude, (lat + y).clamp(-90., 90.)])[0] == owner
+            })
+        });
+        agrees.then_some(polity)
     }
     pub(super) fn click(&mut self,p:[f64;2]) {
         if self.opening_transition_active() {return;}
