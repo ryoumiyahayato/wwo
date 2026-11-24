@@ -101,8 +101,9 @@ directories = {
 Image.open(maps / "background/galactic_chart.png").convert("RGBA").save(data / "galactic-chart.png")
 glyph_sources = [base / "src/formal_ui.rs", base / "src/market_ui.rs", base / "src/lobby.rs",
                  base / "src/ui.rs", base / "src/main.rs",
-                 base / "src/migration_status.rs", base / "src/formal_character.rs", base / "src/native_start.rs",
+                 base / "src/formal_character.rs", base / "src/native_start.rs",
                  base / "tools/formal_host_bridge.gd", base / "tools/formal_market_bridge.gd"]
+glyph_sources += [base / "src/host.rs", *sorted((base / "src/host").glob("*.rs"))]
 glyph_sources += [base.parent.parent / "data/alpha/commodity_market_1900.json",
                   base.parent.parent / "data/world_map/cities.json"]
 glyph_sources += [base.parent / "character-core/src/health.rs", base.parent / "character-core/src/action.rs"]
