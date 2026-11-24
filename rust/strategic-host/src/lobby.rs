@@ -92,7 +92,8 @@ impl Selection {
         let card = [right, 14., width, card_height.min((h - 72.).max(162.))];
         let drawer = if compact || card[3] + 230. > h {
             let width = (w - 24.).min(530.);
-            let height = (h * 0.49).max(155.);
+            let available = h - card[1] - card[3] - 20.;
+            let height = (h * 0.49).min(available).max(100.);
             [(w - width) * 0.5, h - height - 10., width, height]
         } else {
             [right, card[1] + card[3] + 9., width, (h - card[3] - 35.).min(348.)]

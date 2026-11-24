@@ -992,10 +992,12 @@ impl Host {
             }
             Command::Brief => {
                 self.opening_nav.brief = !self.opening_nav.brief;
+                if self.opening_nav.brief { self.opening_nav.drawer = false; }
                 self.opening_nav.brief_scroll = 0;
             }
             Command::Drawer => {
                 self.opening_nav.drawer = !self.opening_nav.drawer;
+                if self.opening_nav.drawer { self.opening_nav.brief = false; }
                 self.country_directory.search_active = false;
                 self.country_directory.query.clear();
                 self.opening_nav.offset = 0;
