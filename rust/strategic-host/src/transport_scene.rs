@@ -19,7 +19,7 @@ use wwo_map_lab::{
     formal_bootstrap::InitialWorld,
     transport::{
         models::{ModelLod, TransportModel, TRACK_RAILHEAD_M},
-        NetworkLayer, NodeKind, TransportMode, TransportNetwork,
+        NetworkLayer, NodeKind, Route, TransportMode, TransportNetwork,
     },
 };
 
@@ -557,11 +557,12 @@ impl TransportScene {
         mode: Mode,
         world: &InitialWorld,
         selection: Option<&ObjectId>,
+        selected_route: Option<&Route>,
         picking: bool,
     ) -> io::Result<()> {
         let network = world.transport();
         let selected_leg_ids = || {
-            world.selected_transport_route().into_iter()
+            selected_route.into_iter()
                 .flat_map(|route| route.legs.iter().map(|leg| leg.segment_id.as_str()))
         };
         let vehicle = match selection {

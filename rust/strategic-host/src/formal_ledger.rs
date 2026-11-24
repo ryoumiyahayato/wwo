@@ -255,16 +255,22 @@ impl Ledger {
         result
     }
 
-    /// The caller retires the same number of statistical reserve units.
-    /// One simulated minor unit per reserve unit is a scenario convention.
-    pub(crate) fn realize_market_reserve(&mut self, market: &str, reserve: i64, reference: &str, minute: i64) -> io::Result<i64> {
+    /// Fund one atomic payment or payment batch from the statistical reserve.
+    /// The callback must leave the ledger unchanged on failure.
+    pub(crate) fn pay_with_market_reserve(
+        &mut self, market: &str, reserve: i64, reference: &str, minute: i64,
+        pay: impl FnOnce(&mut Self, &str) -> io::Result<()>,
+    ) -> io::Result<()> {
+        if reserve == 0 { return pay(self, market); }
         let id = format!("reserve_conversion:{market}:{reference}");
-        if self.transaction_indexes.contains_key(&id) || reserve <= 0 { return Ok(0); }
-        if reserve > MAX_AMOUNT - self.budget { return Err(invalid("market reserve exceeds ledger bounds")); }
+        if self.transaction_indexes.contains_key(&id) || !(1..=MAX_AMOUNT - self.budget).contains(&reserve) {
+            return Err(invalid("invalid or repeated market reserve conversion"));
+        }
         let account = format!("account:market_receipts:{market}");
         let created = !self.accounts.contains_key(&account);
         if created { self.accounts.insert(account.clone(), Account::new(market, MARKET_ROLE, 0)); }
         if self.accounts[&account].owner != market || self.accounts[&account].role != MARKET_ROLE { return Err(invalid("invalid market reserve account")); }
+        let previous_minute = self.last_minute;
         self.accounts.get_mut(SOURCE).unwrap().balance += reserve;
         self.budget += reserve;
         if let Err(error) = self.transfer(&id, SOURCE, &account, reserve, minute, "reserve_conversion", market) {
@@ -273,7 +279,19 @@ impl Ledger {
             if created { self.accounts.remove(&account); }
             return Err(error);
         }
-        Ok(reserve)
+        if let Err(error) = pay(self, market) {
+            self.transactions.pop();
+            self.transaction_indexes.remove(&id);
+            self.last_minute = previous_minute;
+            self.budget -= reserve;
+            if created {
+                self.accounts.remove(&account);
+            } else {
+                self.accounts.get_mut(&account).unwrap().balance -= reserve;
+            }
+            return Err(error);
+        }
+        Ok(())
     }
 
     pub(crate) fn ensure_market_seller(&mut self, market: &str) -> io::Result<()> {
@@ -342,6 +360,10 @@ impl Ledger {
     }
 
     pub(crate) fn pay_market_bid(&mut self, market: &str, seller: &str, reference: &str, amount: i64, minute: i64) -> io::Result<()> {
+        let id = format!("sale:{reference}");
+        if self.transaction_indexes.contains_key(&id) {
+            return Err(invalid("freight sale has already been settled"));
+        }
         let from = format!("account:market_receipts:{market}");
         let market_account = self.accounts.get(&from).filter(|a| a.role == MARKET_ROLE && a.owner == market && a.denomination == CURRENCY)
             .ok_or_else(|| invalid("目的地市场尚无实收资金。"))?;
@@ -351,7 +373,7 @@ impl Ledger {
         let to = self.default_account(seller).map(|balance| balance.account_id.to_owned())
             .filter(|id| matches!(self.accounts[id].role.as_str(), PERSONAL_ROLE | "r1_firm"))
             .ok_or_else(|| invalid("货主缺少个人现金账户。"))?;
-        self.transfer(&format!("sale:{reference}"), &from, &to, amount, minute, "freight_sale", reference)
+        self.transfer(&id, &from, &to, amount, minute, "freight_sale", reference)
     }
 
     fn post(&mut self, receipt: Receipt<'_>, kind: &str, reference: &str) -> io::Result<()> {
@@ -763,6 +785,26 @@ fn optional_map(value: Option<&Value>) -> io::Result<&[Value]> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn failed_market_payment_releases_reserve_and_can_retry() {
+        let mut ledger = Ledger::initialize_people([("person:seller", 20)]).unwrap();
+        let before = ledger.snapshot();
+        let market = "market:destination";
+        let reference = "freight-lot:1:destination";
+        assert!(ledger.pay_with_market_reserve(market, 100, reference, 10, |ledger, market| {
+            ledger.pay_market_bid(market, "person:unknown", reference, 100, 10)
+        }).is_err());
+        assert_eq!(ledger.snapshot(), before);
+
+        ledger.pay_with_market_reserve(market, 100, reference, 10, |ledger, market| {
+            ledger.pay_market_bid(market, "person:seller", reference, 100, 10)
+        }).unwrap();
+        assert_eq!(ledger.default_account("person:seller").unwrap().cash, 120);
+        let after = ledger.snapshot();
+        assert!(ledger.pay_market_bid(market, "person:seller", reference, 100, 10).is_err());
+        assert_eq!(ledger.snapshot(), after);
+    }
 
     #[test]
     fn restored_regional_ledger_uses_existing_reservations_and_atomic_payments() {

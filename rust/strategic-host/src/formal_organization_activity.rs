@@ -385,8 +385,9 @@ mod tests {
         assert!(world.enterprises.contested_sale(baker, supplier).is_some() || world.enterprises.contested_sale(supplier, baker).is_some());
         let org = "organization:opening_paris_workshop";
         assert!(world.organization_relations(org).is_empty());
-        let arrival = world.preview_travel("place:paris", ModeSet::ALL).unwrap().arrival_minute();
-        world.depart_player().unwrap();
+        let plan = world.quote_player_travel("place:paris", ModeSet::ALL).unwrap();
+        let arrival = plan.arrival_minute();
+        world.depart_player(plan).unwrap();
         world.advance_migrated_domains(arrival - world.clock.snapshot().total_minutes, &BTreeMap::new()).unwrap();
         let relations = world.organization_relations(org);
         assert!(relations.iter().any(|line| line.contains("面包订单")));
@@ -478,8 +479,8 @@ mod tests {
         world.book_work().unwrap();
         let hours = world.employment().unwrap().0.hours;
         world.advance_migrated_domains(hours * 60, &BTreeMap::new()).unwrap();
-        world.preview_travel("place:paris", ModeSet::ALL).unwrap();
-        world.depart_player().unwrap();
+        let plan = world.quote_player_travel("place:paris", ModeSet::ALL).unwrap();
+        world.depart_player(plan).unwrap();
         world.advance_migrated_domains(2 * MINUTES_PER_DAY - hours * 60, &BTreeMap::new()).unwrap();
         let (terms, booked, _) = world.employment().unwrap();
         assert!(!booked);

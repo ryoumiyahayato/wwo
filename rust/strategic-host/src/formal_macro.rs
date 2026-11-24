@@ -376,8 +376,9 @@ impl MacroEconomy {
         if !inventory.is_finite() || inventory <= state.inventory {
             return Err(invalid("目的地无法登记这批库存。"));
         }
-        market.fund_order(ledger, amount, reference, now)?;
-        ledger.pay_market_bid(&market.id, seller, reference, amount, now)?;
+        market.pay_order(ledger, amount, reference, now, |ledger, market| {
+            ledger.pay_market_bid(market, seller, reference, amount, now)
+        })?;
         market.commodities.get_mut(good).unwrap().inventory = inventory;
         Ok(amount)
     }
@@ -629,11 +630,12 @@ impl MacroEconomy {
             let route_id = carriage_corridor(&plan).to_owned();
             let id = transport.reserve_trade(plan)?;
             let payer = format!("account:market_receipts:{buyer}");
-            if let Err(error) = self.markets.get_mut(&row.destination).unwrap().fund_order(ledger, fare, &format!("carriage:{id}"), now) {
-                transport.finish(id);
-                return Err(error);
-            }
-            if let Err(error) = ledger.transfer(&format!("carriage:{id}"), &payer, TRANSPORT_ACCOUNT, fare, now, "freight", &row.id) {
+            let reference = format!("carriage:{id}");
+            if let Err(error) = self.markets.get_mut(&row.destination).unwrap().pay_order(
+                ledger, fare, &reference, now, |ledger, _| {
+                    ledger.transfer(&reference, &payer, TRANSPORT_ACCOUNT, fare, now, "freight", &row.id)
+                },
+            ) {
                 transport.finish(id);
                 return Err(error);
             }
@@ -717,22 +719,22 @@ impl MacroEconomy {
                     if value > budget - fare || value > MAX_AMOUNT || value + fare > destination_value { continue; }
                     let arrival = plan.arrival_minute();
                     let route_id = carriage_corridor(&plan).to_owned();
-                    let reservation = transport.reserve_trade(plan)?;
                     let id = format!("formal_shipment:{}", self.next_shipment);
                     let payer = format!("account:market_receipts:{buyer}");
                     let seller = format!("account:market_receipts:{}", self.markets[origin].id);
+                    ledger.ensure_market_seller(&self.markets[origin].id)?;
+                    let reservation = transport.reserve_trade(plan)?;
                     let goods_id = format!("goods:{id}");
                     let fare_id = format!("carriage:{reservation}");
-                    ledger.ensure_market_seller(&self.markets[origin].id)?;
-                    if let Err(error) = self.markets.get_mut(receiver).unwrap().fund_order(ledger, value + fare, &id, now) {
-                        transport.finish(reservation);
-                        return Err(error);
-                    }
                     let legs = [
                         PaymentLeg { id: &goods_id, from: &payer, to: &seller, amount: value, kind: "goods", reference: &id },
                         PaymentLeg { id: &fare_id, from: &payer, to: TRANSPORT_ACCOUNT, amount: fare, kind: "freight", reference: &id },
                     ];
-                    if let Err(error) = ledger.batch_payment(&id, &legs, now, &BTreeMap::new()) {
+                    if let Err(error) = self.markets.get_mut(receiver).unwrap().pay_order(
+                        ledger, value + fare, &id, now, |ledger, _| {
+                            ledger.batch_payment(&id, &legs, now, &BTreeMap::new())
+                        },
+                    ) {
                         transport.finish(reservation);
                         return Err(error);
                     }
@@ -784,12 +786,14 @@ impl Market {
         ledger.market_cash(&self.id).saturating_add(self.gold_reserve_units.floor() as i64).min(MAX_AMOUNT)
     }
 
-    fn fund_order(&mut self, ledger: &mut Ledger, amount: i64, reference: &str, now: i64) -> io::Result<()> {
+    fn pay_order(
+        &mut self, ledger: &mut Ledger, amount: i64, reference: &str, now: i64,
+        pay: impl FnOnce(&mut Ledger, &str) -> io::Result<()>,
+    ) -> io::Result<()> {
         let shortfall = (amount - ledger.market_cash(&self.id)).max(0);
-        if shortfall == 0 { return Ok(()); }
         if shortfall > self.gold_reserve_units.floor() as i64 { return Err(invalid("market cannot fund the purchase")); }
-        let realized = ledger.realize_market_reserve(&self.id, shortfall, reference, now)?;
-        self.gold_reserve_units -= realized as f64;
+        ledger.pay_with_market_reserve(&self.id, shortfall, reference, now, pay)?;
+        self.gold_reserve_units -= shortfall as f64;
         Ok(())
     }
 

@@ -1,7 +1,7 @@
 use super::*;
 use crate::{
     formal_ledger::TRANSPORT_ACCOUNT,
-    transport::{operations::{ActiveVehicle, Plan, Traffic}, ModeSet, Route, TransportMode},
+    transport::{operations::{ActiveVehicle, Plan, Traffic}, ModeSet, TransportMode},
 };
 
 #[derive(Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
@@ -127,33 +127,8 @@ impl InitialWorld {
         self.travel.passenger.as_ref().is_some_and(|p| self.transport.moving(p.id))
     }
 
-    pub fn selected_transport_route(&self) -> Option<&Route> {
-        self.freight_preview.as_ref()
-            .or_else(|| self.selected_freight.and_then(|id| self.transport.plan(id)))
-            .or_else(|| self.travel_plan())
-            .or(self.travel_preview.as_ref())
-            .map(Plan::route)
-    }
-
     pub fn transport_vehicles_on<'a>(&'a self, segment: &str) -> impl Iterator<Item = ActiveVehicle<'a>> + 'a {
         self.transport.active_vehicles_on(segment)
-    }
-
-    pub fn travel_preview(&self) -> Option<&Plan> { self.travel_preview.as_ref() }
-    pub fn clear_transport_preview(&mut self) {
-        self.travel_preview = None;
-        self.freight_preview = None;
-        self.selected_freight = None;
-    }
-
-    pub fn show_freight_route(&mut self, plan: &Plan) {
-        self.clear_transport_preview();
-        self.freight_preview = Some(plan.clone());
-    }
-
-    pub fn select_freight_route(&mut self, reservation: Option<u64>) {
-        self.clear_transport_preview();
-        self.selected_freight = reservation;
     }
 
     pub fn freight_progress(&self, id: u64) -> (Option<&str>, Option<&Plan>) {
@@ -219,24 +194,23 @@ impl InitialWorld {
         self.transport.set_closed(segment, closed)
     }
 
-    pub fn preview_travel(&mut self, to: &str, modes: ModeSet) -> io::Result<&Plan> {
+    pub fn quote_player_travel(&mut self, to: &str, modes: ModeSet) -> io::Result<Plan> {
         if !self.player_alive() { return Err(invalid("人物已无法旅行。")); }
         if self.passenger_in_transit() { return Err(invalid("请在到站后查询新的旅程。")); }
         let from = self.last_station().to_owned();
-        self.clear_transport_preview();
-        self.travel_preview = Some(self.transport.quote(&from, to, modes, 1, self.clock.snapshot().total_minutes)?);
-        Ok(self.travel_preview.as_ref().unwrap())
+        self.transport.quote(&from, to, modes, 1, self.clock.snapshot().total_minutes)
     }
 
-    pub fn preview_work_trip(&mut self) -> io::Result<&Plan> {
+    pub fn quote_work_trip(&mut self) -> io::Result<Plan> {
         let workplace = self.employment().ok_or_else(|| invalid("须先取得真实工作合同。"))?.0.place.clone();
-        self.preview_travel(&workplace, ModeSet::ALL)
+        self.quote_player_travel(&workplace, ModeSet::ALL)
     }
 
-    pub fn depart_player(&mut self) -> io::Result<()> {
+    pub fn depart_player(&mut self, plan: Plan) -> io::Result<()> {
         self.check_leisure()?;
-        let plan = self.travel_preview.take().ok_or_else(|| invalid("请选择目的地并查询路线。"))?;
-        if plan.route().from != self.last_station() { return Err(invalid("出发地已改变，请重新查询。")); }
+        if plan.route().from != self.last_station() || plan.load_units() != 1 {
+            return Err(invalid("出发地或乘客人数与报价不符，请重新查询。"));
+        }
         self.start_passenger(plan, Purpose::Personal)
     }
 
@@ -312,7 +286,7 @@ impl InitialWorld {
             self.clock.snapshot().total_minutes, "transport_refund", &format!("transport:{id}"))
     }
 
-    fn settle_passenger(&mut self) -> io::Result<()> {
+    pub(super) fn settle_passenger(&mut self) -> io::Result<()> {
         let Some(passenger) = self.travel.passenger.as_ref() else { return Ok(()); };
         let (id, purpose) = (passenger.id, passenger.purpose);
         self.travel.place = self.transport.location(id).map(str::to_owned);
@@ -336,7 +310,7 @@ impl InitialWorld {
         Ok(())
     }
 
-    fn settle_named_passengers(&mut self) -> io::Result<()> {
+    pub(super) fn settle_named_passengers(&mut self) -> io::Result<()> {
         for (person, ticket) in &self.travel.named {
             if let Some(station) = self.transport.location(ticket.id) {
                 let initial = self.runtime_people.get(person).map(|row| &row.origin)
@@ -369,15 +343,8 @@ impl InitialWorld {
         next.into_iter().chain(commute.map(|c| c.next_departure)).chain(commute.and_then(|c| c.return_after)).min()
     }
 
-    pub(super) fn advance_transport(&mut self) -> io::Result<()> {
-        let now = self.clock.snapshot().total_minutes;
-        self.transport.advance(now);
-        self.settle_passenger()?;
-        self.settle_named_passengers()?;
-        self.settle_freight()?;
-        self.macro_economy.settle_transport(&mut self.transport, &mut self.ledger, now)?;
-        self.settle_background_migrations(now)?;
-        let Some(commute) = self.travel.commute.as_mut() else { return Ok(()); };
+    pub(super) fn advance_commute(&mut self, now: i64) {
+        let Some(commute) = self.travel.commute.as_mut() else { return; };
         if commute.return_after == Some(now) {
             commute.return_after = None;
             let base = commute.base.clone();
@@ -393,7 +360,6 @@ impl InitialWorld {
                 self.travel.notice = format!("今日未登记出勤：{error}");
             }
         }
-        Ok(())
     }
 
     fn depart_for_work(&mut self, base: &str) -> io::Result<()> {
@@ -483,7 +449,6 @@ impl InitialWorld {
     pub(super) fn stop_transport_on_death(&mut self, person: &str) {
         let ticket = if person == self.player {
             self.travel.commute = None;
-            self.travel_preview = None;
             self.travel.passenger.take()
         } else {
             self.travel.stations.remove(person);
@@ -567,11 +532,11 @@ mod tests {
         let mut world = bootstrap.create("country_fra").unwrap();
         world.apply_for_work("job:opening_paris_workshop").unwrap();
         let initial_cash = world.balance().unwrap().cash;
-        let plan = world.preview_travel("place:le_havre", RAIL).unwrap();
+        let plan = world.quote_player_travel("place:le_havre", RAIL).unwrap();
         let first = plan.route().legs[0].profile;
         let fare = i64::from(first.cost_units);
         let duration = i64::from(first.travel_minutes);
-        world.depart_player().unwrap();
+        world.depart_player(plan).unwrap();
         world.stop_player().unwrap();
         // Earlier French slots had a contract and ticket but no Japanese payroll account.
         let mut slot = world.snapshot();
@@ -609,8 +574,9 @@ mod tests {
         let mut world = bootstrap.create("british_isles_1900").unwrap();
         let player = world.player().id.clone();
         let home = world.player_home().to_owned();
-        let visit = world.preview_travel(PARIS, ModeSet::ALL).unwrap().arrival_minute();
-        world.depart_player().unwrap();
+        let plan = world.quote_player_travel(PARIS, ModeSet::ALL).unwrap();
+        let visit = plan.arrival_minute();
+        world.depart_player(plan).unwrap();
         assert_eq!(world.player_current_place(), None);
         assert_eq!(world.person_home(&player), Some(home.as_str()));
         let mut world = resume(&bootstrap, &world);
@@ -621,11 +587,12 @@ mod tests {
         world.consult_local_work(&player).unwrap();
         world.apply_for_work("job:opening_paris_workshop").unwrap();
 
-        let arrival = world.preview_travel(ROUEN, RAIL).unwrap().arrival_minute();
-        world.depart_player().unwrap();
+        let plan = world.quote_player_travel(ROUEN, RAIL).unwrap();
+        let arrival = plan.arrival_minute();
+        world.depart_player(plan).unwrap();
         world.advance_migrated_domains(arrival - visit, &BTreeMap::new()).unwrap();
         assert!(world.book_work().is_err());
-        assert_eq!(world.preview_work_trip().unwrap().route().to, PARIS);
+        assert_eq!(world.quote_work_trip().unwrap().route().to, PARIS);
         world.set_commute(true).unwrap();
         let first = world.commute_departure().unwrap();
         world.advance_migrated_domains(first - arrival, &BTreeMap::new()).unwrap();
@@ -669,8 +636,9 @@ mod tests {
         assert!(japan_only.entry_job("job:opening_paris_workshop").is_none());
         assert!(world.apply_for_work(JOB).is_err());
         let travel_to = |world: &mut InitialWorld, to: &str| {
-            let arrival = world.preview_travel(to, ModeSet::ALL).unwrap().arrival_minute();
-            world.depart_player().unwrap();
+            let plan = world.quote_player_travel(to, ModeSet::ALL).unwrap();
+            let arrival = plan.arrival_minute();
+            world.depart_player(plan).unwrap();
             world.advance_migrated_domains(arrival - world.clock.snapshot().total_minutes, &BTreeMap::new()).unwrap();
         };
         travel_to(&mut world, &city);
@@ -851,12 +819,12 @@ mod tests {
         let traveler = world.player().id.clone();
         let home = world.player_home().to_owned();
         let destination = world.transport().capital_node("mexican_republic").unwrap().to_owned();
-        let plan = world.preview_travel(&destination, ModeSet::ALL).unwrap();
+        let plan = world.quote_player_travel(&destination, ModeSet::ALL).unwrap();
         let arrival = plan.arrival_minute();
         let first_stop = plan.route().legs[0].to.clone();
         let first_stop_minute = plan.first_departure_minute() + i64::from(plan.route().legs[0].profile.travel_minutes);
         assert!(arrival > MINUTES_PER_DAY);
-        world.depart_player().unwrap();
+        world.depart_player(plan).unwrap();
         world.advance_migrated_domains(first_stop_minute, &BTreeMap::new()).unwrap();
         assert_eq!(world.last_station(), first_stop);
         assert_eq!(world.current_place(&traveler), None);
