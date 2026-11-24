@@ -1467,13 +1467,13 @@ fn opening_sites(
         let unavailable = if default.is_some_and(|person| person.place_id == id) {
             None
         } else if root.is_none() {
-            Some("该政治实体没有正式人口账户")
+            Some("无正式人口账户")
         } else if !pool.is_some_and(|unit| population.parent_unit(unit) == root.map(String::as_str)) {
-            Some("该地点缺少对应的正式居住归属")
+            Some("缺少居住归属")
         } else if !pool.is_some_and(|unit| population.unclassified(unit).unwrap_or(0) > 0
             || default.is_some_and(|person| population.unit_for_person(&person.id) == Some(unit)))
         {
-            Some("该地点没有可登记的居民人口")
+            Some("无可登记居民")
         } else {
             None
         }.map(str::to_owned);
