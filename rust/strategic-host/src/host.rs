@@ -745,7 +745,7 @@ impl Host {
         for id in &self.candidate {if let Some(p)=self.cached.get_mut(id){p.used=now;}}
         self.cached.retain(|_,p|now.duration_since(p.used)<=CACHE_TTL);
         if self.reader.inflight.is_some(){return;}
-        let city_first=self.mode==Mode::Geographic && self.camera.mpp<camera::CITY_INK_MPP
+        let city_first=self.mode==Mode::Geographic
             && self.renderer.as_ref().is_some_and(|r|r.terrain_max_level()>0);
         let city=self.visible.iter().filter(|&&id|city_first&&self.world.tiles[id].city
             && self.index.scissor(id,&self.camera,self.size).is_some());

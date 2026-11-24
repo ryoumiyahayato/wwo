@@ -3,8 +3,6 @@
 import argparse
 import json
 import sqlite3
-import struct
-import zlib
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +12,7 @@ from rasterio.features import rasterize
 from rasterio.transform import from_bounds
 from rasterio.warp import reproject, transform_bounds
 
+from city_ground_pack import write_city_tile
 
 SOURCE = "London / Ordnance Survey 1891–1896 building footprints"
 GROUP = (-0.371, 51.371, 0.104, 51.638)
@@ -57,22 +56,14 @@ def page(database, bounds):
     return coverage
 
 
-def write_tile(path, coverage):
-    width = coverage.shape[0]
-    terrain = zlib.compress(bytes(width * width * 4))
-    city = zlib.compress(coverage.tobytes())
-    metadata = json.dumps({
-        "blocks": {"render/terrain": [0, len(terrain), None], "render/city": [len(terrain), len(city), None]}
-    }, separators=(",", ":")).encode()
-    path.write_bytes(b"WWORGN1\0" + struct.pack("<I", len(metadata)) + metadata + terrain + city)
-
-
 def build(source, output):
     output.mkdir(parents=True, exist_ok=True)
+    catalogue_path = output / "catalogue.json"
+    catalogue = json.loads(catalogue_path.read_text(encoding="utf-8")) if catalogue_path.exists() else {"tiles": []}
     west, south, east, north = GROUP
     dx, dy = (east - west) / COLUMNS, (north - south) / ROWS
     gx, gy = dx * GUTTER / PIXELS, dy * GUTTER / PIXELS
-    tiles = []
+    tiles = [tile for tile in catalogue["tiles"] if not tile["path"].startswith("london-os-1890s-")]
     with sqlite3.connect(source.resolve().as_uri() + "?mode=ro", uri=True) as database:
         for y in range(ROWS):
             for x in range(COLUMNS):
@@ -82,19 +73,20 @@ def build(source, output):
                 if coverage is None or not coverage.max():
                     continue
                 name = f"london-os-1890s-{x}-{y}.wcm"
-                write_tile(output / name, coverage)
+                write_city_tile(output / name, coverage.shape[0], coverage.tobytes())
                 tiles.append(dict(
                     path=name, level=3, core=[left, bottom, right, top], bounds=bounds,
                     group=GROUP, source=SOURCE, size=list(coverage.shape[:2]), cover=False, city=True, ids=False,
                 ))
                 print(name, flush=True)
-    (output / "catalogue.json").write_text(json.dumps({
+    catalogue.update({
         "tiles": tiles,
         "source": "https://doi.org/10.5281/zenodo.19497435",
         "creator": "Rémi Petitpierre, Isabella di Lenardo, Polly Hudson, Hendrik Herold, Katherine McDonough, Beatrice Vaienti, Robert Hecht and Christopher Fleet",
         "license": "CC-BY-4.0",
         "processing": "Building footprints rasterized to coverage. No road or bridge geometry is inferred.",
-    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    })
+    catalogue_path.write_text(json.dumps(catalogue, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

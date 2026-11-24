@@ -51,8 +51,13 @@ struct TileState {extent:[f32;4],core:[f32;4],region:[f32;4],options:[f32;4],edg
 impl TileState {
     fn new(tile:&Tile,opacity:f32,edges:[f32;4],edge_ready:[f32;4])->Self {
         let cast=|values:[f64;4]| values.map(|a|a as f32);
+        let city_style = if tile.city_ink_only {
+            if tile.city_area { 3. } else { 2. }
+        } else {
+            u8::from(tile.city) as f32
+        };
         Self {extent:cast(tile.bounds),core:cast(tile.core),region:cast(tile.group),
-              options:[opacity,f32::from(tile.printed+u8::from(tile.cover)),if tile.city_ink_only {2.} else {u8::from(tile.city) as f32},u8::from(tile.level==0) as f32],edges,edge_ready}
+              options:[opacity,f32::from(tile.printed+u8::from(tile.cover)),city_style,u8::from(tile.level==0) as f32],edges,edge_ready}
     }
 }
 pub struct Page {
