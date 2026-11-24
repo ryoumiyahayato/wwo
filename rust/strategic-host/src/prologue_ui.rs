@@ -15,7 +15,7 @@ const STAGES: [(&str, &str); 5] = [
     ("家庭", "Family"),
     ("教育", "Schooling"),
     ("青年经历", "Early work and study"),
-    ("性情", "Temperament"),
+    ("往事", "A past experience"),
     ("人物确认", "Review character"),
 ];
 const FAMILIES: [Family; 3] = [Family::Poor, Family::Ordinary, Family::Wealthy];
@@ -26,17 +26,37 @@ const YOUTH: [Youth; 4] = [
     Youth::CommercialAssistant,
     Youth::AdvancedStudy,
 ];
-const TEMPERAMENTS: [Temperament; 4] = [
-    Temperament::Practice,
-    Temperament::Persist,
-    Temperament::Struggle,
-    Temperament::Leave,
-];
-const HEALTH: [Option<OpeningHealth>; 4] = [
-    None,
-    Some(OpeningHealth::Strong),
-    Some(OpeningHealth::OldInjury),
-    Some(OpeningHealth::ProlongedIllness),
+struct Experience {
+    story: (&'static str, &'static str),
+    temperament: Temperament,
+    health: Option<OpeningHealth>,
+}
+
+const EXPERIENCES: [Experience; 4] = [
+    Experience {
+        story: ("你跟熟人学做一件活，练了一个冬天，终于能独自做完。",
+            "You spent a winter learning a job and could finally do it alone."),
+        temperament: Temperament::Practice,
+        health: None,
+    },
+    Experience {
+        story: ("你跟家人送了一季货，渐渐能把重货搬完。",
+            "You spent a season delivering goods and grew strong enough to carry heavy loads."),
+        temperament: Temperament::Persist,
+        health: Some(OpeningHealth::Strong),
+    },
+    Experience {
+        story: ("邻家起火，你把人扶了出来，自己的腿受了伤。",
+            "You helped someone escape a fire next door and injured your leg."),
+        temperament: Temperament::Rescue,
+        health: Some(OpeningHealth::OldInjury),
+    },
+    Experience {
+        story: ("你病了大半年，后来才慢慢恢复做活。",
+            "You were ill for most of a year and only slowly returned to work."),
+        temperament: Temperament::Persist,
+        health: Some(OpeningHealth::ProlongedIllness),
+    },
 ];
 
 pub struct Draft {
@@ -77,12 +97,8 @@ impl Draft {
         self.changed = Instant::now();
     }
 
-    pub fn set_health(&mut self, index: usize) {
-        if self.stage == 3 {
-            if let Some(value) = HEALTH.get(index) {
-                self.health = *value;
-            }
-        }
+    fn experienced(&self, event: &Experience) -> bool {
+        self.opening.temperament == event.temperament && self.health == event.health
     }
 
     pub fn choose(&mut self, index: usize) {
@@ -109,8 +125,9 @@ impl Draft {
                 }
             }
             3 => {
-                if let Some(&value) = TEMPERAMENTS.get(index) {
-                    self.opening.temperament = value;
+                if let Some(event) = EXPERIENCES.get(index) {
+                    self.opening.temperament = event.temperament;
+                    self.health = event.health;
                 }
             }
             _ => (),
@@ -335,9 +352,8 @@ impl Display<'_> {
         let header_height = (57. + context_lines as f32 * 23.) * scale;
         let prompt_height = if draft.stage == 4 { 53. } else { 70. } * scale;
         let stride = if width < 1040. || skin.english() { 48. } else { 40. } * scale;
-        let option_count = [3, 2, 4, 4, 3][draft.stage];
-        let health_height = if draft.stage == 3 { 62. * scale } else { 0. };
-        let card_h = header_height + prompt_height + option_count as f32 * stride + health_height + 57. * scale;
+        let option_count = [3, 2, 4, EXPERIENCES.len(), 4][draft.stage];
+        let card_h = header_height + prompt_height + option_count as f32 * stride + 57. * scale;
         let card_y = (height * vertical - card_h * 0.5).clamp(12., (height - card_h - 28.).max(12.));
         paper.image([card_x, card_y, card_w, card_h], [0., 0., 1., 1.], [255, 255, 255, 148]);
         surface.rect(card_x + 7., card_y + 4., card_w - 14., 1., [120, 82, 51, 73]);
@@ -354,7 +370,8 @@ impl Display<'_> {
             paper_choice(skin, surface, text, hits, [left, menu_top + stride * index as f32, inner, stride - 5.],
                 title, enabled.then_some(Command::PrologueChoice(index)), selected, scale);
         };
-        let prompt = match draft.stage {
+        let family_intro;
+        let prompt: &str = match draft.stage {
             0 => {
                 let choices = [
                     say(
@@ -373,13 +390,13 @@ impl Display<'_> {
                 for (i, label) in choices.into_iter().enumerate() {
                     choice(i, label, true, FAMILIES[i] == chosen.family);
                 }
-                scene.map_or(
-                    say(
-                        "家里的生计，决定了你小时候可以把时间花在哪里。",
-                        "Your household’s livelihood shaped how you spent your childhood.",
-                    ),
-                    |scene| say(scene.setting.0, scene.setting.1),
-                )
+                family_intro = scene.map_or_else(
+                    || say("你在这里出生。家里的生计，决定了你小时候可以把时间花在哪里。",
+                        "You were born here. Your household’s livelihood shaped how you spent your childhood.").to_owned(),
+                    |scene| format!("{}{}", say(scene.setting.0, scene.setting.1),
+                        say("而你，就出生在这里。", " This is where you were born.")),
+                );
+                &family_intro
             }
             1 => {
                 let lesson = match chosen.family {
@@ -458,66 +475,10 @@ impl Display<'_> {
                     |scene| say(scene.work.0, scene.work.1))
             }
             3 => {
-                let labels = [
-                    say(
-                        "问清做法，再反复练习。",
-                        "Ask how and practise until it works.",
-                    ),
-                    say(
-                        "把事情分开，一件件做完。",
-                        "Break the work into parts and finish each.",
-                    ),
-                    say(
-                        "哪怕学得慢，也每天练。",
-                        "Practise daily, even when learning is slow.",
-                    ),
-                    say(
-                        "做到一半，常转去做别的。",
-                        "Move on to something else before finishing.",
-                    ),
-                ];
-                for (i, label) in labels.into_iter().enumerate() {
-                    choice(i, label, true, TEMPERAMENTS[i] == chosen.temperament);
+                for (i, experience) in EXPERIENCES.iter().enumerate() {
+                    choice(i, say(experience.story.0, experience.story.1), true, draft.experienced(experience));
                 }
-                let y = menu_top + stride * 4. + 2. * scale;
-                skin.text(
-                    text,
-                    say("身体经历", "Health history"),
-                    0,
-                    [left, y],
-                    inner,
-                    FAINT_INK,
-                );
-                let health = [
-                    say("平常", "Typical"),
-                    say("强健", "Robust"),
-                    say("旧伤", "Old injury"),
-                    say("久病", "Long illness"),
-                ];
-                for (i, label) in health.into_iter().enumerate() {
-                    let w = inner / 4.;
-                    paper_choice(skin, surface, text, hits,
-                        [left + w * i as f32, y + 24. * scale, w - 3., 31. * scale],
-                        label, Some(Command::PrologueHealth(i)), HEALTH[i] == draft.health, 0.92 * scale);
-                }
-                match chosen.youth {
-                    Youth::Labor => say(
-                        "遇到一件怎么也干不顺的活，你会怎么做？",
-                        "A job is giving you trouble. How do you handle it?",
-                    ),
-                    Youth::Apprentice => say(
-                        "师傅交代的功课总做不好，你会怎么做？",
-                        "You keep getting a task from your master wrong. What do you do?",
-                    ),
-                    Youth::CommercialAssistant => say(
-                        "铺子里的账目总对不上，你会怎么做？",
-                        "The shop’s accounts won’t balance. What do you do?",
-                    ),
-                    Youth::AdvancedStudy => say(
-                        "读书时遇到难解的一页，你会怎么做？",
-                        "You keep getting stuck on a page. What do you do?",
-                    ),
-                }
+                say("独立生活前，你记得一件事。", "One event stands out from the years before you set out on your own.")
             }
             _ => {
                 if let Ok(development) = chosen.build_with_health(draft.language, draft.health) {
@@ -552,8 +513,11 @@ impl Display<'_> {
                     } else {
                         chosen.youth.label()
                     };
+                    let story = EXPERIENCES.iter().find(|event| draft.experienced(event))
+                        .map_or("", |event| say(event.story.0, event.story.1));
                     let details = [
                         format!("{} · {} · {}", say("20 岁", "Age 20"), education, youth),
+                        story.to_owned(),
                         format!("{} · {}   |   {}", say("健康", "Health"), health, wealth),
                         format!("{} · {}", say("特质", "Traits"), traits),
                     ];

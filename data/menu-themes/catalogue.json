@@ -1,0 +1,47 @@
+[
+  {
+    "id": "paris-rain",
+    "title_zh": "巴黎街道·雨天",
+    "title": "Paris Street; Rainy Day",
+    "artist": "Gustave Caillebotte",
+    "date": "1877",
+    "source": "https://www.artic.edu/artworks/20684",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "gare-saint-lazare",
+    "title_zh": "诺曼底列车抵达圣拉扎尔车站",
+    "title": "Arrival of the Normandy Train, Gare Saint-Lazare",
+    "artist": "Claude Monet",
+    "date": "1877",
+    "source": "https://www.artic.edu/artworks/16571",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "herring-net",
+    "title_zh": "鲱鱼网",
+    "title": "The Herring Net",
+    "artist": "Winslow Homer",
+    "date": "1885",
+    "source": "https://www.artic.edu/artworks/25865",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "roman-harvest",
+    "title_zh": "罗马乡间的收获",
+    "title": "Harvest on the Roman Campagna",
+    "artist": "John Gadsby Chapman",
+    "date": "1868",
+    "source": "https://www.clevelandart.org/art/1915.688",
+    "license": "CC0-1.0"
+  },
+  {
+    "id": "shono-driving-rain",
+    "title_zh": "庄野·白雨",
+    "title": "Shōno: Driving Rain",
+    "artist": "Utagawa Hiroshige",
+    "date": "1833",
+    "source": "https://www.clevelandart.org/art/1948.306",
+    "license": "CC0-1.0"
+  }
+]

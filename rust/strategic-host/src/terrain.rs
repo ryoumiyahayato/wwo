@@ -584,7 +584,7 @@ pub struct Terrain {
 
 impl Terrain {
     pub fn new(device:&wgpu::Device,queue:&wgpu::Queue,data:Catalogue,
-               proxy:EventLoopProxy<crate::HostEvent>,landscape_supported:bool) -> io::Result<Self> {
+               proxy:EventLoopProxy<crate::HostEvent>) -> io::Result<Self> {
         let Catalogue{pages,mut source,max_level,version,selection,layer_candidate,cover_root,..}=data;
         let water_colors=matches!(&source,Source::Packs(_,Some(_)));
         let texture=|label,width,height,layers,mips,format| device.create_texture(&wgpu::TextureDescriptor{
@@ -603,7 +603,7 @@ impl Terrain {
         }
         let capacity=if version!=VERSION {MAX_PACK_PAGES.min(device.limits().max_texture_array_layers)} else {MAX_PAGES};
         let atlas=texture("Natural terrain page cache",PAGE_SIZE,PAGE_SIZE,capacity,1,FORMAT);
-        let height_enabled=landscape_supported&&version==COMPACT_VERSION&&selection.limit()>=6;
+        let height_enabled=version==COMPACT_VERSION&&selection.limit()>=6;
         let (landscape_cover_path,mut cover)=cover_root.filter(|_|height_enabled).and_then(|root|{
             CoverPack::FILE_NAMES.into_iter().find_map(|name|{
                 let path=root.join(name);

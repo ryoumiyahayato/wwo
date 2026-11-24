@@ -140,6 +140,7 @@ pub enum Temperament {
     Struggle,
     Leave,
     Illness,
+    Rescue,
 }
 
 impl Temperament {
@@ -152,6 +153,7 @@ impl Temperament {
             Self::Struggle => "学得慢，但每天坚持练习",
             Self::Leave => "经常没做完就去干别的活",
             Self::Illness => "久病后复工，身体恢复很慢",
+            Self::Rescue => "邻家失火时救人，腿上留下旧伤",
         }
     }
 }
@@ -295,6 +297,10 @@ impl Prologue {
                 ),
             "opening health already established through a legacy event",
         )?;
+        require(
+            self.temperament != Temperament::Rescue || health == Some(OpeningHealth::OldInjury),
+            "the rescue episode requires the recorded injury",
+        )?;
         require(matches!(self.age, 18 | 20 | 25), "unsupported opening age")?;
         require(
             self.youth.eligible(self.age, self.education),
@@ -383,6 +389,7 @@ impl PlayerDevelopment {
             Temperament::Struggle => &["slow_study", "hardworking"],
             Temperament::Leave => &["careless_work"],
             Temperament::Illness => &["frail", "slow_healing", "chronic_illness"],
+            Temperament::Rescue => &[],
         };
         for id in traits {
             self.grant(id, source)?;
@@ -410,6 +417,7 @@ impl PlayerDevelopment {
                 self.attributes[7] = 455;
                 self.grow(6, 25);
             }
+            Temperament::Rescue => (),
         }
         Ok(())
     }

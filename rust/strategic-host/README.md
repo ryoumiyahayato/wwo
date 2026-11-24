@@ -224,6 +224,20 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 巴黎 Gros-Caillou、威斯敏斯特和米尔班克沿用 [R40 原创城市模块](../../assets/settlements/R40_SOURCE_AND_USAGE.md) 的 18、16 和 4 个摆放点。相同的模块共享 GPU 网格，沿用 8 米/像素切换近远档，并保留资料注明的概念街区比例。搜索 `paris_gros_caillou_miniature`、`westminster_miniature` 或 `millbank_wharves_1900` 可定位。地标与街区沿用地图相对平面。当前原件没有图片贴图。局部地形接地、贴图和动画资源待接入。
 
+## R68 地图与首页迁移
+
+| 范围 | Rust 正式入口 |
+| --- | --- |
+| 世界地形、历史政区、经济图和军事图 | Rust 相机和专题图层。全球自然地面读取 Z0–Z7 QPK，近景读取 QSC。R68 旧底图仅作为兼容资源。 |
+| 旧版区域地表和城市 | 既有 regional WCM 提供地形、城市和道路分片。伦敦另读取 `data/city-overlays` 的 1891–1896 年测绘建筑覆盖。伦敦扩展范围的历史道路需要独立来源。 |
+| 地标和建筑群 | Rust 地标目录提供七个地标、三个局部街区及各自的缩放范围。约 1900 年人口达到十万的城市按既定标准建设城市资源。 |
+| 菜单与画作 | 原有菜单、图集和字体继续使用。主题管理读 `data/menu-themes/catalogue.json`，一次载入一张作品并将模式和最近作品保存到现有界面配置。 |
+| 迁移状态、旧主题说明及首页兼容提示 | 从玩家界面移除。R68 源码由 `archive/godot-r68-source-20261120` 归档保留。 |
+
+伦敦瓦片由 `tools/build_london_city_ground.py` 从已有 GeoPackage 整理。数据版本、作者及许可见 [城市分片清单](../../data/city-overlays/catalogue.json)。画作来源与许可见 [主题清单](../../data/menu-themes/catalogue.json)。
+
+格陵兰和南极的接地冰川、浮冰架、季节性海冰与水域需要结合现有 QWG、QHW 和高程资料单独核对。本阶段继续使用现有极地分片。
+
 ## 全球地图验收
 
 无窗口验收使用正式 Vulkan/wgpu 地图管线。运行 `wwo-map-lab --terrain-review --data <运行数据目录> --observe <临时目录/map.json>`。底图库沿用正式入口的默认选择规则。可通过 `--terrain-candidate <QPK库目录>` 指定候选库。`--terrain-level 0..7` 只打开并绘制指定层，缺页显示紫色。超过显存页预算时，响应中的 `exact_view_over_capacity` 标为真，可缩小取景范围。`--terrain-max-level 0..7` 限制自动 LOD 的最高层，并保留父级回退。严格观察单层替换时可另传 `--terrain-layer-candidate <候选.qpk>`，使用该库共享清单及河网资料，原 QPK 保留。

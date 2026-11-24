@@ -146,7 +146,7 @@ struct Assessment { explanation: Vec<String> }
 
 impl Session {
     pub fn valid(&self)->bool {
-        self.player.starts_with("person:") && self.hour<24 && self.minute<60 && [1,2,4].contains(&self.speed)
+        self.player.starts_with("person:") && self.hour<24 && self.minute<60 && (1..=4).contains(&self.speed)
             && (self.coordinates.is_empty() || (self.coordinates.len()==2 && self.coordinates[0].abs()<=180. && self.coordinates[1].abs()<=90.))
     }
 }
@@ -481,7 +481,6 @@ impl Display<'_> {
         let radius=clock_radius(w);
         let factor=radius/184.;
         let pivot=[w,0.];
-        let seam=[3,5,6,245];
         let metal=[148,120,74,245];
         let highlight=[209,184,125,230];
         let ivory=[237,227,201,255];
@@ -490,17 +489,7 @@ impl Display<'_> {
             let (dy,dx)=angle.to_radians().sin_cos();
             [w+dx*r-dy*t,dy*r+dx*t]
         };
-        let outline=|mesh:&mut Mesh,points:&[[f32;2]],width:f32|{
-            for (&a,&b) in points.iter().zip(points.iter().cycle().skip(1)){mesh.line(a,b,width,seam);}
-        };
         let angle=self.hud.clock_drag.or(self.hud.mechanical.angle).unwrap_or(CLOCK_ANGLES[clock_index(self.session)]);
-        for detent in CLOCK_ANGLES {
-            if self.session.is_some() && (detent-angle).abs()<4. {continue;}
-            let mark=[(143.,-1.),(CLOCK_HAND_TIP,-1.6),(CLOCK_HAND_TIP,1.6),(143.,1.)]
-                .map(|(r,t)|radial(detent,r*factor,t));
-            clock.shape(&mark,metal);
-            outline(clock,&mark,0.8);
-        }
         if self.session.is_some() {
             let blend=if self.hud.clock_drag.is_some(){0.65}else if clock_at(angle)==0{0.25}else{0.4};
             let hand_color=std::array::from_fn(|i|if i==3{255}else{(f32::from(metal[i])*(1.-blend)+f32::from(highlight[i])*blend).round() as u8});
@@ -1330,18 +1319,20 @@ impl Display<'_> {
         }
     }
 }
-const CLOCK_ANGLES:[f32;4]=crate::mechanical::ANGLES;
+const CLOCK_ANGLES:[f32;5]=crate::mechanical::ANGLES;
 const CLOCK_HAND_TIP:f32=165.; // Matches the hand tip in hud.wgsl.
 fn clock_radius(width:f32)->f32 {116_f32.min(width*0.22)}
-pub const CLOCK_SPEEDS:[u32;4]=[0,1,2,4];
+pub const CLOCK_SPEEDS:[u32;5]=[0,1,2,3,4];
 pub fn clock_index(session:Option<&Session>)->usize {
     session.filter(|s|!s.paused).and_then(|s|CLOCK_SPEEDS.iter().position(|v|*v==s.speed)).unwrap_or(0)
 }
 pub fn clock_angle([x,y]:[f64;2],width:u32)->f32 {
-    (y as f32).atan2(x as f32-width as f32).to_degrees().rem_euclid(360.).clamp(96.,174.)
+    (y as f32).atan2(x as f32-width as f32).to_degrees().rem_euclid(360.)
+        .clamp(CLOCK_ANGLES[CLOCK_ANGLES.len()-1],CLOCK_ANGLES[0])
 }
 pub fn clock_at(angle:f32)->usize {
-    (((174.-angle)/26.).round() as usize).min(3)
+    let spacing=CLOCK_ANGLES[0]-CLOCK_ANGLES[1];
+    (((CLOCK_ANGLES[0]-angle)/spacing).round() as usize).min(CLOCK_ANGLES.len()-1)
 }
 pub fn clock_hit([x,y]:[f64;2],width:u32,session:Option<&Session>,display:Option<f32>)->bool {
     if session.is_none(){return false;}

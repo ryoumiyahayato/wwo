@@ -28,7 +28,7 @@ struct Tile {
 @group(0) @binding(0) var<uniform> view: View;
 @group(0) @binding(1) var linear: sampler;
 @group(0) @binding(2) var world_sampler: sampler;
-@group(0) @binding(3) var palette: texture_2d<f32>;
+@group(0) @binding(3) var<uniform> palette: array<vec4u,128>;
 @group(0) @binding(4) var layouts: texture_2d_array<f32>;
 @group(0) @binding(5) var flags: texture_2d<f32>;
 @group(0) @binding(6) var flag_poses: texture_2d<f32>;
@@ -55,7 +55,7 @@ const PI: f32 = 3.14159265358979;
 const EARTH: f32 = 6371008.8;
 const LAND_DETAIL_MPP: f32 = 760.;
 const LAND_MATERIAL_MPP: f32 = 2220.;
-const CITY_INK_MPP: f32 = 125.;
+const CITY_INK_MPP: f32 = 180.;
 const CHART_SUN_VIEW: vec3f = vec3f(.100,.970,.222);
 @vertex fn triangle(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
     let p = array<vec2f,3>(vec2f(-1.,-1.),vec2f(3.,-1.),vec2f(-1.,3.));
@@ -423,9 +423,11 @@ fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> v
     let world=earth*(EARTH/period);
     // Change the phase over a few repeats, in the same coordinates for every LOD.
     let phase=ground_field(world*vec3f(.33,.28,.36)+vec3f(1.7,4.1,7.3));
-    let p=world+phase*vec3f(1.12,-.83,.71);
+    let cross_phase=ground_field(world*vec3f(.54,.39,.47)+vec3f(7.8,2.3,11.1));
+    let p=world+phase*vec3f(1.12,-.83,.71)+cross_phase*vec3f(-.40,.72,.91);
     let turn=mat2x2f(vec2f(.8660254,.5),vec2f(-.5,.8660254));
-    let mip=log2(max(1.,footprint*f32(textureDimensions(land_surface).x)/period));
+    // Include the warp in the footprint to suppress grain aliasing during movement.
+    let mip=log2(max(1.,1.18*footprint*f32(textureDimensions(land_surface).x)/period));
     return textureSampleLevel(land_surface,land_repeat,p.yz,mip)*planes.x
         +textureSampleLevel(land_surface,land_repeat,turn*p.xz+vec2f(.21,.43),mip)*planes.y
         +textureSampleLevel(land_surface,land_repeat,p.yx*turn+vec2f(.67,.29),mip)*planes.z;
@@ -776,7 +778,8 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
         let dims_id=vec2i(textureDimensions(owners));
         let at=vec2i(floor(uv*vec2f(dims_id)));
         let id=ids(at,dims_id);
-        let datum=textureLoad(palette,vec2i(i32(id.x),i32(view.settings.y)-1),0);
+        let index=(u32(view.settings.y)-1u)*256u+id.x;
+        let datum=unpack4x8unorm(palette[index/4u][index%4u]);
         let ink=mix(vec3f(.58,.58,.52),datum.rgb,datum.a*view.settings.z);
         if view.settings.y<1.5 {
             let print_weight=mix(.12,.68,smoothstep(log(300.),log(6500.),log(max(base_mpp,1.))))
@@ -875,7 +878,8 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let buildings=textureSampleLevel(city_data,linear,uv,mip).rg;
     let edge=textureSampleLevel(city_data,linear,uv-du*.82,mip).r;
     let shadow=max(0.,edge-buildings.r)*detail*.49;
-    if max(max(buildings.r,buildings.g),shadow)<=.001 {return vec4f(0.);}
+    let blocks=textureSampleLevel(city_data,linear,uv,3.).r;
+    if max(max(buildings.r,buildings.g),max(shadow,blocks))<=.001 {return vec4f(0.);}
     let base=natural_surface(ll);
     var terrain=vec4f(base.rgb,water_coverage(area,base.a));
     if view.map_style.z>=6. {
@@ -903,8 +907,7 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let land=1.-terrain.a;
     let urban=clamp(cover.x/max(.01,ready),0.,1.);
     let woods=clamp(cover.y/max(.01,ready),0.,1.);
-    let blocks=textureSampleLevel(city_data,linear,uv,3.).r;
-    let built=urban*smoothstep(.02,.23,blocks);
+    let built=smoothstep(.015,.23,blocks)*mix(.75,1.,urban);
     // At the survey limit, attenuate the mapped features over a few source blocks.
     let support=smoothstep(0.,mix(320.,670.,built),edge_distance);
     let facade=mix(vec3f(.68,.56,.48),vec3f(.80,.71,.62),max(0.,buildings.r-edge));
@@ -917,11 +920,12 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let road=buildings.g*detail*mix(fringe,.88,built);
     let bridge=mix(road,buildings.g*detail*.82,terrain.a);
     let shading=shadow*land*mix(.45,1.,built);
-    let color=(vec3f(.36,.32,.31)*shading*(1.-wall)+facade*wall)*(1.-bridge)
+    let ground=detail*land*smoothstep(.055,.36,blocks)*.57;
+    let paving=mix(terrain.rgb,vec3f(.58,.52,.44),.75);
+    let color=((paving*ground*(1.-shading)+vec3f(.36,.32,.31)*shading)*(1.-wall)+facade*wall)*(1.-bridge)
         +mix(road_color,vec3f(.69,.67,.59),terrain.a)*bridge;
-    let alpha=(shading*(1.-wall)+wall)*(1.-bridge)+bridge;
-    let base_ready=select(1.,ready,textureNumLayers(landscape_data)>1u);
-    return vec4f(color/max(.0001,alpha),alpha*support*base_ready);
+    let alpha=((ground*(1.-shading)+shading)*(1.-wall)+wall)*(1.-bridge)+bridge;
+    return vec4f(color/max(.0001,alpha),alpha*support);
 }
 
 fn chart_normal(xy:vec2f,r:f32,t:f32) -> vec3f {

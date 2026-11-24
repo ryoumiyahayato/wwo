@@ -16,6 +16,8 @@ pub struct Tile {
     #[serde(default)]
     pub printed:u8,
     pub city:bool,
+    #[serde(skip)]
+    pub city_ink_only:bool,
     pub ids:bool,
     #[serde(default)]
     pub surface_span:u32,

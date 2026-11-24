@@ -142,7 +142,7 @@ pub struct Renderer {
     view:wgpu::Buffer,
     globals:wgpu::BindGroup,
     pages:wgpu::BindGroupLayout,
-    palette:wgpu::Texture,
+    palette:wgpu::Buffer,
     flag_poses:wgpu::Texture,
     fallback:[wgpu::TextureView;3],
     globe:wgpu::RenderPipeline,
@@ -170,6 +170,8 @@ pub struct Renderer {
     prologue_scene:Option<usize>,
     prologue_paper:wgpu::BindGroup,
     opening_cloud:wgpu::BindGroup,
+    menu_layout:wgpu::BindGroupLayout,
+    menu_sampler:wgpu::Sampler,
     instrument:wgpu::RenderPipeline,
     instrument_view:wgpu::BindGroup,
     screen:wgpu::BindGroup,
@@ -218,18 +220,13 @@ fn water_pixels(device:&wgpu::Device, bytes:u64)->wgpu::Buffer {
 }
 
 impl GroundSurface {
-    fn new(device:&wgpu::Device, supported:bool, water_available:bool)->Self {
-        let mut entries=vec![sampled(0),sampler_entry(1)];
-        let height=supported.then(||{
-            entries.push(wgpu::BindGroupLayoutEntry{
+    fn new(device:&wgpu::Device, water_available:bool)->Self {
+        let entries=[sampled(0),sampler_entry(1),wgpu::BindGroupLayoutEntry{
                 visibility:wgpu::ShaderStages::FRAGMENT|wgpu::ShaderStages::COMPUTE,
                 ..texture_entry(2,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)
-            });
-            create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm)
-                .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()})
-        });
-        entries.push(water_storage(3,wgpu::ShaderStages::FRAGMENT,true));
-        entries.push(water_storage(4,wgpu::ShaderStages::FRAGMENT,true));
+            },water_storage(3,wgpu::ShaderStages::FRAGMENT,true),water_storage(4,wgpu::ShaderStages::FRAGMENT,true)];
+        let height=Some(create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm)
+            .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()}));
         let layout=layout(device,&entries);
         let repeat=device.create_sampler(&wgpu::SamplerDescriptor{
             address_mode_u:wgpu::AddressMode::Repeat,address_mode_v:wgpu::AddressMode::Repeat,
@@ -712,10 +709,9 @@ impl Renderer {
             power_preference:wgpu::PowerPreference::HighPerformance,compatible_surface:surface.as_ref(),force_fallback_adapter:false
         }).await.ok_or(if surface.is_some(){"A Vulkan adapter with window presentation is required"}else{"A Vulkan adapter is required"})?;
         let info=adapter.get_info();
-        let landscape_supported=adapter.limits().max_sampled_textures_per_shader_stage>=17;
         let mut features=if natural.is_some() {wgpu::Features::TEXTURE_COMPRESSION_BC}else{wgpu::Features::empty()};
         if !adapter.features().contains(features) {return Err("自然地貌需要支持 BC7 纹理的 Vulkan 显卡。".into());}
-        if observe && landscape_supported {
+        if observe {
             features |= adapter.features() & (wgpu::Features::TIMESTAMP_QUERY|wgpu::Features::PIPELINE_STATISTICS_QUERY);
         }
         if observe && adapter.features().contains(FRAME_TIMESTAMP_FEATURES) {
@@ -724,7 +720,7 @@ impl Renderer {
         let (device,queue)=adapter.request_device(&wgpu::DeviceDescriptor {
             label:Some("WWO strategic map host"),required_features:features,
             required_limits:wgpu::Limits {max_texture_dimension_2d:4096,
-                max_sampled_textures_per_shader_stage:if landscape_supported {17}else{16},
+                max_sampled_textures_per_shader_stage:16,
                 ..wgpu::Limits::downlevel_defaults()},
             memory_hints:wgpu::MemoryHints::MemoryUsage
         },None).await.map_err(|e|e.to_string())?;
@@ -750,7 +746,7 @@ impl Renderer {
         let fragment=wgpu::ShaderStages::FRAGMENT;
         let compute_fragment=fragment|wgpu::ShaderStages::COMPUTE;
         let global_entries=[uniform(0,compute_fragment|wgpu::ShaderStages::VERTEX),
-            wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..sampler_entry(1)},sampler_entry(2),sampled(3),
+            wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..sampler_entry(1)},sampler_entry(2),uniform(3,fragment),
             texture_entry(4,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),sampled(5),
             texture_entry(6,wgpu::TextureSampleType::Float{filterable:false},wgpu::TextureViewDimension::D2),sampled(7),sampled(8),
             texture_entry(10,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
@@ -775,8 +771,9 @@ impl Renderer {
         let instrument_view=bind(&device,&instrument_layout,&[buf_resource(0,&view)]);
         let screen_size=buffer(&device,32);
         let screen=bind(&device,&screen_layout,&[buf_resource(0,&screen_size)]);
-        let palette=create_texture(&device,[256,2,1],wgpu::TextureFormat::Rgba8Unorm);
-        let palette_view=palette.create_view(&Default::default());
+        let palette=device.create_buffer(&wgpu::BufferDescriptor{
+            label:Some("Map palette"),size:256*2*4,usage:wgpu::BufferUsages::UNIFORM|wgpu::BufferUsages::COPY_DST,mapped_at_creation:false,
+        });
         let scenario_size=if layout_bytes.is_empty(){[1,1,2]}else{[256,256,2]};
         let scenario=create_texture(&device,scenario_size,wgpu::TextureFormat::Rgba8Unorm);
         write_texture(&queue,&scenario,scenario_size,4,if layout_bytes.is_empty(){&[0;8]}else{layout_bytes});
@@ -794,7 +791,7 @@ impl Renderer {
         let ocean_material=material_texture(&device,&queue,ocean);
         let river_source=natural.as_ref().and_then(|(catalogue,_)|catalogue.river_lines()).map(Path::to_owned);
         let water_source=natural.as_ref().and_then(|(catalogue,_)|catalogue.water_geometry()).map(Path::to_owned);
-        let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy,landscape_supported))
+        let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy))
             .transpose().map_err(|error|error.to_string())?;
         let [terrain_world,terrain_detail,terrain_index]=if let Some(terrain)=&terrain {
             terrain.views()
@@ -803,7 +800,7 @@ impl Renderer {
                 .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()});
             [empty(),empty(),create_texture(&device,[1,1,1],wgpu::TextureFormat::R32Uint).create_view(&Default::default())]
         };
-        let mut surface=GroundSurface::new(&device,landscape_supported,water_source.is_some());
+        let mut surface=GroundSurface::new(&device,water_source.is_some());
         let water_pages=water_source.and_then(|source| {
             match crate::hydrology::WaterPages::open(&source,&queue,&surface.water) {
                 Ok(pages)=>Some(pages),
@@ -814,7 +811,7 @@ impl Renderer {
         let (close_surface,close_bounds)=CloseSample::upload(close,&device,&queue);
         let close_group=bind(&device,&close_layout,&[tex_resource(0,&close_surface),buf_resource(1,&close_bounds)]);
         let global_resources=[buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
-            tex_resource(3,&palette_view),tex_resource(4,&scenario),tex_resource(5,&flags),tex_resource(6,&flag_pose_view),
+            buf_resource(3,&palette),tex_resource(4,&scenario),tex_resource(5,&flags),tex_resource(6,&flag_pose_view),
             tex_resource(7,&galactic_chart),tex_resource(8,&ocean_material),
             tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index)];
         let globals=bind(&device,&glob,&global_resources);
@@ -841,13 +838,7 @@ impl Renderer {
             tex.create_view(&Default::default())
         });
         let globe_source=include_str!("globe.wgsl");
-        let scenery_source=if landscape_supported {include_str!("landscape.wgsl")} else {
-            "fn geographic_ground_tint(ll:vec2f, fallback:vec3f)->vec3f {return fallback;}
-            fn landscape_relief(base:vec3f, ll:vec2f, world:vec3f, water:f32, mpp:f32)->vec3f {
-                if view.settings.y>=.5 || view.map_style.z<5. {return base;}
-                return mix(base,natural_land_material(vec4f(base,water),world,mpp),ground_material_weight(water,mpp));
-            }"
-        };
+        let scenery_source=include_str!("landscape.wgsl");
         let globe_shader=device.create_shader_module(wgpu::ShaderModuleDescriptor{
             label:Some("WWO globe and Z7 landscape"),
             source:wgpu::ShaderSource::Wgsl(format!("{globe_source}\n{scenery_source}").into()),
@@ -889,13 +880,24 @@ impl Renderer {
         let instrument=pipeline(&[&screen_layout,&font_layout,&instrument_layout],&hud_shader,"screen_vertex","instrument",&mesh_layout);
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
         let models=ModelLayer::new(&device,format,events);
-        let landscape_pipeline=landscape_supported.then_some((format,glob,globe_shader));
+        let landscape_pipeline=Some((format,glob,globe_shader));
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),
                 frame_timer:None,frame_acquire_ms:0.,view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
-                solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,prologue_art,prologue_texture,prologue_scene:None,prologue_paper,opening_cloud,instrument,instrument_view,screen,screen_size,meshes,models,
+                solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,
+                prologue_art,prologue_texture,prologue_scene:None,prologue_paper,opening_cloud,
+                menu_layout:font_layout,menu_sampler:linear,instrument,instrument_view,screen,screen_size,meshes,models,
                 battle:None,landscape:None,landscape_pipeline,surface,transport_network:None,
                 transport_economy:None,transport_vehicles:None})
+    }
+
+    pub fn replace_menu_painting(&mut self,image:Raster) {
+        let [w,h]=image.size;
+        let texture=create_texture(&self.device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
+        write_texture(&self.queue,&texture,[w,h,1],4,&image.pixels);
+        self.menu_art=bind(&self.device,&self.menu_layout,&[
+            tex_resource(0,&texture.create_view(&Default::default())),sampler_resource(1,&self.menu_sampler),
+        ]);
     }
 
     pub fn prepare_battle(&mut self, terrain: &wwo_map_lab::battlefield_terrain::BattlefieldTerrain, root: &Path) -> io::Result<()> {
@@ -1089,7 +1091,7 @@ impl Renderer {
         }
     }
     pub fn set_politics(&self,bytes:&[u8],flags:&[FlagUniform;256]) {
-        write_texture(&self.queue,&self.palette,[256,2,1],4,bytes);
+        self.queue.write_buffer(&self.palette,0,bytes);
         write_texture(&self.queue,&self.flag_poses,[15,256,1],16,bytemuck::cast_slice(flags));
     }
     pub fn upload(&self,tile:&Tile,pixels:Pixels)->Page {

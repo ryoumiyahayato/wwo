@@ -1,6 +1,7 @@
-//! Display state only. World time remains owned by R68.
+//! Display state for the speed selector. The world owns time progression.
 use std::time::Instant;
-pub const ANGLES:[f32;4]=[174.,148.,122.,96.];
+// The five interior major marks in the clock-face artwork.
+pub const ANGLES:[f32;5]=[165.,150.,135.,120.,105.];
 #[derive(Default)]
 pub struct Mechanical {
  pub angle:Option<f32>, pub phase:f64, pub hidden:bool, pub serial:u64,
@@ -35,49 +36,50 @@ impl Mechanical {
  use super::*;
  #[test] fn aligned_release_and_repeated_confirmation_never_move_the_hand(){
   let mut m=Mechanical::default();let t=Instant::now();m.update(t,0,0,None,0);
-  m.update(t+std::time::Duration::from_millis(10),0,0,Some(148.),0);
-  let id=m.request(1,Some(148.));
+  m.update(t+std::time::Duration::from_millis(10),0,0,Some(ANGLES[1]),0);
+  let id=m.request(1,Some(ANGLES[1]));
   for (ms,index,ack) in [(20,0,0),(60,0,0),(120,1,id),(200,1,id),(300,1,id)] {
    m.update(t+std::time::Duration::from_millis(ms),index,ack,None,1);
-   assert_eq!(m.angle,Some(148.));
+   assert_eq!(m.angle,Some(ANGLES[1]));
   }
  }
  #[test] fn release_stale_ack_pause(){
   let mut m=Mechanical::default();let t=Instant::now();
-  m.update(t,0,0,None,0);let id=m.request(3,Some(98.));
+  m.update(t,0,0,None,0);let id=m.request(4,Some(108.));
   m.update(t+std::time::Duration::from_millis(30),0,0,None,0);
-  assert!(m.angle.unwrap()<98. && m.angle.unwrap()>96.);
-  m.update(t+std::time::Duration::from_millis(100),3,id,None,4);assert_eq!(m.angle,Some(96.));
+  assert!(m.angle.unwrap()<108. && m.angle.unwrap()>ANGLES[4]);
+  m.update(t+std::time::Duration::from_millis(100),4,id,None,4);assert_eq!(m.angle,Some(ANGLES[4]));
   let p=m.phase;m.update(t+std::time::Duration::from_millis(150),0,id,None,0);assert_eq!(m.phase,p);
  }
  #[test] fn drag_and_rejection(){
   let mut m=Mechanical::default();let t=Instant::now();
   m.update(t,0,0,Some(110.),1);assert_eq!(m.angle,Some(110.));let id=m.request(3,Some(110.));
-  m.update(t+std::time::Duration::from_millis(100),0,id,None,0);assert_eq!(m.angle,Some(174.));
+  m.update(t+std::time::Duration::from_millis(100),0,id,None,0);assert_eq!(m.angle,Some(ANGLES[0]));
  }
  #[test] fn newest_request_wins_during_rapid_changes(){
   let mut m=Mechanical::default();let t=Instant::now();m.update(t,0,0,None,0);
-  let old=m.request(1,None);let newest=m.request(3,None);
+  let old=m.request(1,None);let newest=m.request(4,None);
   m.update(t+std::time::Duration::from_millis(90),1,old,None,1);
-  assert_eq!(m.angle,Some(96.));assert_eq!(m.selected(1),3);
-  m.update(t+std::time::Duration::from_millis(100),3,newest,None,4);
-  assert_eq!(m.angle,Some(96.));
+  assert_eq!(m.angle,Some(ANGLES[4]));assert_eq!(m.selected(1),4);
+  m.update(t+std::time::Duration::from_millis(100),4,newest,None,4);
+  assert_eq!(m.angle,Some(ANGLES[4]));
  }
  #[test] fn cancel_drag_and_lost_request_restore_confirmed(){
   let mut m=Mechanical::default();let t=Instant::now();m.update(t,0,0,None,0);
   m.update(t+std::time::Duration::from_millis(10),0,0,Some(120.),0);
-  m.update(t+std::time::Duration::from_millis(100),0,0,None,0);assert_eq!(m.angle,Some(174.));
+  m.update(t+std::time::Duration::from_millis(100),0,0,None,0);assert_eq!(m.angle,Some(ANGLES[0]));
   m.request(3,None);
   for i in 2..=25 {m.update(t+std::time::Duration::from_millis(i*100),0,0,None,0);}
-  assert_eq!(m.angle,Some(174.));
+  assert_eq!(m.angle,Some(ANGLES[0]));
  }
  #[test] fn phase_speed_ratios_and_pause_resume(){
   let t=Instant::now();let mut m=Mechanical::default();m.update(t,0,0,None,0);
   m.update(t+std::time::Duration::from_millis(100),1,0,None,1);let one=m.phase;
   m.update(t+std::time::Duration::from_millis(200),2,0,None,2);assert!((m.phase-one*3.).abs()<1e-8);
-  m.update(t+std::time::Duration::from_millis(300),3,0,None,4);assert!((m.phase-one*7.).abs()<1e-8);
-  m.update(t+std::time::Duration::from_millis(400),0,0,None,0);assert!((m.phase-one*7.).abs()<1e-8);
-  m.update(t+std::time::Duration::from_millis(500),1,0,None,1);assert!((m.phase-one*8.).abs()<1e-8);
+  m.update(t+std::time::Duration::from_millis(300),3,0,None,3);assert!((m.phase-one*6.).abs()<1e-8);
+  m.update(t+std::time::Duration::from_millis(400),4,0,None,4);assert!((m.phase-one*10.).abs()<1e-8);
+  m.update(t+std::time::Duration::from_millis(500),0,0,None,0);assert!((m.phase-one*10.).abs()<1e-8);
+  m.update(t+std::time::Duration::from_millis(600),1,0,None,1);assert!((m.phase-one*11.).abs()<1e-8);
  }
 
 }
