@@ -228,10 +228,10 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
     let mut lines = Vec::new();
     if grid.is_some() {
         lines.push(skin.choose("1900 年估算 · 原始网格 0.25°", "1900 estimate · 0.25° source cells").into());
-        lines.push(skin.choose("深灰：0%　透明：无资料", "Gray: 0% · Clear: no data").into());
+        lines.push(skin.choose("深灰：0% · 透明：无资料", "Gray: 0% · Clear: no data").into());
     } else if Directory::opening().in_view(kind, Bounds::WORLD, year).next().is_some() {
         lines.push(skin.choose("空心：矿区、矿床或汇集点", "Hollow: district, deposit or cluster").into());
-        lines.push(skin.choose("金色：开采　棕色：已知　蓝色：待核实", "Gold: active · Brown: known · Blue: unverified").into());
+        lines.push(skin.choose("金色：开采 · 棕色：已知 · 蓝色：待核实", "Gold: active · Brown: known · Blue: unverified").into());
         lines.push(skin.choose("空白：未核实", "Blank: unverified").into());
     } else {
         lines.push(skin.choose("此时期暂无已纳入的记录", "No mapped records for this period").into());
