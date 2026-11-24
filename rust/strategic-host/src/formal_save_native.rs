@@ -120,10 +120,7 @@ impl WorldBootstrap {
             NativePopulation::Versioned(snapshot) => snapshot.opening_version,
             NativePopulation::Legacy(_) => None,
         };
-        let mut world = self.base_opening_version(&saved.opening, None, version)?;
-        if saved.opening_place.as_deref().is_some_and(|place| place != world.player().place_id) {
-            return Err(invalid("saved opening place differs from the formal opening"));
-        }
+        let mut world = self.base_opening_version_at(&saved.opening, saved.opening_place.as_deref(), None, None, version)?;
         if let Some(members) = &saved.organization_members {
             world.restore_organization_jobs(members)?;
         }
@@ -191,6 +188,9 @@ impl WorldBootstrap {
         world.clock = clock;
         world.character = formal_character::opening_profile(&world.player, &world.identities, day, &saved.character)
             .map_err(io::Error::other)?;
+        if let Some(development) = &world.character.development {
+            Arc::make_mut(&mut world.player_origin).birth_year = development.birth_year();
+        }
         world.wages = WageClaims::restore_shifts(saved.wages, &world.work_opening, &ledger, clock, |actor| world.identities.contains_key(actor))?;
         world.ledger = ledger;
         world.holdings = saved.holdings;

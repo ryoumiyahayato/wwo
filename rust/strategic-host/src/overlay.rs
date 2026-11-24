@@ -59,6 +59,22 @@ impl Mesh {
         let [r,b]=center.map(|c|(c+0.495)/16.);
         self.polygon(&[[x,y-h*0.125],[x+w,y-h*0.125],[x+w,y+h*1.125],[x,y+h*1.125]],[[l,t],[r,t],[r,b],[l,b]],[255;4]);
     }
+    pub fn flag_wave(&mut self, [x, y, w, h]: [f32; 4], slot: u8, seconds: f32, opacity: f32) {
+        let center = [f32::from(slot % 16) + 0.5, f32::from(slot / 16) + 0.5];
+        let [u, v] = center.map(|c| (c - 0.495) / 16.);
+        let [r, b] = center.map(|c| (c + 0.495) / 16.);
+        let wave = |fraction: f32| if seconds == 0. { 0. }
+            else { (seconds * 2.4 - fraction * 5.4).sin() * fraction * 2.2 };
+        for strip in 0..8 {
+            let a = strip as f32 / 8.;
+            let d = (strip + 1) as f32 / 8.;
+            let [left, right] = [x + w * a, x + w * d];
+            let [top_left, top_right] = [y - h * 0.125 + wave(a), y - h * 0.125 + wave(d)];
+            let [ul, ur] = [u + (r - u) * a, u + (r - u) * d];
+            self.polygon(&[[left, top_left], [right, top_right], [right, top_right + h * 1.25], [left, top_left + h * 1.25]],
+                [[ul, v], [ur, v], [ur, b], [ul, b]], [255, 255, 255, opacity as u8]);
+        }
+    }
     pub fn text(&mut self, atlas: &Atlas, variant: usize, text: &str, [mut x, y]: [f32; 2], color: [u8; 4]) {
         let size = [17., 23., 35.][variant];
         for ch in text.chars() {

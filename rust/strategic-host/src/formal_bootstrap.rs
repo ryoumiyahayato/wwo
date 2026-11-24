@@ -195,6 +195,21 @@ impl RuntimePerson {
     }
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct OpeningArea {
+    pub id: String,
+    pub label: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct OpeningSite {
+    pub id: String,
+    pub label: String,
+    pub coordinates: [f64; 2],
+    pub path: Vec<OpeningArea>,
+    pub unavailable: Option<String>,
+}
+
 pub struct WorldBootstrap {
     organization_directory: Arc<OrganizationDirectory>,
     world: Arc<WorldSources>,
@@ -207,6 +222,7 @@ pub struct WorldBootstrap {
     residents: BTreeMap<String, i64>,
     opening_people: BTreeMap<String, Arc<OpeningPerson>>,
     opening_place_names: BTreeMap<String, String>,
+    opening_sites: BTreeMap<String, Vec<OpeningSite>>,
     opening_cash: i64,
     work: Arc<WorkOpening>,
     enterprise_opening: Arc<EnterpriseOpening>,
@@ -462,7 +478,9 @@ impl InitialWorld {
 
     fn player_written_job(&self) -> Option<&str> {
         if !self.player_day.written_job_notice { return None; }
-        self.activities.written_job_notices.get(&self.player().opening_source_id).map(String::as_str)
+        let job = self.activities.written_job_notices.get(&self.player().opening_source_id)?;
+        self.work_opening.jobs(&self.player, Some(&self.player().place_id), 0)
+            .any(|row| row.id == *job).then_some(job.as_str())
     }
 
     fn can_access_player_job(&self, job: &str) -> bool {
@@ -592,7 +610,7 @@ impl InitialWorld {
     pub fn player_alive(&self) -> bool { self.population.unit_for_person(&self.player).is_some() }
 
     pub fn can_read_opening_language(&self) -> bool {
-        self.character.development.as_ref().is_none_or(|player| player.can_read(player.language()))
+        self.character.development.as_ref().is_none_or(|player| player.language().is_some_and(|language| player.can_read(language)))
     }
 
     pub fn can_read_polity_record(&self, id: &str) -> bool {
@@ -616,7 +634,7 @@ impl InitialWorld {
     }
 
     pub fn opening_language(&self) -> Option<Language> {
-        self.character.development.as_ref().map(|player| player.language())
+        self.character.development.as_ref().and_then(|player| player.language())
     }
 
     pub fn scheduled_activity(&self) -> Option<PersonalActivity> {
@@ -653,6 +671,10 @@ impl InitialWorld {
         match kind {
             PersonalActivity::Lesson | PersonalActivity::ReadNotice => {
                 let reachable = self.player_current_place() == Some(self.player().place_id.as_str())
+                    && OPENINGS.iter().any(|&(source, place)| {
+                        self.player().opening_source_id == source
+                            && self.player().place_id.strip_prefix("place:") == Some(place)
+                    })
                     && self.activities.openings.contains_key(&self.player().opening_source_id)
                     && today <= self.activities.lesson_start_hour * MINUTES_PER_HOUR;
                 reachable && !self.can_read_opening_language()
@@ -1159,6 +1181,18 @@ impl WorldBootstrap {
                 birth_year: 1870,
             }));
         }
+        let opening_sites = opening_sites(&world, &network, &populations, &historical_population, &opening_people)?;
+        for (polity, sites) in &opening_sites {
+            let Some(site) = sites.iter().find(|site| site.unavailable.is_none()) else { continue; };
+            opening_people.entry(polity.clone()).or_insert_with(|| Arc::new(OpeningPerson {
+                id: format!("person:formal_generated_{polity}_0001"),
+                claim_id: format!("formal_population_claim:{polity}:0001"),
+                opening_source_id: polity.clone(),
+                polity_id: world.polities[polity].runtime_id(),
+                place_id: site.id.clone(),
+                birth_year: 1870,
+            }));
+        }
         let opening_place_names = opening_people.values().map(|person| {
             let id = &person.place_id;
             let label = world.places.get(id).map(|place| place.name.as_str())
@@ -1191,6 +1225,7 @@ impl WorldBootstrap {
             residents,
             opening_people,
             opening_place_names,
+            opening_sites,
             opening_cash,
             work: Arc::new(work),
             enterprise_opening: Arc::new(enterprise_opening),
@@ -1210,6 +1245,18 @@ impl WorldBootstrap {
         self.opening_place_names.iter().map(|(source, place)| (source.as_str(), place.as_str()))
     }
 
+    pub fn opening_sites(&self, source: &str) -> &[OpeningSite] {
+        self.opening_sites.get(source).map_or(&[], Vec::as_slice)
+    }
+
+    pub fn create_at_with_prologue(&self, source: &str, place: &str, prologue: Prologue, health: Option<wwo_character_core::OpeningHealth>) -> io::Result<InitialWorld> {
+        if prologue.age != 20 || !self.opening_sites(source).iter().any(|site| site.id == place && site.unavailable.is_none()) {
+            return Err(invalid("出生地当前不可开局，或人物年龄无效。"));
+        }
+        let world = self.base_opening_version_at(source, Some(place), Some(prologue), health, Some(self.historical_population.version()))?;
+        Self::finish_opening(world)
+    }
+
     pub fn create(&self, source_id: &str) -> io::Result<InitialWorld> {
         self.create_opening(source_id, None, true)
     }
@@ -1219,7 +1266,11 @@ impl WorldBootstrap {
     }
 
     fn create_opening(&self, source_id: &str, prologue: Option<Prologue>, historical: bool) -> io::Result<InitialWorld> {
-        let mut world = self.base_opening(source_id, prologue, historical)?;
+        let world = self.base_opening(source_id, prologue, historical)?;
+        Self::finish_opening(world)
+    }
+
+    fn finish_opening(mut world: InitialWorld) -> io::Result<InitialWorld> {
         world.initialize_organization_members()?;
         world.plan_household_orders()?;
         world.settle_organization_employment()?;
@@ -1232,6 +1283,11 @@ impl WorldBootstrap {
     }
 
     fn base_opening_version(&self, source_id: &str, prologue: Option<Prologue>, version: Option<u32>) -> io::Result<InitialWorld> {
+        self.base_opening_version_at(source_id, None, prologue, None, version)
+    }
+
+    fn base_opening_version_at(&self, source_id: &str, place: Option<&str>, prologue: Option<Prologue>,
+        health: Option<wwo_character_core::OpeningHealth>, version: Option<u32>) -> io::Result<InitialWorld> {
         let requested = version.unwrap_or(1);
         let sources = if requested == self.historical_population.version() {
             &self.world
@@ -1253,13 +1309,24 @@ impl WorldBootstrap {
             }
         };
         let transport = Operations::restore(sources, 0, OperationsState::default())?;
-        let player_origin = Arc::clone(self.opening_people.get(source_id)
-            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "unknown formal opening"))?);
+        let default_origin = self.opening_people.get(source_id)
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "unknown formal opening"))?;
+        let alternate = place.filter(|&place| place != default_origin.place_id);
+        let mut player_origin = if let Some(place) = alternate {
+            if !self.opening_sites(source_id).iter().any(|site| site.id == place) {
+                return Err(invalid("开局地点不属于所选政治实体。"));
+            }
+            Arc::new(OpeningPerson { place_id: place.to_owned(), ..default_origin.as_ref().clone() })
+        } else {
+            Arc::clone(default_origin)
+        };
         let player = player_origin.id.clone();
         let development = prologue.map(|opening| {
-            let language = self.opening_language(source_id).ok_or_else(|| invalid("opening has no configured prologue language"))?;
-            opening.build(language).map_err(io::Error::other)
+            opening.build_with_health(self.opening_language(source_id), health).map_err(io::Error::other)
         }).transpose()?;
+        if let Some(development) = &development {
+            Arc::make_mut(&mut player_origin).birth_year = development.birth_year();
+        }
         let extra = (!self.world.people.contains_key(&player)).then_some(player_origin.as_ref());
         let mut ledger = Ledger::initialize_people(self.residents.iter().map(|(person, &cash)| (person.as_str(), cash))
             .chain(extra.into_iter().map(|person| (person.id.as_str(), self.opening_cash))).map(|(person, cash)| {
@@ -1276,9 +1343,16 @@ impl WorldBootstrap {
             Population::initialize(self.populations.clone())
         };
         let mut identities = BTreeMap::new();
-        for person in self.world.people.values().chain(extra) {
-            let parent = &self.world.polity_population_bindings[&person.opening_source_id];
-            let unit = population.partition_at(&person.place_id).unwrap_or(parent.as_str()).to_owned();
+        let residents = self.world.people.values().filter(|person| person.id != player);
+        for person in residents.chain(std::iter::once(player_origin.as_ref())) {
+            let parent = &sources.polity_population_bindings[&person.opening_source_id];
+            let unit = if person.id == player && alternate.is_some() {
+                opening_residence(sources, transport.network(), &population, &person.place_id)
+                    .filter(|unit| population.parent_unit(unit) == Some(parent))
+                    .ok_or_else(|| invalid("出生地没有有效的正式人口归属。"))?
+            } else {
+                population.partition_at(&person.place_id).unwrap_or(parent.as_str())
+            }.to_owned();
             population.claim(&person.id, &unit)?;
             let year = development.as_ref().filter(|_| person.id == player).map_or(person.birth_year, |player| player.birth_year());
             let identity = formal_character::opening_identity(year).map_err(io::Error::other)?;
@@ -1291,7 +1365,11 @@ impl WorldBootstrap {
         }.map_err(io::Error::other)?;
         let mut work = WorkState::default();
         work.book_automatic(&self.work, GameClock::default(), |person| {
-            self.world.people.get(person).map(|row| row.place_id.as_str())
+            if person == player { Some(player_origin.place_id.as_str()) }
+            else { self.world.people.get(person).map(|row| row.place_id.as_str()) }
+        });
+        let written_job_notice = prologue.is_some() && self.activities.written_job_notices.get(source_id).is_some_and(|job| {
+            self.work.jobs(&player, Some(&player_origin.place_id), 0).any(|row| row.id == *job)
         });
         let fixed_market_supply = version.is_some_and(|version| version >= 5);
         let market_seed = if fixed_market_supply { &self.market_opening_population } else { population.totals() };
@@ -1330,13 +1408,85 @@ impl WorldBootstrap {
             service: ServiceRoster::default(),
             activities: Arc::clone(&self.activities),
             player_day: PlayerDay {
-                written_job_notice: prologue.is_some() && self.activities.written_job_notices.contains_key(source_id),
+                written_job_notice,
                 ..PlayerDay::default()
             },
             land_battle: None,
             land_battle_history: Vec::new(),
         })
     }
+}
+
+fn opening_residence<'a>(
+    sources: &'a WorldSources, network: &crate::transport::TransportNetwork, population: &'a Population, place: &str,
+) -> Option<&'a str> {
+    population.partition_at(place).or_else(|| {
+        let parent = sources.population_unit_at(place).or_else(|| network.unit_at(place))
+            .or_else(|| sources.opening_parent_at(place))?;
+        population.residence_parent(parent)
+    })
+}
+
+fn opening_sites(
+    sources: &WorldSources, network: &crate::transport::TransportNetwork, totals: &BTreeMap<String, u64>,
+    historical: &Arc<HistoricalOpening>, defaults: &BTreeMap<String, Arc<OpeningPerson>>,
+) -> io::Result<BTreeMap<String, Vec<OpeningSite>>> {
+    use crate::transport::NodeKind;
+    let mut population = Population::initialize_historical(totals, Arc::clone(historical));
+    for person in sources.people.values() {
+        let root = &sources.polity_population_bindings[&person.opening_source_id];
+        let unit = population.partition_at(&person.place_id).unwrap_or(root).to_owned();
+        population.claim(&person.id, &unit)?;
+    }
+    let mut sites = BTreeMap::<String, Vec<OpeningSite>>::new();
+    let capitals: BTreeMap<_, _> = sources.polities.keys().filter_map(|polity| Some((network.capital_node(polity)?, polity.as_str()))).collect();
+    let ids: BTreeSet<_> = network.nodes().filter(|node| node.kind == NodeKind::City).map(|node| node.id.as_str())
+        .chain(sources.places.keys().map(String::as_str).filter(|place| {
+            !place.starts_with("place:port_") && network.node(place).is_none_or(|node| node.kind == NodeKind::City)
+        }))
+        .chain(sources.dated_place_jurisdictions.keys().map(String::as_str))
+        .chain(defaults.values().map(|person| person.place_id.as_str())).collect();
+    let default_owners: BTreeMap<_, _> = defaults.iter()
+        .map(|(owner, person)| (person.place_id.as_str(), owner.as_str())).collect();
+    let aliases: BTreeSet<_> = ids.iter().copied()
+        .filter(|id| id.starts_with("place:"))
+        .filter_map(|id| network.routing_node(id).filter(|node| *node != id))
+        .filter(|node| !default_owners.contains_key(node)).collect();
+    for id in ids.into_iter().filter(|id| !aliases.contains(id)) {
+        let Some(owner) = default_owners.get(id).copied()
+            .or_else(|| sources.dated_place_jurisdiction(id))
+            .filter(|owner| sources.polities.contains_key(*owner))
+            .or_else(|| sources.place_polity(id).map(|polity| polity.id.as_str()))
+            .or_else(|| capitals.get(id).copied())
+        else { continue; };
+        let Some(coordinates) = sources.places.get(id).and_then(|place| place.lon_lat)
+            .or_else(|| network.node_coordinates(id)) else { continue; };
+        let root = sources.polity_population_bindings.get(owner);
+        let pool = opening_residence(sources, network, &population, id);
+        let default = defaults.get(owner);
+        let unavailable = if default.is_some_and(|person| person.place_id == id) {
+            None
+        } else if root.is_none() {
+            Some("该政治实体没有正式人口账户")
+        } else if !pool.is_some_and(|unit| population.parent_unit(unit) == root.map(String::as_str)) {
+            Some("该地点缺少对应的正式居住归属")
+        } else if !pool.is_some_and(|unit| population.unclassified(unit).unwrap_or(0) > 0
+            || default.is_some_and(|person| population.unit_for_person(&person.id) == Some(unit)))
+        {
+            Some("该地点没有可登记的居民人口")
+        } else {
+            None
+        }.map(str::to_owned);
+        let label = network.node_label(id).or_else(|| sources.places.get(id).map(|place| place.name.as_str())).unwrap_or(id);
+        let path = pool.into_iter().flat_map(|unit| population.opening_geography(unit))
+            .filter(|(_, name)| *name != label)
+            .map(|(id, label)| OpeningArea { id: id.into(), label: label.into() }).collect();
+        sites.entry(owner.into()).or_default().push(OpeningSite { id: id.into(), label: label.into(), coordinates, path, unavailable });
+    }
+    for rows in sites.values_mut() {
+        rows.sort_by(|a, b| a.unavailable.is_some().cmp(&b.unavailable.is_some()).then(a.label.cmp(&b.label)));
+    }
+    Ok(sites)
 }
 
 fn known_service_target(target: &ServiceTarget) -> bool {

@@ -425,9 +425,8 @@ fn run(input: Request) -> Result<CharacterOutput> {
         let origin = player.opening();
         profile.age_years = formal_age(player.birth_year(), input.day, &system, &input.player);
         profile.social.family_background = Some(origin.family.label().into());
-        profile.social.education = Some(if player.can_read(player.language()) {
-            format!("识字 · {}", player.language().label())
-        } else { Education::HomeWork.label().into() });
+        profile.social.education = Some(player.language().filter(|&language| player.can_read(language))
+            .map_or_else(|| Education::HomeWork.label().into(), |language| format!("识字 · {}", language.label())));
         profile.history.splice(0..0, player.history().iter().map(|past| {
             format!("{}-{} {}", past.start_year, past.end_year, past.label)
         }));

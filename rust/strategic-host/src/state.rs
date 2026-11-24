@@ -95,7 +95,7 @@ pub enum Request<'a> {
     Relations {verb:&'a str,id:&'a str},
     Transport {verb:&'a str,id:&'a str},
     Consume { id: &'a str, quantity: i64 },
-    NewPlayer { polity: &'a str, prologue: wwo_character_core::Prologue },
+    NewPlayer { polity: &'a str, place: &'a str, prologue: wwo_character_core::Prologue, health: Option<wwo_character_core::OpeningHealth> },
     PersonalActivity { activity: wwo_map_lab::formal_bootstrap::PersonalActivity },
     Lobby {verb:&'static str,polity:&'a str,slot:u8},
 }

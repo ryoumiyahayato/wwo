@@ -152,7 +152,7 @@ impl Session {
 }
 pub(crate) const HUD_TYPE_WIDTH: u32 = 2048;
 pub(crate) const HUD_TYPE_BASE_HEIGHT: u32 = 2048;
-pub(crate) const HUD_TYPE_HEIGHT: u32 = HUD_TYPE_BASE_HEIGHT + 135;
+pub(crate) const HUD_TYPE_HEIGHT: u32 = HUD_TYPE_BASE_HEIGHT + 137;
 
 pub struct Skin {
     art:HashMap<String,[f32;4]>,
@@ -254,7 +254,9 @@ impl Skin {
     }
     fn glyph(&self,font:usize,ch:char)->[f32;5]{
         let key=format!("{font}:{ch}");
-        self.glyphs.get(&key).copied().unwrap_or_else(||self.glyphs[&format!("{}:?",font.min(2))])
+        self.glyphs.get(&key).copied().or_else(|| (font > 0)
+            .then(|| self.glyphs.get(&format!("0:{ch}")).copied()).flatten())
+            .unwrap_or_else(||self.glyphs[&format!("{}:?",font.min(2))])
     }
     pub(crate) fn width(&self,s:&str,font:usize)->f32 {self.localized(s).chars().map(|c|self.glyph(font,c)[4]).sum()}
     pub(crate) fn text(&self,mesh:&mut Mesh,s:&str,font:usize,[mut x,y]:[f32;2],limit:f32,color:[u8;4]){
