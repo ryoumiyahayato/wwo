@@ -115,6 +115,8 @@ pub struct Resource {
     /// Exclusive end year.
     pub valid_to: i32,
     pub discovered_on: Option<i32>,
+    pub first_production_year: Option<i32>,
+    pub last_production_year: Option<i32>,
     pub development_status: Development,
     pub place_id: Option<String>,
     pub region_id: Option<String>,
@@ -194,9 +196,15 @@ impl Directory {
     pub fn opening() -> &'static Self {
         static DIRECTORY: OnceLock<Directory> = OnceLock::new();
         DIRECTORY.get_or_init(|| {
-            let records: Vec<Resource> = serde_json::from_str(include_str!(
-                "../../../data/resource-geography/sites-1900.json"
-            )).expect("embedded opening resource sites");
+            let records = [
+                include_str!("../../../data/resource-geography/sites-1900.json"),
+                include_str!("../../../data/resource-geography/mrds-1900.json"),
+            ]
+            .into_iter()
+            .flat_map(|source| {
+                serde_json::from_str::<Vec<Resource>>(source).expect("embedded opening resource sites")
+            })
+            .collect();
             let mut directory = Self {
                 records, ids: HashMap::new(), types: HashMap::new(), places: HashMap::new(),
                 regions: HashMap::new(), bounds: Vec::new(),
@@ -387,6 +395,15 @@ mod tests {
         let point = site.geometry.anchor();
         assert!(directory.near(ResourceType::Coal, point, 0.1, 1900).any(|other| other.resource_id == site.resource_id));
         assert!(directory.near(ResourceType::Coal, point, 0.1, 1901).next().is_none());
+        assert!(directory.by_region("departement_fr_62")
+            .any(|site| site.resource_id == "history:lens-pit-9-coal"));
+        let older_working = directory.by_id("mrds:10073045:lead_ore").unwrap();
+        assert_eq!(older_working.kind, EntityKind::Working);
+        assert_eq!(older_working.first_production_year, Some(1885));
+        assert_eq!(older_working.development_status, Development::Unknown);
+        let later_working = directory.by_id("mrds:10073052:lead_ore").unwrap();
+        assert_eq!(later_working.kind, EntityKind::Deposit);
+        assert_eq!(later_working.development_status, Development::Discovered);
     }
 
     #[test]

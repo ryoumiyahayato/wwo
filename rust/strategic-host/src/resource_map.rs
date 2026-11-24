@@ -65,9 +65,9 @@ impl State {
         }
     }
 
-    pub fn anchor(command: Command) -> Option<[f64; 2]> {
+    pub fn site(command: Command) -> Option<&'static Resource> {
         let Command::Site(id) = command else { return None; };
-        Some(Directory::opening().by_id(id)?.geometry.anchor())
+        Directory::opening().by_id(id)
     }
 
     pub fn pick(&mut self, point: [f64; 2], polity: Option<usize>) -> bool {
@@ -230,8 +230,13 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
         lines.push(skin.choose("1900 年估算 · 原始网格 0.25°", "1900 estimate · 0.25° source cells").into());
         lines.push(skin.choose("深灰：0% · 透明：无资料", "Gray: 0% · Clear: no data").into());
     } else if Directory::opening().in_view(kind, Bounds::WORLD, year).next().is_some() {
-        lines.push(skin.choose("空心：矿区、矿床或汇集点", "Hollow: district, deposit or cluster").into());
-        lines.push(skin.choose("金色：开采 · 棕色：已知 · 蓝色：待核实", "Gold: active · Brown: known · Blue: unverified").into());
+        if kind.category() == Category::Renewable {
+            lines.push(skin.choose("空心：区域或汇集点", "Hollow: district or cluster").into());
+            lines.push(skin.choose("金色：已开发 · 蓝色：待核实", "Gold: developed · Blue: unverified").into());
+        } else {
+            lines.push(skin.choose("空心：矿区、矿床或汇集点", "Hollow: district, deposit or cluster").into());
+            lines.push(skin.choose("金色：开采 · 棕色：已知 · 蓝色：待核实", "Gold: active · Brown: known · Blue: unverified").into());
+        }
         lines.push(skin.choose("空白：未核实", "Blank: unverified").into());
     } else {
         lines.push(skin.choose("此时期暂无已纳入的记录", "No mapped records for this period").into());
@@ -242,6 +247,7 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
             owner = *polity;
             lines.push(skin.choose(site.name_zh.as_deref().unwrap_or(&site.name), &site.name).into());
             let status = match site.development_status {
+                Development::Working if kind.category() == Category::Renewable => ["已开发", "Developed"],
                 Development::Working => ["开采中", "Active"],
                 Development::Former => ["已停采", "Former working"],
                 Development::Discovered => ["已发现", "Discovered"],
@@ -254,6 +260,16 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
                 Evidence::Unknown => ["待核实", "Unverified"],
             };
             lines.push(format!("{} · {}", title(status), title(evidence)));
+            if let Some(year) = site.discovered_on {
+                lines.push(format!("{} {}", skin.choose("发现", "Discovered"), year));
+            }
+            if let Some(first) = site.first_production_year {
+                let years = site.last_production_year.map_or_else(
+                    || first.to_string(),
+                    |last| format!("{first} / {last}"),
+                );
+                lines.push(format!("{} {}", skin.choose("生产记录", "Production records"), years));
+            }
             let precision = site.spatial_accuracy_m.map_or_else(
                 || skin.choose("位置精度未知", "Position accuracy unknown").to_owned(),
                 |m| format!("{} ±{:.1} km", skin.choose("位置精度", "Position accuracy"), f64::from(m) / 1000.),
@@ -276,6 +292,8 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
     }
     if let Some(polity) = owner.and_then(|index| world.polities.get(index)) {
         lines.push(skin.country_name(polity).into());
+    } else if matches!(state.selected, Some(Selection::Site(..))) {
+        lines.push(skin.choose("地图归属待核实", "Map jurisdiction unverified").into());
     }
     for line in lines {
         if dy + 20. > h { break; }
