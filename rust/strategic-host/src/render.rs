@@ -52,7 +52,7 @@ impl TileState {
     fn new(tile:&Tile,opacity:f32,edges:[f32;4],edge_ready:[f32;4])->Self {
         let cast=|values:[f64;4]| values.map(|a|a as f32);
         Self {extent:cast(tile.bounds),core:cast(tile.core),region:cast(tile.group),
-              options:[opacity,f32::from(tile.printed+u8::from(tile.cover)),u8::from(tile.city) as f32,u8::from(tile.level==0) as f32],edges,edge_ready}
+              options:[opacity,f32::from(tile.printed+u8::from(tile.cover)),if tile.city_ink_only {2.} else {u8::from(tile.city) as f32},u8::from(tile.level==0) as f32],edges,edge_ready}
     }
 }
 pub struct Page {
@@ -1254,7 +1254,7 @@ impl Renderer {
                     layer.mesh.draw(&mut pass);
                     pass.set_pipeline(&self.globe);
                 }
-                for (page,_,[x,y,w,h],_) in pages {
+                for (page,_,[x,y,w,h],_) in pages.iter().filter(|(_,tile,_,_)|!tile.city_ink_only) {
                     pass.set_scissor_rect(*x,*y,*w,*h);
                     pass.set_bind_group(1,&page.group,&[]);
                     pass.draw(0..3,0..1);
@@ -1264,15 +1264,28 @@ impl Renderer {
             if let Some(layer)=&mut self.landscape {
                 layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group,&self.surface.group],[w,h]);
             }
-            if draw_network||draw_economy||draw_vehicles {
+            let draw_city=show_map&&pages.iter().any(|(_,tile,_,_)|tile.city_ink_only);
+            if draw_city||draw_network||draw_economy||draw_vehicles {
                 let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                    label:Some("WWO transport map"),
+                    label:Some("WWO map overlays"),
                     color_attachments:&[Some(wgpu::RenderPassColorAttachment {
                         view:&image,resolve_target:None,
                         ops:wgpu::Operations{load:wgpu::LoadOp::Load,store:wgpu::StoreOp::Store},
                     })],
                     depth_stencil_attachment:None,occlusion_query_set:None,timestamp_writes:None,
                 });
+                if draw_city {
+                    pass.set_pipeline(&self.globe);
+                    pass.set_bind_group(0,&self.globals,&[]);
+                    pass.set_bind_group(2,&self.close_group,&[]);
+                    pass.set_bind_group(3,&self.surface.group,&[]);
+                    for (page,_,[x,y,w,h],_) in pages.iter().filter(|(_,tile,_,_)|tile.city_ink_only) {
+                        pass.set_scissor_rect(*x,*y,*w,*h);
+                        pass.set_bind_group(1,&page.group,&[]);
+                        pass.draw(0..3,0..1);
+                    }
+                    pass.set_scissor_rect(0,0,w,h);
+                }
                 pass.set_pipeline(&self.solid);
                 pass.set_bind_group(0,&self.screen,&[]);
                 if draw_network {self.transport_network.as_ref().unwrap().1.draw(&mut pass);}
