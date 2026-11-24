@@ -38,6 +38,7 @@ pub enum CountryAction {Close,Back,Record,Directory,Page(i32),Region(usize),Boun
 pub enum Action {
     Mode(Mode),Home,Back,Search,Close,Details,Locate,Select(Object),Country(CountryAction),
     Hud(crate::formal_ui::Command),
+    Resources(crate::resource_map::Command),
 }
 #[derive(Clone,Copy)]
 pub struct Hit {pub area:[f32;4],pub action:Action}
@@ -55,6 +56,8 @@ pub struct Ui<'a> {
     pub search_results:&'a [Object],
     pub econ_label:&'a str,
     pub econ_legend:&'a [(String,[u8;4])],
+    pub resources: Option<&'a crate::resource_map::State>,
+    pub year: i32,
     pub mouse:&'a str,
     pub labels:bool,
     pub transport_detail:Option<&'a crate::transport_ui::Detail>,
@@ -222,6 +225,10 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     if ui.formal.population_debug {occupied.push(crate::pop_debug_ui::bounds(ui.size));}
     if matches!(ui.selected,Some(Object::Place(_)|Object::Administration(_))){occupied.push([17.,73.,300.,213.]);}
     if let Some(rect)=ui.formal.page_rect(){occupied.push(rect);}
+    if let Some(resources)=ui.resources.filter(|resources| resources.open) {
+        occupied.push(crate::resource_map::bounds(ui.size));
+        crate::resource_map::draw_layer(resources,ui.camera,ui.size,ui.year,&mut map,&mut hits);
+    }
     let opening_stations = match ui.selected {
         Some(Object::Place(index)) if ui.details && ui.mode == Mode::Military => ui.formal.written_world
             .map_or(&[][..], |host| host.regimental_opening_stations(&world.places[index].id)),
@@ -367,13 +374,12 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         }
     }
     let mut debug_right=145.;
-    if ui.mode==Mode::Economic && ui.formal.hud.page==crate::formal_ui::Page::Map
-        && ui.transport_detail.is_none() && !ui.formal.hud.market_map
-        && ui.formal.hud.menu==crate::formal_ui::Menu::None {
+    if crate::resource_map::available(ui.mode,ui.formal.hud.page,ui.formal.hud.menu,ui.formal.hud.market_map,ui.transport_detail.is_some()) {
         let width=(measure(a,0,ui.econ_label)+25.).clamp(219.,374.);
         let x=w-width-17.;
         let lines=ui.econ_legend.len();
-        panel(&mut panels,x,121.,width,51.+lines as f32*20.);
+        let extra=if ui.resources.is_some(){28.}else{0.};
+        panel(&mut panels,x,121.,width,51.+lines as f32*20.+extra);
         if readable { text.text(a,0,ui.econ_label,[x+12.,130.],LIGHT); }
         else { ui.formal.ink_block(&mut panels,[x+12.,136.,118.,11.]); }
         for (i,(value,color)) in ui.econ_legend.iter().enumerate() {
@@ -382,7 +388,14 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             if readable { text.text(a,0,value,[x+34.,y],SUBTLE); }
             else { ui.formal.ink_block(&mut panels,[x+34.,y+6.,86.,11.]); }
         }
-        debug_right=182.+lines as f32*20.;
+        if let Some(resources)=ui.resources {
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+12.,166.+lines as f32*20.,width-24.,25.],
+                skin.choose("资源分布","Resources"),Some(Action::Resources(crate::resource_map::Command::Toggle)),resources.open);
+            if resources.open {
+                crate::resource_map::draw_panel(resources,world,&ui.formal,ui.size,ui.year,&mut panels,&mut hud_type,&mut hits);
+            }
+        }
+        debug_right=182.+lines as f32*20.+extra;
     }
     if ui.formal.hud.market_map && ui.formal.hud.menu==crate::formal_ui::Menu::None {
         if let Some(market)=ui.formal.session.and_then(|s|s.market.as_ref()) {
