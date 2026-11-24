@@ -419,9 +419,9 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             }
         }
     }
-    if !ui.formal.population_debug && ui.formal.hud.page==crate::formal_ui::Page::Map {
+    if ui.formal.hud.page==crate::formal_ui::Page::Map {
         let y=h-45.;
-        if ui.sea_relation_visible && !ui.formal.hud.market_map && ui.formal.hud.menu==crate::formal_ui::Menu::None {
+        if !ui.formal.population_debug && ui.sea_relation_visible && !ui.formal.hud.market_map && ui.formal.hud.menu==crate::formal_ui::Menu::None {
             let x = w - 249.;
             let legend_y = h - 136.;
             panels.rect(x, legend_y, 223., 21., [15, 25, 34, 220]);

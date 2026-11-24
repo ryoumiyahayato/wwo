@@ -1219,29 +1219,48 @@ impl Host {
     }
 
     fn inspect_population(&mut self, query: String) {
+        self.update_population_debug(query, true);
+    }
+
+    fn update_population_debug(&mut self, query: String, clear_input: bool) {
         let Some(mut panel)=self.population_debug.take() else{return;};
         if let Some(world) = self.written_world() {
-            let market = world.macro_economy();
-            let report = if panel.page == pop_debug_ui::Page::Overview {
-                world.inspect_population_brief(&query)
-            } else {
-                world.inspect_population(&query)
-            };
-            match report {
+            let population = world.population();
+            let clock = world.clock();
+            panel.revision = Some((clock.current_day(), population.journal_revision()));
+            match world.inspect_population_brief(&query) {
                 Ok(report) => {
+                    let social = (report.population_total.is_some() && matches!(panel.page,
+                        pop_debug_ui::Page::Structure | pop_debug_ui::Page::Needs))
+                        .then(|| population.social_distribution(report.account_id)).flatten();
                     let needs = (panel.page == pop_debug_ui::Page::Needs)
                         .then(|| world.population_household_needs(&report)).flatten();
-                    panel.set_report(&report, needs.as_ref(), market);
+                    let days = if panel.page == pop_debug_ui::Page::Changes && report.population_total.is_some() {
+                        population.recorded_population_days(report.account_id, clock, 14)
+                    } else {
+                        Vec::new()
+                    };
+                    panel.set_report(&report, social.as_ref(), needs.as_ref(), world.macro_economy(), days);
                 }
-                Err(error) => panel.set_error(error.to_string()),
+                Err(_) => panel.set_error(),
             }
         } else {
-            panel.set_error("No active formal world");
+            panel.set_error();
         }
+        if panel.query != query { panel.reset_location(); }
         panel.query=query;
-        panel.input.clear();
+        if clear_input { panel.input.clear(); }
         self.population_debug=Some(panel);
         self.dirty=true;
+    }
+
+    fn refresh_population_debug(&mut self) {
+        let Some(panel) = &self.population_debug else { return; };
+        let Some(world) = self.written_world() else { return; };
+        let revision = (world.clock().current_day(), world.population().journal_revision());
+        if panel.revision != Some(revision) {
+            self.update_population_debug(panel.query.clone(), false);
+        }
     }
 
     fn population_page(&mut self, page: pop_debug_ui::Page) {
@@ -1259,7 +1278,7 @@ impl Host {
         }).unwrap_or_else(|| ("unmapped".into(), None));
         if let Some(panel) = &mut self.population_debug {
             panel.place_name = name;
-            panel.scroll = 0;
+            panel.reset_location();
         }
         self.inspect_population(query.strip_prefix("state:").unwrap_or(&query).to_owned());
     }
@@ -1558,9 +1577,10 @@ impl Host {
             return;
         }
         if self.loading(){return;}
-        if let Some(panel)=&self.population_debug {
+        if let Some(panel)=self.population_debug.as_mut().filter(|_|p[1]<f64::from(self.size[1].saturating_sub(92))) {
             if panel.contains(self.size,p) {
                 if let Some(page) = panel.page_at(self.size, p) { self.population_page(page); }
+                else { panel.click_control(self.size, p); self.dirty=true; }
                 return;
             }
             let [x,y]=p.map(|v|v as f32);
@@ -1763,11 +1783,13 @@ impl Host {
                 Key::Named(NamedKey::Delete)=>panel.input.clear(),
                 Key::Named(NamedKey::ArrowUp)=>panel.scroll_by(-1),
                 Key::Named(NamedKey::ArrowDown)=>panel.scroll_by(1),
-                Key::Named(NamedKey::ArrowLeft)=>panel.jump_section(-1),
-                Key::Named(NamedKey::ArrowRight)=>panel.jump_section(1),
                 Key::Named(NamedKey::PageUp)=>panel.scroll_by(-12),
                 Key::Named(NamedKey::PageDown)=>panel.scroll_by(12),
                 Key::Named(NamedKey::Home)=>panel.scroll=0,
+                Key::Named(NamedKey::Space)=>{
+                    let speed=self.state.session.as_ref().map_or(0,|s|if s.paused{s.speed}else{0});
+                    self.hud_action(HudCommand::Clock(speed));
+                }
                 Key::Character(value)=>{
                     for ch in value.chars().filter(|ch|ch.is_ascii_alphanumeric()||matches!(ch,'_'|':'|'-'|'.')) {
                         if panel.input.len()<160 {panel.input.push(ch);}
@@ -2572,6 +2594,7 @@ impl Host {
                 }
             }
         }
+        self.refresh_population_debug();
         #[cfg(windows)]
         if let Some(desktop) = &mut self.config.desktop {
             if let Err(error) = desktop.tick_clock(self.state.session.as_ref(), now) {

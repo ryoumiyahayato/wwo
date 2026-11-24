@@ -9,6 +9,32 @@ fn opening() -> Population {
 }
 
 #[test]
+fn daily_population_totals_track_only_changes_across_the_selected_scope() {
+    use crate::formal_clock::MINUTES_PER_DAY;
+
+    let mut population = opening();
+    population.record_anonymous_births("a", 2, 30).unwrap();
+    population.transfer_unmanaged("a", "b", 3, 0, MINUTES_PER_DAY).unwrap();
+    population.move_person(OPENING, "b", MINUTES_PER_DAY + 1).unwrap();
+    population.record_death(OPENING, MINUTES_PER_DAY + 2).unwrap();
+    let mut clock = GameClock::default();
+    clock.advance_minutes(MINUTES_PER_DAY + 2).unwrap();
+    let days = |scope| population.recorded_population_days(scope, clock, 14);
+
+    let world = days(None);
+    assert_eq!(world.len(), 2);
+    assert_eq!((world[0].population, world[0].births), (Some(13), 2));
+    assert_eq!((world[1].population, world[1].net()), (Some(12), -1));
+    assert_eq!((world[1].immigration, world[1].emigration), (0, 0));
+
+    let source = days(Some("a"));
+    let destination = days(Some("b"));
+    assert_eq!((source[0].population, source[1].population, source[1].emigration), (Some(10), Some(6), 4));
+    assert_eq!((destination[0].population, destination[1].population), (Some(3), Some(6)));
+    assert_eq!((destination[1].immigration, destination[1].deaths), (4, 1));
+}
+
+#[test]
 fn native_population_replays_sparse_cohorts_and_resident_changes() {
     let mut population = opening();
     let id = CohortId::new("population-fixture", "group-1").unwrap();
