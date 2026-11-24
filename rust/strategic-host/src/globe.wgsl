@@ -55,6 +55,7 @@ const PI: f32 = 3.14159265358979;
 const EARTH: f32 = 6371008.8;
 const LAND_DETAIL_MPP: f32 = 760.;
 const LAND_MATERIAL_MPP: f32 = 2220.;
+const CITY_INK_MPP: f32 = 125.;
 const CHART_SUN_VIEW: vec3f = vec3f(.100,.970,.222);
 @vertex fn triangle(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
     let p = array<vec2f,3>(vec2f(-1.,-1.),vec2f(3.,-1.),vec2f(-1.,3.));
@@ -392,8 +393,13 @@ fn water_surface(ll:vec2f, sample:u32, base:vec4f, ground:vec3f, depth:f32) -> v
     let preserve=smoothstep(640.,2450.,view.viewport.z*EARTH)*smoothstep(.88,.995,base.a);
     let ice=smoothstep(52.,68.,abs(ll.y))
         *smoothstep(.46,.68,min(base.r,base.g))*smoothstep(.80,.98,base.a);
-    let retain=max(ice,preserve);
-    let ink=mix(select(sea,river,area==3u),base.rgb,retain);
+    // The Antarctic QPK paints SCAR ADD shelves into marine samples while
+    // keeping their water alpha. Nearby bright ground and lakes do not carry
+    // that shelf pigment. Retain the generic ice tint only in raster fallback.
+    let shelf_color=vec3f(215.,226.,229.)/255.;
+    let shelf=select(0.,(1.-smoothstep(.03,.14,distance(base.rgb,shelf_color)))
+        *smoothstep(.93,.995,base.a),ll.y<-60. && area==2u);
+    let ink=mix(select(sea,river,area==3u),base.rgb,max(shelf,preserve));
     if w>=.999 {
         if area>1u {return vec4f(ink,1.);}
         let ground_color=mix(base.rgb,exposed_ground(ll,ground),smoothstep(.005,.18,base.a));
@@ -404,7 +410,7 @@ fn water_surface(ll:vec2f, sample:u32, base:vec4f, ground:vec3f, depth:f32) -> v
                   (1.-smoothstep(.009,.027,distance(base.rgb,lake)))*(1.-smoothstep(5.,38.,depth)));
     // Render agreed water with the same pigments while geometry is in flight.
     // The QPK samples still define fallback coverage and large-scale bathymetry.
-    let fallback=mix(base.rgb,mix(mix(sea,river,basin),base.rgb,retain),
+    let fallback=mix(base.rgb,mix(mix(sea,river,basin),base.rgb,max(ice,preserve)),
                      zoom*smoothstep(.15,.92,base.a));
     if w<=0. {return vec4f(fallback,base.a);}
     if area==1u {
@@ -861,7 +867,7 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
 // Geographic city pages carry feature coverage. Let the QPK pass own the
 // continuous ground so loading a local page only reveals buildings and bridges.
 fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
-    let detail=1.-smoothstep(16.,66.,mpp);
+    let detail=1.-smoothstep(16.,CITY_INK_MPP,mpp);
     if detail<=0. {return vec4f(0.);}
     let du=1./vec2f(textureDimensions(city_data));
     let pixel_metres=(tile.extent.zw-tile.extent.xy)*du*111195.*vec2f(max(.08,cos(radians(ll.y))),1.);
@@ -1072,7 +1078,7 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
     let feather=select(vec4f(1.),mix(tile.edge_ready,vec4f(1.),edge_fade),tile.edges>vec4f(0.));
     let coverage=feather.x*feather.y*feather.z*feather.w;
     if tile.options.z>.5 && view.map_style.y>.5 && view.settings.y<.5 && view.selection.y<.5 {
-        if view.viewport.z*EARTH>=66. {discard;}
+        if view.viewport.z*EARTH>=CITY_INK_MPP {discard;}
         let ink=geographic_city_ink(ll,uv,view.viewport.z*EARTH,edge_distance,screen_water(p.xy));
         return vec4f(ink.rgb,ink.a*tile.options.x*coverage);
     }

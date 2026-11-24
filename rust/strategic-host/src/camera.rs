@@ -5,6 +5,7 @@ pub const ENTER: f64 = 5500.;
 pub const EXIT: f64 = 7000.;
 pub const CITY_ENTER: f64 = 200.;
 pub const CITY_EXIT: f64 = 280.;
+pub const CITY_INK_MPP: f64 = 125.;
 pub const SCALE_TARGET_PIXELS: f64 = 80.;
 pub const CONTEXT_MPP: f64 = 2000. / SCALE_TARGET_PIXELS;
 pub type V3 = [f64; 3];
@@ -186,7 +187,12 @@ impl Camera {
         self.detail.as_ref().map_or_else(|| {
             if self.local_models&&local_city(point) {1.5}
             else if inside(point,PARIS_CITY) {8.} else {CONTEXT_MPP}
-        },|regions|regions.iter().fold(CONTEXT_MPP,|floor,r|floor.min(r.floor(point,size,requested))))
+        },|regions|{
+            let model_regions=LOCAL_MODEL_REGIONS.into_iter().filter(|_|self.local_models)
+                .map(|extent|DetailRegion{extent,minimum:1.5,city:false});
+            regions.iter().copied().chain(model_regions)
+                .fold(CONTEXT_MPP,|floor,r|floor.min(r.floor(point,size,requested)))
+        })
     }
 
     pub fn track_scale(&mut self,size:[u32;2],motion:[f64;2],anchor:[f64;2],now:Instant)->bool {
@@ -379,11 +385,13 @@ pub fn fit_bounds(bounds:[f64;4],size:[u32;2])->Option<([f64;2],f64)> {
 }
 
 pub const PARIS_CITY:[f64;4]=[2.255,48.815,2.420,48.957];
+const LOCAL_MODEL_REGIONS:[[f64;4];4]=[
+    PARIS_CITY,[-0.20,51.46,-0.06,51.55],[13.32,52.47,13.46,52.57],[31.08,29.92,31.20,30.03],
+];
 pub fn inside([x,y]:[f64;2],[w,s,e,n]:[f64;4])->bool { w<=x && x<=e && s<=y && y<=n }
 
 fn local_city(point:[f64;2])->bool {
-    [PARIS_CITY,[-0.20,51.46,-0.06,51.55],[13.32,52.47,13.46,52.57],[31.08,29.92,31.20,30.03]]
-        .into_iter().any(|bounds|inside(point,bounds))
+    LOCAL_MODEL_REGIONS.into_iter().any(|bounds|inside(point,bounds))
 }
 
 #[cfg(test)]
