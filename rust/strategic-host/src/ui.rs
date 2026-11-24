@@ -2,7 +2,7 @@ use crate::{camera::Camera,overlay::{Atlas,Mesh},world::{Place,World}};
 use std::cmp::Ordering;
 use std::collections::HashSet;
 #[derive(Clone,Copy)]
-pub enum Ink { HudArtGlass, ClockGears, Solid, Text, Flag, HudArt, HudText, Instrument, MenuArt, Loading, HistoryLight }
+pub enum Ink { HudArtGlass, ClockGears, Solid, Text, Flag, HudArt, HudText, Instrument, MenuArt, PrologueArt, ProloguePaper, OpeningCloud, Loading, HistoryLight }
 
 const LIGHT:[u8;4]=[241,230,206,255];
 const SUBTLE:[u8;4]=[199,191,168,255];

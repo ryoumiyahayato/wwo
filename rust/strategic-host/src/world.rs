@@ -139,6 +139,23 @@ impl Polity {
 }
 #[derive(Deserialize)]
 pub struct Admin {pub id:String,pub name:String,pub bounds:[f64;4],pub outlines:Vec<Vec<[f64;2]>>}
+impl Admin {
+    pub fn contains(&self, point: [f64; 2]) -> bool {
+        if !crate::camera::inside(point, self.bounds) { return false; }
+        let [x, y] = point;
+        self.outlines.iter().any(|ring| {
+            let mut inside = false;
+            let Some(mut previous) = ring.last().copied() else { return false; };
+            for &current in ring {
+                let [a, b] = previous;
+                let [c, d] = current;
+                if (b > y) != (d > y) && x < a + (c - a) * (y - b) / (d - b) { inside = !inside; }
+                previous = current;
+            }
+            inside
+        })
+    }
+}
 #[derive(Deserialize)]
 pub struct World {
     #[serde(default)]

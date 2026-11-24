@@ -187,6 +187,22 @@ impl Population {
         aggregates.chain(leaves)
     }
 
+    pub(crate) fn opening_geography<'a>(&'a self, unit: &'a str) -> Vec<(&'a str, &'a str)> {
+        let Some(opening) = &self.opening else { return Vec::new(); };
+        let mut path = Vec::new();
+        let mut next = unit;
+        while let Some(label) = opening.partitions.get(next).map(|entry| entry.name.as_str())
+            .or_else(|| opening.statistical_aggregates.get(next).map(|entry| entry.name.as_str()))
+        {
+            if path.iter().any(|&(id, _)| id == next) { break; }
+            path.push((next, label));
+            let Some(parent) = self.statistical_parent(next) else { break; };
+            next = parent;
+        }
+        path.reverse();
+        path
+    }
+
     fn statistical_parent(&self, unit: &str) -> Option<&str> {
         let opening = self.opening.as_ref()?;
         opening.partitions.get(unit).and_then(|part| part.statistical_parent.as_deref())

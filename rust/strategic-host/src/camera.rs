@@ -66,6 +66,7 @@ impl DetailRegion {
 pub struct Camera {
     pub axes: [V3;3],
     pub mpp:f64,
+    pub screen_offset_x: f64,
     pub level:Level,
     pub local_models: bool,
     pub oblique: bool,
@@ -93,7 +94,7 @@ impl Region {
 impl Camera {
     pub fn new(size:[u32;2]) -> Self {
         let mpp=Self::overview(size);
-        Self { axes:frame([2.3522,48.8566]),mpp,level:Level::World,
+        Self { axes:frame([2.3522,48.8566]),mpp,level:Level::World,screen_offset_x:0.,
             local_models:false,oblique:true,region:None,detail:None,requested_mpp:mpp,
             scale_step:None,last_widening:None }
     }
@@ -107,8 +108,11 @@ impl Camera {
         } else { 0. }
     }
     pub fn coordinates(&self) -> [f64;2] { geographic(self.axes[2]) }
+    fn screen_center(&self, size: [u32; 2]) -> [f64; 2] {
+        [f64::from(size[0]) * (0.5 + self.screen_offset_x), f64::from(size[1]) * 0.5]
+    }
     pub fn projection(&self, size: [u32;2]) -> ([V3;3], [f64;2]) {
-        let mut center = size.map(|n| f64::from(n)*0.5);
+        let mut center = self.screen_center(size);
         let Some(region) = &self.region else {return (self.axes, center);};
         for (value, offset) in center.iter_mut().zip(region.offset) {*value += offset;}
         (region.basis(), center)
@@ -198,7 +202,7 @@ impl Camera {
     pub fn track_scale(&mut self,size:[u32;2],motion:[f64;2],anchor:[f64;2],now:Instant)->bool {
         let dt=self.scale_step.replace(now).map_or(0.,|prev|now.saturating_duration_since(prev).as_secs_f64());
         if self.detail.is_none() || self.mpp.max(self.requested_mpp)>CONTEXT_MPP+0.001 {return false;}
-        let center=size.map(|v|f64::from(v)*0.5);
+        let center=self.screen_center(size);
         let next=std::array::from_fn(|i|center[i]-(motion[i]*0.25).clamp(-center[i]*0.60,center[i]*0.60));
         let minimum=self.minimum_at(self.coordinates(),size,self.requested_mpp);
         let ahead=self.vector(next,size).map_or(minimum,|v|self.minimum_at(geographic(v),size,self.requested_mpp));
@@ -217,18 +221,17 @@ impl Camera {
     }
     pub fn bearing_drag(&mut self, a:[f64;2],b:[f64;2],size:[u32;2]) {
         let compression=self.pitch().cos();
+        let mid = self.screen_center(size);
         if let Some(region) = &mut self.region {
             let angle = (b[0]-a[0])*0.008;
             let (sine,cosine) = angle.sin_cos();
-            let mid = size.map(|n|f64::from(n)*0.5);
             let [x,y] = [mid[0]+region.offset[0]-a[0],(mid[1]+region.offset[1]-a[1])/compression];
             region.offset = [a[0]-mid[0]+x*cosine-y*sine,a[1]-mid[1]+(x*sine+y*cosine)*compression];
             region.bearing += angle;
             self.constrain_region(size);
             return;
         }
-        let x=f64::from(size[0])*0.5;
-        let y=f64::from(size[1])*0.5;
+        let [x, y] = mid;
         let angle=(a[1]-y).atan2(a[0]-x)-(b[1]-y).atan2(b[0]-x);
         self.axes=self.axes.map(|v|rotation(v,self.axes[2],angle));
     }
@@ -258,7 +261,7 @@ impl Camera {
         }
     }
     pub fn toggle_oblique(&mut self, size:[u32;2]) {
-        let center=size.map(|n|f64::from(n)*0.5);
+        let center=self.screen_center(size);
         let anchor=self.vector(center,size);
         self.oblique=!self.oblique;
         if let Some(projected)=anchor.and_then(|v|self.project_vec(v,size)) {
@@ -284,7 +287,7 @@ impl Camera {
         if self.region.is_some() {
             self.constrain_region(size);
         } else {
-            let mid=size.map(|n|f64::from(n)*0.5);
+            let mid=self.screen_center(size);
             self.drag(mid,[mid[0]+offset[0],mid[1]+offset[1]],size);
         }
         self.update_level();
@@ -316,12 +319,12 @@ impl Camera {
         }
     }
     pub fn constrain_region(&mut self, size:[u32;2]) {
+        let mid = self.screen_center(size);
         let Some(region)=&mut self.region else {return;};
         let half_diagonal = f64::from(size[0]).hypot(f64::from(size[1]))*0.5;
         let limit = (9_000_000./self.mpp-half_diagonal).max(0.);
         let distance = region.offset[0].hypot(region.offset[1]);
         if distance>limit {region.offset=region.offset.map(|value|value*limit/distance);}
-        let mid=size.map(|n|f64::from(n)*0.5);
         let anchor=region.axes[2];
         let basis=region.basis();
         if let Some(center)=self.vector(mid,size) {

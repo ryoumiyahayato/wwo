@@ -24,6 +24,117 @@ fn advance(world: &mut InitialWorld, days: i64) {
 }
 
 #[test]
+fn player_prologue_selected_birthplace_survives_native_restore() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let source = "country_fra";
+    let mut sites = bootstrap
+        .opening_sites(source)
+        .iter()
+        .filter(|row| row.unavailable.is_none());
+    let paris = sites
+        .find(|row| row.id == "place:paris")
+        .expect("Paris remains available");
+    let alternate = bootstrap
+        .opening_sites(source)
+        .iter()
+        .find(|row| row.unavailable.is_none() && row.id != paris.id)
+        .expect("another French birthplace");
+    let opening = Prologue {
+        age: 20,
+        ..prologue()
+    };
+    let health = Some(wwo_character_core::OpeningHealth::OldInjury);
+    let mut population_totals = None;
+    for site in [paris, alternate] {
+        let world = bootstrap
+            .create_at_with_prologue(source, &site.id, opening, health)
+            .unwrap();
+        assert_eq!(world.player().place_id, site.id);
+        assert_eq!(world.player_current_place(), Some(site.id.as_str()));
+        assert_eq!(world.player_home(), site.id);
+        assert_eq!(
+            world.population.unit_for_person(&world.player),
+            world.residence_unit_at(&site.id)
+        );
+        assert_eq!(world.clock(), GameClock::default());
+        assert_eq!(world.player_birth_year(), 1880);
+        assert_eq!(world.balance().unwrap().cash, 500);
+        assert!(
+            world
+                .character
+                .development
+                .as_ref()
+                .unwrap()
+                .opening_injury()
+                > 0
+        );
+        if let Some(totals) = population_totals.replace(world.population.totals().clone()) {
+            assert_eq!(&totals, world.population.totals());
+        }
+        let restored = bootstrap
+            .restore_native(serde_json::from_value(world.snapshot()).unwrap())
+            .unwrap();
+        assert_eq!(restored.player_current_place(), Some(site.id.as_str()));
+        assert_eq!(restored.player_home(), site.id);
+        assert_eq!(restored.snapshot(), world.snapshot());
+    }
+    assert!(
+        bootstrap
+            .create_at_with_prologue("empire_of_japan", &alternate.id, opening, None)
+            .is_err()
+    );
+    assert!(
+        bootstrap
+            .create_at_with_prologue(source, &paris.id, prologue(), None)
+            .is_err()
+    );
+}
+
+#[test]
+fn player_prologue_without_reading_language_has_no_invented_literacy() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let (source, site) = bootstrap
+        .sources()
+        .polities()
+        .keys()
+        .filter(|source| bootstrap.opening_language(source).is_none())
+        .find_map(|source| {
+            Some((
+                source,
+                bootstrap
+                    .opening_sites(source)
+                    .iter()
+                    .find(|row| row.unavailable.is_none())?,
+            ))
+        })
+        .expect("a non-specialized opening");
+    let reading = Prologue {
+        age: 20,
+        education: Education::ReadingLessons,
+        ..prologue()
+    };
+    assert!(
+        bootstrap
+            .create_at_with_prologue(source, &site.id, reading, None)
+            .is_err()
+    );
+    let opening = Prologue {
+        education: Education::HomeWork,
+        ..reading
+    };
+    let world = bootstrap
+        .create_at_with_prologue(source, &site.id, opening, None)
+        .unwrap();
+    assert_eq!(world.player().place_id, site.id);
+    assert_eq!(world.player_birth_year(), 1880);
+    assert!(!world.can_read_opening_language());
+    let restored = bootstrap
+        .restore_native(serde_json::from_value(world.snapshot()).unwrap())
+        .unwrap();
+    assert_eq!(restored.snapshot(), world.snapshot());
+}
+
+#[test]
 fn player_prologue_age_cash_npc_and_native_slots() {
     let bootstrap = WorldBootstrap::load().unwrap();
     for (index, &(country, _)) in OPENINGS.iter().enumerate() {
@@ -72,7 +183,10 @@ fn player_prologue_age_cash_npc_and_native_slots() {
         advance(&mut restored, 1);
         assert_eq!(restored.last_read_notice(), Some(MINUTES_PER_DAY));
         assert!(!restored.can_read_opening_language());
-        assert_eq!(restored.oral_work_offer().is_some(), country == "country_fra");
+        assert_eq!(
+            restored.oral_work_offer().is_some(),
+            country == "country_fra"
+        );
     }
     assert!(
         bootstrap
@@ -108,10 +222,21 @@ fn player_prologue_age_cash_npc_and_native_slots() {
     assert_eq!(restored.character().age_years, 30);
     assert_eq!(restored.balance().unwrap().cash, 2500);
 
-    let mut prior_opening = bootstrap.create_with_prologue("country_fra", prologue()).unwrap().snapshot();
-    prior_opening["player_day"].as_object_mut().unwrap().remove("written_job_notice");
-    let old = bootstrap.restore_native(serde_json::from_value(prior_opening).unwrap()).unwrap();
-    assert!(old.jobs().any(|(job, _)| job.id == "job:opening_paris_workshop"));
+    let mut prior_opening = bootstrap
+        .create_with_prologue("country_fra", prologue())
+        .unwrap()
+        .snapshot();
+    prior_opening["player_day"]
+        .as_object_mut()
+        .unwrap()
+        .remove("written_job_notice");
+    let old = bootstrap
+        .restore_native(serde_json::from_value(prior_opening).unwrap())
+        .unwrap();
+    assert!(
+        old.jobs()
+            .any(|(job, _)| job.id == "job:opening_paris_workshop")
+    );
 }
 
 #[test]
@@ -143,13 +268,21 @@ fn player_prologue_learning_and_work_apply_combined_modifiers() {
         }
     }
     assert!(reader.can_read_opening_language());
-    assert!(reader.jobs().any(|(job, _)| job.id == "job:opening_paris_workshop"));
+    assert!(
+        reader
+            .jobs()
+            .any(|(job, _)| job.id == "job:opening_paris_workshop")
+    );
     assert!(reader.can_read_polity_record("country_fra"));
     assert!(reader.can_read_place_record("place:paris"));
     assert!(!reader.can_read_polity_record("empire_of_japan"));
     assert!(!reader.can_read_place_record("place:tokyo"));
     assert!(!slower.can_read_opening_language());
-    assert!(!slower.jobs().any(|(job, _)| job.id == "job:opening_paris_workshop"));
+    assert!(
+        !slower
+            .jobs()
+            .any(|(job, _)| job.id == "job:opening_paris_workshop")
+    );
     assert!(
         person_state(&reader)["capabilities"]["literacy"]["knowledge"].as_u64()
             > person_state(&slower)["capabilities"]["literacy"]["knowledge"].as_u64()
@@ -186,13 +319,23 @@ fn player_prologue_learning_and_work_apply_combined_modifiers() {
         let job = "job:opening_paris_workshop";
         assert!(world.oral_work_offer().is_none());
         assert!(world.apply_for_work(job).is_err());
-        world.schedule_personal_activity(PersonalActivity::ReadNotice).unwrap();
+        world
+            .schedule_personal_activity(PersonalActivity::ReadNotice)
+            .unwrap();
         advance(&mut world, 1);
-        assert_eq!(world.oral_work_offer().map(|(offer, _)| offer.id.as_str()), Some(job));
+        assert_eq!(
+            world.oral_work_offer().map(|(offer, _)| offer.id.as_str()),
+            Some(job)
+        );
         world.apply_for_work(job).unwrap();
         assert!(world.oral_work_offer().is_none());
         world.book_work().unwrap();
-        assert_eq!(world.oral_work_employment().map(|(row, booked)| (row.id.as_str(), booked)), Some((job, true)));
+        assert_eq!(
+            world
+                .oral_work_employment()
+                .map(|(row, booked)| (row.id.as_str(), booked)),
+            Some((job, true))
+        );
         assert!(world.book_work().is_err());
         advance(&mut world, 1);
         let record = person_state(&world);

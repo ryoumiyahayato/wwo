@@ -225,12 +225,32 @@ impl ServiceRecord {
     }
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OpeningHealth {
+    Strong,
+    OldInjury,
+    ProlongedIllness,
+}
+
+impl OpeningHealth {
+    fn event(self) -> Temperament {
+        match self {
+            Self::Strong => Temperament::Endure,
+            Self::OldInjury => Temperament::Recover,
+            Self::ProlongedIllness => Temperament::Illness,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct PlayerDevelopment {
     opening: Prologue,
     birth_year: u16,
-    language: Language,
+    language: Option<Language>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    opening_health: Option<OpeningHealth>,
     attributes: [u16; 8],
     traits: BTreeMap<String, String>,
     history: Vec<Biography>,
@@ -255,6 +275,26 @@ pub enum Check<'a> {
 
 impl Prologue {
     pub fn build(self, language: Language) -> Result<PlayerDevelopment> {
+        self.build_for_language(Some(language))
+    }
+
+    pub fn build_for_language(self, language: Option<Language>) -> Result<PlayerDevelopment> {
+        self.build_with_health(language, None)
+    }
+
+    pub fn build_with_health(
+        self,
+        language: Option<Language>,
+        health: Option<OpeningHealth>,
+    ) -> Result<PlayerDevelopment> {
+        require(
+            health.is_none()
+                || !matches!(
+                    self.temperament,
+                    Temperament::Endure | Temperament::Recover | Temperament::Illness
+                ),
+            "opening health already established through a legacy event",
+        )?;
         require(matches!(self.age, 18 | 20 | 25), "unsupported opening age")?;
         require(
             self.youth.eligible(self.age, self.education),
@@ -265,6 +305,7 @@ impl Prologue {
             opening: self,
             birth_year,
             language,
+            opening_health: health,
             attributes: std::array::from_fn(|index| CATALOG.attributes[index].baseline),
             traits: BTreeMap::new(),
             history: Vec::new(),
@@ -280,6 +321,8 @@ impl Prologue {
         };
         result.biography("school", schooling, birth_year + 7, birth_year + 14);
         if self.education == Education::ReadingLessons {
+            let language = language
+                .ok_or_else(|| Error("no supported reading language at the opening".into()))?;
             result.reading.insert(language, SCALE);
             result.grant("literacy", "prologue:school")?;
             let teaching = match self.family {
@@ -320,7 +363,19 @@ impl Prologue {
             birth_year + 16,
             birth_year + 17,
         );
-        let traits: &[&str] = match self.temperament {
+        result.apply_opening_event(self.temperament, "prologue:temperament")?;
+        if let Some(health) = health {
+            let event = health.event();
+            result.biography("health", event.label(), birth_year + 17, birth_year + 18);
+            result.apply_opening_event(event, "prologue:health")?;
+        }
+        Ok(result)
+    }
+}
+
+impl PlayerDevelopment {
+    fn apply_opening_event(&mut self, event: Temperament, source: &str) -> Result<()> {
+        let traits: &[&str] = match event {
             Temperament::Practice => &["curious", "focused", "quick_study"],
             Temperament::Persist => &["hardworking", "focused"],
             Temperament::Endure => &["robust", "resilient"],
@@ -330,37 +385,35 @@ impl Prologue {
             Temperament::Illness => &["frail", "slow_healing", "chronic_illness"],
         };
         for id in traits {
-            result.grant(id, "prologue:temperament")?;
+            self.grant(id, source)?;
         }
-        match self.temperament {
+        match event {
             Temperament::Practice => {
-                result.grow(0, 45);
-                result.grow(3, 25);
+                self.grow(0, 45);
+                self.grow(3, 25);
             }
             Temperament::Persist => {
-                result.grow(5, 40);
-                result.grow(6, 45);
+                self.grow(5, 40);
+                self.grow(6, 45);
             }
             Temperament::Endure => {
-                result.grow(7, 60);
-                result.grow(6, 25);
+                self.grow(7, 60);
+                self.grow(6, 25);
             }
             Temperament::Recover => {
-                result.grow(1, 35);
-                result.grow(6, 25);
+                self.grow(1, 35);
+                self.grow(6, 25);
             }
-            Temperament::Struggle => result.grow(6, 40),
-            Temperament::Leave => result.grow(2, 20),
+            Temperament::Struggle => self.grow(6, 40),
+            Temperament::Leave => self.grow(2, 20),
             Temperament::Illness => {
-                result.attributes[7] = 455;
-                result.grow(6, 25);
+                self.attributes[7] = 455;
+                self.grow(6, 25);
             }
         }
-        Ok(result)
+        Ok(())
     }
-}
 
-impl PlayerDevelopment {
     pub fn opening(&self) -> Prologue {
         self.opening
     }
@@ -370,7 +423,7 @@ impl PlayerDevelopment {
     pub(crate) fn birth_day(&self) -> i64 {
         year_start(self.birth_year)
     }
-    pub fn language(&self) -> Language {
+    pub fn language(&self) -> Option<Language> {
         self.language
     }
     pub fn can_read(&self, language: Language) -> bool {
@@ -418,7 +471,9 @@ impl PlayerDevelopment {
     }
 
     pub(crate) fn validate(&self, birth_day: i64, day: u32) -> Result<()> {
-        let opening = self.opening.build(self.language)?;
+        let opening = self
+            .opening
+            .build_with_health(self.language, self.opening_health)?;
         require(
             self.birth_year == opening.birth_year
                 && birth_day == opening.birth_day()

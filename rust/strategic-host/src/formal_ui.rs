@@ -152,7 +152,7 @@ impl Session {
 }
 pub(crate) const HUD_TYPE_WIDTH: u32 = 2048;
 pub(crate) const HUD_TYPE_BASE_HEIGHT: u32 = 2048;
-pub(crate) const HUD_TYPE_HEIGHT: u32 = HUD_TYPE_BASE_HEIGHT + 135;
+pub(crate) const HUD_TYPE_HEIGHT: u32 = HUD_TYPE_BASE_HEIGHT + 137;
 
 pub struct Skin {
     art:HashMap<String,[f32;4]>,
@@ -178,6 +178,13 @@ pub struct MapSymbol {
     pub region_max_mpp:f64,
     pub world:bool,
     pub world_max_mpp:f64,
+}
+fn opening_names() -> &'static HashMap<String, String> {
+    static NAMES: std::sync::LazyLock<HashMap<String, String>> = std::sync::LazyLock::new(|| {
+        serde_json::from_str(include_str!("../../../data/character/prologue/place-names-zh.json"))
+            .expect("invalid opening place translations")
+    });
+    &NAMES
 }
 impl Skin {
     pub fn open(root:&Path)->io::Result<Self>{
@@ -220,6 +227,38 @@ impl Skin {
     pub fn division_name<'a>(&'a self,admin:&'a Admin)->&'a str {
         self.geographic_name(&admin.id).unwrap_or(&admin.name)
     }
+    pub(crate) fn opening_name<'a>(&'a self, world: &'a World, id: &str, fallback: &'a str) -> &'a str {
+        if let Some(name) = self.geographic_name(id) { return name; }
+        if self.english { return fallback; }
+        opening_names().get(id).map(String::as_str)
+            .or_else(|| world.places.iter().find(|place| place.id == id && !place.name_zh.is_empty())
+                .map(|place| place.name_zh.as_str()))
+            .unwrap_or(fallback)
+    }
+
+    pub(crate) fn wrapped_lines(&self, text: &str, font: usize, width: f32, scale: f32) -> Vec<String> {
+        let text = self.localized(text);
+        let mut rest = text.trim();
+        let mut lines = Vec::new();
+        while !rest.is_empty() {
+            let mut used = 0.;
+            let mut end = 0;
+            let mut word_end = 0;
+            for (start, ch) in rest.char_indices() {
+                let advance = self.glyph(font, ch)[4] * scale;
+                if ch.is_whitespace() { word_end = end; }
+                if end > 0 && (ch == '\n' || used + advance > width) { break; }
+                used += advance;
+                end = start + ch.len_utf8();
+                if !ch.is_ascii() { word_end = end; }
+            }
+            if end < rest.len() && word_end > 0 && !rest[end..].starts_with('\n') { end = word_end; }
+            lines.push(rest[..end].trim().to_owned());
+            rest = rest[end..].trim_start();
+        }
+        lines
+    }
+
     pub fn admin_count(&self,world:&World,p:&Polity)->usize{
         if p.id=="country_fra" {world.admin.len()}
         else {self.geography.directories.get(&p.id).map_or(0,Vec::len)}
@@ -254,7 +293,9 @@ impl Skin {
     }
     fn glyph(&self,font:usize,ch:char)->[f32;5]{
         let key=format!("{font}:{ch}");
-        self.glyphs.get(&key).copied().unwrap_or_else(||self.glyphs[&format!("{}:?",font.min(2))])
+        self.glyphs.get(&key).copied().or_else(|| (font > 0)
+            .then(|| self.glyphs.get(&format!("0:{ch}")).copied()).flatten())
+            .unwrap_or_else(||self.glyphs[&format!("{}:?",font.min(2))])
     }
     pub(crate) fn width(&self,s:&str,font:usize)->f32 {self.localized(s).chars().map(|c|self.glyph(font,c)[4]).sum()}
     pub(crate) fn text(&self,mesh:&mut Mesh,s:&str,font:usize,[mut x,y]:[f32;2],limit:f32,color:[u8;4]){
@@ -452,16 +493,17 @@ impl Display<'_> {
         let outline=|mesh:&mut Mesh,points:&[[f32;2]],width:f32|{
             for (&a,&b) in points.iter().zip(points.iter().cycle().skip(1)){mesh.line(a,b,width,seam);}
         };
-        for angle in CLOCK_ANGLES {
-            let mark=[(0.775,-1.),(0.895,-1.6),(0.895,1.6),(0.775,1.)].map(|(r,t)|radial(angle,r*radius,t));
-            clock.shape(&mark,if self.hud.clock_drag.is_some_and(|a|(a-angle).abs()<4.){highlight}else{metal});
+        let angle=self.hud.clock_drag.or(self.hud.mechanical.angle).unwrap_or(CLOCK_ANGLES[clock_index(self.session)]);
+        for detent in CLOCK_ANGLES {
+            if self.session.is_some() && (detent-angle).abs()<4. {continue;}
+            let mark=[(143.,-1.),(CLOCK_HAND_TIP,-1.6),(CLOCK_HAND_TIP,1.6),(143.,1.)]
+                .map(|(r,t)|radial(detent,r*factor,t));
+            clock.shape(&mark,metal);
             outline(clock,&mark,0.8);
         }
-        let angle=self.hud.clock_drag.or(self.hud.mechanical.angle).unwrap_or(CLOCK_ANGLES[clock_index(self.session)]);
         if self.session.is_some() {
             let blend=if self.hud.clock_drag.is_some(){0.65}else if clock_at(angle)==0{0.25}else{0.4};
             let hand_color=std::array::from_fn(|i|if i==3{255}else{(f32::from(metal[i])*(1.-blend)+f32::from(highlight[i])*blend).round() as u8});
-            // Same R68 silhouette with subpixel outline/highlight coverage in hud.wgsl.
             clock.image([w-radius,0.,radius,radius],[angle.to_radians(),-3.,angle.to_radians(),-3.],hand_color);
         }
         let gear_radius=34.*factor;
@@ -1289,6 +1331,7 @@ impl Display<'_> {
     }
 }
 const CLOCK_ANGLES:[f32;4]=crate::mechanical::ANGLES;
+const CLOCK_HAND_TIP:f32=165.; // Matches the hand tip in hud.wgsl.
 fn clock_radius(width:f32)->f32 {116_f32.min(width*0.22)}
 pub const CLOCK_SPEEDS:[u32;4]=[0,1,2,4];
 pub fn clock_index(session:Option<&Session>)->usize {
@@ -1311,7 +1354,7 @@ pub fn clock_hit([x,y]:[f64;2],width:u32,session:Option<&Session>,display:Option
     let angle=y.atan2(x).to_degrees().rem_euclid(360.);
     if (125.*factor..=radius+3.*factor).contains(&distance)&&(82. ..=188.).contains(&angle){return true;}
     let (dy,dx)=display.unwrap_or(CLOCK_ANGLES[clock_index(session)]).to_radians().sin_cos();
-    let shaft=(x*dx+y*dy).clamp(32.*factor,143.*factor);
+    let shaft=(x*dx+y*dy).clamp(32.*factor,CLOCK_HAND_TIP*factor);
     (x-dx*shaft).hypot(y-dy*shaft)<=7.
 }
 pub fn gear_hit([x,y]:[f64;2],width:u32)->bool {

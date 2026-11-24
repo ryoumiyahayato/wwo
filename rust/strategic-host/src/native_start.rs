@@ -206,8 +206,9 @@ impl NativeSession {
                 };
                 if let Err(error) = result { self.lobby_status = format!("无法进入世界：{error}"); }
             }
-            Request::NewPlayer { polity, prologue } if self.world.is_none() => {
-                match self.bootstrap.create_with_prologue(polity.strip_prefix("state:").unwrap_or(polity), prologue) {
+            Request::NewPlayer { polity, place, prologue, health } if self.world.is_none() => {
+                self.lobby_status.clear();
+                match self.bootstrap.create_at_with_prologue(polity.strip_prefix("state:").unwrap_or(polity), place, prologue, health) {
                     Ok(world) => self.install(world),
                     Err(error) => self.lobby_status = format!("无法进入世界：{error}"),
                 }
@@ -593,16 +594,22 @@ impl NativeSession {
         let Some(world) = self.world.as_ref() else {
             state.date = Date::new(1900, 1, 1);
             state.session = None;
-            let choices: Vec<_> = self.bootstrap.openings().map(|(id, location)| {
-                let label = &self.bootstrap.sources().polities()[id].name_zh;
-                json!({"id":format!("state:{id}"),"label":label,"place":location,
-                    "language":self.bootstrap.opening_language(id),
-                    "cash":self.bootstrap.opening_cash(id, wwo_character_core::Family::Ordinary)})
-            }).collect();
-            state.lobby = Some(serde_json::from_value::<Lobby>(json!({
-                "ready":true,"selection_ready":true,"busy":false,"native":true,"status":self.lobby_status,
-                "choices":choices,"slots":self.slots
-            }))?);
+            let mut lobby = match state.lobby.take().filter(|lobby| lobby.native) {
+                Some(lobby) => lobby,
+                None => Lobby {
+                    ready: true, selection_ready: true, busy: false, loading: false, native: true,
+                    status: String::new(), slots: Vec::new(), map_bound: false,
+                    choices: self.bootstrap.sources().polities().iter().map(|(id, polity)| crate::lobby::Opening {
+                        id: polity.runtime_id(), label: polity.name_zh.clone(),
+                        language: self.bootstrap.opening_language(id),
+                        sites: self.bootstrap.opening_sites(id).to_vec(), native: true,
+                    }).collect(),
+                },
+            };
+            lobby.selection_ready = true;
+            lobby.status.clone_from(&self.lobby_status);
+            lobby.slots.clone_from(&self.slots);
+            state.lobby = Some(lobby);
             return Ok(());
         };
         let clock = world.clock();
