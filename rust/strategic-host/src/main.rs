@@ -834,6 +834,10 @@ impl Host {
         }
     }
     fn in_lobby(&self)->bool {self.config.managed&&self.state.session.is_none()}
+    fn opening_transition_active(&self) -> bool {
+        self.opening_nav.cloud.is_some() || self.opening_nav.departure_cloud.is_some()
+            || self.opening_nav.arrival_cloud.is_some()
+    }
     fn loading(&self)->bool {
         self.config.managed && (self.lobby_request||self.state.lobby.as_ref().is_some_and(|s|s.loading||s.busy||
                 self.lobby_page==lobby::Page::Selection&&!s.selection_ready&&self.feedback.is_empty()&&s.status.is_empty())
@@ -942,26 +946,15 @@ impl Host {
         let place = draft.place.clone();
         let prologue = draft.opening;
         let health = draft.health;
-        self.opening_nav.departure_cloud = None;
         self.lobby_request = true;
+        self.bridge_wait = Instant::now();
+        self.seen_lobby_busy = false;
         self.emit(Request::NewPlayer { polity: &polity, place: &place, prologue, health });
-    }
-
-    fn skip_opening_transition(&mut self) -> bool {
-        use lobby::Page;
-        if self.opening_nav.cloud.take().is_some() {
-            self.lobby_page = Page::Prologue;
-            self.opening_nav.shift = None;
-            self.focus = None;
-            self.camera.screen_offset_x = -0.11;
-        } else if self.opening_nav.departure_cloud.take().is_some() {
-            self.enter_prologue_world();
-            self.opening_nav.arrival_cloud = None;
-        } else if self.opening_nav.arrival_cloud.take().is_none() {
-            return false;
+        if self.state.session.is_none() {
+            self.lobby_request = false;
+            self.opening_nav.departure_cloud = None;
+            self.opening_nav.arrival_cloud = Some(Instant::now());
         }
-        self.dirty = true;
-        true
     }
 
     fn lobby_action(&mut self, command: lobby::Command) {
@@ -1113,7 +1106,6 @@ impl Host {
                     }
                 }
             }
-            Command::SkipCloud => { self.skip_opening_transition(); }
             Command::PrologueChoice(index) if self.lobby_page == Page::Prologue => {
                 if let Some(draft) = &mut self.prologue { draft.choose(index); }
             }
@@ -1826,10 +1818,7 @@ impl Host {
         self.base.as_ref().map_or([0,0],|p|dated(p.ids_at(&self.world.tiles[0],q)))
     }
     fn click(&mut self,p:[f64;2]) {
-        if self.opening_nav.cloud.is_some() || self.opening_nav.departure_cloud.is_some() || self.opening_nav.arrival_cloud.is_some() {
-            if lobby::contains(lobby::cloud_skip_rect(self.size), p) { self.skip_opening_transition(); }
-            return;
-        }
+        if self.opening_transition_active() {return;}
         if let (Some(view),Some((_,terrain)))=(&mut self.battle_view,&self.battle_terrain){
             let command=view.left_button(true,p,self.size,terrain);
             view.left_button(false,p,self.size,terrain);
@@ -2080,12 +2069,7 @@ impl Host {
             self.dirty=true;
             return;
         }
-        if self.opening_nav.cloud.is_some() || self.opening_nav.departure_cloud.is_some() || self.opening_nav.arrival_cloud.is_some() {
-            if matches!(key, Key::Named(NamedKey::Escape | NamedKey::Enter | NamedKey::Space)) {
-                self.skip_opening_transition();
-            }
-            return;
-        }
+        if self.opening_transition_active() {return;}
         if self.in_lobby(){
             if self.country_directory.search_active {
                 match key {
@@ -2108,7 +2092,7 @@ impl Host {
             if matches!(key,Key::Named(NamedKey::Escape|NamedKey::Backspace))&&!self.lobby_request{
                 let command = match self.lobby_page {
                     lobby::Page::Prologue => lobby::Command::PrologueBack,
-                    lobby::Page::Cloud => lobby::Command::SkipCloud,
+                    lobby::Page::Cloud => return,
                     lobby::Page::Selection => lobby::Command::Back,
                     _ => lobby::Command::Page(lobby::Page::Home),
                 };
@@ -2120,7 +2104,6 @@ impl Host {
                             lobby::Page::Home if state.ready=>self.lobby_action(lobby::Command::Page(lobby::Page::Selection)),
                             lobby::Page::Selection=>self.lobby_action(lobby::Command::Enter),
                             lobby::Page::Prologue=>self.lobby_action(lobby::Command::PrologueNext),
-                            lobby::Page::Cloud=>self.lobby_action(lobby::Command::SkipCloud),
                             _=>(),
                         }
                     }
@@ -2447,7 +2430,7 @@ impl Host {
             else { self.opening_nav.arrival_cloud = None; None }
         } else { None };
         if let Some((opacity, travel)) = cloud {
-            fade = Some(lobby::cloud_cover(self.size, opacity, travel, &self.skin));
+            fade = Some(lobby::cloud_cover(self.size, opacity, travel));
         }
         let needs_overlay=matches!(self.mode,Mode::Political|Mode::Economic)
             ||self.mode==Mode::Military&&view.map_style[3]>0.;
@@ -2786,6 +2769,7 @@ impl Host {
                 if let Some(renderer) = &mut self.renderer { renderer.clear_battle(); }
             }
             if connected && self.lobby_page == lobby::Page::Prologue {
+                self.opening_nav.departure_cloud = None;
                 self.opening_nav.arrival_cloud = Some(now);
             } else if connected {
                 self.loading_fade = Some(now);
@@ -3145,6 +3129,7 @@ impl ApplicationHandler<HostEvent> for Host {
                 self.dirty=true;
             }
             WindowEvent::MouseInput{state,button,..} if matches!(button,MouseButton::Left|MouseButton::Right)=>{
+                if self.opening_transition_active() {return;}
                 if let (Some(view), Some((_,terrain))) = (&mut self.battle_view, &self.battle_terrain) {
                     let down = state == ElementState::Pressed;
                     if button == MouseButton::Left {
@@ -3226,6 +3211,7 @@ impl ApplicationHandler<HostEvent> for Host {
                 } else if button==MouseButton::Left && !formal_ui::clock_hit(self.cursor,self.size[0],self.state.session.as_ref(),self.hud.mechanical.angle) {self.click(self.cursor);}
             }
             WindowEvent::MouseWheel{delta,..}=>{
+                if self.opening_transition_active() {return;}
                 self.country_click=None;
                 let steps=match delta {MouseScrollDelta::LineDelta(_,y)=>f64::from(y),MouseScrollDelta::PixelDelta(p)=>p.y/96.};
                 if let Some(view) = &mut self.battle_view { view.zoom(steps); self.dirty = true; return; }
@@ -3283,7 +3269,7 @@ impl ApplicationHandler<HostEvent> for Host {
             !self.hud.mechanical.hidden && (!s.paused || self.hud.mechanical.moving()));
         let animated=self.loading() || clock_animating;
         let transitioning = self.loading_fade.is_some_and(|t| t.elapsed() < Duration::from_millis(320))
-            || self.opening_nav.cloud.is_some() || self.opening_nav.departure_cloud.is_some() || self.opening_nav.arrival_cloud.is_some();
+            || self.opening_transition_active();
         if let Some(window)=&self.window {
             let periodic=(animated||transitioning||fading)&&now.saturating_duration_since(self.last_present)>=Duration::from_millis(if fading||transitioning{16}else{100});
             if self.dirty||expiry||periodic||(self.trial.timing&&!self.trial.passive_timing)||!self.trial.captures.is_empty()||self.screenshot.is_some(){window.request_redraw();}

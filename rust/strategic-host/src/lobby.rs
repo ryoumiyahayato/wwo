@@ -56,7 +56,7 @@ pub enum Page {#[default] Home,Selection,Cloud,Prologue,Load,Settings,Themes,Mig
 #[derive(Clone,Copy)]
 pub enum Command {
     Page(Page), Country(usize), Back, Drawer, Area(usize, usize), MapArea(usize), Site(usize),
-    Up, Search, ClearSearch, Enter, SkipCloud, PrologueChoice(usize), PrologueHealth(usize), PrologueNext, PrologueBack, Load(u8), Exit,
+    Up, Search, ClearSearch, Enter, PrologueChoice(usize), PrologueHealth(usize), PrologueNext, PrologueBack, Load(u8), Exit,
 }
 
 struct BirthplaceRow<'a> {
@@ -777,7 +777,7 @@ pub fn ease_cloud(t: f32) -> f32 {
     t * t * (3. - 2. * t)
 }
 
-pub fn cloud_cover(size: [u32; 2], coverage: f32, travel: f32, skin: &formal_ui::Skin) -> crate::ui::Layers {
+pub fn cloud_cover(size: [u32; 2], coverage: f32, travel: f32) -> crate::ui::Layers {
     use crate::ui::Ink;
     let mut layers = std::array::from_fn(|_| (Mesh::default(), Ink::Solid));
     let [w, h] = size.map(|value| value as f32);
@@ -795,15 +795,7 @@ pub fn cloud_cover(size: [u32; 2], coverage: f32, travel: f32, skin: &formal_ui:
         let alpha = (coverage.powf(1. + index as f32 * 0.35) * 255. * strength) as u8;
         layers[1].0.image([x, y, span.0, span.1], uv, [tint[0], tint[1], tint[2], alpha]);
     }
-    let [x, y, sw, sh] = cloud_skip_rect(size);
-    layers[2].0.rect(x, y, sw, sh, [20, 29, 35, 205]);
-    layers[3].1 = Ink::HudText;
-    skin.text(&mut layers[3].0, skin.choose("跳过过渡", "Skip transition"), 0, [x + 9., y + 4.], sw - 18., IVORY);
     layers
-}
-
-pub fn cloud_skip_rect(size: [u32; 2]) -> Rect {
-    [size[0] as f32 - 151., size[1] as f32 - 49., 134., 29.]
 }
 
 pub(crate) fn action(command:Command)->Action {Action::Hud(formal_ui::Command::Lobby(command))}
