@@ -262,9 +262,15 @@ impl TransportNetwork {
     pub fn unit_at(&self, node: &str) -> Option<&str> {
         self.catalogue
             .nodes
-            .get(self.routing_node(node)?)?
-            .unit
-            .as_deref()
+            .get(node)
+            .and_then(|record| record.unit.as_deref())
+            .or_else(|| {
+                self.catalogue
+                    .nodes
+                    .get(self.routing_node(node)?)?
+                    .unit
+                    .as_deref()
+            })
     }
     pub fn node_label(&self, node: &str) -> Option<&str> {
         Some(&self.catalogue.nodes.get(&self.node(node)?.id)?.label)
@@ -1400,7 +1406,7 @@ mod tests {
             assert_eq!(net.population_node(id), Some(id));
             assert_eq!(net.population_parent(id), Some(parent));
             assert_eq!(net.population_at(id), Some(id));
-            assert_eq!(net.unit_at(id), net.area_node(parent).map(|_| parent));
+            assert_eq!(net.unit_at(id), net.area_node(parent).map(|_| parent), "{id}");
         }
         for root in opening.standalone_ids() {
             assert_eq!(net.population_parent(root), Some(root));

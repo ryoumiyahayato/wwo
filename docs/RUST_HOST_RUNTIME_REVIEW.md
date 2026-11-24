@@ -2,6 +2,38 @@
 
 Windows 正式入口 `wwo-map-lab --play` 使用 Rust 的 `NativeSession`、`InitialWorld`、时钟、地图、UI 和存档。winit 提供窗口和输入，wgpu 提供图形接口。已归档的 Windows 实跑使用 Vulkan 驱动和 VC++ 运行库。R68 工程供对照及原始资产复用。Godot/R68 旧存档兼容已取消要求，工期从迁移清单移除。
 
+## 2026-11-24 整合基线
+
+正式世界保持同一 `InitialWorld`、`GameClock` 和原生槽位。人口 v41 已入主线。人口分区查市场时保留正式统计归属，寻路仍使用已有物理接入点。意大利分区可按该归属查询市场。没有新增人口、货批或时钟。
+
+| 系统 | 正式入口可用范围 | 未接入范围 |
+| --- | --- | --- |
+| 人口 | F7 和状态工具共用同一账本。按版本离线加载地域、年龄性别、社会边际、需求及未知人数。 | 部分地域缺可点选界线。广域匿名出生死亡和正式军队人员调用未接通。 |
+| 经济 | 国家统计市场、报价与结算、企业货批、巴黎有限生产、工资及玩家交易共用正式账本。 | 完整产业批次成本、企业自主跨区寻源、旧经济沙盒开发授权未接通。 |
+| 组织与人物 | 在地名册、成员和岗位、权限操作、经营活动、人物识字、收入与出行。 | 普遍组织生成与活动、家庭继承及科技项目未接通。 |
+| 交通 | 客运、通勤、货运、迁移及宏观交割使用同一网络与运力。货批和预约随档恢复。 | 未细化地区保留路网缺口。签证、关税、兑换和完整历史班表未接通。 |
+| 军事 | 法国 25／50 公里方格共享交战，演习车辆、弹药和战果随正式存档。 | 正式战略编制、人员损失入账、战略补给及多地同时交战未接通。 |
+| 地图 | 地理、政治、经济和军事地图共用正式选择状态。海陆几何随对应地貌库加载。 | 全球资源产地和独立城市的专题覆盖不完整。 |
+
+### 分支留存
+
+| PR | 留存和处理 |
+| --- | --- |
+| [#250](https://github.com/ryoumiyahayato/wwo/pull/250) | 合入 v41。保留所有旧人口运行版本。 |
+| [#241](https://github.com/ryoumiyahayato/wwo/pull/241) | 岸线和缩放源码已合入。Lynn Ø 七张 Z7 页在[受限资源草稿](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-717723abaf684f23b331)。 |
+| [#125](https://github.com/ryoumiyahayato/wwo/pull/125)、[#121](https://github.com/ryoumiyahayato/wwo/pull/121) | 保留旧经济执行器、路径可见性及开发授权研究。节点网络已在后续旧同步分支延用。60 日期限与撤销仍有独有代码。 |
+| [#126](https://github.com/ryoumiyahayato/wwo/pull/126)、[#127](https://github.com/ryoumiyahayato/wwo/pull/127)、[#77](https://github.com/ryoumiyahayato/wwo/pull/77) | 分别保留旧车组步兵连续、迁移资源和战略能力算法。各分支有独有文件，旧架构与现行 Rust 的存档和权限不兼容。 |
+| [#122](https://github.com/ryoumiyahayato/wwo/pull/122)、[#123](https://github.com/ryoumiyahayato/wwo/pull/123) | Rust 观察模式及空闲调度替代旧 Godot 正式入口。候选反馈导出、旧省电比较和个别验收位置仍属保留资料。#123 依赖 #122。 |
+| [#97](https://github.com/ryoumiyahayato/wwo/pull/97)、[#96](https://github.com/ryoumiyahayato/wwo/pull/96) | Rust 原生序章接管正式入口。旧多候选确认规则保留。OHM 快照证据保留，原始 PBF 不在 Git。 |
+
+### 实跑与恢复
+
+本轮 Windows `--play` 使用 v41 新局。F7 选择奥恩，人口 329,951。打开人物、组织关系、客运、货运和法国市场页面，法国市场显示 65 种商品。进入法国 25 公里军事格 `(0, -1)`，退出再进入，演习累计 5 步。F5 保存，F9 恢复该场演习。意大利人口分区的市场归属通过定向路网测试。交易和权限操作本轮未重跑。前一轮 v41 Windows 实跑已跨日，并恢复原生 v39 和 v40 存档。
+
+从[仓库 README](../README.md#构建与恢复)恢复代码和离线人口运行包。基础地图使用 [Windows 阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)，交通补充包见[交通归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-transport-1900-20261121)。Lynn Ø 修正 QWG 使用上表附件及其中的配套清单。原生候选在 48 米/像素载入视野所需的 9 页。归档文件已上传，本轮远端大文件回读中断，冷恢复未完成。七大洲验收本轮未运行。
+
+本机验证使用固定工作树和共享 Cargo 缓存。旧工作树及用户存档保持原位。旧地貌树的 28 个改动文件可从[源码归档](https://github.com/ryoumiyahayato/wwo/tree/acbb72a5ba4d094c4d79ae2dfcec59d18bfdc37b)恢复，五个文件有行尾差异。[地貌附件](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115)保存相关 QDT、QPK 和耕地试制包。其他未发布试制文件仍在原工作树。
+
 ## Windows 实跑范围
 
 以下记录对应 2026-11-15 的 Windows 实跑。阶段源码、运行附件和云端回读状态见 [Rust Windows 阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)。主线后续修改以 `main` 的提交为准。
