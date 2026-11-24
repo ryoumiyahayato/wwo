@@ -598,15 +598,6 @@ impl Display<'_> {
         let layout = ProfileLayout::new(self.size, view.world, self.skin, polity, opening, directory, nav);
         let [x, y, w, h] = layout.card;
         if let Some(opening) = opening {
-            if let Some(admin) = nav.map_area.and_then(|i| view.world.admin.get(i)) {
-                for outline in &admin.outlines {
-                    for edge in outline.windows(2) {
-                        if let (Some(a), Some(b)) = (view.camera.project(edge[0], self.size), view.camera.project(edge[1], self.size)) {
-                            panels.line(a.map(|p| p as f32), b.map(|p| p as f32), 2., formal_ui::BRASS);
-                        }
-                    }
-                }
-            }
             if view.camera.mpp < 11_000. {
                 let mut painted = Vec::<[f64; 2]>::new();
                 for (i, site) in opening.sites.iter().enumerate() {

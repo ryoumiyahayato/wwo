@@ -238,24 +238,6 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     if ui.details {occupied.push([w/2.-252.,105.,504.,detail_height]);}
     if let Some(country)=ui.country {occupied.push(country.rect(ui.size));}
     if let Some(detail)=ui.transport_detail {occupied.push(detail.rect(ui.size,ui.formal.hud.transport_detail_expanded));}
-    let region=ui.country.and_then(|country|match country.view {
-        CountryView::Region{index,..}=>ui.formal.skin.admin_record(world,&world.polities[country.polity],index).and_then(|record|record.boundary),
-        _=>None,
-    }).map(Object::Administration);
-    if let Some(Object::Administration(i))=region.or(ui.selected).filter(|_|ui.mode==Mode::Political) {
-        for ring in &world.admin[i].outlines {
-            let mut previous:Option<[f32;2]>=None;
-            for &point in ring {
-                let next=ui.camera.project(point,ui.size).map(|p|p.map(|v|v as f32));
-                if let (Some([x,y]),Some([a,b]))=(previous,next) {
-                    if x.max(a)>=0. && x.min(a)<=w && y.max(b)>=0. && y.min(b)<=h {
-                        map.line([x,y],[a,b],1.8,[247,197,86,255]);
-                    }
-                }
-                previous=next;
-            }
-        }
-    }
     let readable = ui.formal.can_read_world();
     for label in labels(world,&ui).into_iter().filter(|_|ui.labels) {
         let readable = can_read_object(world, ui.formal.written_world, label.object);

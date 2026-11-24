@@ -209,28 +209,27 @@ impl Host {
         }
         self.feedback=self.skin.choose("没有匹配的地点或国家","No matching place or country").into();
     }
-    pub(super) fn object_at(&self,q:[f64;2])->[u8;2] {
-        let dated=|[owner,admin]:[u8;2]| {
-            let owner=owner.checked_sub(1).filter(|i|self.available(Object::Polity(usize::from(*i))))
-                .map_or(0,|i|i+1);
-            [owner,admin]
-        };
-        for &i in self.visible.iter().rev() {
-            let t=&self.world.tiles[i];
-            if camera::inside(q,t.core) {
-                if let Some(p)=self.cached.get(&i) {return dated(p.page.ids_at(t,q));}
-            }
-        }
-        self.base.as_ref().map_or([0,0],|p|dated(p.ids_at(&self.world.tiles[0],q)))
+    fn political_page_at(&self, point: [f64; 2]) -> Option<(&crate::world::Tile, &super::Page)> {
+        self.visible.iter().rev().find_map(|&index| {
+            let tile = &self.world.tiles[index];
+            if !tile.ids || !camera::inside(point, tile.core) { return None; }
+            self.cached.get(&index).map(|cached| (tile, &cached.page))
+        }).or_else(|| self.base.as_ref().map(|base| (&self.world.tiles[0], base)))
     }
+
+    pub(super) fn object_at(&self, point: [f64; 2]) -> [u8; 2] {
+        let Some((tile, page)) = self.political_page_at(point) else { return [0, 0]; };
+        let [owner, admin] = page.ids_at(tile, point);
+        let Some(polity) = owner.checked_sub(1).map(usize::from)
+            .filter(|&i| self.available(Object::Polity(i))) else { return [0, 0]; };
+        [owner, if self.world.polities[polity].id == "country_fra" { admin } else { 0 }]
+    }
+
     fn resource_owner(&self, site: &wwo_map_lab::resource_geography::Resource) -> Option<usize> {
         let [lon, lat] = site.geometry.anchor();
         let owner = self.object_at([lon, lat])[0];
         let polity = usize::from(owner.checked_sub(1)?);
-        let tile = self.visible.iter().rev().find_map(|&i| {
-            let tile = &self.world.tiles[i];
-            (self.cached.contains_key(&i) && camera::inside([lon, lat], tile.core)).then_some(tile)
-        }).unwrap_or(&self.world.tiles[0]);
+        let (tile, _) = self.political_page_at([lon, lat])?;
         let [west, south, east, north] = tile.bounds;
         let uncertainty = (f64::from(site.spatial_accuracy_m.unwrap_or(0)) / camera::EARTH).to_degrees();
         // Rasterized boundary pixels can straddle even a precisely located site.
@@ -354,9 +353,6 @@ impl Host {
             if self.world.polities[self.lobby_country].id == "country_fra" {
                 let admin = map_hit.and_then(|owner| {
                     (index == Some(self.lobby_country)).then_some(owner[1])?.checked_sub(1).map(usize::from)
-                }).or_else(|| {
-                    let point = coordinates?;
-                    self.world.admin.iter().position(|admin| admin.contains(point))
                 });
                 if let Some(admin) = admin { self.lobby_action(lobby::Command::MapArea(admin)); }
             }

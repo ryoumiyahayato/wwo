@@ -149,6 +149,9 @@ fn ids(p: vec2i, size: vec2i) -> vec2u {
     if tile.options.w>.5 {x=((p.x%size.x)+size.x)%size.x;}
     return textureLoad(owners,vec2i(x,clamp(p.y,0,size.y-1)),0).rg;
 }
+fn administrative_edge(a:vec2u,b:vec2u) -> bool {
+    return a.x!=0u && a.x==u32(view.selection.w) && a.x==b.x && a.y!=0u && b.y!=0u && a.y!=b.y;
+}
 fn flag_weight(mpp: f32) -> f32 {
     if mpp <= 300. { return 0.; }
     let scale=log(mpp);
@@ -818,8 +821,9 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
             let l=ids(at-vec2i(1,0),dims_id);
             let b=ids(at-vec2i(0,1),dims_id);
             let national=(x.x!=id.x || y.x!=id.x || l.x!=id.x || b.x!=id.x) && id.x!=0u;
-            let admin=(x.y!=id.y || y.y!=id.y || l.y!=id.y || b.y!=id.y) && id.y!=0u;
-            if national || (admin && view.selection.z==0. && view.settings.y<1.5 && base_mpp<2400.) {
+            let admin=administrative_edge(id,x) || administrative_edge(id,y)
+                || administrative_edge(id,l) || administrative_edge(id,b);
+            if national || (admin && view.settings.y<1.5 && base_mpp<2400.) {
                 let linewidth=clamp(base_mpp/max(dx,dy),.035,1.);
                 let boundary=mix(vec3f(.22,.25,.22),vec3f(.71,.71,.62),regional);
                 color=mix(color,boundary,linewidth*select(.34,.74,national));
@@ -838,6 +842,17 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
         let water=mix(lake,sea,data.a);
         color=mix(color,water,data.b);
         color=mix(color,vec3f(.69,.67,.59),bridges*data.b*.82);
+    }
+    if view.settings.z>.5 && view.selection.z>0. {
+        let dims=vec2i(textureDimensions(owners));
+        let at=vec2i(floor(uv*vec2f(dims)));
+        let id=ids(at,dims);
+        if id.x==u32(view.selection.w) && id.y==u32(view.selection.z) {
+            let edge=any(ids(at+vec2i(1,0),dims)!=id) || any(ids(at+vec2i(0,1),dims)!=id)
+                || any(ids(at-vec2i(1,0),dims)!=id) || any(ids(at-vec2i(0,1),dims)!=id);
+            let opacity=select(.08,.88*clamp(base_mpp/max(dx,dy),.12,1.),edge);
+            color=mix(color,vec3f(.97,.77,.34),opacity*(1.-terrain.a));
+        }
     }
     if view.settings.y>2.5 && view.map_style.w>0. {
         // R68's Lambert-93 origin and 50/25 km spacing. This is a display grid;
@@ -870,15 +885,19 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
 // Geographic city pages carry feature coverage. Let the QPK pass own the
 // continuous ground so loading a local page only reveals buildings and bridges.
 fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
+    let historical=tile.options.z>1.5;
     let detail=1.-smoothstep(16.,CITY_INK_MPP,mpp);
-    if detail<=0. {return vec4f(0.);}
+    if !historical && detail<=0. {return vec4f(0.);}
     let du=1./vec2f(textureDimensions(city_data));
     let pixel_metres=(tile.extent.zw-tile.extent.xy)*du*111195.*vec2f(max(.08,cos(radians(ll.y))),1.);
     let mip=max(0.,log2(mpp/max(1.,min(pixel_metres.x,pixel_metres.y))));
     let buildings=textureSampleLevel(city_data,linear,uv,mip).rg;
     let edge=textureSampleLevel(city_data,linear,uv-du*.82,mip).r;
     let shadow=max(0.,edge-buildings.r)*detail*.49;
-    let blocks=textureSampleLevel(city_data,linear,uv,3.).r;
+    // Aggregate the surveyed footprints over the screen footprint. At
+    // overview scales the raster represents built density, not lot boundaries.
+    let block_mip=select(3.,clamp(mip+.7,3.,6.),historical);
+    let blocks=textureSampleLevel(city_data,linear,uv,block_mip).r;
     if max(max(buildings.r,buildings.g),max(shadow,blocks))<=.001 {return vec4f(0.);}
     let base=natural_surface(ll);
     var terrain=vec4f(base.rgb,water_coverage(area,base.a));
@@ -907,21 +926,25 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let land=1.-terrain.a;
     let urban=clamp(cover.x/max(.01,ready),0.,1.);
     let woods=clamp(cover.y/max(.01,ready),0.,1.);
-    let built=smoothstep(.015,.23,blocks)*mix(.75,1.,urban);
+    let density=smoothstep(.018,.32,blocks);
+    let built=density*select(mix(.75,1.,urban),1.,historical);
     // At the survey limit, attenuate the mapped features over a few source blocks.
     let support=smoothstep(0.,mix(320.,670.,built),edge_distance);
     let facade=mix(vec3f(.68,.56,.48),vec3f(.80,.71,.62),max(0.,buildings.r-edge));
-    let wall=buildings.r*detail*mix(.70,.91,built)*land;
+    let footprint_weight=select(detail,1.-smoothstep(24.,134.,mpp),historical);
+    let wall=buildings.r*footprint_weight*mix(.70,.96,built)*land;
     // Wide mapped strokes survive the screen-space filter at the fringe.
     let stroke=smoothstep(.13,.48,buildings.g);
     let local_road=mix(terrain.rgb,vec3f(.76,.70,.59),mix(.39,.75,stroke));
     let road_color=mix(local_road,vec3f(.81,.75,.65),built);
     let fringe=mix(mix(.54,.79,stroke),mix(.27,.51,stroke),woods);
-    let road=buildings.g*detail*mix(fringe,.88,built);
-    let bridge=mix(road,buildings.g*detail*.82,terrain.a);
+    let road_weight=select(detail,1.-smoothstep(58.,300.,mpp),historical);
+    let road=buildings.g*road_weight*mix(fringe,.88,built);
+    let bridge=mix(road,buildings.g*road_weight*.88,terrain.a);
     let shading=shadow*land*mix(.45,1.,built);
-    let ground=detail*land*smoothstep(.055,.36,blocks)*.57;
-    let paving=mix(terrain.rgb,vec3f(.58,.52,.44),.75);
+    let ground=land*select(detail*smoothstep(.055,.36,blocks)*.57,density*.83,historical);
+    let aggregate=mix(vec3f(.59,.51,.42),vec3f(.48,.38,.31),density);
+    let paving=mix(terrain.rgb,select(vec3f(.58,.52,.44),aggregate,historical),.82);
     let color=((paving*ground*(1.-shading)+vec3f(.36,.32,.31)*shading)*(1.-wall)+facade*wall)*(1.-bridge)
         +mix(road_color,vec3f(.69,.67,.59),terrain.a)*bridge;
     let alpha=((ground*(1.-shading)+shading)*(1.-wall)+wall)*(1.-bridge)+bridge;
@@ -1067,7 +1090,7 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
         if !is_world {discard;}
         return vec4f(sky(p.xy),1.);
     }
-    if !is_world && view.map_style.y>.5 && (view.settings.y<.5 || view.settings.y>2.5 && view.map_style.w<=0.) && tile.options.z<.5 && view.selection.y<.5 {discard;}
+    if !is_world && view.map_style.y>.5 && (view.settings.y<.5 || view.settings.y>2.5 && view.map_style.w<=0.) && tile.options.z<.5 && view.selection.y<.5 && view.selection.z<.5 {discard;}
     let v=chart_normal(xy,r,t);
     let ll=degrees(vec2f(atan2(v.x,v.z),atan2(v.y,length(v.xz))));
     if !is_world && (ll.x<tile.core.x || ll.y<tile.core.y || ll.x>=tile.core.z || ll.y>=tile.core.w) {discard;}
@@ -1082,7 +1105,7 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
     let feather=select(vec4f(1.),mix(tile.edge_ready,vec4f(1.),edge_fade),tile.edges>vec4f(0.));
     let coverage=feather.x*feather.y*feather.z*feather.w;
     if tile.options.z>.5 && view.map_style.y>.5 && view.settings.y<.5 && view.selection.y<.5 {
-        if view.viewport.z*EARTH>=CITY_INK_MPP {discard;}
+        if tile.options.z<1.5 && view.viewport.z*EARTH>=CITY_INK_MPP {discard;}
         let ink=geographic_city_ink(ll,uv,view.viewport.z*EARTH,edge_distance,screen_water(p.xy));
         return vec4f(ink.rgb,ink.a*tile.options.x*coverage);
     }

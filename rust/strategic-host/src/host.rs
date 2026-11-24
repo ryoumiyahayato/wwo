@@ -784,7 +784,20 @@ impl Host {
         view.selection[3]=self.world.polities.iter().position(|p|p.id=="country_fra").map_or(0.,|i|(i+1) as f32);
         view.map_style[0]=self.player_polity().map_or(0.,|i|(i+1) as f32);
         if let Some(Object::Polity(i))=self.selected{view.selection[0]=(i+1) as f32;}
-        if let Some(Object::Administration(i))=self.selected{view.selection[2]=(i+1) as f32;}
+        let selected_admin = if self.in_lobby() {
+            self.opening_nav.map_area.filter(|_| self.lobby_page == lobby::Page::Selection)
+        } else if self.mode == Mode::Political {
+            self.country.and_then(|panel| match panel.view {
+                ui::CountryView::Region { index, .. } => self.skin
+                    .admin_record(&self.world, &self.world.polities[panel.polity], index)
+                    .and_then(|record| record.boundary),
+                _ => None,
+            }).or(match self.selected {
+                Some(Object::Administration(i)) => Some(i),
+                _ => None,
+            })
+        } else { None };
+        view.selection[2] = selected_admin.map_or(0., |i| (i + 1) as f32);
         if let Some(model)=self.state.timeline.as_ref() {
             let mut count=0;
             for (i,s) in model.region_sites("paris") {
@@ -912,8 +925,9 @@ impl Host {
             ||self.mode==Mode::Military&&view.map_style[3]>0.;
         let pages:Vec<_>=self.visible.iter().filter_map(|&id| {
             let tile=&self.world.tiles[id];
-            if tile.city_ink_only && (self.mode!=Mode::Geographic || view.map_style[1]<=0.) {return None;}
-            if view.map_style[1]>0.&&!needs_overlay&&!tile.city&&view.selection[1]<0.5{return None;}
+            if !tile.ids && self.mode != Mode::Geographic { return None; }
+            if tile.city_ink_only && view.map_style[1]<=0. { return None; }
+            if view.map_style[1]>0.&&!needs_overlay&&!tile.city&&view.selection[1]<0.5&&view.selection[2]<0.5{return None;}
             let p=self.cached.get(&id)?;
             let progress=(now.duration_since(p.ready).as_secs_f32()/0.16).clamp(0.,1.);
             let opacity=progress*progress*(3.-2.*progress)*tile.weight(self.camera.mpp);

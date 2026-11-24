@@ -42,6 +42,7 @@ impl Tile {
         if self.surface_span>0 {
             return (1.-smooth(self.surface_fade_mpp,self.surface_max_mpp,mpp)) as f32;
         }
+        if self.city_ink_only { return (1. - smooth(460., crate::camera::CITY_INK_MPP, mpp)) as f32; }
         match self.level {
             1 => (1.-smooth(2900.,5900.,mpp)) as f32,
             3 if self.city => (1.-smooth(150.,380.,mpp)) as f32,
@@ -70,7 +71,10 @@ impl Tile {
             + self.cover_size()+self.city_size()
     }
 
-    pub fn city_levels(&self)->u32 { (self.size[0].max(self.size[1]).ilog2()+1).min(4) }
+    pub fn city_levels(&self) -> u32 {
+        let levels = if self.city_ink_only { 7 } else { 4 };
+        (self.size[0].max(self.size[1]).ilog2() + 1).min(levels)
+    }
 
     fn city_size(&self)->usize {
         if !self.city {return 0;}
@@ -285,7 +289,7 @@ impl Index {
         let mut result:Vec<_>=candidates.into_iter().filter_map(|id| {
             let tile=&world.tiles[id];
             let (axis,radius)=self.anchors[id];
-            let max=if tile.surface_span>0 {tile.surface_max_mpp} else {
+            let max=if tile.city_ink_only {crate::camera::CITY_INK_MPP} else if tile.surface_span>0 {tile.surface_max_mpp} else {
                 match tile.level {1=>if prefetch {8500.} else {5900.},3 if tile.city=>if prefetch {650.} else {380.},4=>if prefetch {240.} else {180.},_=>if prefetch {1900.} else {1450.}}
             };
             let proximity=dot(axis,center);
