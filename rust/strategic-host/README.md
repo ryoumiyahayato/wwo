@@ -2,6 +2,8 @@
 
 `wwo-map-lab` 是当前原生 Windows 游戏入口。正式 Windows 构建由 GitHub CI 执行。本机验证使用固定工作树内的 `tools/wwo-cargo.ps1`。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [仓库 README](../../README.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。界面字形更新使用归档项目和 Pillow，运行 `python tools/build_hud.py <R68 项目> <游戏数据目录>`。
 
+`src/host.rs` 持有原生宿主状态。`src/host/` 内的 `config`、`observe`、`map`、`menus` 和 `events` 分别处理命令行及资源路径、观察与调试、地图交互、首页与菜单、窗口事件及运行周期。
+
 ## 军事地图方格与装甲战场
 
 从 `--play` 进入或加载正式世界。在「军事地图」中放大法国本土，点选已显示的 25 或 50 公里方格。回车或再次点击同格进入。50 公里父格和四个 25 公里子格共用地形、位置及交战状态。
@@ -103,6 +105,7 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 
 | 模块 | 所有状态 |
 | --- | --- |
+| `formal_bootstrap` | 正式世界装配。`opening` 初始化领域状态，`historical_places` 加载历史地点、辖区及线路 |
 | `formal_population` | 人口池、具名归属、迁移、出生死亡事件和统计口径 |
 | `formal_character`、`character-core` | 同一具名人口 ID 下的人物、健康、学习、经历和关系 |
 | `formal_organization_registration`、`formal_organization_activity` | 共用组织身份和成员权限。企业经营与互助活动按各自规则结算 |

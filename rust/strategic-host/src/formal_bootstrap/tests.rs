@@ -1,0 +1,2117 @@
+use super::*;
+use crate::formal_clock::MINUTES_PER_DAY;
+
+fn census_opening_v43(bootstrap: &WorldBootstrap) -> InitialWorld {
+    let world = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
+    WorldBootstrap::finish_opening(world).unwrap()
+}
+
+#[test]
+fn opening_regimental_station_uses_formal_lyon_place() {
+    let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+    let stations = world.regimental_opening_stations("place:lyon");
+    let [station] = stations else { panic!("expected the Lyon opening station") };
+    assert_eq!(station.regiment_id, "fra_157th_infantry");
+    assert_eq!(station.polity_id, "country_fra");
+    assert_eq!(station.place_id, "place:lyon");
+    assert!(world.regimental_opening_stations("place:paris").is_empty());
+    assert!(world.land_battle_record().is_none());
+}
+
+#[test]
+fn all_six_openings_select_a_person_in_the_same_world_sources() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let france = bootstrap.create("country_fra").unwrap();
+    assert_eq!(france.sources.polities().len(), 146);
+    assert_eq!(france.population_units().len(), 50);
+    for (id, city, flag, population) in [
+        ("country_fra", "paris", "france_tricolour_1794", 38_852_748),
+        ("british_isles_1900", "london", "uk_union_1801", 41_500_000),
+        ("german_empire", "berlin", "german_empire_1867", 55_619_152),
+        ("russian_empire", "st_petersburg", "russia_1896", 136_000_000),
+        ("qing_empire", "beijing", "qing_1889", 400_000_000),
+        ("empire_of_japan", "tokyo", "japan_1870", 43_800_000),
+    ] {
+        let world = bootstrap.create(id).unwrap();
+        let place = format!("place:{city}");
+        assert_eq!(world.clock(), GameClock::default());
+        assert!(Arc::ptr_eq(&france.sources, &world.sources));
+        assert_eq!(world.population_units(), france.population_units());
+        assert_eq!(world.player().id, format!("person:formal_generated_{id}_0001"));
+        assert_eq!(world.player().claim_id, format!("formal_population_claim:{id}:0001"));
+        assert_eq!(world.player().polity_id, format!("state:{id}"));
+        assert_eq!(world.player().place_id, place);
+        assert_eq!(world.character().id, world.player().id);
+        assert_eq!(world.character().age_years, 30);
+        assert!(world.sources.places()[&place].lon_lat.is_some());
+        assert_eq!(world.sources.polities()[id].flag_id, flag);
+        let named = if id == "country_fra" { 6 } else { 4 };
+        assert_eq!(world.population.named_counts()[id], named);
+        let estimate = world.population.admitted_opening(id).map_or(population, |row| row.population_value);
+        assert_eq!(world.background_population(id), Some(estimate - named));
+        assert_eq!(world.population.named_counts(), france.population.named_counts());
+        let opening_ledger = world.ledger().snapshot();
+        let french_ledger = france.ledger().snapshot();
+        for key in ["accounts", "transactions", "scenario_budget", "denomination"] {
+            let field = |value| crate::formal_save::field(crate::formal_save::map(value).unwrap(), key).unwrap();
+            assert_eq!(field(&opening_ledger), field(&french_ledger));
+        }
+        world.validate_counters().unwrap();
+        assert_eq!(world.balance().unwrap().reserved, 0);
+        let resident = "person:formal_generated_country_fra_0002";
+        assert_eq!(world.person(resident).unwrap().place_id, "place:paris");
+        assert_eq!(world.ledger().default_account(resident).unwrap().cash, 0);
+        assert_eq!(world.person_profile(resident).unwrap().age_years, 30);
+    }
+    assert!(bootstrap.create("british_empire").is_err());
+    assert!(bootstrap.create("japanese_empire").is_err());
+}
+
+#[test]
+fn historical_partition_changes_residence_and_replays_one_service_claim() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut world = bootstrap.create("country_fra").unwrap();
+    let national = "united_states_1900";
+    let dc = "us_district_of_columbia";
+    let ny = "us_state_new_york";
+    let nyc = world.residence_unit_at("place:new_york").unwrap().to_owned();
+    let resident = "person:historical_partition_resident";
+    let target = ServiceTarget::Strategic("fixture:paris_service".into());
+    let parts = world.population().partitions(national).collect::<Vec<_>>();
+    assert_eq!(parts.len(), 156);
+    assert_eq!(parts.iter().map(|(_, _, count)| count).sum::<u64>(), 75_454_976);
+    assert_eq!(world.population_units()[national], 75_454_976);
+    assert_eq!(world.population().resident_pool(national), Some(0));
+    assert!(!world.macro_economy().markets().contains_key(dc));
+    assert!(world.transfer_unmanaged_population(national, ny, 1, 0).is_err());
+    let (cohort, _, members) = world.population().cohorts_in(dc)
+        .find(|(id, _, count)| *count > 10 && world.population().cohort_can_materialize(id, 1875))
+        .unwrap();
+    let cohort = cohort.clone();
+    world.population.transfer_cohort(dc, &nyc, &cohort, 10, 0).unwrap();
+    assert_eq!(world.population().cohort_members(&nyc, &cohort), Some(10));
+    assert_eq!(world.population().population_total(dc), Some(276_709));
+    assert_eq!(world.population().population_total(ny), Some(7_216_556));
+    assert_eq!(world.population().population_total(&nyc), Some(3_437_212));
+    assert_eq!(world.population().admitted_opening(dc).unwrap().population_value, 276_719);
+    assert_eq!(world.population_units()[national], 75_454_976);
+    world.materialize_resident(resident, "Resident".into(), "place:washington", 1875, Some(&cohort)).unwrap();
+    assert_eq!(world.population().cohort_members(dc, &cohort), Some(members - 11));
+    assert_eq!(world.population().unit_for_person(resident), Some(dc));
+    assert_eq!(world.market_unit_for_person(resident), Some(national));
+    assert_eq!(world.population().background(dc), Some(276_708));
+    assert_eq!(world.population().background(national), Some(75_454_975));
+    world.enlist_named_service(resident, target.clone(), true).unwrap();
+    assert!(world.enlist_named_service(resident, target.clone(), true).is_err());
+    let saved = world.snapshot();
+    assert_eq!(saved["population"]["opening_version"], bootstrap.population_assets.current_version());
+    let restored = bootstrap.restore_native(serde_json::from_value(saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.service.named_target(resident), Some(&target));
+    assert_eq!(restored.snapshot(), saved);
+}
+
+#[test]
+fn historical_partition_admits_only_manifest_overrides() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.create("country_fra").unwrap();
+    let population = world.population();
+    assert!(world.population_units().keys().eq(bootstrap.populations.keys()));
+    assert!(world.macro_economy().markets().keys().eq(bootstrap.populations.keys()));
+    assert!(!population.standalone_totals().is_empty());
+    let london = "uk_ancient_kent_middlesex_surrey";
+    assert_eq!(world.residence_unit_at("place:london"), Some(london));
+    assert_eq!(world.residence_unit_at("place:port_london"), Some(london));
+    assert_eq!(population.admitted_opening(london).unwrap().source_id, "england_wales_summary_tables_1901");
+    let india = "cshapes_gw_750";
+    assert!(population.admitted_opening(india).is_none());
+    assert_eq!(population.population_total(india), Some(294_000_000));
+    assert_eq!(population.population_total("raj_mysore_state"), Some(5_470_284));
+    assert!(population.resident_pool(india).is_some_and(|n| n > 0 && n < 294_000_000));
+    let mut admitted = 0;
+    let mut baseline_only = 0;
+    let mut whole_roots = 0;
+    let mut partitioned_roots = 0;
+    for (root, &value) in world.population_units().iter().chain(population.standalone_totals()) {
+        let mut partitions = population.partitions(root).peekable();
+        if let Some(estimate) = population.admitted_opening(root) {
+            assert_eq!(value, estimate.population_value);
+            admitted += 1;
+        } else {
+            assert_eq!(value, bootstrap.populations[root]);
+            baseline_only += 1;
+        }
+        if partitions.peek().is_none() {
+            assert_eq!(population.resident_pool(root), Some(value));
+            whole_roots += 1;
+        } else {
+            let unassigned = population.resident_pool(root).unwrap();
+            assert_eq!(unassigned + partitions.map(|(_, _, count)| count).sum::<u64>(), value);
+            if let Some(estimate) = population.admitted_opening(root) {
+                assert_eq!(unassigned, estimate.research_unlocated_balance.unwrap_or(0));
+            }
+            partitioned_roots += 1;
+        }
+    }
+    assert!(admitted > 0 && baseline_only > 0 && whole_roots > 0 && partitioned_roots > 0);
+    for person in world.sources.people.values() {
+        let unit = population.unit_for_person(&person.id).unwrap();
+        assert_eq!(world.residence_unit_at(&person.place_id), Some(unit));
+        assert_eq!(population.parent_unit(unit), Some(person.opening_source_id.as_str()));
+    }
+}
+
+#[test]
+fn historical_social_scopes_preserve_parent_counts_and_unknown_leaves() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut world = census_opening_v43(&bootstrap);
+    let central_india = "raj_central_india_agency";
+    let gwalior = "raj_gwalior_state";
+    let rest = "raj_central_india_ex_gwalior";
+    let before = world.population().social_distribution(Some(central_india)).unwrap();
+    assert_eq!(before.population_total, 8_824_834);
+    assert_eq!(before.dimensions["occupation"].assigned_residents, 4_585_285);
+    assert_eq!(before.dimensions["residence"].assigned_residents, before.population_total);
+    assert_eq!(before.residents_with_any_attribute_minimum, before.population_total);
+    assert_eq!(before.residents_with_any_attribute_maximum, before.population_total);
+    let gwalior_social = world.population().social_distribution(Some(gwalior)).unwrap();
+    assert_eq!(gwalior_social.population_total, 2_984_713);
+    assert_eq!(gwalior_social.dimensions["occupation"].unknown_residents, gwalior_social.population_total);
+    assert_eq!(gwalior_social.dimensions["residence"].by_classification["india_1901_census_towns_and_rural"]["Urban"], 330_852);
+    let glamorgan = world.population().social_distribution(Some("administrative_region:gb_historic_glamorgan")).unwrap();
+    let housing = &glamorgan.dimensions["housing"];
+    assert_eq!(housing.direct_opening_distribution.unwrap().observed_total, 859_931);
+    assert_eq!(housing.assigned_residents, 838_431);
+    assert_eq!(housing.unknown_residents, 0);
+
+    let (cohort, _, _) = world.population().cohorts_in(gwalior).next().unwrap();
+    let cohort = cohort.clone();
+    world.population.transfer_cohort(gwalior, rest, &cohort, 1, 0).unwrap();
+    let after = world.population().social_distribution(Some(central_india)).unwrap();
+    assert_eq!(after.population_total, 8_824_834);
+    assert_eq!(after.affected_resident_pools, 2);
+    assert!(after.dimensions["occupation"].assigned_residents < 4_585_285);
+    assert_eq!(after.dimensions["residence"].unknown_residents, 2);
+    assert!(after.residents_with_any_attribute_minimum <= after.residents_with_any_attribute_maximum);
+    assert_eq!(after.residents_with_any_attribute_maximum, after.population_total);
+    let restored = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+    let replayed = restored.population().social_distribution(Some(central_india)).unwrap();
+    assert_eq!(serde_json::to_value(replayed).unwrap(), serde_json::to_value(after).unwrap());
+}
+
+#[test]
+fn historical_russian_districts_keep_province_totals_and_census_residence() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = census_opening_v43(&bootstrap);
+    for (province, district, count, province_total, district_total, urban) in [
+        (40, 344, 12, 3_760_260, 572_067, 261_715),
+        (43, 363, 15, 2_935_065, 258_726, 76_588),
+        (57, 533, 12, 2_674_222, 289_298, 85_151),
+        (79, 700, 7, 2_906_736, 428_925, 16_023),
+    ] {
+        let province = format!("administrative_region:ristat_province_{province}");
+        let district = format!("administrative_region:ristat_district_{district}");
+        let parent = world.inspect_population(&province).unwrap();
+        assert_eq!(parent.children.len(), count);
+        assert_eq!(parent.population_total, Some(province_total));
+        assert_eq!(parent.children.iter().map(|child| child.population_total).sum::<u64>(), province_total);
+        let child = world.inspect_population(&district).unwrap();
+        assert_eq!(child.parent_id, Some(province.as_str()));
+        assert_eq!(child.population_total, Some(district_total));
+        let structure = child.structure.unwrap();
+        assert_eq!(structure.cohort_residents, district_total);
+        let social = child.social.unwrap();
+        let residence = &social.dimensions["residence"];
+        assert_eq!(residence.by_classification["russia_1897_administrative_residence"]["Census cities"], urban);
+        assert_eq!(residence.unknown_residents, 0);
+        assert_eq!(social.dimensions["religion"].unknown_residents, district_total);
+    }
+    let total = world.population().population_total("russian_empire");
+    assert_eq!(total, Some(135_382_043));
+}
+
+#[test]
+fn historical_indian_age_tables_preserve_local_totals_and_unknown_ages() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = census_opening_v43(&bootstrap);
+    for (unit, total, unknown_age) in [
+        ("raj_andaman_nicobar_comparable", 16_181, 0),
+        ("raj_united_provinces_states", 800_983, 298),
+        ("raj_central_provinces_states", 2_015_423, 0),
+    ] {
+        let structure = world.population().structure(Some(unit), world.clock()).unwrap();
+        assert_eq!(structure.population_total, total);
+        assert_eq!(structure.cohort_residents, total);
+        assert_eq!(structure.residents_with_cohort_age_and_sex, total - unknown_age);
+    }
+}
+
+#[test]
+fn historical_austrian_census_uses_matching_territories_and_retains_language_unknowns() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.create("country_fra").unwrap();
+    let unit = "ah_lower_austria";
+    let report = world.inspect_population(unit).unwrap();
+    assert_eq!(report.population_total, Some(3_056_648));
+    let structure = report.structure.unwrap();
+    assert_eq!(structure.residents_with_cohort_age_and_sex, 3_056_648);
+    assert_eq!(structure.cohorts.len(), 22);
+    let social = report.social.unwrap();
+    let religion = &social.dimensions["religion"];
+    assert_eq!(religion.direct_opening_distribution.unwrap().observed_total, 3_100_493);
+    assert_eq!(religion.by_classification["austria_1900_reported_religion"]["Jewish"], 155_054);
+    let jewish_norm = report.dietary_norms.iter()
+        .find(|norm| norm.trait_id == "leviticus_11_7_12_food_restrictions").unwrap();
+    assert_eq!(jewish_norm.residents_with_matching_religion, 155_054);
+    assert!(jewish_norm.observed_adherents.is_none());
+    assert_eq!(social.dimensions["marital_status"].unknown_residents, 0);
+    let language = &social.dimensions["language"];
+    assert_eq!(language.direct_opening_distribution.unwrap().observed_unknown, 243_792);
+    assert!(language.unknown_residents > 0);
+    assert_eq!(language.assigned_residents + language.unknown_residents, 3_056_648);
+    assert_eq!(social.dimensions["literacy"].assigned_residents, 3_056_648);
+    assert_eq!(social.dimensions["residence"].by_classification["austria_1900_locality_population_size"].len(), 6);
+    assert_eq!(social.dimensions["culture"].assigned_residents, 0);
+    assert_eq!(report.dietary_norms[0].residents_with_matching_religion, 878);
+    assert_eq!(report.dietary_norms[0].observed_adherents, None);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(15)).unwrap();
+    let previous = old.inspect_population(unit).unwrap();
+    assert_eq!(previous.population_total, report.population_total);
+    assert_eq!(previous.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+    assert_eq!(previous.social.unwrap().dimensions["religion"].assigned_residents, 0);
+}
+
+#[test]
+fn historical_argentine_and_australian_ages_preserve_coverage_gaps() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.base_opening_version("country_fra", None, Some(31)).unwrap();
+    let old = bootstrap.base_opening_version("country_fra", None, Some(29)).unwrap();
+    assert_eq!(world.population().global_total(), old.population().global_total());
+
+    let argentina = world.inspect_population("argentina_1900").unwrap();
+    assert_eq!(argentina.population_total, Some(4_624_686));
+    let profile = argentina.structure.unwrap();
+    assert_eq!(profile.residents_with_cohort_age_and_sex, 4_505_257);
+    assert_eq!(profile.cohort_residents, 4_524_861);
+    assert_eq!(profile.unclassified_residents, 99_825);
+    assert_eq!(argentina.children.len(), 4);
+    assert_eq!(argentina.children.iter().map(|child| child.population_total).sum::<u64>(), 4_624_686);
+    let capital = world.inspect_population("place:buenos_aires").unwrap();
+    assert_eq!(capital.account_id, Some("ar_capital_federal"));
+    assert_eq!(capital.population_total, Some(772_173));
+    assert_eq!(capital.structure.unwrap().residents_with_cohort_age_and_sex, 768_331);
+    let religion = &capital.social.unwrap().dimensions["religion"];
+    assert_eq!(religion.assigned_residents, 771_251);
+    assert_eq!(religion.unknown_residents, 922);
+    assert_eq!(capital.dietary_norms[0].residents_with_matching_religion, 876);
+    assert_eq!(capital.dietary_norms[0].observed_adherents, None);
+    let province = world.inspect_population("ar_buenos_aires_province").unwrap();
+    assert_eq!(province.population_total, Some(1_072_742));
+    assert_eq!(province.structure.unwrap().residents_with_cohort_age_and_sex, 1_069_246);
+    let rosario = world.inspect_population("place:rosario").unwrap();
+    assert_eq!(rosario.scope_relation, "residence_site_in_account");
+    assert_eq!(rosario.population_total, None);
+
+    let java = world.inspect_population("java_madoera_colonial_population").unwrap();
+    assert_eq!(java.population_total, Some(28_092_332));
+    let profile = java.structure.unwrap();
+    assert_eq!(profile.cohort_residents, 27_798_112);
+    assert_eq!(profile.residents_with_cohort_age_and_sex, 0);
+    assert_eq!(profile.unclassified_residents, 294_220);
+    let before = bootstrap.base_opening_version("country_fra", None, Some(30)).unwrap();
+    assert_eq!(before.inspect_population("java_madoera_colonial_population").unwrap()
+        .structure.unwrap().cohort_residents, 0);
+    assert_eq!(before.inspect_population("place:buenos_aires").unwrap().population_total, None);
+
+    let australia = world.inspect_population("australia_colonies_1900").unwrap();
+    assert_eq!(australia.population_total, Some(3_837_578));
+    let profile = australia.structure.unwrap();
+    assert_eq!(profile.residents_with_cohort_age_and_sex, 3_703_086);
+    assert_eq!(profile.cohort_residents, 3_716_123);
+    assert_eq!(profile.unclassified_residents, 121_455);
+    let south = world.inspect_population("abs_south_australia").unwrap();
+    assert_eq!(south.population_total, Some(359_306));
+    assert_eq!(south.structure.unwrap().residents_with_cohort_age_and_sex, 358_758);
+
+    for unit in ["argentina_1900", "australia_colonies_1900"] {
+        let before = old.inspect_population(unit).unwrap().structure.unwrap();
+        assert_eq!(before.residents_with_cohort_age_and_sex, 0);
+    }
+    let cochin = world.inspect_population("raj_cochin_state").unwrap().social.unwrap();
+    assert_eq!(cochin.dimensions["language"].assigned_residents, 801_687);
+    assert_eq!(cochin.dimensions["language"].unknown_residents, 0);
+    assert_eq!(cochin.dimensions["occupation"].assigned_residents, 368_764);
+    let bengal = world.inspect_population("raj_bengal_province").unwrap().social.unwrap();
+    assert_eq!(bengal.dimensions["occupation"].assigned_residents, 29_712_198);
+    let agra_oudh = world.inspect_population("raj_agra_oudh").unwrap().social.unwrap();
+    assert_eq!(agra_oudh.dimensions["occupation"].assigned_residents, 22_793_163);
+    let central = world.inspect_population("raj_central_provinces").unwrap().social.unwrap();
+    assert_eq!(central.dimensions["occupation"].assigned_residents, 6_626_834);
+    let old_central = before.inspect_population("raj_central_provinces").unwrap().social.unwrap();
+    assert_eq!(old_central.dimensions["occupation"].assigned_residents, 0);
+    let old_bengal = old.inspect_population("raj_bengal_province").unwrap().social.unwrap();
+    assert_eq!(old_bengal.dimensions["occupation"].assigned_residents, 0);
+
+    let v32 = bootstrap.base_opening_version("country_fra", None, Some(32)).unwrap();
+    let argentina = v32.inspect_population("argentina_1900").unwrap();
+    assert_eq!(argentina.population_total, Some(4_624_686));
+    let profile = argentina.structure.unwrap();
+    assert_eq!(profile.residents_with_cohort_age_and_sex, 4_502_031);
+    assert_eq!(profile.cohort_residents, 4_524_112);
+    assert_eq!(profile.unclassified_residents, 100_574);
+    let literacy = &argentina.social.unwrap().dimensions["literacy"];
+    assert_eq!(literacy.assigned_residents, 3_713_957);
+    assert_eq!(literacy.unknown_residents, 910_729);
+    let chaco = v32.inspect_population("ar_central_chaco_comparable").unwrap();
+    assert_eq!(chaco.structure.unwrap().residents_with_cohort_age_and_sex, 1_072_009);
+    let puna = v32.inspect_population("ar_puna_1899_geography_unlocated").unwrap();
+    assert_eq!(puna.structure.unwrap().unclassified_residents, 749);
+
+    let java = v32.inspect_population("java_madoera_colonial_population").unwrap();
+    assert_eq!(java.population_total, Some(28_092_332));
+    let profile = java.structure.unwrap();
+    assert_eq!(profile.cohort_residents, 27_798_112);
+    assert_eq!(profile.residents_with_cohort_age_and_sex, 17_092_483);
+    assert_eq!(profile.unclassified_residents, 294_220);
+
+    let current = census_opening_v43(&bootstrap);
+    let java = current.inspect_population("java_madoera_colonial_population").unwrap();
+    assert_eq!(java.population_total, Some(28_092_332));
+    assert_eq!(java.children.len(), 17);
+    assert_eq!(java.children.iter().map(|child| child.population_total).sum::<u64>(), 28_092_332);
+    let demographic = java.structure.unwrap();
+    assert_eq!(demographic.residents_with_cohort_age_and_sex, 24_536_078);
+    assert_eq!(demographic.unclassified_residents, 294_220);
+    let java_status = &java.social.unwrap().dimensions["legal_estate"];
+    assert_eq!(java_status.assigned_residents, 28_092_332);
+    assert_eq!(java_status.unknown_residents, 0);
+    let batavia = current.inspect_population("java_madoera_batavia_krawang").unwrap();
+    assert_eq!(batavia.population_total, Some(1_893_007));
+    assert_eq!(batavia.structure.unwrap().residents_with_cohort_age_and_sex, 1_787_592);
+    let cheribon = current.inspect_population("java_madoera_cheribon").unwrap();
+    assert_eq!(cheribon.population_total, Some(1_639_947));
+    assert_eq!(cheribon.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+    let djokjakarta = current.inspect_population("java_madoera_djokjakarta").unwrap();
+    assert_eq!(djokjakarta.structure.unwrap().residents_with_cohort_age_and_sex, 1_020_879);
+    for (scope, expected) in [
+        ("java_madoera_kedoe_bagelen", 2_312_693),
+        ("java_madoera_kediri", 1_445_934),
+        ("java_madoera_madoera", 1_474_414),
+    ] {
+        let local = current.inspect_population(scope).unwrap().structure.unwrap();
+        assert_eq!(local.residents_with_cohort_age_and_sex, expected);
+    }
+    let v37 = bootstrap.base_opening_version("country_fra", None, Some(37)).unwrap();
+    let previous_java = v37.inspect_population("java_madoera_colonial_population").unwrap();
+    assert_eq!(previous_java.structure.unwrap().residents_with_cohort_age_and_sex, 17_078_108);
+    let mendoza = current.inspect_population("ar_mendoza").unwrap().social.unwrap();
+    assert_eq!(mendoza.dimensions["occupation"].assigned_residents, 55_383);
+    assert_eq!(mendoza.dimensions["class"].assigned_residents, 506);
+}
+
+#[test]
+fn historical_sichuan_and_philippines_keep_separate_scope_balances() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.base_opening_version("country_fra", None, Some(41)).unwrap();
+    let old = bootstrap.base_opening_version("country_fra", None, Some(28)).unwrap();
+    let sichuan = world.inspect_population("qing_hist_sichuan").unwrap();
+    assert_eq!(sichuan.population_total, old.inspect_population("qing_hist_sichuan").unwrap().population_total);
+    assert_eq!(sichuan.population_total, Some(42_424_139));
+    assert_eq!(sichuan.children.len(), 19);
+    assert_eq!(sichuan.children.iter().map(|unit| unit.population_total).sum::<u64>(), 42_424_139);
+    let west = world.inspect_population("qing_hist_sichuan_unlocated").unwrap();
+    assert_eq!(west.population_total, Some(2_791_411));
+    assert_eq!(west.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+    let islands = world.inspect_population("cshapes_gw_840").unwrap();
+    assert_eq!(islands.population_total, Some(6_961_339));
+    assert_eq!(islands.direct_residents, Some(6_871_648));
+    assert_eq!(islands.structure.unwrap().unclassified_residents, 6_871_648);
+    assert_eq!(islands.children.len(), 1);
+    assert_eq!(islands.children[0].population_total, 89_691);
+    let surigao = world.inspect_population("ph_1900_surigao_main_population").unwrap();
+    assert_eq!(surigao.structure.unwrap().residents_with_cohort_age_and_sex, 89_691);
+    assert_eq!(surigao.social.unwrap().dimensions["occupation"].assigned_residents, 34_300);
+    assert!(old.inspect_population("cshapes_gw_840").unwrap().population_total.is_none());
+    assert_eq!(world.population().global_total() - old.population().global_total(), 6_961_339);
+    for unit in ["qing_empire", "united_states_1900", "kingdom_of_spain"] {
+        assert_eq!(world.population().population_total(unit), old.population().population_total(unit));
+    }
+}
+
+#[test]
+fn opening_v42_philippine_provinces_debit_existing_archipelago() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.base_opening_version("country_fra", None, Some(42)).unwrap();
+    let old = bootstrap.base_opening_version("country_fra", None, Some(41)).unwrap();
+    let islands = world.inspect_population_brief("cshapes_gw_840").unwrap();
+    let cebu = world.inspect_population_brief("ph_atlas_1900_cebu").unwrap();
+    assert_eq!(islands.population_total, old.population().population_total("cshapes_gw_840"));
+    assert_eq!(islands.population_total, Some(6_961_339));
+    assert_eq!(islands.direct_residents, Some(5_125_411));
+    assert_eq!(islands.child_residents, Some(1_835_928));
+    assert_eq!(cebu.parent_id, Some("cshapes_gw_840"));
+    assert_eq!(cebu.population_total, Some(504_076));
+    assert_eq!(cebu.opening.unwrap().source_id, "ph_philippine_commission_atlas_1900");
+    assert!(old.population().population_total("ph_atlas_1900_cebu").is_none());
+}
+
+#[test]
+fn opening_v42_danish_regions_close_to_the_domestic_census_control() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.base_opening_version("country_fra", None, Some(42)).unwrap();
+    let denmark = world.inspect_population("state:kingdom_of_denmark").unwrap();
+    assert_eq!(denmark.population_total, Some(2_422_217));
+    assert_eq!(denmark.children.len(), 7);
+    assert_eq!(denmark.child_residents, Some(2_422_217));
+    assert_eq!(denmark.children.iter().map(|child| child.population_total).sum::<u64>(), 2_422_217);
+    assert_eq!(denmark.opening.unwrap().source_id, "dk_statistics_population_1905_table3");
+}
+
+#[test]
+fn city_lookup_preserves_dated_census_with_separate_live_parent() {
+    let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+    let new_york = world.inspect_population_brief("place:new_york").unwrap();
+    assert_eq!(new_york.account_id, Some("us_city_new_york_new_york"));
+    assert_eq!(new_york.population_total, Some(3_437_202));
+    assert_eq!(new_york.parent_id, Some("us_state_new_york"));
+    assert_eq!(new_york.opening.unwrap().population_value, 3_437_202);
+    let state = world.inspect_population("us_state_new_york").unwrap();
+    assert_eq!(state.population_total, Some(7_216_546));
+    assert_eq!(state.children.iter().map(|unit| unit.population_total).sum::<u64>(), 7_216_546);
+    let population = world.population();
+    let paris = world.inspect_population_brief("place:paris").unwrap();
+    assert_eq!(paris.population_total, Some(2_670_538));
+    assert_eq!(paris.parent_id, Some("administrative_region:france_seine"));
+    let needs = world.population_household_needs(&new_york).unwrap();
+    assert_eq!(needs.by_class.iter().map(|group| group.residents).sum::<u64>(), 3_437_202);
+    let bread = needs.needs.iter().find(|row| row.id == "bread").unwrap();
+    let class_bread: f64 = needs.by_class.iter().flat_map(|group| &group.needs)
+        .filter(|row| row.id == "bread").map(|row| row.quantity).sum();
+    assert!((bread.quantity - class_bread).abs() < 0.000_001);
+    let clothing = needs.needs.iter().find(|need| need.id == "clothing").unwrap();
+    assert!(clothing.quantity / (needs.residents as f64) < 0.004);
+    let japan = world.inspect_population_brief("empire_of_japan").unwrap();
+    let japanese = world.population_household_needs(&japan).unwrap();
+    let rice = |needs: &crate::formal_population::households::HouseholdNeeds| {
+        needs.needs.iter().find(|row| row.id == "rice").unwrap().quantity / needs.residents as f64
+    };
+    assert!(rice(&japanese) > 8.0 * rice(&needs));
+    let social = population.social_distribution(new_york.account_id).unwrap();
+    let workforce = population.labor_supply(new_york.account_id, new_york.structure.as_ref().unwrap(), Some(&social));
+    assert_eq!(workforce.residents, workforce.potential_workers + workforce.caregivers + workforce.children
+        + workforce.students + workforce.older + workforce.unresolved_activity);
+    assert_eq!(workforce.sectors.iter().map(|sector| sector.workers).sum::<u64>(), workforce.potential_workers);
+    assert_eq!(workforce.unemployment, None);
+    assert!(workforce.sectors.iter().flat_map(|sector| &sector.alternatives)
+        .any(|plan| plan.parallel_batches > 0 && !plan.own_use.is_empty() && plan.historical_yield.is_some()));
+    let manchester = world.inspect_population_brief("place:manchester").unwrap();
+    assert_eq!(manchester.population_total, None);
+    assert!(manchester.city_reference.is_some());
+}
+
+#[test]
+fn historical_qing_prefectures_preserve_provinces_and_unknown_attributes() {
+    let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+    for (unit, population, count) in [
+        ("qing_hist_shaanxi", 8_680_861, 11),
+        ("qing_hist_gansu", 6_389_222, 10),
+        ("qing_hist_jiangxi", 14_385_490, 14),
+    ] {
+        let report = world.inspect_population(unit).unwrap();
+        assert_eq!(report.population_total, Some(population));
+        assert_eq!(report.direct_residents, None);
+        assert_eq!(report.children.len(), count);
+        assert_eq!(report.children.iter().map(|child| child.population_total).sum::<u64>(), population);
+    }
+    let scope = world.inspect_population("qing_hist_shaanxi_xian_hanzhong").unwrap();
+    assert_eq!(scope.parent_id, Some("qing_hist_shaanxi"));
+    assert_eq!(scope.population_total, Some(3_279_041));
+    assert!(scope.structure.unwrap().residents_with_cohort_age_and_sex > 3_000_000);
+    assert!(scope.social.unwrap().dimensions["occupation"].modelled_residents > 0);
+    assert_eq!(world.population().population_total("qing_empire"), Some(400_000_000));
+}
+
+#[test]
+fn historical_german_civil_status_and_canadian_occupations_match_census_scopes() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let unit = "administrative_region:germany_sachsen";
+    let world = bootstrap.create("country_fra").unwrap();
+    let saxony = world.inspect_population(unit).unwrap();
+    assert_eq!(saxony.population_total, Some(4_126_352));
+    assert_eq!(saxony.structure.unwrap().residents_with_cohort_age_and_sex, 4_126_352);
+    let social = saxony.social.unwrap();
+    assert_eq!(social.dimensions["marital_status"].assigned_residents, 4_126_352);
+    assert_eq!(social.dimensions["marital_status"].by_classification["saxony_1900_reported_marital_status"]["Married"], 1_537_122);
+    let wuerttemberg = world.inspect_population("administrative_region:germany_wuerttemberg").unwrap();
+    assert_eq!(wuerttemberg.population_total, Some(2_153_315));
+    assert_eq!(wuerttemberg.structure.unwrap().residents_with_cohort_age_and_sex, 2_153_315);
+    assert_eq!(wuerttemberg.social.unwrap().dimensions["marital_status"].assigned_residents, 2_153_315);
+
+    let ledger = world.population();
+    let quebec = ledger.social_distribution(Some("ca_quebec_and_unorganized_territories")).unwrap();
+    let occupation = &quebec.dimensions["occupation"];
+    assert_eq!((occupation.assigned_residents, occupation.unknown_residents), (520_818, 1_158_263));
+    let source = occupation.direct_opening_distribution.unwrap();
+    assert_eq!((source.observed_total, source.observed_unknown), (1_701_607, 1_173_802));
+    let canada = ledger.social_distribution(Some("dominion_of_canada")).unwrap();
+    assert_eq!(canada.dimensions["occupation"].assigned_residents, 1_774_092);
+    let v19 = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
+    assert_eq!(v19.population().social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 59_646_786);
+    let previous = bootstrap.base_opening_version("country_fra", None, Some(18)).unwrap();
+    assert_eq!(previous.inspect_population(unit).unwrap().structure.unwrap().residents_with_cohort_age_and_sex, 0);
+    assert_eq!(previous.population().social_distribution(Some("dominion_of_canada")).unwrap().dimensions["occupation"].assigned_residents, 0);
+}
+
+#[test]
+fn historical_taiwan_register_has_a_separate_control_and_unlocated_residents() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.create("country_fra").unwrap();
+    let report = world.inspect_population("taiwan_under_japan").unwrap();
+    assert_eq!(report.population_total, Some(2_796_343));
+    assert_eq!(report.direct_residents, Some(38_182));
+    assert_eq!(report.children.len(), 6);
+    assert_eq!(report.children.iter().map(|child| child.population_total).sum::<u64>(), 2_758_161);
+    let tainan = world.inspect_population("tw_register_tainan").unwrap();
+    assert_eq!(tainan.parent_id, Some("taiwan_under_japan"));
+    assert_eq!(tainan.population_total, Some(1_005_179));
+    let tainan_structure = tainan.structure.unwrap();
+    assert_eq!(tainan_structure.unclassified_residents, 2_381);
+    assert_eq!(tainan_structure.cohort_residents, 1_002_798);
+    let taiwan_structure = report.structure.unwrap();
+    assert_eq!(taiwan_structure.residents_with_cohort_age_and_sex, 2_563_147);
+    assert_eq!(taiwan_structure.unclassified_residents, 40_563);
+    let yilan = world.inspect_population("tw_register_yilan").unwrap().structure.unwrap();
+    assert_eq!(yilan.cohort_residents, 99_547);
+    assert_eq!(yilan.residents_with_cohort_age_and_sex, 0);
+    let old = bootstrap.base_opening_version("country_fra", None, Some(20)).unwrap();
+    assert_eq!(old.population().population_total("taiwan_under_japan"), None);
+    for scope in ["qing_empire", "empire_of_japan"] {
+        assert_eq!(world.population().population_total(scope), old.population().population_total(scope));
+    }
+}
+
+#[test]
+fn historical_italian_and_mexican_age_and_social_tables_preserve_census_scope() {
+    let world = WorldBootstrap::load().unwrap().base_opening_version("country_fra", None, Some(21)).unwrap();
+    for (scope, total, known_age) in [
+        ("kingdom_of_italy", 32_296_914, 32_295_479),
+        ("mexican_republic", 13_447_810, 13_423_676),
+    ] {
+        let report = world.inspect_population(scope).unwrap();
+        assert_eq!(report.population_total, Some(total));
+        let structure = report.structure.unwrap();
+        assert_eq!(structure.cohort_residents, total);
+        assert_eq!(structure.residents_with_cohort_age_and_sex, known_age);
+    }
+    let italy = world.inspect_population("kingdom_of_italy").unwrap().social.unwrap();
+    let marriage = &italy.dimensions["marital_status"];
+    assert_eq!(marriage.assigned_residents, 32_296_914);
+    assert_eq!(marriage.direct_opening_distribution.as_ref().unwrap().observed_total, 32_475_253);
+    let mexico = world.inspect_population("mexican_republic").unwrap().social.unwrap();
+    assert_eq!(mexico.dimensions["occupation"].assigned_residents, 8_352_122);
+    assert_eq!(mexico.dimensions["language"].assigned_residents, 13_447_810);
+    assert_eq!(mexico.dimensions["religion"].unknown_residents, 1);
+    let durango = world.inspect_population("mx_durango").unwrap().social.unwrap();
+    assert_eq!(durango.dimensions["religion"].direct_opening_distribution.as_ref().unwrap().observed_total, 370_294);
+    let coahuila = world.inspect_population("mx_coahuila").unwrap().social.unwrap();
+    assert_eq!(coahuila.dimensions["occupation"].unknown_residents, 287_792);
+    assert_eq!(coahuila.dimensions["religion"].assigned_residents, 287_792);
+}
+
+#[test]
+fn historical_local_italy_india_and_canadian_ancestry_preserve_their_sources() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = census_opening_v43(&bootstrap);
+    let italy = world.inspect_population("kingdom_of_italy").unwrap();
+    assert_eq!(italy.population_total, Some(32_296_914));
+    assert_eq!(italy.social.unwrap().dimensions["marital_status"].assigned_residents, 32_296_914);
+    let civil_status = world.inspect_population("it_1901_civil_status_scope").unwrap();
+    assert_eq!(civil_status.children.len(), 17);
+    assert_eq!(civil_status.children.iter().map(|child| child.population_total).sum::<u64>(), 32_296_914);
+    let site = world.inspect_population("place:milan").unwrap();
+    assert_eq!(site.account_id, Some("it_1901_lombardia"));
+    assert_eq!(site.population_total, None);
+    let lombardy = world.inspect_population("it_1901_lombardia").unwrap();
+    assert_eq!(lombardy.population_total, Some(4_254_990));
+    assert_eq!(lombardy.structure.unwrap().cohort_residents, 4_254_990);
+    assert_eq!(lombardy.social.unwrap().dimensions["marital_status"].unknown_residents, 4_254_990);
+
+    let mysore = world.inspect_population("raj_mysore_state").unwrap();
+    assert_eq!(mysore.children.len(), 5);
+    assert_eq!(mysore.children.iter().map(|child| child.population_total).sum::<u64>(), 5_470_284);
+    let states = world.inspect_population("raj_united_provinces_states").unwrap();
+    assert_eq!(states.children.len(), 2);
+    assert_eq!(states.children.iter().map(|child| child.population_total).sum::<u64>(), 800_983);
+    let rampur = world.inspect_population("raj_rampur_state").unwrap();
+    assert_eq!(rampur.population_total, Some(535_305));
+    let structure = rampur.structure.unwrap();
+    assert_eq!(structure.residents_with_cohort_age_and_sex, 535_107);
+
+    let canada = world.inspect_population("dominion_of_canada").unwrap();
+    let ancestry = &canada.social.unwrap().dimensions["culture"];
+    assert_eq!(ancestry.assigned_residents, 5_273_225);
+    assert_eq!(ancestry.unknown_residents, 31_089);
+    let before = bootstrap.base_opening_version("country_fra", None, Some(21)).unwrap();
+    assert_eq!(before.population().population_total("it_1901_lombardia"), None);
+    assert_eq!(before.population().population_total("raj_rampur_state"), None);
+    assert_eq!(before.inspect_population("dominion_of_canada").unwrap().social.unwrap()
+               .dimensions["culture"].assigned_residents, 0);
+}
+
+#[test]
+fn historical_brazilian_local_ages_italian_residence_and_mysore_sex_close() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = census_opening_v43(&bootstrap);
+    let brazil = world.inspect_population("brazil_1900").unwrap();
+    assert_eq!(brazil.children.len(), 21);
+    let structure = brazil.structure.unwrap();
+    assert_eq!(structure.population_total, 17_021_073);
+    assert_eq!(structure.residents_with_cohort_age_and_sex, 16_894_202);
+    let capital = world.inspect_population("br_federal_district_1900").unwrap();
+    assert_eq!(capital.population_total, Some(674_729));
+    assert!(capital.structure.unwrap().cohorts.iter().filter_map(|cohort| cohort.evidence.as_ref())
+        .all(|source| source.uncertainty.contains("enumeration was annulled")));
+
+    let italy = world.inspect_population("kingdom_of_italy").unwrap().social.unwrap();
+    let residence = &italy.dimensions["residence"];
+    assert_eq!(residence.assigned_residents, 32_296_914);
+    assert_eq!(residence.by_classification["italy_1901_settlement_pattern"].len(), 3);
+    let station = world.inspect_population("raj_bangalore_civil_military_station").unwrap();
+    let station_structure = station.structure.unwrap();
+    assert_eq!(station_structure.population_total, 90_815);
+    let men: u64 = station_structure.cohorts.iter()
+        .filter(|cohort| cohort.sex == Some(crate::formal_population::CohortSex::Male))
+        .map(|cohort| cohort.members).sum();
+    assert_eq!(men, 45_710);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(22)).unwrap();
+    let old_brazil = old.inspect_population("brazil_1900").unwrap();
+    assert_eq!(old_brazil.population_total, Some(17_021_073));
+    assert_eq!(old_brazil.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+    assert_eq!(old.inspect_population("kingdom_of_italy").unwrap().social.unwrap()
+               .dimensions["residence"].assigned_residents, 0);
+}
+
+#[test]
+fn historical_oudh_italy_egypt_and_spain_opening_counts_close() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.base_opening_version("country_fra", None, Some(24)).unwrap();
+    let agra_oudh = world.inspect_population("raj_agra_oudh").unwrap();
+    assert_eq!(agra_oudh.children.len(), 13);
+    assert_eq!(agra_oudh.children.iter().map(|child| child.population_total).sum::<u64>(), 47_600_781);
+    assert_eq!(agra_oudh.structure.unwrap().cohort_residents, 47_600_781);
+    let lucknow = world.inspect_population("raj_oudh_lucknow").unwrap();
+    assert_eq!(lucknow.population_total, Some(791_028));
+    assert_eq!(lucknow.parent_id, Some("raj_agra_oudh"));
+    assert_eq!(world.inspect_population("place:lucknow").unwrap().account_id, Some("raj_oudh_lucknow"));
+    assert_eq!(lucknow.structure.as_ref().unwrap().cohort_residents, 791_028);
+    let lucknow_religion = &lucknow.social.unwrap().dimensions["religion"];
+    assert_eq!(lucknow_religion.assigned_residents, 791_028);
+    assert!(lucknow_religion.by_classification["india_1901_reported_religion"].contains_key("Brahmos"));
+
+    let lombardy = world.inspect_population("it_1901_lombardia").unwrap().social.unwrap();
+    let occupation = &lombardy.dimensions["occupation"];
+    let opening = occupation.direct_opening_distribution.as_ref().unwrap();
+    assert_eq!(opening.observed_total, 4_282_728);
+    assert_eq!(occupation.by_classification["italy_1901_reported_occupation"].len(), 6);
+    assert_eq!(occupation.assigned_residents + occupation.unknown_residents, 4_254_990);
+    assert_eq!(lombardy.dimensions["class"].assigned_residents, 0);
+    let property = &lombardy.dimensions["property_declaration"];
+    assert_eq!(property.assigned_residents, 4_254_990);
+    assert_eq!(property.by_classification["italy_1901_registered_real_property"].len(), 4);
+    assert_eq!(lombardy.dimensions["literacy"].assigned_residents, 4_254_990);
+    let piemonte = world.inspect_population("it_1901_piemonte").unwrap().social.unwrap();
+    let industrial_position = &piemonte.dimensions["class"];
+    assert_eq!(industrial_position.by_classification["italy_1901_industrial_position"].len(), 4);
+    assert_eq!(industrial_position.assigned_residents + industrial_position.unknown_residents, 3_308_662);
+
+    let faiyum = world.inspect_population("egy_mudiriya_faiyum").unwrap();
+    let religion = &faiyum.social.unwrap().dimensions["religion"];
+    assert_eq!(religion.unknown_residents, 0);
+    assert_eq!(religion.assigned_residents, faiyum.population_total.unwrap());
+    let norm = &faiyum.dietary_norms[0];
+    assert_eq!(norm.residents_with_matching_religion,
+        religion.by_classification["egypt_1897_reported_religion"]["Muslim"]);
+    assert_eq!(norm.observed_adherents, None);
+
+    let spain = world.inspect_population("kingdom_of_spain").unwrap();
+    assert_eq!(spain.population_total, Some(18_511_807));
+    let spain_structure = spain.structure.unwrap();
+    assert_eq!(spain_structure.cohort_residents, 18_511_807);
+    assert!(spain_structure.cohorts.iter().any(|cohort| cohort.age_years.is_none()));
+    let marriage = &spain.social.unwrap().dimensions["marital_status"];
+    assert_eq!(marriage.assigned_residents + marriage.unknown_residents, 18_511_807);
+    assert_eq!(marriage.unknown_residents, 5_997);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(23)).unwrap();
+    assert_eq!(old.population().population_total("raj_oudh_lucknow"), None);
+    assert_eq!(old.population().population_total("raj_agra_oudh"), Some(47_600_781));
+    let old_italy = old.inspect_population("it_1901_lombardia").unwrap().social.unwrap();
+    assert_eq!(old_italy.dimensions["occupation"].assigned_residents, 0);
+    assert!(!old_italy.dimensions.contains_key("property_declaration"));
+}
+
+#[test]
+fn historical_spanish_belgian_faiyum_and_brazilian_opening_counts_close() {
+    let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+    let spain = world.inspect_population("kingdom_of_spain").unwrap();
+    assert_eq!(spain.children.len(), 10);
+    assert_eq!(spain.children.iter().map(|child| child.population_total).sum::<u64>(), 18_511_807);
+    let barcelona = world.inspect_population("es_census_1900_province_08").unwrap();
+    assert_eq!(barcelona.population_total, Some(1_052_534));
+    assert!(barcelona.structure.unwrap().cohorts.iter().all(|cohort| {
+        cohort.evidence.as_ref().is_some_and(|evidence| evidence.source_id == "es_census_1900_age_marital")
+    }));
+    let marriage = &barcelona.social.unwrap().dimensions["marital_status"];
+    assert_eq!(marriage.direct_opening_distribution.as_ref().unwrap().observed_total, 1_054_541);
+    assert_eq!(marriage.assigned_residents + marriage.unknown_residents, 1_052_534);
+    let alava = world.inspect_population("es_census_1900_province_01").unwrap();
+    assert_eq!(alava.population_total, Some(96_213));
+    assert_eq!(alava.social.unwrap().dimensions["marital_status"].assigned_residents, 0);
+
+    let belgium = world.inspect_population("kingdom_of_belgium").unwrap();
+    assert_eq!(belgium.structure.unwrap().residents_with_cohort_age_and_sex, 6_631_330);
+    let belgian_social = belgium.social.unwrap();
+    assert_eq!(belgian_social.dimensions["language"].assigned_residents, 6_631_330);
+    assert_eq!(belgian_social.dimensions["marital_status"].assigned_residents, 6_631_330);
+    let antwerp = world.inspect_population("be_census_antwerp").unwrap().structure.unwrap();
+    assert_eq!(antwerp.cohorts.len(), 6);
+    assert_eq!(antwerp.residents_with_cohort_age_and_sex, 807_274);
+
+    let faiyum = world.inspect_population("egy_mudiriya_faiyum").unwrap();
+    assert_eq!(faiyum.children.len(), 3);
+    assert_eq!(faiyum.children.iter().map(|child| child.population_total).sum::<u64>(), 389_421);
+    let itsa = world.inspect_population("egy_markaz_itsa").unwrap();
+    let structure = itsa.structure.unwrap();
+    assert_eq!(structure.cohort_residents, 124_623);
+    assert_eq!(structure.residents_with_cohort_age_and_sex, 124_623);
+    let itsa_social = itsa.social.unwrap();
+    assert_eq!(itsa_social.dimensions["religion"].assigned_residents, 124_623);
+    assert_eq!(itsa_social.dimensions["literacy"].assigned_residents, 124_623);
+    let district = world.inspect_population("egy_markaz_faiyum").unwrap().social.unwrap();
+    assert_eq!(district.dimensions["occupation"].assigned_residents, 132_375);
+    let literacy = &district.dimensions["literacy"];
+    assert_eq!(literacy.assigned_residents, 109_228);
+    assert_eq!(literacy.unknown_residents, 23_147);
+
+    let sao_paulo = world.inspect_population("br_sao_paulo").unwrap().social.unwrap();
+    assert_eq!(sao_paulo.dimensions["marital_status"].assigned_residents, 2_192_821);
+    assert_eq!(sao_paulo.dimensions["literacy"].assigned_residents, 2_192_821);
+    let lucknow = world.inspect_population("raj_oudh_lucknow").unwrap().structure.unwrap();
+    assert!(lucknow.cohorts.iter().all(|cohort| {
+        cohort.evidence.as_ref().is_some_and(|evidence| evidence.locator.contains("Table VII(B)"))
+    }));
+}
+
+#[test]
+fn historical_portuguese_and_agra_districts_close_without_allocating_unlocated_people() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = census_opening_v43(&bootstrap);
+    let portugal = world.inspect_population("kingdom_of_portugal").unwrap();
+    assert_eq!(portugal.children.len(), 21);
+    assert_eq!(portugal.children.iter().map(|child| child.population_total).sum::<u64>(), 5_388_982);
+    let lisboa = world.inspect_population("pt1900_lisboa").unwrap();
+    assert_eq!(lisboa.population_total, Some(700_515));
+    assert!(lisboa.structure.unwrap().cohorts.iter().all(|cohort| {
+        cohort.evidence.as_ref().is_some_and(|evidence| evidence.method.contains("directly observed district"))
+    }));
+    let lisboa = lisboa.social.unwrap();
+    assert_eq!(lisboa.dimensions["occupation"].assigned_residents, 680_949);
+    assert_eq!(lisboa.dimensions["occupation"].unknown_residents, 19_566);
+    assert_eq!(lisboa.dimensions["religion"].unknown_residents, 186);
+    let aveiro = world.inspect_population("pt1900_aveiro").unwrap().structure.unwrap();
+    assert!(aveiro.cohorts.iter().all(|cohort| {
+        cohort.evidence.as_ref().is_some_and(|evidence| evidence.method.contains("deducting Lisboa and Porto"))
+    }));
+
+    let provinces = world.inspect_population("raj_agra_oudh").unwrap();
+    assert_eq!(provinces.children.len(), 49);
+    assert_eq!(provinces.children.iter().map(|child| child.population_total).sum::<u64>(), 47_600_781);
+    let agra = world.inspect_population("raj_agra_agra").unwrap();
+    assert_eq!(agra.population_total, Some(1_053_947));
+    assert_eq!(agra.structure.unwrap().cohort_residents, 1_053_947);
+    assert_eq!(agra.social.unwrap().dimensions["religion"].assigned_residents, 1_053_947);
+    let balance = world.inspect_population("raj_agra_unlocated_table_ii_a").unwrap();
+    assert_eq!(balance.population_total, Some(294));
+    assert_eq!(balance.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+    assert_eq!(balance.social.unwrap().dimensions["religion"].unknown_residents, 294);
+
+    let santa_catarina = world.inspect_population("br_santa_catarina").unwrap().social.unwrap();
+    assert_eq!(santa_catarina.dimensions["religion"].assigned_residents, 301_906);
+    assert_eq!(santa_catarina.dimensions["religion"].unknown_residents, 14_743);
+    let peru = world.inspect_population("peru_1900").unwrap();
+    assert_eq!(peru.population_total, Some(3_383_000));
+    assert!(peru.children.is_empty());
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(25)).unwrap();
+    assert_eq!(old.inspect_population("raj_agra_remainder").unwrap().population_total, Some(34_788_845));
+    assert_eq!(old.inspect_population("peru_1900").unwrap().population_total, Some(3_800_000));
+}
+
+#[test]
+fn historical_indian_princely_ages_and_uk_occupations_keep_census_scopes() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.base_opening_version("country_fra", None, Some(27)).unwrap();
+    let old = bootstrap.base_opening_version("country_fra", None, Some(26)).unwrap();
+    let bombay = world.inspect_population("raj_bombay_states").unwrap();
+    assert_eq!(bombay.population_total, Some(7_021_967));
+    assert_eq!(bombay.structure.unwrap().residents_with_cohort_age_and_sex, 7_016_635);
+    assert_eq!(old.inspect_population("raj_bombay_states").unwrap()
+        .structure.unwrap().residents_with_cohort_age_and_sex, 0);
+
+    let state = world.inspect_population("raj_madras_banganapalle").unwrap();
+    assert_eq!(state.population_total, Some(32_639));
+    assert_eq!(state.structure.unwrap().residents_with_cohort_age_and_sex, 32_639);
+    assert_eq!(state.social.unwrap().dimensions["religion"].unknown_residents, 96);
+    let madras = world.inspect_population("raj_madras_states").unwrap();
+    assert_eq!(madras.children.len(), 5);
+    assert_eq!(madras.population_total, old.inspect_population("raj_madras_states").unwrap().population_total);
+
+    for (unit, census_total, assigned, unknown, agriculture) in [
+        ("administrative_region:uk_constituent_scotland", 4_472_103, 1_958_171, 2_458_355, 202_459),
+        ("administrative_region:uk_constituent_ireland", 4_458_775, 1_962_996, 2_526_399, 865_428),
+    ] {
+        let report = world.inspect_population(unit).unwrap();
+        assert!(report.children.len() > 30);
+        let child = world.inspect_population(&report.children[0].unit_id).unwrap();
+        assert_eq!(child.social.unwrap().dimensions["occupation"].assigned_residents, 0);
+        let occupation = &report.social.as_ref().unwrap().dimensions["occupation"];
+        assert_eq!((occupation.assigned_residents, occupation.unknown_residents), (assigned, unknown));
+        assert_eq!(occupation.direct_opening_distribution.as_ref().unwrap().observed_total, census_total);
+        assert_eq!(occupation.by_classification["uk_1901_general_report_occupation_orders"]["Agriculture"], agriculture);
+    }
+
+    let gharbiya = world.inspect_population("egy_mudiriya_gharbiya").unwrap().social.unwrap();
+    assert_eq!(gharbiya.dimensions["occupation"]
+        .by_classification["egypt_1897_reported_occupation_status"]["With occupation"], 450_890);
+    let jirja = world.inspect_population("egy_mudiriya_jirja").unwrap().social.unwrap();
+    assert_eq!(jirja.dimensions["literacy"]
+        .by_classification["egypt_1897_reported_instruction"]["Read and write"], 16_745);
+}
+
+#[test]
+fn historical_bombay_common_jurisdiction_preserves_india_and_models_local_ages() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.create("country_fra").unwrap();
+    let old = bootstrap.base_opening_version("country_fra", None, Some(27)).unwrap();
+    assert_eq!(world.population().population_total("cshapes_gw_750"),
+               old.population().population_total("cshapes_gw_750"));
+    let presidency = world.inspect_population("raj_bombay_presidency").unwrap();
+    assert_eq!(presidency.population_total, Some(18_552_552));
+    assert_eq!(presidency.children.len(), 24);
+    assert_eq!(presidency.children.iter().map(|child| child.population_total).sum::<u64>(), 18_552_552);
+    let city = world.inspect_population("place:bombay").unwrap();
+    assert_eq!(city.account_id, Some("raj_bombay_bombay_city"));
+    assert_eq!(city.population_total, Some(781_314));
+    assert_eq!(city.structure.unwrap().residents_with_cohort_age_and_sex, 781_295);
+    let v39 = bootstrap.base_opening_version("country_fra", None, Some(39)).unwrap();
+    let city_v39 = v39.inspect_population("place:bombay").unwrap();
+    let social = city_v39.social.unwrap();
+    assert_eq!(social.dimensions["religion"].assigned_residents, 780_671);
+    assert_eq!(social.dimensions["religion"].unknown_residents, 643);
+    assert_eq!(social.dimensions["marital_status"].assigned_residents, 781_314);
+    assert_eq!(social.dimensions["literacy"].assigned_residents, 781_314);
+    assert_eq!(city_v39.dietary_norms[0].residents_with_matching_religion, 156_812);
+    assert_eq!(city_v39.dietary_norms[1].residents_with_matching_religion, 5_394);
+    assert!(world.inspect_population("place:karachi").unwrap().population_total.is_none());
+    let states = world.inspect_population("raj_bombay_states").unwrap();
+    assert_eq!(states.population_total, Some(7_044_776));
+    assert_eq!(states.structure.unwrap().residents_with_cohort_age_and_sex, 7_039_427);
+    assert_eq!(old.inspect_population("raj_bombay_states").unwrap().population_total, Some(7_021_967));
+}
+
+#[test]
+fn historical_dietary_matches_use_the_opening_version_and_reported_religion() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.create("country_fra").unwrap();
+    let prior = bootstrap.base_opening_version("country_fra", None, Some(38)).unwrap();
+    let istanbul = world.inspect_population("ottoman_1897_istanbul").unwrap();
+    assert_eq!(istanbul.dietary_norms[0].residents_with_matching_religion, 520_194);
+    assert_eq!(istanbul.dietary_norms[0].observed_adherents, None);
+    assert!(prior.inspect_population("ottoman_1897_istanbul").unwrap().dietary_norms.is_empty());
+    let arges = world.inspect_population("ro_1899_county_arges").unwrap();
+    assert_eq!(arges.dietary_norms[0].residents_with_matching_religion, 95);
+    assert_eq!(arges.dietary_norms[1].residents_with_matching_religion, 903);
+    assert!(prior.inspect_population("ro_1899_county_arges").unwrap().dietary_norms.is_empty());
+}
+
+#[test]
+fn historical_bengal_districts_preserve_the_opening_balance_and_local_sex_profiles() {
+    use crate::formal_population::CohortSex;
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = census_opening_v43(&bootstrap);
+    let old = bootstrap.base_opening_version("country_fra", None, Some(26)).unwrap();
+    assert_eq!(world.population().population_total("cshapes_gw_750"),
+               old.population().population_total("cshapes_gw_750"));
+    let bengal = world.inspect_population("raj_bengal_province").unwrap();
+    assert_eq!(bengal.children.len(), 48);
+    assert_eq!(bengal.children.iter().map(|child| child.population_total).sum::<u64>(), 74_350_690);
+    assert_eq!(bengal.population_total, Some(74_350_690));
+    let bengal_social = bengal.social.unwrap();
+    assert_eq!(bengal_social.dimensions["religion"].unknown_residents, 227);
+    assert_eq!(bengal_social.dimensions["marital_status"].assigned_residents, 74_350_690);
+    let language = &bengal_social.dimensions["language"];
+    assert_eq!(language.assigned_residents, 74_350_690);
+    assert_eq!(language.direct_opening_distribution.as_ref().unwrap().observed_total, 74_744_866);
+    let united = world.inspect_population("raj_agra_oudh").unwrap().social.unwrap();
+    let language = &united.dimensions["language"];
+    assert!(language.unknown_residents > 294);
+    assert_eq!(language.direct_opening_distribution.as_ref().unwrap().observed_unknown, 6_791);
+    let balance = world.inspect_population("raj_bengal_unlocated_comparison").unwrap();
+    assert_eq!(balance.population_total, Some(26));
+    assert_eq!(balance.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+
+    let calcutta = world.inspect_population("place:kolkata").unwrap();
+    assert_eq!(calcutta.account_id, Some("raj_bengal_calcutta"));
+    let city = world.inspect_population("place:kolkata").unwrap();
+    assert_eq!(city.account_id, Some("raj_bengal_calcutta"));
+    assert_eq!(city.population_total, Some(828_598));
+    let structure = city.structure.unwrap();
+    assert_eq!(structure.residents_with_cohort_age_and_sex + structure.named_residents, 828_598);
+    let male = structure.cohorts.iter().filter(|cohort| cohort.sex == Some(CohortSex::Male))
+        .map(|cohort| cohort.members).sum::<u64>();
+    assert!((549_850..549_862).contains(&male), "{male}");
+    let city_social = city.social.unwrap();
+    let literacy = &city_social.dimensions["literacy"];
+    assert_eq!(literacy.assigned_residents, 828_598);
+    assert_eq!(literacy.by_classification["india_1901_reported_literacy"]["Literate"], 205_678);
+    assert_eq!(city_social.dimensions["religion"].unknown_residents, 828_598);
+    assert_eq!(city_social.dimensions["language"].unknown_residents, 828_598);
+    let dacca = world.inspect_population("raj_bengal_dacca").unwrap();
+    assert_eq!(dacca.social.unwrap().dimensions["literacy"].assigned_residents, 2_620_046);
+    assert_eq!(old.residence_unit_at("place:kolkata"), Some("raj_bengal_province"));
+}
+
+#[test]
+fn historical_baden_survey_adds_age_and_civil_status_without_changing_the_balance() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let unit = "administrative_region:germany_baden";
+    let world = bootstrap.create("country_fra").unwrap();
+    let report = world.inspect_population(unit).unwrap();
+    assert_eq!(report.population_total, Some(1_841_868));
+    assert_eq!(report.structure.unwrap().residents_with_cohort_age_and_sex, 1_841_868);
+    assert_eq!(report.social.unwrap().dimensions["marital_status"].assigned_residents, 1_841_868);
+
+    let wuerttemberg = "administrative_region:germany_wuerttemberg";
+    let structure = world.inspect_population(wuerttemberg).unwrap().structure.unwrap();
+    assert_eq!(structure.residents_with_cohort_age_and_sex, 2_153_315);
+    assert!(structure.cohorts.iter().all(|cohort| {
+        cohort.age_years.is_some_and(|age| age.oldest == Some(age.youngest))
+    }));
+
+    let previous = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
+    let before = previous.inspect_population(unit).unwrap();
+    assert_eq!(before.population_total, report.population_total);
+    assert_eq!(before.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+    assert_eq!(before.social.unwrap().dimensions["marital_status"].assigned_residents, 0);
+    let before_wuerttemberg = previous.inspect_population(wuerttemberg).unwrap().structure.unwrap();
+    assert_eq!(before_wuerttemberg.residents_with_cohort_age_and_sex, 2_153_315);
+    assert!(before_wuerttemberg.cohorts.iter().any(|cohort| {
+        cohort.age_years.is_some_and(|age| age.oldest == Some(15) && age.youngest == 0)
+    }));
+}
+
+#[test]
+fn historical_egypt_provinces_partition_the_control_with_known_sex_only() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = bootstrap.base_opening_version("country_fra", None, Some(24)).unwrap();
+    let egypt = world.inspect_population("khedivate_of_egypt").unwrap();
+    assert_eq!(egypt.population_total, Some(10_000_000));
+    assert_eq!(egypt.direct_residents, Some(4_195_390));
+    assert_eq!(egypt.children.iter().map(|child| child.population_total).sum::<u64>(), 5_804_610);
+    for (unit, total) in [
+        ("egy_mudiriya_asyut", 815_260),
+        ("egy_mudiriya_faiyum", 389_421),
+        ("egy_mudiriya_gharbiya", 1_346_489),
+        ("egy_mudiriya_jirja", 716_693),
+        ("egy_mudiriya_menufiya", 892_075),
+        ("egy_mudiriya_qena", 729_563),
+    ] {
+        let report = world.inspect_population(unit).unwrap();
+        assert_eq!(report.population_total, Some(total));
+        let structure = report.structure.unwrap();
+        assert_eq!(structure.residents_with_cohort_age_and_sex, 0);
+        assert_eq!(structure.cohort_residents, total);
+        assert_eq!(structure.cohorts.len(), 2);
+        assert!(structure.cohorts.iter().all(|cohort| cohort.sex.is_some() && cohort.age_years.is_none()));
+        assert_eq!(report.social.unwrap().dimensions["occupation"].unknown_residents, total);
+    }
+
+    let unit = "egy_mudiriya_faiyum";
+    let report = world.inspect_population(unit).unwrap();
+    let structure = report.structure.unwrap();
+    assert!(structure.cohorts.iter().any(|cohort| cohort.members == 196_981));
+    assert!(structure.cohorts.iter().any(|cohort| cohort.members == 192_440));
+    let previous = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
+    assert_eq!(previous.inspect_population(unit).unwrap().population_total, None);
+    assert_eq!(previous.inspect_population("khedivate_of_egypt").unwrap().direct_residents, Some(9_084_891));
+    let current = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
+    for (unit, population) in [
+        ("place:cairo", 592_087),
+        ("place:alexandria", 308_541),
+        ("egy_markaz_ramleh", 24_335),
+        ("egy_mudiriya_gharbiya", 1_346_489),
+        ("egy_markaz_itsa", 124_623),
+        ("egy_markaz_faiyum", 132_375),
+        ("egy_markaz_sinuris", 132_423),
+    ] {
+        let report = current.inspect_population(unit).unwrap();
+        assert_eq!(report.population_total, Some(population));
+        assert_eq!(report.structure.unwrap().residents_with_cohort_age_and_sex, population);
+    }
+    for (unit, total, age_unknown) in [
+        ("egy_mudiriya_menufiya", 892_075, 400),
+        ("egy_mudiriya_asyut", 815_260, 3_687),
+        ("egy_mudiriya_jirja", 716_693, 4_471),
+        ("egy_mudiriya_qena", 729_563, 7_817),
+    ] {
+        let demographic = current.inspect_population(unit).unwrap().structure.unwrap();
+        assert_eq!(demographic.cohort_residents, total);
+        assert_eq!(demographic.residents_with_cohort_age_and_sex, total - age_unknown);
+    }
+    let cairo = current.inspect_population("place:cairo").unwrap().social.unwrap();
+    assert!(cairo.dimensions["literacy"].assigned_residents > 500_000);
+}
+
+#[test]
+fn historical_hungarian_work_status_keeps_occupation_and_county_scope_separate() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = census_opening_v43(&bootstrap);
+    let unit = "ah_croatia_slavonia";
+    let report = world.inspect_population(unit).unwrap();
+    let social = report.social.unwrap();
+    let class = &social.dimensions["class"];
+    assert_eq!((class.assigned_residents, class.unknown_residents), (1_266_506, 1_128_372));
+    assert_eq!(social.dimensions["occupation"].assigned_residents, 1_270_958);
+    let tisza = world.inspect_population("ah_tisza_maros").unwrap().social.unwrap();
+    assert_eq!(tisza.dimensions["class"].assigned_residents, 893_916);
+    let global = world.population().social_distribution(None).unwrap();
+    let crown = &global.dimensions["class"].by_classification["hungarian_crown_1900_work_status"];
+    assert_eq!(crown.values().sum::<u64>(), 8_368_163);
+    let county = world.inspect_population(report.children[0].unit_id).unwrap();
+    assert_eq!(county.social.unwrap().dimensions["class"].assigned_residents, 0);
+    let previous = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
+    let old_social = previous.inspect_population(unit).unwrap().social.unwrap();
+    assert_eq!(old_social.dimensions["class"].assigned_residents, 0);
+    assert_eq!(old_social.dimensions["occupation"].assigned_residents, 1_270_958);
+}
+
+#[test]
+fn historical_alaska_and_hawaii_keep_own_age_tables_and_missing_ages() {
+    let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+    for (unit, total, with_age) in [("cshapes_gw_3", 62_288, 45_724), ("cshapes_gw_4", 151_193, 150_640)] {
+        let report = world.inspect_population(unit).unwrap();
+        assert_eq!(report.population_total, Some(total));
+        let structure = report.structure.unwrap();
+        assert_eq!(structure.cohort_residents, total);
+        assert_eq!(structure.residents_with_cohort_age_and_sex, with_age);
+    }
+}
+
+#[test]
+fn historical_hungarian_counties_preserve_parent_controls() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let world = census_opening_v43(&bootstrap);
+    for (unit, total, children, occupied, primary) in [
+        ("ah_tisza_maros", 2_041_110, 9, 901_454, 660_774),
+        ("ah_croatia_slavonia", 2_394_878, 12, 1_270_958, 1_081_677),
+    ] {
+        let report = world.inspect_population(unit).unwrap();
+        assert_eq!(report.population_total, Some(total));
+        assert_eq!(report.direct_residents, None);
+        assert_eq!(report.children.len(), children);
+        assert_eq!(report.children.iter().map(|child| child.population_total).sum::<u64>(), total);
+        let structure = report.structure.unwrap();
+        assert_eq!(structure.cohort_residents, total);
+        assert!(structure.residents_with_cohort_age_and_sex >= total - 200);
+        let social = report.social.unwrap();
+        let religion = &social.dimensions["religion"];
+        let language = &social.dimensions["language"];
+        assert_eq!(religion.assigned_residents + religion.unknown_residents, total);
+        assert!(religion.assigned_residents > total - 16_000);
+        assert_eq!(language.assigned_residents + language.unknown_residents, total);
+        assert!((language.assigned_residents as i64 - religion.assigned_residents as i64).abs() <= 1);
+        let occupation = &social.dimensions["occupation"];
+        assert_eq!(occupation.assigned_residents, occupied);
+        assert_eq!(occupation.unknown_residents, total - occupied);
+        assert_eq!(occupation.by_classification["hungarian_crown_1900_occupation"]["Primary production"], primary);
+    }
+    let municipality = world.inspect_population("ah_zagrab_city").unwrap();
+    assert_eq!(municipality.population_total, Some(59_051));
+    assert_eq!(municipality.parent_id, Some("ah_croatia_slavonia"));
+    let social = municipality.social.unwrap();
+    for dimension in ["occupation", "religion", "language"] {
+        assert_eq!(social.dimensions[dimension].assigned_residents, 0);
+        assert_eq!(social.dimensions[dimension].unknown_residents, 59_051);
+    }
+    assert_eq!(world.population().population_total("austria_hungary"), Some(45_000_882));
+    let prior = bootstrap.base_opening_version("country_fra", None, Some(18)).unwrap();
+    assert_eq!(prior.population().social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 57_872_694);
+}
+
+#[test]
+fn historical_england_wales_occupation_stays_at_the_census_scope() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let current = bootstrap.create("country_fra").unwrap();
+    let scope = "uk_england_wales_except_anglesey";
+    let county = "administrative_region:gb_historic_anglesey";
+    let world = current.population();
+    assert_eq!(world.population_total(scope), Some(32_038_448));
+    assert_eq!(world.population_total(county), Some(50_543));
+    let occupation = &world.social_distribution(Some(scope)).unwrap().dimensions["occupation"];
+    assert_eq!(occupation.assigned_residents, 14_113_822);
+    assert_eq!(occupation.assigned_residents + occupation.unknown_residents, 32_038_448);
+    let original = occupation.direct_opening_distribution.unwrap();
+    assert_eq!((original.observed_total, original.observed_unknown), (32_477_237, 18_170_116));
+    assert_eq!(occupation.by_classification["england_wales_1901_occupation_orders"]["Agriculture"], 1_106_572);
+    let local = &world.social_distribution(Some(county)).unwrap().dimensions["occupation"];
+    assert_eq!(local.assigned_residents, 21_579);
+    assert_eq!(local.by_classification["england_wales_1901_occupation_orders"]["Agriculture"], 6_868);
+    let previous = bootstrap.base_opening_version("country_fra", None, Some(16)).unwrap();
+    assert_eq!(world.population_total(county), previous.population().population_total(county));
+    let county_structure = current.inspect_population(county).unwrap().structure.unwrap();
+    let previous_structure = previous.inspect_population(county).unwrap().structure.unwrap();
+    assert_eq!(county_structure.residents_with_cohort_age_and_sex, previous_structure.residents_with_cohort_age_and_sex);
+    assert_eq!(previous.population().population_total(scope), None);
+}
+
+#[test]
+fn runtime_population_assets_keep_disk_save_versions() -> io::Result<()> {
+    use crate::formal_save::{read_native_slot, write_native_slot};
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    let bootstrap = WorldBootstrap::load()?;
+    let current = bootstrap.population_assets.current_version();
+    let suffix = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+    let slot = std::env::temp_dir().join(format!("wwo-opening-{}-{suffix}.json", std::process::id()));
+    for version in [1, 10, 17, 31, current] {
+        let world = if version == current {
+            bootstrap.create("country_fra")?
+        } else {
+            bootstrap.base_opening_version("country_fra", None, Some(version))?
+        };
+        write_native_slot(&slot, &world)?;
+        let read = read_native_slot(&slot, &bootstrap);
+        std::fs::remove_file(&slot)?;
+        let restored = read?;
+        let snapshot = restored.snapshot();
+        assert_eq!(snapshot["population"]["opening_version"], version);
+        assert!(snapshot == world.snapshot(), "population v{version} changed after save and restore");
+    }
+
+    let mut snapshot = bootstrap.create("country_fra")?.snapshot();
+    snapshot["population"]["opening_version"] = serde_json::json!(u32::MAX);
+    let error = bootstrap.restore_native(serde_json::from_value(snapshot)?).err().unwrap();
+    assert_eq!(error.kind(), io::ErrorKind::NotFound);
+    assert!(error.to_string().contains("historical population version 4294967295"));
+    Ok(())
+}
+
+#[test]
+fn historical_population_structure_and_old_openings_restore() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut world = census_opening_v43(&bootstrap);
+    let origin = world.residence_unit_at("place:moscow").unwrap().to_owned();
+    let origin = origin.as_str();
+    let destination = "country_fra";
+    let clock = world.clock();
+    let orne = "administrative_region:france_orne";
+    let argentan = "administrative_region:france_arrondissement_612";
+    let domfront = "administrative_region:france_arrondissement_613";
+    assert_eq!(world.population().resident_pool(orne), None);
+    assert_eq!(world.population().population_total(destination), Some(38_852_748));
+    for (province, people, districts) in [
+        ("ardeche", 356_005, 3),
+        ("cher", 346_079, 3),
+        ("vendee", 441_415, 3),
+        ("vosges", 421_180, 5),
+    ] {
+        let unit = format!("administrative_region:france_{province}");
+        let report = world.inspect_population(&unit).unwrap();
+        assert_eq!(report.population_total, Some(people));
+        assert_eq!(report.children.len(), districts);
+        assert_eq!(report.children.iter().map(|district| district.population_total).sum::<u64>(), people);
+    }
+    let division = world.inspect_population(orne).unwrap();
+    assert_eq!(division.population_total, Some(329_951));
+    assert_eq!(division.children.len(), 4);
+    assert_eq!(division.children.iter().map(|child| child.population_total).sum::<u64>(), 329_951);
+    assert_eq!(world.population().social_distribution(Some(destination)).unwrap()
+        .dimensions["occupation"].assigned_residents, 19_637_865);
+    assert!(division.social.unwrap().dimensions["occupation"].assigned_residents > 0);
+    let county = world.inspect_population(argentan).unwrap();
+    assert_eq!(county.population_total, Some(76_124));
+    assert_eq!(county.parent_id, Some(orne));
+    assert_eq!(county.social.unwrap().dimensions["occupation"].unknown_residents, 76_124);
+    assert_eq!(world.residence_unit_at("place:rouen"), Some("administrative_region:france_arrondissement_763"));
+    assert_eq!(world.market_unit_for_population(argentan), Some(destination));
+    let (french_cohort, _, _) = world.population().cohorts_in(argentan).next().unwrap();
+    let french_cohort = french_cohort.clone();
+    world.population.transfer_cohort(argentan, domfront, &french_cohort, 1, 0).unwrap();
+    let division = world.inspect_population(orne).unwrap();
+    assert_eq!(division.population_total, Some(329_951));
+    assert_eq!(division.recent_changes[0].unit_id, Some(argentan));
+    let france_structure = division.structure.unwrap();
+    assert_eq!(france_structure.cohort_residents, 329_951);
+    let orne_with_age_and_sex = france_structure.residents_with_cohort_age_and_sex;
+    for (unit, total) in [("ft_sweden", 5_097_402), ("ft_norway", 2_217_971)] {
+        let structure = world.population().structure(Some(unit), clock).unwrap();
+        assert_eq!(structure.population_total, total);
+        assert_eq!(structure.residents_with_cohort_age_and_sex + structure.named_residents, total);
+    }
+    let belgium = world.inspect_population("kingdom_of_belgium").unwrap();
+    assert_eq!(belgium.population_total, Some(6_631_330));
+    assert_eq!(belgium.children.len(), 9);
+    assert_eq!(belgium.children.iter().map(|child| child.population_total).sum::<u64>(), 6_631_330);
+
+    let swiss = world.population().structure(Some("swiss_confederation"), clock).unwrap();
+    assert_eq!(swiss.population_total, 3_285_131);
+    assert_eq!(swiss.residents_with_cohort_age_and_sex + swiss.named_residents, 3_285_131);
+    let netherlands = "kingdom_of_netherlands";
+    assert_eq!(world.population().population_total(netherlands), Some(5_104_137));
+    assert_eq!(world.population().resident_pool(netherlands), Some(158));
+    assert_eq!(world.residence_unit_at("place:amsterdam"), Some("nl1899_pv2700"));
+    let dutch_structure = world.population().structure(Some(netherlands), clock).unwrap();
+    assert_eq!(dutch_structure.cohort_residents, 5_103_979);
+    assert_eq!(dutch_structure.residents_with_cohort_age_and_sex, 5_103_872);
+    let dutch_social = world.population().social_distribution(Some(netherlands)).unwrap();
+    assert_eq!(dutch_social.dimensions["religion"].assigned_residents, 5_103_887);
+    assert_eq!(dutch_social.dimensions["occupation"].assigned_residents, 1_923_577);
+    assert_eq!(dutch_social.dimensions["marital_status"].assigned_residents, 5_103_913);
+    for (unit, assigned) in [
+        ("raj_central_india_agency", 4_585_285),
+        ("raj_rajputana_agency", 5_875_312),
+    ] {
+        let social = world.population().social_distribution(Some(unit)).unwrap();
+        assert_eq!(social.dimensions["occupation"].assigned_residents, assigned);
+    }
+    assert_eq!(world.residence_unit_at("place:cairo"), Some("egy_madina_cairo"));
+    assert_eq!(world.residence_unit_at("place:alexandria"), Some("egy_madina_alexandria"));
+    assert_eq!(world.population().population_total("egy_madina_cairo"), Some(592_087));
+    assert_eq!(world.population().population_total("khedivate_of_egypt"), Some(10_000_000));
+    assert_eq!(world.population().population_total("cshapes_gw_561"), Some(2_265_556));
+    let cape = world.population().structure(Some("cshapes_gw_561"), clock).unwrap();
+    assert_eq!(cape.cohort_residents, 2_265_556);
+    assert_eq!(cape.residents_with_cohort_age_and_sex, 2_264_636);
+    assert_eq!(cape.cohorts.iter().filter(|row| row.age_years.is_none()).map(|row| row.members).sum::<u64>(), 920);
+    let cape_archive = crate::formal_population::population_archive("cape_colony").unwrap().unwrap();
+    assert!(cape_archive.dated_structure.iter().any(|row| row["panel_id"] == "cape_1904" && row["values"]["both"] == 2_409_804));
+    assert_eq!(world.population().population_total("cshapes_gw_850"), Some(44_363_679));
+    assert_eq!(world.population().population_total("java_madoera_colonial_population"), Some(28_092_332));
+    assert_eq!(world.population().resident_pool("cshapes_gw_850"), Some(16_271_347));
+    assert_eq!(world.population().population_total("republic_of_colombia_1900"), Some(4_124_729));
+    assert_eq!(world.population().population_total("ft_colombia"), Some(3_803_231));
+    assert_eq!(world.population().population_total("ft_panama"), Some(321_498));
+    assert_eq!(world.market_unit_for_population("ft_panama"), Some("republic_of_colombia_1900"));
+    let bosnia = "statistical_area:bosnia_herzegovina_1900";
+    assert_eq!(world.population().population_total(bosnia), Some(1_668_263));
+    assert_eq!(world.population().population_total("austria_hungary"), Some(45_000_882));
+    assert_eq!(world.population().population_total("cshapes_gw_3461"), None);
+    assert_eq!(world.population().population_total("cshapes_gw_3462"), None);
+    assert_eq!(world.market_unit_for_population(bosnia), None);
+    let bosnia_structure = world.population().structure(Some(bosnia), clock).unwrap();
+    assert_eq!(bosnia_structure.cohort_residents, 1_668_263);
+    assert_eq!(bosnia_structure.residents_with_cohort_age_and_sex, 0);
+    assert_eq!(bosnia_structure.cohorts.iter().map(|row| row.members).sum::<u64>(), 1_668_263);
+    assert!(bosnia_structure.cohorts.iter().all(|row| row.sex.is_some() && row.age_years.is_none()));
+    let member_archive = crate::formal_population::population_archive("cshapes_gw_3461").unwrap().unwrap();
+    assert!(member_archive.dated_population.iter().any(|row| row["unit_id"] == bosnia && row["population_value"] == 1_568_092));
+    assert_eq!(world.population().population_total("ecuador_1900"), None);
+    let qing = world.population();
+    assert_eq!(qing.population_total("qing_empire"), Some(400_000_000));
+    for (label, unit) in [("qing_empire:label:7", "qing_hist_jiangxi"), ("qing_empire:label:8", "qing_hist_zhejiang"),
+        ("qing_empire:label:18", "qing_hist_guizhou"), ("qing_empire:label:5", "qing_hist_jiangsu"),
+        ("qing_empire:label:3", "qing_hist_shanxi"), ("qing_empire:label:16", "qing_hist_guangxi"),
+        ("qing_empire:label:17", "qing_hist_yunnan")]
+    {
+        let archive = crate::formal_population::population_archive(label).unwrap().unwrap();
+        assert!(archive.geographies.iter().any(|row| row["opening_id"] == unit));
+        assert!(archive.dated_population.iter().any(|row| row["unit_id"] == unit && row["date"] == "1880"));
+        assert!(qing.population_total(unit).is_some());
+    }
+    let coverage = crate::formal_population::structural_coverage_reference("russian_empire").unwrap().unwrap();
+    assert_eq!(coverage["panels"]["russia_1897_religion"]["directly_classified_count"], 125_640_021);
+    assert!(coverage["scope"]["dimensions"]["religion"]["opening_known_people"].is_null());
+    assert_eq!(coverage["scope"]["dimensions"]["religion"]["opening_unknown_people"], 135_382_043);
+    let mysore = world.population().structure(Some("raj_mysore_state"), clock).unwrap();
+    assert_eq!(mysore.population_total, 5_470_284);
+    assert_eq!(mysore.residents_with_cohort_age_and_sex, 5_470_284);
+    let madras = world.population().structure(Some("raj_madras_presidency"), clock).unwrap();
+    assert_eq!(madras.population_total, 37_910_258);
+    assert_eq!(madras.residents_with_cohort_age_and_sex, 37_910_258);
+    let coverage = crate::formal_population::structural_coverage_reference("british_isles_1900").unwrap().unwrap();
+    let crowded = &coverage["panels"]["england_wales_1901_crowded_small_tenements"];
+    assert_eq!(crowded["directly_classified_count"], 2_667_506);
+    assert_eq!(crowded["count_of_reported_tenements"], 392_414);
+    let occupants = &coverage["panels"]["england_wales_1901_occupants_by_tenement_rooms"];
+    let tenements = &coverage["panels"]["england_wales_1901_tenements_by_rooms"];
+    assert_eq!(occupants["directly_classified_count"], 32_527_843);
+    assert_eq!(tenements["directly_classified_count"], 7_036_868);
+    assert_eq!(tenements["measure_unit"], "tenements");
+    let coverage = crate::formal_population::structural_coverage_reference("russian_empire").unwrap().unwrap();
+    let language = &coverage["panels"]["russia_1897_mother_tongue"];
+    assert_eq!(language["directly_classified_count"], 125_634_894);
+    assert_eq!(language["unreported_count"], 5_127);
+    let estates = &coverage["panels"]["russia_1897_legal_estates"];
+    assert_eq!(estates["directly_classified_count"], 124_962_686);
+    assert_eq!(estates["foreign_subjects_outside_denominator"], 605_500);
+    let ecuador = crate::formal_population::population_archive("ecuador_1900").unwrap().unwrap();
+    assert!(ecuador.candidate_research_population.iter().any(|row| {
+        row["unit_id"] == "ft_ecuador" && row["date"] == "1900-01-01" && row["population_value"] == 1_100_787
+    }));
+    assert!(ecuador.sources.iter().any(|row| row["id"] == "ft_world_v5"));
+    let us = world.population().structure(Some("united_states_1900"), clock).unwrap();
+    assert_eq!(us.population_total, 75_454_976);
+    assert_eq!(us.cohort_residents + us.named_residents, us.population_total);
+    assert!(us.residents_with_cohort_age_and_sex > 75_000_000);
+    let us_social = world.population().social_distribution(Some("united_states_1900")).unwrap();
+    assert_eq!(us_social.dimensions["occupation"].assigned_residents, 28_866_450);
+    assert_eq!(us_social.dimensions["residence"].unknown_residents, 0);
+    assert_eq!(us_social.dimensions["literacy"].assigned_residents, 57_539_868);
+    assert_eq!(us_social.dimensions["household"].assigned_residents, 72_890_961);
+    assert_eq!(us_social.dimensions["culture"].unknown_residents, us.population_total);
+    let prussia_id = "administrative_region:germany_preussen";
+    let prussia = world.population().structure(Some(prussia_id), clock).unwrap();
+    assert_eq!(prussia.population_total, 33_993_492);
+    assert_eq!(prussia.cohort_residents + prussia.named_residents, prussia.population_total);
+    assert_eq!(prussia.residents_with_cohort_age_and_sex, 33_986_841);
+    let prussian_social = world.population().social_distribution(Some(prussia_id)).unwrap();
+    assert_eq!(prussian_social.dimensions["marital_status"].assigned_residents, 33_993_492);
+    let port_louis = world.transport().capital_node("cshapes_gw_590").unwrap();
+    assert_eq!(world.residence_unit_at(port_louis), Some("mu_district_port_louis"));
+    assert_eq!(world.population().population_total("qing_hist_shandong"), Some(42_165_666));
+    let initial = world.population().structure(None, clock).unwrap();
+    assert_eq!(initial.population_total,
+        initial.named_residents + initial.unclassified_residents + initial.cohort_residents);
+    assert!(initial.residents_with_cohort_age_and_sex > 0);
+    let water = &initial.published_adult_water_references;
+    assert_eq!(water.adults_with_reference + water.residents_outside_reference, initial.population_total);
+    assert!(water.adults_with_reference > 0 && water.adults_with_reference < initial.residents_with_cohort_age_and_sex);
+    assert!(water.temperate_sedentary_litres_per_day.unwrap().upper < water.warm_moderate_work_litres_per_day.unwrap().lower);
+    let efsa = &initial.published_efsa_water_reference;
+    assert_eq!(efsa.people_with_reference + efsa.people_without_reference, initial.population_total);
+    assert!(efsa.people_with_reference > water.adults_with_reference);
+    let moderate = efsa.moderate_environment_pal_1_6_total_ingested_litres_per_day.unwrap();
+    assert!(moderate.lower > 0.0 && moderate.upper >= moderate.lower);
+    let protein = &initial.published_protein_reference;
+    assert_eq!(protein.people_with_reference + protein.people_without_reference, initial.population_total);
+    assert_eq!(protein.people_with_reference, initial.published_energy_reference.people_with_reference);
+    let grams = protein.conditional_grams_per_day.unwrap();
+    assert!(grams.lower > 0.0 && grams.upper >= grams.lower);
+    let service_water = &initial.published_domestic_water_service_reference;
+    assert_eq!(service_water.scenario_population, initial.population_total);
+    assert_eq!(service_water.basic_access_litres_per_day, initial.population_total as f64 * 20.0);
+    assert_eq!(service_water.intermediate_access_litres_per_day, initial.population_total as f64 * 50.0);
+    let (cohort, _, _) = world.population().cohorts_in(origin)
+        .find(|(_, def, count)| def.sex.is_some() && *count >= 4)
+        .unwrap();
+    let cohort = cohort.clone();
+    let members = world.population().cohort_members(origin, &cohort).unwrap();
+    let global_total = world.population().global_total();
+    let moscow_religion = world.population().social_distribution(Some(origin)).unwrap();
+    let confession = &moscow_religion.dimensions["religion"];
+    assert!(confession.direct_opening_distribution.is_some());
+    assert_eq!(confession.assigned_residents, moscow_religion.population_total);
+    assert_eq!(confession.unknown_residents, 0);
+    let norm = &world.inspect_population(origin).unwrap().dietary_norms[0];
+    assert_eq!(norm.residents_with_matching_religion,
+        confession.by_classification["russia_1897_reported_confession"]["Магометане"]);
+    assert!(norm.observed_adherents.is_none());
+    world.population.transfer_cohort(origin, destination, &cohort, 2, 0).unwrap();
+    world.population.record_cohort_deaths(destination, &cohort, 1, 0).unwrap();
+    world.population.record_anonymous_births(destination, 3, 0).unwrap();
+    let saved = world.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().cohort_members(origin, &cohort), Some(members - 2));
+    assert_eq!(restored.population().cohort_members(destination, &cohort), Some(1));
+    assert_eq!(restored.population().global_total(), global_total + 2);
+    assert_eq!(restored.snapshot(), saved);
+    let after = restored.population().social_distribution(Some(origin)).unwrap();
+    assert_eq!(after.affected_resident_pools, 1);
+    assert!(after.dimensions["religion"].unknown_residents > 0);
+    assert_eq!(after.dimensions["religion"].assigned_residents + after.dimensions["religion"].unknown_residents, after.population_total);
+    assert_eq!(serde_json::to_value(after).unwrap(), serde_json::to_value(world.population().social_distribution(Some(origin))).unwrap());
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(1)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().global_total(), 1_455_178_503);
+    assert_eq!(restored.population().structure(None, clock).unwrap().cohort_residents, 0);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(2)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    let structure = restored.population().structure(None, clock).unwrap();
+    assert_eq!(structure.population_total, 1_457_759_052);
+    assert_eq!(structure.residents_with_cohort_age_and_sex, 150_314_640);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(3)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().global_total(), 1_458_689_022);
+    assert_eq!(restored.residence_unit_at("place:cairo"), Some("egy_madina_cairo"));
+    assert_eq!(restored.population().population_total("java_madoera_colonial_population"), None);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(4)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().global_total(), 1_460_954_578);
+    assert_eq!(restored.population().population_total("java_madoera_colonial_population"), Some(28_092_332));
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(5)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().global_total(), 1_463_599_198);
+    assert_eq!(restored.population().population_total("ft_panama"), None);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(6)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().global_total(), 1_465_392_190);
+    assert_eq!(restored.population().population_total("qing_hist_zhejiang"), None);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(7)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().global_total(), 1_465_392_190);
+    assert_eq!(restored.population().population_total("qing_hist_guangxi"), None);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(8)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    let cape = restored.population().structure(Some("cshapes_gw_561"), restored.clock()).unwrap();
+    assert_eq!(cape.population_total, 2_265_556);
+    assert_eq!(cape.cohort_residents, 0);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(9)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().global_total(), 1_465_392_190);
+    assert_eq!(restored.residence_unit_at("place:moscow"), Some("ft_russia_empire_ussr"));
+    assert_eq!(restored.population().structure(None, clock).unwrap().residents_with_cohort_age_and_sex, 325_734_333);
+    assert_eq!(restored.population().social_distribution(None).unwrap().residents_with_any_attribute_minimum, 0);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(10)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    let port_louis = restored.transport().capital_node("cshapes_gw_590").unwrap();
+    assert_eq!(restored.residence_unit_at(port_louis), Some("mu_main_island"));
+    assert_eq!(restored.population().global_total(), 1_465_392_190);
+    assert_eq!(restored.population().population_total("qing_hist_shandong"), None);
+    assert_eq!(restored.population().social_distribution(None).unwrap().residents_with_any_attribute_minimum, 309_272_209);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(11)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().global_total(), 1_465_392_189);
+    assert_eq!(restored.population().population_total(netherlands), Some(5_141_915));
+    assert_eq!(restored.population().population_total("nl1899_pv2700"), None);
+    assert_eq!(restored.snapshot(), old_saved);
+
+    let old = bootstrap.base_opening_version("country_fra", None, Some(12)).unwrap();
+    let old_saved = old.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.population().global_total(), 1_465_354_411);
+    assert_eq!(restored.population().resident_pool(orne), Some(329_951));
+    assert_eq!(restored.population().population_total(argentan), None);
+    assert_eq!(restored.residence_unit_at("place:rouen"), Some("administrative_region:france_seine_inferieure"));
+    let old_ages = restored.population().structure(Some(orne), clock).unwrap();
+    assert_eq!(old_ages.residents_with_cohort_age_and_sex, orne_with_age_and_sex);
+    assert_eq!(restored.snapshot(), old_saved);
+}
+
+#[test]
+fn historical_partition_restores_legacy_journal_and_flat_openings() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut opening = bootstrap.create_opening("country_fra", None, false).unwrap();
+    let national = "united_states_1900";
+    assert_eq!(opening.population_units(), &bootstrap.populations);
+    assert!(opening.population().standalone_totals().is_empty());
+    opening.transfer_unmanaged_population(national, "country_fra", 42, 0).unwrap();
+    let saved = opening.snapshot();
+    assert!(saved["population"].get("opening_version").is_none());
+    let restored = bootstrap.restore_native(serde_json::from_value(saved.clone()).unwrap()).unwrap();
+    assert_eq!(restored.snapshot(), saved);
+    assert!(restored.population().standalone_totals().is_empty());
+
+    // The aggregate-only slot predates runtime residents and their population journal.
+    let mut old = bootstrap.base_opening("country_fra", None, false).unwrap();
+    old.transfer_unmanaged_population(national, "country_fra", 42, 0).unwrap();
+    let mut flat = old.snapshot();
+    flat.as_object_mut().unwrap().remove("organization_members");
+    flat["population"] = serde_json::to_value(old.population_units()).unwrap();
+    let restored = bootstrap.restore_native(serde_json::from_value(flat).unwrap()).unwrap();
+    assert_eq!(restored.population_units(), opening.population_units());
+    assert!(restored.snapshot()["population"].get("opening_version").is_none());
+    assert!(restored.population().standalone_totals().is_empty());
+    for (root, &value) in restored.population_units() {
+        assert_eq!(restored.population().partitions(root).count(), 0);
+        assert_eq!(restored.population().resident_pool(root), Some(value));
+        assert!(restored.population().admitted_opening(root).is_none());
+    }
+}
+
+#[test]
+fn historic_authority_and_map_parents_are_independent_of_population_bindings() {
+    let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+    let sources = &world.sources;
+    let (controller, _) = sources.authority("taiwan_under_japan").unwrap();
+    assert_eq!(controller.id, "empire_of_japan");
+    assert_eq!(sources.places()["place:london"].parent_country_id, "british_empire");
+    assert_eq!(sources.population_unit_at("place:london"), Some("british_isles_1900"));
+    assert_eq!(sources.population_unit_at("place:kolkata"), Some("cshapes_gw_750"));
+    assert_eq!(world.residence_unit_at("place:kolkata"), Some("raj_bengal_calcutta"));
+    assert_eq!(sources.places()["place:tokyo"].parent_country_id, "japanese_empire");
+    assert_eq!(sources.population_unit_at("place:tokyo"), Some("empire_of_japan"));
+    let tokyo = world.inspect_population("place:tokyo").unwrap();
+    assert_eq!(tokyo.account_id, Some("jp_otsu_pref_tokyo"));
+    assert_eq!(tokyo.population_total, None);
+    let tokyo_archive = tokyo.archive.unwrap();
+    assert!(tokyo_archive.dated_structure.iter().any(|row| row["unit_id"] == "tokyo_city_1900_occupational_persons"));
+    assert!(!tokyo_archive.dated_structure.iter().any(|row| row["unit_id"] == "japan_proper_honseki_1898"));
+    let luxembourg = world.inspect_population("state:grand_duchy_of_luxembourg").unwrap();
+    assert_eq!(luxembourg.account_id, Some("kingdom_of_luxembourg"));
+    assert_eq!(luxembourg.population_total, Some(231_321));
+    assert_eq!(luxembourg.scope_relation, "historical_name_alias_of_account");
+    assert!(world.sources.population_name_aliases.get("cshapes_gw_901").is_none());
+    let australian_colony = world.inspect_population("state:cshapes_gw_901").unwrap();
+    assert_ne!(australian_colony.account_id, Some("australia_colonies_1900"));
+    for (id, mode) in [
+        ("road_lyon_strasbourg", RouteMode::Road),
+        ("rail_bordeaux_toulouse", RouteMode::Rail),
+        ("shipping_mediterranean", RouteMode::Shipping),
+    ] {
+        let route = &sources.routes()[id];
+        assert_eq!(route.mode, mode);
+        assert!(sources.places().contains_key(&route.from_place_id));
+        assert!(sources.places().contains_key(&route.to_place_id));
+    }
+}
+
+#[test]
+fn macro_days_settle_other_countries_and_deliver_trade_using_the_same_clock() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut france = bootstrap.create("country_fra").unwrap();
+    let mut batch = bootstrap.create("country_fra").unwrap();
+    let managed = BTreeMap::new();
+    let grain_before = france.macro_economy().markets()["qing_empire"].commodities["potatoes"].inventory;
+    france.advance_migrated_domains(MINUTES_PER_DAY - 1, &managed).unwrap();
+    assert_eq!(france.macro_economy().last_settlement_hour(), 0);
+    france.advance_migrated_domains(1, &managed).unwrap();
+    assert_eq!(france.macro_economy().last_settlement_hour(), 24);
+    assert_eq!(france.macro_economy().markets().len(), 50);
+    assert!(france.macro_economy().markets().values().all(|market| market.commodities["potatoes"].demanded > 0.0));
+    assert!(france.macro_economy().markets()["qing_empire"].commodities["potatoes"].inventory < grain_before);
+    let mut flows = BTreeMap::<String, (f64, f64, f64, i64)>::new();
+    let mut received_units = BTreeMap::<String, BTreeMap<String, f64>>::new();
+    let mut tonnes = BTreeMap::<String, (f64, f64, f64)>::new();
+    let mut first_dispatch = None;
+    let mut first_australian_delivery = None;
+    for day in 1..=90 {
+        if day > 1 { france.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap(); }
+        for s in france.macro_economy.shipments().iter().filter(|s| s.dispatch_hour == day * 24) {
+            first_dispatch.get_or_insert_with(|| (day, s.origin.clone(), s.destination.clone(), s.arrival_hour));
+            flows.entry(s.origin.clone()).or_default().0 += s.units;
+            let buyer = flows.entry(s.destination.clone()).or_default();
+            buyer.1 += s.units;
+            buyer.3 += s.carriage.as_ref().unwrap().fare_centimes;
+            let mass = france.macro_economy.freight_mass(&s.commodity).unwrap().tonnes(s.units);
+            tonnes.entry(s.destination.clone()).or_default().0 += mass;
+            tonnes.entry(s.origin.clone()).or_default().2 += mass;
+        }
+        for s in france.macro_economy.last_arrivals() {
+            if s.destination == "australia_colonies_1900" {
+                first_australian_delivery.get_or_insert_with(|| (s.id.clone(), s.origin.clone(), s.commodity.clone(), s.units, s.dispatch_hour, s.arrival_hour));
+            }
+            flows.entry(s.destination.clone()).or_default().2 += s.units;
+            tonnes.entry(s.destination.clone()).or_default().1 += france.macro_economy.freight_mass(&s.commodity).unwrap().tonnes(s.units);
+            let scale = france.macro_economy.commodity_info(&s.commodity).unwrap().2;
+            *received_units.entry(s.destination.clone()).or_default().entry(scale.into()).or_default() += s.units;
+        }
+    }
+    assert!(first_australian_delivery.is_some(), "Australia must receive a natural overseas market delivery");
+    println!("First natural shipment (day, seller, buyer, arrival hour): {first_dispatch:?}; first Australian receipt: {first_australian_delivery:?}");
+    for (unit, market) in france.macro_economy.markets() {
+        let (sold, bought, arrived, freight) = flows.get(unit).copied().unwrap_or_default();
+        let unmet: f64 = market.commodities.values().map(|c| c.unmet).sum();
+        let received = received_units.get(unit);
+        let (ordered_t, arrived_t, sent_t) = tonnes.get(unit).copied().unwrap_or_default();
+        println!("{unit}: shipped={sold:.3} ordered={bought:.3} received={arrived:.3} freight={freight} unmet_d90={unmet:.3} ordered_t={ordered_t:.6} arrived_t={arrived_t:.6} sent_t={sent_t:.6} received_units={received:?}");
+    }
+    batch.advance_migrated_domains(MINUTES_PER_DAY * 90, &managed).unwrap();
+    assert_eq!(batch.character.day, 90);
+    assert_eq!(france.character.state, batch.character.state);
+    let all_markets = france.macro_economy().markets();
+    assert_eq!(france.clock(), batch.clock());
+    assert!(all_markets.iter().all(|(id, market)| market.commodities == batch.macro_economy().markets()[id].commodities));
+    assert!(france.macro_economy().shipments().iter().all(|shipment| shipment.arrival_hour > 90 * 24));
+    assert!(all_markets.values().any(|market| market.trade_balance_centimes > 0));
+    assert_eq!(all_markets.values().map(|market| market.trade_balance_centimes).sum::<i64>(), 0);
+}
+
+#[test]
+fn each_opening_pays_for_aggregate_stock_and_learns_only_once() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    for &(source, _) in OPENINGS {
+        let mut world = bootstrap.create(source).unwrap();
+        let market = format!("market:legacy_aggregate:{source}");
+        let good = "potatoes";
+        let current = |world: &InitialWorld| world.macro_economy().markets()[source].commodities[good];
+        let before = current(&world);
+        assert_eq!(world.balance().unwrap().cash, 2500);
+        assert!(world.buy_local_stock("market:legacy_aggregate:ottoman_empire", good, 1000, before.price_centimes, "buy-1").is_err());
+        assert!(world.buy_local_stock(&market, good, 1000, before.price_centimes + 1, "buy-1").is_err());
+        assert!(world.buy_local_stock(&market, "electricity_service", 1000, 75, "buy-1").is_err());
+        assert!(world.buy_local_stock(&market, good, MAX_AMOUNT, before.price_centimes, "buy-1").is_err());
+        assert_eq!(current(&world), before);
+        assert!(world.character().history.is_empty());
+        let cost = world.buy_local_stock(&market, good, 1000, before.price_centimes, "buy-1").unwrap();
+        assert_eq!(cost, before.price_centimes);
+        assert_eq!(world.holding_milli(good), 1000);
+        assert_eq!(current(&world).inventory, before.inventory - 1.0);
+        assert_eq!(world.balance().unwrap().available, 2500 - cost);
+        assert_eq!(world.ledger.default_account(&market).unwrap().cash, cost);
+        assert!(world.buy_local_stock(&market, good, 1000, before.price_centimes, "buy-1").is_err());
+        assert_eq!(world.balance().unwrap().cash, 2500 - cost);
+        world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+        assert_eq!(world.character().history, ["完成正式市场下单"]);
+        assert_eq!(world.character.day, 1);
+        let saved_ledger = world.ledger().snapshot();
+        let restored = Ledger::restore(&saved_ledger, true).unwrap();
+        assert_eq!(restored.default_account(&world.player().id).unwrap().cash, 2500 - cost);
+        assert_eq!(restored.default_account(&market).unwrap().cash, cost);
+        assert_eq!(restored.snapshot(), saved_ledger);
+    }
+}
+
+#[test]
+fn anonymous_transfer_changes_market_demand_without_changing_supply() {
+    let dry_rice = crate::formal_population::needs::conditional_market_food_energy("rice", 0.453_592_37).unwrap();
+    assert_eq!((dry_rice.kcal.lower, dry_rice.kcal.upper), (1_600.0, 1_690.0));
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut world = bootstrap.create("qing_empire").unwrap();
+    let mut unchanged = bootstrap.create("qing_empire").unwrap();
+    let source = "qing_empire";
+    let destination = "empire_of_japan";
+    let total = world.population_units().values().sum::<u64>();
+    let background = world.background_population(source).unwrap();
+    assert!(world.transfer_unmanaged_population(source, destination, background, 1).is_err());
+    assert_eq!(world.background_population(source), Some(background));
+    world.transfer_unmanaged_population(source, destination, 10_000, 1).unwrap();
+    assert_eq!(world.population_units().values().sum::<u64>(), total);
+    assert_eq!(world.background_population(source), Some(background - 10_000));
+    assert_eq!(world.population.unit_for_person(&world.player().id), Some(source));
+
+    let staple = |world: &InitialWorld, country: &str| world.macro_economy().markets()[country].commodities["potatoes"];
+    let mut earlier = bootstrap.base_opening_version("qing_empire", None, Some(4)).unwrap();
+    earlier.initialize_organization_members().unwrap();
+    earlier.plan_household_orders().unwrap();
+    earlier.settle_organization_employment().unwrap();
+    for country in [source, destination] {
+        assert_eq!(staple(&world, country), staple(&earlier, country));
+        assert_eq!(world.macro_economy().markets()[country].gold_reserve_units,
+            earlier.macro_economy().markets()[country].gold_reserve_units);
+    }
+    let managed = BTreeMap::new();
+    world.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    unchanged.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    earlier.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    assert!(staple(&world, source).demanded < staple(&unchanged, source).demanded);
+    assert!(staple(&world, destination).demanded > staple(&unchanged, destination).demanded);
+    for country in [source, destination] {
+        assert_eq!(staple(&world, country).produced, staple(&unchanged, country).produced);
+        assert_eq!(staple(&unchanged, country).produced, staple(&earlier, country).produced);
+        let flows = world.macro_economy().food_flows(country).unwrap().collect::<Vec<_>>();
+        let potatoes = flows.iter().find(|row| row.commodity == "potatoes").unwrap();
+        let flow = potatoes.last_settlement.as_ref().unwrap();
+        assert_eq!(flow.removed_from_macro_stock_units, staple(&world, country).consumed);
+        assert!(flow.energy_in_removed_stock.is_none());
+        let potato_energy = flow.conditional_energy_in_removed_stock.unwrap();
+        let removed_pounds = flow.removed_from_macro_stock_units * f64::from(potatoes.market_unit_mass_kg) / 0.453_592_37;
+        assert!((potato_energy.kcal.lower - 228.0 * removed_pounds).abs() < 0.01);
+        assert!((potato_energy.kcal.upper - 456.0 * removed_pounds).abs() < 0.01);
+        let rice = flows.iter().find(|row| row.commodity == "rice").unwrap();
+        assert!(rice.last_settlement.as_ref().unwrap().energy_in_removed_stock.is_none());
+    }
+    let mut restored = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+    for active in [&mut world, &mut restored] {
+        active.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    }
+    for country in [source, destination] {
+        assert_eq!(staple(&world, country), staple(&restored, country));
+    }
+}
+
+#[test]
+fn consumption_uses_purchased_lots_without_charging_again() {
+    let mut world = WorldBootstrap::load().unwrap().create("russian_empire").unwrap();
+    let market = "market:legacy_aggregate:russian_empire";
+    let good = "potatoes";
+    let price = world.macro_economy().markets()["russian_empire"].commodities[good].price_centimes;
+    let first_record = world.next_living_record;
+    world.buy_local_stock(market, good, 1000, price, "first").unwrap();
+    world.buy_local_stock(market, good, 2000, price, "second").unwrap();
+    let cash = world.balance().unwrap().cash;
+    assert!(world.consume_purchased_stock(good, 4000).is_err());
+    assert_eq!(world.holding_milli(good), 3000);
+    let consumption = world.consume_purchased_stock(good, 1500).unwrap();
+    assert_eq!(consumption.record_id, format!("personal_life:{}", first_record + 2));
+    assert_eq!(consumption.effective_minute, 0);
+    assert_eq!(consumption.allocations, [
+        ConsumptionAllocation { purchase_record_id: format!("personal_life:{first_record}"), quantity_milli: 1000 },
+        ConsumptionAllocation { purchase_record_id: format!("personal_life:{}", first_record + 1), quantity_milli: 500 },
+    ]);
+    assert_eq!(world.holding_milli(good), 1500);
+    assert_eq!(world.balance().unwrap().cash, cash);
+    assert_eq!(world.consume_purchased_stock(good, 1500).unwrap().allocations.len(), 1);
+    assert_eq!(world.holding_milli(good), 0);
+}
+
+#[test]
+fn people_in_other_countries_can_transact_in_the_active_world() {
+    let mut world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+    let qing = "person:formal_generated_qing_empire_0001";
+    let market = "market:legacy_aggregate:qing_empire";
+    let good = "potatoes";
+    let price = world.macro_economy().markets()["qing_empire"].commodities[good].price_centimes;
+    assert_eq!(world.buy_statistical_stock(qing, market, good, 1000, price, "first").unwrap(), price);
+    assert_eq!(world.ledger().default_account(qing).unwrap().cash, 2500 - price);
+    assert_eq!(world.balance().unwrap().cash, 2500);
+    assert_eq!(world.holding_milli(good), 0);
+    assert_eq!(world.person_holding_milli(qing, good), 1000);
+    assert_eq!(world.person_profile(qing).unwrap().history, ["完成正式市场下单"]);
+    assert!(world.character().history.is_empty());
+    assert_eq!(world.consume_statistical_stock(qing, good, 1000).unwrap().allocations[0].quantity_milli, 1000);
+    assert_eq!(world.person_holding_milli(qing, good), 0);
+}
+
+#[test]
+fn firm_work_cost_comes_from_completed_shifts_before_and_after_payment() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut world = bootstrap.create("country_fra").unwrap();
+    let firm = "firm:opening_paris_bakery";
+    let workshop = "firm:opening_paris_workshop";
+    let managed = BTreeMap::new();
+    assert!(world.completed_firm_work(firm, 1).is_err());
+    world.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    let work = world.completed_firm_work(firm, 1).unwrap();
+    assert_eq!(work.len(), 1);
+    assert_eq!((work[0].hours, work[0].accrued_wages, work[0].paid_wages, work[0].unpaid_wages), (2, 8, 0, 8));
+    assert!(world.completed_firm_work(workshop, 1).unwrap().is_empty());
+    assert!(world.completed_firm_work("firm:unknown", 1).is_err());
+    let restored = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+    assert_eq!(restored.completed_firm_work(firm, 1).unwrap(), work);
+    let work_id = work[0].work_id.to_owned();
+    world.advance_migrated_domains(2 * MINUTES_PER_DAY, &managed).unwrap();
+    let paid = world.completed_firm_work(firm, 1).unwrap();
+    assert_eq!(paid[0].work_id, work_id);
+    assert_eq!((paid[0].accrued_wages, paid[0].paid_wages, paid[0].unpaid_wages), (8, 8, 0));
+}
+
+#[test]
+fn population_world_household_consumes_owned_surplus_and_restores() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut world = bootstrap.create("country_fra").unwrap();
+    let recipient = "person:formal_generated_country_fra_0002";
+    let donor = world.player.clone();
+    let good = "potatoes";
+    let market = "market:legacy_aggregate:country_fra";
+    let price = world.macro_economy().markets()["country_fra"].commodities[good].price_centimes;
+    let opening_total = world.population_units()["country_fra"];
+    world.buy_statistical_stock(&donor, market, good, 2, price, "fixture-family-meals").unwrap();
+    world.invite_to_household(&donor, recipient).unwrap();
+    assert!(world.household_of(recipient).is_none());
+    world.accept_household(recipient, &donor).unwrap();
+    let cash = world.ledger.default_account(recipient).unwrap().cash;
+    world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+    let meal = world.person_livelihood(recipient).unwrap();
+    assert_eq!(meal.last_day.unwrap().food_received_milli, 1);
+    assert_eq!(meal.last_food_intake.unwrap().portions[0].donor.as_deref(), Some(donor.as_str()));
+    assert_eq!(world.person_holding_milli(&donor, good), 0);
+    assert_eq!(world.ledger.default_account(recipient).unwrap().cash, cash);
+    assert_eq!(world.population_units()["country_fra"], opening_total);
+    let saved = world.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(saved.clone()).unwrap()).unwrap();
+    assert!(restored.snapshot() == saved, "household and its food provenance changed after restore");
+}
+
+#[test]
+fn population_world_service_fixture_stops_civilian_shifts_until_discharge() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut world = bootstrap.create("country_fra").unwrap();
+    let mut civilian = bootstrap.create("country_fra").unwrap();
+    let worker = "person:formal_generated_country_fra_0002";
+    let firm = "firm:opening_paris_bakery";
+    let service = ServiceTarget::Strategic("fixture:paris_service".into());
+    let population = world.population_units().clone();
+    assert!(world.enlist_named_service(worker, service.clone(), false).is_err());
+    world.enlist_named_service(worker, service.clone(), true).unwrap();
+    let mobilized = world.resident_age_availability(Some("country_fra"), 18, 80).unwrap();
+    let available = civilian.resident_age_availability(Some("country_fra"), 18, 80).unwrap();
+    assert_eq!(mobilized.population_total, available.population_total);
+    assert_eq!(mobilized.named_in_age_range, available.named_in_age_range);
+    assert_eq!(mobilized.named_in_age_range_in_active_service, 1);
+    assert_eq!(mobilized.named_in_age_range_eligible_for_civilian_work + 1,
+        available.named_in_age_range_eligible_for_civilian_work);
+    let unit = world.residence_unit_at("place:moscow").unwrap().to_owned();
+    let unit = unit.as_str();
+    let origin = world.population.structure(Some(unit), world.clock()).unwrap();
+    let cohort = origin.cohorts.iter()
+        .find(|cohort| cohort.members >= 4 && cohort.age_years.is_some_and(|age| age.youngest == 25))
+        .unwrap().id.clone();
+    world.service.enlist_cohort(&world.population, unit, &cohort, service.clone(), 4, 0, true).unwrap();
+    let availability = world.resident_age_availability(Some("russian_empire"), 25, 29).unwrap();
+    assert_eq!(availability.anonymous_in_active_service_all_ages, 4);
+    assert_eq!(availability.anonymous.definitely_in_range - availability.anonymous_outside_active_service.definitely_in_range, 4);
+    let managed = BTreeMap::new();
+    world.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    civilian.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    assert!(world.completed_firm_work(firm, 1).unwrap().is_empty());
+    assert_eq!(civilian.completed_firm_work(firm, 1).unwrap().len(), 1);
+    assert!(world.local_bread_offer().is_none());
+    assert!(civilian.local_bread_offer().is_some());
+    assert_eq!(world.population_units(), &population);
+    let mut world = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+    assert_eq!(world.service.named_target(worker), Some(&service));
+    assert_eq!(world.resident_age_availability(Some(unit), 25, 29).unwrap().anonymous_in_active_service_all_ages, 4);
+    world.discharge_named_service(worker).unwrap();
+    world.advance_migrated_domains(MINUTES_PER_DAY * 2, &managed).unwrap();
+    assert_eq!(world.completed_firm_work(firm, 3).unwrap().len(), 1);
+}
+
+#[test]
+fn population_world_materializes_residents_and_restores_one_identity() {
+    let mut bootstrap = WorldBootstrap::load().unwrap();
+    let opening = bootstrap.create("country_fra").unwrap();
+    let unit = "country_fra";
+    bootstrap.populations.insert(unit.into(), 2_000 + opening.population.named_counts()[unit]);
+    let mut world = bootstrap.create_opening(unit, None, false).unwrap();
+    let total_before = world.population_units()[unit];
+    let worker = "person:fixture_worker";
+    assert_eq!(world.background_population(unit), Some(2_000));
+    world.materialize_resident(worker, "Fixture worker".into(), "place:paris", 1875, None).unwrap();
+    assert_eq!(world.background_population(unit), Some(1_999));
+    assert_eq!(world.population_units()[unit], total_before);
+    assert_eq!(world.ledger.default_account(worker).unwrap().cash, 0);
+    assert!(world.materialize_resident(worker, "Duplicate".into(), "place:paris", 1875, None).is_err());
+    world.register_birth("person:fixture_child", "Fixture child".into(), "place:paris").unwrap();
+    assert_eq!(world.population_units()[unit], total_before + 1);
+    assert_eq!(world.background_population(unit), Some(1_999));
+    let job = "job:opening_paris_workshop";
+    assert!(world.apply_for_work_as(worker, job).is_err());
+    world.consult_local_work(worker).unwrap();
+    world.apply_for_work_as(worker, job).unwrap();
+    world.book_work_as(worker).unwrap();
+    world.advance_migrated_domains(MINUTES_PER_DAY * 2, &BTreeMap::new()).unwrap();
+    let wages = world.completed_firm_work("firm:opening_paris_workshop", 1).unwrap();
+    assert_eq!(wages[0].worker, worker);
+    assert_eq!(wages[0].paid_wages, 6);
+    let route = "rail_paris_lille";
+    let duration = i64::from(world.transport().segment(route).unwrap().profile.travel_minutes);
+    let fare = i64::from(world.transport().segment(route).unwrap().profile.cost_units);
+    for _ in 0..30 {
+        if world.ledger.default_account(worker).unwrap().available >= fare { break; }
+        world.book_work_as(worker).unwrap();
+        world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+    }
+    world.travel_person(worker, route, "place:lille").unwrap();
+    assert_eq!(world.person_home(worker), Some("place:paris"));
+    world.advance_migrated_domains(duration, &BTreeMap::new()).unwrap();
+    world.move_person_home(worker).unwrap();
+    assert!(world.book_work_as(worker).is_err());
+    let saved = world.snapshot();
+    let restored = bootstrap.restore_native(serde_json::from_value(saved.clone()).unwrap()).unwrap();
+    assert!(restored.snapshot() == saved, "restoring duplicated or changed a resident");
+    assert_eq!(restored.person_home(worker), Some("place:lille"));
+    assert_eq!(restored.current_place(worker), Some("place:lille"));
+}
+
+#[test]
+fn population_world_travel_and_native_resume_use_the_single_clock() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut world = bootstrap.create("country_fra").unwrap();
+    let mut batch = bootstrap.create("country_fra").unwrap();
+    let totals = world.population_units().clone();
+    let route = "rail_paris_rouen";
+    let destination = "place:rouen";
+    let arrival = i64::from(world.transport().segment(route).unwrap().profile.travel_minutes);
+    for world in [&mut world, &mut batch] {
+        let nominal = world.transport().segment(route).unwrap().profile.capacity_units;
+        world.set_segment_access(route, false, 0).unwrap();
+        assert!(world.travel_player(route, destination).is_err());
+        world.set_segment_access(route, true, nominal).unwrap();
+        world.travel_player(route, destination).unwrap();
+        world.set_segment_access(route, false, 0).unwrap();
+        assert_eq!(world.player_current_place(), None);
+        assert!(!world.can_book_work());
+        assert!(world.local_bread_offer().is_none());
+    }
+    let managed = BTreeMap::new();
+    world.advance_migrated_domains(arrival - 1, &managed).unwrap();
+    assert_eq!(world.player_home(), "place:paris");
+    let mut world = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+    assert!(!world.transport.network().availability(route).unwrap().open);
+    world.advance_migrated_domains(1, &managed).unwrap();
+    assert_eq!(world.player_current_place(), Some(destination));
+    assert_eq!(world.player_home(), "place:paris");
+    batch.advance_migrated_domains(arrival, &managed).unwrap();
+    world.move_player_home().unwrap();
+    batch.move_player_home().unwrap();
+    assert_eq!(world.player_home(), destination);
+    assert_eq!(world.population_units(), &totals);
+    for _ in 0..10 {
+        world.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    }
+    batch.advance_migrated_domains(MINUTES_PER_DAY * 10, &managed).unwrap();
+    assert!(world.snapshot() == batch.snapshot(), "daily and batch native snapshots differ");
+}
+
+#[test]
+#[ignore = "measure the formal-world opening and one year of gameplay"]
+fn population_world_year_measurement() {
+    measure_population_year(0);
+    measure_population_year(100);
+}
+
+fn measure_population_year(groups_per_unit: u64) {
+    use crate::formal_save::{read_native_slot, write_native_slot};
+    use crate::formal_population::{CohortBirthYears, CohortDefinition, CohortProvenance};
+    use std::time::{Instant, SystemTime, UNIX_EPOCH};
+    let start = Instant::now();
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let inputs = start.elapsed();
+    let start = Instant::now();
+    let mut world = bootstrap.create("country_fra").unwrap();
+    let opening = start.elapsed();
+    let start = Instant::now();
+    let units: Vec<_> = world.population_units().keys().cloned().collect();
+    let mut fixture_groups = 0;
+    for unit in units.iter().filter(|_| groups_per_unit > 0) {
+        let Some((pool, _)) = world.population.partitions(unit).map(|(id, _, _)| id)
+            .chain(std::iter::once(unit.as_str()))
+            .filter_map(|id| world.population.unclassified(id).map(|count| (id, count)))
+            .max_by_key(|&(_, count)| count)
+            .filter(|&(_, count)| count >= groups_per_unit * 2000)
+        else { continue };
+        let pool = pool.to_owned();
+        for index in 0..groups_per_unit {
+            let birth_year = 1801 + index as i64;
+            world.population.alloc_cohort(
+                &pool, CohortId::new("fixture:annual_population", format!("{unit}:{index}")).unwrap(),
+                CohortDefinition { provenance: CohortProvenance::Fixture, sex: None,
+                    birth_years: Some(CohortBirthYears { earliest: birth_year, latest: birth_year }) },
+                2000, 0,
+            ).unwrap();
+        }
+        fixture_groups += groups_per_unit;
+    }
+    let cohort_setup = start.elapsed();
+    day_measurement::enable();
+    let start = Instant::now();
+    world.advance_migrated_domains(365 * MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+    let year = start.elapsed();
+    let [work, enterprise, livelihood, health, market] = day_measurement::take().map(|sum| sum / 365);
+    let suffix = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+    let path = std::env::temp_dir().join(format!("wwo-population-year-{}-{suffix}.json", std::process::id()));
+    let measurement = (|| -> io::Result<_> {
+        let start = Instant::now();
+        write_native_slot(&path, &world)?;
+        let save = start.elapsed();
+        let bytes = std::fs::metadata(&path)?.len();
+        let start = Instant::now();
+        let loaded = read_native_slot(&path, &bootstrap)?;
+        Ok((loaded, bytes, save, start.elapsed()))
+    })();
+    if path.is_file() { std::fs::remove_file(&path).unwrap(); }
+    let (loaded, bytes, save, restore) = measurement.unwrap();
+    assert_eq!(world.clock(), loaded.clock());
+    assert_eq!(world.population_units(), loaded.population_units());
+    assert!(world.snapshot() == loaded.snapshot(), "restored annual snapshot differs");
+    println!("units={} residents={} named={} fixture_groups={} inputs_ms={} opening_ms={} cohort_setup_ms={} year_ms={} save_bytes={} save_ms={} restore_ms={}",
+        units.len(), world.population().global_total(), world.identities.len(),
+        fixture_groups, inputs.as_millis(), opening.as_millis(),
+        cohort_setup.as_millis(), year.as_millis(), bytes, save.as_millis(), restore.as_millis());
+    println!("average_day_us work_and_wages={work} enterprise={enterprise} livelihood={livelihood} character_and_population={health} market={market}");
+}
+
+#[test]
+fn macro_transport_cross_day_interruption_refunds_and_rebooks_one_paid_lot() {
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let mut world = bootstrap.create("country_fra").unwrap();
+    let responsibility = BTreeMap::new();
+    let mut active = None;
+    for _ in 0..90 {
+        world.advance_migrated_domains(MINUTES_PER_DAY, &responsibility).unwrap();
+        active = world.macro_economy.shipments().iter().find_map(|row| {
+            let c = row.carriage.as_ref()?;
+            let plan = world.transport.plan(c.reservation)?;
+            let second = plan.route().legs.get(1)?;
+            (world.transport.moving(c.reservation) && plan.departure_minute() == world.clock.snapshot().total_minutes)
+                .then(|| (row.id.clone(), row.origin.clone(), row.destination.clone(), row.commodity.clone(),
+                    row.units, c.reservation, second.segment_id.clone(), plan.route().legs[0].profile.travel_minutes))
+        });
+        if active.is_some() { break; }
+    }
+    let (id, origin, destination, commodity, units, reservation, segment, first_minutes) = active.unwrap();
+    println!("paid shipment {id}: {origin} -> {destination}, {commodity}, {units}");
+    let nominal = world.transport.network().segment(&segment).unwrap().profile.capacity_units;
+    world.set_segment_access(&segment, false, 0).unwrap();
+    world.advance_migrated_domains(i64::from(first_minutes), &responsibility).unwrap();
+    let row = world.macro_economy.shipments().iter().find(|r| r.id == id).unwrap();
+    assert!(row.carriage.as_ref().unwrap().held);
+    let station = world.transport.held(reservation).unwrap().to_owned();
+    let refund = world.transport.unused_fare(reservation).unwrap();
+    let buyer = format!("account:market_receipts:{}", world.macro_economy.markets()[&destination].id);
+    assert!(world.ledger.has_payment(&format!("held-refund:{reservation}"), crate::formal_ledger::TRANSPORT_ACCOUNT,
+        &buyer, refund, "cargo_refund", &id));
+    let mut world = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+    world.set_segment_access(&segment, true, nominal).unwrap();
+    let next_day = MINUTES_PER_DAY - world.clock.snapshot().total_minutes % MINUTES_PER_DAY;
+    world.advance_migrated_domains(next_day, &responsibility).unwrap();
+    let c = world.macro_economy.shipments().iter().find(|r| r.id == id).unwrap().carriage.as_ref().unwrap();
+    assert_ne!(c.reservation, reservation);
+    assert_eq!(c.from, station);
+    assert!(world.transport.plan(reservation).is_none());
+    let arrival = c.arrival_minute;
+    world.advance_migrated_domains(arrival - world.clock.snapshot().total_minutes - 1, &responsibility).unwrap();
+    assert!(world.macro_economy.shipments().iter().any(|r| r.id == id));
+    world.advance_migrated_domains(1, &responsibility).unwrap();
+    assert!(world.macro_economy.shipments().iter().all(|r| r.id != id));
+    assert_eq!(world.macro_economy.last_arrivals().iter().find(|r| r.id == id).unwrap().units, units);
+    bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+}
+
+#[test]
+fn macro_save_fields_restore_in_transit_cargo_and_resume_settlement() {
+    use crate::formal_save::typed_map;
+    let bootstrap = WorldBootstrap::load().unwrap();
+    let managed = BTreeMap::new();
+    let mut world = bootstrap.create("german_empire").unwrap();
+    while world.macro_economy().shipments().is_empty() && world.clock().current_day() < 90 {
+        world.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    }
+    let hour = world.clock();
+    let cargo = world.macro_economy().shipments();
+    assert!(!cargo.is_empty());
+    let snapshot = typed_map(world.macro_economy().persistent_fields(hour));
+    let loaded = MacroEconomy::restore(Arc::clone(&bootstrap.markets), world.population_units(), &snapshot, hour).unwrap();
+    assert_eq!(loaded.shipments(), cargo);
+    assert_eq!(typed_map(loaded.persistent_fields(hour)), snapshot);
+    let mut loaded = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+    world.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    loaded.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+    assert_eq!(
+        typed_map(loaded.macro_economy().persistent_fields(world.clock())),
+        typed_map(world.macro_economy().persistent_fields(world.clock())),
+    );
+}
