@@ -972,7 +972,7 @@ impl Renderer {
         Ok(())
     }
 
-    fn prepare_landscape(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant) {
+    fn prepare_landscape(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant,seconds:f32) {
         let Some(terrain)=&mut self.terrain else {return;};
         let enabled=enabled&&terrain.view_max().max(terrain.view_demand())>=6;
         if enabled && camera.mpp<1460. && terrain.landscape_cover() {
@@ -981,7 +981,7 @@ impl Renderer {
             }
         }
         if let Some(layer)=&mut self.landscape {
-            layer.prepare(&self.queue,camera,size,terrain,enabled);
+            layer.prepare(&self.queue,camera,size,terrain,enabled,seconds);
             terrain.reveal_pages(layer.awaiting_pages(),now);
         } else {
             terrain.reveal_pages(&HashSet::new(),now);
@@ -1052,7 +1052,7 @@ impl Renderer {
     pub fn terrain_fading(&self)->bool {
         self.terrain.as_ref().is_some_and(Terrain::fading)
             || self.detail.as_ref().is_some_and(terrain_detail::Stream::fading)
-            || self.landscape.as_ref().is_some_and(Landscape::pending)
+            || self.landscape.as_ref().is_some_and(Landscape::needs_redraw)
             || self.water_pages.as_ref().is_some_and(crate::hydrology::WaterPages::pending)
     }
 
@@ -1148,7 +1148,7 @@ impl Renderer {
             RenderTarget::Window(_,config)=>[config.width,config.height],
             RenderTarget::Offscreen(texture)=>[texture.width(),texture.height()],
         };
-        if battle.is_none() {self.prepare_landscape(camera,size,landscape_enabled,now);}
+        if battle.is_none() {self.prepare_landscape(camera,size,landscape_enabled,now,seconds);}
         let [draw_network,draw_economy,draw_vehicles]=self.prepare_transport(transport.filter(|_|show_map && battle.is_none()));
         let (texture,copy_src)=match &self.target {
             RenderTarget::Window(_,config)=>(&frame.as_ref().unwrap().texture,config.usage.contains(wgpu::TextureUsages::COPY_SRC)),
