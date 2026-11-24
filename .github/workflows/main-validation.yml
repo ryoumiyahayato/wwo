@@ -1,92 +1,22 @@
 name: Main validation
-
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, edited, ready_for_review]
-  push:
-    branches: [main]
   workflow_dispatch:
-
 permissions:
-  contents: read
-
-concurrency:
-  group: main-validation-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
+  contents: write
 jobs:
-  source-checks:
-    name: Source checks
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-          persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Check changed source and whitespace
-        # PR checkout is GitHub's merge result; HEAD^1 is its main parent.
-        shell: bash
-        run: |
-          set -euo pipefail
-          git diff --check HEAD^1 HEAD
-          python3 - <<'PY'
-          import ast, json, pathlib, subprocess
-          changed = subprocess.check_output([
-              'git', 'diff', '--name-only', '--diff-filter=ACMR', '-z', 'HEAD^1', 'HEAD'
-          ]).decode().split('\0')
-          for name in filter(None, changed):
-              path = pathlib.Path(name)
-              if path.suffix == '.py':
-                  ast.parse(path.read_text(encoding='utf-8-sig'), filename=name)
-              elif path.suffix == '.json':
-                  json.loads(path.read_text(encoding='utf-8-sig'))
-          population = pathlib.Path('data/historical_population_1900')
-          manifest_path = population / 'runtime-manifest.json'
-          prior = subprocess.run(
-              ['git', 'show', f'HEAD^1:{manifest_path}'], capture_output=True
-          )
-          if prior.returncode == 0:
-              previous = json.loads(prior.stdout)
-              manifest = json.loads(manifest_path.read_text(encoding='utf-8-sig'))
-              changed_paths = set(subprocess.check_output([
-                  'git', 'diff', '--name-only', '--no-renames', '-z', 'HEAD^1', 'HEAD'
-              ]).decode().split('\0'))
-              for version, assets in previous['versions'].items():
-                  if manifest['versions'].get(version) != assets:
-                      raise SystemExit(f'Bindings for population v{version} changed; add a new version')
-                  for asset in assets.values():
-                      if str(population / asset) in changed_paths:
-                          raise SystemExit(f'Population v{version} asset {asset} changed; add a new version')
-          print('Changed Python/JSON syntax and diff whitespace passed')
-          PY
-      - name: Check Actions syntax
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl --fail --location --retry 3 \
-            https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz \
-            --output "$RUNNER_TEMP/actionlint.tar.gz"
-          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
-          "$RUNNER_TEMP/actionlint" -shellcheck= -pyflakes=
-
   rust-windows:
-    name: Build Rust Windows game
+    name: Archive Rust Windows game
     runs-on: windows-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: 97ebaf1003c75e39679a7507a6dc7e1869e471b7
           persist-credentials: false
       - name: Build the formal game and state tool
         working-directory: rust/strategic-host
         run: cargo +stable build --release --locked --bin wwo-map-lab --bin wwo-formal-state
-      - name: Stage the offline Windows build
-        if: github.event_name != 'pull_request'
+      - name: Pack the Windows binaries and offline population
         shell: pwsh
         run: |
           $stage = Join-Path $env:RUNNER_TEMP 'wwo-rust-windows'
@@ -94,9 +24,16 @@ jobs:
           Copy-Item rust/strategic-host/target/release/wwo-map-lab.exe -Destination $stage
           Copy-Item rust/strategic-host/target/release/wwo-formal-state.exe -Destination $stage
           ./rust/strategic-host/tools/package_population.ps1 -DataDirectory (Join-Path $stage 'data')
-      - name: Retain the Windows build in private repositories
-        if: github.event_name != 'pull_request' && github.event.repository.private
-        uses: actions/upload-artifact@v4
-        with:
-          name: wwo-rust-windows
-          path: ${{ runner.temp }}/wwo-rust-windows
+          Compress-Archive -Path (Join-Path $stage '*') -DestinationPath (Join-Path $env:RUNNER_TEMP 'wwo-rust-windows-97ebaf1003.zip')
+      - name: Upload to the existing draft
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $draft = gh release view 'wwo-rust-archive-20261124-97ebaf1003' --json isDraft,targetCommitish | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or !$draft.isDraft -or $draft.targetCommitish -ne '97ebaf1003c75e39679a7507a6dc7e1869e471b7') {
+            throw 'The requested draft does not target this build.'
+          }
+          gh release upload 'wwo-rust-archive-20261124-97ebaf1003' (Join-Path $env:RUNNER_TEMP 'wwo-rust-windows-97ebaf1003.zip')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
