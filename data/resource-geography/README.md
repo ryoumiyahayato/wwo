@@ -37,4 +37,12 @@ The economy map opens the 5 arc-minute agricultural grid under Renewables → Ag
 
 Cropland includes irrigated and rainfed cropland. Rice is a subset of cropland, split into irrigated and rainfed rice. Grazing includes pasture, converted rangeland and unconverted rangeland. These are sources for physical land occupation. Harvested area accounting and modeled yield are separate. Overview shading divides summed hectares by the area of known source cells. Clicking the map always queries the original 5′ cell.
 
-The existing LUH2 forest and land-use API remains available at its original 0.25° resolution for cross-reference. Historical crop area comes from HYDE for rice. GAEZ suitability, irrigated suitability scenarios and actual distributions for other crops are pending.
+The existing LUH2 forest and land-use API remains available at its original 0.25° resolution for cross-reference. Historical crop area comes from HYDE for rice. Actual distributions for other crops are pending.
+
+## Optional FAO–IIASA crop suitability
+
+[GAEZ v4](https://www.fao.org/gaez/gaezv4/en), module V, `res05`, 1961–1990 climate, provides modeled suitability for all land in each 5′ cell. The importer uses low-input rainfed classes (`siLr0`) and optionally low-input gravity-irrigation classes (`siLg0`). These scenarios describe growing conditions under the stated inputs. Historical land occupation and irrigation come from HYDE.
+
+Run `python rust/strategic-host/tools/import_gaez_suitability.py <runtime-data> --gravity-irrigation` with Pillow and curl. Install only under the game data directory. The importer accepts `--crop whe rye` for a subset and `--source-dir` to reuse local GeoTIFFs. Each installed band retains the original unsigned byte classes and grid alignment. Missing rasters stay unavailable. The map loads a band when selected and uses the area-dominant suitability class at wide scales. Clicking returns the source class.
+
+`gaez-crops.json` preserves individual crops with existing commodity IDs where applicable. Commodity categories carry no combined suitability score. Read the [data guide](https://gaez-v4-data.fao.org/data/GAEZ%20v4%20data%20repository%20user%20guide.pdf) and [FAO access and usage conditions](https://data.fao.org/catalog/iso/fd3fc7ff-07d3-477a-a905-c46dbecc9dcc) for this dataset family. The public game package carries the catalogue, importer and reader. Suitability rasters are installed separately.

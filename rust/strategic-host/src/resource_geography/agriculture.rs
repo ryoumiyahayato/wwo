@@ -3,6 +3,8 @@ use std::{fmt, sync::OnceLock};
 
 use super::{Bounds, Evidence};
 
+pub mod suitability;
+
 const COLS: usize = 4320;
 const ROWS: usize = 2160;
 const STEP: f64 = 1. / 12.;
@@ -164,26 +166,32 @@ impl Band {
 pub fn in_view(field: Field, bounds: Bounds, level: usize) -> impl Iterator<Item = (Bounds, f32)> {
     let level = level.min(2);
     let steps = [1, 12, 48][level];
-    let span = STEP * steps as f64;
     let band = field.band();
     let overview = (level > 0).then(|| band.overview(level - 1, steps));
+    blocks_in_view(bounds, steps).filter_map(move |(id, index)| {
+        let fraction = if let Some(overview) = overview {
+            overview[index]
+        } else {
+            let hectares = band.hectares[index];
+            if hectares == NO_DATA { return None; }
+            hectares / id.area_ha() as f32
+        };
+        (fraction != NO_DATA).then(|| (id.block_bounds(steps), fraction.clamp(0., 1.)))
+    })
+}
+
+fn blocks_in_view(bounds: Bounds, steps: usize) -> impl Iterator<Item = (CellId, usize)> {
+    let span = STEP * steps as f64;
     let row_start = ((90. - bounds.north) / span).floor().clamp(0., (ROWS / steps) as f64) as usize;
     let row_end = ((90. - bounds.south) / span).ceil().clamp(0., (ROWS / steps) as f64) as usize;
     bounds.longitude_intervals().flat_map(move |[west, east]| {
         let col_start = ((west + 180.) / span).floor().clamp(0., (COLS / steps) as f64) as usize;
         let col_end = ((east + 180.) / span).ceil().clamp(0., (COLS / steps) as f64) as usize;
         (row_start..row_end).flat_map(move |row| {
-            (col_start..col_end).filter_map(move |col| {
+            (col_start..col_end).map(move |col| {
                 let id = CellId { row: (row * steps) as u16, col: (col * steps) as u16 };
                 let index = row * (COLS / steps) + col;
-                let fraction = if let Some(overview) = overview {
-                    overview[index]
-                } else {
-                    let hectares = band.hectares[index];
-                    if hectares == NO_DATA { return None; }
-                    hectares / id.area_ha() as f32
-                };
-                (fraction != NO_DATA).then(|| (id.block_bounds(steps), fraction.clamp(0., 1.)))
+                (id, index)
             })
         })
     })

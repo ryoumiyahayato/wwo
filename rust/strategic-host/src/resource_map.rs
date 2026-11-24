@@ -1,7 +1,7 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::Path};
 
 use wwo_map_lab::resource_geography::{
-    agriculture::{self, CellId, Field},
+    agriculture::{self, suitability::{self, Scenario}, CellId, Field},
     Bounds, Category, Development, Directory, EntityKind, Evidence, GridCell, LandGrid,
     Resource, ResourceType,
 };
@@ -26,6 +26,8 @@ pub enum Command {
     Category(Category),
     Kind(ResourceType),
     Agriculture(Field),
+    Crops(usize),
+    Suitability(usize, Scenario),
     Site(&'static str),
 }
 
@@ -35,7 +37,15 @@ pub struct State {
     category: Option<Category>,
     kind: Option<ResourceType>,
     agriculture: Option<Field>,
+    suitability: suitability::Directory,
+    crop: Option<CropView>,
     selected: Option<Selection>,
+}
+
+enum CropView {
+    Directory(usize),
+    Map(suitability::Band),
+    Unreadable,
 }
 
 enum Selection {
@@ -46,6 +56,10 @@ enum Selection {
 }
 
 impl State {
+    pub fn new(data: &Path) -> Self {
+        Self { suitability: suitability::Directory::open(data), ..Self::default() }
+    }
+
     pub fn command(&mut self, command: Command, polity: Option<usize>) {
         match command {
             Command::Toggle => self.open = !self.open,
@@ -53,16 +67,19 @@ impl State {
                 self.category = None;
                 self.kind = None;
                 self.agriculture = None;
+                self.crop = None;
                 self.selected = None;
             }
             Command::Category(category) => {
                 self.category = Some(category);
                 self.kind = None;
                 self.agriculture = None;
+                self.crop = None;
                 self.selected = None;
             }
             Command::Kind(kind) => {
                 self.kind = Some(kind);
+                self.crop = None;
                 self.agriculture = match kind {
                     ResourceType::AgriculturalLand => Some(Field::Cropland),
                     ResourceType::Pasture => Some(Field::Pasture),
@@ -70,7 +87,17 @@ impl State {
                 };
                 self.selected = None;
             }
-            Command::Agriculture(field) => self.agriculture = Some(field),
+            Command::Agriculture(field) => {
+                self.agriculture = Some(field);
+                self.crop = None;
+            }
+            Command::Crops(page) => self.crop = Some(CropView::Directory(page)),
+            Command::Suitability(index, scenario) => {
+                self.crop = Some(self.suitability.load(index, scenario).map_or_else(|error| {
+                    eprintln!("GAEZ suitability: {error}");
+                    CropView::Unreadable
+                }, CropView::Map));
+            }
             Command::Site(id) => {
                 self.selected = Directory::opening().by_id(id).map(|record| Selection::Site(record, polity));
             }
@@ -138,14 +165,32 @@ fn agriculture_color(field: Field) -> [u8; 4] {
     }
 }
 
+const SUITABILITY_COLORS: [[u8; 4]; 8] = [
+    [39, 121, 62, 202], [81, 168, 80, 192], [154, 194, 87, 185], [211, 201, 94, 181],
+    [211, 158, 77, 170], [186, 124, 72, 159], [115, 117, 100, 145], [50, 62, 64, 139],
+];
+
 fn draw_agriculture(state: &State, field: Field, camera: &Camera, size: [u32; 2], map: &mut Mesh) {
     let level = if camera.mpp > 8_000. { 2 } else if camera.mpp > 1_200. { 1 } else { 0 };
-    for (bounds, fraction) in agriculture::in_view(field, view(camera, size), level) {
-        let Some(corners) = project_cell(camera, size, bounds) else { continue; };
-        let mut ink = agriculture_color(field);
-        ink[3] = (26. + 183. * fraction.sqrt()) as u8;
-        if fraction == 0. { ink = [39, 55, 62, 85]; }
-        map.shape(&corners, ink);
+    let bounds = view(camera, size);
+    match &state.crop {
+        Some(CropView::Map(band)) => {
+            for (cell, class) in band.in_view(bounds, level) {
+                if let Some(corners) = project_cell(camera, size, cell) {
+                    map.shape(&corners, SUITABILITY_COLORS[usize::from(class - 1)]);
+                }
+            }
+        }
+        Some(CropView::Unreadable) => return,
+        _ => {
+            for (cell, fraction) in agriculture::in_view(field, bounds, level) {
+                let Some(corners) = project_cell(camera, size, cell) else { continue; };
+                let mut ink = agriculture_color(field);
+                ink[3] = (26. + 183. * fraction.sqrt()) as u8;
+                if fraction == 0. { ink = [39, 55, 62, 85]; }
+                map.shape(&corners, ink);
+            }
+        }
     }
     if let Some(Selection::Agricultural(id)) = state.selected {
         if let Some(corners) = project_cell(camera, size, id.bounds()) {
@@ -269,6 +314,64 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
     };
     if let Some(field) = state.agriculture {
         let column = (w - 29.) * 0.5;
+        if let Some(crop_view) = &state.crop {
+            command([x + 12., y + 41., 105., 25.], skin.choose("农业资源", "Agriculture"), Command::Agriculture(field), false, panel, text, hits);
+            skin.text(text, skin.choose("作物适宜性", "Crop suitability"), 0, [x + 127., y + 43.], w - 139., INK);
+            match crop_view {
+                CropView::Directory(page) => {
+                    const PER_PAGE: usize = 8;
+                    let available = state.suitability.available();
+                    let pages = available.len().div_ceil(PER_PAGE);
+                    for (i, &index) in available.iter().skip(page * PER_PAGE).take(PER_PAGE).enumerate() {
+                        let crop = &suitability::crops()[index];
+                        command([x + 12. + (column + 5.) * (i % 2) as f32, y + 73. + (i / 2) as f32 * 29., column, 25.],
+                            skin.choose(&crop.zh, &crop.en), Command::Suitability(index, Scenario::Rainfed), false, panel, text, hits);
+                    }
+                    if *page > 0 {
+                        command([x + 12., y + 193., 75., 25.], skin.choose("上一页", "Previous"), Command::Crops(page - 1), false, panel, text, hits);
+                    }
+                    if page + 1 < pages {
+                        command([x + w - 87., y + 193., 75., 25.], skin.choose("下一页", "Next"), Command::Crops(page + 1), false, panel, text, hits);
+                    }
+                }
+                CropView::Map(band) => {
+                    let crop = band.crop();
+                    command([x + 12., y + 73., column, 25.], skin.choose(&crop.zh, &crop.en),
+                        Command::Crops(0), true, panel, text, hits);
+                    let scenarios = [(Scenario::Rainfed, ["雨养", "Rainfed"]), (Scenario::GravityIrrigation, ["重力灌溉", "Gravity irrigation"])];
+                    for (i, (scenario, name)) in scenarios.into_iter().enumerate() {
+                        if state.suitability.has(crop, scenario) {
+                            command([x + 12. + (column + 5.) * i as f32, y + 102., column, 25.],
+                                &title(name), Command::Suitability(band.index, scenario), band.scenario == scenario, panel, text, hits);
+                        }
+                    }
+                    label(text, skin.choose("1961–1990 气候 · 低投入", "1961–1990 climate · Low inputs"), 135., SUBTLE);
+                    let strip = (w - 24.) / 8.;
+                    for (i, color) in SUITABILITY_COLORS.into_iter().enumerate() {
+                        panel.rect(x + 12. + i as f32 * strip, y + 160., strip, 8., color);
+                    }
+                    label(text, skin.choose("1 最高 · 8 不适宜", "1 Highest · 8 Unsuitable"), 174., SUBTLE);
+                    label(text, skin.choose("透明 · 无资料或水域", "Clear · Water or no data"), 195., SUBTLE);
+                    if let Some(Selection::Agricultural(cell)) = state.selected {
+                        let class = match band.class_at(cell) {
+                            Some(9) => skin.choose("水域", "Water").to_owned(),
+                            Some(class) => format!("{} {class} / 8", skin.choose("适宜性等级", "Suitability class")),
+                            None => skin.choose("无资料", "No data").to_owned(),
+                        };
+                        label(text, &class, 217., INK);
+                        if h >= 266. {
+                            label(text, &cell.to_string(), 239., SUBTLE);
+                        }
+                    }
+                }
+                CropView::Unreadable => {
+                    command([x + 12., y + 73., column, 25.], skin.choose("选择作物", "Choose crop"),
+                        Command::Crops(0), false, panel, text, hits);
+                    label(text, skin.choose("无法读取作物数据", "Crop data could not be read"), 110., SUBTLE);
+                }
+            }
+            return;
+        }
         command([x + 12., y + 41., 105., 25.], &title(category.name()), Command::Category(category), false, panel, text, hits);
         skin.text(text, skin.choose("农业资源", "Agriculture"), 0, [x + 127., y + 43.], w - 139., INK);
         let fields = [Field::Cropland, Field::Grazing, Field::Pasture, Field::Irrigated, Field::Rainfed, Field::Rice];
@@ -276,18 +379,25 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
             command([x + 12. + (column + 5.) * (i % 2) as f32, y + 73. + (i / 2) as f32 * 29., column, 25.],
                 &title(choice.name()), Command::Agriculture(choice), field == choice, panel, text, hits);
         }
-        label(text, skin.choose("1900 年估算 · 5 角分网格", "1900 estimates · 5 arc-minute cells"), 163., SUBTLE);
-        label(text, skin.choose("深灰 · 零   透明 · 无资料", "Gray · zero   Clear · no data"), 185., SUBTLE);
+        let offset = if state.suitability.available().is_empty() { 0. } else {
+            command([x + 12., y + 160., column, 25.], skin.choose("作物适宜性", "Crop suitability"),
+                Command::Crops(0), false, panel, text, hits);
+            29.
+        };
+        label(text, skin.choose("1900 年估算 · 5 角分网格", "1900 estimates · 5 arc-minute cells"), 163. + offset, SUBTLE);
+        label(text, skin.choose("深灰 · 零   透明 · 无资料", "Gray · zero   Clear · no data"), 185. + offset, SUBTLE);
         if let Some(Selection::Agricultural(id)) = state.selected {
             let amount = |value: Option<f32>| value.map_or_else(
                 || skin.choose("无资料", "No data").to_owned(),
                 |area| format!("{area:.2} ha"),
             );
-            label(text, &format!("{}  {}", title(field.name()), amount(id.hectares(field))), 208., INK);
-            label(text, &format!("{}  {}", skin.choose("陆地", "Land"), amount(id.hectares(Field::Land))), 230., SUBTLE);
-            if h >= 284. {
-                label(text, &format!("{}  {:.2} ha", skin.choose("网格总面积", "Cell area"), id.area_ha()), 252., SUBTLE);
-                label(text, &id.to_string(), 274., SUBTLE);
+            label(text, &format!("{}  {}", title(field.name()), amount(id.hectares(field))), 208. + offset, INK);
+            if h >= 251. + offset {
+                label(text, &format!("{}  {}", skin.choose("陆地", "Land"), amount(id.hectares(Field::Land))), 230. + offset, SUBTLE);
+            }
+            if h >= 298. + offset {
+                label(text, &format!("{}  {:.2} ha", skin.choose("网格总面积", "Cell area"), id.area_ha()), 252. + offset, SUBTLE);
+                label(text, &id.to_string(), 274. + offset, SUBTLE);
             }
         }
         return;
