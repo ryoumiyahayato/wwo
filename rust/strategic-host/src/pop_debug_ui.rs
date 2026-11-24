@@ -527,12 +527,13 @@ impl Panel {
         if DIMENSIONS[self.dimension].0 == "labour" {
             ui.label(("估算 · 各配方为备选 · 产量 / 自用", "Estimated · Alternative recipes · Output / own use"),
                 [x, start, w, 22.], MUTED);
-            let headers = [("行业或商品", "Sector or good"), ("人数", "People"), ("工时/年", "Hours/year"),
+            let headers = [("行业或商品", "Sector or good"), ("人数", "People"), ("万小时/年", "1,000 h/year"),
                 ("并行批次产量", "Parallel batch output")];
+            let hour_unit = if skin.english() { 1_000. } else { 10_000. };
             let rows = self.structure.labour.iter().map(|row| vec![
                 if row.item.is_empty() { skin.choose(row.label.0, row.label.1).into() } else { row.item.clone() },
                 option_number(row.people),
-                row.hours.map_or_else(|| "—".into(), |hours| magnitude(hours as f64, skin)),
+                option_number(row.hours.map(|hours| (hours as f64 / hour_unit).round() as u64)),
                 row.output.clone(),
             ]);
             self.table(ui, [x, start + 24., w, (y + h - start - 24.).max(0.)], &headers,
@@ -723,7 +724,7 @@ impl Panel {
         ui.label(("底账已记录事件  ·  — 无可用统计", "Ledger events  ·  — unavailable"), [x + 4., top, w - 8., 20.], MUTED);
         top += 23.;
         let headers = [("日期", "Date"), ("出生", "Births"), ("死亡", "Deaths"), ("迁入", "In"),
-            ("迁出", "Out"), ("净变化", "Net")];
+            ("迁出", "Out"), ("记录净变", "Recorded net")];
         let widths = [0.20, 0.16, 0.16, 0.16, 0.16, 0.16];
         let rows = self.days.iter().rev().map(|day| {
             vec![short_date(day), event_count(day.births, false), event_count(day.deaths, false),
@@ -883,7 +884,7 @@ fn quantity(value: Option<f64>, unit: &str, period: NeedPeriod, per_person: bool
 fn magnitude(value: f64, skin: &Skin) -> String {
     if value == 0. { "0".into() }
         else if value >= 1_000_000_000. { skin.choose(
-            &format!("{:.2}亿", value / 100_000_000.),
+            &format!("{}万", number((value / 10_000.).round() as u64)),
             &format!("{:.2}B", value / 1_000_000_000.),
         ).to_owned() }
         else if value >= 100_000. { skin.choose(
