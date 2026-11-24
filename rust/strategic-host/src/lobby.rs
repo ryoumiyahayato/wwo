@@ -1,5 +1,4 @@
 use crate::{formal_ui::{self,Display,Slot,IVORY,MUTED},overlay::Mesh,ui::{Action,Hit},world::{Polity,World}};
-use crate::migration_status::Status;
 use serde::Deserialize;
 use std::{collections::BTreeMap, sync::LazyLock, time::Instant};
 use crate::{camera::Camera, politics::PoliticalVisuals};
@@ -52,11 +51,12 @@ impl Lobby {
 }
 
 #[derive(Clone,Copy,Debug,Default,PartialEq,Eq)]
-pub enum Page {#[default] Home,Selection,Cloud,Prologue,Load,Settings,Themes,Migration(Status,usize)}
+pub enum Page {#[default] Home,Selection,Cloud,Prologue,Load,Settings,Themes}
 #[derive(Clone,Copy)]
 pub enum Command {
     Page(Page), Country(usize), Back, Drawer, Area(usize, usize), MapArea(usize), Site(usize),
-    Up, Search, ClearSearch, Enter, PrologueChoice(usize), PrologueHealth(usize), PrologueNext, PrologueBack, Load(u8), Exit,
+    Up, Search, ClearSearch, ChangePainting, FixPainting(bool), Enter, PrologueChoice(usize),
+    PrologueNext, PrologueBack, Load(u8), Exit,
 }
 
 struct BirthplaceRow<'a> {
@@ -446,12 +446,12 @@ impl Directory {
 }
 
 impl Display<'_> {
-    pub fn loading(&self, status:&str, seconds:f32) -> crate::ui::Layers {
+    pub fn loading(&self, status:&str, seconds:f32, aspect:f32) -> crate::ui::Layers {
         use crate::ui::Ink;
         let [w,h]=self.size.map(|n|n as f32);
         let mut painting=Mesh::default();let mut shade=Mesh::default();let mut label=Mesh::default();let mut strip=Mesh::default();
         let phase=seconds*std::f32::consts::TAU/36.;
-        self.painting(&mut painting,0.964+0.014*phase.cos(),[0.0096*phase.sin(),0.00456*(2.*phase).sin()]);
+        self.painting(&mut painting,aspect,0.964+0.014*phase.cos(),[0.0096*phase.sin(),0.00456*(2.*phase).sin()]);
         shade.rect(0.,0.,w,h,[3,5,5,153]);
         self.skin.text(&mut label,status,0,[48.,h-73.],w-96.,IVORY);
         strip.image([48.,h-39.,w-96.,3.],[0.,0.,1.,1.],[255;4]);
@@ -461,15 +461,16 @@ impl Display<'_> {
          (Mesh::default(),Ink::HudArt),(Mesh::default(),Ink::Solid),(label,Ink::HudText)]
     }
 
-    fn painting(&self, mesh:&mut Mesh, scale:f32, drift:[f32;2]) {
+    fn painting(&self, mesh:&mut Mesh, aspect:f32, scale:f32, drift:[f32;2]) {
         let [w,h]=self.size.map(|n|n as f32);
-        let span=if w/h>1.6 {[1.,1.6*h/w]} else {[w/h/1.6,1.]};
+        let span=if w/h>aspect {[1.,aspect*h/w]} else {[w/h/aspect,1.]};
         let [u,v]=[0.5+drift[0],0.5+drift[1]];
         let [x,y]=span.map(|n|n*scale*0.5);
         mesh.image([0.,0.,w,h],[u-x,v-y,u+x,v+y],[255;4]);
     }
 
-    pub fn lobby(&self,world:&World,state:Option<&Lobby>,page:Page,selection:usize,waiting:bool,directory:&Directory,draft:Option<&crate::prologue_ui::Draft>, view: SelectionView<'_>)
+    pub fn lobby(&self,world:&World,state:Option<&Lobby>,page:Page,selection:usize,waiting:bool,directory:&Directory,
+        draft:Option<&crate::prologue_ui::Draft>,view:SelectionView<'_>,themes:&crate::menu_theme::Themes)
         -> (crate::ui::Layers,Vec<Hit>)
     {
         use crate::ui::Ink;
@@ -483,7 +484,7 @@ impl Display<'_> {
         let mut flags=Mesh::default();
         let mut hits=Vec::new();
         if !matches!(page, Page::Selection | Page::Cloud | Page::Prologue) {
-            self.painting(&mut background,1.,[0.;2]);
+            self.painting(&mut background,themes.aspect,1.,[0.;2]);
             panels.rect(0.,0.,w,h,[3,5,5,75]);
         }
         let row=|label,page| (label,Some(action(Command::Page(page))));
@@ -491,17 +492,15 @@ impl Display<'_> {
         let ready=state.is_some_and(|s|s.ready);
         match page {
             Page::Home=>{
-                let x=48.;let y=(h-388.)*0.5;let width=350.;
-                formal_ui::panel(&mut panels,[x,y,width,388.],[6,14,23,241]);
+                let x=48.;let y=(h-296.)*0.5;let width=350.;
+                formal_ui::panel(&mut panels,[x,y,width,296.],[6,14,23,241]);
                 self.skin.text(&mut text,"1900",2,[x+24.,y+27.],width-48.,IVORY);
                 let rows=[("开始",ready.then_some(action(Command::Page(Page::Selection)))),("加载",ready.then_some(action(Command::Page(Page::Load)))),
                     row("主题管理",Page::Themes),row("设置",Page::Settings),
-                    row("R68 迁移状态",Page::Migration(Status::Partial,0)),("退出",Some(action(Command::Exit)))];
+                    ("退出",Some(action(Command::Exit)))];
                 for (i,(label,command)) in rows.into_iter().enumerate(){
                     self.row(&mut panels,&mut text,&mut hits,[x+24.,y+79.+i as f32*40.,width-48.,32.],label,command,false);
                 }
-                let runtime=if state.is_some_and(|s|s.native) {"Rust 原生世界"} else {"R68 规则兼容 · Rust 候选"};
-                self.skin.text(&mut text,runtime,0,[x+24.,y+342.],width-48.,MUTED);
             }
             Page::Selection => {
                 let navigation = view.navigation;
@@ -548,22 +547,32 @@ impl Display<'_> {
                     (!busy).then_some(action(Command::Page(Page::Home))),false);
             }
             Page::Settings|Page::Themes=>{
-                let height=if page==Page::Settings{290.}else{218.};
+                let height=if page==Page::Settings{290.}else{228.};
                 let width=365.;let x=(w-width)*0.5;let y=(h-height)*0.5;
                 formal_ui::panel(&mut panels,[x,y,width,height],[6,14,23,247]);
                 self.skin.text(&mut text,if page==Page::Settings{"设置"}else{"主题管理"},1,[x+22.,y+15.],width-44.,IVORY);
                 if page==Page::Settings {
                     self.settings(&mut panels,&mut text,&mut hits,[x,y,width,height],formal_ui::Command::Lobby(Command::Page(Page::Home)),true);
                 }else{
-                    self.skin.text(&mut text,"1900 · 当前使用 R68 原主题",0,[x+24.,y+76.],width-48.,IVORY);
-                    self.row(&mut panels,&mut text,&mut hits,[x+22.,y+158.,width-44.,31.],"返回",
-                    Some(action(Command::Page(Page::Home))),false);
+                    let say=|zh,en|self.skin.choose(zh,en);
+                    if let Some(title)=themes.title(self.skin.english()) {
+                        self.skin.paragraph(&mut text,title,0,[x+24.,y+48.,width-48.,40.],IVORY,1.);
+                    }
+                    let fixed=themes.preference().0.is_some();
+                    let button=(width-52.)*0.5;
+                    self.row(&mut panels,&mut text,&mut hits,[x+22.,y+93.,button,31.],say("随机轮换","Shuffle on startup"),
+                        Some(action(Command::FixPainting(false))),!fixed);
+                    self.row(&mut panels,&mut text,&mut hits,[x+30.+button,y+93.,button,31.],say("固定当前","Keep this painting"),
+                        themes.title(false).is_some().then_some(action(Command::FixPainting(true))),fixed);
+                    self.row(&mut panels,&mut text,&mut hits,[x+22.,y+134.,width-44.,31.],say("更换画作","Next painting"),
+                        themes.can_change().then_some(action(Command::ChangePainting)),false);
+                    self.row(&mut panels,&mut text,&mut hits,[x+22.,y+175.,width-44.,31.],say("返回","Back"),
+                        Some(action(Command::Page(Page::Home))),false);
                 }
             }
-            Page::Migration(status,page)=>self.migration_status(&mut panels,&mut text,&mut hits,status,page,state.is_some_and(|s|s.native)),
         }
-        if !matches!(page,Page::Migration(_, _) | Page::Cloud) && view.navigation.departure_cloud.is_none() {
-            let status=state.map(|s|s.status.as_str()).filter(|s|!s.is_empty()).unwrap_or(if busy{"正在进入世界。"}else if !ready{"正在连接 R68 正式规则。"}else{""});
+        if page != Page::Cloud && view.navigation.departure_cloud.is_none() {
+            let status=state.map(|s|s.status.as_str()).filter(|s|!s.is_empty()).unwrap_or(if busy{"正在进入世界。"}else if !ready{"正在读取地图资料。"}else{""});
             let status=if self.feedback.is_empty(){status}else{self.feedback};
             if !status.is_empty(){
                 formal_ui::panel(&mut panels,[(w-550.)*0.5,h-55.,550.,41.],[6,14,23,245]);

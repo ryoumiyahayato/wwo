@@ -1,0 +1,938 @@
+{
+  "tiles": [
+    {
+      "path": "london-os-1890s-1-0.wcm",
+      "level": 3,
+      "core": [
+        -0.29183333333333333,
+        51.371,
+        -0.21266666666666667,
+        51.4155
+      ],
+      "bounds": [
+        -0.29324702380952383,
+        51.37020535714286,
+        -0.2112529761904762,
+        51.416294642857146
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-2-0.wcm",
+      "level": 3,
+      "core": [
+        -0.21266666666666667,
+        51.371,
+        -0.1335,
+        51.4155
+      ],
+      "bounds": [
+        -0.21408035714285714,
+        51.37020535714286,
+        -0.13208630952380954,
+        51.416294642857146
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-3-0.wcm",
+      "level": 3,
+      "core": [
+        -0.1335,
+        51.371,
+        -0.054333333333333345,
+        51.4155
+      ],
+      "bounds": [
+        -0.13491369047619048,
+        51.37020535714286,
+        -0.052919642857142866,
+        51.416294642857146
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-4-0.wcm",
+      "level": 3,
+      "core": [
+        -0.054333333333333345,
+        51.371,
+        0.02483333333333332,
+        51.4155
+      ],
+      "bounds": [
+        -0.05574702380952382,
+        51.37020535714286,
+        0.026247023809523793,
+        51.416294642857146
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-5-0.wcm",
+      "level": 3,
+      "core": [
+        0.02483333333333332,
+        51.371,
+        0.10399999999999998,
+        51.4155
+      ],
+      "bounds": [
+        0.023419642857142844,
+        51.37020535714286,
+        0.10541369047619045,
+        51.416294642857146
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-0-1.wcm",
+      "level": 3,
+      "core": [
+        -0.371,
+        51.4155,
+        -0.29183333333333333,
+        51.46
+      ],
+      "bounds": [
+        -0.3724136904761905,
+        51.41470535714286,
+        -0.29041964285714283,
+        51.460794642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-1-1.wcm",
+      "level": 3,
+      "core": [
+        -0.29183333333333333,
+        51.4155,
+        -0.21266666666666667,
+        51.46
+      ],
+      "bounds": [
+        -0.29324702380952383,
+        51.41470535714286,
+        -0.2112529761904762,
+        51.460794642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-2-1.wcm",
+      "level": 3,
+      "core": [
+        -0.21266666666666667,
+        51.4155,
+        -0.1335,
+        51.46
+      ],
+      "bounds": [
+        -0.21408035714285714,
+        51.41470535714286,
+        -0.13208630952380954,
+        51.460794642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-3-1.wcm",
+      "level": 3,
+      "core": [
+        -0.1335,
+        51.4155,
+        -0.054333333333333345,
+        51.46
+      ],
+      "bounds": [
+        -0.13491369047619048,
+        51.41470535714286,
+        -0.052919642857142866,
+        51.460794642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-4-1.wcm",
+      "level": 3,
+      "core": [
+        -0.054333333333333345,
+        51.4155,
+        0.02483333333333332,
+        51.46
+      ],
+      "bounds": [
+        -0.05574702380952382,
+        51.41470535714286,
+        0.026247023809523793,
+        51.460794642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-5-1.wcm",
+      "level": 3,
+      "core": [
+        0.02483333333333332,
+        51.4155,
+        0.10399999999999998,
+        51.46
+      ],
+      "bounds": [
+        0.023419642857142844,
+        51.41470535714286,
+        0.10541369047619045,
+        51.460794642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-0-2.wcm",
+      "level": 3,
+      "core": [
+        -0.371,
+        51.46,
+        -0.29183333333333333,
+        51.5045
+      ],
+      "bounds": [
+        -0.3724136904761905,
+        51.45920535714286,
+        -0.29041964285714283,
+        51.505294642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-1-2.wcm",
+      "level": 3,
+      "core": [
+        -0.29183333333333333,
+        51.46,
+        -0.21266666666666667,
+        51.5045
+      ],
+      "bounds": [
+        -0.29324702380952383,
+        51.45920535714286,
+        -0.2112529761904762,
+        51.505294642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-2-2.wcm",
+      "level": 3,
+      "core": [
+        -0.21266666666666667,
+        51.46,
+        -0.1335,
+        51.5045
+      ],
+      "bounds": [
+        -0.21408035714285714,
+        51.45920535714286,
+        -0.13208630952380954,
+        51.505294642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-3-2.wcm",
+      "level": 3,
+      "core": [
+        -0.1335,
+        51.46,
+        -0.054333333333333345,
+        51.5045
+      ],
+      "bounds": [
+        -0.13491369047619048,
+        51.45920535714286,
+        -0.052919642857142866,
+        51.505294642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-4-2.wcm",
+      "level": 3,
+      "core": [
+        -0.054333333333333345,
+        51.46,
+        0.02483333333333332,
+        51.5045
+      ],
+      "bounds": [
+        -0.05574702380952382,
+        51.45920535714286,
+        0.026247023809523793,
+        51.505294642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-5-2.wcm",
+      "level": 3,
+      "core": [
+        0.02483333333333332,
+        51.46,
+        0.10399999999999998,
+        51.5045
+      ],
+      "bounds": [
+        0.023419642857142844,
+        51.45920535714286,
+        0.10541369047619045,
+        51.505294642857145
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-0-3.wcm",
+      "level": 3,
+      "core": [
+        -0.371,
+        51.5045,
+        -0.29183333333333333,
+        51.549
+      ],
+      "bounds": [
+        -0.3724136904761905,
+        51.503705357142856,
+        -0.29041964285714283,
+        51.549794642857144
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-1-3.wcm",
+      "level": 3,
+      "core": [
+        -0.29183333333333333,
+        51.5045,
+        -0.21266666666666667,
+        51.549
+      ],
+      "bounds": [
+        -0.29324702380952383,
+        51.503705357142856,
+        -0.2112529761904762,
+        51.549794642857144
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-2-3.wcm",
+      "level": 3,
+      "core": [
+        -0.21266666666666667,
+        51.5045,
+        -0.1335,
+        51.549
+      ],
+      "bounds": [
+        -0.21408035714285714,
+        51.503705357142856,
+        -0.13208630952380954,
+        51.549794642857144
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-3-3.wcm",
+      "level": 3,
+      "core": [
+        -0.1335,
+        51.5045,
+        -0.054333333333333345,
+        51.549
+      ],
+      "bounds": [
+        -0.13491369047619048,
+        51.503705357142856,
+        -0.052919642857142866,
+        51.549794642857144
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-4-3.wcm",
+      "level": 3,
+      "core": [
+        -0.054333333333333345,
+        51.5045,
+        0.02483333333333332,
+        51.549
+      ],
+      "bounds": [
+        -0.05574702380952382,
+        51.503705357142856,
+        0.026247023809523793,
+        51.549794642857144
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-5-3.wcm",
+      "level": 3,
+      "core": [
+        0.02483333333333332,
+        51.5045,
+        0.10399999999999998,
+        51.549
+      ],
+      "bounds": [
+        0.023419642857142844,
+        51.503705357142856,
+        0.10541369047619045,
+        51.549794642857144
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-1-4.wcm",
+      "level": 3,
+      "core": [
+        -0.29183333333333333,
+        51.549,
+        -0.21266666666666667,
+        51.5935
+      ],
+      "bounds": [
+        -0.29324702380952383,
+        51.548205357142855,
+        -0.2112529761904762,
+        51.59429464285714
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-2-4.wcm",
+      "level": 3,
+      "core": [
+        -0.21266666666666667,
+        51.549,
+        -0.1335,
+        51.5935
+      ],
+      "bounds": [
+        -0.21408035714285714,
+        51.548205357142855,
+        -0.13208630952380954,
+        51.59429464285714
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-3-4.wcm",
+      "level": 3,
+      "core": [
+        -0.1335,
+        51.549,
+        -0.054333333333333345,
+        51.5935
+      ],
+      "bounds": [
+        -0.13491369047619048,
+        51.548205357142855,
+        -0.052919642857142866,
+        51.59429464285714
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-4-4.wcm",
+      "level": 3,
+      "core": [
+        -0.054333333333333345,
+        51.549,
+        0.02483333333333332,
+        51.5935
+      ],
+      "bounds": [
+        -0.05574702380952382,
+        51.548205357142855,
+        0.026247023809523793,
+        51.59429464285714
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-5-4.wcm",
+      "level": 3,
+      "core": [
+        0.02483333333333332,
+        51.549,
+        0.10399999999999998,
+        51.5935
+      ],
+      "bounds": [
+        0.023419642857142844,
+        51.548205357142855,
+        0.10541369047619045,
+        51.59429464285714
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-2-5.wcm",
+      "level": 3,
+      "core": [
+        -0.21266666666666667,
+        51.5935,
+        -0.1335,
+        51.638
+      ],
+      "bounds": [
+        -0.21408035714285714,
+        51.592705357142854,
+        -0.13208630952380954,
+        51.63879464285714
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-3-5.wcm",
+      "level": 3,
+      "core": [
+        -0.1335,
+        51.5935,
+        -0.054333333333333345,
+        51.638
+      ],
+      "bounds": [
+        -0.13491369047619048,
+        51.592705357142854,
+        -0.052919642857142866,
+        51.63879464285714
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    },
+    {
+      "path": "london-os-1890s-4-5.wcm",
+      "level": 3,
+      "core": [
+        -0.054333333333333345,
+        51.5935,
+        0.02483333333333332,
+        51.638
+      ],
+      "bounds": [
+        -0.05574702380952382,
+        51.592705357142854,
+        0.026247023809523793,
+        51.63879464285714
+      ],
+      "group": [
+        -0.371,
+        51.371,
+        0.104,
+        51.638
+      ],
+      "source": "London / Ordnance Survey 1891–1896 building footprints",
+      "size": [
+        464,
+        464
+      ],
+      "cover": false,
+      "city": true,
+      "ids": false
+    }
+  ],
+  "source": "https://doi.org/10.5281/zenodo.19497435",
+  "creator": "Rémi Petitpierre, Isabella di Lenardo, Polly Hudson, Hendrik Herold, Katherine McDonough, Beatrice Vaienti, Robert Hecht and Christopher Fleet",
+  "license": "CC-BY-4.0",
+  "processing": "Building footprints rasterized to coverage. No road or bridge geometry is inferred."
+}

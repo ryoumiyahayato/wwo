@@ -119,7 +119,7 @@ impl TimeControl {
     pub fn toggle_pause(&mut self) { self.paused = !self.paused; }
 
     pub fn set_speed(&mut self, speed: i64) {
-        if matches!(speed, 1 | 2 | 4) {
+        if (1..=4).contains(&speed) {
             self.speed = speed;
             self.paused = false;
         }

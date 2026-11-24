@@ -12,7 +12,7 @@ mod lobby;
 mod prologue_ui;
 mod landmarks;
 mod map_release;
-mod migration_status;
+mod menu_theme;
 mod interface;
 mod overlay;
 mod pop_debug_ui;
@@ -280,6 +280,7 @@ struct Host {
     hud:Hud,skin:Skin,exit_requested:bool,
     prologue: Option<prologue_ui::Draft>,
     opening_nav: lobby::Selection,
+    menu_themes:menu_theme::Themes,
     lobby_page:lobby::Page,lobby_country:usize,lobby_request:bool,country_directory:lobby::Directory,
     bridge_wait:Instant,seen_lobby_busy:bool,departure_requested:bool,
     loading_fade:Option<Instant>,loading_status:String,
@@ -343,6 +344,11 @@ impl Host {
         };
         let mut world=if map_signature.is_some() {map_release::open(&map_root)?}
             else {World::open(&map_root.join("world.json"))?};
+        if formal_map {
+            if let Err(error)=map_release::add_city_ground(&mut world,&config.root) {
+                eprintln!("City ground catalogue: {error}");
+            }
+        }
         let landmarks=if formal_map {Some(landmarks::Landmarks::install(&mut world)?)} else {None};
         let mut camera=Camera::new(VIEW_SIZE);
         camera.local_models=landmarks.is_some();
@@ -369,6 +375,7 @@ impl Host {
         let mode=if config.terrain_review {Mode::Geographic} else {Mode::Political};
         let preferences=config.preferences.as_deref().map(interface::Preferences::load).unwrap_or_default();
         skin.set_english(preferences.english);
+        let menu_themes=menu_theme::Themes::open(&config.root,preferences.fixed_painting,preferences.last_painting);
         let visuals=PoliticalVisuals::open(&map_root,&world)?;
         let employment=state::EmploymentReference::open(&config.root)?;
         let index=Index::new(&world.tiles);
@@ -382,7 +389,7 @@ impl Host {
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
             animate:false,next_date:Instant::now(),feedback:String::new(),dirty:true,last_input_check:Instant::now(),
             version:None,last_palette:None,trial:Trial{last:observation_id,..Trial::default()},hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,..Hud::default()},skin,exit_requested:false,
-            prologue: None,
+            prologue: None,menu_themes,
             opening_nav: lobby::Selection::default(),
             lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,country_directory:lobby::Directory::default(),
             bridge_wait:Instant::now(),seen_lobby_busy:false,departure_requested:false,
@@ -582,10 +589,15 @@ impl Host {
         self.dirty=true;
     }
     fn save_interface(&mut self) {
+        self.emit(Request::Interface{volume:f64::from(self.hud.volume)/100.,locale:if self.hud.english{"en"}else{"zh_CN"}});
+        self.save_preferences();
+    }
+    fn save_preferences(&mut self) {
+        let (fixed,last)=self.menu_themes.preference();
         let preferences=interface::Preferences{
             fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,
+            fixed_painting:fixed.map(str::to_owned),last_painting:last.map(str::to_owned),
         };
-        self.emit(Request::Interface{volume:f64::from(preferences.volume)/100.,locale:preferences.locale()});
         if let Some(path)=&self.config.preferences {
             if let Err(error)=preferences.save(path) {
                 self.feedback=format!("设置保存失败：{error}");
@@ -699,8 +711,10 @@ impl Host {
             HudCommand::Technology(tab)=>self.hud.tech=tab,
             HudCommand::Milestone(index)=>self.hud.milestone=index,
             HudCommand::FinancePage(page)=>self.emit(Request::FinancePage{page}),
-            HudCommand::Clock(speed)=>{
+            HudCommand::Clock(mut speed)=>{
                 if self.state.session.is_some(){
+                    // The archived comparison bridge only accepts the original four speeds.
+                    if speed == 3 && self.config.requests.is_some() { speed = 4; }
                     let index=formal_ui::CLOCK_SPEEDS.iter().position(|v|*v==speed).unwrap_or(0);
                     let serial=self.hud.mechanical.request(index,self.hud.clock_drag.take());
                     self.emit(Request::Clock{speed,serial});
@@ -1082,6 +1096,16 @@ impl Host {
                 self.opening_nav.offset = 0;
                 self.filter_countries();
             }
+            Command::ChangePainting=>{
+                if let Some(image)=self.menu_themes.change(&self.config.root) {
+                    if let Some(renderer)=&mut self.renderer {renderer.replace_menu_painting(image);}
+                    self.save_preferences();
+                }
+            }
+            Command::FixPainting(fixed)=>{
+                self.menu_themes.set_fixed(fixed);
+                self.save_preferences();
+            }
             Command::Enter => {
                 if self.lobby_page != Page::Selection || self.lobby_request || self.opening_nav.stage != SelectionStage::Profile
                     || self.state.lobby.as_ref().is_none_or(|state| !state.selection_ready || state.busy) { return; }
@@ -1108,9 +1132,6 @@ impl Host {
             }
             Command::PrologueChoice(index) if self.lobby_page == Page::Prologue => {
                 if let Some(draft) = &mut self.prologue { draft.choose(index); }
-            }
-            Command::PrologueHealth(index) if self.lobby_page == Page::Prologue => {
-                if let Some(draft) = &mut self.prologue { draft.set_health(index); }
             }
             Command::PrologueBack if self.lobby_page == Page::Prologue => {
                 if let Some(draft) = &mut self.prologue {
@@ -2192,9 +2213,13 @@ impl Host {
         if let Some(s)=self.state.session.as_ref(){
             let speed=match &key {
                 Key::Character(v)=>match v.as_str(){
-                    "0"=>Some(0),"1"=>Some(1),"2"=>Some(2),"4"=>Some(4),
-                    "+"|"="=>Some(formal_ui::CLOCK_SPEEDS[(self.hud.mechanical.selected(formal_ui::clock_index(Some(s)))+1).min(3)]),
-                    "-"=>Some(formal_ui::CLOCK_SPEEDS[self.hud.mechanical.selected(formal_ui::clock_index(Some(s))).saturating_sub(1)]),_=>None,
+                    "0"=>Some(0),"1"=>Some(1),"2"=>Some(2),"3"=>Some(3),"4"=>Some(4),
+                    "+"|"="=>Some(formal_ui::CLOCK_SPEEDS[(self.hud.mechanical.selected(formal_ui::clock_index(Some(s)))+1).min(formal_ui::CLOCK_SPEEDS.len()-1)]),
+                    "-"=>{
+                        let index=self.hud.mechanical.selected(formal_ui::clock_index(Some(s))).saturating_sub(1);
+                        let speed=formal_ui::CLOCK_SPEEDS[index];
+                        Some(if speed==3 && self.config.requests.is_some(){2}else{speed})
+                    },_=>None,
                 },_=>None,
             };
             if let Some(speed)=speed{self.action(Action::Hud(HudCommand::Clock(speed)));return;}
@@ -2276,7 +2301,8 @@ impl Host {
         let city=self.visible.iter().filter(|&&id|city_first&&self.world.tiles[id].city
             && self.index.scissor(id,&self.camera,self.size).is_some());
         let Some(i)=city.chain(self.visible.iter()).chain(self.candidate.iter()).copied()
-            .find(|i|!self.cached.contains_key(i)&&!self.failed.contains(i))else{return;};
+            .find(|i|(!self.world.tiles[*i].city_ink_only||city_first)
+                &&!self.cached.contains_key(i)&&!self.failed.contains(i))else{return;};
         let tile=&self.world.tiles[i];
         let required=tile.data_size()-if self.reader.cover {0}else{tile.cover_size()};
         let mut occupied=self.cached.values().map(|p|p.page.bytes).sum::<usize>();
@@ -2385,10 +2411,11 @@ impl Host {
         let (mut meshes,hits)=if loading {
             let status=self.state.lobby.as_ref().map(|s|s.status.as_str()).filter(|s|!s.is_empty())
                 .unwrap_or(if self.lobby_request{"正在进入世界"}else{"正在读取地图资料"});
-            (formal.loading(status,seconds),Vec::new())
+            (formal.loading(status,seconds,self.menu_themes.aspect),Vec::new())
         }else if self.in_lobby(){
             formal.lobby(&self.world,self.state.lobby.as_ref(),self.lobby_page,self.lobby_country,self.lobby_request,&self.country_directory,self.prologue.as_ref(),
-                lobby::SelectionView { navigation: &self.opening_nav, camera: &self.camera, visuals: &self.visuals, world: &self.world })
+                lobby::SelectionView { navigation: &self.opening_nav, camera: &self.camera, visuals: &self.visuals, world: &self.world },
+                &self.menu_themes)
         }else{ui::compose(&self.world,&self.atlas,Ui{
             mode:self.mode,date:&date,camera:&self.camera,size:self.size,selected:self.selected,admin:&admin,details:self.details,country:self.country,
             search:self.search.as_deref(),search_results:&search,econ_label:&econ_label,econ_legend:&econ_legend,
@@ -2411,7 +2438,7 @@ impl Host {
         if let Some(start)=self.loading_fade {
             let t=(start.elapsed().as_secs_f32()/0.32).clamp(0.,1.);
             if t<1. && !loading {
-                let mut old=formal.loading(&self.loading_status,seconds);
+                let mut old=formal.loading(&self.loading_status,seconds,self.menu_themes.aspect);
                 for (mesh,_) in &mut old {for point in &mut mesh.vertices {point.color[3]=(f32::from(point.color[3])*(1.-t)) as u8;}}
                 fade=Some(old);
             }
@@ -2436,6 +2463,7 @@ impl Host {
             ||self.mode==Mode::Military&&view.map_style[3]>0.;
         let pages:Vec<_>=self.visible.iter().filter_map(|&id| {
             let tile=&self.world.tiles[id];
+            if tile.city_ink_only && (self.mode!=Mode::Geographic || view.map_style[1]<=0.) {return None;}
             if view.map_style[1]>0.&&!needs_overlay&&!tile.city&&view.selection[1]<0.5{return None;}
             let p=self.cached.get(&id)?;
             let progress=(now.duration_since(p.ready).as_secs_f32()/0.16).clamp(0.,1.);
@@ -2940,11 +2968,13 @@ impl ApplicationHandler<HostEvent> for Host {
                 if layouts.len()!=524288{return Err(io::Error::other("invalid simulation layout").into());}
             }
             let blank = || Raster { size: [1, 1], pixels: vec![0; 4] };
+            let painting=self.config.managed.then(||self.menu_themes.start(&self.config.root)).flatten();
+            if painting.is_some(){self.save_preferences();}
             let opening_asset = |data: &[u8]| {
                 if self.config.managed { decode_rgba(data) } else { Ok(blank()) }
             };
             let hud=[font(&self.config.root.join("hud-art.png"))?,hud_type_atlas(&self.config.root.join("hud-type.png"))?,
-                if self.config.managed{font(&self.config.root.join("menu-painting.png"))?}else{blank()},
+                painting.unwrap_or_else(blank),
                 opening_asset(include_bytes!("../../../data/character/prologue/parchment.png"))?,
                 opening_asset(include_bytes!("../../../data/character/prologue/cloud.png"))?];
 

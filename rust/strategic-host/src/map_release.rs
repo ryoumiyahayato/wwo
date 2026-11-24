@@ -1,4 +1,4 @@
-use crate::{compact::Pack, world::World};
+use crate::{compact::Pack, world::{Tile, World}};
 use std::{
     collections::HashSet,
     fs::File,
@@ -68,4 +68,37 @@ pub fn open(root: &Path) -> io::Result<World> {
     check().map_err(|e| {
         io::Error::other(format!("正式地图需要 {VERSION}。{} · {e}", root.display()))
     })
+}
+
+pub fn add_city_ground(world: &mut World, data: &Path) -> io::Result<()> {
+    #[derive(serde::Deserialize)]
+    struct Catalogue { tiles: Vec<Tile> }
+
+    let folder = data.join("city-overlays");
+    let file = match File::open(folder.join("catalogue.json")) {
+        Ok(file) => file,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
+        Err(error) => return Err(error),
+    };
+    let mut catalogue: Catalogue = serde_json::from_reader(file)?;
+    let mut seen = HashSet::new();
+    for tile in &mut catalogue.tiles {
+        if !tile.city || tile.level != 3 || tile.cover || tile.ids
+            || tile.size.iter().any(|size| !(2..=1024).contains(size))
+            || !tile.path.ends_with(".wcm")
+            || !tile.path.bytes().all(|byte| byte.is_ascii_alphanumeric() || b"-_.".contains(&byte))
+            || !seen.insert(tile.path.clone())
+        {
+            return Err(io::Error::other(format!("无效的城市分片 {}", tile.path)));
+        }
+        let path = folder.join(&tile.path);
+        if let Err(error) = Pack::check_signature(&path, TILE_SIGNATURE) {
+            eprintln!("City ground {}: {error}", path.display());
+            continue;
+        }
+        tile.path = path.canonicalize()?.to_string_lossy().into_owned();
+        tile.city_ink_only = true;
+    }
+    world.tiles.extend(catalogue.tiles.into_iter().filter(|tile| tile.city_ink_only));
+    Ok(())
 }

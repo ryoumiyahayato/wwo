@@ -263,7 +263,7 @@ fn cultivated_fields(base: vec3f, ll: vec2f, world: vec3f, mpp: f32, cover: f32)
 }
 
 fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level: u32, water: f32, mpp: f32) -> vec3f {
-    let near = 1. - smoothstep(90., 430., mpp);
+    let near = 1. - smoothstep(65., 320., mpp);
     // Match the physical lighting footprint at both levels. Keep the coarse
     // footprint wide enough to sample independent DEM texels in fallback.
     let step = f32(1u << (7u-level));
@@ -294,7 +294,7 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
     let grove = landscape_grove(world);
     let canopy = smoothstep(.13,.54,grove);
     let alpine = smoothstep(1700.,3850.,height);
-    let forest = mix(base,mix(vec3f(.32,.331,.224),vec3f(.243,.328,.218),canopy),.49*near)
+    let forest = mix(base,mix(vec3f(.318,.355,.237),vec3f(.197,.299,.185),canopy),.56*near)
         * (1. + motif.r*.16 + (canopy-.55)*(.09+.09*(1.-near)));
     let open = land.grass+land.shrub+land.crop;
     var sediment=vec2f(0.);
@@ -350,10 +350,12 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
 
 fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) -> vec3f {
     if water > .65 || mpp >= LAND_MATERIAL_MPP || view.settings.y >= .5
-        || view.map_style.z < 5. || all(base==vec3f(1.,0.,1.)) { return base; }
+        || all(base==vec3f(1.,0.,1.)) { return base; }
     let strength = ground_material_weight(water,mpp);
     if strength <= .001 { return base; }
-    let coarse=select(natural_lod_weight(5u),1.,view.chart_origin.w>.5);
+    // Keep the world-aligned detail when color temporarily falls back farther
+    // than Z5 while zooming or when a nearby page has yet to load.
+    let coarse=max(natural_lod_weight(5u),1.-smoothstep(240.,480.,mpp));
     let regional_weight=landscape_surface_weight(6u);
     let fine_weight=landscape_surface_weight(7u);
     let modern = 1. - landscape_survey_mask(ll,mpp);

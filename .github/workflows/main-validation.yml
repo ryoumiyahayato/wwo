@@ -94,6 +94,8 @@ jobs:
           Copy-Item rust/strategic-host/target/release/wwo-map-lab.exe -Destination $stage
           Copy-Item rust/strategic-host/target/release/wwo-formal-state.exe -Destination $stage
           ./rust/strategic-host/tools/package_population.ps1 -DataDirectory (Join-Path $stage 'data')
+          Copy-Item data/menu-themes -Destination (Join-Path $stage 'data') -Recurse
+          Copy-Item data/city-overlays -Destination (Join-Path $stage 'data') -Recurse
       - name: Retain the Windows build in private repositories
         if: github.event_name != 'pull_request' && github.event.repository.private
         uses: actions/upload-artifact@v4
