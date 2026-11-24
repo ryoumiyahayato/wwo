@@ -26047,7 +26047,9 @@
           "method": "Allocate the selected opening control of 44,012,686 by the shares in the published 1899-12-31 statistical control of 44,269,900. Integer people use largest remainders.",
           "scope": "The home-island opening total is split across the 47 contemporary prefectural reporting scopes. Weights represent estimated residents in the Japanese register (乙種). Taiwan is excluded.",
           "uncertainty_kind": "No quantitative prefectural interval. The published register rounds to hundreds and excludes foreigners outside the register. Relative shares are applied to the distinct opening control. There is no separate foreign resident allocation.",
-          "place_ids": [],
+          "place_ids": [
+            "place:kyoto"
+          ],
           "statistical_parent": "jp_home_islands",
           "population_lower": null,
           "population_upper": null
@@ -26074,7 +26076,9 @@
           "method": "Allocate the selected opening control of 44,012,686 by the shares in the published 1899-12-31 statistical control of 44,269,900. Integer people use largest remainders.",
           "scope": "The home-island opening total is split across the 47 contemporary prefectural reporting scopes. Weights represent estimated residents in the Japanese register (乙種). Taiwan is excluded.",
           "uncertainty_kind": "No quantitative prefectural interval. The published register rounds to hundreds and excludes foreigners outside the register. Relative shares are applied to the distinct opening control. There is no separate foreign resident allocation.",
-          "place_ids": [],
+          "place_ids": [
+            "place:osaka"
+          ],
           "statistical_parent": "jp_home_islands",
           "population_lower": null,
           "population_upper": null
@@ -26130,7 +26134,9 @@
           "method": "Allocate the selected opening control of 44,012,686 by the shares in the published 1899-12-31 statistical control of 44,269,900. Integer people use largest remainders.",
           "scope": "The home-island opening total is split across the 47 contemporary prefectural reporting scopes. Weights represent estimated residents in the Japanese register (乙種). Taiwan is excluded.",
           "uncertainty_kind": "No quantitative prefectural interval. The published register rounds to hundreds and excludes foreigners outside the register. Relative shares are applied to the distinct opening control. There is no separate foreign resident allocation.",
-          "place_ids": [],
+          "place_ids": [
+            "place:kobe"
+          ],
           "statistical_parent": "jp_home_islands",
           "population_lower": null,
           "population_upper": null
@@ -26400,7 +26406,9 @@
           "method": "Allocate the selected opening control of 44,012,686 by the shares in the published 1899-12-31 statistical control of 44,269,900. Integer people use largest remainders.",
           "scope": "The home-island opening total is split across the 47 contemporary prefectural reporting scopes. Weights represent estimated residents in the Japanese register (乙種). Taiwan is excluded.",
           "uncertainty_kind": "No quantitative prefectural interval. The published register rounds to hundreds and excludes foreigners outside the register. Relative shares are applied to the distinct opening control. There is no separate foreign resident allocation.",
-          "place_ids": [],
+          "place_ids": [
+            "place:nagoya"
+          ],
           "statistical_parent": "jp_home_islands",
           "population_lower": null,
           "population_upper": null
@@ -26886,7 +26894,9 @@
           "method": "Allocate the selected opening control of 44,012,686 by the shares in the published 1899-12-31 statistical control of 44,269,900. Integer people use largest remainders.",
           "scope": "The home-island opening total is split across the 47 contemporary prefectural reporting scopes. Weights represent estimated residents in the Japanese register (乙種). Taiwan is excluded.",
           "uncertainty_kind": "No quantitative prefectural interval. The published register rounds to hundreds and excludes foreigners outside the register. Relative shares are applied to the distinct opening control. There is no separate foreign resident allocation.",
-          "place_ids": [],
+          "place_ids": [
+            "place:hiroshima"
+          ],
           "statistical_parent": "jp_home_islands",
           "population_lower": null,
           "population_upper": null
