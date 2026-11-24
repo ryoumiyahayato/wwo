@@ -167,13 +167,16 @@ impl Panel {
         self.number("直属人数", "Direct residents", inspection.direct_residents);
         self.number("下级地区人数", "Child accounts", inspection.child_residents);
         self.field("统计账户", "Account", inspection.account_name.or(inspection.account_id));
+        if inspection.account_name.is_some() {
+            self.field("账户编号", "Account ID", inspection.account_id);
+        }
         self.field("上级账户", "Parent account", inspection.parent_id);
         if let Some(structure) = &inspection.structure {
             self.number("具名人口", "Named", Some(structure.named_residents));
-            self.number("匿名人口", "Anonymous", Some(structure.population_total - structure.named_residents));
+            self.number("未具名人口", "Anonymous", Some(structure.population_total - structure.named_residents));
             let female = structure.cohorts.iter().filter(|c| c.sex == Some(CohortSex::Female)).map(|c| c.members).sum::<u64>();
             let male = structure.cohorts.iter().filter(|c| c.sex == Some(CohortSex::Male)).map(|c| c.members).sum::<u64>();
-            self.field("匿名男 / 女 / 未知", "Anonymous male / female / unknown", Some(format!(
+            self.field("未具名 M / F / 未知", "Anonymous male / female / unknown", Some(format!(
                 "{} / {} / {}", number(male), number(female),
                 number(structure.population_total - structure.named_residents - female - male),
             )));
@@ -183,8 +186,8 @@ impl Panel {
                 let high = covered.possibly_in_range_with_known_age;
                 if high == covered.definitely_in_range { low } else { format!("{low}–{}", number(high)) }
             });
-            self.field("匿名 0–14 / 15–64 / 65+", "Anonymous 0–14 / 15–64 / 65+", Some(age_bands.join(" / ")));
-            self.number("年龄未知的匿名人口", "Anonymous with unknown age", structure.count_ages(0, u16::MAX).map(|a| a.age_unknown));
+            self.field("未具名 0–14 / 15–64 / 65+", "Anonymous 0–14 / 15–64 / 65+", Some(age_bands.join(" / ")));
+            self.number("年龄未知的未具名人口", "Anonymous with unknown age", structure.count_ages(0, u16::MAX).map(|a| a.age_unknown));
         }
         self.heading("人口资料", "Population evidence");
         self.number("开局版本", "Opening version", inspection.opening_version.map(u64::from));
@@ -283,7 +286,7 @@ impl Panel {
                 Some(structure.residents_with_cohort_age_and_sex),
             );
             self.number(
-                "匿名居民未分配年龄或性别",
+                "未具名居民未分配年龄或性别",
                 "Anonymous residents with age or sex unassigned",
                 Some(structure.population_total - structure.named_residents - structure.residents_with_cohort_age_and_sex),
             );
@@ -298,7 +301,7 @@ impl Panel {
                 Some(structure.unclassified_residents),
             );
             if let Some(ages) = structure.count_ages(15, 64) {
-                self.heading("潜在劳动年龄（匿名居民 15–64 岁）", "Potential working age (anonymous residents aged 15–64)");
+                self.heading("潜在劳动年龄（未具名居民 15–64 岁）", "Potential working age (anonymous residents aged 15–64)");
                 self.number("确定在范围内", "Within range", Some(ages.definitely_in_range));
                 self.number("年龄段与范围相交", "Age band overlaps range", Some(ages.possibly_in_range_with_known_age));
                 self.number("年龄未知", "Age unknown", Some(ages.age_unknown));
@@ -504,17 +507,23 @@ impl Panel {
                 .and_then(|id| market.commodity_info(id).map(|(name, _, _)| format!("{name} / {id}")))
                 .unwrap_or_else(|| row.id.into());
             let period = match row.period {
-                NeedPeriod::Day => "/日·day",
-                NeedPeriod::Year => "/年·yr",
-                NeedPeriod::Occupancy => " 占用·occupied",
+                NeedPeriod::Day => "/日",
+                NeedPeriod::Year => "/年",
+                NeedPeriod::Occupancy => " 占用",
             };
             let basis = match row.basis {
                 "staple_scenarios_1900" => "R",
                 "market_catalogue_reference_1900" => "C",
                 _ => "P",
             };
-            let per_person = if row.eligible_people == 0 { "—".into() } else {
-                format!("{:.4}", row.quantity / row.eligible_people as f64)
+            let per_person = if row.eligible_people == 0 {
+                "—".into()
+            } else {
+                let rate = row.quantity / row.eligible_people as f64;
+                match row.unit.as_str() {
+                    "吨" => format!("{:.3} kg{period}", rate * 1_000.0),
+                    unit => format!("{rate:.6} {unit}{period}"),
+                }
             };
             self.line(format!(
                 "{label}  {basis}  |  {:.3} {}{period}  |  {per_person}  |  {}",

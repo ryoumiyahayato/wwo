@@ -297,7 +297,7 @@ impl Population {
             children,
             map_place_ids,
             population_total: total,
-            direct_residents: self.resident_pool(unit),
+            direct_residents: live.then(|| self.resident_pool(unit).unwrap_or(0)),
             opening_version: self.opening_version(),
             opening,
             legacy_estimate: self.opening_estimate(unit)?,

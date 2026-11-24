@@ -2145,7 +2145,7 @@ mod tests {
         assert_eq!(islands.population_total, old.population().population_total("cshapes_gw_840"));
         assert_eq!(islands.population_total, Some(6_961_339));
         assert_eq!(islands.direct_residents, Some(5_125_411));
-        assert_eq!(islands.children.iter().map(|child| child.population_total).sum::<u64>(), 1_835_928);
+        assert_eq!(islands.child_residents, Some(1_835_928));
         assert_eq!(cebu.parent_id, Some("cshapes_gw_840"));
         assert_eq!(cebu.population_total, Some(504_076));
         assert_eq!(cebu.opening.unwrap().source_id, "ph_philippine_commission_atlas_1900");
@@ -2156,9 +2156,10 @@ mod tests {
     fn opening_v42_danish_regions_close_to_the_domestic_census_control() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let world = bootstrap.base_opening_version("country_fra", None, Some(42)).unwrap();
-        let denmark = world.inspect_population_brief("state:kingdom_of_denmark").unwrap();
+        let denmark = world.inspect_population("state:kingdom_of_denmark").unwrap();
         assert_eq!(denmark.population_total, Some(2_422_217));
         assert_eq!(denmark.children.len(), 7);
+        assert_eq!(denmark.child_residents, Some(2_422_217));
         assert_eq!(denmark.children.iter().map(|child| child.population_total).sum::<u64>(), 2_422_217);
         assert_eq!(denmark.opening.unwrap().source_id, "dk_statistics_population_1905_table3");
     }
