@@ -3,6 +3,8 @@
 use serde::Deserialize;
 use std::{collections::HashMap, sync::OnceLock};
 
+pub mod agriculture;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Category {
     Energy, Precious, BaseMetal, AlloyMetal, Chemical, Fertilizer, Construction, Gem, Renewable,
