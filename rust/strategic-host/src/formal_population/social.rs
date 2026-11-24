@@ -107,6 +107,7 @@ pub struct SocialDimension<'a> {
     pub by_classification: BTreeMap<&'a str, BTreeMap<&'a str, u64>>,
     pub source_ids: BTreeSet<&'a str>,
     pub direct_opening_distribution: Option<&'a OpeningSocialDistribution>,
+    pub modelled_residents: u64,
 }
 
 #[derive(Serialize)]
@@ -134,6 +135,8 @@ impl Population {
             .map(|key| (key, SocialDimension { unknown_residents: population_total, ..SocialDimension::default() }))
             .collect();
         let mut coverage = BTreeMap::<&str, (u64, u64, u64)>::new();
+        let use_scenarios = self.opening_version().is_some_and(|version| version >= 44);
+        let mut observed = BTreeSet::new();
         let mut affected_resident_pools = BTreeSet::new();
         for (opening, id, region) in self.opening.iter().flat_map(|opening| {
             opening.social.regions.iter().map(move |(id, region)| (opening, id, region))
@@ -157,6 +160,9 @@ impl Population {
             let mut pool_minimum = 0;
             let mut pool_maximum = 0;
             for (key, distribution) in &region.marginal_distributions {
+                if use_scenarios {
+                    observed.extend(members.iter().map(|member| (member.as_str(), key.as_str())));
+                }
                 let dimension = dimensions.get_mut(key.as_str()).expect("validated population dimension");
                 dimension.source_ids.extend(distribution.source_ids.iter().map(String::as_str));
                 if unit == Some(id) {
@@ -191,9 +197,88 @@ impl Population {
             (minimum + leaf_minimum.max(aggregate_minimum),
              maximum + scope_maximum.min(self.population_total(id).expect("validated scope")))
         });
+        let mut modelled_any = 0;
+        if use_scenarios {
+            for (pool, &count) in &self.pools {
+                if count == 0 || unit.is_some_and(|scope| !self.pool_in_scope(pool, scope)) {
+                    continue;
+                }
+                let (region, urban) = self.household_profile(pool);
+                let root = self.parent_unit(pool).unwrap_or(pool);
+                let [primary, extraction, manufacturing, transport, services] = region.sectors(urban);
+                let occupations = [
+                    ("Agriculture", primary * 43), ("Mining class", extraction * 43),
+                    ("Manufacturing and mechanical class", manufacturing * 43),
+                    ("Transport", transport * 43), ("Tertiary sector (commerce and services)", services * 43),
+                ];
+                let classes = if urban {
+                    [("Manual and service households", 6200), ("Smallholder and self-employed households", 1500),
+                        ("Salaried and professional households", 1900), ("Proprietor and rentier households", 400)]
+                } else {
+                    [("Manual and service households", 3800), ("Smallholder and self-employed households", 5050),
+                        ("Salaried and professional households", 1000), ("Proprietor and rentier households", 150)]
+                };
+                let (language, culture, religion) = cultural_scenario(root, pool);
+                let mut most = 0;
+                for (key, rows, evidence) in [
+                    ("class", classes.as_slice(), "opening_household_class_scenario_v44"),
+                    ("occupation", occupations.as_slice(), "opening_industry_participation_scenario_v44"),
+                    ("language", language, "historical_language_dominant_lower_scenario_v44"),
+                    ("culture", culture, "historical_cultural_affiliation_scenario_v44"),
+                    ("religion", religion, "historical_religious_affiliation_scenario_v44"),
+                ] {
+                    if rows.is_empty() || observed.contains(&(pool.as_str(), key)) {
+                        continue;
+                    }
+                    let dimension = dimensions.get_mut(key).expect("scenario dimension");
+                    let bucket = dimension.by_classification.entry(evidence).or_default();
+                    let mut basis_points = 0;
+                    let mut assigned = 0;
+                    for &(category, points) in rows {
+                        basis_points += points;
+                        let amount = count * basis_points / 10_000 - assigned;
+                        assigned += amount;
+                        if amount != 0 { *bucket.entry(category).or_default() += amount; }
+                    }
+                    dimension.assigned_residents += assigned;
+                    dimension.modelled_residents += assigned;
+                    dimension.unknown_residents -= assigned;
+                    most = most.max(assigned);
+                }
+                modelled_any += most;
+            }
+        }
         Some(SocialDistribution {
-            population_total, dimensions, residents_with_any_attribute_minimum: minimum,
-            residents_with_any_attribute_maximum: maximum, affected_resident_pools: affected_resident_pools.len() as u64,
+            population_total, dimensions, residents_with_any_attribute_minimum: minimum.max(modelled_any),
+            residents_with_any_attribute_maximum: population_total.min(maximum + modelled_any),
+            affected_resident_pools: affected_resident_pools.len() as u64,
         })
+    }
+}
+
+type Scenario = &'static [(&'static str, u64)];
+
+/// Cautious dominant-affiliation scenarios. Unresolved shares remain unassigned.
+/// Language, religious affiliation and cultural affiliation are independent.
+fn cultural_scenario(root: &str, pool: &str) -> (Scenario, Scenario, Scenario) {
+    match root {
+        "empire_of_japan" if !pool.contains("okinawa") && !pool.contains("hokkaido") => (
+            &[("Japanese", 9000)], &[("Japanese", 8500)], &[]),
+        "korean_empire" => (&[("Korean", 8800)], &[("Korean", 8500)], &[]),
+        "country_fra" => (&[("French", 6800)], &[], &[("Roman Catholic", 6800)]),
+        "kingdom_of_italy" => (&[], &[("Italian regional cultures", 7200)], &[("Roman Catholic", 8500)]),
+        "kingdom_of_spain" => (&[], &[], &[("Roman Catholic", 8500)]),
+        "kingdom_of_portugal" => (&[("Portuguese", 8200)], &[], &[("Roman Catholic", 8500)]),
+        "khedivate_of_egypt" => (&[("Arabic", 7600)], &[], &[("Muslim", 7300)]),
+        "cshapes_gw_840" => (&[], &[], &[("Roman Catholic", 6900)]),
+        "brazil_1900" => (&[("Portuguese", 6800)], &[], &[("Roman Catholic", 6800)]),
+        "mexican_republic" => (&[], &[], &[("Roman Catholic", 8000)]),
+        "qing_empire" if ["sichuan", "henan", "shandong", "zhili", "shanxi", "shaanxi"]
+            .iter().any(|part| pool.contains(part)) => (
+                &[("Mandarin varieties", 6500)], &[("Han Chinese regional cultures", 6200)], &[]),
+        "qing_empire" if pool.contains("hunan") => (&[("Xiang varieties", 3500)], &[], &[]),
+        "qing_empire" if pool.contains("jiangxi") => (&[("Gan varieties", 3500)], &[], &[]),
+        "qing_empire" if pool.contains("fujian") => (&[("Min varieties", 4500)], &[], &[]),
+        _ => (&[], &[], &[]),
     }
 }

@@ -74,6 +74,29 @@ impl OpeningAssets {
             "historical population version {version} {kind} asset {}: {error}", path.display(),
         )))
     }
+
+    fn opening_groups(&self, version: u32, exact_places: &mut BTreeMap<String, String>) -> io::Result<BTreeMap<String, Group>> {
+        let entry = self.catalogue.versions.get(&version)
+            .ok_or_else(|| invalid(format!("unknown historical opening version {version}")))?;
+        let manifest: Manifest = serde_json::from_slice(&self.read(version, "opening", &entry.opening)?)?;
+        if manifest.version != version || manifest.groups.is_empty()
+            || manifest.inherits.is_some_and(|base| base >= version)
+        {
+            return Err(invalid("unsupported historical population opening"));
+        }
+        let mut changed = BTreeMap::new();
+        for group in manifest.groups {
+            if changed.insert(group.unit_id.clone(), group).is_some() {
+                return Err(invalid("duplicate opening group"));
+            }
+        }
+        let mut groups = manifest.inherits.map_or_else(|| Ok(BTreeMap::new()), |base| {
+            self.opening_groups(base, exact_places)
+        })?;
+        groups.append(&mut changed);
+        exact_places.extend(manifest.exact_inherited_places);
+        Ok(groups)
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -107,7 +130,7 @@ pub(crate) struct HistoricalOpening {
     pub(super) catalogue: PopulationCatalogue,
     pub(super) demography: OpeningDemography,
     pub(super) social: OpeningSocial,
-    estimates: BTreeMap<String, OpeningPopulationEstimate>,
+    pub(super) estimates: BTreeMap<String, OpeningPopulationEstimate>,
     pub(super) partitions: BTreeMap<String, Partition>,
     pub(super) statistical_aggregates: BTreeMap<String, StatisticalAggregate>,
     pub(super) standalone: BTreeMap<String, u64>,
@@ -120,7 +143,8 @@ pub(super) struct Partition {
     pub(super) parent: String,
     pub(super) name: String,
     pub(super) statistical_parent: Option<String>,
-    coextensive_place: bool,
+    exact_place: Option<String>,
+    pub(super) urban_municipality: bool,
 }
 
 pub(super) struct StatisticalAggregate {
@@ -132,7 +156,10 @@ pub(super) struct StatisticalAggregate {
 #[derive(Deserialize)]
 struct Manifest {
     version: u32,
+    inherits: Option<u32>,
     groups: Vec<Group>,
+    #[serde(default)]
+    exact_inherited_places: BTreeMap<String, String>,
 }
 
 #[derive(Deserialize)]
@@ -180,6 +207,8 @@ struct Unit {
     place_ids: Vec<String>,
     #[serde(default)]
     coextensive_place: bool,
+    #[serde(default)]
+    urban_municipality: bool,
     statistical_parent: Option<String>,
 }
 
@@ -195,11 +224,8 @@ impl HistoricalOpening {
             io::ErrorKind::NotFound,
             format!("historical population version {version} is absent from {}", assets.root.display()),
         ))?;
-        let bytes = assets.read(version, "opening", &files.opening)?;
-        let manifest: Manifest = serde_json::from_slice(&bytes)?;
-        if manifest.version != version || manifest.groups.is_empty() {
-            return Err(invalid("unsupported historical population opening"));
-        }
+        let mut exact_places = BTreeMap::new();
+        let groups = assets.opening_groups(version, &mut exact_places)?;
         let mut opening = Self {
             version, demography: OpeningDemography::default(), social: OpeningSocial::default(),
             catalogue: PopulationCatalogue::new(assets.root.clone()),
@@ -207,9 +233,9 @@ impl HistoricalOpening {
             standalone: BTreeMap::new(),
             collective_scopes: BTreeMap::new(), declared_places: BTreeMap::new(), places: OnceLock::new(),
         };
-        let mut occupied_scopes: BTreeSet<String> = manifest.groups.iter().map(|group| group.unit_id.clone()).collect();
+        let mut occupied_scopes: BTreeSet<String> = groups.keys().cloned().collect();
         occupied_scopes.extend(legacy.keys().cloned());
-        for group in manifest.groups {
+        for group in groups.into_values() {
             let root = group.unit_id;
             if let Some(scope) = group.collective_scope {
                 if !root.starts_with("statistical_area:") || known_polity(&root) || legacy.contains_key(&root)
@@ -236,12 +262,13 @@ impl HistoricalOpening {
                 let id = leaf.unit_id;
                 if id.trim().is_empty() || leaf.name.trim().is_empty() || known_polity(&id)
                     || !occupied_scopes.insert(id.clone()) || leaf.population_value == 0
-                    || leaf.coextensive_place && leaf.place_ids.len() != 1
+                    || leaf.coextensive_place && leaf.place_ids.is_empty()
                 {
                     return Err(invalid(format!("invalid historical population partition {id}")));
                 }
                 remaining = remaining.checked_sub(leaf.population_value)
                     .ok_or_else(|| invalid(format!("historical population partitions exceed {root}")))?;
+                let exact_place = leaf.coextensive_place.then(|| leaf.place_ids[0].clone());
                 for place in leaf.place_ids {
                     if market_at(&place) != Some(root.as_str())
                         || opening.declared_places.insert(place.clone(), id.clone()).is_some()
@@ -269,7 +296,7 @@ impl HistoricalOpening {
                 }
                 opening.partitions.insert(id, Partition {
                     parent: root.clone(), name: leaf.name, statistical_parent: leaf.statistical_parent,
-                    coextensive_place: leaf.coextensive_place,
+                    exact_place, urban_municipality: leaf.urban_municipality || leaf.coextensive_place,
                 });
             }
             for aggregate in group.statistical_aggregates {
@@ -312,6 +339,13 @@ impl HistoricalOpening {
             }).is_some() {
                 return Err(invalid(format!("repeated historical population group {root}")));
             }
+        }
+        for (place, account) in exact_places {
+            let partition = opening.partitions.get_mut(&account).filter(|part| part.exact_place.is_none())
+                .filter(|_| opening.declared_places.get(&place) == Some(&account))
+                .ok_or_else(|| invalid(format!("invalid exact city account {place}: {account}")))?;
+            partition.exact_place = Some(place);
+            partition.urban_municipality = true;
         }
         let totals = opening.totals(legacy);
         if totals.values().chain(opening.standalone.values()).try_fold(0u64, |sum, &value| {
@@ -369,7 +403,7 @@ impl HistoricalOpening {
 
     pub(super) fn coextensive_unit_at(&self, place: &str) -> Option<&str> {
         let unit = self.declared_places.get(place)?;
-        self.partitions[unit].coextensive_place.then_some(unit.as_str())
+        (self.partitions[unit].exact_place.as_deref() == Some(place)).then_some(unit.as_str())
     }
 
     pub(crate) fn totals(&self, legacy: &BTreeMap<String, u64>) -> BTreeMap<String, u64> {

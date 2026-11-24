@@ -2010,7 +2010,7 @@ mod tests {
     #[test]
     fn historical_social_scopes_preserve_parent_counts_and_unknown_leaves() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let mut world = bootstrap.create("country_fra").unwrap();
+        let mut world = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
         let central_india = "raj_central_india_agency";
         let gwalior = "raj_gwalior_state";
         let rest = "raj_central_india_ex_gwalior";
@@ -2048,7 +2048,7 @@ mod tests {
     #[test]
     fn historical_russian_districts_keep_province_totals_and_census_residence() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
         for (province, district, count, province_total, district_total, urban) in [
             (40, 344, 12, 3_760_260, 572_067, 261_715),
             (43, 363, 15, 2_935_065, 258_726, 76_588),
@@ -2079,7 +2079,7 @@ mod tests {
     #[test]
     fn historical_indian_age_tables_preserve_local_totals_and_unknown_ages() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
         for (unit, total, unknown_age) in [
             ("raj_andaman_nicobar_comparable", 16_181, 0),
             ("raj_united_provinces_states", 800_983, 298),
@@ -2318,9 +2318,39 @@ mod tests {
     fn city_lookup_preserves_dated_census_with_separate_live_parent() {
         let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
         let new_york = world.inspect_population_brief("place:new_york").unwrap();
-        assert_eq!(new_york.account_id, Some("us_state_new_york"));
-        assert_eq!(new_york.population_total, None);
-        assert_eq!(new_york.city_reference.unwrap()["population_value"].as_u64(), Some(3_437_202));
+        assert_eq!(new_york.account_id, Some("us_city_new_york_new_york"));
+        assert_eq!(new_york.population_total, Some(3_437_202));
+        assert_eq!(new_york.parent_id, Some("us_state_new_york"));
+        assert_eq!(new_york.opening.unwrap().population_value, 3_437_202);
+        let state = world.inspect_population("us_state_new_york").unwrap();
+        assert_eq!(state.population_total, Some(7_216_546));
+        assert_eq!(state.children.iter().map(|unit| unit.population_total).sum::<u64>(), 7_216_546);
+        let population = world.population();
+        let paris = world.inspect_population_brief("place:paris").unwrap();
+        assert_eq!(paris.population_total, Some(2_670_538));
+        assert_eq!(paris.parent_id, Some("administrative_region:france_seine"));
+        let needs = world.population_household_needs(&new_york).unwrap();
+        assert_eq!(needs.by_class.iter().map(|group| group.residents).sum::<u64>(), 3_437_202);
+        let bread = needs.needs.iter().find(|row| row.id == "bread").unwrap();
+        let class_bread: f64 = needs.by_class.iter().flat_map(|group| &group.needs)
+            .filter(|row| row.id == "bread").map(|row| row.quantity).sum();
+        assert!((bread.quantity - class_bread).abs() < 0.000_001);
+        let clothing = needs.needs.iter().find(|need| need.id == "clothing").unwrap();
+        assert!(clothing.quantity / (needs.residents as f64) < 0.004);
+        let japan = world.inspect_population_brief("empire_of_japan").unwrap();
+        let japanese = world.population_household_needs(&japan).unwrap();
+        let rice = |needs: &crate::formal_population::households::HouseholdNeeds| {
+            needs.needs.iter().find(|row| row.id == "rice").unwrap().quantity / needs.residents as f64
+        };
+        assert!(rice(&japanese) > 8.0 * rice(&needs));
+        let social = population.social_distribution(new_york.account_id).unwrap();
+        let workforce = population.labor_supply(new_york.account_id, new_york.structure.as_ref().unwrap(), Some(&social));
+        assert_eq!(workforce.residents, workforce.potential_workers + workforce.caregivers + workforce.children
+            + workforce.students + workforce.older + workforce.unresolved_activity);
+        assert_eq!(workforce.sectors.iter().map(|sector| sector.workers).sum::<u64>(), workforce.potential_workers);
+        assert_eq!(workforce.unemployment, None);
+        assert!(workforce.sectors.iter().flat_map(|sector| &sector.alternatives)
+            .any(|plan| plan.parallel_batches > 0 && !plan.own_use.is_empty() && plan.historical_yield.is_some()));
         let manchester = world.inspect_population_brief("place:manchester").unwrap();
         assert_eq!(manchester.population_total, None);
         assert!(manchester.city_reference.is_some());
@@ -2343,8 +2373,8 @@ mod tests {
         let scope = world.inspect_population("qing_hist_shaanxi_xian_hanzhong").unwrap();
         assert_eq!(scope.parent_id, Some("qing_hist_shaanxi"));
         assert_eq!(scope.population_total, Some(3_279_041));
-        assert_eq!(scope.structure.unwrap().residents_with_cohort_age_and_sex, 0);
-        assert_eq!(scope.social.unwrap().dimensions["occupation"].unknown_residents, 3_279_041);
+        assert!(scope.structure.unwrap().residents_with_cohort_age_and_sex > 3_000_000);
+        assert!(scope.social.unwrap().dimensions["occupation"].modelled_residents > 0);
         assert_eq!(world.population().population_total("qing_empire"), Some(400_000_000));
     }
 
@@ -2438,7 +2468,7 @@ mod tests {
     #[test]
     fn historical_local_italy_india_and_canadian_ancestry_preserve_their_sources() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
         let italy = world.inspect_population("kingdom_of_italy").unwrap();
         assert_eq!(italy.population_total, Some(32_296_914));
         assert_eq!(italy.social.unwrap().dimensions["marital_status"].assigned_residents, 32_296_914);
@@ -2478,7 +2508,7 @@ mod tests {
     #[test]
     fn historical_brazilian_local_ages_italian_residence_and_mysore_sex_close() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
         let brazil = world.inspect_population("brazil_1900").unwrap();
         assert_eq!(brazil.children.len(), 21);
         let structure = brazil.structure.unwrap();
@@ -2623,7 +2653,7 @@ mod tests {
     #[test]
     fn historical_portuguese_and_agra_districts_close_without_allocating_unlocated_people() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
         let portugal = world.inspect_population("kingdom_of_portugal").unwrap();
         assert_eq!(portugal.children.len(), 21);
         assert_eq!(portugal.children.iter().map(|child| child.population_total).sum::<u64>(), 5_388_982);
@@ -2756,7 +2786,7 @@ mod tests {
     fn historical_bengal_districts_preserve_the_opening_balance_and_local_sex_profiles() {
         use crate::formal_population::CohortSex;
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
         let old = bootstrap.base_opening_version("country_fra", None, Some(26)).unwrap();
         assert_eq!(world.population().population_total("cshapes_gw_750"),
                    old.population().population_total("cshapes_gw_750"));
@@ -2862,7 +2892,7 @@ mod tests {
         let previous = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
         assert_eq!(previous.inspect_population(unit).unwrap().population_total, None);
         assert_eq!(previous.inspect_population("khedivate_of_egypt").unwrap().direct_residents, Some(9_084_891));
-        let current = bootstrap.create("country_fra").unwrap();
+        let current = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
         for (unit, population) in [
             ("place:cairo", 592_087),
             ("place:alexandria", 308_541),
@@ -3027,7 +3057,7 @@ mod tests {
     #[test]
     fn historical_population_structure_and_old_openings_restore() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let mut world = bootstrap.create("country_fra").unwrap();
+        let mut world = bootstrap.base_opening_version("country_fra", None, Some(43)).unwrap();
         let origin = world.residence_unit_at("place:moscow").unwrap().to_owned();
         let origin = origin.as_str();
         let destination = "country_fra";

@@ -715,14 +715,23 @@ impl Builder {
             .partition_identities()
             .map(|(leaf, parent, _)| (leaf, parent))
             .collect();
+        let historical_scope_members: BTreeMap<_, _> = opening.statistical_scopes()
+            .map(|(id, _, _, members)| (id, members)).collect();
         for (archived_leaf, city, source) in &sites.sites {
-            let leaf = if parents.contains_key(archived_leaf.as_str()) {
-                archived_leaf
+            let leaf = if let Some(members) = historical_scope_members.get(archived_leaf.as_str()) {
+                // A census city can now have a pool within the archived state account.
+                let city_key = key(city);
+                opening.partition_identities()
+                    .find(|(id, _, name)| members.iter().any(|member| member == id) && key(name) == city_key)
+                    .map(|(id, _, _)| id)
+                    .unwrap_or_else(|| sites.partition_successors.get(archived_leaf).unwrap_or(archived_leaf))
+            } else if parents.contains_key(archived_leaf.as_str()) {
+                archived_leaf.as_str()
             } else {
-                sites.partition_successors.get(archived_leaf).unwrap_or(archived_leaf)
+                sites.partition_successors.get(archived_leaf).unwrap_or(archived_leaf).as_str()
             };
             let parent = parents
-                .get(leaf.as_str())
+                .get(leaf)
                 .ok_or_else(|| invalid(format!("unknown census partition {leaf}")))?;
             let hub = self
                 .cities
@@ -735,8 +744,8 @@ impl Builder {
             if self
                 .catalogue
                 .population_at
-                .insert(hub.clone(), leaf.clone())
-                .is_some_and(|before| before != *leaf)
+                .insert(hub.clone(), leaf.to_owned())
+                .is_some_and(|before| before != leaf)
             {
                 return Err(invalid(format!("conflicting census partition for {hub}")));
             }

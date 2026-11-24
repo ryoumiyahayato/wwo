@@ -72,6 +72,7 @@ pub struct PopulationInspection<'a> {
     pub basis: &'static str,
     pub account_id: Option<&'a str>,
     pub parent_id: Option<&'a str>,
+    pub parent_name: Option<&'a str>,
     pub account_name: Option<&'a str>,
     pub child_residents: Option<u64>,
     pub children: Vec<PopulationChild<'a>>,
@@ -288,6 +289,11 @@ impl Population {
             basis,
             account_id,
             parent_id,
+            parent_name: parent_id.and_then(|id| {
+                let opening = self.opening.as_ref()?;
+                opening.statistical_aggregates.get(id).map(|row| row.name.as_str())
+                    .or_else(|| opening.partitions.get(id).map(|row| row.name.as_str()))
+            }),
             account_name: account_id.and_then(|id| {
                 let opening = self.opening.as_ref()?;
                 opening.partitions.get(id).map(|row| row.name.as_str())
@@ -297,7 +303,7 @@ impl Population {
             children,
             map_place_ids,
             population_total: total,
-            direct_residents: live.then(|| self.resident_pool(unit).unwrap_or(0)),
+            direct_residents: live.then(|| self.resident_pool(unit)).flatten(),
             opening_version: self.opening_version(),
             opening,
             legacy_estimate: self.opening_estimate(unit)?,

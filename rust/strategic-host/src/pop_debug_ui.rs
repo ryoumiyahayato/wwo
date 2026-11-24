@@ -4,7 +4,8 @@ use std::{cell::Cell, cmp::Reverse, collections::BTreeMap};
 use wwo_map_lab::{
     formal_macro::MacroEconomy,
     formal_population::{
-        households::{HouseholdNeeds, NeedPeriod},
+        households::{HouseholdNeed, HouseholdNeeds, NeedPeriod},
+        workforce::LaborSupply,
         CohortSex, PopulationInspection, PopulationStructure, RecordedPopulationDay, SocialDistribution,
     },
 };
@@ -43,12 +44,13 @@ const PAGES: [(Page, Words); 4] = [
     (Page::Changes, ("变动", "Changes")),
 ];
 
-const DIMENSIONS: [(&str, Words); 10] = [
+const DIMENSIONS: [(&str, Words); 11] = [
     ("age", ("年龄", "Age")), ("sex", ("性别", "Sex")),
     ("class", ("阶层", "Class")), ("occupation", ("职业", "Occupation")),
     ("religion", ("宗教", "Religion")), ("culture", ("文化", "Culture")),
     ("language", ("语言", "Language")), ("literacy", ("识字", "Literacy")),
     ("residence", ("城乡", "Residence")), ("legal_estate", ("法律身份", "Legal status")),
+    ("labour", ("劳动与产能", "Labour & output")),
 ];
 
 #[derive(Default)]
@@ -81,6 +83,10 @@ impl Group {
             "female" => skin.choose("女性", "Female"),
             "Urban" => skin.choose("城市", "Urban"),
             "Rural" => skin.choose("农村", "Rural"),
+            "Manual and service households" => skin.choose("体力与服务业家庭", "Manual and service households"),
+            "Smallholder and self-employed households" => skin.choose("小农与自营家庭", "Smallholder and self-employed households"),
+            "Salaried and professional households" => skin.choose("受薪与专业家庭", "Salaried and professional households"),
+            "Proprietor and rentier households" => skin.choose("业主与食利家庭", "Proprietor and rentier households"),
             name => name,
         }
     }
@@ -94,10 +100,21 @@ struct Structure {
     pyramid_max: u64,
     age_unassigned: [u64; 3],
     by_dimension: BTreeMap<&'static str, Distribution>,
+    labour: Vec<LaborRow>,
+    modelled_ages: u64,
+}
+
+struct LaborRow {
+    label: Words,
+    item: String,
+    people: Option<u64>,
+    hours: Option<u64>,
+    output: String,
 }
 
 impl Structure {
-    fn from_report(structure: &PopulationStructure<'_>, social: Option<&SocialDistribution<'_>>) -> Self {
+    fn from_report(structure: &PopulationStructure<'_>, social: Option<&SocialDistribution<'_>>,
+        labour: Option<&LaborSupply>, market: &MacroEconomy) -> Self {
         let mut result = Self::default();
         let mut sex = [0_u64; 2];
         let mut age_groups = BTreeMap::<(u16, Option<u16>), [u64; 3]>::new();
@@ -109,6 +126,9 @@ impl Structure {
             };
             if column < 2 { sex[column] += cohort.members; }
             let Some(age) = cohort.age_years else { continue; };
+            if cohort.evidence.as_ref().is_some_and(|evidence| evidence.method == "regional_age_sex_analogue_v44") {
+                result.modelled_ages += cohort.members;
+            }
             age_groups.entry((age.youngest, age.oldest)).or_default()[column] += cohort.members;
         }
         result.age = age_groups.into_iter().map(|((youngest, oldest), counts)| {
@@ -135,7 +155,51 @@ impl Structure {
             Group { name: String::new(), count: total - sex[0] - sex[1], unknown: true },
         ]));
         for (dimension, _) in DIMENSIONS.into_iter().skip(2) {
-            result.by_dimension.insert(dimension, Distribution::new(groups_for(social, dimension, total)));
+            let mut distribution = Distribution::new(groups_for(social, dimension, total));
+            distribution.modelled = social.and_then(|s| s.dimensions.get(dimension)).map_or(0, |s| s.modelled_residents);
+            result.by_dimension.insert(dimension, distribution);
+        }
+        if let Some(labour) = labour {
+            for (label, count) in [
+                (("劳动人口", "Potential workers"), Some(labour.potential_workers)),
+                (("儿童及未就学未成年人", "Children and nonstudents"), Some(labour.children)),
+                (("学生", "Students"), Some(labour.students)), (("老年人", "Older residents"), Some(labour.older)),
+                (("家庭照护者", "Family caregivers"), Some(labour.caregivers)),
+                (("活动状态未分配", "Activity unassigned"), Some(labour.unresolved_activity)),
+                (("失业", "Unemployment"), labour.unemployment),
+            ] {
+                result.labour.push(LaborRow { label, item: String::new(), people: count,
+                    hours: (label.1 == "Potential workers").then_some(labour.annual_labor_hours), output: String::new() });
+            }
+            for sector in &labour.sectors {
+                let label = match sector.id {
+                    "cultivation" => ("种植业", "Cultivation"), "livestock" => ("畜牧业", "Livestock"),
+                    "fisheries" => ("渔业", "Fisheries"), "forestry" => ("林业", "Forestry"),
+                    "extraction" => ("采掘", "Extraction"), "manufacturing" => ("制造", "Manufacturing"),
+                    "textiles" => ("纺织与制衣", "Textiles & clothing"),
+                    "construction" => ("建筑", "Construction"), "commerce" => ("商业", "Commerce"),
+                    "education" => ("教育", "Education"), "healthcare" => ("医疗", "Health care"),
+                    "transport" => ("运输", "Transport"), _ => ("其他服务业", "Other services"),
+                };
+                result.labour.push(LaborRow { label, item: String::new(), people: Some(sector.workers),
+                    hours: Some(sector.annual_hours), output: String::new() });
+                for setup in &sector.alternatives {
+                    for output in &setup.output {
+                        let Some((name, _, unit)) = market.commodity_info(&output.commodity_id) else { continue; };
+                        let mut amount = format!("{:.1} {unit}", output.units);
+                        if let Some(own) = setup.own_use.iter().find(|own| own.commodity_id == output.commodity_id) {
+                            amount.push_str(&format!(" / {:.1}", own.units));
+                        }
+                        result.labour.push(LaborRow { label: ("", ""), item: name.into(),
+                            people: None, hours: None, output: amount });
+                    }
+                    if let Some(history) = &setup.historical_yield {
+                        result.labour.push(LaborRow { label: ("单产参考 / 条件收成", "Yield / conditional harvest"),
+                            item: String::new(), people: None, hours: None,
+                            output: format!("{:.2} t/ha / {:.0} t", history.tonnes_per_hectare, history.conditional_tonnes_per_harvest) });
+                    }
+                }
+            }
         }
         result
     }
@@ -144,12 +208,13 @@ impl Structure {
 struct Distribution {
     groups: Vec<Group>,
     other: u64,
+    modelled: u64,
 }
 
 impl Distribution {
     fn new(groups: Vec<Group>) -> Self {
         let other = groups.iter().filter(|group| !group.unknown).skip(3).map(|group| group.count).sum();
-        Self { groups, other }
+        Self { groups, other, modelled: 0 }
     }
 }
 
@@ -185,11 +250,12 @@ struct Need {
 struct Needs {
     rows: Vec<Need>,
     classes: Vec<Group>,
+    by_class: BTreeMap<String, Vec<Need>>,
 }
 
 impl Needs {
     fn from_report(needs: &HouseholdNeeds, social: Option<&SocialDistribution<'_>>, market: &MacroEconomy) -> Self {
-        let rows = needs.needs.iter().map(|row| Need {
+        let build = |rows: &[HouseholdNeed]| rows.iter().map(|row| Need {
             label: row.commodity_id.and_then(|id| market.commodity_info(id))
                 .map_or(row.id, |(name, _, _)| name).into(),
             service: match row.id {
@@ -199,14 +265,21 @@ impl Needs {
                 "basic_care" => Some(("基础医疗", "Basic care")),
                 "primary_school_places" => Some(("小学学位", "Primary places")),
                 "local_passenger_trips" => Some(("地方出行", "Local trips")),
+                "vegetables" => Some(("蔬菜", "Vegetables")),
+                "wood_fuel" => Some(("薪柴", "Fuelwood")),
+                "household_furnishings" => Some(("家具", "Furnishings")),
                 _ => None,
             },
             unit: row.unit.clone(),
             period: row.period,
             quantity: row.quantity,
             eligible: row.eligible_people,
-        }).collect();
-        Self { rows, classes: groups_for(social, "class", needs.residents) }
+        }).collect::<Vec<_>>();
+        let mut classes = groups_for(social, "class", needs.residents);
+        let by_class = needs.by_class.iter().map(|group| (group.class.clone(), build(&group.needs))).collect();
+        // Sources reporting an industrial position may not define household classes.
+        classes.retain(|group| group.count != 0);
+        Self { rows: build(&needs.needs), classes, by_class }
     }
 }
 
@@ -244,7 +317,7 @@ impl Default for Panel {
 impl Panel {
     pub fn set_report(
         &mut self, report: &PopulationInspection<'_>, social: Option<&SocialDistribution<'_>>,
-        needs: Option<&HouseholdNeeds>, market: &MacroEconomy, days: Vec<RecordedPopulationDay>,
+        needs: Option<&HouseholdNeeds>, labour: Option<&LaborSupply>, market: &MacroEconomy, days: Vec<RecordedPopulationDay>,
     ) {
         let city_without_account = report.population_total.is_none() && report.query_id.starts_with("place:");
         let account = report.account_name.or(report.account_id).map(str::to_owned);
@@ -262,13 +335,13 @@ impl Panel {
                 row["source_date"].as_str().or(row["date"].as_str()).unwrap_or_default().into()))),
             account,
             state_account: report.account_id.is_some_and(|id| id.starts_with("us_state_")),
-            parent: report.parent_id.map(str::to_owned),
+            parent: report.parent_name.or(report.parent_id).map(str::to_owned),
             version: report.opening_version,
             relation: report.scope_relation,
         };
         if self.page == Page::Structure {
             self.structure = report.structure.as_ref()
-                .map(|structure| Structure::from_report(structure, social)).unwrap_or_default();
+                .map(|structure| Structure::from_report(structure, social, labour, market)).unwrap_or_default();
         }
         if self.page == Page::Needs {
             self.needs = needs.map(|needs| Needs::from_report(needs, social, market)).unwrap_or_default();
@@ -449,8 +522,31 @@ impl Panel {
             ui.label(("当地人口未分配", "Local population unallocated"), [x, y + 63., w, 22.], MUTED);
             return;
         };
-        let start = y + 56.;
+        let start = y + 79.;
         let skin = ui.skin;
+        if DIMENSIONS[self.dimension].0 == "labour" {
+            ui.label(("估算 · 各配方为备选 · 产量 / 自用", "Estimated · Alternative recipes · Output / own use"),
+                [x, start, w, 22.], MUTED);
+            let headers = [("行业或商品", "Sector or good"), ("人数", "People"), ("工时/年", "Hours/year"),
+                ("并行批次产量", "Parallel batch output")];
+            let rows = self.structure.labour.iter().map(|row| vec![
+                if row.item.is_empty() { skin.choose(row.label.0, row.label.1).into() } else { row.item.clone() },
+                option_number(row.people),
+                row.hours.map_or_else(|| "—".into(), |hours| magnitude(hours as f64, skin)),
+                row.output.clone(),
+            ]);
+            self.table(ui, [x, start + 24., w, (y + h - start - 24.).max(0.)], &headers,
+                &[0.30, 0.16, 0.17, 0.37], self.structure.labour.len(), rows);
+            return;
+        }
+        let modelled = if self.dimension < 2 { self.structure.modelled_ages } else {
+            self.structure.by_dimension.get(DIMENSIONS[self.dimension].0).map_or(0, |row| row.modelled)
+        };
+        let start = if modelled > 0 {
+            ui.text(&format!("{} {}", ui.word(("含模型估算", "Modelled residents")), number(modelled)),
+                [x, start, w, 18.], MUTED);
+            start + 20.
+        } else { start };
         let chart = (h - 180.).clamp(72., 150.);
         let table_y = start + chart + 6.;
         let table_h = (y + h - table_y).max(0.);
@@ -551,27 +647,32 @@ impl Panel {
             ui.button(("‹", "‹"), [x + w - 63., y, 30., 28.], false);
             ui.button(("›", "›"), [x + w - 30., y, 30., 28.], false);
         }
-        let note = if group.is_some() {
+        let rows = if let Some(group) = group {
+            self.needs.by_class.get(&group.name).map(Vec::as_slice)
+        } else {
+            Some(self.needs.rows.as_slice())
+        };
+        let note = if rows.is_none() {
             ("该阶层需求未计算", "Requirements for this class have not been calculated")
         } else if self.needs.rows.is_empty() {
             ("当地人口未分配", "Local population unallocated")
         } else {
-            ("需求为参考量  ·  实际消费与满足率未统计", "Reference needs  ·  Actual consumption and fulfilment unmeasured")
+            ("需求为模型估算  ·  实际消费与满足率未统计", "Modelled needs  ·  Actual use and fulfilment unmeasured")
         };
         ui.label(note, [x + 2., y + 33., w - 4., 22.], MUTED);
         let headers = [("商品或服务", "Good or service"), ("人均需求", "Per person"),
             ("总需求", "Total need"), ("实际消费", "Actual use"), ("满足率", "Fulfilled")];
         let widths = [0.245, 0.218, 0.247, 0.166, 0.124];
         let skin = ui.skin;
-        let rows = self.needs.rows.iter().map(|need| {
-            let allowed = group.is_none();
-            let individual = (allowed && need.eligible != 0).then(|| need.quantity / need.eligible as f64);
+        let rows = rows.unwrap_or_default();
+        let values = rows.iter().map(|need| {
+            let individual = (need.eligible != 0).then(|| need.quantity / need.eligible as f64);
             vec![need.service.map_or(need.label.as_str(), |label| skin.choose(label.0, label.1)).into(),
                 quantity(individual, &need.unit, need.period, true, skin),
-                quantity(allowed.then_some(need.quantity), &need.unit, need.period, false, skin),
+                quantity(Some(need.quantity), &need.unit, need.period, false, skin),
                 "—".into(), "—".into()]
         });
-        self.table(ui, [x, y + 58., w, (h - 58.).max(0.)], &headers, &widths, self.needs.rows.len(), rows);
+        self.table(ui, [x, y + 58., w, (h - 58.).max(0.)], &headers, &widths, rows.len(), values);
     }
 
     fn draw_changes(&self, ui: &mut Surface<'_>, [x, y, w, h]: [f32; 4]) {
@@ -625,10 +726,9 @@ impl Panel {
             ("迁出", "Out"), ("净变化", "Net")];
         let widths = [0.20, 0.16, 0.16, 0.16, 0.16, 0.16];
         let rows = self.days.iter().rev().map(|day| {
-            let any = day.births > 0 || day.deaths > 0 || day.immigration > 0 || day.emigration > 0;
-            vec![short_date(day), event_count(day.births), event_count(day.deaths),
-                event_count(day.immigration), event_count(day.emigration),
-                if any { format!("{:+}", day.net()) } else { "—".into() }]
+            vec![short_date(day), event_count(day.births, false), event_count(day.deaths, false),
+                event_count(day.immigration, day.journal_covers_day), event_count(day.emigration, day.journal_covers_day),
+                if day.journal_covers_day { format!("{:+}", day.net()) } else { "—".into() }]
         });
         self.table(ui, [x, top, w, (y + h - top).max(0.)], &headers, &widths, self.days.len(), rows);
     }
@@ -746,7 +846,9 @@ fn number(value: u64) -> String {
 
 fn option_number(count: Option<u64>) -> String { count.map(number).unwrap_or_else(|| "—".into()) }
 
-fn event_count(count: u64) -> String { option_number((count > 0).then_some(count)) }
+fn event_count(count: u64, observed_zero: bool) -> String {
+    option_number((count > 0 || observed_zero).then_some(count))
+}
 
 fn share(count: u64, total: u64) -> String {
     if total == 0 { "—".into() } else { format!("{:.1}%", count as f64 / total as f64 * 100.) }
@@ -758,6 +860,13 @@ fn quantity(value: Option<f64>, unit: &str, period: NeedPeriod, per_person: bool
         ("吨", true, _) if value >= 0.001 => { value *= 1_000.; "kg" }
         ("吨", true, _) => { value *= 1_000_000.; "g" }
         ("吨", false, _) => "t",
+        ("千件", true, _) => { value *= 1_000.; skin.choose("件", "items") }
+        ("百件", true, _) => { value *= 100.; skin.choose("件", "items") }
+        ("百套", true, _) => { value *= 100.; skin.choose("套", "sets") }
+        ("百匹", true, _) => { value *= 100.; skin.choose("匹", "bolts") }
+        ("百箱", true, _) => { value *= 100.; skin.choose("箱", "cases") }
+        ("百万支", true, _) => { value *= 1_000_000.; skin.choose("支", "pieces") }
+        ("兆瓦时", true, _) => { value *= 1_000.; "kWh" }
         ("dwellings", _, _) => skin.choose("户", "homes"),
         ("visits" | "trips", _, _) => skin.choose("次", "trips"),
         ("places", _, _) => skin.choose("位", "seats"),
@@ -768,10 +877,20 @@ fn quantity(value: Option<f64>, unit: &str, period: NeedPeriod, per_person: bool
         NeedPeriod::Year => skin.choose("/年", "/yr"),
         NeedPeriod::Occupancy => "",
     };
-    let magnitude = if value == 0. { "0".into() }
-        else if value >= 100_000. { format!("{:.2e}", value) }
+    format!("{} {unit}{suffix}", magnitude(value, skin))
+}
+
+fn magnitude(value: f64, skin: &Skin) -> String {
+    if value == 0. { "0".into() }
+        else if value >= 1_000_000_000. { skin.choose(
+            &format!("{:.2}亿", value / 100_000_000.),
+            &format!("{:.2}B", value / 1_000_000_000.),
+        ).to_owned() }
+        else if value >= 100_000. { skin.choose(
+            &format!("{:.2}万", value / 10_000.),
+            &format!("{:.2}M", value / 1_000_000.),
+        ).to_owned() }
         else if value >= 100. { format!("{:.1}", value) }
         else if value >= 0.01 { format!("{:.3}", value) }
-        else { format!("{:.2e}", value) };
-    format!("{magnitude} {unit}{suffix}")
+        else { format!("{:.2e}", value) }
 }
