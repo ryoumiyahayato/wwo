@@ -2,6 +2,12 @@
 
 `wwo-map-lab` 是当前原生 Windows 游戏入口。正式 Windows 构建由 GitHub CI 执行。本机验证使用固定工作树内的 `tools/wwo-cargo.ps1`。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [仓库 README](../../README.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。界面字形更新使用归档项目和 Pillow，运行 `python tools/build_hud.py <R68 项目> <游戏数据目录>`。
 
+## 经济地图资源专题
+
+在「经济地图」打开「资源分布」，选类别和资源，再点地图地点或网格。颜色区分开采、已知和待核实状态。空白区没有已核实的矿点资料。土地网格的灰色表示来源估计为 0%，透明表示没有网格资料。
+
+`wwo_map_lab::resource_geography` 提供地点目录、按视野或坐标筛选、已关联地点和统计区索引，以及历史土地网格的原始精度查询。`ResourceType::commodity_id` 返回已有商品目录 ID。黄金、白银继续作为独立资源。国家归属使用游戏当期疆界。地理记录随程序打包，按需读取，与地貌包、交易和存档分开。[数据和覆盖说明](../../data/resource-geography/README.md)
+
 `src/host.rs` 持有原生宿主状态。`src/host/` 内的 `config`、`observe`、`map`、`menus` 和 `events` 分别处理命令行及资源路径、观察与调试、地图交互、首页与菜单、窗口事件及运行周期。
 
 ## 军事地图方格与装甲战场

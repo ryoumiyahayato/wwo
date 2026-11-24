@@ -29,6 +29,7 @@ mod landscape_cover;
 mod landscape_models;
 mod timeline;
 mod ui;
+mod resource_map;
 mod world;
 mod battle_render;
 mod battle_view;

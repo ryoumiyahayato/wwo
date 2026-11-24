@@ -66,6 +66,7 @@ struct Host {
     transport_scene:Option<transport_scene::TransportScene>,
     transport_selection:Option<transport_ui::ObjectId>,
     transport_detail:Option<(i64, transport_ui::Detail)>,
+    resources: crate::resource_map::State,
     config:Config,window:Option<Arc<Window>>,renderer:Option<Renderer>,
     map_root:PathBuf,map_signature:Option<&'static [u8;8]>,fatal_error:Option<String>,
     world:World,visuals:PoliticalVisuals,index:Index,base:Option<Page>,reader:Reader,cached:HashMap<usize,Resident>,
@@ -183,7 +184,7 @@ impl Host {
         let reader=Reader::new(map_root.clone(),map_signature,legacy_cover,events.create_proxy());
         let observation_id=config.observe.as_ref().filter(|_|!config.terrain_review).and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
-        Ok(Self {natural,events:events.create_proxy(),landmarks,transport_scene:None,transport_selection:None,transport_detail:None,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
+        Ok(Self {natural,events:events.create_proxy(),landmarks,transport_scene:None,transport_selection:None,transport_detail:None,resources:Default::default(),config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
@@ -866,6 +867,7 @@ impl Host {
         }else{ui::compose(&self.world,&self.atlas,Ui{
             mode:self.mode,date:&date,camera:&self.camera,size:self.size,selected:self.selected,admin:&admin,details:self.details,country:self.country,
             search:self.search.as_deref(),search_results:&search,econ_label:&econ_label,econ_legend:&econ_legend,
+            resources:self.resources_available().then_some(&self.resources),year:self.state.date.year,
             mouse:&mouse,labels:self.labels,formal,
             transport_detail:self.transport_detail.as_ref().filter(|_|show_transport_detail).map(|(_, detail)|detail),
             sea_relation_visible: transport_world.is_some() && self.transport_scene.as_ref()

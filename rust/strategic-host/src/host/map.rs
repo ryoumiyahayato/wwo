@@ -120,6 +120,10 @@ impl Host {
         self.search=None;
         if let Object::Polity(polity)=object{self.open_country(polity);}else{self.select(Some(object));}
     }
+    pub(super) fn resources_available(&self) -> bool {
+        !self.in_lobby() && self.population_debug.is_none() && self.search.is_none() && self.country.is_none() && !self.details
+            && crate::resource_map::available(self.mode,self.hud.page,self.hud.menu,self.hud.market_map,self.transport_detail.is_some())
+    }
     pub(super) fn action(&mut self,action:Action) {
         self.country_click=None;
         self.feedback.clear();
@@ -165,6 +169,16 @@ impl Host {
                 }
             },
             Action::Hud(command)=>self.hud_action(command),
+            Action::Resources(command)=>{
+                if self.resources_available() {
+                    let polity=crate::resource_map::State::anchor(command)
+                        .and_then(|point|self.object_at(point)[0].checked_sub(1)).map(usize::from);
+                    if matches!(command,crate::resource_map::Command::Toggle) && !self.resources.open {
+                        self.select(None);
+                    }
+                    self.resources.command(command,polity);
+                }
+            }
         }
         self.dirty=true;
     }
@@ -243,6 +257,7 @@ impl Host {
         }
         let [x,y]=p.map(|v|v as f32);
         let contains=|[a,b,w,h]:[f32;4]| x>=a&&x<=a+w&&y>=b&&y<=b+h;
+        let resource_map=self.resources_available()&&self.resources.open;
         if self.hud.menu==HudMenu::MapModes&&contains(formal_ui::map_modes_rect(self.size)) {
             if let Some(hit)=self.hits.iter().find(|hit|matches!(hit.action,Action::Mode(_))&&contains(hit.area)) {
                 self.action(hit.action);
@@ -259,6 +274,9 @@ impl Host {
                 &&portrait
                 &&(!in_menu||!matches!(h.action,Action::Country(_)|Action::Select(_)))
                 &&(!self.transport_panel_at(p)||!matches!(h.action,Action::Select(_)))
+                &&(!resource_map||!matches!(h.action,Action::Select(_)))
+                &&(!matches!(h.action,Action::Resources(crate::resource_map::Command::Site(_)))
+                    || resource_map&&!contains(crate::resource_map::bounds(self.size)))
                 &&(!in_country||in_menu||matches!(h.action,Action::Country(_)))
                 &&(!self.details||!matches!(h.action,Action::Select(_))||self.search.is_some())
         }) {
@@ -283,6 +301,12 @@ impl Host {
             return;
         }
         if self.is_panel(p){return;}
+        if resource_map {
+            if let Some(point)=self.camera.vector(p,self.size).map(camera::geographic) {
+                let owner=self.object_at(point)[0].checked_sub(1).map(usize::from);
+                if self.resources.pick(point,owner) {self.dirty=true;return;}
+            }
+        }
         if self.pick_transport_destination(p,None)||self.pick_transport(p)||self.hud.market_map{return;}
         let coordinates=self.camera.vector(p,self.size).map(camera::geographic);
         let map_hit = coordinates.map(|q| self.object_at(q));
@@ -351,13 +375,14 @@ impl Host {
         let radius=(w*0.056).clamp(52.,78.);
         let modal=self.hud.menu.modal();
         modal||self.search.is_some()||self.details||self.transport_panel_at(p)||
+            (self.resources_available()&&self.resources.open&&contains(crate::resource_map::bounds(self.size)))||
             self.country.is_some_and(|country|contains(country.rect(self.size)))||
             formal_ui::page_rect(&self.hud,self.size).is_some_and(contains)||
             (self.hud.menu!=HudMenu::None&&contains(formal_ui::menu_rect(self.hud.menu,self.size,radius)))||
             (self.hud.messages&&contains(formal_ui::message_rect([w,h],((h+16.)*0.5).max(190.))))||
             self.hits.iter().any(|hit|{
                 let gear=matches!(hit.action,Action::Hud(HudCommand::Menu(HudMenu::System)))&&hit.area[1]==0.;
-                !matches!(hit.action,Action::Select(_))&&contains(hit.area)&&(!gear||formal_ui::gear_hit(p,self.size[0]))
+                !matches!(hit.action,Action::Select(_)|Action::Resources(crate::resource_map::Command::Site(_)))&&contains(hit.area)&&(!gear||formal_ui::gear_hit(p,self.size[0]))
             })||
             (self.hud.page==HudPage::Map && match self.selected {
                 Some(Object::Polity(_))=>false,
