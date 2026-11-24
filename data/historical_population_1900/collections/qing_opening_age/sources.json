@@ -1,0 +1,16 @@
+[
+  {
+    "id": "chiao_china_farm_age_1929_1931",
+    "title": "Chi-ming Chiao, A Study of the Chinese Population, Chapter III",
+    "publisher": "The Milbank Memorial Fund Quarterly Bulletin 12(1), 1934, pp. 85–96",
+    "url": "https://www.milbank.org/wp-content/uploads/mq/volume-12/issue-01/12-1-A-Study-of-the-Chinese-Population-Chapter-III.pdf",
+    "locator": "Table 9, printed p. 91, North and South age-by-sex counts",
+    "rights": "Numerical data transcribed from the cited table",
+    "raw_paths": ["age_sex.csv"],
+    "corroboration": {
+      "title": "A Study of the Chinese Population, Chapter I",
+      "url": "https://www.milbank.org/wp-content/uploads/mq/volume-11/issue-04/11-4-A-Study-of-the-Chinese-Population.pdf",
+      "locator": "Table 1, printed p. 331, survey scope"
+    }
+  }
+]

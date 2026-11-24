@@ -15,7 +15,7 @@
     "cities_europe": 2077,
     "colombia_panama_population": 2,
     "crown_islands": 29,
-    "danish": 56,
+    "danish": 72,
     "eastern": 1105,
     "ecuador_population": 35,
     "egypt_age_1907": 28,
@@ -67,23 +67,23 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 293,
+  "cited_sources": 301,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
-  "production_roots": 57,
+  "production_roots": 58,
   "partially_located_legacy_roots": 4,
   "documented_people_under_legacy_controls": 697355207,
-  "replaced_legacy_roots": 31,
+  "replaced_legacy_roots": 32,
   "new_roots": 26,
-  "production_people": 1369872959,
-  "production_people_pct_world_estimate": 85.881,
-  "population_outside_evidence_opening_estimate": 225201289,
-  "legacy_only_people": 104724793,
-  "authoritative_total_for_new_game": 1474597752,
-  "roots_with_partitions": 30,
-  "disjoint_leaves": 1343,
-  "people_in_partitions": 1284755964,
+  "production_people": 1372295176,
+  "production_people_pct_world_estimate": 86.033,
+  "population_outside_evidence_opening_estimate": 222779072,
+  "legacy_only_people": 102274793,
+  "authoritative_total_for_new_game": 1474569969,
+  "roots_with_partitions": 31,
+  "disjoint_leaves": 1356,
+  "people_in_partitions": 1288924418,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -91,7 +91,7 @@
     },
     {
       "unit_id": "cshapes_gw_840",
-      "people": 6871648
+      "people": 5125411
     },
     {
       "unit_id": "cshapes_gw_850",
@@ -138,7 +138,7 @@
   "people_in_partitions_with_explicit_places": 93277968,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 67,
+  "political_catalogue_members_of_production_groups": 68,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -380,11 +380,11 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2812,
+  "source_statistical_units": 2820,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 30,
-      "people": 343522157
+      "roots": 31,
+      "people": 345944374
     },
     "historical_world_reconstruction": {
       "roots": 27,
@@ -404,52 +404,52 @@
   "city_index_unresolved": 31,
   "opening_social_coverage": {
     "class": {
-      "assigned_people": 11239501,
-      "unknown_people": 1463358251
+      "assigned_people": 16373401,
+      "unknown_people": 1458196568
     },
     "culture": {
       "assigned_people": 5273225,
-      "unknown_people": 1469324527
+      "unknown_people": 1469296744
     },
     "household": {
       "assigned_people": 72890961,
-      "unknown_people": 1401706791
+      "unknown_people": 1401679008
     },
     "housing": {
       "assigned_people": 1655881,
-      "unknown_people": 1472941871
+      "unknown_people": 1472914088
     },
     "language": {
-      "assigned_people": 421507756,
-      "unknown_people": 1053089996
+      "assigned_people": 425438432,
+      "unknown_people": 1049131537
     },
     "legal_estate": {
       "assigned_people": 160113101,
-      "unknown_people": 1314484651
+      "unknown_people": 1314456868
     },
     "literacy": {
       "assigned_people": 328759400,
-      "unknown_people": 1145838352
+      "unknown_people": 1145810569
     },
     "marital_status": {
       "assigned_people": 346455931,
-      "unknown_people": 1128141821
+      "unknown_people": 1128114038
     },
     "occupation": {
-      "assigned_people": 241232961,
-      "unknown_people": 1233364791
+      "assigned_people": 265748961,
+      "unknown_people": 1208821008
     },
     "property_declaration": {
       "assigned_people": 32296914,
-      "unknown_people": 1442300838
+      "unknown_people": 1442273055
     },
     "religion": {
-      "assigned_people": 475170801,
-      "unknown_people": 999426951
+      "assigned_people": 482845876,
+      "unknown_people": 991724093
     },
     "residence": {
       "assigned_people": 412274110,
-      "unknown_people": 1062323642
+      "unknown_people": 1062295859
     }
   },
   "structural_observations_by_source": {
@@ -501,6 +501,9 @@
     "ar_capital_federal_1914_age_sex": 20,
     "abs_yearbook_1908_census_ages": 189,
     "ph_census_1903_vol2": 25,
+    "chiao_china_farm_age_1929_1931": 50,
+    "cu_census_1899_table_ix": 29,
+    "kr_kihasa_report_2010_30_6": 25,
     "pt_census_1890": 105,
     "pt_census_1900": 105,
     "be_census_1900_age_and_spoken_languages": 40,
@@ -517,9 +520,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 889065389,
-  "structure_opening_pool_count": 928,
-  "structure_opening_residents_outside_modeled_pools": 585532363,
+  "structure_opening_pool_controls": 1159611831,
+  "structure_opening_pool_count": 960,
+  "structure_opening_residents_outside_modeled_pools": 314958138,
   "structure_opening_scopes": [
     {
       "unit_id": "abs_new_south_wales",
@@ -3252,6 +3255,13 @@
       "observed_date": "1901-03-31"
     },
     {
+      "unit_id": "cuba_occupation_1900",
+      "opening_total": 1585419,
+      "observed_unit_id": "cuba_census_age_1899",
+      "observed_total": 1572797,
+      "observed_date": "1899-10-16"
+    },
+    {
       "unit_id": "egy_madina_alexandria",
       "opening_total": 308541,
       "observed_unit_id": "egy_madina_alexandria",
@@ -4624,6 +4634,13 @@
       "observed_date": "1899-12-31"
     },
     {
+      "unit_id": "korean_empire",
+      "opening_total": 17078033,
+      "observed_unit_id": "korean_peninsula_korean_residents_1925",
+      "observed_total": 19020030,
+      "observed_date": "1925-10-01"
+    },
+    {
       "unit_id": "mx_aguascalientes",
       "opening_total": 102776,
       "observed_unit_id": "mx_aguascalientes",
@@ -5077,6 +5094,216 @@
       "observed_unit_id": "pt1900_viseu",
       "observed_total": 401231,
       "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "qing_hist_anhui",
+      "opening_total": 23865806,
+      "observed_unit_id": "chiao_farm_north_south_1929_1931",
+      "observed_total": 67643,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_fujian",
+      "opening_total": 11967854,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_guangdong",
+      "opening_total": 28406540,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_henan",
+      "opening_total": 29383561,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_anlu",
+      "opening_total": 1487577,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_dean",
+      "opening_total": 1518977,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_hanyang",
+      "opening_total": 3345633,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_huangzhou",
+      "opening_total": 3242720,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_jingmen",
+      "opening_total": 650612,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_jingzhou",
+      "opening_total": 2390901,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_shinan",
+      "opening_total": 1252020,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_wuchang",
+      "opening_total": 2505359,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_xiangyang",
+      "opening_total": 2050604,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_yichang",
+      "opening_total": 1237026,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_hubei_yunyang",
+      "opening_total": 1307175,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_jiangsu",
+      "opening_total": 31353018,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_caozhou",
+      "opening_total": 4019551,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_dongchang",
+      "opening_total": 2726569,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_jinan",
+      "opening_total": 5170671,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_jining",
+      "opening_total": 1179968,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_linqing",
+      "opening_total": 906691,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_qingzhou",
+      "opening_total": 4034493,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_taian",
+      "opening_total": 3032534,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_unlocated",
+      "opening_total": 9267405,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_wuding",
+      "opening_total": 2554921,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_yanzhou",
+      "opening_total": 3888032,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shandong_yizhou",
+      "opening_total": 5384831,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_shanxi",
+      "opening_total": 10803444,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_zhejiang",
+      "opening_total": 17629009,
+      "observed_unit_id": "chiao_farm_south_1929_1931",
+      "observed_total": 37734,
+      "observed_date": "1929–1931"
+    },
+    {
+      "unit_id": "qing_hist_zhili",
+      "opening_total": 35319488,
+      "observed_unit_id": "chiao_farm_north_1929_1931",
+      "observed_total": 29909,
+      "observed_date": "1929–1931"
     },
     {
       "unit_id": "raj_agra_agra",
@@ -7180,6 +7407,14 @@
       "combined_open_age_and_unreported": null
     },
     {
+      "panel_id": "cuba_census_age_1899",
+      "unit_id": "cuba_census_age_1899",
+      "date": "1899-10-16",
+      "population": 1572797,
+      "age_not_stated": 85,
+      "combined_open_age_and_unreported": null
+    },
+    {
       "panel_id": "ah_hungary_including_fiume_1900_age_sex",
       "unit_id": "ah_hungary_including_fiume",
       "date": "1900-12-31",
@@ -7189,8 +7424,8 @@
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 530,
-  "dated_parent_controls_arithmetic_closure": 493,
+  "dated_parent_controls": 532,
+  "dated_parent_controls_arithmetic_closure": 495,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -7285,7 +7520,7 @@
       ],
       "production_people": 787661987,
       "production_pct_of_regional_research_estimate": 88.068,
-      "people_with_opening_subdivision": 731874365,
+      "people_with_opening_subdivision": 733620602,
       "research_only_units": 25,
       "research_only_people": 79176163
     },
@@ -7664,10 +7899,10 @@
         "opening_unit_id": "cuba_occupation_1900",
         "research_region": "America",
         "opening_control": 1585419,
-        "in_model_pools": 0,
-        "outside_model_pools": 1585419,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 1585419,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 1585334,
+        "modeled_sex_age_unknown": 85
       },
       {
         "opening_unit_id": "dominion_of_canada",
@@ -7744,9 +7979,9 @@
       {
         "opening_unit_id": "kingdom_of_denmark",
         "research_region": null,
-        "opening_control": 2450000,
+        "opening_control": 2422217,
         "in_model_pools": 0,
-        "outside_model_pools": 2450000,
+        "outside_model_pools": 2422217,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
@@ -7844,9 +8079,9 @@
         "opening_unit_id": "korean_empire",
         "research_region": "Asia",
         "opening_control": 17078033,
-        "in_model_pools": 0,
-        "outside_model_pools": 17078033,
-        "modeled_age_and_sex": 0,
+        "in_model_pools": 17078033,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 17078033,
         "modeled_sex_age_unknown": 0
       },
       {
@@ -7925,10 +8160,10 @@
         "opening_unit_id": "qing_empire",
         "research_region": "Asia",
         "opening_control": 400000000,
-        "in_model_pools": 0,
-        "outside_model_pools": 400000000,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 251882990,
+        "outside_model_pools": 148117010,
+        "modeled_age_and_sex": 251715568,
+        "modeled_sex_age_unknown": 167422
       },
       {
         "opening_unit_id": "republic_of_colombia_1900",
@@ -8042,10 +8277,10 @@
     "by_research_region": {
       "America": {
         "opening_control": 131491928,
-        "in_model_pools": 115814573,
-        "outside_model_pools": 15677355,
-        "modeled_age_and_sex": 115378333,
-        "modeled_sex_age_unknown": 436240
+        "in_model_pools": 117399992,
+        "outside_model_pools": 14091936,
+        "modeled_age_and_sex": 116963667,
+        "modeled_sex_age_unknown": 436325
       },
       "Oceania": {
         "opening_control": 4905385,
@@ -8069,26 +8304,26 @@
         "modeled_sex_age_unknown": 29173
       },
       "no_reviewed_research_region": {
-        "opening_control": 98080000,
+        "opening_control": 98052217,
         "in_model_pools": 2497168,
-        "outside_model_pools": 95582832,
+        "outside_model_pools": 95555049,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 2497168
       },
       "Asia": {
         "opening_control": 812681304,
-        "in_model_pools": 358353021,
-        "outside_model_pools": 454328283,
-        "modeled_age_and_sex": 354847848,
-        "modeled_sex_age_unknown": 3505173
+        "in_model_pools": 627314044,
+        "outside_model_pools": 185367260,
+        "modeled_age_and_sex": 623641449,
+        "modeled_sex_age_unknown": 3672595
       }
     },
     "world": {
-      "opening_control": 1474597752,
-      "in_model_pools": 889065389,
-      "outside_model_pools": 585532363,
-      "modeled_age_and_sex": 880693586,
-      "modeled_sex_age_unknown": 8371803
+      "opening_control": 1474569969,
+      "in_model_pools": 1159611831,
+      "outside_model_pools": 314958138,
+      "modeled_age_and_sex": 1151072521,
+      "modeled_sex_age_unknown": 8539310
     }
   },
   "opening_count_basis": {
@@ -8098,16 +8333,16 @@
         "pct_of_research_reference": 0.32
       },
       "published_historical_estimates": {
-        "people": 699628279,
-        "pct_of_research_reference": 43.862
+        "people": 697882042,
+        "pct_of_research_reference": 43.752
       },
       "date_models_from_territorial_returns": {
-        "people": 665140543,
-        "pct_of_research_reference": 41.7
+        "people": 669308997,
+        "pct_of_research_reference": 41.961
       },
       "retained_legacy_estimates": {
-        "people": 104724793,
-        "pct_of_research_reference": 6.566
+        "people": 102274793,
+        "pct_of_research_reference": 6.412
       }
     },
     "scopes": [
@@ -8372,7 +8607,7 @@
       {
         "unit_id": "cshapes_gw_840",
         "source_id": "ph_us_census_1900_plehn",
-        "sourced_people": 6871648,
+        "sourced_people": 5125411,
         "sourced_basis": "published_historical_estimates",
         "retained_legacy_people": 0
       },
@@ -8598,10 +8833,10 @@
       },
       {
         "unit_id": "kingdom_of_denmark",
-        "source_id": null,
-        "sourced_people": 0,
-        "sourced_basis": null,
-        "retained_legacy_people": 2450000
+        "source_id": "dk_statistics_population_1905_table3",
+        "sourced_people": 2422217,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0
       },
       {
         "unit_id": "kingdom_of_greece",
@@ -8821,6 +9056,54 @@
         "unit_id": "ph_1900_surigao_main_population",
         "source_id": "ph_census_1903_vol2",
         "sourced_people": 89691,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_840"
+      },
+      {
+        "unit_id": "ph_atlas_1900_antique",
+        "source_id": "ph_philippine_commission_atlas_1900",
+        "sourced_people": 114483,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_840"
+      },
+      {
+        "unit_id": "ph_atlas_1900_batangas",
+        "source_id": "ph_philippine_commission_atlas_1900",
+        "sourced_people": 312192,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_840"
+      },
+      {
+        "unit_id": "ph_atlas_1900_bohol",
+        "source_id": "ph_philippine_commission_atlas_1900",
+        "sourced_people": 248000,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_840"
+      },
+      {
+        "unit_id": "ph_atlas_1900_cebu",
+        "source_id": "ph_philippine_commission_atlas_1900",
+        "sourced_people": 504076,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_840"
+      },
+      {
+        "unit_id": "ph_atlas_1900_leyte",
+        "source_id": "ph_philippine_commission_atlas_1900",
+        "sourced_people": 270491,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_840"
+      },
+      {
+        "unit_id": "ph_atlas_1900_negros_occidental",
+        "source_id": "ph_philippine_commission_atlas_1900",
+        "sourced_people": 296995,
         "sourced_basis": "date_models_from_territorial_returns",
         "retained_legacy_people": 0,
         "parent_id": "cshapes_gw_840"

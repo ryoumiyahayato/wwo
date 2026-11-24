@@ -1,5 +1,13 @@
 [
   {
+    "id": "ie_census_1911_retro_religion_language",
+    "title": "Census of Ireland 1911, General Report with Tables",
+    "publisher": "Census of Ireland Commissioners",
+    "url": "https://www.cso.ie/en/media/csoie/releasespublications/documents/ep/storiesfromcensus1911/census1911originalreports/459-General_report%2C_Ireland%2C_1911.pdf",
+    "locator": "Table 29a and Table 37, retrospective 1901 Ireland totals.",
+    "rights": "Published historical numeric facts"
+  },
+  {
     "id": "uk_general_census_report_1901",
     "title": "Census of England and Wales, 1901. General Report with Appendices",
     "publisher": "General Register Office / HMSO (London, 1904)",

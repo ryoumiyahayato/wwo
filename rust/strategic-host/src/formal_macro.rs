@@ -2,7 +2,10 @@ use crate::{
     formal_bootstrap::{columns, local_id},
     formal_clock::{GameClock, MINUTES_PER_DAY, MINUTES_PER_HOUR},
     formal_ledger::{Ledger, PaymentLeg, TRANSPORT_ACCOUNT, MAX_AMOUNT},
-    formal_population::needs::{conditional_market_food_energy, recorded_food_energy, FoodEnergyEstimate},
+    formal_population::{
+        households::HouseholdCommodity,
+        needs::{conditional_market_food_energy, recorded_food_energy, FoodEnergyEstimate},
+    },
     transport::{operations::{Operations, Traffic}, ModeSet},
     formal_save::{field, lookup, integer, invalid, map, number, tagged, typed_int, typed_map},
     legacy_variant::encode_number,
@@ -201,6 +204,16 @@ impl MacroEconomy {
 
     pub fn markets(&self) -> &BTreeMap<String, Market> {
         &self.markets
+    }
+
+    /// Unadjusted catalogue calibration in market units per person/day.
+    pub fn household_catalogue_rate(&self, good: &str) -> Option<HouseholdCommodity<'_>> {
+        let item = self.inputs.commodities.iter().find(|item| item.commodity_id == good)?;
+        Some(HouseholdCommodity {
+            unit: &item.unit_name_zh,
+            mass_kg: item.unit_mass_kg,
+            daily_units_per_person: item.base_daily_units_per_million / 1_000_000.0,
+        })
     }
 
     pub fn food_flows(&self, unit: &str) -> Option<impl Iterator<Item = MarketFoodFlow<'_>>> {

@@ -30,3 +30,11 @@ D,dk_st_thomas_rural,dk_st_thomas,admin,St. Thomas rural districts,Øen St. Thom
 D,dk_st_jan,dk_west_indies,admin,St. Jan,Øen St. Jan / Tilsammen,984,445,480,925
 D,dk_cruxbay,dk_st_jan,city,Cruxbay,Byen Cruxbay,74,22,36,58
 D,dk_st_jan_rural,dk_st_jan,admin,St. Jan rural districts,Øen St. Jan / Landdistr.,910,423,444,867
+Mainland,kingdom_of_denmark,,country,Denmark proper,Hele Landet,2172380,,,2449540
+Mainland,dk1905_zealand,kingdom_of_denmark,admin,Zealand,Sjælland,834123,,,960053
+Mainland,dk1905_bornholm,kingdom_of_denmark,admin,Bornholm,Bornholm,38761,,,40889
+Mainland,dk1905_lolland_falster,kingdom_of_denmark,admin,Lolland–Falster,Lolland-Falster,100552,,,105021
+Mainland,dk1905_funen,kingdom_of_denmark,admin,Funen,Fyn,256824,,,279785
+Mainland,dk1905_jutland_southeast,kingdom_of_denmark,admin,Southeastern Jutland,Det sydøstlige Jylland,379539,,,430549
+Mainland,dk1905_jutland_north,kingdom_of_denmark,admin,Northern Jutland,Det nordlige Jylland,284558,,,319479
+Mainland,dk1905_jutland_southwest,kingdom_of_denmark,admin,Southwestern Jutland,Det sydvestlige Jylland,278023,,,313764

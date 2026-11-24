@@ -6,5 +6,13 @@
     "url": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=12689&sid=oversigter",
     "locator": "Tables A.1 p. 177, B.1 p. 179, C.1 p. 182, D.1 p. 183 and p. 184 table 2 note 1. Population figures by census date.",
     "rights": "Numerical facts manually transcribed from the 1903 statistical yearbook. Scanned pages are available at the publisher."
+  },
+  {
+    "id": "dk_statistics_population_1905_table3",
+    "title": "Befolkningsforholdene i Danmark i det 19. Aarhundrede, Tabel 3",
+    "publisher": "Statens Statistiske Bureau, Copenhagen, 1905, digital edition by Danmarks Statistik",
+    "url": "https://www.dst.dk/pubfile/19256/Befolk1905",
+    "locator": "Table 3, p. 11, Hele Landet and seven geographic regions, 1890 and 1901.",
+    "rights": "Numerical facts transcribed from the published census compilation. Scanned pages are available at the publisher."
   }
 ]

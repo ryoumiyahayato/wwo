@@ -402,6 +402,7 @@ pub struct Display<'a> {
     pub written_world: Option<&'a wwo_map_lab::formal_bootstrap::InitialWorld>,
     pub managed:bool,
     pub debug:Option<&'a crate::Diagnostics>,
+    pub population_debug:bool,
 }
 impl Display<'_> {
     pub(crate) fn can_read_world(&self) -> bool {
@@ -574,7 +575,7 @@ impl Display<'_> {
         if self.can_read_world() {
             visual.text(text,&scale,0,[start+length+8.,h-25.],75.,MUTED);
         } else { self.ink_block(panels,[start+length+8.,h-19.,40.,8.]); }
-        if self.modern_terrain && self.hud.page==Page::Map {
+        if self.modern_terrain && self.hud.page==Page::Map && !self.population_debug {
             let label=if self.surveyed_terrain {
                 visual.choose("历史测绘与现代地表参照","Historical survey and modern terrain reference")
             } else {

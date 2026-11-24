@@ -1220,15 +1220,56 @@ impl Host {
 
     fn inspect_population(&mut self, query: String) {
         let Some(mut panel)=self.population_debug.take() else{return;};
-        match self.written_world().map(|world|world.inspect_population(&query)) {
-            Some(Ok(report))=>panel.set_report(&report),
-            Some(Err(error))=>panel.set_error(error.to_string()),
-            None=>panel.set_error("No active formal world"),
+        if let Some(world) = self.written_world() {
+            let market = world.macro_economy();
+            let report = if panel.page == pop_debug_ui::Page::Overview {
+                world.inspect_population_brief(&query)
+            } else {
+                world.inspect_population(&query)
+            };
+            match report {
+                Ok(report) => {
+                    let needs = (panel.page == pop_debug_ui::Page::Needs)
+                        .then(|| world.population_household_needs(&report)).flatten();
+                    panel.set_report(&report, needs.as_ref(), market);
+                }
+                Err(error) => panel.set_error(error.to_string()),
+            }
+        } else {
+            panel.set_error("No active formal world");
         }
         panel.query=query;
         panel.input.clear();
         self.population_debug=Some(panel);
         self.dirty=true;
+    }
+
+    fn population_page(&mut self, page: pop_debug_ui::Page) {
+        let Some(panel) = self.population_debug.as_mut().filter(|panel| panel.page != page) else { return; };
+        panel.page = page;
+        panel.scroll = 0;
+        let query = panel.query.clone();
+        self.inspect_population(query);
+    }
+
+    fn population_location(&mut self, object: Option<Object>) {
+        let (query, name) = object.map(|object| {
+            let name = ui::object_name(&self.world, &self.skin, object);
+            (self.id(object), Some(name.to_owned()))
+        }).unwrap_or_else(|| ("unmapped".into(), None));
+        if let Some(panel) = &mut self.population_debug {
+            panel.place_name = name;
+            panel.scroll = 0;
+        }
+        self.inspect_population(query.strip_prefix("state:").unwrap_or(&query).to_owned());
+    }
+
+    fn population_polity_at(&mut self, point: [f64; 2]) {
+        let polity = self.camera.vector(point, self.size)
+            .and_then(|v| self.object_at(camera::geographic(v))[0].checked_sub(1))
+            .map(|index| Object::Polity(usize::from(index)))
+            .filter(|&object| self.available(object));
+        self.population_location(polity);
     }
 
     fn scroll_population_debug(&mut self, point:[f64;2], steps:f64)->bool {
@@ -1518,7 +1559,10 @@ impl Host {
         }
         if self.loading(){return;}
         if let Some(panel)=&self.population_debug {
-            if panel.contains(self.size,p) {return;}
+            if panel.contains(self.size,p) {
+                if let Some(page) = panel.page_at(self.size, p) { self.population_page(page); }
+                return;
+            }
             let [x,y]=p.map(|v|v as f32);
             let object=self.hits.iter().rev().find_map(|hit| {
                 let [left,top,width,height]=hit.area;
@@ -1533,12 +1577,7 @@ impl Host {
                     .filter(|&object|self.available(object))
                     .or_else(||polity.checked_sub(1).map(|i|Object::Polity(usize::from(i))).filter(|&object|self.available(object)))
             });
-            if let Some(object)=object {
-                let id=self.id(object);
-                self.inspect_population(id.strip_prefix("state:").unwrap_or(&id).to_owned());
-            } else {
-                self.inspect_population("unmapped".into());
-            }
+            self.population_location(object);
             return;
         }
         let [x,y]=p.map(|v|v as f32);
@@ -1696,12 +1735,14 @@ impl Host {
         if key==Key::Named(NamedKey::F7) && !self.in_lobby() && self.written_world().is_some() && !self.hud.menu.modal() {
             if self.population_debug.take().is_none() {
                 self.population_debug=Some(pop_debug_ui::Panel::default());
-                let id = self.selected.map(|object| self.id(object)).or_else(|| {
-                    let world = self.written_world()?;
-                    let place = world.player_current_place().unwrap_or_else(|| world.last_station());
-                    world.residence_unit_at(place).or_else(|| world.population_unit_at(place)).map(str::to_owned)
-                }).unwrap_or_else(|| "world".into());
-                self.inspect_population(id.strip_prefix("state:").unwrap_or(&id).to_owned());
+                if self.selected.is_some() {
+                    self.population_location(self.selected);
+                } else {
+                    let id = self.written_world().map(|world| {
+                        world.player_current_place().unwrap_or_else(|| world.last_station()).to_owned()
+                    }).unwrap_or_else(|| "world".into());
+                    self.inspect_population(id);
+                }
             }
             self.dirty=true;
             return;
@@ -1711,7 +1752,12 @@ impl Host {
                 Key::Named(NamedKey::Escape)=>self.population_debug=None,
                 Key::Named(NamedKey::Enter)=>{
                     let query=if panel.input.trim().is_empty() {panel.query.clone()} else {panel.input.trim().to_owned()};
+                    if query != panel.query { panel.place_name = None; }
                     self.inspect_population(query);
+                }
+                Key::Named(NamedKey::Tab)=>{
+                    let page = panel.next_page();
+                    self.population_page(page);
                 }
                 Key::Named(NamedKey::Backspace)=>{panel.input.pop();}
                 Key::Named(NamedKey::Delete)=>panel.input.clear(),
@@ -2034,7 +2080,7 @@ impl Host {
             camera:&self.camera,size:self.size,mode:self.mode,flags,cursor:self.cursor,source:&source,feedback:&self.feedback,labels:self.labels,managed:self.config.managed,
             written_world, modern_terrain:view.map_style[1]>0.,
             surveyed_terrain:view.close_sample[0]>0. && view.close_sample[2]>0.5,
-            debug:self.debug.then_some(&self.perf)};
+            debug:self.debug.then_some(&self.perf),population_debug:self.population_debug.is_some()};
         let seconds=self.started.elapsed().as_secs_f32();
         let (mut meshes,hits)=if loading {
             let status=self.state.lobby.as_ref().map(|s|s.status.as_str()).filter(|s|!s.is_empty())
@@ -2748,7 +2794,15 @@ impl ApplicationHandler<HostEvent> for Host {
                     return;
                 }
                 if state==ElementState::Pressed {
-                    if self.population_debug.is_some() {return;}
+                    if let Some(panel) = &self.population_debug {
+                        self.focus = None;
+                        self.velocity = [0.; 2];
+                        self.drag = (!panel.contains(self.size, self.cursor)).then(|| Drag {
+                            at: self.cursor, origin: self.cursor, last: Instant::now(),
+                            bearing: button == MouseButton::Right, moved: false,
+                        });
+                        return;
+                    }
                     self.focus=None;self.velocity=[0.;2];
                     if button==MouseButton::Left&&self.in_lobby()&&self.lobby_page==lobby::Page::Selection
                         &&!self.loading()&&self.country_directory.grab(self.size,self.cursor)
@@ -2765,7 +2819,15 @@ impl ApplicationHandler<HostEvent> for Host {
                     self.drag=(!clock_surface&&!self.is_panel(self.cursor)).then(||Drag{
                         at:self.cursor,origin:self.cursor,last:Instant::now(),bearing:button==MouseButton::Right,moved:false});
                 } else if self.population_debug.is_some() {
-                    if button==MouseButton::Left {self.click(self.cursor);}
+                    let drag = self.drag.take();
+                    if drag.as_ref().is_some_and(|drag| drag.moved) {
+                        self.moved_at = Instant::now();
+                        self.velocity = [0.; 2];
+                    } else if button == MouseButton::Left {
+                        self.click(self.cursor);
+                    } else if drag.is_some() {
+                        self.population_polity_at(self.cursor);
+                    }
                 } else if button==MouseButton::Left&&self.country_directory.drag.take().is_some() {
                     self.dirty=true;
                 } else if button==MouseButton::Left&&self.hud.volume_drag {

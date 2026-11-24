@@ -270,7 +270,7 @@ impl PopulationStructure<'_> {
             };
             if ages.youngest <= oldest && ages.oldest.is_none_or(|max| max >= youngest) {
                 coverage.possibly_in_range_with_known_age += count;
-                if ages.youngest >= youngest && ages.oldest.is_some_and(|max| max <= oldest) {
+                if ages.youngest >= youngest && (oldest == u16::MAX || ages.oldest.is_some_and(|max| max <= oldest)) {
                     coverage.definitely_in_range += count;
                 }
             }
@@ -354,6 +354,12 @@ impl Population {
     }
 
     pub fn structure(&self, unit: Option<&str>, clock: GameClock) -> Option<PopulationStructure<'_>> {
+        self.structure_for_inspection(unit, clock, true)
+    }
+
+    pub(super) fn structure_for_inspection(
+        &self, unit: Option<&str>, clock: GameClock, include_needs: bool,
+    ) -> Option<PopulationStructure<'_>> {
         let population_total = match unit {
             Some(unit) => self.population_total(unit)?,
             None => self.global_total(),
@@ -407,34 +413,36 @@ impl Population {
                 if age_years.is_some() && definition.sex.is_some() {
                     summary.residents_with_cohort_age_and_sex += members;
                 }
-                if let Requirement::Known { range, .. } = published_energy_reference(age_years, definition.sex) {
-                    let energy = &mut summary.published_energy_reference;
-                    add_group_requirement(&mut energy.conditional_kcal_per_day, range, members);
-                    energy.people_with_reference += members;
-                }
-                if let Requirement::Known { range, .. } =
-                    published_protein_reference(age_years, definition.sex)
-                {
-                    let protein = &mut summary.published_protein_reference;
-                    add_group_requirement(&mut protein.conditional_grams_per_day, range, members);
-                    protein.people_with_reference += members;
-                }
-                if let Some((temperate, warm_work)) = adult_water_references(age_years, definition.sex) {
-                    let water = &mut summary.published_adult_water_references;
-                    add_group_requirement(&mut water.temperate_sedentary_litres_per_day, temperate, members);
-                    add_group_requirement(&mut water.warm_moderate_work_litres_per_day, warm_work, members);
-                    water.adults_with_reference += members;
-                }
-                if let Requirement::Known { range, .. } =
-                    published_efsa_water_reference(age_years, definition.sex)
-                {
-                    let water = &mut summary.published_efsa_water_reference;
-                    add_group_requirement(
-                        &mut water.moderate_environment_pal_1_6_total_ingested_litres_per_day,
-                        range,
-                        members,
-                    );
-                    water.people_with_reference += members;
+                if include_needs {
+                    if let Requirement::Known { range, .. } = published_energy_reference(age_years, definition.sex) {
+                        let energy = &mut summary.published_energy_reference;
+                        add_group_requirement(&mut energy.conditional_kcal_per_day, range, members);
+                        energy.people_with_reference += members;
+                    }
+                    if let Requirement::Known { range, .. } =
+                        published_protein_reference(age_years, definition.sex)
+                    {
+                        let protein = &mut summary.published_protein_reference;
+                        add_group_requirement(&mut protein.conditional_grams_per_day, range, members);
+                        protein.people_with_reference += members;
+                    }
+                    if let Some((temperate, warm_work)) = adult_water_references(age_years, definition.sex) {
+                        let water = &mut summary.published_adult_water_references;
+                        add_group_requirement(&mut water.temperate_sedentary_litres_per_day, temperate, members);
+                        add_group_requirement(&mut water.warm_moderate_work_litres_per_day, warm_work, members);
+                        water.adults_with_reference += members;
+                    }
+                    if let Requirement::Known { range, .. } =
+                        published_efsa_water_reference(age_years, definition.sex)
+                    {
+                        let water = &mut summary.published_efsa_water_reference;
+                        add_group_requirement(
+                            &mut water.moderate_environment_pal_1_6_total_ingested_litres_per_day,
+                            range,
+                            members,
+                        );
+                        water.people_with_reference += members;
+                    }
                 }
                 summary.cohorts.push(ResidentCohort {
                     unit_id: id,

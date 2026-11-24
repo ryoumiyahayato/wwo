@@ -1,0 +1,36 @@
+[
+  {
+    "id": "chiao_farm_north_1929_1931",
+    "observed_unit_id": "chiao_farm_north_1929_1931",
+    "observed_date": "1929–1931",
+    "source_id": "chiao_china_farm_age_1929_1931",
+    "locator": "Chapter III, Table 9, printed p. 91 (North); Chapter I, Table 1, printed p. 331",
+    "published_scope": "North China farm family survey, 29,909 people",
+    "broad_observation": false,
+    "definition": "North China ages by sex. Use the single-age rows under 5, keeping their subtotal separately.",
+    "uncertainty": "Farm-family sample about 30 years after opening, with under-reporting of girls and demographic shifts. No quantified opening error interval."
+  },
+  {
+    "id": "chiao_farm_south_1929_1931",
+    "observed_unit_id": "chiao_farm_south_1929_1931",
+    "observed_date": "1929–1931",
+    "source_id": "chiao_china_farm_age_1929_1931",
+    "locator": "Chapter III, Table 9, printed p. 91 (South); Chapter I, Table 1, printed p. 331",
+    "published_scope": "South China farm family survey, 37,734 people",
+    "broad_observation": false,
+    "definition": "South China ages by sex. Use the single-age rows under 5, keeping their subtotal separately.",
+    "uncertainty": "Farm-family sample about 30 years after opening, with under-reporting of girls and demographic shifts. No quantified opening error interval."
+  },
+  {
+    "id": "chiao_farm_north_south_1929_1931",
+    "observed_unit_id": "chiao_farm_north_south_1929_1931",
+    "observed_date": "1929–1931",
+    "source_id": "chiao_china_farm_age_1929_1931",
+    "locator": "Chapter III, Table 9, printed p. 91 (North and South pooled); Chapter I, Table 1, printed p. 331",
+    "published_scope": "North and South China farm family survey, 67,643 people",
+    "broad_observation": false,
+    "component_panels": ["chiao_farm_north_1929_1931", "chiao_farm_south_1929_1931"],
+    "definition": "North and South joint counts pooled because sample provinces can span survey regions.",
+    "uncertainty": "Both samples cover parts of Anhui. The pooled distribution has no measured province-level weighting. Farm-only coverage, age misreporting, sex undercount and the time shift are unquantified."
+  }
+]

@@ -2,8 +2,11 @@ use crate::{formal_ui::Skin, overlay::Mesh};
 use serde_json::Value;
 use std::cell::{Cell, RefCell};
 use wwo_map_lab::formal_population::{
+    households::{HouseholdNeeds, NeedPeriod},
+    workforce::{historical_production_reference, production_recipe, workforce_reference},
     needs::QuantityRange, CohortSex, PopulationInspection, PopulationStructure, SocialDistribution,
 };
+use wwo_map_lab::formal_macro::MacroEconomy;
 
 const INK: [u8; 4] = [243, 236, 221, 255];
 const MUTED: [u8; 4] = [183, 193, 195, 255];
@@ -11,6 +14,26 @@ const GOLD: [u8; 4] = [221, 185, 123, 255];
 const ROW_HEIGHT: f32 = 23.;
 const BODY_TOP: f32 = 105.;
 const FOOTER_HEIGHT: f32 = 33.;
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum Page {
+    #[default]
+    Overview,
+    Structure,
+    Social,
+    Needs,
+    Changes,
+    Sources,
+}
+
+const PAGES: [(Page, &str, &str); 6] = [
+    (Page::Overview, "概况", "Overview"),
+    (Page::Structure, "结构", "Structure"),
+    (Page::Social, "社会", "Society"),
+    (Page::Needs, "需求", "Needs"),
+    (Page::Changes, "变动", "Changes"),
+    (Page::Sources, "史料", "Sources"),
+];
 
 struct Row {
     label: (&'static str, &'static str),
@@ -30,6 +53,8 @@ pub struct Panel {
     pub input: String,
     pub query: String,
     pub scroll: usize,
+    pub page: Page,
+    pub place_name: Option<String>,
     report: Vec<Row>,
     reported_query: String,
     scope_relation: Option<&'static str>,
@@ -44,6 +69,8 @@ impl Default for Panel {
             input: "world".into(),
             query: "world".into(),
             scroll: 0,
+            page: Page::Overview,
+            place_name: None,
             report: Vec::new(),
             reported_query: String::new(),
             scope_relation: None,
@@ -55,7 +82,12 @@ impl Default for Panel {
 }
 
 impl Panel {
-    pub fn set_report(&mut self, inspection: &PopulationInspection<'_>) {
+    pub fn set_report(
+        &mut self,
+        inspection: &PopulationInspection<'_>,
+        needs: Option<&HouseholdNeeds>,
+        market: &MacroEconomy,
+    ) {
         if self.reported_query != inspection.query_id {
             self.scroll = 0;
             self.reported_query = inspection.query_id.into();
@@ -65,16 +97,47 @@ impl Panel {
         self.scope_relation = Some(inspection.scope_relation);
         self.population_total = inspection.population_total;
 
+        match self.page {
+            Page::Overview => self.show_overview(inspection),
+            Page::Structure => {
+                self.show_structure(inspection.structure.as_ref());
+                self.show_workforce(inspection, market);
+                self.show_cohorts(inspection.structure.as_ref());
+            }
+            Page::Social => {
+                self.show_social(inspection.social.as_ref());
+                self.show_dietary_norms(inspection);
+                for trait_record in &inspection.traits {
+                    self.record(trait_record, &["dimension", "category", "value", "status", "source_id"]);
+                }
+            }
+            Page::Needs => {
+                self.show_household_needs(needs, market);
+                self.show_living(inspection);
+                self.show_historical_households(inspection);
+            }
+            Page::Changes => self.show_changes(inspection),
+            Page::Sources => {
+                self.show_opening(inspection);
+                self.field("地图地点", "Explicit map sites", joined(&inspection.map_place_ids));
+                self.show_coverage(inspection.structural_coverage.as_ref());
+                self.show_history(inspection);
+                if !inspection.children.is_empty() {
+                    self.heading("下级人口账户", "Child accounts");
+                }
+                for child in &inspection.children {
+                    self.line(format!("{}  |  {}  |  {}", child.name, child.unit_id, number(child.population_total)));
+                }
+            }
+        }
+    }
+
+    fn show_overview(&mut self, inspection: &PopulationInspection<'_>) {
         self.heading("当前人口", "Current population");
-        self.field("查询对象", "Query", Some(inspection.query_id));
-        let date = inspection.date;
         self.field(
-            "游戏时间",
-            "Game time",
-            Some(format!(
-                "{:04}-{:02}-{:02} {:02}:{:02}  /  #{}",
-                date.year, date.month, date.day, date.hour, date.minute, inspection.minute,
-            )),
+            "地点", "Place",
+            self.place_name.clone().or(inspection.account_name.map(str::to_owned))
+                .or_else(|| (inspection.query_id != "world").then(|| inspection.query_id.to_owned())),
         );
         let (zh, en) = match inspection.scope_relation {
             "world" => ("全球账户", "World accounts"),
@@ -84,13 +147,13 @@ impl Panel {
                 "Historical name for this population account",
             ),
             "residence_site_in_account" => (
-                "账户内的居住地点，地点人数未知",
-                "Residence site in an account. Site population unknown.",
+                "归属已知统计账户，当地人数未知",
+                "Containing account known. Local population unknown.",
             ),
-            "dated_city_reference" => ("历史城市资料", "Dated city evidence"),
+            "dated_city_reference" => ("历史城市资料未分配", "Dated city population unallocated"),
             "dated_evidence_only" => (
-                "历史资料，当前人数未知",
-                "Dated evidence. Current population unknown.",
+                "历史资料未分配，当前人数未知",
+                "Unallocated dated evidence. Current population unknown.",
             ),
             _ => ("人口范围未知", "Population scope unknown"),
         };
@@ -98,35 +161,51 @@ impl Panel {
         let (zh, en) = if inspection.scope_relation == "world" {
             ("全球人口", "World population")
         } else {
-            ("账户总人口", "Account population")
+            ("当地总人口", "Local population")
         };
         self.number(zh, en, inspection.population_total);
         self.number("直属人数", "Direct residents", inspection.direct_residents);
-        self.field("统计账户", "Account", inspection.account_id);
+        self.number("下级地区人数", "Child accounts", inspection.child_residents);
+        self.field("统计账户", "Account", inspection.account_name.or(inspection.account_id));
         self.field("上级账户", "Parent account", inspection.parent_id);
-        self.field(
-            "地图地点",
-            "Explicit map sites",
-            joined(&inspection.map_place_ids),
-        );
-        self.show_structure(inspection.structure.as_ref());
-        self.show_cohorts(inspection.structure.as_ref());
-        self.show_social(inspection.social.as_ref());
-        self.show_living(inspection);
-        self.show_coverage(inspection.structural_coverage.as_ref());
-        self.show_opening(inspection);
-        self.show_changes(inspection);
-        self.show_history(inspection);
-
-        if !inspection.children.is_empty() {
-            self.heading("下级人口账户", "Child accounts");
-            for child in &inspection.children {
-                self.line(format!(
-                    "{}  |  {}  |  {}",
-                    child.name,
-                    child.unit_id,
-                    number(child.population_total)
-                ));
+        if let Some(structure) = &inspection.structure {
+            self.number("具名人口", "Named", Some(structure.named_residents));
+            self.number("匿名人口", "Anonymous", Some(structure.population_total - structure.named_residents));
+            let female = structure.cohorts.iter().filter(|c| c.sex == Some(CohortSex::Female)).map(|c| c.members).sum::<u64>();
+            let male = structure.cohorts.iter().filter(|c| c.sex == Some(CohortSex::Male)).map(|c| c.members).sum::<u64>();
+            self.field("匿名男 / 女 / 未知", "Anonymous male / female / unknown", Some(format!(
+                "{} / {} / {}", number(male), number(female),
+                number(structure.population_total - structure.named_residents - female - male),
+            )));
+            let age_bands = [(0, 14), (15, 64), (65, u16::MAX)].map(|(min, max)| {
+                let covered = structure.count_ages(min, max).expect("valid age band");
+                let low = number(covered.definitely_in_range);
+                let high = covered.possibly_in_range_with_known_age;
+                if high == covered.definitely_in_range { low } else { format!("{low}–{}", number(high)) }
+            });
+            self.field("匿名 0–14 / 15–64 / 65+", "Anonymous 0–14 / 15–64 / 65+", Some(age_bands.join(" / ")));
+            self.number("年龄未知的匿名人口", "Anonymous with unknown age", structure.count_ages(0, u16::MAX).map(|a| a.age_unknown));
+        }
+        self.heading("人口资料", "Population evidence");
+        self.number("开局版本", "Opening version", inspection.opening_version.map(u64::from));
+        if let Some(opening) = inspection.opening {
+            self.field("统计日期", "Reference date", opening.reference_date());
+            self.field("历史依据", "Source", Some(opening.source_id.as_str()));
+            self.field("估计状态", "Estimate status", opening.uncertainty_kind().or(Some(&opening.method)));
+            if let Some(count) = opening.research_unlocated_balance {
+                self.number("开局未定位余额", "Opening unlocated balance", Some(count));
+            }
+        } else if let Some(estimate) = &inspection.legacy_estimate {
+            self.field("估计状态", "Estimate status", Some(estimate.source_method));
+            self.field("参考年份", "Reference year", Some(estimate.calibration_date));
+        }
+        if inspection.population_total.is_none() {
+            let dated = inspection.city_reference.as_ref().or_else(|| {
+                inspection.archive.as_ref()?.dated_population.iter().find(|row| row["population_value"].is_u64())
+            });
+            if let Some(dated) = dated {
+                self.number("历史记录人数（未分配）", "Dated count (unallocated)", dated["population_value"].as_u64());
+                self.field("历史记录日期", "Dated count date", dated["source_date"].as_str().or(dated["date"].as_str()));
             }
         }
     }
@@ -271,7 +350,7 @@ impl Panel {
             self.number("未知人数", "Unknown residents", Some(dimension.unknown_residents));
             for (classification, categories) in &dimension.by_classification {
                 if !categories.is_empty() {
-                    self.field("原表分类", "Census classification", Some(*classification));
+                    self.field("统计分类", "Classification", Some(*classification));
                     for (category, count) in categories {
                         self.line(format!("{category}  |  {}", number(*count)));
                     }
@@ -349,16 +428,6 @@ impl Panel {
                 self.number("未知人数", "Unknown residents", Some(unknown));
             }
         }
-        self.heading("历史饮食习惯及禁忌", "Historical dietary customs and restrictions");
-        if inspection.dietary_norms.is_empty() {
-            self.field("适用人群未分配", "Applicable population unassigned", Some(""));
-        }
-        for norm in &inspection.dietary_norms {
-            self.field("饮食规范", "Dietary norm", Some(norm.trait_id));
-            self.number("登记宗教可能适用人数", "Residents with matching recorded religion", Some(norm.residents_with_matching_religion));
-            self.number("宗教未分配人数", "Residents with religion unassigned", Some(norm.residents_with_unassigned_religion));
-            self.number("实际遵行人数", "Observed adherents", norm.observed_adherents);
-        }
         let Ok(living) = serde_json::to_value(&inspection.living_conditions) else {
             return;
         };
@@ -400,6 +469,138 @@ impl Panel {
                 );
             }
         }
+    }
+
+    fn show_dietary_norms(&mut self, inspection: &PopulationInspection<'_>) {
+        self.heading("历史饮食习惯及禁忌", "Historical dietary customs and restrictions");
+        if inspection.dietary_norms.is_empty() {
+            self.field("适用人群未分配", "Applicable population unassigned", Some(""));
+        }
+        for norm in &inspection.dietary_norms {
+            self.field("饮食规范", "Dietary norm", Some(norm.trait_id));
+            self.number("登记宗教可能适用人数", "Residents with matching recorded religion", Some(norm.residents_with_matching_religion));
+            self.number("宗教未分配人数", "Residents with religion unassigned", Some(norm.residents_with_unassigned_religion));
+            self.number("实际遵行人数", "Observed adherents", norm.observed_adherents);
+        }
+    }
+
+    fn show_household_needs(&mut self, needs: Option<&HouseholdNeeds>, market: &MacroEconomy) {
+        self.heading("家庭需求参考", "Household requirements");
+        let Some(needs) = needs else {
+            self.field("本地人口尚未分配", "Local population unallocated", Some(""));
+            return;
+        };
+        self.number("地区居民", "Area residents", Some(needs.residents));
+        self.field(
+            "读数 R / C / P", "Basis R / C / P",
+            Some("R 主食情景 / staple scenario · C 游戏目录 / catalogue · P 规划假设 / planning"),
+        );
+        self.field(
+            "每行依次显示", "Reading order",
+            Some("地区总量 / total · 人均 / per person · 适用人数 / eligible"),
+        );
+        for row in &needs.needs {
+            let label = row.commodity_id
+                .and_then(|id| market.commodity_info(id).map(|(name, _, _)| format!("{name} / {id}")))
+                .unwrap_or_else(|| row.id.into());
+            let period = match row.period {
+                NeedPeriod::Day => "/日·day",
+                NeedPeriod::Year => "/年·yr",
+                NeedPeriod::Occupancy => " 占用·occupied",
+            };
+            let basis = match row.basis {
+                "staple_scenarios_1900" => "R",
+                "market_catalogue_reference_1900" => "C",
+                _ => "P",
+            };
+            let per_person = if row.eligible_people == 0 { "—".into() } else {
+                format!("{:.4}", row.quantity / row.eligible_people as f64)
+            };
+            self.line(format!(
+                "{label}  {basis}  |  {:.3} {}{period}  |  {per_person}  |  {}",
+                row.quantity, row.unit, number(row.eligible_people),
+            ));
+            if row.unclassified_people > 0 {
+                self.number("年龄未能判定", "Age eligibility uncertain", Some(row.unclassified_people));
+            }
+            if row.commodity_id.is_none() {
+                self.field("商品或服务目录缺项", "No matching household good or service", Some(""));
+            }
+        }
+        self.heading("按食物能量替代", "Staple substitution by food energy");
+        for pair in needs.staples {
+            self.line(format!("1 {} ≈ {:.2} {}", pair.first, pair.second_per_first, pair.second));
+        }
+        self.heading("生产投入关系", "Production input relationships");
+        for id in ["flour_mill", "bakery", "oil_press", "clothing_factory"] {
+            let Some(recipe) = production_recipe(id) else { continue; };
+            let goods = |items: &[wwo_map_lab::formal_population::workforce::RecipeOutput]| {
+                items.iter().map(|row| format!("{} {}", row.units, row.commodity_id)).collect::<Vec<_>>().join(" + ")
+            };
+            self.line(format!("{}  →  {}", goods(&recipe.inputs), goods(&recipe.outputs)));
+        }
+    }
+
+    fn show_workforce(&mut self, inspection: &PopulationInspection<'_>, market: &MacroEconomy) {
+        self.heading("职业与可用人力", "Occupation and potential labour");
+        if let Some(unit) = inspection.account_id {
+            if let Some(reference) = historical_production_reference(unit) {
+                self.field("产量参考（历史经济估算）", "Output reference (historical economy estimate)",
+                    Some(format!("{}  |  {}  |  {} bp", reference.year, reference.method, reference.confidence_basis_points)));
+                self.number("钢产量（吨）", "Steel output (tonnes)", Some(reference.steel_tonnes));
+                self.number("能源（吨煤当量）", "Energy (tonnes coal equivalent)", Some(reference.energy_tonnes_coal_equivalent));
+            }
+            if market.last_settlement_hour() != 0 {
+                if let Some(account) = market.markets().get(unit) {
+                    self.field("正式市场基础模型产出", "Formal market model output",
+                        Some(format!("#{} h", market.last_settlement_hour())));
+                    for id in ["bread", "rice", "coal", "steel"] {
+                        if let (Some(state), Some((_, _, unit))) = (account.commodities.get(id), market.commodity_info(id)) {
+                            self.line(format!("{id}  |  {:.3} {unit}", state.produced));
+                        }
+                    }
+                }
+            }
+        }
+        let Some(workforce) = inspection.social.as_ref().and_then(workforce_reference) else { return; };
+        self.number("已对应产业的人数", "People mapped to sectors", Some(workforce.mapped_occupation_residents));
+        self.number("职业人数未分配", "People with unallocated occupation", Some(workforce.occupation_unassigned));
+        for group in workforce.groups {
+            self.line(format!("{}  |  {}  |  {}", group.occupation, group.sector, number(group.residents)));
+            self.field("技能方向（职业推定）", "Skill area (from occupation)", Some(group.skills));
+            if group.own_use_possible {
+                self.field("家庭自产潜在适用", "Potential household production", Some("实际自产未知 / Actual own use unknown"));
+            }
+            for recipe in group.recipes {
+                let outputs = recipe.outputs.iter().map(|output| {
+                    let unit = market.commodity_info(&output.commodity_id).map_or("", |(_, _, unit)| unit);
+                    format!("{} {} {}", output.units, unit, output.commodity_id)
+                }).collect::<Vec<_>>().join(" · ");
+                self.field("目录配方每批", "Catalogue recipe per batch",
+                    Some(format!("{}  |  {}  |  {} 人·workers", recipe.recipe_id, outputs, number(recipe.workers_per_batch))));
+            }
+        }
+    }
+
+    fn show_historical_households(&mut self, inspection: &PopulationInspection<'_>) {
+        use wwo_map_lab::formal_population::historical_food::{HistoricalFoodSupply, HISTORICAL_FOOD_CASES};
+        let case = match inspection.account_id {
+            Some("country_fra") | Some("fr_paris") => Some(&HISTORICAL_FOOD_CASES[1]),
+            Some("kingdom_of_belgium") => Some(&HISTORICAL_FOOD_CASES[0]),
+            _ => None,
+        };
+        let Some(case) = case else { return; };
+        self.heading("历史家庭账本样本", "Dated household account sample");
+        self.line(format!("{}  |  {}–{}  |  {} 人·people  |  p. {}",
+            case.locality, case.fieldwork_first_year, case.fieldwork_last_year, case.covered_people, case.printed_page));
+        for food in case.foods {
+            let supply = match food.supply {
+                HistoricalFoodSupply::Cash { .. } => "购买 / purchased",
+                HistoricalFoodSupply::OwnProduction { .. } => "自产 / own production",
+            };
+            self.line(format!("{}  |  {} kg  |  {supply}", food.commodity_id, food.household_accounted_kg));
+        }
+        self.line(case.source_url.into());
     }
 
     fn show_changes(&mut self, inspection: &PopulationInspection<'_>) {
@@ -689,6 +890,7 @@ impl Panel {
             "input": self.input,
             "scroll": first,
             "scope_relation": self.scope_relation,
+            "page": format!("{:?}", self.page),
             "population_total": self.population_total,
             "visible_preview": visible_preview,
         })
@@ -791,12 +993,26 @@ impl Panel {
         w >= 70. && h >= 98. && px >= x && py >= y && px < x + w && py < y + h
     }
 
+    pub fn page_at(&self, size: [u32; 2], [px, py]: [f64; 2]) -> Option<Page> {
+        let [x, y, w, _] = bounds(size).map(f64::from);
+        let width = (w - 30.) / PAGES.len() as f64;
+        if px < x + 15. || px >= x + w - 15. || py < y + 75. || py >= y + 97. {
+            return None;
+        }
+        PAGES.get(((px - x - 15.) / width) as usize).map(|(page, _, _)| *page)
+    }
+
+    pub fn next_page(&self) -> Page {
+        let index = PAGES.iter().position(|(page, _, _)| *page == self.page).unwrap_or(0);
+        PAGES[(index + 1) % PAGES.len()].0
+    }
+
     pub fn draw(&self, size: [u32; 2], skin: &Skin, background: &mut Mesh, text: &mut Mesh) {
         let [x, y, w, h] = bounds(size);
         if w < 70. || h < 98. {
             return;
         }
-        background.rect(x, y, w, h, [13, 22, 29, 250]);
+        background.rect(x, y, w, h, [13, 22, 29, 255]);
         background.rect(x, y, w, 2., GOLD);
         background.rect(x + 15., y + 41., w - 30., 33., [24, 38, 44, 255]);
         background.rect(x + 15., y + 97., w - 30., 1., [83, 95, 95, 255]);
@@ -818,10 +1034,18 @@ impl Panel {
         let query = format!("{}  {query_text}", skin.choose("查询", "Query"));
         skin.text(text, &query, 0, [left, y + 47.], text_width, query_color);
         let help = skin.choose(
-            "回车查询 · 地图选择 · 滚轮查看 · 左右键切换 · F7 关闭",
-            "Enter to query · Select on map · Scroll · Left/Right sections · F7 to close",
+            "左击地点或地区 · 右击国家 · F7 关闭",
+            "Left click city/region · Right click country · F7 close",
         );
-        skin.text(text, help, 0, [left, y + 75.], text_width, MUTED);
+        let tab_width = (w - 30.) / PAGES.len() as f32;
+        for (index, (page, zh, en)) in PAGES.iter().enumerate() {
+            let x = x + 15. + index as f32 * tab_width;
+            if self.page == *page {
+                background.rect(x, y + 75., tab_width - 1., 22., [54, 68, 74, 255]);
+            }
+            skin.text(text, skin.choose(zh, en), 0, [x + 4., y + 75.], tab_width - 6.,
+                if self.page == *page { GOLD } else { MUTED });
+        }
         let visible = ((h - BODY_TOP - FOOTER_HEIGHT) / ROW_HEIGHT)
             .floor()
             .max(0.) as usize;
@@ -855,16 +1079,7 @@ impl Panel {
             background.rect(x + w - 11., y + BODY_TOP, 3., track, [54, 68, 74, 255]);
             background.rect(x + w - 11., y + BODY_TOP + offset, 3., thumb, GOLD);
         }
-        if !layout.lines.is_empty() {
-            skin.text(
-                text,
-                &format!("{}–{} / {}", first + 1, last, layout.lines.len()),
-                0,
-                [left, y + h - 27.],
-                text_width,
-                MUTED,
-            );
-        }
+        skin.text(text, help, 0, [left, y + h - 27.], text_width, MUTED);
     }
 
     fn layout(&self, skin: &Skin, width: f32) -> Layout {
@@ -936,12 +1151,12 @@ fn romanize_russian(text: &str) -> std::borrow::Cow<'_, str> {
     result.into()
 }
 
-fn bounds([width, height]: [u32; 2]) -> [f32; 4] {
+pub(crate) fn bounds([width, height]: [u32; 2]) -> [f32; 4] {
     let (width, height) = (width as f32, height as f32);
     let w = if width >= 900. {
-        (width * 0.62).min(860.)
+        (width * 0.38).clamp(435., 620.)
     } else {
-        (width - 32.).max(0.)
+        (width * 0.66).min(width - 16.).max(0.)
     };
     let h = (height - 90.).clamp(0., 805.);
     [(width - w - 16.).max(0.), (height - h) / 2. + 16., w, h]

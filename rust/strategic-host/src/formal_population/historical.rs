@@ -151,6 +151,8 @@ impl PopulationCatalogue {
         let dated_units = linked_units(&archive.geographies, "historical_observation_ids");
         let research_units = linked_units(&archive.geographies, "study_candidates");
         let city_key = unit.strip_prefix("city:").or_else(|| {
+            archive.geographies.iter().find_map(|row| row["city_key"].as_str())
+        }).or_else(|| {
             if unit.starts_with("place:") && dated_units.len() == 1 { dated_units.first().copied() } else { None }
         });
         let city_reference = city_key.map(|key| self.city(key)).transpose()?.flatten();

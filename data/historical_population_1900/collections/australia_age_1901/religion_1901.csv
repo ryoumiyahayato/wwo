@@ -1,0 +1,7 @@
+unit_id,colony_census_total,separately_counted_unrecorded,anglican,presbyterian,methodist,catholic,jewish,buddhist,scope
+abs_new_south_wales,1359133,4287,623131,132617,137653,347117,6447,3630,"New South Wales. The all-resident control from Table 9 reconciles with the Table 8 religion classes. The footnoted 4,287 Aboriginal people whose religions were not recorded are outside the ABS-compatible denominator."
+abs_victoria,1201341,0,424011,191503,181629,260016,5907,1418,"Victoria. The Table 8 total is used. No separate comparable Aboriginal denomination counts are assigned."
+abs_queensland,523266,20000,185023,57615,46556,120663,733,1750,"Queensland. The Table 9 count plus the footnoted 20,000 people separately estimated with religion unrecorded is the Table 8 denominator. The footnoted addition is excluded from the opening shares."
+abs_south_australia,389727,27123,106987,18357,90126,52193,786,3190,"South Australia including the Northern Territory. The 27,123 Aboriginal residents explicitly included without religion returns are excluded from the opening shares."
+abs_western_australia,189385,0,75706,14708,24542,40768,1259,761,"Western Australia. The Table 8 total is used. No separate comparable Aboriginal denomination counts are assigned."
+abs_tasmania,172475,0,83812,11523,24999,30314,107,353,"Tasmania. The Table 8 total is used."

@@ -17,6 +17,12 @@
 
 1916 年政府重印将 Algué 估值归于基督教人口序列。见 [Population of the Philippine Islands in 1916，Previous Censuses and Estimates](https://upload.wikimedia.org/wikipedia/commons/6/62/Population_of_the_Philippine_islands_in_1916_%28poblaci%C3%B3n_de_las_islas_Filipinas_en_1916%29_%28IA_afp8308.0001.001.umich.edu%29.pdf)。
 
+## v42 地域分配
+
+沿用 6,961,339 人的群岛控制。1900 年地图册的六个省合计 1,746,237 人，作为开局估计从未定位余额划出。安蒂克 114,483 人，八打雁 312,192 人，保和 248,000 人，宿务省 504,076 人，莱特 270,491 人，西内格罗斯 296,995 人。地图册没有公布各省的登记日和覆盖定义。1901 年条文用于核对省域延续。地图册对宿务、保和和莱特的邻岛列各有自己的口径。1903 年普查保留原日期与地域，供比较。[1900 年地图册印页 4–5](https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~34713~1180326%3AStatistics-and-Description--Atlas-o) · [省域对照](geography_crosswalk.csv)
+
+苏里高 89,691 人的早期开局分区继续独立保留。群岛余额为 5,125,411 人。首都与同名城市的范围另查。各省可在 F7 按统计 ID 查询。省的地图边界尚未接入。
+
 ## 1903 年普查
 
 已有 `collections/philippines` 保存 1903-03-02 全国、军区和省级观测。全国 7,635,426 人由 6,987,686 个主表登记者和 647,740 个单列村级回报或补估组成。年龄细表覆盖主表。两期地理对应只支持比较。开局至普查日之间的出生、死亡、迁入迁出缺少同范围资料。1903 年龄保留原期。见 [1903 普查卷二，表 1、14、17–18](https://www2.census.gov/library/publications/decennial/island-areas/1903/1903-census-phillipine-islands-vol2.pdf)。

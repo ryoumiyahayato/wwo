@@ -578,10 +578,10 @@
     "research_candidates": [
       "ft_denmark"
     ],
-    "opening_replacement": null,
+    "opening_replacement": 2422217,
     "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "replacement_minus_legacy": -27783,
+    "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {
