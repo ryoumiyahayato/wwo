@@ -2,6 +2,7 @@ mod demography;
 mod historical;
 pub mod historical_food;
 pub mod households;
+mod profiles;
 mod inspection;
 pub mod living_conditions;
 mod native;

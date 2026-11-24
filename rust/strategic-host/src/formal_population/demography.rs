@@ -8,7 +8,7 @@ use super::{
 };
 use crate::{formal_clock::GameClock, formal_save::invalid};
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeSet, io, sync::Arc};
+use std::{collections::{BTreeMap, BTreeSet}, io, sync::Arc};
 
 const OPENING_YEAR: i64 = 1900;
 
@@ -24,7 +24,7 @@ struct Manifest {
     groups: Vec<SourceGroup>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct SourceGroup {
     unit_id: String,
@@ -43,7 +43,7 @@ struct SourceGroup {
     bands: Vec<Band>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Band {
     id: String,
@@ -101,7 +101,7 @@ impl SourceCell {
 
 impl OpeningDemography {
     pub(super) fn load(opening: &super::HistoricalOpening, bytes: &[u8]) -> io::Result<Self> {
-        let manifest: Manifest = serde_json::from_slice(bytes)?;
+        let mut manifest: Manifest = serde_json::from_slice(bytes)?;
         if manifest.version != 1 {
             return Err(invalid("unsupported historical opening demography"));
         }
@@ -110,7 +110,7 @@ impl OpeningDemography {
             let unit = &group.unit_id;
             let covered = opening.statistical_aggregates.get(unit)
                 .map_or(std::slice::from_ref(unit), |scope| scope.members.as_slice());
-            if covered.iter().any(|pool| !pools.insert(pool))
+            if covered.iter().any(|pool| !pools.insert(pool.as_str()))
                 || opening.estimate(unit).map(|row| row.population_value) != Some(group.opening_total)
                 || group.unclassified_opening_residents >= group.opening_total
                 || opening.partitions.values().any(|part| part.parent == *unit)
@@ -120,6 +120,31 @@ impl OpeningDemography {
                 return Err(invalid(format!("invalid historical demography source for {unit}")));
             }
             validate_bands(group)?;
+        }
+        if opening.version() >= 44 {
+            let sources: BTreeMap<_, _> = manifest.groups.iter().filter(|group| !group.sex_only)
+                .map(|group| (group.unit_id.as_str(), group)).collect();
+            let parents: BTreeSet<_> = opening.partitions.values().map(|part| part.parent.as_str()).collect();
+            let modelled: Vec<_> = opening.estimates.iter().filter_map(|(id, estimate)| {
+                if pools.contains(id.as_str()) || parents.contains(id.as_str())
+                    || opening.statistical_aggregates.contains_key(id) {
+                    return None;
+                }
+                let part = opening.partitions.get(id);
+                let root = part.map_or(id.as_str(), |part| part.parent.as_str());
+                let profile = super::profiles::Region::at(root, id);
+                let source = sources.get(profile.age_analogue(part.is_some_and(|part| part.urban_municipality))?)?;
+                let mut group = (*source).clone();
+                group.unit_id.clone_from(id);
+                group.opening_total = estimate.population_value;
+                let known = source.opening_total - source.unclassified_opening_residents;
+                group.unclassified_opening_residents = (u128::from(estimate.population_value)
+                    * u128::from(source.opening_total - known) / u128::from(source.opening_total)) as u64;
+                group.method = "regional_age_sex_analogue_v44".into();
+                group.uncertainty = "Age and sex shares estimated from the cited comparable census or survey; no local joint observation.".into();
+                Some(group)
+            }).collect();
+            manifest.groups.extend(modelled);
         }
         Ok(Self { groups: manifest.groups.into_iter().map(Arc::new).collect() })
     }

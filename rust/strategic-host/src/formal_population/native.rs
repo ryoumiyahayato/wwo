@@ -62,6 +62,7 @@ pub struct RecordedPopulationDay {
     pub deaths: u64,
     pub immigration: u64,
     pub emigration: u64,
+    pub journal_covers_day: bool,
 }
 
 impl RecordedPopulationDay {
@@ -83,14 +84,16 @@ impl Population {
         let today = clock.current_day();
         let earliest = (today + 1 - days.clamp(1, 31)).max(0);
         // The pre-journal migration has no dates. Keep the series within the journal period.
-        let first = if self.has_migrated_population_baseline() {
-            self.history.journal.first().map_or(today, |event| event.minute / MINUTES_PER_DAY).max(earliest)
-        } else { earliest };
+        let partial = self.has_migrated_population_baseline().then(|| {
+            self.history.journal.first().map_or(today, |event| event.minute / MINUTES_PER_DAY)
+        });
+        let first = earliest.max(partial.unwrap_or(0));
         let mut rows: Vec<_> = (first..=today).map(|day| {
             let mut date = GameClock::default();
             date.advance_minutes(day * MINUTES_PER_DAY).expect("current ledger day");
             RecordedPopulationDay { date: date.current_date(), population: None,
-                births: 0, deaths: 0, immigration: 0, emigration: 0 }
+                births: 0, deaths: 0, immigration: 0, emigration: 0,
+                journal_covers_day: partial.is_none_or(|partial| day > partial) }
         }).collect();
         let in_scope = |place: &str| unit.is_none_or(|scope| self.pool_in_scope(place, scope));
         for (index, event) in self.history.journal.iter().enumerate().rev() {

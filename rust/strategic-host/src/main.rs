@@ -1503,13 +1503,18 @@ impl Host {
                         pop_debug_ui::Page::Structure | pop_debug_ui::Page::Needs))
                         .then(|| population.social_distribution(report.account_id)).flatten();
                     let needs = (panel.page == pop_debug_ui::Page::Needs)
-                        .then(|| world.population_household_needs(&report)).flatten();
+                        .then(|| world.population_household_needs_with_social(&report, social.as_ref())).flatten();
+                    let labour = (panel.page == pop_debug_ui::Page::Structure).then(|| {
+                        report.structure.as_ref().map(|structure| {
+                            population.labor_supply(report.account_id, structure, social.as_ref())
+                        })
+                    }).flatten();
                     let days = if panel.page == pop_debug_ui::Page::Changes && report.population_total.is_some() {
                         population.recorded_population_days(report.account_id, clock, 14)
                     } else {
                         Vec::new()
                     };
-                    panel.set_report(&report, social.as_ref(), needs.as_ref(), world.macro_economy(), days);
+                    panel.set_report(&report, social.as_ref(), needs.as_ref(), labour.as_ref(), world.macro_economy(), days);
                 }
                 Err(_) => panel.set_error(),
             }
