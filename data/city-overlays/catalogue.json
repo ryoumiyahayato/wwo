@@ -929,10 +929,638 @@
       "cover": false,
       "city": true,
       "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-0-0.wcm",
+      "level": 3,
+      "core": [
+        1.78,
+        49.01,
+        2.0020000000000002,
+        49.15
+      ],
+      "bounds": [
+        1.775375,
+        49.007083333333334,
+        2.006625,
+        49.15291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-1-0.wcm",
+      "level": 3,
+      "core": [
+        2.0020000000000002,
+        49.01,
+        2.224,
+        49.15
+      ],
+      "bounds": [
+        1.9973750000000001,
+        49.007083333333334,
+        2.228625,
+        49.15291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-2-0.wcm",
+      "level": 3,
+      "core": [
+        2.224,
+        49.01,
+        2.446,
+        49.15
+      ],
+      "bounds": [
+        2.2193750000000003,
+        49.007083333333334,
+        2.450625,
+        49.15291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-3-0.wcm",
+      "level": 3,
+      "core": [
+        2.446,
+        49.01,
+        2.668,
+        49.15
+      ],
+      "bounds": [
+        2.4413750000000003,
+        49.007083333333334,
+        2.672625,
+        49.15291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-4-0.wcm",
+      "level": 3,
+      "core": [
+        2.668,
+        49.01,
+        2.89,
+        49.15
+      ],
+      "bounds": [
+        2.6633750000000003,
+        49.007083333333334,
+        2.894625,
+        49.15291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-0-1.wcm",
+      "level": 3,
+      "core": [
+        1.78,
+        48.87,
+        2.0020000000000002,
+        49.01
+      ],
+      "bounds": [
+        1.775375,
+        48.86708333333333,
+        2.006625,
+        49.01291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-1-1.wcm",
+      "level": 3,
+      "core": [
+        2.0020000000000002,
+        48.87,
+        2.224,
+        49.01
+      ],
+      "bounds": [
+        1.9973750000000001,
+        48.86708333333333,
+        2.228625,
+        49.01291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-2-1.wcm",
+      "level": 3,
+      "core": [
+        2.224,
+        48.87,
+        2.446,
+        49.01
+      ],
+      "bounds": [
+        2.2193750000000003,
+        48.86708333333333,
+        2.450625,
+        49.01291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-3-1.wcm",
+      "level": 3,
+      "core": [
+        2.446,
+        48.87,
+        2.668,
+        49.01
+      ],
+      "bounds": [
+        2.4413750000000003,
+        48.86708333333333,
+        2.672625,
+        49.01291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-4-1.wcm",
+      "level": 3,
+      "core": [
+        2.668,
+        48.87,
+        2.89,
+        49.01
+      ],
+      "bounds": [
+        2.6633750000000003,
+        48.86708333333333,
+        2.894625,
+        49.01291666666666
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-0-2.wcm",
+      "level": 3,
+      "core": [
+        1.78,
+        48.730000000000004,
+        2.0020000000000002,
+        48.870000000000005
+      ],
+      "bounds": [
+        1.775375,
+        48.72708333333334,
+        2.006625,
+        48.87291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-1-2.wcm",
+      "level": 3,
+      "core": [
+        2.0020000000000002,
+        48.730000000000004,
+        2.224,
+        48.870000000000005
+      ],
+      "bounds": [
+        1.9973750000000001,
+        48.72708333333334,
+        2.228625,
+        48.87291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-2-2.wcm",
+      "level": 3,
+      "core": [
+        2.224,
+        48.730000000000004,
+        2.446,
+        48.870000000000005
+      ],
+      "bounds": [
+        2.2193750000000003,
+        48.72708333333334,
+        2.450625,
+        48.87291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-3-2.wcm",
+      "level": 3,
+      "core": [
+        2.446,
+        48.730000000000004,
+        2.668,
+        48.870000000000005
+      ],
+      "bounds": [
+        2.4413750000000003,
+        48.72708333333334,
+        2.672625,
+        48.87291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-4-2.wcm",
+      "level": 3,
+      "core": [
+        2.668,
+        48.730000000000004,
+        2.89,
+        48.870000000000005
+      ],
+      "bounds": [
+        2.6633750000000003,
+        48.72708333333334,
+        2.894625,
+        48.87291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-0-3.wcm",
+      "level": 3,
+      "core": [
+        1.78,
+        48.59,
+        2.0020000000000002,
+        48.730000000000004
+      ],
+      "bounds": [
+        1.775375,
+        48.58708333333334,
+        2.006625,
+        48.73291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-1-3.wcm",
+      "level": 3,
+      "core": [
+        2.0020000000000002,
+        48.59,
+        2.224,
+        48.730000000000004
+      ],
+      "bounds": [
+        1.9973750000000001,
+        48.58708333333334,
+        2.228625,
+        48.73291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-2-3.wcm",
+      "level": 3,
+      "core": [
+        2.224,
+        48.59,
+        2.446,
+        48.730000000000004
+      ],
+      "bounds": [
+        2.2193750000000003,
+        48.58708333333334,
+        2.450625,
+        48.73291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-3-3.wcm",
+      "level": 3,
+      "core": [
+        2.446,
+        48.59,
+        2.668,
+        48.730000000000004
+      ],
+      "bounds": [
+        2.4413750000000003,
+        48.58708333333334,
+        2.672625,
+        48.73291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
+    },
+    {
+      "path": "paris-ipr-1900-4-3.wcm",
+      "level": 3,
+      "core": [
+        2.668,
+        48.59,
+        2.89,
+        48.730000000000004
+      ],
+      "bounds": [
+        2.6633750000000003,
+        48.58708333333334,
+        2.894625,
+        48.73291666666667
+      ],
+      "group": [
+        1.78,
+        48.59,
+        2.89,
+        49.15
+      ],
+      "source": "Institut Paris Region / Carte de France vers 1900",
+      "size": [
+        400,
+        400
+      ],
+      "cover": false,
+      "city": true,
+      "city_area": true,
+      "ids": false
     }
   ],
   "source": "https://doi.org/10.5281/zenodo.19497435",
   "creator": "Rémi Petitpierre, Isabella di Lenardo, Polly Hudson, Hendrik Herold, Katherine McDonough, Beatrice Vaienti, Robert Hecht and Christopher Fleet",
   "license": "CC-BY-4.0",
-  "processing": "Building footprints rasterized to coverage. No road or bridge geometry is inferred."
+  "processing": "Building footprints rasterized to coverage. No road or bridge geometry is inferred.",
+  "paris_1900": {
+    "creator": "Institut Paris Region",
+    "land_use": "https://data.iledefrance.fr/explore/dataset/occupation-du-sol-en-5-postes-vers-1900-carte-de-france-type-1900-dile-de-franc1/",
+    "roads": "https://data.iledefrance.fr/explore/dataset/reseau-routier-vers-1900-carte-de-france-type-1900-dile-de-france1/",
+    "license": "Licence Ouverte",
+    "scale": "1:50000",
+    "processing": "Rasterized urban area class and published road centre lines. Line width is a display style."
+  }
 }

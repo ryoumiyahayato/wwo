@@ -243,7 +243,7 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 | 菜单与画作 | 原有菜单、图集和字体继续使用。主题管理读 `data/menu-themes/catalogue.json`，一次载入一张作品并将模式和最近作品保存到现有界面配置。 |
 | 迁移状态、旧主题说明及首页兼容提示 | 从玩家界面移除。R68 源码由 `archive/godot-r68-source-20261120` 归档保留。 |
 
-伦敦瓦片由 `tools/build_london_city_ground.py` 从已有 GeoPackage 整理。数据版本、作者及许可见 [城市分片清单](../../data/city-overlays/catalogue.json)。画作来源与许可见 [主题清单](../../data/menu-themes/catalogue.json)。
+伦敦瓦片由 `tools/build_london_city_ground.py` 从已有 GeoPackage 整理。巴黎及周边建成区与道路由 `tools/build_paris_city_ground.py` 从 Institut Paris Region 的约 1900 年、1∶50,000 资料整理。巴黎瓦片的建成区通道表示总体覆盖范围，道路笔画表示资料中的路线。数据版本、作者及许可见 [城市分片清单](../../data/city-overlays/catalogue.json)。画作来源与许可见 [主题清单](../../data/menu-themes/catalogue.json)。
 
 格陵兰和南极的接地冰川、浮冰架、季节性海冰与水域需要结合现有 QWG、QHW 和高程资料单独核对。本阶段继续使用现有极地分片。
 

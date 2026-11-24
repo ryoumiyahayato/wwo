@@ -904,6 +904,19 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     if view.map_style.z>=6. {
         terrain=close_terrain(ll,mpp/max(.3,view.chart_origin.z),terrain);
     }
+    if tile.options.z>2.5 {
+        // This source maps generalized built-up areas and roads at 1:50,000.
+        let land=1.-terrain.a;
+        let browns=mix(vec3f(.54,.43,.34),vec3f(.62,.53,.43),buildings.r);
+        let ground=land*blocks*mix(.46,.86,smoothstep(24.,125.,mpp));
+        let survey_edge=smoothstep(480.,7200.,edge_distance);
+        let street=pow(buildings.g,.68)*(1.-smoothstep(90.,310.,mpp))*.92*survey_edge;
+        let top=mix(vec3f(.83,.75,.61),vec3f(.72,.67,.57),terrain.a);
+        let alpha=ground*(1.-street)+street;
+        let color=browns*ground*(1.-street)+top*street;
+        let support=smoothstep(0.,420.,edge_distance);
+        return vec4f(color/max(.0001,alpha),alpha*support);
+    }
     // The source masks supply the footprints. Land cover controls their contrast.
     var cover=vec2f(0.);
     var ready=0.;
