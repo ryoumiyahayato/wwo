@@ -963,6 +963,56 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
     }
     return color;
 }
+// Park masks use the covered fraction of each mip texel. The masks and the
+// near trees are generated together from the same paths and planting plan.
+fn park_mask_level(uv:vec2f,base:u32,side:u32,level:u32) -> vec4f {
+    let width=side>>level;
+    let start=base+4u*(side*side-width*width)/3u;
+    let point=clamp(uv*f32(width)-.5,vec2f(0.),vec2f(f32(width-1u)));
+    let low=vec2u(point);
+    let high=min(low+1u,vec2u(width-1u));
+    let row_start=start+low.y*width;
+    let row_end=start+high.y*width;
+    let t=fract(point);
+    let a=mix(unpack4x8unorm(city_water[row_start+low.x]),unpack4x8unorm(city_water[row_start+high.x]),t.x);
+    let b=mix(unpack4x8unorm(city_water[row_end+low.x]),unpack4x8unorm(city_water[row_end+high.x]),t.x);
+    return mix(a,b,t.y);
+}
+
+fn park_coverage(ll:vec2f,mpp:f32) -> vec4f {
+    if mpp>=42. {return vec4f(0.);}
+    let base=city_water[arrayLength(&city_water)-1u];
+    for (var site=0u;site<city_water[base];site+=1u) {
+        let header=base+1u+site*8u;
+        let center=vec2f(bitcast<f32>(city_water[header]),bitcast<f32>(city_water[header+1u]));
+        let scale=vec2f(bitcast<f32>(city_water[header+2u]),bitcast<f32>(city_water[header+3u]));
+        let uv=(ll-center)*scale+.5;
+        if any(uv<vec2f(0.)) || any(uv>=vec2f(1.)) {continue;}
+        let side=city_water[header+4u];
+        let first=base+city_water[header+5u];
+        let mip=max(0.,log2(mpp*.5));
+        let level=u32(mip);
+        var cover=park_mask_level(uv,first,side,level);
+        if fract(mip)>.001 {
+            cover=mix(cover,park_mask_level(uv,first,side,level+1u),fract(mip));
+        }
+        return cover*(1.-smoothstep(20.,42.,mpp));
+    }
+    return vec4f(0.);
+}
+
+fn park_ground(color:vec3f,ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec3f {
+    if (area&3u)>1u {return color;}
+    let cover=park_coverage(ll,mpp);
+    if cover.a<=.001 {return color;}
+    let turf=vec3f(.461,.525,.344)*(1.+material_grain(earth,mpp,GRASS,18.,5.)*.39);
+    let gravel=vec3f(.651,.611,.519)*(1.+material_grain(earth,mpp,GRAVEL,8.,4.)*.37);
+    let water=vec3f(.250,.359,.364);
+    let canopy=vec3f(.285,.393,.228);
+    let lawn=max(0.,cover.a-cover.g-cover.b-cover.r*.95);
+    return color*(1.-cover.a)+turf*lawn+gravel*cover.g+water*cover.b+canopy*cover.r*.95;
+}
+
 // City pages carry feature coverage. Let the QPK pass own the
 // continuous ground so loading a local page only reveals buildings and bridges.
 fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
@@ -1057,20 +1107,20 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
     let dry=1.-terrain.a;
     let court=vec3f(.602,.589,.550)*(1.+material_grain(earth,mpp,SETTS,13.,8.)*.38);
     if tile.options.z>4.5 {
-        // The inset mask is built-block shading. The exclusions and holes of
-        // the survey remain open. Meshes cover the roofs in the near view.
+        // Known gardens trump generalized block shading. The surveyed
+        // streets and the individual building meshes still draw above it.
         let coverage=buildings.r;
         let interior=clamp(buildings.g/max(.001,coverage),0.,1.);
         let middle=smoothstep(5.,17.,mpp);
         let roofs=mix(city_roof(true)*.94,city_roof(true)*1.15,interior);
         let surface=mix(court,roofs,middle);
-        let opacity=dry*coverage*mix(.48,.88,middle)*smoothstep(0.,200.,edge_distance);
+        let opacity=dry*coverage*mix(.48,.88,middle)*smoothstep(0.,200.,edge_distance)*(1.-park_coverage(ll,mpp).a);
         return vec4f(surface,opacity);
     }
     if tile.options.z>2.5 {
         // The generalized historical survey supplies the outer built area.
         let support=smoothstep(0.,420.,edge_distance);
-        let built=dry*buildings.r*mix(.17,.66,smoothstep(32.,155.,mpp));
+        let built=dry*buildings.r*mix(.17,.66,smoothstep(32.,155.,mpp))*(1.-park_coverage(ll,mpp).a);
         let street=buildings.g*.43*(1.-smoothstep(54.,163.,mpp))*smoothstep(480.,7200.,edge_distance);
         let surface=mix(court,city_roof(true)*1.23,smoothstep(14.,95.,mpp));
         let alpha=built*(1.-street)+street;
@@ -1268,6 +1318,9 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
     if city_on_natural {
         let ink=city_ink(ll,v,uv,mpp,edge_distance,area);
         color=mix(color,ink.rgb,ink.a);
+    }
+    if is_world || tile.options.z<.5 {
+        color=park_ground(color,ll,v,mpp,area);
     }
     if is_world {
         let street=city_street(ll,v,mpp,area);

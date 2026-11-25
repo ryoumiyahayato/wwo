@@ -731,7 +731,8 @@ fn landscape_fragment(input: LandscapeVertex) -> @location(0) vec4f {
     let strength = fine*input.lod*landscape_object_mask(page,input,sample);
     if strength <= .001 { discard; }
     let modern = 1.-landscape_survey_mask(input.site.xy,mpp);
-    let opacity = input.color.a*edge*modern*strength;
+    let park = park_coverage(input.site.xy,mpp).a;
+    let opacity = input.color.a*edge*modern*strength*(1.-park);
     if opacity <= .012 { discard; }
     return vec4f(input.color.rgb,opacity);
 }

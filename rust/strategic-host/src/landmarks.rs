@@ -173,7 +173,7 @@ impl FootprintModel {
 enum Lod { Single, Far, Near }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-enum ModelAsset { Landmark(usize), City(usize), CityPage(u64,usize), Transport(TransportModel, ModelLod) }
+enum ModelAsset { Landmark(usize), City(usize), CityPage(u64,usize), Park(usize), Transport(TransportModel, ModelLod) }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ModelKey { asset: ModelAsset, lod: Lod }
@@ -191,6 +191,7 @@ impl ModelKey {
             ModelAsset::Landmark(asset) => ASSETS[asset].name,
             ModelAsset::City(module) => R40_MODULES[module],
             ModelAsset::CityPage(..) => "City block page",
+            ModelAsset::Park(_) => "Park trees",
             ModelAsset::Transport(model, _) => model.id(),
         }
     }
@@ -201,6 +202,9 @@ impl ModelKey {
     }
     pub(crate) fn city_detail(module:usize)->Self {
         Self {asset:ModelAsset::City(module),lod:Lod::Near}
+    }
+    pub(crate) fn park(site:usize)->Self {
+        Self {asset:ModelAsset::Park(site),lod:Lod::Single}
     }
     pub fn is_transport(self) -> bool { matches!(self.asset, ModelAsset::Transport(..)) }
     pub fn clips_at_waterline(self) -> bool {
@@ -342,6 +346,7 @@ impl Landmarks {
                 visible.extend([high,low]);
             }
         }
+        visible.extend(crate::city_parks::visible(camera, size));
         visible
     }
 
@@ -531,6 +536,7 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
         ModelAsset::Landmark(asset) => ASSETS[asset].bytes,
         ModelAsset::City(_) => city_override.unwrap_or(R40_MODELS),
         ModelAsset::CityPage(..) => return Err(io::Error::other("City page mesh was not loaded")),
+        ModelAsset::Park(site) => return Ok(crate::city_parks::mesh(site)),
         ModelAsset::Transport(model, lod) => {
             let mesh = transport_models::decode(model, lod)?;
             return Ok(ModelMesh {
@@ -555,7 +561,7 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
         ModelAsset::City(module) => {
             append(city_node(&glb, module, key.lod)?, Mat4::IDENTITY, blob, key.lod, &mut model)?;
         }
-        ModelAsset::Transport(..) | ModelAsset::CityPage(..) => unreachable!(),
+        ModelAsset::Transport(..) | ModelAsset::CityPage(..) | ModelAsset::Park(_) => unreachable!(),
     }
     if model.indices.is_empty() {
         return Err(io::Error::other(format!("{} has no static triangles", key.model())));

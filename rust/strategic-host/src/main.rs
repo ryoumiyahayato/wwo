@@ -3,6 +3,7 @@ mod mechanical;
 mod build_identity;
 mod camera;
 mod city_models;
+mod city_parks;
 #[cfg(windows)]
 mod desktop_start;
 #[cfg(windows)]

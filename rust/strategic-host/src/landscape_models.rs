@@ -35,6 +35,30 @@ fn face(mesh: &mut Mesh, points: [Vec3; 3], edge: [f32; 3], tone: f32) {
 
 const GROVES: usize = 7;
 const TREES_PER_GROVE: usize = 4;
+const BROADLEAF: [(f32, f32); 10] = [
+    (1., 0.),
+    (0.64, 0.34),
+    (0.39, 0.95),
+    (-0.25, 0.85),
+    (-0.81, 0.63),
+    (-0.9, 0.02),
+    (-0.87, -0.64),
+    (-0.24, -0.78),
+    (0.37, -0.93),
+    (0.60, -0.45),
+];
+
+pub(crate) fn park_tree() -> (Vec<([f32; 3], [f32; 3], f32)>, Vec<u16>) {
+    let mut mesh = Mesh::default();
+    volume(&mut mesh, &BROADLEAF, 1., false, true);
+    trunk(&mut mesh, 1.);
+    let vertices = mesh.vertices.into_iter().map(|v| {
+        let [x, y, z] = v.offset;
+        let [nx, ny, nz] = v.normal;
+        ([x, z, -y], [nx, nz, -ny], v.tone)
+    }).collect();
+    (vertices, mesh.indices)
+}
 
 fn stand(outline: &[(f32, f32)], group: &Mesh, conifer: bool) -> Mesh {
     // Keep the stand first so the indirect draw can omit subpixel crowns.
@@ -160,18 +184,7 @@ fn crown(
 }
 
 pub fn meshes() -> ([Mesh; 3], u32) {
-    let lobed = [
-        (1., 0.),
-        (0.64, 0.34),
-        (0.39, 0.95),
-        (-0.25, 0.85),
-        (-0.81, 0.63),
-        (-0.9, 0.02),
-        (-0.87, -0.64),
-        (-0.24, -0.78),
-        (0.37, -0.93),
-        (0.60, -0.45),
-    ];
+    let lobed = BROADLEAF;
     let needles = [
         (1., 0.),
         (0.43, 0.32),
