@@ -131,9 +131,11 @@ impl Host {
         self.country_click=None;
         self.feedback.clear();
         match action {
-            Action::PlaceFilter(filter)=>{
-                if self.hud.place_filter != filter { self.select(None); }
-                self.hud.place_filter=filter;
+            Action::PlaceFilter(mode,filter)=>{
+                if self.mode==mode && self.hud.place_filter(mode)!=filter {
+                    self.select(None);
+                    self.hud.place_filters[mode.index() as usize]=filter;
+                }
             }
             Action::Mode(mode)=>{
                 if self.hud.page==HudPage::Market{self.market_command("close",0);}
@@ -144,6 +146,7 @@ impl Host {
                 }
                 self.mode=mode;
                 if self.hud.page!=HudPage::Travel {self.hud.page=HudPage::Map;}
+                self.hud.place_filters_open=None;
                 self.hud.menu=HudMenu::None;
                 self.emit(Request::SetMapMode{mode:mode.key()});
             }
@@ -292,7 +295,7 @@ impl Host {
         let in_menu=self.hud.menu!=HudMenu::None&&contains(formal_ui::menu_rect(&self.hud,self.size));
         if self.hud.menu==HudMenu::MapModes&&in_menu {
             if let Some(hit)=self.hits.iter().rev().find(|hit|matches!(hit.action,
-                Action::Mode(_)|Action::PlaceFilter(_)|Action::Hud(HudCommand::PlaceFilters))
+                Action::Mode(_)|Action::PlaceFilter(_,_)|Action::Hud(HudCommand::PlaceFilters(_)))
                 &&contains(hit.area)) {
                 self.action(hit.action);
             }

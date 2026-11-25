@@ -857,7 +857,7 @@ impl Host {
             if self.transport_scene.is_none() {
                 self.transport_scene=Some(transport_scene::TransportScene::new(world.transport())?);
             }
-            self.transport_scene.as_mut().unwrap().update_map(&self.camera,self.size,&date,self.mode,self.hud.place_filter,world,
+            self.transport_scene.as_mut().unwrap().update_map(&self.camera,self.size,&date,self.mode,self.hud.place_filter(self.mode),world,
                 self.transport_selection.as_ref(), transport_route, planning_transport)?;
         }
         let show_transport_detail=self.transport_detail_visible();

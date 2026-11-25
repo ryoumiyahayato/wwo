@@ -723,14 +723,14 @@ impl TransportScene {
                             continue;
                         }
                         let port = terminal.kind == NodeKind::Port;
-                        if mode == Mode::Political && !picking
-                            && !matches!(place_filter, PlaceFilter::Overview | PlaceFilter::Transport) { continue; }
+                        if !picking && !matches!(place_filter, PlaceFilter::Overview | PlaceFilter::Transport) {
+                            continue;
+                        }
                         let destination = picking && (port || terminal.kind == NodeKind::City && camera.mpp <= camera::ENTER)
                             && world.can_book_transport_to(&terminal.id);
                         let context = destination || match mode {
                             Mode::Geographic => water || camera.mpp <= camera::ENTER,
-                            Mode::Political => international || status.is_some() || port && camera.mpp <= 1200.
-                                || place_filter == PlaceFilter::Transport && camera.mpp <= camera::ENTER,
+                            Mode::Political => international || status.is_some() || port && camera.mpp <= 1200.,
                             Mode::Economic => water || camera.mpp <= camera::ENTER,
                             Mode::Military => has_civil_capacity && (water || camera.mpp <= camera::ENTER),
                         };

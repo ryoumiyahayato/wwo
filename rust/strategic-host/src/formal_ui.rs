@@ -353,8 +353,8 @@ pub enum Tech {#[default] Capacity,Chronicle,Public}
 #[derive(Default)]
 pub struct Hud {
     pub page:Page,pub menu:Menu,pub messages:bool,pub message_offset:usize,pub tech:Tech,pub milestone:usize,
-    pub place_filter:crate::map_facilities::PlaceFilter,
-    pub place_filters_open:bool,
+    pub place_filters:[PlaceFilter;4],
+    pub place_filters_open:Option<Mode>,
     pub place_filter_offset:usize,
     pub clock_origin:Option<[f64;2]>,
     pub mechanical:crate::mechanical::Mechanical,
@@ -370,9 +370,14 @@ pub struct Hud {
     pub transport_lots_open: bool,
     pub volume:u8,pub english:bool,pub volume_drag:bool,
 }
+impl Hud {
+    pub fn place_filter(&self,mode:Mode)->PlaceFilter {
+        self.place_filters[mode.index() as usize]
+    }
+}
 #[derive(Clone,Copy)]
 pub enum Command {
-    Page(Page),Menu(Menu),PlaceFilters,PlaceFilterScroll(i32),Messages,MessageScroll(i32),Technology(Tech),Milestone(usize),
+    Page(Page),Menu(Menu),PlaceFilters(Mode),PlaceFilterScroll(i32),Messages,MessageScroll(i32),Technology(Tech),Milestone(usize),
     FinancePage(usize),Clock(u32),Player,LocatePlayer,PlayerCountry,Slot(u8),ConfirmSlot(u8),MessageLink(usize),
     Labels,Fullscreen,MilitaryGrid,Quit,PlayerMarker,Volume(u8),Language(bool),
     Market(&'static str,usize),MarketScroll(i32),
@@ -1310,24 +1315,18 @@ impl Display<'_> {
     }
 
     fn map_modes(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,[x,y,width,_]:[f32;4]) {
-        let options=[
-            (self.skin.choose("政治地图","Political"),Mode::Political),
-            (self.skin.choose("经济地图","Economic"),Mode::Economic),
-            (self.skin.choose("军事地图","Military"),Mode::Military),
-        ];
         let mut top=y+37.;
-        for (label,mode) in options {
+        for (mode,zh,en) in MAP_MODE_ROWS {
+            let label=self.skin.choose(zh,en);
             let active=self.mode==mode;
             let target=if active{Mode::Geographic}else{mode};
             self.row(m,t,hits,[x+13.,top,width-26.,27.],label,Some(Action::Mode(target)),active);
-            if mode!=Mode::Political {
-                top+=32.;
-                continue;
-            }
             let right=x+width-13.;
-            let open=self.hud.place_filters_open;
-            if active && self.hud.place_filter!=PlaceFilter::Overview {
-                if let Some(&(_,zh,en))=PLACE_FILTERS.iter().find(|(filter,_,_)|*filter==self.hud.place_filter) {
+            let open=self.hud.place_filters_open==Some(mode);
+            let filter=self.hud.place_filter(mode);
+            let filters=place_filters(mode);
+            if filter!=PlaceFilter::Overview {
+                if let Some(&(_,zh,en))=filters.iter().find(|(choice,_,_)|*choice==filter) {
                     let selected=self.skin.choose(zh,en);
                     let span=self.skin.width(selected,0).min(150.);
                     self.skin.text(t,selected,0,[right-40.-span,top+4.],span+1.,MUTED);
@@ -1338,17 +1337,17 @@ impl Display<'_> {
             m.line([right-31.,top+4.],[right-31.,top+23.],1.,RIM);
             m.line([cx-4.5,cy-2.*direction],[cx,cy+2.5*direction],1.5,IVORY);
             m.line([cx,cy+2.5*direction],[cx+4.5,cy-2.*direction],1.5,IVORY);
-            Self::hit(hits,[right-31.,top,31.,27.],Command::PlaceFilters);
-            top+=32.;
+            Self::hit(hits,[right-31.,top,31.,27.],Command::PlaceFilters(mode));
+            top+=MAP_MODE_ROW;
             if open {
-                let (drawer,visible)=place_filter_drawer(self.size);
-                let offset=self.hud.place_filter_offset.min(PLACE_FILTERS.len()-visible);
+                let (drawer,visible)=place_filter_drawer(self.size,mode);
+                let offset=self.hud.place_filter_offset.min(filters.len()-visible);
                 let [left,drawer_top,span,_]=drawer;
-                let scrollbar=drawer_scrollbar(drawer,visible,PLACE_FILTERS.len(),offset);
+                let scrollbar=drawer_scrollbar(drawer,visible,filters.len(),offset);
                 let row_width=span-if scrollbar.is_some(){20.}else{0.};
-                for (i,&(filter,zh,en)) in PLACE_FILTERS.iter().skip(offset).take(visible).enumerate() {
+                for (i,&(choice,zh,en)) in filters.iter().skip(offset).take(visible).enumerate() {
                     self.row(m,t,hits,[left,drawer_top+i as f32*PLACE_FILTER_ROW,row_width,24.],
-                        self.skin.choose(zh,en),Some(Action::PlaceFilter(filter)),filter==self.hud.place_filter);
+                        self.skin.choose(zh,en),Some(Action::PlaceFilter(mode,choice)),choice==filter);
                 }
                 if let Some((track,thumb))=scrollbar {
                     m.rect(track[0],track[1],track[2],track[3],[34,42,46,255]);
@@ -1507,39 +1506,62 @@ pub fn menu_rect(hud:&Hud,size:[u32;2])->[f32;4]{
 fn globe_radius(width:f32)->f32 {
     (width*0.056).clamp(52.,78.)
 }
-pub fn map_modes_rect(size:[u32;2],expanded:bool)->[f32;4] {
+fn map_modes_rect(size:[u32;2],expanded:Option<Mode>)->[f32;4] {
     let [w,h]=size.map(|value|value as f32);
-    let height=MAP_MODES_HEIGHT+if expanded{place_filter_height(place_filter_rows(size))}else{0.};
+    let height=MAP_MODES_HEIGHT+expanded.map_or(0.,|mode|place_filter_height(place_filter_rows(size,mode)));
     [w*0.5-165.,h-globe_radius(w)-21.-height,330.,height]
 }
 const MAP_MODES_HEIGHT:f32=141.;
+const MAP_MODE_ROW:f32=32.;
 const PLACE_FILTER_ROW:f32=28.;
+const MAP_MODE_ROWS:[(Mode,&str,&str);3]=[
+    (Mode::Political,"政治地图","Political"),
+    (Mode::Economic,"经济地图","Economic"),
+    (Mode::Military,"军事地图","Military"),
+];
 use crate::map_facilities::PlaceFilter;
-pub const PLACE_FILTERS:[(PlaceFilter,&str,&str);8]=[
-    (PlaceFilter::Overview,"全部地点","All places"),
+const OVERVIEW:(PlaceFilter,&str,&str)=(PlaceFilter::Overview,"全部地点","All places");
+const POLITICAL_FILTERS:[(PlaceFilter,&str,&str);4]=[
+    OVERVIEW,
     (PlaceFilter::Settlements,"行政与聚落","Administration"),
     (PlaceFilter::Heritage,"历史文化","Heritage"),
+    (PlaceFilter::Government,"政府建筑","Government buildings"),
+];
+const ECONOMIC_FILTERS:[(PlaceFilter,&str,&str);4]=[
+    OVERVIEW,
     (PlaceFilter::Transport,"交通设施","Transport sites"),
     (PlaceFilter::Economy,"工业与矿业","Industry & mining"),
-    (PlaceFilter::Government,"政府建筑","Government buildings"),
-    (PlaceFilter::Military,"军事设施","Military sites"),
     (PlaceFilter::Aviation,"航空设施","Aviation"),
 ];
+const MILITARY_FILTERS:[(PlaceFilter,&str,&str);2]=[
+    OVERVIEW,
+    (PlaceFilter::Military,"军事设施","Military sites"),
+];
 
-fn place_filter_rows(size:[u32;2])->usize {
+pub fn place_filters(mode:Mode)->&'static [(PlaceFilter,&'static str,&'static str)] {
+    match mode {
+        Mode::Political=>&POLITICAL_FILTERS,
+        Mode::Economic=>&ECONOMIC_FILTERS,
+        Mode::Military=>&MILITARY_FILTERS,
+        Mode::Geographic=>&[],
+    }
+}
+
+fn place_filter_rows(size:[u32;2],mode:Mode)->usize {
     let [w,h]=size.map(|value|value as f32);
     let available=h-globe_radius(w)-21.-MAP_MODES_HEIGHT-54.-4.;
-    ((available/PLACE_FILTER_ROW).floor() as usize).clamp(1,PLACE_FILTERS.len())
+    ((available/PLACE_FILTER_ROW).floor() as usize).clamp(1,place_filters(mode).len())
 }
 
 fn place_filter_height(visible:usize)->f32 {
     visible as f32*PLACE_FILTER_ROW+4.
 }
 
-pub fn place_filter_drawer(size:[u32;2])->([f32;4],usize) {
-    let [x,y,w,_]=map_modes_rect(size,true);
-    let visible=place_filter_rows(size);
-    ([x+24.,y+69.,w-37.,visible as f32*PLACE_FILTER_ROW-4.],visible)
+pub fn place_filter_drawer(size:[u32;2],mode:Mode)->([f32;4],usize) {
+    let [x,y,w,_]=map_modes_rect(size,Some(mode));
+    let visible=place_filter_rows(size,mode);
+    let row=MAP_MODE_ROWS.iter().position(|(item,_,_)|*item==mode).unwrap();
+    ([x+24.,y+37.+(row+1) as f32*MAP_MODE_ROW,w-37.,visible as f32*PLACE_FILTER_ROW-4.],visible)
 }
 
 pub(crate) fn drawer_scrollbar([x,y,w,h]:[f32;4],visible:usize,rows:usize,offset:usize)->Option<([f32;4],[f32;4])> {

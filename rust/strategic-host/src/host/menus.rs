@@ -37,26 +37,29 @@ impl Host {
 
     pub(super) fn hud_action(&mut self,command:HudCommand) {
         match command {
-            HudCommand::PlaceFilters => {
-                if self.hud.place_filters_open {
-                    self.hud.place_filters_open = false;
+            HudCommand::PlaceFilters(mode) => {
+                if self.hud.place_filters_open == Some(mode) {
+                    self.hud.place_filters_open = None;
                 } else {
-                    if self.mode != Mode::Political {
-                        self.action(Action::Mode(Mode::Political));
+                    if self.mode != mode {
+                        self.action(Action::Mode(mode));
                         self.hud.menu = HudMenu::MapModes;
                     }
-                    self.hud.place_filters_open = true;
-                    let (_, visible) = formal_ui::place_filter_drawer(self.size);
-                    let active = formal_ui::PLACE_FILTERS.iter()
-                        .position(|(filter, _, _)| *filter == self.hud.place_filter).unwrap_or_default();
-                    self.hud.place_filter_offset = active.min(formal_ui::PLACE_FILTERS.len() - visible);
+                    self.hud.place_filters_open = Some(mode);
+                    let (_, visible) = formal_ui::place_filter_drawer(self.size, mode);
+                    let filters = formal_ui::place_filters(mode);
+                    let active = filters.iter()
+                        .position(|(filter, _, _)| *filter == self.hud.place_filter(mode)).unwrap_or_default();
+                    self.hud.place_filter_offset = active.min(filters.len() - visible);
                 }
             }
             HudCommand::PlaceFilterScroll(steps) => {
-                let (_, visible) = formal_ui::place_filter_drawer(self.size);
-                let max = formal_ui::PLACE_FILTERS.len() - visible;
-                self.hud.place_filter_offset = self.hud.place_filter_offset.min(max)
-                    .saturating_add_signed(steps as isize).min(max);
+                if let Some(mode) = self.hud.place_filters_open {
+                    let (_, visible) = formal_ui::place_filter_drawer(self.size, mode);
+                    let max = formal_ui::place_filters(mode).len() - visible;
+                    self.hud.place_filter_offset = self.hud.place_filter_offset.min(max)
+                        .saturating_add_signed(steps as isize).min(max);
+                }
             }
             HudCommand::Page(page)=>{
                 if page!=HudPage::Map { self.population_debug=None; }
@@ -129,7 +132,7 @@ impl Host {
                 self.hud.menu=if previous==menu{HudMenu::None}else{menu};
                 self.hud.waiting_slot=false;
                 if menu==HudMenu::MapModes {
-                    self.hud.place_filters_open=false;
+                    self.hud.place_filters_open=None;
                     self.search=None;
                     if self.hud.page==HudPage::Market{self.market_command("close",0);}
                     if self.hud.page==HudPage::Relations{self.emit(Request::Relations{verb:"close",id:""});}
@@ -621,10 +624,9 @@ impl Host {
             self.dirty = true;
             return true;
         }
-        if self.hud.menu != HudMenu::MapModes || self.mode != Mode::Political || !self.hud.place_filters_open {
-            return false;
-        }
-        let (drawer, _) = formal_ui::place_filter_drawer(self.size);
+        if self.hud.menu != HudMenu::MapModes { return false; }
+        let Some(mode) = self.hud.place_filters_open else { return false; };
+        let (drawer, _) = formal_ui::place_filter_drawer(self.size, mode);
         if !lobby::contains(drawer, point) { return false; }
         self.action(Action::Hud(HudCommand::PlaceFilterScroll(-(steps.signum() as i32))));
         true
