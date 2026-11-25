@@ -284,10 +284,14 @@ impl GroundSurface {
         let fringe_offset=(city_geometry.len()/4) as u32;
         city_geometry.extend_from_slice(&zstd::stream::decode_all(&include_bytes!("paris-fringe-roads.bin.zst")[..])
             .expect("embedded Paris fringe roads"));
+        let historic_surface_offset=(city_geometry.len()/4) as u32;
+        city_geometry.extend_from_slice(&zstd::stream::decode_all(&include_bytes!("historical-city-surface.bin.zst")[..])
+            .expect("embedded historical city surface"));
+        city_geometry.extend_from_slice(&historic_surface_offset.to_le_bytes());
         city_geometry.extend_from_slice(&fringe_offset.to_le_bytes());
         city_geometry.extend_from_slice(&park_offset.to_le_bytes());
         let city_water=device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label:Some("Near-map city banks, streets, and parks"),
+            label:Some("Near-map city banks, streets, parks, and ground coverage"),
             contents:&city_geometry,
             usage:wgpu::BufferUsages::STORAGE,
         });

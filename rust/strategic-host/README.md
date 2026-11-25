@@ -268,6 +268,10 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 `tools/build_city_parks.py <已有地图资料目录> src/city-parks.bin.zst` 生成杜乐丽园和圣詹姆斯公园的独立景观覆盖。杜乐丽园按主轴组织西侧开敞广场、林荫段和东侧花坛。圣詹姆斯公园沿 1827 年步道布置疏密不同的树列，保留湖面与小岛。地表林冠范围和近景模型取自同一份种植布局。现存边界与水面取自 OpenStreetMap，步道取自 OpenHistoricalMap。树位、花坛和历史边界细节属美术重建。单取圣詹姆斯公园湖关系的完整 XML，保存为资料目录的 `london_1890s/park-st-james-lake-reference.osm`。 [卢浮宫](https://www.louvre.fr/en/explore/the-palace/from-royal-garden-to-public-park) [英国皇家公园](https://www.royalparks.org.uk/visit/parks/st-jamess-park/history) [湖面关系 XML](https://api.openstreetmap.org/api/0.6/relation/276130/full) [OpenStreetMap 版权](https://www.openstreetmap.org/copyright) [OpenHistoricalMap 版权](https://www.openhistoricalmap.org/copyright)
 
+`tools/build_historical_city_surface.py <已有地图资料目录> <正式 data 目录> src/paris-fringe.bin src/historical-city-surface.bin.zst` 从现有历史资料生成两城地表覆盖并按面积聚合 mip。干地先分配给园林、屋顶、庭院、作业场、开放地、林地和道路，再给各用途选材。未分类面积沿用 QPK。接近 5 公里档启用历史覆盖，10 公里档沿用原有表现。原有道路矢量和建筑模型接替近景细节。
+
+巴黎资料采用 IPR 1900 年土地使用图及 Paris Time Machine 的街区、非建成地和道路。外围屋顶和相邻庭院由现有景观模型估算。现有 IPR 提取缺少耕地多边形，耕地沿用原景观分布。伦敦采用 1891 至 1896 年测绘建筑轮廓和已整理的同期道路。庭院和宅旁绿地根据历史建筑分布估算。已知公园保留其现有边界。萨里码头作业地根据 1895 年地图和附近测绘建筑布局估算。 [IPR 图例](https://www.institutparisregion.fr/fileadmin/DataStorage/IauEtVous/CartesEtDonnees/cartesetdonnees/opendata/MetaPDF/mos1900_ancien.pdf) [Paris Time Machine](https://doi.org/10.34847/nkl.cbf5ecd0) [伦敦建筑轮廓](https://doi.org/10.5281/zenodo.19497435) [萨里码头测绘图](https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~271015~90044134:London-Sheet-VII-89)
+
 格陵兰和南极的接地冰川、浮冰架、季节性海冰与水域需要结合现有 QWG、QHW 和高程资料单独核对。本阶段继续使用现有极地分片。
 
 ## 全球地图验收
