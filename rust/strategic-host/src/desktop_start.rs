@@ -5,16 +5,91 @@ use wwo_map_lab::formal_clock::TimeControl;
 
 pub(crate) const TICK_INTERVAL: Duration = Duration::from_millis(250);
 
-pub(crate) fn lock_profile() -> io::Result<(PathBuf, File)> {
+pub(crate) fn runtime_directory() -> io::Result<PathBuf> {
     let local = env::var_os("LOCALAPPDATA").ok_or_else(|| io::Error::other("找不到 Windows 用户数据目录。"))?;
+    Ok(PathBuf::from(local).join("WWO-Rust-Candidate"))
+}
+
+pub(crate) fn configured_data() -> io::Result<Option<PathBuf>> {
+    #[derive(serde::Deserialize)]
+    struct RuntimeConfig { data_directory: PathBuf, program_directory: Option<PathBuf> }
+
+    let path = runtime_directory()?.join("runtime.json");
+    let file = match File::open(&path) {
+        Ok(file) => file,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(io::Error::other(format!("{} · {error}", path.display()))),
+    };
+    let config: RuntimeConfig = serde_json::from_reader(file)
+        .map_err(|error| io::Error::other(format!("{} · {error}", path.display())))?;
+    if !config.data_directory.is_absolute() {
+        return Err(io::Error::other(format!("{} · data_directory 需要使用绝对路径。", path.display())));
+    }
+    if let Some(directory)=config.program_directory {
+        if !directory.is_absolute() {
+            return Err(io::Error::other(format!("{} · program_directory 需要使用绝对路径。",path.display())));
+        }
+        if env::args_os().nth(1).is_none() {
+            let expected=directory.join("wwo-map-lab.exe").canonicalize().map_err(|error|
+                io::Error::other(format!("无法打开正式程序目录 {} · {error}",directory.display())))?;
+            if env::current_exe()?.canonicalize()?!=expected {
+                return Err(io::Error::other(format!("请从正式程序路径启动 · {}",expected.display())));
+            }
+        }
+    }
+    Ok(Some(config.data_directory))
+}
+
+pub(crate) fn write_runtime_log(text: &str) {
+    let Ok(dir) = runtime_directory() else { return; };
+    if fs::create_dir_all(&dir).is_err() { return; }
+    let mut end = text.len().min(32 * 1024);
+    while !text.is_char_boundary(end) { end -= 1; }
+    let _ = fs::write(dir.join("startup.log"), &text[..end]);
+}
+
+pub(crate) fn notify_program_update(message: &str) {
+    static NOTIFIED: std::sync::OnceLock<()> = std::sync::OnceLock::new();
+    NOTIFIED.get_or_init(|| {
+        if let Some(path) = env::var_os("WWO_UPDATE_READY_FILE") {
+            let _ = fs::write(path, message);
+        }
+    });
+}
+
+pub(crate) fn attach_parent_console() {
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn AttachConsole(process: u32) -> i32;
+        fn GetStdHandle(kind: u32) -> *mut core::ffi::c_void;
+    }
+    unsafe {
+        let output = GetStdHandle(-11i32 as u32);
+        if output.is_null() || output as isize == -1 {
+            AttachConsole(u32::MAX);
+        }
+    }
+}
+
+pub(crate) fn require_writable_directory(path: &Path) -> io::Result<()> {
+    use std::os::windows::fs::OpenOptionsExt;
+    // FILE_ADD_FILE | FILE_DELETE_CHILD and FILE_FLAG_BACKUP_SEMANTICS.
+    OpenOptions::new().access_mode(0x42).custom_flags(0x0200_0000).open(path)
+        .map(drop).map_err(|error| io::Error::other(format!("目录无法写入或替换文件 · {} · {error}", path.display())))
+}
+
+pub(crate) fn lock_profile() -> io::Result<(PathBuf, File)> {
     let profile = env::var("WWO_RUST_PROFILE").unwrap_or_else(|_| "Default".into());
     if profile.is_empty() || profile.len() > 40 || !profile.bytes().all(|c| c.is_ascii_alphanumeric() || matches!(c, b'_' | b'-')) {
         return Err(io::Error::other("WWO_RUST_PROFILE 无效。"));
     }
-    let profile = PathBuf::from(local).join("WWO-Rust-Candidate").join("profiles").join(profile);
-    fs::create_dir_all(profile.join("WWO_R68_Candidate"))?;
-    let lock = OpenOptions::new().create(true).truncate(false).read(true).write(true).open(profile.join("session.lock"))?;
-    lock.try_lock().map_err(|e| io::Error::other(format!("候选档位正在使用，或无法打开档位。\n{e}")))?;
+    let profile = runtime_directory()?.join("profiles").join(profile);
+    fs::create_dir_all(profile.join("WWO_R68_Candidate"))
+        .map_err(|e| io::Error::other(format!("无法创建档案目录 {} · {e}", profile.display())))?;
+    let path = profile.join("session.lock");
+    let lock = OpenOptions::new().create(true).truncate(false).read(true).write(true).open(&path)
+        .map_err(|e| io::Error::other(format!("无法打开会话锁 {} · {e}", path.display())))?;
+    lock.try_lock().map_err(|e| io::Error::other(format!("档案正在使用，或无法锁定 {} · {e}", path.display())))?;
     Ok((profile, lock))
 }
 

@@ -5,12 +5,16 @@ param(
     [string] $Command = 'check',
 
     [switch] $DebugSymbols,
+    [switch] $Restart,
 
     [Parameter(Position = 1, ValueFromRemainingArguments)]
     [string[]] $CargoArguments
 )
 
 $ErrorActionPreference = 'Stop'
+if ($Restart -and ($Command -ne 'build' -or $CargoArguments)) {
+    throw 'Use wwo-cargo.ps1 build -Restart to build and restart the configured game.'
+}
 $hostRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $worktree = (Resolve-Path -LiteralPath (Join-Path $hostRoot '../..')).Path
 $workspace = Split-Path -Parent $worktree
@@ -85,6 +89,15 @@ $previousTarget = $env:CARGO_TARGET_DIR
 $previousData = $env:WWO_DATA_DIR
 $previousRustFlags = $env:RUSTFLAGS
 $previousEncodedRustFlags = $env:CARGO_ENCODED_RUSTFLAGS
+$buildEnvironment = @{}
+foreach ($name in 'RUSTC_WORKSPACE_WRAPPER', 'WWO_BUILD_SOURCE', 'WWO_BUILD_ALLOCATION', 'WWO_BUILD_SHELL', 'WWO_BUILD_ALLOCATOR', 'WWO_BUILD_RECEIPT') {
+    $buildEnvironment[$name] = [Environment]::GetEnvironmentVariable($name)
+}
+. (Join-Path $PSScriptRoot 'wwo-build-context.ps1')
+if ($Restart) {
+    . (Join-Path $PSScriptRoot 'update-wwo-program.ps1')
+    $CargoArguments = @('--bin', 'wwo-map-lab')
+}
 $lock = [Threading.Mutex]::new($false, 'Local\WWO-Shared-Cargo-v31')
 $held = $false
 try {
@@ -138,6 +151,8 @@ try {
         $retirement = 'already-retired'
     }
 
+    Set-WwoBuildContext $hostRoot $target.FullName
+    $buildReceipt = $env:WWO_BUILD_RECEIPT
     $timer = [Diagnostics.Stopwatch]::StartNew()
     & cargo $Command --locked --manifest-path $manifest @profileArguments @CargoArguments
     $code = $LASTEXITCODE
@@ -159,6 +174,7 @@ try {
         Write-BuildUsage $target.FullName @{
             utc = [DateTime]::UtcNow.ToString('o')
             commit = $commit
+            build = if ([IO.File]::Exists($buildReceipt)) { [IO.File]::ReadAllText($buildReceipt) }
             command = $Command
             profile = $profile
             cargo_ms = $timer.ElapsedMilliseconds
@@ -175,12 +191,21 @@ try {
     if ($bytesAfter -gt $budget) {
         Write-Warning "Cargo $profile cache is $bytesAfter bytes. Dependency outputs are retained. Automatic workspace cleanup rearms at $rearmAt bytes."
     }
+    if ($Restart -and !$code) {
+        # Child startup reads the unified configuration instead of Cargo's developer data setting.
+        $env:WWO_DATA_DIR = $previousData
+        Update-WwoProgram (Join-Path $profileDirectory 'wwo-map-lab.exe')
+    }
     exit $code
 } finally {
     $env:CARGO_TARGET_DIR = $previousTarget
     $env:WWO_DATA_DIR = $previousData
     $env:RUSTFLAGS = $previousRustFlags
     $env:CARGO_ENCODED_RUSTFLAGS = $previousEncodedRustFlags
+    if ($buildReceipt -and [IO.File]::Exists($buildReceipt)) { [IO.File]::Delete($buildReceipt) }
+    foreach ($name in $buildEnvironment.Keys) {
+        [Environment]::SetEnvironmentVariable($name, $buildEnvironment[$name])
+    }
     if ($held) { $lock.ReleaseMutex() }
     $lock.Dispose()
 }

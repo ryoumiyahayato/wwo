@@ -57,9 +57,8 @@ pub fn open(root: &Path) -> io::Result<World> {
             {
                 return Err(io::Error::other(format!("无效的地图分片路径 {}", tile.path)));
             }
-            let path = root.join(&tile.path);
-            Pack::check_signature(&path, TILE_SIGNATURE)?;
         }
+        Pack::check_signature(&root.join(&world.tiles[0].path), TILE_SIGNATURE)?;
         for name in ART_FILES {
             open_art(root, name)?;
         }
@@ -70,18 +69,16 @@ pub fn open(root: &Path) -> io::Result<World> {
     })
 }
 
-pub fn add_city_ground(world: &mut World, data: &Path) -> io::Result<()> {
+pub fn add_city_ground(world: &mut World, data: &Path) -> io::Result<Vec<String>> {
     #[derive(serde::Deserialize)]
     struct Catalogue { tiles: Vec<Tile> }
 
     let folder = data.join("city-overlays");
-    let file = match File::open(folder.join("catalogue.json")) {
-        Ok(file) => file,
-        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
-        Err(error) => return Err(error),
-    };
+    let path = folder.join("catalogue.json");
+    let file = File::open(&path).map_err(|error|io::Error::other(format!("{} · {error}",path.display())))?;
     let mut catalogue: Catalogue = serde_json::from_reader(file)?;
     let mut seen = HashSet::new();
+    let mut warnings = Vec::new();
     for tile in &mut catalogue.tiles {
         if !tile.city || tile.level != 3 || tile.cover || tile.ids
             || tile.size.iter().any(|size| !(2..=1024).contains(size))
@@ -93,12 +90,12 @@ pub fn add_city_ground(world: &mut World, data: &Path) -> io::Result<()> {
         }
         let path = folder.join(&tile.path);
         if let Err(error) = Pack::check_signature(&path, TILE_SIGNATURE) {
-            eprintln!("City ground {}: {error}", path.display());
+            warnings.push(format!("City ground {} · {error}", path.display()));
             continue;
         }
         tile.path = path.canonicalize()?.to_string_lossy().into_owned();
         tile.city_ink_only = true;
     }
     world.tiles.extend(catalogue.tiles.into_iter().filter(|tile| tile.city_ink_only));
-    Ok(())
+    Ok(warnings)
 }

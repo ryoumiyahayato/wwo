@@ -1,4 +1,4 @@
-"""Build the 1900 Paris-region built-up area and roads from Institut Paris Region exports."""
+"""Build 1900 Paris ground from Institut Paris Region and Paris Time Machine."""
 
 import argparse
 import json
@@ -14,6 +14,10 @@ PIXELS, GUTTER, SAMPLES = 384, 8, 3
 PREFIX = "paris-ipr-1900-"
 CATALOGUE_BASE = "https://data.iledefrance.fr/explore/dataset/"
 SOURCE = "Institut Paris Region / Carte de France vers 1900"
+STREETS_GROUP = (2.251, 48.815, 2.417, 48.903)
+STREETS_GRID = (4, 4)
+STREETS_PREFIX = "paris-ptm-1900-"
+STREETS_SOURCE = "Paris Time Machine / historical street reconstruction c. 1900"
 
 
 def features(path):
@@ -58,31 +62,66 @@ def coverage(land_use, roads):
     return [band.resize(out_size, Image.Resampling.BOX) for band in (built, streets)]
 
 
-def build(land_use, roads, output):
-    path = output / "catalogue.json"
-    catalogue = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"tiles": []}
-    tiles = [tile for tile in catalogue["tiles"] if not tile["path"].startswith(PREFIX)]
-    bands = coverage(land_use, roads)
-    west, south, east, north = GROUP
-    dx, dy = (east - west) / COLUMNS, (north - south) / ROWS
+def street_coverage(roads):
+    west, south, east, north = STREETS_GROUP
+    width, height = (dim * PIXELS for dim in STREETS_GRID)
+    size = (width + 2 * GUTTER, height + 2 * GUTTER)
+    bands = [Image.new("L", tuple(dim * SAMPLES for dim in size)) for _ in range(2)]
+    major, local = map(ImageDraw.Draw, bands)
+    for row in features(roads):
+        geometry = row["geometry"]
+        if not geometry:
+            continue
+        kind = (row["properties"].get("typvoie") or "").casefold()
+        arterial = kind in {"avenue", "boulevard", "quai", "pont", "place"}
+        lines = [geometry["coordinates"]] if geometry["type"] == "LineString" else geometry["coordinates"]
+        for line in lines:
+            points = [((GUTTER + width * (x - west) / (east - west)) * SAMPLES,
+                       (GUTTER + height * (north - y) / (north - south)) * SAMPLES)
+                      for x, y, *_ in line]
+            (major if arterial else local).line(points, fill=255, width=6 if arterial else 3, joint="curve")
+    return [band.resize(size, Image.Resampling.BOX) for band in bands]
+
+
+def write_tiles(output, bands, group, grid, prefix, source, **style):
+    west, south, east, north = group
+    columns, rows = grid
+    dx, dy = (east - west) / columns, (north - south) / rows
     gx, gy = dx * GUTTER / PIXELS, dy * GUTTER / PIXELS
     size = PIXELS + 2 * GUTTER
     output.mkdir(parents=True, exist_ok=True)
-    for y in range(ROWS):
-        for x in range(COLUMNS):
+    for y in range(rows):
+        for x in range(columns):
             col, row = x * PIXELS, y * PIXELS
             box = (col, row, col + size, row + size)
-            urban, streets = (band.crop(box) for band in bands)
-            if not urban.getbbox() and not streets.getbbox():
+            first, second = (band.crop(box) for band in bands)
+            if not first.getbbox() and not second.getbbox():
                 continue
             left, top = west + x * dx, north - y * dy
             core = [left, top - dy, left + dx, top]
             bounds = [core[0] - gx, core[1] - gy, core[2] + gx, core[3] + gy]
-            filename = f"{PREFIX}{x}-{y}.wcm"
-            write_city_tile(output / filename, size, Image.merge("LA", (urban, streets)).tobytes())
-            tiles.append(dict(path=filename, level=3, core=core, bounds=bounds, group=GROUP,
-                              source=SOURCE, size=[size, size], cover=False, city=True,
-                              city_area=True, ids=False))
+            filename = f"{prefix}{x}-{y}.wcm"
+            write_city_tile(output / filename, size, Image.merge("LA", (first, second)).tobytes())
+            yield dict(path=filename, level=3, core=core, bounds=bounds, group=group,
+                       source=source, size=[size, size], cover=False, city=True, **style, ids=False)
+
+
+def build(land_use, roads, output, detailed_streets=None):
+    path = output / "catalogue.json"
+    catalogue = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"tiles": []}
+    tiles = [tile for tile in catalogue["tiles"] if not tile["path"].startswith(PREFIX)]
+    tiles.extend(write_tiles(output, coverage(land_use, roads), GROUP, (COLUMNS, ROWS),
+                             PREFIX, SOURCE, city_area=True))
+    if detailed_streets is not None:
+        tiles = [tile for tile in tiles if not tile["path"].startswith(STREETS_PREFIX)]
+        tiles.extend(write_tiles(output, street_coverage(detailed_streets), STREETS_GROUP, STREETS_GRID,
+                                 STREETS_PREFIX, STREETS_SOURCE, city_streets=True))
+        catalogue["paris_streets_1900"] = {
+            "creator": "Paris Time Machine",
+            "source": "https://doi.org/10.34847/nkl.cbf5ecd0",
+            "license": "ODbL 1.0",
+            "processing": "Rasterized reconstructed street centre lines. Display widths based on street type.",
+        }
     catalogue["tiles"] = tiles
     catalogue["paris_1900"] = {
         "creator": "Institut Paris Region",
@@ -100,5 +139,6 @@ if __name__ == "__main__":
     parser.add_argument("land_use", type=Path)
     parser.add_argument("roads", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--detailed-streets", type=Path)
     args = parser.parse_args()
-    build(args.land_use, args.roads, args.output)
+    build(args.land_use, args.roads, args.output, args.detailed_streets)

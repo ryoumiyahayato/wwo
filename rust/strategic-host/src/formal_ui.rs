@@ -354,6 +354,7 @@ pub enum Tech {#[default] Capacity,Chronicle,Public}
 #[derive(Default)]
 pub struct Hud {
     pub page:Page,pub menu:Menu,pub messages:bool,pub message_offset:usize,pub tech:Tech,pub milestone:usize,
+    pub place_filter:crate::map_facilities::PlaceFilter,
     pub clock_origin:Option<[f64;2]>,
     pub mechanical:crate::mechanical::Mechanical,
     pub waiting_slot:bool,pub fullscreen:bool,pub clock_drag:Option<f32>,pub military_grid:bool,
@@ -448,6 +449,10 @@ pub struct Display<'a> {
     pub camera:&'a Camera,pub size:[u32;2],pub mode:Mode,pub flags:Option<u8>,pub cursor:[f64;2],
     pub source:&'a str,pub feedback:&'a str,pub labels:bool,pub modern_terrain:bool,
     pub surveyed_terrain:bool,
+    pub sea_relation_visible: bool,
+    pub resource_root: &'a std::path::Path,
+    pub resource_warnings: &'a [String],
+    pub city_sources: &'a [String],
     pub country:Option<(&'a World,CountryPanel,Option<u8>)>,
     pub written_world: Option<&'a wwo_map_lab::formal_bootstrap::InitialWorld>,
     pub managed:bool,
@@ -607,25 +612,33 @@ impl Display<'_> {
         let target=self.camera.mpp*crate::camera::SCALE_TARGET_PIXELS;
         let magnitude=10_f64.powf(target.log10().floor());
         let metres=[5.,2.,1.].into_iter().map(|n|n*magnitude).find(|n|*n<=target).unwrap_or(magnitude);
-        let length=(metres/self.camera.mpp) as f32;
-        let start=w-160.;
-        panels.line([start,h-14.],[start+length,h-14.],1.,BRASS);
-        for x in [start,start+length]{panels.line([x,h-18.],[x,h-11.],1.,BRASS);}
         let scale=if metres>=1000.{format!("{} km",metres/1000.)}else{format!("{metres} m")};
-        if self.can_read_world() {
-            visual.text(text,&scale,0,[start+length+8.,h-25.],75.,MUTED);
-        } else { self.ink_block(panels,[start+length+8.,h-19.,40.,8.]); }
-        if self.modern_terrain && self.hud.page==Page::Map {
-            let label=if self.surveyed_terrain {
-                visual.choose("历史测绘与现代地表参照","Historical survey and modern terrain reference")
-            } else {
-                visual.choose("现代地表参照","Modern terrain reference")
-            };
-            let width=visual.width(label,0)+18.;
-            let x=w-26.-width;
-            panel(panels,[x,h-109.,width,23.],[8,14,21,214]);
-            visual.text(text,label,0,[x+9.,h-108.],width-14.,MUTED);
-        }
+        let [lon,lat]=self.camera.coordinates();
+        let coordinates=format!("{:.3}° {}  {:.3}° {}",lat.abs(),if lat<0. {"S"}else{"N"},
+            lon.abs(),if lon<0. {"W"}else{"E"});
+        let version=crate::build_identity::display();
+        let label=if self.hud.page==Page::Map && self.hud.menu==Menu::None {
+            match (self.resource_warnings.is_empty(),self.modern_terrain,self.sea_relation_visible) {
+                (false, _, _) => visual.choose("部分资源不可用 · F10","Resource notice · F10"),
+                (true, true, true) => visual.choose("地表参照 · 航线示意","Terrain reference · Sea links"),
+                (true, true, false) => visual.choose("地表参照","Terrain reference"),
+                (true, false, true) => visual.choose("航线示意","Sea links"),
+                _ => "",
+            }
+        } else {""};
+        let length=(metres/self.camera.mpp) as f32;
+        let row=visual.width(&coordinates,0)+length+visual.width(&scale,0)+32.;
+        let width=row.max(visual.width(version,0)+20.).max(visual.width(label,0)+20.);
+        let height=if label.is_empty(){47.}else{68.};
+        let right=w-10.;
+        panels.rect(right-width,h-height-6.,width,height,[11,20,27,203]);
+        visual.text(text,version,0,[right-visual.width(version,0)-9.,h-48.],width-16.,IVORY);
+        visual.text(text,label,0,[right-visual.width(label,0)-9.,h-69.],width-16.,MUTED);
+        let start=right-visual.width(&scale,0)-length-19.;
+        panels.line([start,h-17.],[start+length,h-17.],1.,BRASS);
+        for x in [start,start+length]{panels.line([x,h-21.],[x,h-14.],1.,BRASS);}
+        visual.text(text,&scale,0,[start+length+8.,h-28.],75.,IVORY);
+        visual.text(text,&coordinates,0,[start-visual.width(&coordinates,0)-10.,h-28.],width-16.,MUTED);
         if !self.feedback.is_empty() && self.hud.menu==Menu::None && self.can_read_world() {
             let width=(w-64.).min(680.);let x=(w-width)*0.5;
             panel(panels,[x,59.,width,32.],[8,13,20,249]);
@@ -695,11 +708,24 @@ impl Display<'_> {
         let level=match self.camera.level{crate::Level::World=>"WORLD",crate::Level::Region=>"REGION",crate::Level::Local=>"LOCAL"};
         let state=self.session.map_or("Offline map".into(),|s|format!("R68 clock: {} min | {}",s.total_minutes,
             if s.paused{"paused".into()}else{format!("{}x",s.speed)}));
-        let left_rows=["DEBUG / World and camera".into(),state,format!("{level} / {}",self.mode.key()),
+        let build=crate::build_identity::get();
+        let left_rows=["DEBUG / World and build".into(),crate::build_identity::display().into(),format!("Source: {}",build.state),
+            build.commit.into(),state,format!("{level} / {}",self.mode.key()),
             format!("Center: {:.4}, {:.4}",pos[0],pos[1]),format!("Scale: {:.1} m/px",self.camera.mpp)];
-        let right_rows=["DEBUG / Rust renderer".into(),format!("Present: {:.0} fps | CPU: {:.1} ms",d.rate,d.cpu_ms),
-            format!("Tiles: {} visible / {} cached",d.visible,d.tiles),format!("Tile data: {:.1} MiB | I/O: {}",d.mib,if d.streaming{"busy"}else{"idle"}),self.source.into()];
-        for (x,y,bottom,rows) in [(12.,left,h-173.,left_rows),(w-width-43.,right,h-121.,right_rows)] {
+        let mut right_rows=vec!["DEBUG / Resources and renderer".into(),format!("Data: {}",self.resource_root.display())];
+        right_rows.extend(self.resource_warnings.iter().cloned());
+        right_rows.extend([format!("Present: {:.0} fps | CPU: {:.1} ms",d.rate,d.cpu_ms),
+            format!("Tiles: {} visible / {} cached",d.visible,d.tiles),format!("Tile data: {:.1} MiB | I/O: {}",d.mib,if d.streaming{"busy"}else{"idle"}),self.source.into()]);
+        if self.modern_terrain {
+            right_rows.push(if self.surveyed_terrain { "Historical survey with modern terrain reference" } else { "Modern terrain reference" }.into());
+        }
+        if self.sea_relation_visible {
+            right_rows.push("Dashed links show shipping service. Track unconfirmed.".into());
+        }
+        right_rows.extend(self.city_sources.iter().cloned());
+        let lines=right_rows.iter().flat_map(|row|self.skin.wrapped_lines(row,0,width-14.,1.)).collect::<Vec<_>>();
+        let build_lines=left_rows.iter().flat_map(|row|self.skin.wrapped_lines(row,0,width-14.,1.)).collect::<Vec<_>>();
+        for (x,y,bottom,rows) in [(12.,left,h-173.,build_lines.as_slice()),(w-width-43.,right,h-90.,lines.as_slice())] {
             let count=(((bottom-y-12.)/17.).floor().max(0.) as usize).min(rows.len());
             if count<2 {continue;}
             m.rect(x,y,width,12.+count as f32*17.,[8,13,20,227]);
@@ -1279,8 +1305,31 @@ impl Display<'_> {
                     let action=if active{Mode::Geographic}else{mode};
                     self.row(m,t,hits,[x+13.,y+37.+i as f32*32.,width-26.,27.],label,Some(Action::Mode(action)),active);
                 }
-                if self.mode!=Mode::Geographic {
-                    self.skin.text(t,"再次点击当前模式可返回基础地貌",0,[x+15.,y+136.],width-30.,MUTED);
+                let say=|zh,en|self.skin.choose(zh,en);
+                let button=(width-30.)/2.;
+                let commands=[
+                    (say("搜索","Search"),Some(Action::Search)),
+                    (say("返回视图","Previous view"),Some(Action::Back)),
+                    (say("全球","Globe"),Some(Action::Home)),
+                    (say("运输","Transport"),self.session.is_some_and(|s|s.transport.is_some())
+                        .then_some(Action::Hud(Command::Page(Page::Travel)))),
+                ];
+                for (i,(label,action)) in commands.into_iter().enumerate() {
+                    if action.is_some() {
+                        self.row(m,t,hits,[x+13.+(i%2) as f32*(button+4.),y+139.+(i/2) as f32*31.,button,26.],label,action,false);
+                    }
+                }
+                if self.mode==Mode::Political {
+                    use crate::map_facilities::PlaceFilter;
+                    for (i,(label,filter)) in [
+                        (say("行政与聚落","Administration"),PlaceFilter::Settlements),
+                        (say("历史文化","Heritage"),PlaceFilter::Heritage),
+                        (say("交通与经济","Infrastructure"),PlaceFilter::Infrastructure),
+                        (say("军事设施","Military sites"),PlaceFilter::Military),
+                    ].into_iter().enumerate() {
+                        self.row(m,t,hits,[x+13.+(i%2) as f32*(button+4.),y+203.+(i/2) as f32*31.,button,26.],
+                            label,Some(Action::PlaceFilter(filter)),self.hud.place_filter==filter);
+                    }
                 }
             },
             Menu::System=>{
@@ -1397,7 +1446,7 @@ pub fn page_rect(hud:&Hud,size:[u32;2])->Option<[f32;4]>{
 pub fn menu_rect(menu:Menu,size:[u32;2],radius:f32)->[f32;4]{
     let [w,h]=size.map(|v|v as f32);
     match menu {
-        Menu::MapModes=>[w*0.5-165.,h-radius-202.,330.,166.],
+        Menu::MapModes=>[w*0.5-165.,h-radius-291.,330.,270.],
         Menu::System=>[w-292.,145.,280.,252.],
         Menu::Settings=>[(w-340.)*0.5,(h-290.)*0.5,340.,290.],
         Menu::Save|Menu::Load=>[(w-500.)*0.5,(h-368.)*0.5,500.,368.],

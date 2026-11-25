@@ -78,15 +78,23 @@ jobs:
     name: Build Rust Windows game
     runs-on: windows-latest
     timeout-minutes: 25
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - name: Build the formal game and state tool
         working-directory: rust/strategic-host
-        run: cargo +stable build --release --locked --bin wwo-map-lab --bin wwo-formal-state
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.ref == 'refs/heads/main' && github.token || '' }}
+        run: |
+          . ./tools/wwo-build-context.ps1
+          Set-WwoBuildContext $PWD.Path (Join-Path $PWD 'target') -Validation:($env:GITHUB_REF -ne 'refs/heads/main')
+          cargo +stable build --release --locked --bin wwo-map-lab --bin wwo-formal-state
       - name: Stage the offline Windows build
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main'
         shell: pwsh
         run: |
           $stage = Join-Path $env:RUNNER_TEMP 'wwo-rust-windows'
@@ -97,7 +105,7 @@ jobs:
           Copy-Item data/menu-themes -Destination (Join-Path $stage 'data') -Recurse
           Copy-Item data/city-overlays -Destination (Join-Path $stage 'data') -Recurse
       - name: Retain the Windows build in private repositories
-        if: github.event_name != 'pull_request' && github.event.repository.private
+        if: github.ref == 'refs/heads/main' && github.event.repository.private
         uses: actions/upload-artifact@v4
         with:
           name: wwo-rust-windows

@@ -1,6 +1,6 @@
 # WWO Rust Windows 游戏
 
-`wwo-map-lab` 是当前原生 Windows 游戏入口。正式 Windows 构建由 GitHub CI 执行。本机验证使用固定工作树内的 `tools/wwo-cargo.ps1`。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [构建与恢复](../../docs/BUILD_AND_RECOVERY.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。界面字形更新使用归档项目和 Pillow，运行 `python tools/build_hud.py <R68 项目> <游戏数据目录>`。
+`wwo-map-lab.exe` 是原生 Windows 游戏入口。双击进入首页。正式 Windows 构建由 GitHub CI 执行。本机验证使用固定工作树的 `tools/wwo-cargo.ps1`。程序读取 `%LOCALAPPDATA%\WWO-Rust-Candidate\runtime.json` 的绝对路径 `program_directory` 和 `data_directory`。没有配置时，解包后的程序可读取旁边的 `data/`。开发时用 `--data` 显式指定资源目录，原有 `--observe` 和 `--background` 继续可用。恢复步骤见 [构建与恢复](../../docs/BUILD_AND_RECOVERY.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。界面字形更新使用归档项目和 Pillow，运行 `python tools/build_hud.py <R68 项目> <游戏数据目录>`。
 
 ## 经济地图资源专题
 
@@ -231,7 +231,9 @@ QPK 底色由高程、地类和矢量水域经项目调色与计算生成。现�
 
 GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景按视野解码和上传，桥梁、车站沿用原 GLB 两档网格。读取原件的材质底色、顶点色和法线。桥梁沿用 R68 的显示坐标和桥面基准。
 
-巴黎 Gros-Caillou、威斯敏斯特和米尔班克沿用 [R40 原创城市模块](../../assets/settlements/R40_SOURCE_AND_USAGE.md) 的 18、16 和 4 个摆放点。相同的模块共享 GPU 网格，沿用 8 米/像素切换近远档，并保留资料注明的概念街区比例。搜索 `paris_gros_caillou_miniature`、`westminster_miniature` 或 `millbank_wharves_1900` 可定位。地标与街区沿用地图相对平面。当前原件没有图片贴图。局部地形接地、贴图和动画资源待接入。
+伦敦和巴黎先绘制历史城市地面分片，再随放大加入成组建筑和单体模型。同一 [R40 原创城市模块](../../assets/settlements/R40_SOURCE_AND_USAGE.md) 共享 GPU 网格，放置记录按视野加载。城市资料目录为 `data/city-models`，其中 `catalogue.json` 记录分片边界、数量、重建方法和署名。伦敦使用 1891–1896 年建筑外廓，屋顶和高度为重建估计。巴黎使用约 1900 年历史街区及街道重建资料约束单体放置，屋顶、高度及单栋位置为程序化重建。缺少分片时显示资源提示。其他城市仍使用原有地图资源。
+
+使用 `tools/build_city_models.py <输入资料目录> <独立输出目录>` 生成分片。需要 GeoPandas、Shapely 2、NumPy、pyproj 和 zstandard。源码中的输入相对路径与资料包目录一致。通过 `--city london` 或 `--city paris` 可单独构建到暂存目录，再安装完整目录。授权与来源随目录保存。 [伦敦建筑资料](https://doi.org/10.5281/zenodo.19497435)，[巴黎历史重建资料](https://doi.org/10.34847/nkl.cbf5ecd0)
 
 ## R68 地图与首页迁移
 
@@ -239,11 +241,13 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 | --- | --- |
 | 世界地形、历史政区、经济图和军事图 | Rust 相机和专题图层。全球自然地面读取 Z0–Z7 QPK，近景读取 QSC。R68 旧底图仅作为兼容资源。 |
 | 旧版区域地表和城市 | 既有 regional WCM 提供地形、城市和道路分片。伦敦另读取 `data/city-overlays` 的 1891–1896 年测绘建筑覆盖。伦敦扩展范围的历史道路需要独立来源。 |
-| 地标和建筑群 | Rust 地标目录提供七个地标、三个局部街区及各自的缩放范围。约 1900 年人口达到十万的城市按既定标准建设城市资源。 |
+| 地标和建筑群 | Rust 地标目录提供原有地标和局部街区。伦敦和巴黎接入城市建筑分片。约 1900 年人口达到十万的其他城市继续按同一标准建设。 |
 | 菜单与画作 | 原有菜单、图集和字体继续使用。主题管理读 `data/menu-themes/catalogue.json`，一次载入一张作品并将模式和最近作品保存到现有界面配置。 |
 | 迁移状态、旧主题说明及首页兼容提示 | 从玩家界面移除。R68 源码由 `archive/godot-r68-source-20261120` 归档保留。 |
 
 伦敦瓦片由 `tools/build_london_city_ground.py` 从已有 GeoPackage 整理。巴黎及周边建成区与道路由 `tools/build_paris_city_ground.py` 从 Institut Paris Region 的约 1900 年、1∶50,000 资料整理。巴黎瓦片的建成区通道表示总体覆盖范围，道路笔画表示资料中的路线。数据版本、作者及许可见 [城市分片清单](../../data/city-overlays/catalogue.json)。画作来源与许可见 [主题清单](../../data/menu-themes/catalogue.json)。
+
+巴黎市内道路分片使用 `build_paris_city_ground.py` 的 `--detailed-streets` 选项，从 Paris Time Machine 重建线生成。道路按原始街道类别分层。显示宽度用于区分层级。政治地图「地点类别」按现有地点 ID 筛选，并可从地点卡片打开相应专题。 [编号地图标识图册](map-symbols.html)
 
 格陵兰和南极的接地冰川、浮冰架、季节性海冰与水域需要结合现有 QWG、QHW 和高程资料单独核对。本阶段继续使用现有极地分片。
 
@@ -295,10 +299,14 @@ Z7 水文按复杂度加密。QWG 含边界的单元、Natural Earth 的岸线�
 | --- | --- |
 | Rust 正式构建工作树 | `wwo-population-foundation-v32` |
 | Cargo 构建缓存 | `.wwo-historical-population-v31-target`，由 `rust/strategic-host/tools/wwo-cargo.ps1` 管理 |
-| 当前 Windows 运行目录 | `wwo/local-artifacts/strategic-map-phase4`，随 EXE 保留所需 `data/` |
+| 当前 Windows 运行目录 | 由 `runtime.json` 的 `program_directory` 指定 |
 | 自然地理候选和回退 | 当前 Windows 运行目录下的 `natural-terrain-preview`，同机位交付截图在 `z7-review` |
 | 地理输入和来源记录 | `offline-map-sources` |
 | 单次临时观察输出 | `%TEMP%` 下的本次会话目录 |
+
+`wwo-cargo.ps1 build` 分配共享 Build 编号。Cargo 复用现有产物时保留原编号，编号在链接前分配并随程序嵌入。远端 `wwo-build-sequence` 保留已分配编号。首页、窗口标题、地图右下角和 `--version` 读取同一构建身份。F10 可查看完整 Git 提交、资源路径和数据来源。F10 打开后，F11 可重新读取主题、城市分片和资源目录下 `debug-resources` 的 `globe.wgsl`、`landscape.wgsl`、`land-material.png` 及 `urban_landscape_r40.glb`。加载失败会报告对应资源并保留有效版本。
+
+`wwo-cargo.ps1 build -Restart` 构建后请求已安装程序正常退出。旧程序通过原退出对话框保存。新版渲染首个就绪画面后删除临时回退文件。更新期间写入的自动存档可由新版恢复。读取失败时，首页显示原因。
 
 正式构建交付后，用独立档案确认启动、世界推进、地图切换和重启读档。保留当前发布、必要回退及对应数据，清理本次已退出的观察会话、重复打包和可再生构建输出。地貌构建的临时母栅格用于续建，只有当前预定层级生成并核验后才清理。移除已合并的临时工作树前，核对 `main`、远程引用、未提交和未跟踪文件，再用 `git worktree remove`。R68 和未合并的独立工作线保留原工程与资产。
 
