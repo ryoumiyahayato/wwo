@@ -2,6 +2,7 @@
 struct LandscapePage {
     texel: vec2f,
     slot: i32,
+    regional_slot: i32,
     fade: f32,
 };
 
@@ -19,7 +20,7 @@ fn landscape_page(ll: vec2f, level: u32, at_surface: bool) -> LandscapePage {
         let color_fade=f32((index>>16u)&255u)/255.;
         fade=page_coverage(cell,q,rows,24u,min(fade,color_fade));
     }
-    return LandscapePage(q * 256. + 4., i32(index & 65535u) - 1, fade);
+    return LandscapePage(q * 256. + 4., i32(index & 511u) - 1, i32((index >> 9u) & 127u) - 1, fade);
 }
 
 fn landscape_elevation(page: LandscapePage, offset: vec2f) -> f32 {
@@ -57,7 +58,19 @@ struct LandCover {
     urban: f32,
     bare: f32,
     snow: f32,
+    regional: f32,
 };
+
+fn mix_cover(a: LandCover, b: LandCover, t: f32) -> LandCover {
+    return LandCover(mix(a.forest,b.forest,t),mix(a.shrub,b.shrub,t),mix(a.grass,b.grass,t),
+        mix(a.damp,b.damp,t),mix(a.crop,b.crop,t),mix(a.urban,b.urban,t),mix(a.bare,b.bare,t),
+        mix(a.snow,b.snow,t),mix(a.regional,b.regional,t));
+}
+
+fn regional_scale(mpp: f32) -> f32 {
+    // The 50 km ruler starts at 625 m/px (50,000 m / 80 pixels).
+    return 1.-smoothstep(435.,625.,mpp);
+}
 
 fn class_fraction(classes: vec4u, weights: vec4f, code: u32) -> f32 {
     return dot(weights, select(vec4f(0.), vec4f(1.), classes == vec4u(code)));
@@ -74,7 +87,7 @@ fn cover_axis(t: f32) -> vec4f {
     return mix(vec4f(0.,1.-edge,edge,0.),spline,.46);
 }
 
-fn landscape_material(page: LandscapePage) -> LandCover {
+fn legacy_landscape_material(page: LandscapePage) -> LandCover {
     // Shear along each axis in turn. The artwork rounds source corners on a
     // sub-texel scale while preserving area. The phase matches across gutters.
     let cycle = (2.*PI)/256.;
@@ -100,7 +113,48 @@ fn landscape_material(page: LandscapePage) -> LandCover {
             +class_fraction(c,wc,code)+class_fraction(d,wd,code);
     }
     return LandCover(fraction[1]+fraction[10],fraction[2],fraction[3],
-        fraction[9]+fraction[11],fraction[4],fraction[5],fraction[6],fraction[7]);
+        fraction[9]+fraction[11],fraction[4],fraction[5],fraction[6],fraction[7],0.);
+}
+
+fn forest_child(texel: vec2i, slot: i32) -> f32 {
+    let bank = textureLoad(regional_cover,texel/2,slot,0);
+    return bank[u32((texel.y & 1)*2 + (texel.x & 1))];
+}
+
+fn reconstructed_forest(page: LandscapePage) -> f32 {
+    let texel = page.texel*2.-.5;
+    let cell = vec2i(texel);
+    let t = fract(texel);
+    let a = mix(forest_child(cell,page.regional_slot),forest_child(cell+vec2i(1,0),page.regional_slot),t.x);
+    let b = mix(forest_child(cell+vec2i(0,1),page.regional_slot),
+                forest_child(cell+vec2i(1,1),page.regional_slot),t.x);
+    return mix(a,b,t.y);
+}
+
+fn landscape_material(page: LandscapePage, regional_weight: f32, forest_detail: f32) -> LandCover {
+    if page.regional_slot < 0 || regional_weight <= .001 {
+        return legacy_landscape_material(page);
+    }
+    let uv = page.texel / vec2f(792.,264.);
+    let b = textureSampleLevel(regional_cover,linear,uv+vec2f(2./3.,0.),page.regional_slot,0.);
+    if b.a*regional_weight <= .001 { return legacy_landscape_material(page); }
+    let a = textureSampleLevel(regional_cover,linear,uv+vec2f(1./3.,0.),page.regional_slot,0.);
+    let broad = dot(textureSampleLevel(regional_cover,linear,uv,page.regional_slot,0.),vec4f(.25));
+    let open = dot(a.rgb+b.rgb,vec3f(1.));
+    let observed = smoothstep(.01,.50,broad+open+a.a);
+    let weight = b.a * regional_weight * observed;
+    if weight <= .001 { return legacy_landscape_material(page); }
+    var forest = broad;
+    var rest = 1.;
+    if forest_detail > .001 {
+        // Keep water, town and unknown acreage fixed as the forest edge resolves.
+        forest = min(broad+open,mix(broad,reconstructed_forest(page),forest_detail));
+        rest = (open+broad-forest)/max(.0001,open);
+        if open <= .0001 { forest = broad; }
+    }
+    let land = LandCover(forest,a.r*rest,a.g*rest,b.b*rest,a.b*rest,a.a,b.r*rest,b.g*rest,1.);
+    if weight >= .999 { return land; }
+    return mix_cover(legacy_landscape_material(page),land,weight);
 }
 
 const FOREST_GROUND: vec3f = vec3f(.318,.391,.277);
@@ -124,7 +178,7 @@ struct LandscapeLayer {
 };
 
 fn landscape_layers(ll: vec2f) -> array<LandscapeLayer,2> {
-    var fine = LandscapeLayer(LandscapePage(vec2f(0.),-1,0.),0.);
+    var fine = LandscapeLayer(LandscapePage(vec2f(0.),-1,-1,0.),0.);
     var regional = fine;
     let fine_zoom = natural_lod_weight(7u);
     let regional_zoom = natural_lod_weight(6u);
@@ -139,15 +193,13 @@ fn landscape_layers(ll: vec2f) -> array<LandscapeLayer,2> {
     return array<LandscapeLayer,2>(fine,regional);
 }
 
-fn blended_landcover(layers: array<LandscapeLayer,2>, weight: f32) -> LandCover {
-    if layers[0].weight <= .001 { return landscape_material(layers[1].page); }
-    let a = landscape_material(layers[0].page);
+fn blended_landcover(layers: array<LandscapeLayer,2>, weight: f32, mpp: f32) -> LandCover {
+    let regional = regional_scale(mpp);
+    let forest_detail = 1.-smoothstep(95.,230.,mpp);
+    if layers[0].weight <= .001 { return landscape_material(layers[1].page,regional,forest_detail); }
+    let a = landscape_material(layers[0].page,regional,forest_detail);
     if layers[1].weight <= .001 { return a; }
-    let b = landscape_material(layers[1].page);
-    let t = layers[1].weight/weight;
-    return LandCover(mix(a.forest,b.forest,t),mix(a.shrub,b.shrub,t),mix(a.grass,b.grass,t),
-        mix(a.damp,b.damp,t),mix(a.crop,b.crop,t),mix(a.urban,b.urban,t),mix(a.bare,b.bare,t),
-        mix(a.snow,b.snow,t));
+    return mix_cover(a,landscape_material(layers[1].page,regional,forest_detail),layers[1].weight/weight);
 }
 
 fn geographic_ground_tint(ll: vec2f, fallback: vec3f) -> vec3f {
@@ -155,7 +207,7 @@ fn geographic_ground_tint(ll: vec2f, fallback: vec3f) -> vec3f {
     let layers = landscape_layers(ll);
     let weight = layers[0].weight+layers[1].weight;
     if weight <= .001 { return fallback; }
-    let land = blended_landcover(layers,weight);
+    let land = blended_landcover(layers,weight,view.viewport.z*EARTH);
     let tint = (FOREST_GROUND-fallback)*land.forest+(SHRUB_GROUND-fallback)*land.shrub
         +(GRASS_GROUND-fallback)*land.grass+(DAMP_GROUND-fallback)*land.damp
         +(CROP_GROUND-fallback)*land.crop+(BUILT_GROUND-fallback)*land.urban*.23
@@ -331,9 +383,9 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, land: LandCover,
     var forest = FOREST_GROUND;
     if land.forest > .001 {
         // The same continuous canopy remains below the individual crowns.
-        let crowns = material_grain(world,mpp,WOODLAND,1320.,84.);
+        let crowns = material_grain(world,mpp,WOODLAND,mix(1320.,240.,land.regional),mix(84.,35.,land.regional));
         let leaves = material_grain(world,mpp,WOODLAND,315.,16.);
-        forest *= 1.+(crowns*1.32+leaves*.48)*(landscape_wood(land).x/max(.001,land.forest));
+        forest *= 1.+(crowns*mix(1.32,.60,land.regional)+leaves*.48)*(landscape_wood(land).x/max(.001,land.forest));
     }
     let exposure = clamp(slope.y*.19+height*.00007,-.08,.15);
     var grass = GRASS_GROUND+vec3f(-.09,-.012,.09)*exposure;
@@ -361,8 +413,9 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, land: LandCover,
         + (earth-base)*(land.bare-share.x) + (stone-base)*rock + (snow-base)*land.snow;
     let normal = normalize(vec3f(-slope*1.32,1.));
     let light = clamp((dot(normal,LANDSCAPE_SUN)-LANDSCAPE_SUN.z)*.57,-.34,.22);
-    let painted = base+tint*(1.-smoothstep(90.,430.,mpp))*.81;
-    return clamp(painted*(1.+light*(1.-land.snow*.5)),vec3f(0.),vec3f(1.));
+    let paint = mix((1.-smoothstep(90.,430.,mpp))*.81,.87,land.regional);
+    let relief = mix(1.,.65,land.regional);
+    return clamp((base+tint*paint)*(1.+light*relief*(1.-land.snow*.5)),vec3f(0.),vec3f(1.));
 }
 
 fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) -> vec3f {
@@ -378,7 +431,7 @@ fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) 
         fallback = mix(base,natural_land_material(vec4f(base,water),world,mpp),strength*overview);
     }
     if weight*modern <= .001 { return fallback; }
-    let land = blended_landcover(layers,weight);
+    let land = blended_landcover(layers,weight,mpp);
     var slope = vec2f(0.);
     var height = 0.;
     for (var i=0u; i<2u; i+=1u) {
@@ -471,7 +524,7 @@ fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     let previous = landscape_cache[cache_index];
     landscape_cache[cache_index].style = 0u;
     if landscape_coverage(page) >= .20 { return; }
-    let cover = landscape_material(page);
+    let cover = landscape_material(page,1.,1.);
     let wood = landscape_wood(cover);
     let height = landscape_elevation(page,vec2f(0.));
     let slope = landscape_slope(page,ll.y,.83,7u);
@@ -617,7 +670,7 @@ fn landscape_object_mask(page: LandscapePage, input: LandscapeVertex, sample: u3
     if water_weight(sample)<.999 {
         land = 1.-smoothstep(.10,.44,water_coverage(sample,landscape_coverage(page)));
     }
-    let cover = landscape_material(page);
+    let cover = landscape_material(page,1.,1.);
     let clearance = input.site.z-landscape_elevation(page,vec2f(0.));
     let vegetation = select(cover.forest,cover.shrub,input.kind==3u);
     let exposed = cover.bare+cover.shrub+cover.grass;
