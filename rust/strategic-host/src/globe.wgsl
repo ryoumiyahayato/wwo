@@ -979,8 +979,7 @@ fn park_mask_level(uv:vec2f,base:u32,side:u32,level:u32) -> vec4f {
     return mix(a,b,t.y);
 }
 
-fn park_coverage(ll:vec2f,mpp:f32) -> vec4f {
-    if mpp>=42. {return vec4f(0.);}
+fn park_layout(ll:vec2f,mpp:f32) -> vec4f {
     let base=city_water[arrayLength(&city_water)-1u];
     for (var site=0u;site<city_water[base];site+=1u) {
         let header=base+1u+site*8u;
@@ -990,27 +989,36 @@ fn park_coverage(ll:vec2f,mpp:f32) -> vec4f {
         if any(uv<vec2f(0.)) || any(uv>=vec2f(1.)) {continue;}
         let side=city_water[header+4u];
         let first=base+city_water[header+5u];
-        let mip=max(0.,log2(mpp*.5));
+        let mip=clamp(log2(mpp*.5),0.,log2(f32(side)));
         let level=u32(mip);
         var cover=park_mask_level(uv,first,side,level);
         if fract(mip)>.001 {
             cover=mix(cover,park_mask_level(uv,first,side,level+1u),fract(mip));
         }
-        return cover*(1.-smoothstep(20.,42.,mpp));
+        return cover;
     }
     return vec4f(0.);
 }
 
-fn park_ground(color:vec3f,ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec3f {
-    if (area&3u)>1u {return color;}
-    let cover=park_coverage(ll,mpp);
-    if cover.a<=.001 {return color;}
+fn park_coverage(ll:vec2f,mpp:f32) -> vec4f {
+    if mpp>=42. {return vec4f(0.);}
+    return park_layout(ll,mpp)*(1.-smoothstep(20.,42.,mpp));
+}
+
+fn park_pigment(cover:vec4f,earth:vec3f,mpp:f32) -> vec3f {
     let turf=vec3f(.461,.525,.344)*(1.+material_grain(earth,mpp,GRASS,18.,5.)*.39);
     let gravel=vec3f(.651,.611,.519)*(1.+material_grain(earth,mpp,GRAVEL,8.,4.)*.37);
     let water=vec3f(.250,.359,.364);
     let canopy=vec3f(.285,.393,.228);
     let lawn=max(0.,cover.a-cover.g-cover.b-cover.r*.95);
-    return color*(1.-cover.a)+turf*lawn+gravel*cover.g+water*cover.b+canopy*cover.r*.95;
+    return turf*lawn+gravel*cover.g+water*cover.b+canopy*cover.r*.95;
+}
+
+fn park_ground(color:vec3f,ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec3f {
+    if (area&3u)>1u {return color;}
+    let cover=park_coverage(ll,mpp)*(1.-historic_surface_page(ll,mpp).weight);
+    if cover.a<=.001 {return color;}
+    return color*(1.-cover.a)+park_pigment(cover,earth,mpp);
 }
 
 // City pages carry feature coverage. Let the QPK pass own the
@@ -1077,6 +1085,8 @@ fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
 
 fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
     let historical=tile.options.z>1.5;
+    let historic=historic_surface_page(ll,mpp).weight;
+    let legacy_ground=1.-historic;
     let detail=1.-smoothstep(16.,CITY_INK_MPP,mpp);
     if !historical && detail<=0. {return vec4f(0.);}
     let du=1./vec2f(textureDimensions(city_data));
@@ -1104,7 +1114,8 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
         let surface=mix(city_road(true,major/max(.001,road)),vec3f(.674,.660,.631),
             smoothstep(5.,17.,mpp));
         let grain=material_grain(earth,mpp,SETTS,5.,7.);
-        return vec4f(surface*(1.+grain*.52),road*smoothstep(0.,160.,edge_distance));
+        let legacy_street=1.-historic*historic_street_weight(mpp,true);
+        return vec4f(surface*(1.+grain*.52),road*smoothstep(0.,160.,edge_distance)*legacy_street);
     }
     let offset=max(1.,exp2(mip)*.46);
     let edge=textureSampleLevel(city_data,linear,uv-du*offset,mip).r;
@@ -1125,13 +1136,14 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
         let middle=smoothstep(5.,17.,mpp);
         let roofs=mix(city_roof(true)*.94,city_roof(true)*1.15,interior);
         let surface=mix(court,roofs,middle);
-        let opacity=dry*coverage*mix(.48,.88,middle)*smoothstep(0.,200.,edge_distance)*(1.-park_coverage(ll,mpp).a);
+        let opacity=dry*coverage*mix(.48,.88,middle)*smoothstep(0.,200.,edge_distance)
+            *(1.-park_coverage(ll,mpp).a)*legacy_ground;
         return vec4f(surface,opacity);
     }
     if tile.options.z>2.5 {
         // The generalized historical survey supplies the outer built area.
         let support=smoothstep(0.,420.,edge_distance);
-        let built=dry*buildings.r*mix(.17,.66,smoothstep(32.,155.,mpp))*(1.-park_coverage(ll,mpp).a);
+        let built=dry*buildings.r*mix(.17,.66,smoothstep(32.,155.,mpp))*(1.-park_coverage(ll,mpp).a)*legacy_ground;
         let street=buildings.g*.43*(1.-smoothstep(54.,163.,mpp))*smoothstep(480.,7200.,edge_distance);
         let surface=mix(court,city_roof(true)*1.23,smoothstep(14.,95.,mpp));
         let alpha=built*(1.-street)+street;
@@ -1142,19 +1154,21 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
     // London uses the area of the Ordnance Survey footprints and streets.
     // Keep the footprint average intact even after individual roofs become subpixel.
     let support=smoothstep(0.,mix(310.,620.,blocks),edge_distance);
-    let roof_alpha=dry*buildings.r*select(detail,smoothstep(2.,9.,mpp),historical);
-    let shadow=dry*max(0.,edge-buildings.r)*.44*(1.-smoothstep(52.,145.,mpp));
-    let paved=dry*blocks*mix(.25,.70,smoothstep(5.,19.,mpp))*(1.-smoothstep(54.,165.,mpp));
+    let roof_alpha=dry*buildings.r*select(detail,smoothstep(2.,9.,mpp),historical)*legacy_ground;
+    let shadow=dry*max(0.,edge-buildings.r)*.44*(1.-smoothstep(52.,145.,mpp))*legacy_ground;
+    let paved=dry*blocks*mix(.25,.70,smoothstep(5.,19.,mpp))*(1.-smoothstep(54.,165.,mpp))*legacy_ground;
     let main=smoothstep(.18,.67,buildings.g);
     let road_weight=mix(1.-smoothstep(45.,128.,mpp),1.-smoothstep(95.,315.,mpp),main);
-    let road=buildings.g*road_weight;
+    let legacy_street=1.-historic*historic_street_weight(mpp,false);
+    let road=buildings.g*road_weight*select(1.,legacy_street,historical);
     let roof_color=mix(city_roof(false)*.91,city_roof(false)*1.10,buildings.r);
     let paving=mix(terrain.rgb,court-vec3f(.046,.044,.028),.74);
     let shadow_color=city_roof(false)*.72;
     let covered=(paved*(1.-shadow)+shadow)*(1.-roof_alpha)+roof_alpha;
     let base_color=(paving*paved*(1.-shadow)+shadow_color*shadow)*(1.-roof_alpha)+roof_color*roof_alpha;
     let alpha=covered*(1.-road)+road;
-    let road_ink=mix(city_road(false,main),vec3f(.695,.672,.623),smoothstep(5.,18.,mpp));
+    let street_paint=smoothstep(5.,18.,mpp);
+    let road_ink=mix(city_road(false,main),vec3f(.695,.672,.623),mix(street_paint,max(street_paint,.74),historic));
     let road_color=mix(road_ink,vec3f(.63,.60,.56),terrain.a);
     let color=base_color*(1.-road)+road_color*road;
     return vec4f(color/max(.0001,alpha),alpha*support);
