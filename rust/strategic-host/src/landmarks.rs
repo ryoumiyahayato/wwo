@@ -2,7 +2,7 @@ use crate::{camera::{self, Camera}, world::{Place, World}};
 use bytemuck::{Pod, Zeroable};
 use glam::{Mat3, Mat4, Vec3};
 use serde::Deserialize;
-use std::{collections::BTreeMap, io};
+use std::{collections::BTreeMap, io, path::Path};
 use wwo_map_lab::transport::models::{self as transport_models, ModelLod, TransportModel};
 
 const R40_MODELS: &[u8] = include_bytes!("../../../assets/settlements/urban_landscape_r40.glb");
@@ -202,7 +202,7 @@ pub struct VisibleModel {
 }
 
 impl Landmarks {
-    pub fn install(world: &mut World) -> io::Result<Self> {
+    pub fn install(world: &mut World, ground_root: Option<&Path>) -> io::Result<Self> {
         let mut models = Vec::new();
         let mut cities = BTreeMap::new();
         for source in SHARDS {
@@ -239,10 +239,15 @@ impl Landmarks {
                 });
                 cities.insert(index, CityLayout::from_source(city.geometry.coordinates, city.valid_from, city.valid_to, city.miniature_layout)?);
             }
-            for landmark in shard.metadata.landmark_visuals {
+            for mut landmark in shard.metadata.landmark_visuals {
                 let Some(asset) = ASSETS.iter().position(|asset| asset.path == landmark.model_path)
                     else { continue };
                 let model = &ASSETS[asset];
+                let has_city_ground=ground_root.is_some_and(|root|world.tiles.iter().any(|tile|
+                    tile.city && camera::inside(landmark.anchor(),tile.core) && root.join(&tile.path).is_file()));
+                if !has_city_ground {
+                    landmark.model_max_mpp=landmark.model_admission_mpp.unwrap_or(landmark.model_max_mpp);
+                }
                 let place = Place {
                     id: landmark.id.clone(), name: model.name.into(),
                     name_zh: landmark.display_name.clone(), symbol: model.symbol.into(),
@@ -394,9 +399,7 @@ impl Landmark {
     fn anchor(&self) -> [f64; 2] { self.display_lon_lat.unwrap_or(self.geometry.coordinates) }
 
     fn project(&self, place: usize, asset: usize, date: &str, camera: &Camera, pitch: f64, size: [u32; 2]) -> Option<VisibleModel> {
-        let limit=if camera.precision_enabled() && camera.has_city_ground(self.anchor()) {self.model_max_mpp}
-            else {self.model_admission_mpp.unwrap_or(self.model_max_mpp)};
-        if camera.mpp > limit
+        if camera.mpp > self.model_max_mpp
             || !crate::ui::active(date, &self.valid_from, &self.valid_to) {
             return None;
         }

@@ -157,7 +157,9 @@ impl Host {
                 Err(error)=>{resource_warnings.push(format!("Building models · {error}"));None}
             }
         } else {None};
-        let landmarks=if formal_map {Some(landmarks::Landmarks::install(&mut world)?)} else {None};
+        let landmarks=if formal_map {
+            Some(landmarks::Landmarks::install(&mut world,(!config.terrain_review).then_some(map_root.as_path()))?)
+        } else {None};
         let mut camera=Camera::new(VIEW_SIZE);
         camera.local_models=landmarks.is_some();
         if world.tiles.first().is_none_or(|t|t.level!=0) || world.polities.len()>255 || world.admin.len()>255 {return Err(io::Error::other("invalid world index"));}
@@ -753,8 +755,7 @@ impl Host {
         for id in &self.candidate {if let Some(p)=self.cached.get_mut(id){p.used=now;}}
         self.cached.retain(|_,p|now.duration_since(p.used)<=CACHE_TTL);
         if self.reader.inflight.is_some(){return;}
-        let city_first=self.mode==Mode::Geographic
-            && self.renderer.as_ref().is_some_and(|r|r.terrain_max_level()>0);
+        let city_first=self.renderer.as_ref().is_some_and(|r|r.terrain_max_level()>0);
         let city=self.visible.iter().filter(|&&id|city_first&&self.world.tiles[id].city
             && self.index.scissor(id,&self.camera,self.size).is_some());
         let Some(i)=city.chain(self.visible.iter()).chain(self.candidate.iter()).copied()
@@ -784,7 +785,7 @@ impl Host {
         if self.camera.mpp<700.{self.grid_step=25000.;}else if self.camera.mpp>900.{self.grid_step=50000.;}
         view.settings=[self.state.date.season_day(),self.mode.index() as f32,u8::from(active) as f32,u8::from(self.theme) as f32];
         view.map_style[1]=self.renderer.as_ref().unwrap().terrain_max_level() as f32;
-        let land_detail=self.mode==Mode::Geographic && !self.in_lobby();
+        let land_detail=!self.in_lobby();
         view.close_sample=self.renderer.as_mut().unwrap().update_close_terrain(&self.camera,self.size,land_detail,now);
         view.map_style[3]=if self.hud.military_grid{self.grid_step}else{0.};
         if self.military_grid_active(){
@@ -936,7 +937,7 @@ impl Host {
             ||self.mode==Mode::Military&&view.map_style[3]>0.;
         let pages:Vec<_>=self.visible.iter().filter_map(|&id| {
             let tile=&self.world.tiles[id];
-            if !tile.ids && self.mode != Mode::Geographic { return None; }
+            if !tile.ids && !tile.city_ink_only && self.mode != Mode::Geographic { return None; }
             if tile.city_ink_only && view.map_style[1]<=0. { return None; }
             if view.map_style[1]>0.&&!needs_overlay&&!tile.city&&view.selection[1]<0.5&&view.selection[2]<0.5{return None;}
             let p=self.cached.get(&id)?;
@@ -979,7 +980,7 @@ impl Host {
         view.map_style[2]=renderer.terrain_view_level() as f32;
         view.natural_lod=renderer.terrain_viewport_mix();
         view.set_terrain_exact(renderer.terrain_exact());
-        let landscape_enabled=!loading&&(!self.config.managed||self.state.session.is_some())&&self.mode==Mode::Geographic;
+        let landscape_enabled=!loading&&(!self.config.managed||self.state.session.is_some());
         renderer.prepare_rivers(&self.camera,self.size,landscape_enabled&&!renderer.terrain_exact());
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
