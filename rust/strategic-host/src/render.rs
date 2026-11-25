@@ -223,7 +223,9 @@ struct GroundSurface {
     repeat:wgpu::Sampler,
     height:Option<wgpu::TextureView>,
     art:wgpu::TextureView,
+    materials:wgpu::TextureView,
     water:wgpu::Buffer,
+    city_water:wgpu::Buffer,
     water_pixels:wgpu::Buffer,
     water_raster:Option<WaterRaster>,
     loaded:bool,
@@ -253,11 +255,13 @@ fn water_pixels(device:&wgpu::Device, bytes:u64)->wgpu::Buffer {
 }
 
 impl GroundSurface {
-    fn new(device:&wgpu::Device, water_available:bool)->Self {
+    fn new(device:&wgpu::Device, materials:wgpu::TextureView, water_available:bool)->Self {
         let entries=[sampled(0),sampler_entry(1),wgpu::BindGroupLayoutEntry{
                 visibility:wgpu::ShaderStages::FRAGMENT|wgpu::ShaderStages::COMPUTE,
                 ..texture_entry(2,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)
-            },water_storage(3,wgpu::ShaderStages::FRAGMENT,true),water_storage(4,wgpu::ShaderStages::FRAGMENT,true)];
+            },water_storage(3,wgpu::ShaderStages::FRAGMENT,true),water_storage(4,wgpu::ShaderStages::FRAGMENT,true),
+            texture_entry(6,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
+            water_storage(7,wgpu::ShaderStages::FRAGMENT,true)];
         let height=Some(create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm)
             .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()}));
         let layout=layout(device,&entries);
@@ -268,16 +272,23 @@ impl GroundSurface {
         });
         let art=create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm).create_view(&Default::default());
         let water=crate::hydrology::water_buffer(device,water_available);
+        let city_geometry=zstd::stream::decode_all(&include_bytes!("city-geometry.bin.zst")[..])
+            .expect("embedded city geometry");
+        let city_water=device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label:Some("Near-map city banks and streets"),
+            contents:&city_geometry,
+            usage:wgpu::BufferUsages::STORAGE,
+        });
         let water_pixels=water_pixels(device,4);
-        let group=Self::bind(device,&layout,&repeat,&art,height.as_ref(),&water,&water_pixels);
-        Self{layout,group,repeat,height,art,water,water_pixels,water_raster:None,loaded:false,custom_art:false}
+        let group=Self::bind(device,&layout,&repeat,&art,height.as_ref(),&materials,&water,&water_pixels,&city_water);
+        Self{layout,group,repeat,height,art,materials,water,city_water,water_pixels,water_raster:None,loaded:false,custom_art:false}
     }
 
     fn bind(device:&wgpu::Device, layout:&wgpu::BindGroupLayout, repeat:&wgpu::Sampler,
-            art:&wgpu::TextureView, height:Option<&wgpu::TextureView>,
-            water:&wgpu::Buffer, pixels:&wgpu::Buffer)->wgpu::BindGroup {
+            art:&wgpu::TextureView, height:Option<&wgpu::TextureView>, materials:&wgpu::TextureView,
+            water:&wgpu::Buffer, pixels:&wgpu::Buffer, city_water:&wgpu::Buffer)->wgpu::BindGroup {
         let mut entries=vec![tex_resource(0,art),sampler_resource(1,repeat),
-            buf_resource(3,water),buf_resource(4,pixels)];
+            buf_resource(3,water),buf_resource(4,pixels),tex_resource(6,materials),buf_resource(7,city_water)];
         if let Some(height)=height {entries.push(tex_resource(2,height));}
         bind(device,layout,&entries)
     }
@@ -290,7 +301,7 @@ impl GroundSurface {
             self.art=material_texture(device,queue,art);
         }
         self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,self.height.as_ref(),
-            &self.water,&self.water_pixels);
+            &self.materials,&self.water,&self.water_pixels,&self.city_water);
         self.loaded=true;
         Ok(())
     }
@@ -316,9 +327,9 @@ impl GroundSurface {
             let fits=bytes<=u64::from(device.limits().max_storage_buffer_binding_size);
             self.water_pixels=water_pixels(device,if fits {bytes} else {4});
             raster.buffers=fits.then(||bind(device,&raster.pipeline.get_bind_group_layout(3),
-                &[buf_resource(3,&self.water),buf_resource(5,&self.water_pixels)]));
+                &[buf_resource(3,&self.water),buf_resource(5,&self.water_pixels),buf_resource(7,&self.city_water)]));
             self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,self.height.as_ref(),
-                &self.water,&self.water_pixels);
+                &self.materials,&self.water,&self.water_pixels,&self.city_water);
             raster.previous=None;
         }
         let Some(buffers)=&raster.buffers else {return;};
@@ -341,7 +352,8 @@ impl GroundSurface {
 #[derive(Clone,Copy,Pod,Zeroable)]
 struct ModelInstance {
     clip_from_model:[[f32;4];4],
-    style:[f32;3],
+    style:[f32;4],
+    model_scale:[f32;3],
 }
 
 struct ResidentModel {
@@ -355,6 +367,7 @@ struct ResidentModel {
 
 struct ModelLayer {
     pipeline: wgpu::RenderPipeline,
+    materials: wgpu::BindGroup,
     depth: Option<([u32; 2], wgpu::TextureView)>,
     residents: HashMap<ModelKey, ResidentModel>,
     visible: HashSet<ModelKey>,
@@ -369,9 +382,15 @@ impl ModelLayer {
     const DEPTH: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
     const CITY_LOD_CACHE_TIME: Duration = Duration::from_secs(2);
 
-    fn new(device: &wgpu::Device, format: wgpu::TextureFormat, events: winit::event_loop::EventLoopProxy<crate::HostEvent>) -> Self {
+    fn new(device: &wgpu::Device, format: wgpu::TextureFormat, surface: &GroundSurface,
+           events: winit::event_loop::EventLoopProxy<crate::HostEvent>) -> Self {
+        let material_layout=layout(device,&[
+            texture_entry(0,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
+            sampler_entry(1),
+        ]);
+        let materials=bind(device,&material_layout,&[tex_resource(0,&surface.materials),sampler_resource(1,&surface.repeat)]);
         let stages = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("WWO static model"), bind_group_layouts: &[], push_constant_ranges: &[],
+            label: Some("WWO static model"), bind_group_layouts: &[&material_layout], push_constant_ranges: &[],
         });
         let shader = device.create_shader_module(wgpu::include_wgsl!("landmark.wgsl"));
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -390,7 +409,7 @@ impl ModelLayer {
                 }, wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<ModelInstance>() as u64,
                     step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: &wgpu::vertex_attr_array![3=>Float32x4, 4=>Float32x4, 5=>Float32x4, 6=>Float32x4, 7=>Float32x3],
+                    attributes: &wgpu::vertex_attr_array![3=>Float32x4, 4=>Float32x4, 5=>Float32x4, 6=>Float32x4, 7=>Float32x4, 8=>Float32x3],
                 }],
             },
             fragment: Some(wgpu::FragmentState {
@@ -398,14 +417,15 @@ impl ModelLayer {
                 targets: &[Some(wgpu::ColorTargetState { format, blend: None, write_mask: wgpu::ColorWrites::ALL })],
             }),
         });
-        Self { pipeline, depth: None, residents: HashMap::new(), visible: HashSet::new(),
+        Self { pipeline, materials, depth: None, residents: HashMap::new(), visible: HashSet::new(),
             pending: HashSet::new(), failed: HashSet::new(), events, city_override:None,city_revision:0 }
     }
 
     fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel]) {
         let now = Instant::now();
         self.visible.clear();
-        self.visible.extend(models.iter().filter(|model| model.lod_range[0] < model.lod_range[1]).map(|model| model.key));
+        self.visible.extend(models.iter().filter(|model| model.lod_range[0] < model.lod_range[1]
+            || model.city_page.is_some()).map(|model| model.key));
         self.residents.retain(|key, model| {
             self.visible.contains(key) || (key.is_city() && now.duration_since(model.last_drawn) < Self::CITY_LOD_CACHE_TIME)
         });
@@ -423,14 +443,20 @@ impl ModelLayer {
             });
             self.depth = Some((size, texture.create_view(&Default::default())));
         }
+        let loaded_detail=self.loaded_city_details();
         for model in models {
             let key = model.key;
-            let lod_range=self.lod_range(model);
+            if let Some(mesh)=&model.city_page {
+                if !self.residents.contains_key(&key) {self.upload(device,key,mesh);}
+            }
+            let lod_range=self.lod_range(model,loaded_detail);
             if let Some(resident) = self.residents.get_mut(&key) {
                 if lod_range[0]<lod_range[1] {
                     let [low,high]=lod_range;
                     let waterline=f32::from(u8::from(key.clips_at_waterline()));
-                    resident.transforms.push(ModelInstance{clip_from_model:model.clip_from_model,style:[low,high,waterline]});
+                    let city=f32::from(u8::from(key.is_city()));
+                    resident.transforms.push(ModelInstance{clip_from_model:model.clip_from_model,
+                        style:[low,high,waterline,city],model_scale:model.model_scale});
                     resident.last_drawn = now;
                 }
             } else if self.visible.contains(&key) && !self.failed.contains(&key) && self.pending.insert(key) {
@@ -456,7 +482,18 @@ impl ModelLayer {
         }
     }
 
-    fn lod_range(&self,model:&VisibleModel)->[f32;2] {
+    fn loaded_city_details(&self)->u8 {
+        (1..=4).filter(|&module|self.residents.contains_key(&ModelKey::city_detail(module)))
+            .fold(0,|mask,module|mask|(1u8<<module))
+    }
+
+    fn lod_range(&self,model:&VisibleModel,loaded_detail:u8)->[f32;2] {
+        if model.city_detail_mask & !loaded_detail != 0 {
+            return match &model.city_page {
+                Some(_)=>[0.,model.lod_range[1]],
+                None=>[0.,0.],
+            };
+        }
         if let Some((key,opacity))=model.alternate {
             if !self.residents.contains_key(&key) {return [0.,opacity];}
         }
@@ -474,6 +511,11 @@ impl ModelLayer {
         self.pending.remove(&key);
         let model = model.inspect_err(|_| { self.failed.insert(key); })?;
         if !self.visible.contains(&key) { return Ok(()); }
+        self.upload(device,key,&model);
+        Ok(())
+    }
+
+    fn upload(&mut self, device:&wgpu::Device, key:ModelKey, model:&ModelMesh) {
         let upload = |contents, usage| device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("WWO static model"), contents, usage,
         });
@@ -483,7 +525,6 @@ impl ModelLayer {
             count: model.indices.len() as u32, instance_buffer: Self::instance_buffer(device, std::mem::size_of::<ModelInstance>() as u64),
             transforms: Vec::new(), last_drawn: Instant::now(),
         });
-        Ok(())
     }
 
     fn draw(&self, encoder: &mut wgpu::CommandEncoder, image: &wgpu::TextureView) {
@@ -500,6 +541,7 @@ impl ModelLayer {
             }), occlusion_query_set: None, timestamp_writes: None,
         });
         pass.set_pipeline(&self.pipeline);
+        pass.set_bind_group(0,&self.materials,&[]);
         for model in self.residents.values().filter(|model|!model.transforms.is_empty()) {
             pass.set_vertex_buffer(0, model.vertices.slice(..));
             pass.set_vertex_buffer(1, model.instance_buffer.slice(..));
@@ -557,6 +599,28 @@ fn material_texture(device:&wgpu::Device,queue:&wgpu::Queue,art:Raster)->wgpu::T
         if level+1<levels {pixels=downsample_rgba(&pixels,w,h);}
     }
     texture.create_view(&Default::default())
+}
+
+fn surface_materials(device:&wgpu::Device,queue:&wgpu::Queue)->io::Result<wgpu::TextureView> {
+    const LAYERS:u32=12;
+    let art=crate::decode_rgba(&include_bytes!("surface-materials.png")[..])?;
+    let [side,height]=art.size;
+    if !side.is_power_of_two() || height!=side*LAYERS {
+        return Err(io::Error::other("Invalid WWO surface material layers"));
+    }
+    let levels=side.ilog2()+1;
+    let texture=create_texture_mips(device,[side,side,LAYERS],wgpu::TextureFormat::Rgba8Unorm,levels);
+    let mut pixels=art.pixels;
+    for level in 0..levels {
+        let width=side>>level;
+        write_texture_mip(queue,&texture,[width,width,LAYERS],4,&pixels,level);
+        if level+1<levels {
+            // Filter each material independently so the smallest mip cannot mix layers.
+            pixels=pixels.chunks_exact((width*width*4) as usize)
+                .flat_map(|layer|downsample_rgba(layer,width,width)).collect();
+        }
+    }
+    Ok(texture.create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()}))
 }
 fn create_texture_mips(device:&wgpu::Device,size:[u32;3],format:wgpu::TextureFormat,levels:u32)->wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
@@ -841,7 +905,8 @@ impl Renderer {
                 .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()});
             [empty(),empty(),create_texture(&device,[1,1,1],wgpu::TextureFormat::R32Uint).create_view(&Default::default())]
         };
-        let mut surface=GroundSurface::new(&device,water_source.is_some());
+        let materials=surface_materials(&device,&queue).map_err(|error|error.to_string())?;
+        let mut surface=GroundSurface::new(&device,materials,water_source.is_some());
         let water_pages=water_source.and_then(|source| {
             match crate::hydrology::WaterPages::open(&source,&queue,&surface.water) {
                 Ok(pages)=>Some(pages),
@@ -907,7 +972,7 @@ impl Renderer {
         let history_light=pipeline(&[&screen_layout],&hud_shader,"screen_vertex","history_light",&mesh_layout);
         let instrument=pipeline(&[&screen_layout,&font_layout,&instrument_layout],&hud_shader,"screen_vertex","instrument",&mesh_layout);
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
-        let models=ModelLayer::new(&device,format,events);
+        let models=ModelLayer::new(&device,format,&surface,events);
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),
                 frame_timer:None,frame_acquire_ms:0.,view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
@@ -967,7 +1032,7 @@ impl Renderer {
         let art=material_texture(&self.device,&self.queue,image);
         let surface=&mut self.surface;
         surface.group=GroundSurface::bind(&self.device,&surface.layout,&surface.repeat,&art,surface.height.as_ref(),
-            &surface.water,&surface.water_pixels);
+            &surface.materials,&surface.water,&surface.water_pixels,&surface.city_water);
         surface.art=art;
         surface.custom_art=true;
         Ok(true)
@@ -1080,7 +1145,7 @@ impl Renderer {
     }
 
     pub fn has_model(&self, model:&VisibleModel) -> bool {
-        let [low,high]=self.models.lod_range(model);
+        let [low,high]=self.models.lod_range(model,self.models.loaded_city_details());
         low<high && self.models.residents.contains_key(&model.key)
     }
     pub fn update_terrain(&mut self,camera:&Camera,size:[u32;2],now:Instant)->io::Result<()> {

@@ -289,7 +289,8 @@ impl Host {
             "click"=>self.click([input.x,input.y]),
             "wheel"=>{
                 let point=[input.x,input.y];
-                if !self.scroll_population_debug(point,input.steps)&&!self.scroll_countries(point,input.steps){self.zoom(point,input.steps);}
+                if !self.scroll_population_debug(point,input.steps) && !self.scroll_countries(point,input.steps)
+                    && !self.scroll_place_filters(point,input.steps) {self.zoom(point,input.steps);}
             }
             "drag"=>{
                 self.velocity=[0.;2];

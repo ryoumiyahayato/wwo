@@ -192,6 +192,7 @@ pub struct Directory {
     places: HashMap<String, Vec<usize>>,
     regions: HashMap<String, Vec<usize>>,
     bounds: Vec<Bounds>,
+    areas: Vec<usize>,
 }
 
 impl Directory {
@@ -209,7 +210,7 @@ impl Directory {
             .collect();
             let mut directory = Self {
                 records, ids: HashMap::new(), types: HashMap::new(), places: HashMap::new(),
-                regions: HashMap::new(), bounds: Vec::new(),
+                regions: HashMap::new(), bounds: Vec::new(), areas: Vec::new(),
             };
             for (i, record) in directory.records.iter().enumerate() {
                 assert!(directory.ids.insert(record.resource_id.clone(), i).is_none());
@@ -221,6 +222,7 @@ impl Directory {
                     directory.regions.entry(region.clone()).or_default().push(i);
                 }
                 directory.bounds.push(record.geometry.bounds());
+                if matches!(&record.geometry, Geometry::Polygon(_)) { directory.areas.push(i); }
             }
             directory
         })
@@ -244,6 +246,14 @@ impl Directory {
             let record = &self.records[i];
             (record.valid_from <= year && year < record.valid_to && self.bounds[i].intersects(bounds))
                 .then_some(record)
+        })
+    }
+
+    pub fn areas_in_view(&self, category: Category, bounds: Bounds, year: i32) -> impl Iterator<Item = &Resource> {
+        self.areas.iter().filter_map(move |&i| {
+            let record = &self.records[i];
+            (record.resource_type.category() == category && record.valid_from <= year
+                && year < record.valid_to && self.bounds[i].intersects(bounds)).then_some(record)
         })
     }
 

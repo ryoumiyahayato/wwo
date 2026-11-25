@@ -2,6 +2,7 @@ use crate::{camera::Camera,overlay::{Atlas,Mesh},world::{Place,World}};
 use std::cmp::Ordering;
 use std::collections::HashSet;
 use crate::{map_facilities::{self, Facility, PlaceFilter}, map_markers};
+use wwo_character_core::Language;
 #[derive(Clone,Copy)]
 pub enum Ink { HudArtGlass, ClockGears, Solid, Text, Flag, HudArt, HudText, Instrument, MenuArt, PrologueArt, ProloguePaper, OpeningCloud, Loading, HistoryLight }
 
@@ -60,7 +61,6 @@ pub struct Ui<'a> {
     pub econ_legend:&'a [(String,[u8;4])],
     pub resources: Option<&'a crate::resource_map::State>,
     pub year: i32,
-    pub mouse:&'a str,
     pub labels:bool,
     pub transport_detail:Option<&'a crate::transport_ui::Detail>,
     pub formal:crate::formal_ui::Display<'a>,
@@ -76,6 +76,32 @@ pub fn can_read_object(world: &World, written: Option<&wwo_map_lab::formal_boots
         Object::Polity(index) => written.can_read_polity_record(&world.polities[index].id),
         Object::Administration(_) => written.can_read_polity_record("country_fra"),
     })
+}
+
+pub fn readable_map_name<'a>(world: &'a World, skin: &'a crate::formal_ui::Skin,
+    written: Option<&wwo_map_lab::formal_bootstrap::InitialWorld>, object: Object) -> Option<&'a str> {
+    let fallback = object_name(world, skin, object);
+    let Some(written) = written else { return Some(fallback); };
+    let Object::Place(index) = object else {
+        return can_read_object(world, Some(written), object).then_some(fallback);
+    };
+    use Language::*;
+    let place = &world.places[index];
+    let key=place.id.strip_prefix("place:").unwrap_or(&place.id);
+    let variants: &[(Language, &str)] = match key {
+        "london" => &[(English,"London"),(French,"Londres"),(German,"London"),(Russian,"Лондон"),(Japanese,"ロンドン")],
+        "paris" => &[(French,"Paris"),(English,"Paris"),(German,"Paris"),(Russian,"Париж"),(Japanese,"パリ")],
+        "berlin" => &[(German,"Berlin"),(French,"Berlin"),(English,"Berlin"),(Russian,"Берлин"),(Japanese,"ベルリン")],
+        "moscow" => &[(Russian,"Москва"),(French,"Moscou"),(English,"Moscow"),(German,"Moskau"),(Japanese,"モスクワ")],
+        _ => &[],
+    };
+    let variants = || variants.iter().copied().chain(
+        (!place.name_zh.is_empty()).then_some((WrittenChinese, place.name_zh.as_str())));
+    let opening = written.opening_language();
+    variants().find(|&(language, _)| Some(language) == opening && written.can_read_language(language))
+        .or_else(|| variants().find(|&(language, _)| written.can_read_language(language)))
+        .map(|(_, name)| name)
+        .or_else(|| can_read_object(world, Some(written), object).then_some(place.name.as_str()))
 }
 
 pub fn active(date:&str,from:&str,to:&str)->bool {(from.is_empty() || date>=from) && (to.is_empty() || date<to)}
@@ -98,7 +124,6 @@ fn labels<'a>(world:&'a World,ui:&Ui<'a>)->Vec<Label<'a>> {
     });
     list
 }
-fn measure(a:&Atlas,variant:usize,s:&str)->f32 {s.chars().map(|c|a.glyph(variant,c)[2]).sum()}
 fn panel(m:&mut Mesh,x:f32,y:f32,w:f32,h:f32) {
     m.rect(x,y,w,h,PANEL);m.rect(x,y,w,1.,GOLD);m.rect(x,y+h-1.,w,1.,LINE);
 }
@@ -174,16 +199,15 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
         placed.push((i,place,[x+px+4.,y+px*0.5-7.],chosen));
     }
     for (i,place,[x,y],chosen) in placed {
-        let name=if skin.english()||place.name_zh.is_empty(){&place.name}else{&place.name_zh};
-        let readable = can_read_object(world, ui.formal.written_world, Object::Place(i));
-        let width=if readable { skin.width(name,0) } else { 36. };
+        let name=readable_map_name(world,skin,ui.formal.written_world,Object::Place(i));
+        let width=name.map_or(36., |name|skin.width(name,0));
         let area=[x-2.,y-2.,width+4.,19.];
         if x+width>w||(!chosen&&occupied.iter().any(|&old|intersects(area,old))) {continue;}
         occupied.push(area);
-        if !readable {
+        let Some(name)=name else {
             ui.formal.ink_block(map,[x,y+6.,width,9.]);
             continue;
-        }
+        };
         for [dx,dy] in [[-1.,0.],[1.,0.],[0.,-1.],[0.,1.]] {
             skin.text(text,name,0,[x+dx,y+dy],width+1.,[41,48,43,230]);
         }
@@ -225,10 +249,10 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
 
 pub type Layers = [(Mesh,Ink);13];
 
-pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(Layers,Vec<Hit>) {
+pub fn compose(world:&World,_:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(Layers,Vec<Hit>) {
     let [w,h]=ui.size.map(|x|x as f32);
     let mut map=Mesh::default();let labels_mesh=Mesh::default();
-    let mut panels=Mesh::default();let mut text=Mesh::default();let mut flags=Mesh::default();
+    let mut panels=Mesh::default();let text=Mesh::default();let mut flags=Mesh::default();
     let mut hud_art=Mesh::default();let mut hud_type=Mesh::default();let mut instrument=Mesh::default();let mut clock=Mesh::default();
     let mut marker_art=Mesh::default();
     let mut marker_type=Mesh::default();
@@ -255,7 +279,6 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     if ui.details {occupied.push([w/2.-252.,105.,504.,detail_height]);}
     if let Some(country)=ui.country {occupied.push(country.rect(ui.size));}
     if let Some(detail)=ui.transport_detail {occupied.push(detail.rect(ui.size,ui.formal.hud.transport_detail_expanded));}
-    let readable = ui.formal.can_read_world();
     for label in labels(world,&ui).into_iter().filter(|_|ui.labels) {
         let readable = can_read_object(world, ui.formal.written_world, label.object);
         if occupied.len()>95 {break;}
@@ -316,15 +339,18 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         };
         skin.text(&mut hud_type,label,0,[x+15.,y+9.],230.,GOLD);
         crate::formal_ui::close_button(&mut panels, &mut hits, [x + width - 15., y + 8.], Action::Close);
-        if can_read_object(world, ui.formal.written_world, object) {
-        skin.text(&mut hud_type,object_name(world,skin,object),1,[x+15.,y+35.],270.,LIGHT);
-        let context=if ui.mode==Mode::Political { &extra } else { &desc };
-        skin.text(&mut hud_type,context,0,[x+15.,y+68.],270.,SUBTLE);
-        if has_debug { skin.text(&mut hud_type,&id,0,[x+15.,y+151.+extra_row],270.,SUBTLE); }
+        if let Some(name)=readable_map_name(world,skin,ui.formal.written_world,object) {
+            skin.text(&mut hud_type,name,1,[x+15.,y+35.],270.,LIGHT);
         } else {
             ui.formal.ink_block(&mut panels,[x+15.,y+42.,123.,12.]);
+        }
+        if ui.mode!=Mode::Political || can_read_object(world,ui.formal.written_world,object) {
+            let context=if ui.mode==Mode::Political { &extra } else { &desc };
+            skin.text(&mut hud_type,context,0,[x+15.,y+68.],270.,SUBTLE);
+        } else {
             ui.formal.ink_block(&mut panels,[x+15.,y+72.,217.,12.]);
         }
+        if has_debug { skin.text(&mut hud_type,&id,0,[x+15.,y+151.+extra_row],270.,SUBTLE); }
         if let Some(mode)=topic {
             let label=match mode {
                 Mode::Economic=>skin.choose("在经济地图显示","Show in economic map"),
@@ -345,10 +371,11 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     }
     if ui.details {
         if let Some(object)=ui.selected {
-            let readable = can_read_object(world, ui.formal.written_world, object);
             let width=504.;let x=(w-width)*0.5;let y=105.;
             panel(&mut panels,x,y,width,detail_height);
-            if readable { skin.text(&mut hud_type,object_name(world,skin,object),1,[x+22.,y+16.],420.,LIGHT); }
+            if let Some(name)=readable_map_name(world,skin,ui.formal.written_world,object) {
+                skin.text(&mut hud_type,name,1,[x+22.,y+16.],420.,LIGHT);
+            }
             else { ui.formal.ink_block(&mut panels,[x+22.,y+23.,174.,11.]); }
             crate::formal_ui::close_button(&mut panels, &mut hits, [x + width - 15., y + 8.], Action::Details);
             let mut lines=match object {
@@ -377,8 +404,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
                 }
             }
             for (i,line) in lines.iter().enumerate(){
-                if readable { skin.text(&mut hud_type,line,0,[x+22.,y+75.+i as f32*28.],460.,LIGHT); }
-                else { ui.formal.ink_block(&mut panels,[x+22.,y+82.+i as f32*28.,195.,11.]); }
+                skin.text(&mut hud_type,line,0,[x+22.,y+75.+i as f32*28.],460.,LIGHT);
             }
         }
     }
@@ -389,24 +415,21 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         skin.text(&mut hud_type,&format!("{query}_"),1,[x+15.,94.],420.,LIGHT);
         for (i,&object) in ui.search_results.iter().enumerate() {
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,132.+i as f32*30.,420.,27.],
-                if readable { object_name(world,skin,object) } else { "" },Some(Action::Select(object)),i==0);
-            if !readable { ui.formal.ink_block(&mut panels,[x+25.,140.+i as f32*30.,96.,11.]); }
+                readable_map_name(world,skin,ui.formal.written_world,object).unwrap_or_default(),Some(Action::Select(object)),i==0);
         }
     }
     let mut debug_right=145.;
     if crate::resource_map::available(ui.mode,ui.formal.hud.page,ui.formal.hud.menu,ui.formal.hud.market_map,ui.transport_detail.is_some()) {
-        let width=(measure(a,0,ui.econ_label)+25.).clamp(219.,374.);
+        let width=(skin.width(ui.econ_label,0)+25.).clamp(219.,374.);
         let x=w-width-17.;
         let lines=ui.econ_legend.len();
         let extra=if ui.resources.is_some(){28.}else{0.};
         panel(&mut panels,x,121.,width,51.+lines as f32*20.+extra);
-        if readable { text.text(a,0,ui.econ_label,[x+12.,130.],LIGHT); }
-        else { ui.formal.ink_block(&mut panels,[x+12.,136.,118.,11.]); }
+        skin.text(&mut hud_type,ui.econ_label,0,[x+12.,130.],width-24.,LIGHT);
         for (i,(value,color)) in ui.econ_legend.iter().enumerate() {
             let y=158.+i as f32*20.;
             panels.rect(x+12.,y+6.,13.,10.,*color);
-            if readable { text.text(a,0,value,[x+34.,y],SUBTLE); }
-            else { ui.formal.ink_block(&mut panels,[x+34.,y+6.,86.,11.]); }
+            skin.text(&mut hud_type,value,0,[x+34.,y],width-46.,SUBTLE);
         }
         if let Some(resources)=ui.resources {
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+12.,166.+lines as f32*20.,width-24.,25.],
@@ -450,12 +473,6 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             if market.sites.is_empty() {
                 skin.text(&mut hud_type,"暂无已知交易地点",0,[left+12.,113.],260.,LIGHT);
             }
-        }
-    }
-    if ui.formal.hud.page==crate::formal_ui::Page::Map {
-        if readable {
-            let width=skin.width(ui.mouse,0).min(234.);
-            skin.text(&mut hud_type,ui.mouse,0,[w-width-18.,h-48.],width+1.,SUBTLE);
         }
     }
     if let Some(detail)=ui.transport_detail {
