@@ -12,6 +12,13 @@ struct Output {
 @group(0) @binding(0) var materials: texture_2d_array<f32>;
 @group(0) @binding(1) var material_sampler: sampler;
 
+struct CityBatch {
+    clip_from_page: mat4x4f,
+    fit: mat4x4f,
+    inverse_size_and_opacity: vec4f,
+};
+@group(1) @binding(0) var<uniform> city_batch: CityBatch;
+
 @vertex fn model_vertex(
     @location(0) position: vec3f,
     @location(1) normal: vec3f,
@@ -26,6 +33,23 @@ struct Output {
     let clip_from_model = mat4x4f(column_x, column_y, column_z, origin);
     return Output(clip_from_model * vec4f(position, 1.), normal, color, style.xy, position.y, style.z,
                   position*model_scale, style.w);
+}
+
+@vertex fn city_vertex(
+    @location(0) position: vec3f,
+    @location(1) normal: vec3f,
+    @location(2) color: vec4f,
+    @location(3) column_x: vec4f,
+    @location(4) column_y: vec4f,
+    @location(5) column_z: vec4f,
+    @location(6) origin: vec4f,
+    @location(7) dimensions: vec3f,
+) -> Output {
+    let placement=mat4x4f(column_x,column_y,column_z,origin);
+    let fitted=placement*(city_batch.fit*vec4f(position,1.));
+    let inverse=city_batch.inverse_size_and_opacity;
+    return Output(city_batch.clip_from_page*fitted,normal,color,vec2f(0.,inverse.w),position.y,0.,
+                  position*dimensions*inverse.xyz,1.);
 }
 
 @fragment fn model_fragment(input: Output) -> @location(0) vec4f {

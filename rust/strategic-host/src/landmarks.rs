@@ -153,6 +153,22 @@ pub struct Landmarks {
 
 pub(crate) type ModelBounds = ([f64; 3], [f64; 3]);
 
+#[repr(C)]
+#[derive(Clone, Copy, Pod, Zeroable)]
+pub(crate) struct FootprintModel {
+    local_transform: [[f32;4];4],
+    dimensions: [f32; 3],
+}
+
+impl FootprintModel {
+    pub(crate) fn new([east,south]: [f64; 2], heading: f64, dimensions: [f64; 3]) -> Self {
+        let dimensions=dimensions.map(|value|value as f32);
+        let local_transform=Mat4::from_scale_rotation_translation(Vec3::from_array(dimensions),
+            Quat::from_rotation_y(heading.to_radians() as f32),Vec3::new(east as f32,0.,south as f32));
+        Self {local_transform:local_transform.to_cols_array_2d(),dimensions}
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum Lod { Single, Far, Near }
 
@@ -207,8 +223,7 @@ pub struct VisibleModel {
     pub clip_from_model: [[f32; 4]; 4],
     pub lod_range: [f32; 2],
     pub alternate: Option<(ModelKey, f32)>,
-    pub city_page: Option<std::sync::Arc<ModelMesh>>,
-    pub city_detail_mask: u8,
+    pub city_page: Option<crate::city_models::CityDraw>,
 }
 
 impl Landmarks {
@@ -330,21 +345,12 @@ impl Landmarks {
         visible
     }
 
-    pub(crate) fn footprint_model(&self, module: usize, [east,south]: [f64;2], heading: f64,
-        dimensions: [f64;3], page_transform: Mat4) -> VisibleModel {
+    pub(crate) fn footprint_fit(&self, module: usize) -> ([[f32;4];4],[f32;3]) {
         let bounds = self.city_bounds[module][0];
-        let model_scale=std::array::from_fn(|i| (dimensions[i]/(bounds.1[i]-bounds.0[i]).max(0.001)) as f32);
-        let scale=Vec3::from_array(model_scale);
+        let scale=Vec3::from_array(std::array::from_fn(|i| (1./(bounds.1[i]-bounds.0[i]).max(0.001)) as f32));
         let center=Vec3::new(((bounds.0[0]+bounds.1[0])*0.5) as f32,bounds.0[1] as f32,
             ((bounds.0[2]+bounds.1[2])*0.5) as f32)*scale;
-        let rotation=Quat::from_rotation_y(heading.to_radians() as f32);
-        let origin=Vec3::new(east as f32,0.,south as f32)-rotation*center;
-        let transform=page_transform*Mat4::from_scale_rotation_translation(scale,rotation,origin);
-        VisibleModel {
-            model_scale, key:ModelKey::city_detail(module),place:None,screen_bounds:[0.;4],
-            clip_from_model:transform.to_cols_array_2d(),lod_range:[0.,1.],alternate:None,
-            city_page:None,city_detail_mask:0,
-        }
+        (Mat4::from_scale_rotation_translation(scale,Quat::IDENTITY,-center).to_cols_array_2d(),scale.to_array())
     }
 
     pub fn focus(&self, place: usize) -> Option<([f64; 2], f64)> {
@@ -483,7 +489,6 @@ impl ModelPose {
             lod_range: [0.,1.],
             alternate: None,
             city_page: None,
-            city_detail_mask: 0,
         })
     }
 }
