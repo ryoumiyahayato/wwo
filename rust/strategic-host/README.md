@@ -251,6 +251,8 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 `tools/build_city_water.py` 将已有河岸和街道整理成塞纳河和泰晤士河的近景层。河岸使用 IGN BD TOPO 水域（Etalab Open Licence 2.0）和 OpenStreetMap 贡献者的泰晤士河资料（ODbL 1.0）。街道使用巴黎 PTM 1900 街道和 OpenHistoricalMap 贡献者记录。曲线受原始河岸、岛屿和桥梁位置约束。近景河岸经过美术平滑，道路缺失宽度按类别估算。全球 QWG 继续提供背景水域。[IGN BD TOPO](https://geoservices.ign.fr/bdtopo) [OpenStreetMap 版权](https://www.openstreetmap.org/copyright) [OpenHistoricalMap 版权](https://www.openhistoricalmap.org/copyright)
 
+局部场景的资源制作可调用 `tools/local_scene_data.py` 的 `read_city_scene(sources, buildings, (lon, lat), size_km)`。输入沿用河岸原始资料目录和游戏 `data/city-models`。`size_km` 支持 5、25、50，输出 CRS84 的 GeoJSON FeatureCollection。建筑按中心选取，道路和水域按几何交集选取。同一地物在各范围内保持原坐标和 ID。道路沿用 PTM 与 OHM 源记录 ID，建筑 ID 由城市、记录坐标及朝向确定。建筑记录指向现有 GLB 节点，路面、屋顶和墙面指向现有材质图集层。接口提供现有近景资料，全球高程及水域仍由 QPK 和 QWG 提供。
+
 巴黎市内道路分片使用 `build_paris_city_ground.py` 的 `--detailed-streets` 选项，从 Paris Time Machine 重建线生成。道路按原始街道类别分层。显示宽度用于区分层级。`--blocks` 读取同一资料集的建成街区。街区层在中尺度显示，排除历史非建成地类，并随放大让位给单栋模型。政治地图「地点类别」按现有地点 ID 筛选，并可从地点卡片打开相应专题。 [编号地图标识图册](map-symbols.html)
 
 格陵兰和南极的接地冰川、浮冰架、季节性海冰与水域需要结合现有 QWG、QHW 和高程资料单独核对。本阶段继续使用现有极地分片。
