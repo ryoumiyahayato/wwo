@@ -4,7 +4,7 @@ import argparse
 from functools import lru_cache
 from os import link
 from pathlib import Path
-from struct import pack
+from struct import pack, unpack
 from tempfile import TemporaryDirectory
 
 import numpy as np
@@ -252,14 +252,13 @@ def pilot_pages():
             for y in range(top, bottom) for x in range(left, right)}
 
 
-def regional_build(source, output, parents, use_overviews):
+def regional_frames(source, parents, coverage_parents, use_overviews):
     from scipy.ndimage import distance_transform_edt
 
     tiles, load = worldcover(source)
     overviews = {key: path.with_name(path.stem + "-overview.png") for key, path in tiles.items()}
     fine = {key: path for key, path in overviews.items() if use_overviews and path.is_file()}
     compressor = ZstdCompressor(level=12)
-    records = []
     span = CORE * 4
     feather = 64
     halo = feather + GUTTER * 4 + 8
@@ -269,8 +268,10 @@ def regional_build(source, output, parents, use_overviews):
         yy = np.arange(y * span - halo, (y + 1) * span + halo + 1)
         fractions = reconstruct(regional_source(tiles, load, yy, xx, fine))
         area = np.zeros(fractions.shape[:2], dtype=bool)
-        for px, py in parents:
-            area |= ((yy[:-1] // span == py)[:, None] & (xx[:-1] // span == px)[None, :])
+        for py in range(y-1, y+2):
+            for px in range(x-1, x+2):
+                if (px % (WIDTH // 2), py) in coverage_parents:
+                    area |= ((yy[:-1] // span == py)[:, None] & (xx[:-1] // span == px)[None, :])
         support = (distance_transform_edt(area) / feather).clip(0, 1).astype(np.float32)
         fractions = np.concatenate((fractions, support[:, :, None]), axis=2)
         for z, sx, sy in [(6, x, y)] + [(7, 2*x+dx, 2*y+dy) for dy in range(2) for dx in range(2)]:
@@ -293,12 +294,63 @@ def regional_build(source, output, parents, use_overviews):
             banks = np.ascontiguousarray(layers.reshape(PAGE, PAGE, 3, 4).transpose(0, 2, 1, 3))
             # Store the GPU row order and keep the source water share at the end.
             payload = banks.tobytes() + coverage[:, :, 8].tobytes()
-            records.append((z, sx, sy, compressor.compress(payload)))
+            yield (z, sx, sy), compressor.compress(payload)
+
+
+def regional_directory(stream):
+    magic, page, count = unpack("<8sII", stream.read(16))
+    if magic not in (b"WWOREGC3", b"WWOREGC4") or page != PAGE or count > WIDTH * HEIGHT * 5 // 4:
+        raise ValueError("Invalid regional landscape pack header")
+    offset = 16 + count * 8
+    frames = {}
+    for _ in range(count):
+        z, x, y, length = unpack("<BBHI", stream.read(8))
+        key = z, x, y
+        if z not in (6, 7) or x >= 2 << z or y >= 1 << z or not length or key in frames:
+            raise ValueError(f"Invalid regional landscape page {key}")
+        if magic == b"WWOREGC3":
+            frames[key] = stream.tell(), length
+            stream.seek(length, 1)
+        else:
+            frames[key] = offset, length
+            offset += length
+    end = stream.tell() if magic == b"WWOREGC3" else offset
+    if end != stream.seek(0, 2):
+        raise ValueError("Invalid regional landscape pack length")
+    return frames
+
+
+def regional_build(source, output, parents, use_overviews, base):
+    def parent(key):
+        z, x, y = key
+        shift = z - 6
+        return x >> shift, y >> shift
+
+    def retained_frames():
+        if base:
+            for key, (offset, length) in existing.items():
+                base.seek(offset)
+                yield key, base.read(length)
+
+    frames = regional_directory(base) if base else {}
+    existing_parents = {parent(key) for key in frames}
+    # The coverage feather of existing neighbours changes when a new page joins.
+    for x, y in tuple(parents - existing_parents):
+        parents.update(((x+dx) % (WIDTH//2), y+dy)
+                       for dy in (-1, 0, 1) for dx in (-1, 0, 1)
+                       if ((x+dx) % (WIDTH//2), y+dy) in existing_parents)
+    existing = {key: frame for key, frame in frames.items() if parent(key) not in parents}
+    count = len(existing) + len(parents) * 5
+    directory = bytearray()
     with output.open("xb") as stream:
-        stream.write(pack("<8sII", b"WWOREGC3", PAGE, len(records)))
-        for z, x, y, frame in records:
-            stream.write(pack("<BBHI", z, x, y, len(frame)))
-            stream.write(frame)
+        stream.write(pack("<8sII", b"WWOREGC4", PAGE, count))
+        stream.seek(count * 8, 1)
+        for frames in (retained_frames(), regional_frames(source, parents, existing_parents | parents, use_overviews)):
+            for (z, x, y), frame in frames:
+                directory.extend(pack("<BBHI", z, x, y, len(frame)))
+                stream.write(frame)
+        stream.seek(16)
+        stream.write(directory)
 
 
 if __name__ == "__main__":
@@ -311,7 +363,10 @@ if __name__ == "__main__":
                        help="Build selected Z6 parents and their Z7 children")
     parser.add_argument("--regional-overviews", action="store_true",
                         help="Use locally cached <tile>-overview.png WorldCover COG overviews")
+    parser.add_argument("--regional-base", type=Path, help="Retain pages from a prior WWOREGC3/4 pack")
     args = parser.parse_args()
+    if args.regional_base and not (args.regional_pilot or args.regional_parent):
+        parser.error("--regional-base requires selected regional pages")
     if args.output.exists():
         parser.error(f"Output already exists: {args.output}")
     with TemporaryDirectory(dir=args.output.parent, prefix="landscape-cover-") as temp:
@@ -321,7 +376,11 @@ if __name__ == "__main__":
                 tuple(map(int, page.split("/"))) for page in args.regional_parent}
             if any(not 0 <= x < WIDTH // 2 or not 0 <= y < HEIGHT // 2 for x, y in parents):
                 parser.error("Regional parents must be inside the Z6 grid")
-            regional_build(args.worldcover_cache, candidate, parents, args.regional_overviews)
+            if args.regional_base:
+                with args.regional_base.open("rb") as base:
+                    regional_build(args.worldcover_cache, candidate, parents, args.regional_overviews, base)
+            else:
+                regional_build(args.worldcover_cache, candidate, parents, args.regional_overviews, None)
         else:
             build(args.worldcover_cache, candidate)
         link(candidate, args.output)

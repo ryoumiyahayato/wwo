@@ -30,6 +30,8 @@ const GROUPED_LOD_START: u32 = 1;
 const GROUPED_LOD_COUNT: usize = (MAX_LEVEL-GROUPED_LOD_START+1) as usize;
 const GROUPED_LOADS_PER_FRAME: u32 = 3;
 const COARSE_CACHE_LEVEL: u32 = 3;
+// Request ahead of the 625 m/px blend in landscape.wgsl.
+const REGIONAL_PREFETCH_MPP: f64 = 750.;
 
 pub fn compact_files_present(root: &Path) -> bool {
     root.join("index.json").is_file()
@@ -299,7 +301,7 @@ impl Source {
                 let mut file=open_tile(&key.path(root),key,COLOR_MAGIC,1)?;
                 let mut bytes=vec![0;(PAGE_SIZE*PAGE_SIZE) as usize];
                 file.read_exact(&mut bytes)?;
-                Ok(DecodedTile{pixels:bytes,landscape:None,regional:None,classified:false,decode_time:Duration::ZERO})
+                Ok(DecodedTile{pixels:bytes,landscape:None,classified:false,decode_time:Duration::ZERO})
             }
             Self::Packs(packs,water)=>{
                 let override_frame=water.as_mut().map(|colors|colors.frame(key)).transpose()?.flatten();
@@ -452,7 +454,7 @@ impl LevelPack {
             }
             _=>(None,false),
         };
-        Ok(DecodedTile{pixels,landscape,regional:None,classified,decode_time:started.elapsed()})
+        Ok(DecodedTile{pixels,landscape,classified,decode_time:started.elapsed()})
     }
 }
 
@@ -505,7 +507,6 @@ fn landscape_pixels(residual:&[u8],classes:Option<&[u8]>)->io::Result<Vec<u8>> {
 pub struct DecodedTile {
     pixels:Vec<u8>,
     landscape:Option<Vec<u8>>,
-    regional:Option<Vec<u8>>,
     classified:bool,
     pub decode_time:Duration,
 }
@@ -513,6 +514,7 @@ pub struct Completion {pub key:Key,pub requested:Instant,pub result:io::Result<D
 
 enum DecodeRequest {
     Page(Key, Instant),
+    Regional(Key),
     Detail(usize, Arc<terrain_detail::Catalogue>),
 }
 
@@ -568,6 +570,10 @@ pub struct Terrain {
     landscape:Option<wgpu::Texture>,
     regional:Option<wgpu::Texture>,
     regional_slots:Vec<u32>,
+    regional_path:Option<PathBuf>,
+    regional_index:Option<Arc<HashMap<Key,(u64,usize)>>>,
+    regional_wanted:HashSet<Key>,
+    regional_failed:HashSet<Key>,
     height_enabled:bool,
     landscape_cover_path:Option<PathBuf>,
     water_colors:bool,
@@ -614,6 +620,16 @@ impl Terrain {
         let capacity=if version!=VERSION {MAX_PACK_PAGES.min(device.limits().max_texture_array_layers)} else {MAX_PAGES};
         let atlas=texture("Natural terrain page cache",PAGE_SIZE,PAGE_SIZE,capacity,1,FORMAT);
         let height_enabled=version==COMPACT_VERSION&&selection.limit()>=6;
+        let (regional_path,mut regional_cover)=cover_root.as_ref().filter(|_|height_enabled)
+            .and_then(|root|{
+                let path=root.join(RegionalCover::FILE_NAME);
+                match RegionalCover::open(&path,PAGE_SIZE) {
+                    Ok(cover)=>Some((path,cover)),
+                    Err(error) if error.kind()==io::ErrorKind::NotFound=>None,
+                    Err(error)=>{eprintln!("Regional landscape unavailable at {}: {error}",path.display());None}
+                }
+            }).unzip();
+        let regional_index=regional_cover.as_ref().map(RegionalCover::index);
         let (landscape_cover_path,mut cover)=cover_root.filter(|_|height_enabled).and_then(|root|{
             CoverPack::FILE_NAMES.into_iter().find_map(|name|{
                 let path=root.join(name);
@@ -633,25 +649,18 @@ impl Terrain {
                 dot(axis,frame([x,y])[2]).clamp(-1.,1.).acos()).fold(0.,f64::max);
             Visible {key,axis,radius}
         }).collect();
-        let mut regional_cover=if height_enabled {Some(RegionalCover::open(PAGE_SIZE)?)} else {None};
         let (sender,receiver)=mpsc::channel();
         std::thread::Builder::new().name("WWO natural terrain".into()).spawn(move||{
             while let Ok(request)=receiver.recv() {
                 let event=match request {
                     DecodeRequest::Page(key,requested)=>{
-                        let result=source.read(key,cover.as_mut(),height_enabled).map(|mut tile|{
-                            if let Some(regional)=regional_cover.as_mut().filter(|_|tile.landscape.is_some()) {
-                                let start=Instant::now();
-                                let Key(z,x,y)=key;
-                                match regional.read(z,x,y,PAGE_SIZE as usize) {
-                                    Ok(page)=>tile.regional=page,
-                                    Err(error)=>eprintln!("Regional landscape unavailable at {z}/{x}/{y}: {error}"),
-                                }
-                                tile.decode_time+=start.elapsed();
-                            }
-                            tile
-                        });
+                        let result=source.read(key,cover.as_mut(),height_enabled);
                         crate::HostEvent::Terrain(Completion{key,requested,result})
+                    }
+                    DecodeRequest::Regional(key)=>{
+                        let result=regional_cover.as_mut().ok_or(io::ErrorKind::NotFound.into())
+                            .and_then(|cover|cover.read(key,PAGE_SIZE as usize));
+                        crate::HostEvent::TerrainRegional(key,result)
                     }
                     DecodeRequest::Detail(index,catalogue)=>crate::HostEvent::TerrainDetail(index,catalogue.read(index)),
                 };
@@ -659,6 +668,7 @@ impl Terrain {
             }
         })?;
         Ok(Self{base,atlas,table,landscape:None,regional:None,regional_slots:(0..REGIONAL_SLOTS).rev().collect(),
+            regional_path,regional_index,regional_wanted:HashSet::new(),regional_failed:HashSet::new(),
             height_enabled,landscape_cover_path,water_colors,landscape_revision:0,keys,sender,inflight:None,requests_this_frame:0,pages:HashMap::new(),
             slots:(0..capacity).rev().collect(),selected:Vec::new(),view:None,max_level,view_max:0,
             target_level:None,projected_lod:0.,version,selection,layer_candidate,required_pages:0,viewport_pages:0,
@@ -684,7 +694,8 @@ impl Terrain {
             view_formats:&[],
         });
         let landscape=create("Z6/Z7 elevation and landscape cover",PAGE_SIZE,self.atlas.depth_or_array_layers());
-        let regional=create("Reconstructed regional landscape cover",PAGE_SIZE*REGIONAL_BANKS,REGIONAL_SLOTS);
+        let slots=if self.regional_index.is_some(){REGIONAL_SLOTS}else{1};
+        let regional=create("Reconstructed regional landscape cover",PAGE_SIZE*REGIONAL_BANKS,slots);
         let views=[&landscape,&regional].map(|texture|texture.create_view(&wgpu::TextureViewDescriptor{
             dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()}));
         self.landscape=Some(landscape);
@@ -759,6 +770,10 @@ impl Terrain {
             "landscape_cover_path": self.landscape_cover_path,
             "landscape_height_enabled": self.height_enabled,
             "landscape_cover_classified_pages": self.pages.values().filter(|p|p.classified).count(),
+            "landscape_regional_path": self.regional_path,
+            "landscape_regional_catalogue_pages": self.regional_index.as_ref().map_or(0,|index|index.len()),
+            "landscape_regional_resident_pages": REGIONAL_SLOTS as usize-self.regional_slots.len(),
+            "landscape_regional_wanted_pages": self.regional_wanted.len(),
             "landscape_regional_pages_by_level": ([6,7].map(|level|[self.selected.iter().filter(|key|key.0==level)
                 .filter(|key|self.pages.get(key).is_some_and(|page|page.regional_slot.is_some())).count(),
                 self.selected.iter().filter(|key|key.0==level).count()])),
@@ -890,12 +905,18 @@ impl Terrain {
     }
 
     fn request_page(&mut self,now:Instant) {
-        if self.inflight.is_none() {
-            if let Some(&key)=self.selected.iter().find(|key|!self.pages.contains_key(key)) {
-                if self.sender.send(DecodeRequest::Page(key,now)).is_ok(){
-                    self.inflight=Some(key);
-                    self.requests_this_frame+=1;
-                }
+        if self.inflight.is_some(){return;}
+        let next=self.selected.iter().find_map(|&key|match self.pages.get(&key) {
+            None=>Some((key,DecodeRequest::Page(key,now))),
+            Some(page) if page.landscape_fade.is_some() && page.regional_slot.is_none()
+                && self.regional_wanted.contains(&key) && !self.regional_failed.contains(&key)
+                =>Some((key,DecodeRequest::Regional(key))),
+            _=>None,
+        });
+        if let Some((key,request))=next.filter(|_|self.requests_this_frame<GROUPED_LOADS_PER_FRAME) {
+            if self.sender.send(request).is_ok(){
+                self.inflight=Some(key);
+                self.requests_this_frame+=1;
             }
         }
     }
@@ -999,6 +1020,12 @@ impl Terrain {
             near.retain(|&(key,_,_)|key.0<=self.view_max);
         }
         self.selected.extend(near.iter().take(capacity).map(|&(key,_,_)|key));
+        self.regional_wanted.clear();
+        if let Some(index)=self.regional_index.as_ref().filter(|_|camera.mpp<=REGIONAL_PREFETCH_MPP || exact) {
+            self.regional_wanted.extend(self.selected.iter().copied()
+                .filter(|key|index.contains_key(key) && !self.regional_failed.contains(key))
+                .take(REGIONAL_SLOTS as usize));
+        }
         for key in &self.selected {
             if let Some(page)=self.pages.get_mut(key){page.used=now;}
         }
@@ -1035,25 +1062,56 @@ impl Terrain {
             );
             1 // Available to instance builds while the surface fade is still zero.
         });
-        let regional_slot=tile.regional.zip(self.regional.as_ref()).and_then(|(pixels,texture)|{
-            let slot=self.regional_slots.pop()?;
-            let width=PAGE_SIZE*REGIONAL_BANKS;
-            queue.write_texture(wgpu::TexelCopyTextureInfo{texture,mip_level:0,
-                origin:wgpu::Origin3d{x:0,y:0,z:slot},aspect:wgpu::TextureAspect::All},
-                &pixels,wgpu::TexelCopyBufferLayout{offset:0,bytes_per_row:Some(4*width),rows_per_image:None},
-                wgpu::Extent3d{width,height:PAGE_SIZE,depth_or_array_layers:1});
-            Some(slot)
-        });
         let now=Instant::now();
         let fade=if self.exact() {255} else {0};
         let ready=(landscape_fade.is_none() || self.exact()).then_some(now);
-        let page=Page{slot,regional_slot,ready,used:now,fade,landscape_fade,classified:tile.classified};
+        let page=Page{slot,regional_slot:None,ready,used:now,fade,landscape_fade,classified:tile.classified};
         Self::write_index(&self.table,queue,completion.key,page.index());
         self.pages.insert(completion.key,page);
         if !self.exact() && self.view_max>=GROUPED_LOD_START && self.requests_this_frame<GROUPED_LOADS_PER_FRAME {
             self.request_page(now);
         }
         Ok(())
+    }
+
+    pub fn complete_regional(&mut self,queue:&wgpu::Queue,key:Key,result:io::Result<Vec<u8>>) -> io::Result<()> {
+        self.inflight=None;
+        match result {
+            Ok(pixels) if self.regional_wanted.contains(&key)=>self.upload_regional(queue,key,&pixels),
+            Ok(_)=>{},
+            Err(error)=>{
+                self.regional_failed.insert(key);
+                self.regional_wanted.remove(&key);
+                self.view=None;
+                return Err(error);
+            }
+        }
+        if !self.exact(){self.request_page(Instant::now());}
+        Ok(())
+    }
+
+    fn upload_regional(&mut self,queue:&wgpu::Queue,key:Key,pixels:&[u8]) {
+        let Some(texture)=&self.regional else {return;};
+        if !self.pages.contains_key(&key){return;}
+        let slot=if let Some(slot)=self.regional_slots.pop(){slot}else{
+            // A regional page can retire while its terrain page remains resident.
+            let Some((&old,_))=self.pages.iter().filter(|(key,page)|
+                page.regional_slot.is_some() && !self.regional_wanted.contains(key))
+                .min_by_key(|(key,page)|(page.used,key.0,key.1,key.2)) else {return;};
+            let page=self.pages.get_mut(&old).unwrap();
+            let slot=page.regional_slot.take().unwrap();
+            Self::write_index(&self.table,queue,old,page.index());
+            slot
+        };
+        let width=PAGE_SIZE*REGIONAL_BANKS;
+        queue.write_texture(wgpu::TexelCopyTextureInfo{texture,mip_level:0,
+            origin:wgpu::Origin3d{x:0,y:0,z:slot},aspect:wgpu::TextureAspect::All},
+            pixels,wgpu::TexelCopyBufferLayout{offset:0,bytes_per_row:Some(4*width),rows_per_image:None},
+            wgpu::Extent3d{width,height:PAGE_SIZE,depth_or_array_layers:1});
+        let page=self.pages.get_mut(&key).unwrap();
+        page.regional_slot=Some(slot);
+        Self::write_index(&self.table,queue,key,page.index());
+        self.landscape_revision=self.landscape_revision.wrapping_add(1);
     }
 
     pub fn fading(&self)->bool {

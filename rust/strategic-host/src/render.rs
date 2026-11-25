@@ -1314,6 +1314,11 @@ impl Renderer {
         Ok(())
     }
 
+    pub fn terrain_regional_ready(&mut self,key:terrain::Key,result:io::Result<Vec<u8>>)->io::Result<()> {
+        if let Some(terrain)=&mut self.terrain {terrain.complete_regional(&self.queue,key,result)?;}
+        Ok(())
+    }
+
     pub fn terrain_max_level(&self)->u32 {self.terrain.as_ref().map_or(0,Terrain::max_level)}
 
     pub fn terrain_view_level(&self)->u32 {self.terrain.as_ref().map_or(0,Terrain::view_max)}

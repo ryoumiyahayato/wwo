@@ -589,6 +589,18 @@ impl ApplicationHandler<HostEvent> for Host {
                 }
                 return;
             }
+            HostEvent::TerrainRegional(key,result)=>{
+                if let Some(renderer)=&mut self.renderer {
+                    if let Err(error)=renderer.terrain_regional_ready(key,result) {
+                        let terrain::Key(z,x,y)=key;
+                        if self.resource_warnings.len()<24 {
+                            self.resource_warnings.push(format!("Regional landscape {z}/{x}/{y} · {error}"));
+                        }
+                    }
+                    self.dirty=true;
+                }
+                return;
+            }
             HostEvent::Terrain(event)=>{
                 if let Some(renderer)=&mut self.renderer {
                     if self.trial.timing {

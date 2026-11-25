@@ -3,7 +3,10 @@ use std::{
     fs::File,
     io::{self, Read, Seek, SeekFrom},
     path::Path,
+    sync::Arc,
 };
+
+use crate::terrain::Key;
 
 const WIDTH: u32 = 256;
 const HEIGHT: u32 = 128;
@@ -16,54 +19,66 @@ pub const REGIONAL_SLOTS: u32 = 80;
 const REGIONAL_CHANNELS: usize = 13;
 
 pub struct RegionalCover {
-    frames: HashMap<(u32, u32, u32), &'static [u8]>,
+    file: File,
+    frames: Arc<HashMap<Key, (u64, usize)>>,
     decoder: zstd::bulk::Decompressor<'static>,
 }
 
 impl RegionalCover {
-    pub fn open(page: u32) -> io::Result<Self> {
-        let raw = include_bytes!("regional-land-cover.qsc");
-        let mut stream = raw.as_slice();
+    pub const FILE_NAME: &'static str = "regional-land-cover.qsc";
+
+    pub fn open(path: &Path, page: u32) -> io::Result<Self> {
+        let mut file = File::open(path)?;
+        let file_len = file.metadata()?.len();
         let mut header = [0; 16];
-        stream.read_exact(&mut header)?;
+        file.read_exact(&mut header)?;
         let pages = u32::from_le_bytes(header[12..16].try_into().unwrap());
-        let invalid = || io::Error::other("Invalid regional landscape cover pack");
-        if &header[..8] != b"WWOREGC3" || header[8..12] != page.to_le_bytes()
-            || pages > REGIONAL_SLOTS
+        let invalid = || io::Error::other(format!("Invalid regional landscape cover pack: {}", path.display()));
+        let mut offset = 16 + u64::from(pages) * 8;
+        if &header[..8] != b"WWOREGC4" || header[8..12] != page.to_le_bytes()
+            || pages > PARENT_COUNT + WIDTH * HEIGHT || offset > file_len
         {
             return Err(invalid());
         }
-        let mut frames = HashMap::new();
-        for _ in 0..pages {
-            let mut record = [0; 8];
-            stream.read_exact(&mut record)?;
+        let mut directory = vec![0; pages as usize * 8];
+        file.read_exact(&mut directory)?;
+        let mut frames = HashMap::with_capacity(pages as usize);
+        let max_frame = zstd::zstd_safe::compress_bound(page as usize * page as usize * REGIONAL_CHANNELS);
+        for record in directory.chunks_exact(8) {
             let z = u32::from(record[0]);
             let x = u32::from(record[1]);
             let y = u32::from(u16::from_le_bytes(record[2..4].try_into().unwrap()));
             let len = u32::from_le_bytes(record[4..8].try_into().unwrap()) as usize;
-            let (frame, next) = stream.split_at_checked(len).ok_or_else(invalid)?;
-            if !(6..=7).contains(&z) || x >= 2 << z || y >= 1 << z
-                || frame.is_empty() || frames.insert((z, x, y), frame).is_some()
+            if !(6..=7).contains(&z) || x >= 2 << z || y >= 1 << z || !(1..=max_frame).contains(&len)
+                || frames.insert(Key(z, x, y), (offset, len)).is_some()
             {
                 return Err(invalid());
             }
-            stream = next;
+            offset += len as u64;
         }
-        if !stream.is_empty() {
+        if offset != file_len {
             return Err(invalid());
         }
-        Ok(Self { frames, decoder: zstd::bulk::Decompressor::new()? })
+        Ok(Self { file, frames: Arc::new(frames), decoder: zstd::bulk::Decompressor::new()? })
     }
 
-    pub fn read(&mut self, z: u32, x: u32, y: u32, width: usize) -> io::Result<Option<Vec<u8>>> {
-        let Some(frame) = self.frames.get(&(z, x, y)) else { return Ok(None); };
+    pub fn index(&self) -> Arc<HashMap<Key, (u64, usize)>> {
+        Arc::clone(&self.frames)
+    }
+
+    pub fn read(&mut self, key: Key, width: usize) -> io::Result<Vec<u8>> {
+        let &(offset, length) = self.frames.get(&key).ok_or(io::ErrorKind::NotFound)?;
+        self.file.seek(SeekFrom::Start(offset))?;
+        let mut frame = vec![0; length];
+        self.file.read_exact(&mut frame)?;
         let size = width * width;
-        let mut banks = self.decoder.decompress(frame, size * REGIONAL_CHANNELS)?;
+        let mut banks = self.decoder.decompress(&frame, size * REGIONAL_CHANNELS)?;
         if banks.len() != size * REGIONAL_CHANNELS {
+            let Key(z, x, y) = key;
             return Err(io::Error::other(format!("Invalid regional landscape page: {z}/{x}/{y}")));
         }
         banks.truncate(size * 4 * REGIONAL_BANKS as usize);
-        Ok(Some(banks))
+        Ok(banks)
     }
 }
 
