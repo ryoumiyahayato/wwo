@@ -945,7 +945,13 @@ impl Host {
         }).collect();
         let mut models=if loading||self.in_lobby() {Vec::new()} else if let Some(landmarks)=&self.landmarks {
             let mut models=self.city_models.as_mut().map_or_else(Vec::new,|catalogue|
-                catalogue.visible(&date,&self.camera,self.size,landmarks,&self.events));
+                catalogue.visible(&date,&self.camera,self.size,landmarks,&self.events,|[lon,lat]| {
+                    pages.iter().filter(|(_,tile,_,_)| {
+                        let [west,south,east,north]=tile.core;
+                        tile.city_ink_only && !tile.city_area && !tile.city_streets
+                            && lon>=west && lon<east && lat>=south && lat<north
+                    }).map(|(_,_,_,alpha)|*alpha).next().unwrap_or(0.)
+                }));
             models.extend(landmarks.visible(&date,&self.camera,self.size,|point|
                 self.city_models.as_ref().is_some_and(|catalogue|catalogue.covers(point))));
             models

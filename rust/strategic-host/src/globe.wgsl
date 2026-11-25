@@ -631,7 +631,8 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
         var crop_surface=crop_ink;
         if base.a>=0. && occupied.b>.12 && footprint<180. {
             let crop=occupied.b*(1.-smoothstep(.04,.26,occupied.r));
-            crop_surface=cultivated_fields(crop_ink,ll,landscape_world(ll),footprint,crop);
+            crop_surface=mix(crop_ink,cultivated_fields(crop_ink,ll,landscape_world(ll),footprint),
+                smoothstep(.12,.72,crop));
         }
         let surface=other*vec3f(.43,.51,.33)
             +occupied.r*vec3f(.20,.38,.45)
@@ -978,24 +979,40 @@ fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
         let at=road+2u+2u*(cell.y*city_water[road]+cell.x);
         var strength=0.;
         var surface=0u;
+        var carriageway=0.;
+        var arterial=0.;
         for (var i=city_water[at];i<city_water[at+1u];i+=6u) {
             let style=city_water[i+5u];
-            if (area&3u)>1u && (style&4u)==0u {continue;}
+            let bridge=(style&4u)!=0u;
+            if (area&3u)>1u && !bridge {continue;}
             let a=vec2f(bitcast<f32>(city_water[i]),bitcast<f32>(city_water[i+1u]));
             let b=vec2f(bitcast<f32>(city_water[i+2u]),bitcast<f32>(city_water[i+3u]));
             let d=b-a;
             let station=clamp(dot(point-a,d)/max(.0001,dot(d,d)),0.,1.);
-            let edge=length(point-a-station*d)-bitcast<f32>(city_water[i+4u]);
-            let opacity=1.-smoothstep(-mpp*.30,mpp*.50,edge);
-            if opacity>strength {
-                strength=opacity;
+            let width=bitcast<f32>(city_water[i+4u]);
+            let edge=length(point-a-station*d)-width;
+            let opacity=1.-smoothstep(-mpp*.44,mpp*.44,edge);
+            let paved=(style&3u)==2u && !bridge;
+            // Treat the verge of mapped paved streets as a walkable strip
+            // within the mapped width. The carriageway wins at intersections.
+            let walk=select(0.,clamp(width*.25,.85,2.2)*(1.-smoothstep(2.2,6.,mpp)),paved && width>2.8);
+            let lane=1.-smoothstep(-mpp*.44,mpp*.44,edge+walk);
+            if lane>carriageway || (lane==carriageway && opacity>strength) {
                 surface=style&3u;
+                arterial=smoothstep(4.,7.,width);
             }
+            carriageway=max(carriageway,lane);
+            strength=max(strength,opacity);
         }
         if strength<=0. {continue;}
+        let paris=origin.x>1.;
         let layers=array<i32,3>(DIRT_ROAD,GRAVEL,SETTS);
         let spans=array<f32,3>(18.,8.,5.);
-        let ink=painted_material(earth,mpp,layers[surface],spans[surface])*.88+vec3f(.096,.088,.079);
+        let dirt=array<vec3f,3>(vec3f(.62,.549,.446),vec3f(.582,.558,.515),city_road(paris,arterial));
+        let lane_ink=dirt[surface]*(1.+material_grain(earth,mpp,layers[surface],spans[surface],7.)*.68);
+        let walk_ink=select(vec3f(.632,.611,.573),vec3f(.693,.661,.608),paris)
+            *(1.+material_grain(earth,mpp,SETTS,4.,4.)*.34);
+        let ink=mix(walk_ink,lane_ink,clamp(carriageway/strength,0.,1.));
         let edge=min(point-low,high-point);
         return vec4f(ink,strength*(1.-smoothstep(6.,13.,mpp))*smoothstep(0.,100.,min(edge.x,edge.y)));
     }
@@ -1018,101 +1035,66 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
         buildings.g*=1.-vector_weight;
     }
     if tile.options.z>3.5 && tile.options.z<4.5 {
-        let major=pow(buildings.r,.74)*.68;
-        let local=buildings.g*(1.-smoothstep(20.,76.,mpp))*.48;
-        let road=max(major,local)*smoothstep(0.,160.,edge_distance);
-        let dry=painted_material(earth,mpp,DIRT_ROAD,21.);
-        let gravel=painted_material(earth,mpp,GRAVEL,9.);
-        let paved=painted_material(earth,mpp,SETTS,4.);
-        let material=mix(mix(dry,gravel,.60),paved,smoothstep(.12,.53,major));
-        return vec4f(material*.95+vec3f(.064,.059,.050),road);
+        // The two mipped channels preserve surveyed arterial and local area.
+        let major=buildings.r;
+        let local=buildings.g*(1.-smoothstep(34.,98.,mpp));
+        let road=major+local*(1.-major);
+        let surface=mix(city_road(true,major/max(.001,road)),vec3f(.674,.660,.631),
+            smoothstep(5.,17.,mpp));
+        let grain=material_grain(earth,mpp,SETTS,5.,7.);
+        return vec4f(surface*(1.+grain*.52),road*smoothstep(0.,160.,edge_distance));
     }
-    let edge=textureSampleLevel(city_data,linear,uv-du*.82,mip).r;
-    let shadow=max(0.,edge-buildings.r)*detail*.49;
-    // Aggregate the surveyed footprints over the screen footprint. At
-    // overview scales the raster represents built density, not lot boundaries.
-    let block_mip=select(3.,clamp(mip+.7,3.,6.),historical);
-    let blocks=textureSampleLevel(city_data,linear,uv,block_mip).r;
-    if max(max(buildings.r,buildings.g),max(shadow,blocks))<=.001 {return vec4f(0.);}
+    let offset=max(1.,exp2(mip)*.46);
+    let edge=textureSampleLevel(city_data,linear,uv-du*offset,mip).r;
+    let blocks=textureSampleLevel(city_data,linear,uv,max(3.,mip+.8)).r;
+    if max(max(buildings.r,buildings.g),max(edge,blocks))<=.001 {return vec4f(0.);}
     let base=natural_surface(ll);
     var terrain=vec4f(base.rgb,water_coverage(area,base.a));
     if view.map_style.z>=6. {
         terrain=close_terrain(ll,mpp/max(.3,view.chart_origin.z),terrain);
     }
+    let dry=1.-terrain.a;
+    let court=vec3f(.602,.589,.550)*(1.+material_grain(earth,mpp,SETTS,13.,8.)*.38);
     if tile.options.z>4.5 {
-        // The first channel is the reconstructed built block. The inset channel
-        // distinguishes block interiors from edges without introducing lots.
-        let coverage=smoothstep(.045,.69,buildings.r);
-        let interior=clamp(buildings.g/max(.05,buildings.r),0.,1.);
-        let shade=smoothstep(.05,.53,max(0.,edge-buildings.r));
-        let roofs=mix(vec3f(.56,.53,.49),vec3f(.47,.44,.40),interior);
-        let opacity=(1.-terrain.a)*coverage*smoothstep(7.,30.,mpp)*smoothstep(0.,200.,edge_distance);
-        return vec4f(mix(roofs,vec3f(.39,.36,.33),shade*.52),opacity);
+        // The inset mask is built-block shading. The exclusions and holes of
+        // the survey remain open. Meshes cover the roofs in the near view.
+        let coverage=buildings.r;
+        let interior=clamp(buildings.g/max(.001,coverage),0.,1.);
+        let middle=smoothstep(5.,17.,mpp);
+        let roofs=mix(city_roof(true)*.94,city_roof(true)*1.15,interior);
+        let surface=mix(court,roofs,middle);
+        let opacity=dry*coverage*mix(.48,.88,middle)*smoothstep(0.,200.,edge_distance);
+        return vec4f(surface,opacity);
     }
     if tile.options.z>2.5 {
-        // This source maps generalized built-up areas and roads at 1:50,000.
-        let land=1.-terrain.a;
-        let soil=painted_material(earth,mpp,SOIL,930.);
-        let blocks_color=mix(vec3f(.55,.53,.48),vec3f(.62,.58,.51),buildings.r);
-        let ground_color=mix(blocks_color,soil,.23*(1.-smoothstep(22.,105.,mpp)));
-        let ground=land*smoothstep(.06,.50,blocks)*mix(.39,.91,smoothstep(17.,125.,mpp));
-        let survey_edge=smoothstep(480.,7200.,edge_distance);
-        let street=pow(buildings.g,1.5)*(1.-smoothstep(19.,67.,mpp))*.24*survey_edge;
-        let top=mix(vec3f(.65,.59,.47),vec3f(.67,.62,.49),terrain.a);
-        let alpha=ground*(1.-street)+street;
-        let color=ground_color*ground*(1.-street)+top*street;
+        // The generalized historical survey supplies the outer built area.
         let support=smoothstep(0.,420.,edge_distance);
+        let built=dry*buildings.r*mix(.17,.66,smoothstep(32.,155.,mpp));
+        let street=buildings.g*.43*(1.-smoothstep(54.,163.,mpp))*smoothstep(480.,7200.,edge_distance);
+        let surface=mix(court,city_roof(true)*1.23,smoothstep(14.,95.,mpp));
+        let alpha=built*(1.-street)+street;
+        let color=surface*built*(1.-street)+city_road(true,.78)*street;
         return vec4f(color/max(.0001,alpha),alpha*support);
     }
-    // The source masks supply the footprints. Land cover controls their contrast.
-    var cover=vec2f(0.);
-    var ready=0.;
-    let fine=landscape_page(ll,7u,true);
-    let fine_weight=natural_lod_weight(7u)*fine.fade;
-    if fine_weight<.999 {
-        let regional=landscape_page(ll,6u,true);
-        let weight=natural_lod_weight(6u)*regional.fade;
-        if weight>.001 {
-            let surface=landscape_material(regional);
-            cover=vec2f(surface.urban,surface.forest+surface.shrub*.55)*weight;
-            ready=weight;
-        }
-    }
-    if fine_weight>.001 {
-        let surface=landscape_material(fine);
-        cover=mix(cover,vec2f(surface.urban,surface.forest+surface.shrub*.55),fine_weight);
-        ready=mix(ready,1.,fine_weight);
-    }
-    let land=1.-terrain.a;
-    let urban=clamp(cover.x/max(.01,ready),0.,1.);
-    let woods=clamp(cover.y/max(.01,ready),0.,1.);
-    let density=smoothstep(.026,.24,blocks);
-    let built=density*select(mix(.75,1.,urban),1.,historical);
-    // At the survey limit, attenuate the mapped features over a few source blocks.
-    let support=smoothstep(0.,mix(320.,670.,built),edge_distance);
-    let facade=mix(vec3f(.47,.44,.40),vec3f(.68,.63,.55),max(0.,buildings.r-edge));
-    let footprint_weight=select(detail,1.-smoothstep(24.,134.,mpp),historical);
-    let footprint=select(buildings.r,smoothstep(.028,.53,buildings.r),historical);
-    let wall=footprint*footprint_weight*mix(.70,.96,built)*land*select(1.,smoothstep(3.,15.,mpp),historical);
-    // Wide mapped strokes survive the screen-space filter at the fringe.
-    let stroke=smoothstep(.13,.48,buildings.g);
-    let local_road=mix(terrain.rgb,vec3f(.76,.70,.59),mix(.39,.75,stroke));
-    let road_color=mix(local_road,vec3f(.81,.75,.65),built);
-    let fringe=mix(mix(.54,.79,stroke),mix(.27,.51,stroke),woods);
-    let neighbourhood=1.-smoothstep(26.,77.,mpp);
-    let main_street=1.-smoothstep(65.,315.,mpp);
-    let road_weight=select(detail,mix(neighbourhood,main_street,stroke),historical);
-    let road=buildings.g*road_weight*mix(fringe,.88,built);
-    let bridge=mix(road,buildings.g*road_weight*.88,terrain.a);
-    let shading=shadow*land*mix(.45,1.,built);
-    let ground=land*select(detail*smoothstep(.055,.36,blocks)*.57,
-        density*mix(.39,.92,smoothstep(11.,99.,mpp)),historical);
-    let stone=painted_material(earth,mpp,SOIL,320.);
-    let aggregate=mix(mix(vec3f(.61,.58,.52),vec3f(.50,.49,.45),density),stone,.23);
-    let paving=mix(terrain.rgb,select(vec3f(.57,.54,.48),aggregate,historical),select(.82,1.,historical));
-    let color=((paving*ground*(1.-shading)+vec3f(.36,.32,.31)*shading)*(1.-wall)+facade*wall)*(1.-bridge)
-        +mix(road_color,vec3f(.69,.67,.59),terrain.a)*bridge;
-    let alpha=((ground*(1.-shading)+shading)*(1.-wall)+wall)*(1.-bridge)+bridge;
+
+    // London uses the area of the Ordnance Survey footprints and streets.
+    // Keep the footprint average intact even after individual roofs become subpixel.
+    let support=smoothstep(0.,mix(310.,620.,blocks),edge_distance);
+    let roof_alpha=dry*buildings.r*select(detail,smoothstep(2.,9.,mpp),historical);
+    let shadow=dry*max(0.,edge-buildings.r)*.44*(1.-smoothstep(52.,145.,mpp));
+    let paved=dry*blocks*mix(.25,.70,smoothstep(5.,19.,mpp))*(1.-smoothstep(54.,165.,mpp));
+    let main=smoothstep(.18,.67,buildings.g);
+    let road_weight=mix(1.-smoothstep(45.,128.,mpp),1.-smoothstep(95.,315.,mpp),main);
+    let road=buildings.g*road_weight;
+    let roof_color=mix(city_roof(false)*.91,city_roof(false)*1.10,buildings.r);
+    let paving=mix(terrain.rgb,court-vec3f(.046,.044,.028),.74);
+    let shadow_color=city_roof(false)*.72;
+    let covered=(paved*(1.-shadow)+shadow)*(1.-roof_alpha)+roof_alpha;
+    let base_color=(paving*paved*(1.-shadow)+shadow_color*shadow)*(1.-roof_alpha)+roof_color*roof_alpha;
+    let alpha=covered*(1.-road)+road;
+    let road_ink=mix(city_road(false,main),vec3f(.695,.672,.623),smoothstep(5.,18.,mpp));
+    let road_color=mix(road_ink,vec3f(.63,.60,.56),terrain.a);
+    let color=base_color*(1.-road)+road_color*road;
     return vec4f(color/max(.0001,alpha),alpha*support);
 }
 
