@@ -39,7 +39,7 @@ pub enum CountryAction {Close,Back,Record,Directory,Page(i32),Region(usize),Boun
 #[derive(Clone,Copy)]
 pub enum Action {
     Mode(Mode),Home,Back,Search,Close,Details,Locate,Select(Object),Country(CountryAction),
-    PlaceFilter(PlaceFilter),
+    PlaceFilter(Mode,PlaceFilter),
     Hud(crate::formal_ui::Command),
     Resources(crate::resource_map::Command),
 }
@@ -130,12 +130,18 @@ fn panel(m:&mut Mesh,x:f32,y:f32,w:f32,h:f32) {
 fn intersects([x,y,w,h]:[f32;4],[a,b,c,d]:[f32;4])->bool{x<a+c && x+w>a && y<b+d && y+h>b}
 
 fn place_visible(ui:&Ui<'_>,place:&Place,kind:&str,facility:Option<Facility>)->bool {
+    let filter=ui.formal.hud.place_filter(ui.mode);
+    if filter!=PlaceFilter::Overview {
+        return filter.visible(place,kind,facility);
+    }
     match ui.mode {
         Mode::Geographic=>true,
-        Mode::Political=>ui.formal.hud.place_filter.visible(place,kind,facility),
+        Mode::Political=>facility.is_none_or(|facility|facility.mode()==Mode::Political)
+            && !PlaceFilter::Military.visible(place,kind,facility)
+            && !PlaceFilter::Transport.visible(place,kind,facility),
         Mode::Economic=>matches!(kind,"capital"|"city"|"town"|"station"|"bridge"|"port")
-            || matches!(facility,Some(Facility::Industrial|Facility::Mining)),
-        Mode::Military=>(place.military_facility_active && place.facility_active != Some(false)) ||
+            || PlaceFilter::Economy.visible(place,kind,facility) || PlaceFilter::Aviation.visible(place,kind,facility),
+        Mode::Military=>PlaceFilter::Military.visible(place,kind,facility) ||
             matches!(kind,"capital"|"admin_primary"|"admin_secondary"|"city"|"bridge"|"station"|"port"),
     }
 }
@@ -315,10 +321,10 @@ pub fn compose(world:&World,_:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         let has_debug=ui.formal.debug.is_some();
         let topic=if let Object::Place(i)=object {
             let place=&world.places[i];
-            if ui.mode==Mode::Political && ui.formal.hud.place_filter == PlaceFilter::Military
-                && PlaceFilter::Military.visible(place,&place.symbol,Facility::at(place, ui.date)) {
+            let facility=Facility::at(place,ui.date);
+            if PlaceFilter::Military.visible(place,&place.symbol,facility) {
                 Some(Mode::Military)
-            } else { Facility::at(place, ui.date).map(Facility::mode).or(match map_facilities::symbol(&place.symbol) {
+            } else { facility.map(Facility::mode).or(match map_facilities::symbol(&place.symbol) {
                 "historic_site"|"castle"|"fort"|"monument"|"religious"|"eiffel"|"clock_tower"|"pyramids"=>Some(Mode::Geographic),
                 "station"|"bridge"|"port"=>Some(Mode::Economic),
                 _=>None,

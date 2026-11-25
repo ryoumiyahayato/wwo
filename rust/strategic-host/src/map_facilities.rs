@@ -26,10 +26,9 @@ impl Facility {
 
     pub fn mode(self) -> Mode {
         match self {
-            Self::Industrial | Self::Mining => Mode::Economic,
+            Self::Industrial | Self::Mining | Self::Aviation => Mode::Economic,
             Self::Government => Mode::Political,
             Self::MilitaryBase => Mode::Military,
-            Self::Aviation => Mode::Geographic,
         }
     }
 
@@ -71,7 +70,7 @@ impl PlaceFilter {
             Self::Economy => matches!(facility,Some(Facility::Industrial|Facility::Mining)),
             Self::Government => facility == Some(Facility::Government),
             Self::Military => place.military_facility_active && place.facility_active != Some(false),
-            Self::Aviation => facility == Some(Facility::Aviation),
+            Self::Aviation => facility == Some(Facility::Aviation) && !place.military_facility_active,
         }
     }
 }
