@@ -43,6 +43,8 @@ struct Tile {
 @group(3) @binding(3) var<storage,read> water_geometry: array<u32>;
 @group(3) @binding(4) var<storage,read> water_pixels: array<u32>;
 @group(3) @binding(5) var<storage,read_write> water_output: array<u32>;
+@group(3) @binding(6) var surface_art: texture_2d_array<f32>;
+@group(3) @binding(7) var<storage,read> city_water: array<u32>;
 @group(2) @binding(0) var close_surface: texture_2d<f32>;
 @group(2) @binding(1) var<uniform> close_extent: vec4f;
 @group(1) @binding(0) var<uniform> tile: Tile;
@@ -304,7 +306,7 @@ fn water_page_area(page:u32, q:vec2f) -> u32 {
 
 // The raster carries the area and its age origin. A parked camera can reuse it
 // through the handoff without rerunning the polygon tests each frame.
-fn water_area(ll:vec2f) -> u32 {
+fn global_water_area(ll:vec2f) -> u32 {
     let tile_uv=min(vec2f(fract(ll.x/360.+.5),clamp(.5-ll.y/180.,0.,1.)),vec2f(.99999994));
     let grid=tile_uv*vec2f(256.,128.);
     let tile_cell=vec2u(grid);
@@ -312,6 +314,37 @@ fn water_area(ll:vec2f) -> u32 {
     if page<=3u {return page;}
     let q=vec2f(fract(grid.x),min(1.-fract(grid.y),.99999994));
     return (water_geometry[page]<<2u)|water_page_area(page+1u,q);
+}
+
+fn water_area(ll:vec2f) -> u32 {
+    let mpp=view.viewport.z*EARTH;
+    if mpp<21. {
+        for (var site=0u;site<20u;site+=10u) {
+            let origin=vec2f(bitcast<f32>(city_water[site]),bitcast<f32>(city_water[site+1u]));
+            let scale=vec2f(bitcast<f32>(city_water[site+2u]),bitcast<f32>(city_water[site+3u]));
+            let p=(ll-origin)*scale;
+            let low=vec2f(bitcast<f32>(city_water[site+4u]),bitcast<f32>(city_water[site+5u]));
+            let high=vec2f(bitcast<f32>(city_water[site+6u]),bitcast<f32>(city_water[site+7u]));
+            if any(p<low) || any(p>=high) {continue;}
+            let border=min(p-low,high-p);
+            let handoff=(1.-smoothstep(7.,21.,mpp))*smoothstep(0.,150.,min(border.x,border.y));
+            if handoff<1. && handoff<hash(floor(p*.34)) {continue;}
+            let band=min(u32((p.y-low.y)/32.),city_water[site+9u]-1u);
+            let offset=city_water[site+8u]+band*2u;
+            var bits=0u;
+            for (var i=city_water[offset];i<city_water[offset+1u];i+=5u) {
+                let ay=bitcast<f32>(city_water[i+1u]);
+                let by=bitcast<f32>(city_water[i+3u]);
+                if p.y<ay || p.y>=by {continue;}
+                let ax=bitcast<f32>(city_water[i]);
+                let bx=bitcast<f32>(city_water[i+2u]);
+                if p.x<mix(ax,bx,(p.y-ay)/(by-ay)) {bits^=city_water[i+4u];}
+            }
+            if (bits&1u)!=0u {return 3u;}
+            if (bits&2u)!=0u {return 1u;}
+        }
+    }
+    return global_water_area(ll);
 }
 
 fn geographic_water_weight() -> f32 {
@@ -485,6 +518,48 @@ fn land_palette_weight(chroma:vec2f, reference:vec3f, radius:f32) -> f32 {
 fn ground_material_weight(water: f32, mpp: f32) -> f32 {
     return (1.-smoothstep(880.,LAND_MATERIAL_MPP,mpp)) * (1.-smoothstep(.04,.65,water));
 }
+
+const GRASS:i32=0;
+const SOIL:i32=1;
+const FIELD:i32=2;
+const WOODLAND:i32=3;
+const ROCK:i32=4;
+const SAND:i32=5;
+const SNOW:i32=6;
+const DIRT_ROAD:i32=7;
+const GRAVEL:i32=8;
+const SETTS:i32=9;
+
+fn painted_material(earth:vec3f, mpp:f32, layer:i32, period:f32) -> vec3f {
+    let p=earth*(EARTH/period);
+    let mip=log2(max(1.,1.35*mpp*f32(textureDimensions(surface_art).x)/period));
+    let plane=abs(earth);
+    let dominant=max(plane.x,max(plane.y,plane.z));
+    let weight=smoothstep(vec3f(dominant-.18),vec3f(dominant),plane);
+    var art=vec3f(0.);
+    if weight.x>.001 {art+=textureSampleLevel(surface_art,land_repeat,p.zy,layer,mip).rgb*weight.x;}
+    if weight.y>.001 {art+=textureSampleLevel(surface_art,land_repeat,p.xz,layer,mip).rgb*weight.y;}
+    if weight.z>.001 {art+=textureSampleLevel(surface_art,land_repeat,p.xy,layer,mip).rgb*weight.z;}
+    return art/dot(weight,vec3f(1.));
+}
+
+fn cover_material(color:vec3f, earth:vec3f, mpp:f32, weights:vec4f, bare:vec2f, snow:f32) -> vec3f {
+    let amount=max(1.,dot(weights,vec4f(1.))+bare.x+bare.y+snow);
+    let strength=(1.-smoothstep(38.,230.,mpp))*.76/amount;
+    if strength<=.001 {return color;}
+    let weathering=painted_material(earth,mpp,SOIL,1420.);
+    let tone=1.+(weathering.r-.55)*.37;
+    var painted=vec3f(0.);
+    if weights.x>.008 {painted+=(painted_material(earth,mpp,GRASS,95.)*tone-color)*weights.x;}
+    if weights.y>.008 {painted+=(painted_material(earth,mpp,FIELD,142.)*tone-color)*weights.y;}
+    if weights.z>.008 {painted+=(painted_material(earth,mpp,WOODLAND,190.)*tone-color)*weights.z;}
+    if weights.w>.008 {painted+=(painted_material(earth,mpp,ROCK,166.)*tone-color)*weights.w;}
+    if bare.x>.008 {painted+=(painted_material(earth,mpp,SOIL,83.)*tone-color)*bare.x;}
+    if bare.y>.008 {painted+=(painted_material(earth,mpp,SAND,142.)*tone-color)*bare.y;}
+    if snow>.008 {painted+=(painted_material(earth,mpp,SNOW,214.)-color)*snow;}
+    return color+painted*strength;
+}
+
 fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     let base=terrain.rgb;
     let land=1.-smoothstep(.02,.42,terrain.a);
@@ -521,7 +596,11 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
         let fine=land_material_band(earth,planes,footprint,2150.)-.5;
         relief+=dot(fine,solid*vec4f(.18,.075,.28,.12))*(1.-smoothstep(38.,102.,footprint));
     }
-    return clamp(base*(1.+relief*land),vec3f(0.),vec3f(1.));
+    let color=base*(1.+relief*land);
+    let open=soil*(1.-snow);
+    let painted=cover_material(color,earth,footprint,vec4f(open*sward,0.,woods,rock*(1.-snow))*land,
+        vec2f(open*(1.-sward),sand*(1.-snow))*land,snow*land);
+    return clamp(painted,vec3f(0.),vec3f(1.));
 }
 
 fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
@@ -884,19 +963,69 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
 }
 // City pages carry feature coverage. Let the QPK pass own the
 // continuous ground so loading a local page only reveals buildings and bridges.
-fn city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
+fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
+    if mpp>=13. {return vec4f(0.);}
+    for (var site=0u;site<2u;site++) {
+        let header=site*10u;
+        let origin=vec2f(bitcast<f32>(city_water[header]),bitcast<f32>(city_water[header+1u]));
+        let scale=vec2f(bitcast<f32>(city_water[header+2u]),bitcast<f32>(city_water[header+3u]));
+        let point=(ll-origin)*scale;
+        let low=vec2f(bitcast<f32>(city_water[header+4u]),bitcast<f32>(city_water[header+5u]));
+        let high=vec2f(bitcast<f32>(city_water[header+6u]),bitcast<f32>(city_water[header+7u]));
+        if any(point<low) || any(point>=high) {continue;}
+        let road=city_water[20u+site];
+        let cell=vec2u((point-low)/64.);
+        let at=road+2u+2u*(cell.y*city_water[road]+cell.x);
+        var strength=0.;
+        var surface=0u;
+        for (var i=city_water[at];i<city_water[at+1u];i+=6u) {
+            let style=city_water[i+5u];
+            if (area&3u)>1u && (style&4u)==0u {continue;}
+            let a=vec2f(bitcast<f32>(city_water[i]),bitcast<f32>(city_water[i+1u]));
+            let b=vec2f(bitcast<f32>(city_water[i+2u]),bitcast<f32>(city_water[i+3u]));
+            let d=b-a;
+            let station=clamp(dot(point-a,d)/max(.0001,dot(d,d)),0.,1.);
+            let edge=length(point-a-station*d)-bitcast<f32>(city_water[i+4u]);
+            let opacity=1.-smoothstep(-mpp*.30,mpp*.50,edge);
+            if opacity>strength {
+                strength=opacity;
+                surface=style&3u;
+            }
+        }
+        if strength<=0. {continue;}
+        let layers=array<i32,3>(DIRT_ROAD,GRAVEL,SETTS);
+        let spans=array<f32,3>(18.,8.,5.);
+        let ink=painted_material(earth,mpp,layers[surface],spans[surface])*.88+vec3f(.096,.088,.079);
+        let edge=min(point-low,high-point);
+        return vec4f(ink,strength*(1.-smoothstep(6.,13.,mpp))*smoothstep(0.,100.,min(edge.x,edge.y)));
+    }
+    return vec4f(0.);
+}
+
+fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
     let historical=tile.options.z>1.5;
     let detail=1.-smoothstep(16.,CITY_INK_MPP,mpp);
     if !historical && detail<=0. {return vec4f(0.);}
     let du=1./vec2f(textureDimensions(city_data));
     let pixel_metres=(tile.extent.zw-tile.extent.xy)*du*111195.*vec2f(max(.08,cos(radians(ll.y))),1.);
     let mip=max(0.,log2(mpp/max(1.,min(pixel_metres.x,pixel_metres.y))));
-    let buildings=textureSampleLevel(city_data,linear,uv,mip).rg;
+    var buildings=textureSampleLevel(city_data,linear,uv,mip).rg;
+    // The near Paris streets cover the historical central street network.
+    // Keep regional roads outside that survey and London's incomplete dated network.
+    if tile.options.z>2.5 && tile.options.z<3.5 && mpp<13. {
+        let interior=min(ll-vec2f(2.255,48.815),vec2f(2.42,48.91)-ll);
+        let vector_weight=(1.-smoothstep(6.,13.,mpp))*smoothstep(0.,.004,min(interior.x,interior.y));
+        buildings.g*=1.-vector_weight;
+    }
     if tile.options.z>3.5 && tile.options.z<4.5 {
         let major=pow(buildings.r,.74)*.68;
         let local=buildings.g*(1.-smoothstep(20.,76.,mpp))*.48;
         let road=max(major,local)*smoothstep(0.,160.,edge_distance);
-        return vec4f(mix(vec3f(.70,.60,.50),vec3f(.81,.72,.57),major),road);
+        let dry=painted_material(earth,mpp,DIRT_ROAD,21.);
+        let gravel=painted_material(earth,mpp,GRAVEL,9.);
+        let paved=painted_material(earth,mpp,SETTS,4.);
+        let material=mix(mix(dry,gravel,.60),paved,smoothstep(.12,.53,major));
+        return vec4f(material*.95+vec3f(.064,.059,.050),road);
     }
     let edge=textureSampleLevel(city_data,linear,uv-du*.82,mip).r;
     let shadow=max(0.,edge-buildings.r)*detail*.49;
@@ -916,20 +1045,22 @@ fn city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
         let coverage=smoothstep(.045,.69,buildings.r);
         let interior=clamp(buildings.g/max(.05,buildings.r),0.,1.);
         let shade=smoothstep(.05,.53,max(0.,edge-buildings.r));
-        let roofs=mix(vec3f(.65,.49,.36),vec3f(.48,.32,.27),interior);
+        let roofs=mix(vec3f(.56,.53,.49),vec3f(.47,.44,.40),interior);
         let opacity=(1.-terrain.a)*coverage*smoothstep(7.,30.,mpp)*smoothstep(0.,200.,edge_distance);
-        return vec4f(mix(roofs,vec3f(.38,.29,.27),shade*.58),opacity);
+        return vec4f(mix(roofs,vec3f(.39,.36,.33),shade*.52),opacity);
     }
     if tile.options.z>2.5 {
         // This source maps generalized built-up areas and roads at 1:50,000.
         let land=1.-terrain.a;
-        let browns=mix(vec3f(.57,.42,.34),vec3f(.69,.52,.41),buildings.r);
-        let ground=land*smoothstep(.06,.50,blocks)*mix(.77,.99,smoothstep(24.,125.,mpp));
+        let soil=painted_material(earth,mpp,SOIL,930.);
+        let blocks_color=mix(vec3f(.55,.53,.48),vec3f(.62,.58,.51),buildings.r);
+        let ground_color=mix(blocks_color,soil,.23*(1.-smoothstep(22.,105.,mpp)));
+        let ground=land*smoothstep(.06,.50,blocks)*mix(.39,.91,smoothstep(17.,125.,mpp));
         let survey_edge=smoothstep(480.,7200.,edge_distance);
         let street=pow(buildings.g,1.5)*(1.-smoothstep(19.,67.,mpp))*.24*survey_edge;
         let top=mix(vec3f(.65,.59,.47),vec3f(.67,.62,.49),terrain.a);
         let alpha=ground*(1.-street)+street;
-        let color=browns*ground*(1.-street)+top*street;
+        let color=ground_color*ground*(1.-street)+top*street;
         let support=smoothstep(0.,420.,edge_distance);
         return vec4f(color/max(.0001,alpha),alpha*support);
     }
@@ -959,10 +1090,10 @@ fn city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
     let built=density*select(mix(.75,1.,urban),1.,historical);
     // At the survey limit, attenuate the mapped features over a few source blocks.
     let support=smoothstep(0.,mix(320.,670.,built),edge_distance);
-    let facade=mix(vec3f(.52,.40,.35),vec3f(.77,.65,.55),max(0.,buildings.r-edge));
+    let facade=mix(vec3f(.47,.44,.40),vec3f(.68,.63,.55),max(0.,buildings.r-edge));
     let footprint_weight=select(detail,1.-smoothstep(24.,134.,mpp),historical);
     let footprint=select(buildings.r,smoothstep(.028,.53,buildings.r),historical);
-    let wall=footprint*footprint_weight*mix(.70,.96,built)*land;
+    let wall=footprint*footprint_weight*mix(.70,.96,built)*land*select(1.,smoothstep(3.,15.,mpp),historical);
     // Wide mapped strokes survive the screen-space filter at the fringe.
     let stroke=smoothstep(.13,.48,buildings.g);
     let local_road=mix(terrain.rgb,vec3f(.76,.70,.59),mix(.39,.75,stroke));
@@ -974,9 +1105,11 @@ fn city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
     let road=buildings.g*road_weight*mix(fringe,.88,built);
     let bridge=mix(road,buildings.g*road_weight*.88,terrain.a);
     let shading=shadow*land*mix(.45,1.,built);
-    let ground=land*select(detail*smoothstep(.055,.36,blocks)*.57,density*.98,historical);
-    let aggregate=mix(vec3f(.68,.53,.40),vec3f(.49,.33,.28),density);
-    let paving=mix(terrain.rgb,select(vec3f(.58,.52,.44),aggregate,historical),select(.82,1.,historical));
+    let ground=land*select(detail*smoothstep(.055,.36,blocks)*.57,
+        density*mix(.39,.92,smoothstep(11.,99.,mpp)),historical);
+    let stone=painted_material(earth,mpp,SOIL,320.);
+    let aggregate=mix(mix(vec3f(.61,.58,.52),vec3f(.50,.49,.45),density),stone,.23);
+    let paving=mix(terrain.rgb,select(vec3f(.57,.54,.48),aggregate,historical),select(.82,1.,historical));
     let color=((paving*ground*(1.-shading)+vec3f(.36,.32,.31)*shading)*(1.-wall)+facade*wall)*(1.-bridge)
         +mix(road_color,vec3f(.69,.67,.59),terrain.a)*bridge;
     let alpha=((ground*(1.-shading)+shading)*(1.-wall)+wall)*(1.-bridge)+bridge;
@@ -1140,15 +1273,22 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
     let mpp=view.viewport.z*EARTH;
     let city_on_natural=view.map_style.y>.5 && tile.options.z>.5 && view.selection.y<.5;
     if tile.options.z>1.5 || (city_on_natural && view.settings.y<.5 && view.selection.z<.5) {
-        let ink=city_ink(ll,uv,mpp,edge_distance,area);
+        var ink=city_ink(ll,v,uv,mpp,edge_distance,area);
+        let street=city_street(ll,v,mpp,area);
+        if street.a>0. {
+            let blend=ink.a*(1.-street.a);
+            ink=vec4f((ink.rgb*blend+street.rgb*street.a)/(blend+street.a),blend+street.a);
+        }
         return vec4f(ink.rgb,ink.a*tile.options.x*coverage);
     }
     var color=shade_map(ll,uv,v,normal_view,area);
     if city_on_natural {
-        let ink=city_ink(ll,uv,mpp,edge_distance,area);
+        let ink=city_ink(ll,v,uv,mpp,edge_distance,area);
         color=mix(color,ink.rgb,ink.a);
     }
     if is_world {
+        let street=city_street(ll,v,mpp,area);
+        color=mix(color,street.rgb,street.a);
         let edge=1.-smoothstep(0.,view.viewport.z*1.2,horizon-r);
         color=mix(color,sky(p.xy),edge*.47);
     }

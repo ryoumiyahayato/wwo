@@ -789,6 +789,7 @@ impl ApplicationHandler<HostEvent> for Host {
                 if let Some(view) = &mut self.battle_view { view.zoom(steps); self.dirty = true; return; }
                 if self.scroll_population_debug(self.cursor,steps) {return;}
                 if self.scroll_countries(self.cursor,steps) {return;}
+                if self.scroll_place_filters(self.cursor,steps) {return;}
                 let [w,h]=self.size.map(|n|n as f32);
                 let [x,y,width,height]=formal_ui::message_rect([w,h],((h+16.)*0.5).max(190.));
                 if self.hud.messages && (f64::from(x)..=f64::from(x+width)).contains(&self.cursor[0]) && (f64::from(y)..=f64::from(y+height)).contains(&self.cursor[1]){

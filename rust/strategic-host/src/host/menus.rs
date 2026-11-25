@@ -37,6 +37,21 @@ impl Host {
 
     pub(super) fn hud_action(&mut self,command:HudCommand) {
         match command {
+            HudCommand::PlaceFilters => {
+                self.hud.place_filters_open = !self.hud.place_filters_open;
+                if self.hud.place_filters_open {
+                    let (_, visible) = formal_ui::place_filter_drawer(self.size);
+                    let active = formal_ui::PLACE_FILTERS.iter()
+                        .position(|(filter, _, _)| *filter == self.hud.place_filter).unwrap_or_default();
+                    self.hud.place_filter_offset = active.min(formal_ui::PLACE_FILTERS.len() - visible);
+                }
+            }
+            HudCommand::PlaceFilterScroll(steps) => {
+                let (_, visible) = formal_ui::place_filter_drawer(self.size);
+                let max = formal_ui::PLACE_FILTERS.len() - visible;
+                self.hud.place_filter_offset = self.hud.place_filter_offset.min(max)
+                    .saturating_add_signed(steps as isize).min(max);
+            }
             HudCommand::Page(page)=>{
                 if page!=HudPage::Map { self.population_debug=None; }
                 if let (true,Some(window))=(self.hud.market_search.is_some() || self.hud.transport_directory.is_some(),&self.window) {
@@ -591,6 +606,20 @@ impl Host {
             self.country_directory.filter(&self.world, self.state.lobby.as_ref(), &self.state.date.to_string(), self.hud.english);
         }
         self.dirty = true;
+    }
+
+    pub(super) fn scroll_place_filters(&mut self, point: [f64; 2], steps: f64) -> bool {
+        if self.resources_available() && self.resources.scroll_categories(self.size,point,steps) {
+            self.dirty = true;
+            return true;
+        }
+        if self.hud.menu != HudMenu::MapModes || self.mode != Mode::Political || !self.hud.place_filters_open {
+            return false;
+        }
+        let (drawer, _) = formal_ui::place_filter_drawer(self.size);
+        if !lobby::contains(drawer, point) { return false; }
+        self.action(Action::Hud(HudCommand::PlaceFilterScroll(-(steps.signum() as i32))));
+        true
     }
 
     pub(super) fn scroll_countries(&mut self, point: [f64; 2], steps: f64) -> bool {

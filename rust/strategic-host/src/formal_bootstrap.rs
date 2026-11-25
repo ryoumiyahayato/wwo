@@ -618,6 +618,10 @@ impl InitialWorld {
         self.character.development.as_ref().is_none_or(|player| player.language().is_some_and(|language| player.can_read(language)))
     }
 
+    pub fn can_read_language(&self, language: Language) -> bool {
+        self.character.development.as_ref().is_none_or(|player| player.can_read(language))
+    }
+
     pub fn can_read_polity_record(&self, id: &str) -> bool {
         self.character.development.as_ref().is_none_or(|player| {
             self.activities.openings.get(id).is_some_and(|&language| player.can_read(language))

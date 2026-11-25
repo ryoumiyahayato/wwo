@@ -252,14 +252,9 @@ impl ProfileLayout {
     }
 
     fn scrollbar(&self, offset: usize) -> Option<(Rect, Rect)> {
-        let max = self.max_scroll();
-        if max == 0 { return None; }
         let [x, y, w, _] = self.drawer;
         let height = self.visible as f32 * DRAWER_ROW - 4.;
-        let track = [x + w - 23., y + DRAWER_HEADER, 15., height];
-        let thumb_height = (height * self.visible as f32 / self.rows as f32).max(16.);
-        let thumb_y = (height - thumb_height) * offset.min(max) as f32 / max as f32;
-        Some((track, [track[0], track[1] + thumb_y, track[2], thumb_height]))
+        formal_ui::drawer_scrollbar([x+8.,y+DRAWER_HEADER,w-16.,height],self.visible,self.rows,offset)
     }
 }
 

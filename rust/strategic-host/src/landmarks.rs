@@ -1,6 +1,6 @@
 use crate::{camera::{self, Camera}, world::{Place, World}};
 use bytemuck::{Pod, Zeroable};
-use glam::{Mat3, Mat4, Vec3};
+use glam::{Mat3, Mat4, Quat, Vec3};
 use serde::Deserialize;
 use std::{collections::BTreeMap, io, path::Path};
 use wwo_map_lab::transport::models::{self as transport_models, ModelLod, TransportModel};
@@ -157,7 +157,7 @@ pub(crate) type ModelBounds = ([f64; 3], [f64; 3]);
 enum Lod { Single, Far, Near }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-enum ModelAsset { Landmark(usize), City(usize), Transport(TransportModel, ModelLod) }
+enum ModelAsset { Landmark(usize), City(usize), CityPage(u64,usize), Transport(TransportModel, ModelLod) }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ModelKey { asset: ModelAsset, lod: Lod }
@@ -174,11 +174,18 @@ impl ModelKey {
         match self.asset {
             ModelAsset::Landmark(asset) => ASSETS[asset].name,
             ModelAsset::City(module) => R40_MODULES[module],
+            ModelAsset::CityPage(..) => "City block page",
             ModelAsset::Transport(model, _) => model.id(),
         }
     }
 
-    pub fn is_city(self) -> bool { matches!(self.asset, ModelAsset::City(_)) }
+    pub fn is_city(self) -> bool { matches!(self.asset, ModelAsset::City(_) | ModelAsset::CityPage(..)) }
+    pub fn city_page(revision:u64,index:usize)->Self {
+        Self {asset:ModelAsset::CityPage(revision,index),lod:Lod::Far}
+    }
+    pub(crate) fn city_detail(module:usize)->Self {
+        Self {asset:ModelAsset::City(module),lod:Lod::Near}
+    }
     pub fn is_transport(self) -> bool { matches!(self.asset, ModelAsset::Transport(..)) }
     pub fn clips_at_waterline(self) -> bool {
         matches!(self.asset, ModelAsset::Transport(
@@ -193,12 +200,15 @@ impl ModelKey {
 }
 
 pub struct VisibleModel {
+    pub model_scale: [f32;3],
     pub key: ModelKey,
     pub place: Option<usize>,
     pub screen_bounds: [f32; 4],
     pub clip_from_model: [[f32; 4]; 4],
     pub lod_range: [f32; 2],
     pub alternate: Option<(ModelKey, f32)>,
+    pub city_page: Option<std::sync::Arc<ModelMesh>>,
+    pub city_detail_mask: u8,
 }
 
 impl Landmarks {
@@ -311,7 +321,7 @@ impl Landmarks {
                     datum:bounds.0[1]*model.scale[1],dimensions:model.scale,bounds,
                 }).project(Some(place),camera,pitch,size) else {continue;};
                 let low=VisibleModel{key:key(Lod::Far),lod_range:[crossover,opacity],
-                    alternate:Some((high.key,opacity)),..high};
+                    alternate:Some((high.key,opacity)),city_page:None,..high};
                 high.lod_range=[0.,crossover];
                 high.alternate=Some((low.key,opacity));
                 visible.extend([high,low]);
@@ -320,26 +330,21 @@ impl Landmarks {
         visible
     }
 
-    pub(crate) fn footprint_model(&self, module: usize, anchor: [f64;2], heading: f64,
-        dimensions: [f64;3], camera: &Camera, size: [u32;2]) -> Option<VisibleModel> {
-        let low = camera.mpp > 7.;
-        let bounds = self.city_bounds[module][usize::from(low)];
-        let scale = std::array::from_fn(|i| dimensions[i]/(bounds.1[i]-bounds.0[i]).max(0.001));
-        // Translate the authored mesh's plan center to the measured footprint center.
-        let [sin,cos] = {let (sin,cos)=heading.to_radians().sin_cos();[sin,cos]};
-        let x = (bounds.0[0]+bounds.1[0])*0.5*scale[0];
-        let z = (bounds.0[2]+bounds.1[2])*0.5*scale[2];
-        let metres = camera::EARTH*std::f64::consts::PI/180.;
-        let origin = [anchor[0]-(x*cos+z*sin)/(metres*anchor[1].to_radians().cos().max(0.01)),
-            anchor[1]-(-z*cos+x*sin)/metres];
-        let pose = ModelPose {
-            key: ModelKey { asset:ModelAsset::City(module),lod:if low {Lod::Far}else{Lod::Near} },
-            anchor:origin,heading,datum:bounds.0[1]*scale[1],
-            dimensions:scale,bounds,
-        };
-        let mut model=pose.project(None,camera,camera.pitch(),size)?;
-        model.lod_range[1]=(1.-camera::smooth(115.,155.,camera.mpp)) as f32;
-        Some(model)
+    pub(crate) fn footprint_model(&self, module: usize, [east,south]: [f64;2], heading: f64,
+        dimensions: [f64;3], page_transform: Mat4) -> VisibleModel {
+        let bounds = self.city_bounds[module][0];
+        let model_scale=std::array::from_fn(|i| (dimensions[i]/(bounds.1[i]-bounds.0[i]).max(0.001)) as f32);
+        let scale=Vec3::from_array(model_scale);
+        let center=Vec3::new(((bounds.0[0]+bounds.1[0])*0.5) as f32,bounds.0[1] as f32,
+            ((bounds.0[2]+bounds.1[2])*0.5) as f32)*scale;
+        let rotation=Quat::from_rotation_y(heading.to_radians() as f32);
+        let origin=Vec3::new(east as f32,0.,south as f32)-rotation*center;
+        let transform=page_transform*Mat4::from_scale_rotation_translation(scale,rotation,origin);
+        VisibleModel {
+            model_scale, key:ModelKey::city_detail(module),place:None,screen_bounds:[0.;4],
+            clip_from_model:transform.to_cols_array_2d(),lod_range:[0.,1.],alternate:None,
+            city_page:None,city_detail_mask:0,
+        }
     }
 
     pub fn focus(&self, place: usize) -> Option<([f64; 2], f64)> {
@@ -457,7 +462,8 @@ impl ModelPose {
         let heading = Mat4::from_rotation_y(self.heading.to_radians() as f32);
         let scale = Mat4::from_scale(Vec3::from_array(self.dimensions.map(|n| n as f32)));
         let transform = chart_from_model * heading * scale;
-        let [left, top, right, bottom] = [min[0], max[0]].into_iter().flat_map(|x| {
+        let screen_bounds=if place.is_some() {
+            let [left, top, right, bottom] = [min[0], max[0]].into_iter().flat_map(|x| {
             [min[2], max[2]].into_iter().flat_map(move |z| {
                 [min[1], max[1]].into_iter().map(move |y| {
                     let p = transform.transform_point3(Vec3::new(x as f32, y as f32, z as f32));
@@ -466,13 +472,18 @@ impl ModelPose {
             })
         }).fold([f32::INFINITY, f32::INFINITY, f32::NEG_INFINITY, f32::NEG_INFINITY], |[l, t, r, b], [x, y]| {
             [l.min(x), t.min(y), r.max(x), b.max(y)]
-        });
+            });
+            [left - 3., top - 3., right - left + 6., bottom - top + 6.]
+        } else {[0.;4]};
         Some(VisibleModel {
             key: self.key, place,
+            model_scale: self.dimensions.map(|n|n as f32),
             clip_from_model: transform.to_cols_array_2d(),
-            screen_bounds: [left - 3., top - 3., right - left + 6., bottom - top + 6.],
+            screen_bounds,
             lod_range: [0.,1.],
             alternate: None,
+            city_page: None,
+            city_detail_mask: 0,
         })
     }
 }
@@ -480,9 +491,9 @@ impl ModelPose {
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 pub struct ModelVertex {
-    position: [f32; 3],
-    normal: [f32; 3],
-    color: [f32; 4],
+    pub(crate) position: [f32; 3],
+    pub(crate) normal: [f32; 3],
+    pub(crate) color: [f32; 4],
 }
 
 pub struct ModelMesh {
@@ -514,6 +525,7 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
     let bytes = match key.asset {
         ModelAsset::Landmark(asset) => ASSETS[asset].bytes,
         ModelAsset::City(_) => city_override.unwrap_or(R40_MODELS),
+        ModelAsset::CityPage(..) => return Err(io::Error::other("City page mesh was not loaded")),
         ModelAsset::Transport(model, lod) => {
             let mesh = transport_models::decode(model, lod)?;
             return Ok(ModelMesh {
@@ -538,7 +550,7 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
         ModelAsset::City(module) => {
             append(city_node(&glb, module, key.lod)?, Mat4::IDENTITY, blob, key.lod, &mut model)?;
         }
-        ModelAsset::Transport(..) => unreachable!(),
+        ModelAsset::Transport(..) | ModelAsset::CityPage(..) => unreachable!(),
     }
     if model.indices.is_empty() {
         return Err(io::Error::other(format!("{} has no static triangles", key.model())));

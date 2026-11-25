@@ -354,6 +354,8 @@ pub enum Tech {#[default] Capacity,Chronicle,Public}
 pub struct Hud {
     pub page:Page,pub menu:Menu,pub messages:bool,pub message_offset:usize,pub tech:Tech,pub milestone:usize,
     pub place_filter:crate::map_facilities::PlaceFilter,
+    pub place_filters_open:bool,
+    pub place_filter_offset:usize,
     pub clock_origin:Option<[f64;2]>,
     pub mechanical:crate::mechanical::Mechanical,
     pub waiting_slot:bool,pub fullscreen:bool,pub clock_drag:Option<f32>,pub military_grid:bool,
@@ -370,7 +372,7 @@ pub struct Hud {
 }
 #[derive(Clone,Copy)]
 pub enum Command {
-    Page(Page),Menu(Menu),Messages,MessageScroll(i32),Technology(Tech),Milestone(usize),
+    Page(Page),Menu(Menu),PlaceFilters,PlaceFilterScroll(i32),Messages,MessageScroll(i32),Technology(Tech),Milestone(usize),
     FinancePage(usize),Clock(u32),Player,LocatePlayer,PlayerCountry,Slot(u8),ConfirmSlot(u8),MessageLink(usize),
     Labels,Fullscreen,MilitaryGrid,Quit,PlayerMarker,Volume(u8),Language(bool),
     Market(&'static str,usize),MarketScroll(i32),
@@ -611,10 +613,12 @@ impl Display<'_> {
         let target=self.camera.mpp*crate::camera::SCALE_TARGET_PIXELS;
         let magnitude=10_f64.powf(target.log10().floor());
         let metres=[5.,2.,1.].into_iter().map(|n|n*magnitude).find(|n|*n<=target).unwrap_or(magnitude);
-        let scale=if metres>=1000.{format!("{} km",metres/1000.)}else{format!("{metres} m")};
+        let scale=if metres>=1000.{format!("{} {}",metres/1000.,visual.choose("千米","km"))}
+            else{format!("{metres} {}",visual.choose("米","m"))};
         let [lon,lat]=self.camera.coordinates();
-        let coordinates=format!("{:.3}° {}  {:.3}° {}",lat.abs(),if lat<0. {"S"}else{"N"},
-            lon.abs(),if lon<0. {"W"}else{"E"});
+        let coordinates=format!("{:.3}° {}  {:.3}° {}",lat.abs(),
+            if lat<0. {visual.choose("南","S")}else{visual.choose("北","N")},
+            lon.abs(),if lon<0. {visual.choose("西","W")}else{visual.choose("东","E")});
         let version=crate::build_identity::display();
         let label=if self.hud.page==Page::Map && self.hud.menu==Menu::None {
             match (self.resource_warnings.is_empty(),self.modern_terrain,self.sea_relation_visible) {
@@ -626,28 +630,30 @@ impl Display<'_> {
             }
         } else {""};
         let length=(metres/self.camera.mpp) as f32;
-        let row=visual.width(&coordinates,0)+length+visual.width(&scale,0)+32.;
-        let width=row.max(visual.width(version,0)+20.).max(visual.width(label,0)+20.);
-        let height=if label.is_empty(){47.}else{68.};
+        let row=length+visual.width(&scale,0)+28.;
+        let width=row.max(visual.width(&coordinates,0)+20.).max(visual.width(version,0)+20.)
+            .max(visual.width(label,0)+20.).min((w-20.).max(1.));
+        let height=if label.is_empty(){65.}else{85.};
         let right=w-10.;
         panels.rect(right-width,h-height-6.,width,height,[11,20,27,203]);
-        visual.text(text,version,0,[right-visual.width(version,0)-9.,h-48.],width-16.,IVORY);
-        visual.text(text,label,0,[right-visual.width(label,0)-9.,h-69.],width-16.,MUTED);
-        let start=right-visual.width(&scale,0)-length-19.;
+        let right_line=|label:&str|right-visual.width(label,0).min(width-16.)-9.;
+        visual.text(text,version,0,[right_line(version),h-66.],width-16.,IVORY);
+        visual.text(text,label,0,[right_line(label),h-86.],width-16.,MUTED);
+        visual.text(text,&coordinates,0,[right_line(&coordinates),h-46.],width-16.,MUTED);
+        let start=right-visual.width(&scale,0)-length-17.;
         panels.line([start,h-17.],[start+length,h-17.],1.,BRASS);
         for x in [start,start+length]{panels.line([x,h-21.],[x,h-14.],1.,BRASS);}
         visual.text(text,&scale,0,[start+length+8.,h-28.],75.,IVORY);
-        visual.text(text,&coordinates,0,[start-visual.width(&coordinates,0)-10.,h-28.],width-16.,MUTED);
-        if !self.feedback.is_empty() && self.hud.menu==Menu::None && self.can_read_world() {
+        if !self.feedback.is_empty() && self.hud.menu==Menu::None {
             let width=(w-64.).min(680.);let x=(w-width)*0.5;
             panel(panels,[x,59.,width,32.],[8,13,20,249]);
             visual.text(text,self.feedback,0,[x+12.,66.],width-24.,IVORY);
         }
         if self.hud.page==Page::Map && self.hud.menu==Menu::None {
             let shortcut=match self.mode {
-                Mode::Economic if s.is_some()=>Some(("打开市场",Command::Market("open",0),false)),
+                Mode::Economic if s.is_some()=>Some((visual.choose("打开市场","Market"),Command::Market("open",0),false)),
                 Mode::Political if s.is_some()=>Some((visual.choose("国家概况","My country"),Command::PlayerCountry,false)),
-                Mode::Military=>Some(("25 / 50 km 方格",Command::MilitaryGrid,self.hud.military_grid)),
+                Mode::Military=>Some((visual.choose("25 / 50 千米方格","25 / 50 km grid"),Command::MilitaryGrid,self.hud.military_grid)),
                 _=>None,
             };
             if let Some((label,command,active))=shortcut {
@@ -1292,19 +1298,20 @@ impl Display<'_> {
             rim(m,inset([x,y,width,height],4.),12.,1.5,[189,152,88,255]);
             rim(m,inset([x,y,width,height],9.),9.,1.,[142,119,81,173]);
         } else {panel(m,[x,y,width,height],dark);}
-        let title=match menu{Menu::MapModes=>"地图模式",Menu::System=>"系统菜单",Menu::Settings=>"设置",Menu::Save=>"保存",Menu::Load=>"加载",Menu::Overwrite(_)=>"覆盖已有存档？",Menu::Departure=>"保存当前游戏？",Menu::None=>unreachable!()};
+        let title=match menu{Menu::MapModes=>self.skin.choose("地图模式","Map modes"),Menu::System=>"系统菜单",Menu::Settings=>"设置",Menu::Save=>"保存",Menu::Load=>"加载",Menu::Overwrite(_)=>"覆盖已有存档？",Menu::Departure=>"保存当前游戏？",Menu::None=>unreachable!()};
         self.skin.text(t,title,if menu==Menu::Settings{0}else{1},[x+16.,y+7.],width-32.,IVORY);
         m.rect(x+13.,y+31.,width-26.,1.5,BRASS);
         let action=|command|Some(Action::Hud(command));
         match menu {
             Menu::MapModes=>{
-                let rows=[("政治地图",Mode::Political),("经济地图",Mode::Economic),("军事地图",Mode::Military)];
+                let say=|zh,en|self.skin.choose(zh,en);
+                let rows=[(say("政治地图","Political"),Mode::Political),(say("经济地图","Economic"),Mode::Economic),
+                    (say("军事地图","Military"),Mode::Military)];
                 for (i,(label,mode)) in rows.into_iter().enumerate(){
                     let active=self.mode==mode;
                     let action=if active{Mode::Geographic}else{mode};
                     self.row(m,t,hits,[x+13.,y+37.+i as f32*32.,width-26.,27.],label,Some(Action::Mode(action)),active);
                 }
-                let say=|zh,en|self.skin.choose(zh,en);
                 let button=(width-30.)/2.;
                 let commands=[
                     (say("搜索","Search"),Some(Action::Search)),
@@ -1319,19 +1326,24 @@ impl Display<'_> {
                     }
                 }
                 if self.mode==Mode::Political {
-                    use crate::map_facilities::PlaceFilter;
-                    for (i,(label,filter)) in [
-                        (say("全部地点","All places"),PlaceFilter::Overview),
-                        (say("行政与聚落","Administration"),PlaceFilter::Settlements),
-                        (say("历史文化","Heritage"),PlaceFilter::Heritage),
-                        (say("交通设施","Transport sites"),PlaceFilter::Transport),
-                        (say("工业与矿业","Industry & mining"),PlaceFilter::Economy),
-                        (say("政府建筑","Government"),PlaceFilter::Government),
-                        (say("军事设施","Military sites"),PlaceFilter::Military),
-                        (say("航空设施","Aviation"),PlaceFilter::Aviation),
-                    ].into_iter().enumerate() {
-                        self.row(m,t,hits,[x+13.+(i%2) as f32*(button+4.),y+203.+(i/2) as f32*31.,button,26.],
-                            label,Some(Action::PlaceFilter(filter)),self.hud.place_filter==filter);
+                    let open=self.hud.place_filters_open;
+                    let active=PLACE_FILTERS.iter().find(|(filter,_,_)|*filter==self.hud.place_filter).unwrap();
+                    let label=format!("{} · {}",say("地点分类","Place filters"),say(active.1,active.2));
+                    self.row(m,t,hits,[x+13.,y+203.,width-26.,26.],&label,action(Command::PlaceFilters),open);
+                    let marker=if open {"-"} else {"+"};
+                    self.skin.text(t,marker,0,[x+width-30.,y+205.],16.,IVORY);
+                    if open {
+                        let (rows,visible)=place_filter_drawer(self.size);
+                        let offset=self.hud.place_filter_offset.min(PLACE_FILTERS.len()-visible);
+                        let [left,top,span,_]=rows;
+                        for (i,&(filter,zh,en)) in PLACE_FILTERS.iter().skip(offset).take(visible).enumerate() {
+                            self.row(m,t,hits,[left,top+i as f32*PLACE_FILTER_ROW,span-20.,24.],
+                                say(zh,en),Some(Action::PlaceFilter(filter)),filter==self.hud.place_filter);
+                        }
+                        if let Some((track,thumb))=drawer_scrollbar(rows,visible,PLACE_FILTERS.len(),offset) {
+                            m.rect(track[0],track[1],track[2],track[3],[34,42,46,255]);
+                            m.rect(thumb[0]+3.,thumb[1],thumb[2]-6.,thumb[3],BRASS);
+                        }
                     }
                 }
             },
@@ -1460,6 +1472,34 @@ pub fn menu_rect(menu:Menu,size:[u32;2],radius:f32)->[f32;4]{
 }
 pub fn map_modes_rect(size:[u32;2])->[f32;4] {
     menu_rect(Menu::MapModes,size,(size[0] as f32*0.056).clamp(52.,78.))
+}
+const PLACE_FILTER_ROW:f32=28.;
+use crate::map_facilities::PlaceFilter;
+pub const PLACE_FILTERS:[(PlaceFilter,&str,&str);8]=[
+    (PlaceFilter::Overview,"全部地点","All places"),
+    (PlaceFilter::Settlements,"行政与聚落","Administration"),
+    (PlaceFilter::Heritage,"历史文化","Heritage"),
+    (PlaceFilter::Transport,"交通设施","Transport sites"),
+    (PlaceFilter::Economy,"工业与矿业","Industry & mining"),
+    (PlaceFilter::Government,"政府建筑","Government buildings"),
+    (PlaceFilter::Military,"军事设施","Military sites"),
+    (PlaceFilter::Aviation,"航空设施","Aviation"),
+];
+
+pub fn place_filter_drawer(size:[u32;2])->([f32;4],usize) {
+    let [x,y,w,h]=map_modes_rect(size);
+    let visible=((h-240.)/PLACE_FILTER_ROW).floor().max(1.) as usize;
+    let visible=visible.min(PLACE_FILTERS.len());
+    ([x+13.,y+236.,w-26.,visible as f32*PLACE_FILTER_ROW-4.],visible)
+}
+
+pub(crate) fn drawer_scrollbar([x,y,w,h]:[f32;4],visible:usize,rows:usize,offset:usize)->Option<([f32;4],[f32;4])> {
+    let max=rows.saturating_sub(visible);
+    if max==0 {return None;}
+    let track=[x+w-15.,y,15.,h];
+    let height=(h*visible as f32/rows as f32).max(16.);
+    let dy=(h-height)*offset.min(max) as f32/max as f32;
+    Some((track,[track[0],y+dy,track[2],height]))
 }
 pub fn message_rect([w,h]:[f32;2],center:f32)->[f32;4]{
     let width=(w*0.34).min(320.);

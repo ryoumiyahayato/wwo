@@ -138,7 +138,6 @@ impl Host {
             Action::PlaceFilter(filter)=>{
                 if self.hud.place_filter != filter { self.select(None); }
                 self.hud.place_filter=filter;
-                self.hud.menu=HudMenu::None;
             }
             Action::Mode(mode)=>{
                 if self.hud.page==HudPage::Market{self.market_command("close",0);}
@@ -195,14 +194,13 @@ impl Host {
         self.dirty=true;
     }
     pub(super) fn search_results(&self)->Vec<Object> {
-        let q=self.search.as_deref().unwrap_or("").trim().to_ascii_lowercase();
+        let q=self.search.as_deref().unwrap_or("").trim().to_lowercase();
         if q.is_empty(){return Vec::new();}
         let items=self.world.places.iter().enumerate().map(|(i,p)|(Object::Place(i),p.rank,&p.name,&p.id))
             .chain(self.world.polities.iter().enumerate().map(|(i,p)|(Object::Polity(i),p.rank,&p.name,&p.id)));
         let mut rows:Vec<_>=items.filter_map(|(o,rank,name,id)| {
-            if !ui::can_read_object(&self.world, self.written_world(), o) { return None; }
-            let name=name.to_ascii_lowercase();
-            let localized=ui::object_name(&self.world,&self.skin,o).to_ascii_lowercase();
+            let localized=ui::readable_map_name(&self.world,&self.skin,self.written_world(),o)?.to_lowercase();
+            let name=name.to_lowercase();
             ((name.contains(&q)||localized.contains(&q)||id.contains(&q)||q.strip_prefix("state:")==Some(id))&&self.available(o))
                 .then(||(localized!=q&&name!=q,!localized.starts_with(&q)&&!name.starts_with(&q),rank,localized,o))
         }).collect();
@@ -293,7 +291,8 @@ impl Host {
         let resource_map=self.resources_available()&&self.resources.open;
         if self.hud.menu==HudMenu::MapModes&&contains(formal_ui::map_modes_rect(self.size)) {
             if let Some(hit)=self.hits.iter().rev().find(|hit|matches!(hit.action,
-                Action::Mode(_)|Action::PlaceFilter(_)|Action::Home|Action::Back|Action::Search|Action::Hud(HudCommand::Page(HudPage::Travel)))
+                Action::Mode(_)|Action::PlaceFilter(_)|Action::Home|Action::Back|Action::Search|
+                Action::Hud(HudCommand::Page(HudPage::Travel)|HudCommand::PlaceFilters|HudCommand::PlaceFilterScroll(_)))
                 &&contains(hit.area)) {
                 self.action(hit.action);
             }

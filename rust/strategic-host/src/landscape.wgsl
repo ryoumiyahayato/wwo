@@ -326,6 +326,9 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
     let dry_crop = land.crop*(1.-steep)*(1.-smoothstep(.04,.26,max(land.damp,water)));
     color = cultivated_fields(color,ll,world,mpp,dry_crop);
     color = mix(color,mix(base,mineral,near*.87),exposed);
+    let vegetation=vec4f(land.grass+land.shrub*.68+land.damp*.70,land.crop,land.forest,exposed);
+    let deposits_art=land.bare*(1.-exposed);
+    color=cover_material(color,world,mpp,vegetation,deposits_art*vec2f(1.-sandy,sandy),land.snow);
     if near > .001 {
         // A shared geographic coordinate keeps the grain phase stable across DEM levels.
         let grains = land_material_band(world,planes,mpp,2630.) - .5;

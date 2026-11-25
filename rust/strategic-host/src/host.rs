@@ -30,7 +30,7 @@ pub(crate) enum HostEvent {
     TerrainDetail(usize,io::Result<Vec<u8>>),
     Rivers(io::Result<hydrology::Rivers>),
     Model(u64,landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
-    CityTile(u64,usize,io::Result<Vec<crate::city_models::Building>>),
+    CityTile(u64,usize,io::Result<crate::city_models::CityPage>),
     BattleTerrain(MilitaryCell, io::Result<PreparedBattleTerrain>),
 }
 
@@ -821,9 +821,6 @@ impl Host {
         }
         let center=self.camera.coordinates();
         let coord=self.camera.vector(self.cursor,self.size).map(camera::geographic);
-        let pointer=self.skin.choose("坐标","Coordinates");
-        let mouse=coord.map_or_else(||self.skin.choose("坐标 · 太空","Coordinates · Space").into(),
-            |p|format!("{pointer} · {:.4}, {:.4}",p[0],p[1]));
         let owner=coord.map_or([0,0],|p|self.object_at(p));
         let admin=if active {owner[1].checked_sub(1).and_then(|i|self.world.admin.get(i as usize))
             .map_or(String::new(),|p|self.skin.division_name(p).into())}else{String::new()};
@@ -834,7 +831,7 @@ impl Host {
         if source=="Paris" {source.push_str(" / APUR, IGN, (c) OpenStreetMap contributors / modern");}
         if self.mode!=Mode::Geographic && !active {source.push_str(" / historical boundaries unavailable");}
         if let Some(model)=&self.state.timeline {source=format!("SIMULATION   {} / {}",model.sites[self.site].label,model.at(self.site).label());}
-        let (econ_label,econ_legend)=self.state.legend();
+        let (econ_label,econ_legend)=self.state.legend(self.hud.english);
         let search=self.search_results();
         let flag_index=if self.in_lobby(){Some(self.lobby_country)}else{self.player_polity()};
         let flags=flag_index.map(|i|self.visuals.record(i)).filter(|v|v.active(&date)).map(|v|v.flag);
@@ -895,7 +892,7 @@ impl Host {
             mode:self.mode,date:&date,camera:&self.camera,size:self.size,selected:self.selected,admin:&admin,details:self.details,country:self.country,
             search:self.search.as_deref(),search_results:&search,econ_label:&econ_label,econ_legend:&econ_legend,
             resources:self.resources_available().then_some(&self.resources),year:self.state.date.year,
-            mouse:&mouse,labels:self.labels,formal,
+            labels:self.labels,formal,
             transport_detail:self.transport_detail.as_ref().filter(|_|show_transport_detail).map(|(_, detail)|detail),
         },&mut self.shown_markers)};
         if let Some(panel)=self.population_debug.as_ref().filter(|_|!loading&&!self.in_lobby()) {

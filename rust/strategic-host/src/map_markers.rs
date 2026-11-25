@@ -12,6 +12,8 @@ const SHADOW: [u8; 4] = [15, 23, 27, 112];
 #[derive(Deserialize)]
 struct Glyph {
     paths: Vec<Vec<[f32; 2]>>,
+    #[serde(default)]
+    fills: Vec<Vec<[f32; 2]>>,
 }
 
 static GLYPHS: LazyLock<HashMap<String, Glyph>> = LazyLock::new(|| {
@@ -20,18 +22,33 @@ static GLYPHS: LazyLock<HashMap<String, Glyph>> = LazyLock::new(|| {
 
 pub fn glyph(mesh: &mut Mesh, name: &str, [x, y]: [f32; 2], size: f32, ink: [u8; 4]) {
     let scale = size / 24.;
+    let glyph = &GLYPHS[name];
+    let project = |[u, v]: [f32; 2], offset: f32| [x + (u - 12.) * scale, y + (v - 12.) * scale + offset];
+    let fade = |mut color: [u8; 4]| { color[3] = (u16::from(color[3]) * u16::from(ink[3]) / 255) as u8; color };
     let paint = |mesh: &mut Mesh, width, offset: f32, color| {
-        let project = |[u, v]: [f32; 2]| [x + (u - 12.) * scale, y + (v - 12.) * scale + offset];
-        for path in &GLYPHS[name].paths {
+        for path in &glyph.paths {
             for segment in path.windows(2) {
-                mesh.line(project(segment[0]), project(segment[1]), width * scale, color);
+                mesh.line(project(segment[0],offset), project(segment[1],offset), width * scale, color);
             }
         }
     };
-    let fade = |mut color: [u8; 4]| { color[3] = (u16::from(color[3]) * u16::from(ink[3]) / 255) as u8; color };
     paint(mesh, 3.6, 0.85, fade(SHADOW));
-    paint(mesh, 3.5, 0., fade(OUTLINE));
-    paint(mesh, 1.9, 0., ink);
+    if glyph.fills.is_empty() {
+        paint(mesh, 3.5, 0., fade(OUTLINE));
+        paint(mesh, 1.9, 0., ink);
+        return;
+    }
+    let center = [ink[0].saturating_sub(45), ink[1].saturating_sub(48), ink[2].saturating_sub(41), ink[3]];
+    let fill = |mesh: &mut Mesh, offset, color| {
+        for polygon in &glyph.fills {
+            let points:Vec<_> = polygon.iter().map(|&point|project(point,offset)).collect();
+            mesh.shape(&points,color);
+        }
+    };
+    fill(mesh,0.85,fade(SHADOW));
+    fill(mesh,0.,center);
+    paint(mesh, 2.75, 0., fade(OUTLINE));
+    paint(mesh, 1.35, 0., ink);
 }
 
 pub fn diamond(mesh: &mut Mesh, [x, y]: [f32; 2], r: f32, ink: [u8; 4], filled: bool) {

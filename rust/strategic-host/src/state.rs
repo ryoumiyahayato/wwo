@@ -66,17 +66,23 @@ impl State {
         }
         rgba
     }
-    pub fn legend(&self)->(String,Vec<(String,[u8;4])>) {
-        let unknown=("No value".into(),[147,147,131,255]);
+    pub fn legend(&self,english:bool)->(String,Vec<(String,[u8;4])>) {
+        let unknown=(if english {"No value"} else {"无数值"}.into(),[147,147,131,255]);
         let Some(e)=self.economy.as_ref().filter(|e|e.date==self.date) else {
-            return ("Employment structure / circa 1900".into(),["Agriculture","Industry","Services","Mixed","No reference"]
+            let (title,labels)=if english {
+                ("Employment structure / circa 1900",["Agriculture","Industry","Services","Mixed","No reference"])
+            } else {
+                ("约 1900 年就业结构",["农业","工业","服务业","混合","无参考数据"])
+            };
+            return (title.into(),labels
                 .into_iter().zip(STRUCTURE).map(|(name,color)|(name.to_owned(),color)).collect());
         };
         let mut entries=Vec::new();
         for (i,color) in ECON.iter().enumerate().take(e.thresholds.len()+1) {
             let label=match (i.checked_sub(1).map(|n|e.thresholds[n]),e.thresholds.get(i)) {
-                (None,None)=>format!("Reported {}",e.unit),(None,Some(b))=>format!("< {b} {}",e.unit),
-                (Some(a),None)=>format!(">= {a} {}",e.unit),(Some(a),Some(b))=>format!("{a} to < {b} {}",e.unit),
+                (None,None)=>format!("{} {}",if english {"Reported"} else {"已报告"},e.unit),
+                (None,Some(b))=>format!("< {b} {}",e.unit),
+                (Some(a),None)=>format!("≥ {a} {}",e.unit),(Some(a),Some(b))=>format!("{a} – < {b} {}",e.unit),
             };
             entries.push((label,*color));
         }

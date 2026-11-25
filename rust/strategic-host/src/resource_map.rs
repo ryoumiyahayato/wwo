@@ -2,7 +2,7 @@ use std::{collections::HashMap, path::Path};
 
 use wwo_map_lab::resource_geography::{
     agriculture::{self, suitability::{self, Scenario}, CellId, Field},
-    Bounds, Category, Development, Directory, EntityKind, Evidence, GridCell, LandGrid,
+    Bounds, Category, Development, Directory, EntityKind, Evidence, Geometry, GridCell, LandGrid,
     Resource, ResourceType,
 };
 
@@ -35,6 +35,7 @@ pub enum Command {
 #[derive(Default)]
 pub struct State {
     pub open: bool,
+    category_offset: usize,
     category: Option<Category>,
     kind: Option<ResourceType>,
     agriculture: Option<Field>,
@@ -105,6 +106,16 @@ impl State {
         }
     }
 
+    pub fn scroll_categories(&mut self, size: [u32; 2], point: [f64; 2], steps: f64) -> bool {
+        if !self.open || self.category.is_some() { return false; }
+        let (drawer, visible) = category_drawer(size);
+        if !crate::lobby::contains(drawer, point) { return false; }
+        let max = Category::ALL.len()-visible;
+        self.category_offset = self.category_offset.min(max)
+            .saturating_add_signed(-steps.signum() as isize).min(max);
+        true
+    }
+
     pub fn site(command: Command) -> Option<&'static Resource> {
         let Command::Site(id) = command else { return None; };
         Directory::opening().by_id(id)
@@ -129,6 +140,12 @@ pub fn available(mode: Mode, page: Page, menu: Menu, market_map: bool, transport
 pub fn bounds([width, height]: [u32; 2]) -> [f32; 4] {
     let width = (width as f32 - 30.).clamp(200., 306.);
     [15., 110., width, (height as f32 - 202.).clamp(260., 420.)]
+}
+
+fn category_drawer(size: [u32; 2]) -> ([f32; 4], usize) {
+    let [x, y, w, h] = bounds(size);
+    let rows = (((h-49.)/29.).floor() as usize).min(Category::ALL.len());
+    ([x+12.,y+42.,w-24.,rows as f32*29.-4.],rows)
 }
 
 fn view(camera: &Camera, size: [u32; 2]) -> Bounds {
@@ -237,7 +254,62 @@ fn diamond([x, y]: [f32; 2], radius: f32) -> [[f32; 2]; 4] {
     [[x, y - radius], [x + radius, y], [x, y + radius], [x - radius, y]]
 }
 
+fn draw_area(map: &mut Mesh, camera: &Camera, size: [u32; 2], record: &Resource, active: bool, selected: bool) {
+    let Geometry::Polygon(rings) = &record.geometry else { return; };
+    let index = ResourceType::ALL.iter().position(|&kind| kind == record.resource_type).unwrap_or(0);
+    let palette = [[239,182,83],[120,210,216],[194,144,223],[152,212,131],[224,154,139],[183,188,239]];
+    let [r,g,b] = palette[index%palette.len()];
+    let color = [r,g,b,if selected {255} else if active {220} else {148}];
+    let width = if selected {2.0} else {1.15};
+    let dash = 4. + (index%4) as f32*1.35;
+    let period = dash+4.;
+    let [w,h] = size.map(|n| n as f32);
+    for ring in rings {
+        let mut phase = (index as f32*2.1).rem_euclid(period);
+        for (a,b) in ring.iter().zip(ring.iter().cycle().skip(1)) {
+            let (Some(a),Some(b)) = (project(camera,*a,size),project(camera,*b,size)) else {continue;};
+            let diff = [b[0]-a[0],b[1]-a[1]];
+            let length = diff[0].hypot(diff[1]);
+            if length < 0.02 {continue;}
+            let mut visible = [0_f32,1.];
+            for ((start,delta),limit) in a.into_iter().zip(diff).zip([w,h]) {
+                if delta.abs()<0.001 {
+                    if start < -4. || start > limit+4. {visible=[1.,0.];}
+                    continue;
+                }
+                let first=(-4.-start)/delta;
+                let last=(limit+4.-start)/delta;
+                visible[0]=visible[0].max(first.min(last));
+                visible[1]=visible[1].min(first.max(last));
+            }
+            if visible[0]<visible[1] {
+                let start=visible[0]*length;
+                let end=visible[1]*length;
+                let mut tick=((start+phase)/period).floor()*period-phase;
+                let at=|distance:f32| [a[0]+diff[0]*distance/length,a[1]+diff[1]*distance/length];
+                while tick<end {
+                    let lo=tick.max(start);
+                    let hi=(tick+dash).min(end);
+                    if hi>lo {
+                        if selected {map.line(at(lo),at(hi),width+1.5,[24,32,33,205]);}
+                        map.line(at(lo),at(hi),width,color);
+                    }
+                    tick+=period;
+                }
+            }
+            phase=(phase+length).rem_euclid(period);
+        }
+    }
+}
+
 pub fn draw_layer(state: &State, camera: &Camera, size: [u32; 2], year: i32, map: &mut Mesh, hits: &mut Vec<Hit>) {
+    if let Some(category) = state.category {
+        let areas = Directory::opening().areas_in_view(category, view(camera,size), year);
+        let selected = |record: &Resource| matches!(state.selected, Some(Selection::Site(site,_)) if site.resource_id==record.resource_id);
+        for record in areas {
+            draw_area(map,camera,size,record,state.kind==Some(record.resource_type),selected(record));
+        }
+    }
     let Some(kind) = state.kind else { return; };
     if let Some(field) = state.agriculture {
         draw_agriculture(state, field, camera, size, map);
@@ -315,10 +387,17 @@ pub fn draw_panel(state: &State, world: &World, formal: &Display<'_>, size: [u32
     label(text, skin.choose("资源分布", "Resources"), 8., INK);
     command([x + w - 74., y + 7., 62., 25.], skin.choose("关闭", "Close"), Command::Toggle, false, panel, text, hits);
     let Some(category) = state.category else {
-        let column = (w - 29.) * 0.5;
-        for (i, category) in Category::ALL.into_iter().enumerate() {
-            command([x + 12. + (column + 5.) * (i % 2) as f32, y + 42. + (i / 2) as f32 * 29., column, 25.],
+        let (drawer, visible) = category_drawer(size);
+        let offset = state.category_offset.min(Category::ALL.len()-visible);
+        let [left,top,span,_] = drawer;
+        let scrollbar = crate::formal_ui::drawer_scrollbar(drawer,visible,Category::ALL.len(),offset);
+        for (i, category) in Category::ALL.into_iter().skip(offset).take(visible).enumerate() {
+            command([left, top+i as f32*29., span-if scrollbar.is_some() {20.} else {0.}, 25.],
                 &title(category.name()), Command::Category(category), false, panel, text, hits);
+        }
+        if let Some((track,thumb)) = scrollbar {
+            panel.rect(track[0],track[1],track[2],track[3],DARK);
+            panel.rect(thumb[0]+3.,thumb[1],thumb[2]-6.,thumb[3],GOLD);
         }
         return;
     };
