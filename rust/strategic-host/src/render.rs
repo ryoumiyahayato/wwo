@@ -277,10 +277,13 @@ impl GroundSurface {
         });
         let art=create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm).create_view(&Default::default());
         let water=crate::hydrology::water_buffer(device,water_available);
-        let city_geometry=zstd::stream::decode_all(&include_bytes!("city-geometry.bin.zst")[..])
+        let mut city_geometry=zstd::stream::decode_all(&include_bytes!("city-geometry.bin.zst")[..])
             .expect("embedded city geometry");
+        let park_offset=(city_geometry.len()/4) as u32;
+        city_geometry.extend_from_slice(crate::city_parks::data());
+        city_geometry.extend_from_slice(&park_offset.to_le_bytes());
         let city_water=device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label:Some("Near-map city banks and streets"),
+            label:Some("Near-map city banks, streets, and parks"),
             contents:&city_geometry,
             usage:wgpu::BufferUsages::STORAGE,
         });
