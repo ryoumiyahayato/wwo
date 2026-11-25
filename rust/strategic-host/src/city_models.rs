@@ -17,6 +17,7 @@ pub(crate) const MODULES: usize=4;
 const MAX_PENDING: usize = 6;
 const RECORD: usize = 18;
 const MAX_BUILDINGS: usize = 12000;
+const PARIS_FRINGE: &[u8] = include_bytes!("paris-fringe.bin");
 const METRES_PER_DEGREE:f64=camera::EARTH*std::f64::consts::PI/180.;
 const BLOCK_METRES:f64=96.;
 
@@ -34,11 +35,13 @@ struct City {
     tiles: Vec<Tile>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 struct Tile {
     file: String,
     bounds: [f64; 4],
     buildings: usize,
+    #[serde(skip)]
+    embedded: Option<&'static [u8]>,
 }
 
 impl Tile {
@@ -50,6 +53,45 @@ impl Tile {
         let [w,s,e,n]=self.bounds;
         [(w+e)*0.5,(s+n)*0.5]
     }
+
+    fn load(&self, root: &Path) -> io::Result<CityPage> {
+        let rows = match self.embedded {
+            Some(bytes) => read_tile(bytes, self.buildings),
+            None => read_tile(File::open(root.join(&self.file))?, self.buildings),
+        }?;
+        Ok(CityPage::pack(rows, self.anchor()))
+    }
+}
+
+fn paris_fringe() -> io::Result<Vec<Tile>> {
+    let invalid = || io::Error::other("Invalid Paris fringe building pack");
+    let mut bytes = PARIS_FRINGE.strip_prefix(b"WWOFRNG1").ok_or_else(invalid)?;
+    let take_u32 = |bytes: &mut &'static [u8]| {
+        let (number, rest) = bytes.split_first_chunk::<4>().ok_or_else(invalid)?;
+        *bytes = rest;
+        Ok::<_, io::Error>(u32::from_le_bytes(*number))
+    };
+    let count = take_u32(&mut bytes)? as usize;
+    if count == 0 || count > 2048 { return Err(invalid()); }
+    let mut tiles = Vec::with_capacity(count);
+    for index in 0..count {
+        let mut bounds = [0.; 4];
+        for coordinate in &mut bounds {
+            *coordinate = f64::from(take_u32(&mut bytes)? as i32) / 1_000_000.;
+        }
+        let buildings = take_u32(&mut bytes)? as usize;
+        let length = take_u32(&mut bytes)? as usize;
+        let (payload, rest) = bytes.split_at_checked(length).ok_or_else(invalid)?;
+        let [w,s,e,n] = bounds;
+        if !(1..=MAX_BUILDINGS).contains(&buildings) || !(-180. ..=e).contains(&w)
+            || e > 180. || !(-90. ..=n).contains(&s) || n > 90. {
+            return Err(invalid());
+        }
+        bytes = rest;
+        tiles.push(Tile { file: format!("paris-fringe-{index}.wcb"), bounds, buildings, embedded: Some(payload) });
+    }
+    if !bytes.is_empty() { return Err(invalid()); }
+    Ok(tiles)
 }
 
 fn distance_to_view(bounds:[f64;4],camera:&Camera,[width,height]:[u32;2],apron:f64)->Option<f64> {
@@ -237,6 +279,8 @@ impl Catalogue {
             }
         }
         if tiles.is_empty() {return Err(io::Error::other("City model catalogue has no tiles"));}
+        tiles.extend(paris_fringe()?);
+        sources.push("Paris fringe · Institut Paris Region, c. 1900 land use and roads. Reconstructed building placements.".into());
         Ok(Self { root, tiles, sources, cache:HashMap::new(),pending:HashSet::new(),failed:HashSet::new(),revision:0 })
     }
 
@@ -249,8 +293,7 @@ impl Catalogue {
             visible.sort_by(|a,b|a.1.total_cmp(&b.1));
             for (index,_) in visible.into_iter().take(MAX_RESIDENT) {
                 let tile=&candidate.tiles[index];
-                let path=candidate.root.join(&tile.file);
-                let buildings=read_page(&path,tile.buildings,tile.anchor()).map_err(|error|io::Error::other(format!("{} · {error}",path.display())))?;
+                let buildings=tile.load(&candidate.root).map_err(|error|io::Error::other(format!("{} · {error}",tile.file)))?;
                 candidate.cache.insert(index,buildings);
             }
         }
@@ -270,7 +313,7 @@ impl Catalogue {
     }
 
     pub(crate) fn covers(&self, [lon,lat]: [f64;2]) -> bool {
-        self.cache.keys().any(|&index| {
+        self.cache.keys().filter(|&&index| self.tiles[index].embedded.is_none()).any(|&index| {
             let [w,s,e,n]=self.tiles[index].bounds;
             (w..=e).contains(&lon) && (s..=n).contains(&lat)
         })
@@ -299,7 +342,12 @@ impl Catalogue {
             let tile=&self.tiles[index];
             let anchor=tile.anchor();
             // Keep the mesh while the matching footprint or block page streams in.
-            let opacity=(1.-middle*footprint_coverage(anchor))*fallback;
+            let opacity=if tile.embedded.is_some() {
+                // Regional areas give settlement bounds. The mesh carries individual roof coverage.
+                (1.-camera::smooth(34.,92.,camera.mpp)) as f32
+            } else {
+                (1.-middle*footprint_coverage(anchor))*fallback
+            };
             if opacity<=0.03 {continue;}
             let detail=details*opacity;
             if let Some(page) = self.cache.get(&index) {
@@ -312,12 +360,12 @@ impl Catalogue {
                 block_model.city_page=Some(CityDraw{geometry:Arc::clone(&page.mesh),preload:camera.mpp<6.,paris:page.paris,batches});
                 models.push(block_model);
             } else if self.pending.len()<MAX_PENDING && !self.failed.contains(&index) && self.pending.insert(index) {
-                let path=self.root.join(&tile.file);
-                let count=tile.buildings;
+                let root=self.root.clone();
+                let tile=tile.clone();
                 let proxy=events.clone();
                 let revision=self.revision;
                 if let Err(error)=std::thread::Builder::new().name("WWO city tile".into()).spawn(move || {
-                    let _=proxy.send_event(HostEvent::CityTile(revision,index,read_page(&path,count,anchor)));
+                    let _=proxy.send_event(HostEvent::CityTile(revision,index,tile.load(&root)));
                 }) {
                     let _=events.send_event(HostEvent::CityTile(revision,index,Err(error)));
                 }
@@ -327,12 +375,7 @@ impl Catalogue {
     }
 }
 
-fn read_page(path:&Path,count:usize,anchor:[f64;2])->io::Result<CityPage> {
-    read_tile(path,count).map(|rows|CityPage::pack(rows,anchor))
-}
-
-fn read_tile(path: &Path, count: usize) -> io::Result<Vec<Building>> {
-    let mut file = File::open(path)?;
+fn read_tile(mut file: impl Read, count: usize) -> io::Result<Vec<Building>> {
     let mut header = [0;12];
     file.read_exact(&mut header)?;
     if &header[..8]!=b"WWOWCB01" || u32::from_le_bytes(header[8..].try_into().unwrap()) as usize != count {

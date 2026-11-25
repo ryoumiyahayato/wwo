@@ -134,22 +134,22 @@ def prepared_roads(root, limits, values, london):
             yield feature_id, lines, max(.85, full_width*.5), material, bridge
 
 
-def pack_roads(root, words, limits, values, london):
+def pack_road_cells(words, values, roads, cell_size):
     west, south, east, north = values[4:]
-    width, height = math.ceil((east-west)/ROAD_CELL), math.ceil((north-south)/ROAD_CELL)
+    width, height = math.ceil((east-west)/cell_size), math.ceil((north-south)/cell_size)
     index = len(words)
     words.extend([width, height] + [0]*(2*width*height))
     cells = {}
-    for _, lines, radius, material, bridge in prepared_roads(root, limits, values, london):
+    for _, lines, radius, material, bridge in roads:
         for part in lines:
             points = list(part.coords)
             for a, b in zip(points, points[1:]):
-                count = max(1, math.ceil(math.dist(a, b)/ROAD_CELL))
+                count = max(1, math.ceil(math.dist(a, b)/cell_size))
                 for i in range(count):
                     u, v = (tuple(x+(y-x)*t/count for x,y in zip(a,b)) for t in (i,i+1))
-                    lo = [max(0, math.floor((min(x,y)-r-base)/ROAD_CELL))
+                    lo = [max(0, math.floor((min(x,y)-r-base)/cell_size))
                           for x,y,base,r in zip(u,v,(west,south),(radius+12,)*2)]
-                    hi = [min(n-1, math.floor((max(x,y)+r-base)/ROAD_CELL))
+                    hi = [min(n-1, math.floor((max(x,y)+r-base)/cell_size))
                           for x,y,base,r,n in zip(u,v,(west,south),(radius+12,)*2,(width,height))]
                     segment = [*(encode(c, "f") for c in (*u,*v,radius)), material | (4 if bridge else 0)]
                     for y in range(lo[1],hi[1]+1):
@@ -195,7 +195,7 @@ def write(root, output):
             words[start+2*i:start+2*i+2] = [len(words), len(words)+len(row)]
             words.extend(row)
         print(f"{source}: {len(shapes)} water polygons, {sum(len(p.interiors) for p in shapes)} interior rings")
-        words[20+index] = pack_roads(root,words,valid,values,index==1)
+        words[20+index] = pack_road_cells(words, values, prepared_roads(root, valid, values, index==1), ROAD_CELL)
     payload = struct.pack(f"<{len(words)}I", *words)
     output.write_bytes(zstandard.ZstdCompressor(level=9).compress(payload))
 

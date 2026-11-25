@@ -239,6 +239,8 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 使用 `tools/build_city_models.py <输入资料目录> <独立输出目录>` 生成分片。需要 GeoPandas、Shapely 2、NumPy、pyproj 和 zstandard。源码中的输入相对路径与资料包目录一致。通过 `--city london` 或 `--city paris` 可单独构建到暂存目录，再安装完整目录。授权与来源随目录保存。 [伦敦建筑资料](https://doi.org/10.5281/zenodo.19497435)，[巴黎历史重建资料](https://doi.org/10.34847/nkl.cbf5ecd0)
 
+`tools/build_paris_fringe.py <输入资料目录> <建筑分片输出> <道路分片输出>` 从 Institut Paris Region 约 1900 年的 1∶50,000 建成区和道路离线生成巴黎外围景观。建筑位于建成区内，避开中央街区资料、水域、公园等开敞用地。建成区内部允许较深的沿街布局，边缘逐渐减疏。两份小型分片随 EXE 分发，沿用现有城市网格、道路材质及加载路径。道路宽度、逐栋建筑位置、高度和样式为景观重建。 [历史建成区](https://data.iledefrance.fr/explore/dataset/occupation-du-sol-en-5-postes-vers-1900-carte-de-france-type-1900-dile-de-franc1/) [历史道路](https://data.iledefrance.fr/explore/dataset/reseau-routier-vers-1900-carte-de-france-type-1900-dile-de-france1/)
+
 ## R68 地图与首页迁移
 
 | 范围 | Rust 正式入口 |
