@@ -222,7 +222,7 @@ struct GroundSurface {
     layout:wgpu::BindGroupLayout,
     group:wgpu::BindGroup,
     repeat:wgpu::Sampler,
-    height:Option<wgpu::TextureView>,
+    landscape:[wgpu::TextureView;2],
     art:wgpu::TextureView,
     materials:wgpu::TextureView,
     water:wgpu::Buffer,
@@ -262,9 +262,13 @@ impl GroundSurface {
                 ..texture_entry(2,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)
             },water_storage(3,wgpu::ShaderStages::FRAGMENT,true),water_storage(4,wgpu::ShaderStages::FRAGMENT,true),
             texture_entry(6,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
-            water_storage(7,wgpu::ShaderStages::FRAGMENT,true)];
-        let height=Some(create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm)
-            .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()}));
+            water_storage(7,wgpu::ShaderStages::FRAGMENT,true),wgpu::BindGroupLayoutEntry{
+                visibility:wgpu::ShaderStages::FRAGMENT|wgpu::ShaderStages::COMPUTE,
+                ..texture_entry(8,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)
+            }];
+        let placeholder=create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm);
+        let landscape=std::array::from_fn(|_|placeholder.create_view(&wgpu::TextureViewDescriptor{
+            dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()}));
         let layout=layout(device,&entries);
         let repeat=device.create_sampler(&wgpu::SamplerDescriptor{
             address_mode_u:wgpu::AddressMode::Repeat,address_mode_v:wgpu::AddressMode::Repeat,
@@ -281,27 +285,27 @@ impl GroundSurface {
             usage:wgpu::BufferUsages::STORAGE,
         });
         let water_pixels=water_pixels(device,4);
-        let group=Self::bind(device,&layout,&repeat,&art,height.as_ref(),&materials,&water,&water_pixels,&city_water);
-        Self{layout,group,repeat,height,art,materials,water,city_water,water_pixels,water_raster:None,loaded:false,custom_art:false}
+        let group=Self::bind(device,&layout,&repeat,&art,&landscape,&materials,&water,&water_pixels,&city_water);
+        Self{layout,group,repeat,landscape,art,materials,water,city_water,water_pixels,water_raster:None,loaded:false,custom_art:false}
     }
 
     fn bind(device:&wgpu::Device, layout:&wgpu::BindGroupLayout, repeat:&wgpu::Sampler,
-            art:&wgpu::TextureView, height:Option<&wgpu::TextureView>, materials:&wgpu::TextureView,
+            art:&wgpu::TextureView, landscape:&[wgpu::TextureView;2], materials:&wgpu::TextureView,
             water:&wgpu::Buffer, pixels:&wgpu::Buffer, city_water:&wgpu::Buffer)->wgpu::BindGroup {
-        let mut entries=vec![tex_resource(0,art),sampler_resource(1,repeat),
-            buf_resource(3,water),buf_resource(4,pixels),tex_resource(6,materials),buf_resource(7,city_water)];
-        if let Some(height)=height {entries.push(tex_resource(2,height));}
+        let entries=[tex_resource(0,art),sampler_resource(1,repeat),tex_resource(2,&landscape[0]),
+            buf_resource(3,water),buf_resource(4,pixels),tex_resource(6,materials),buf_resource(7,city_water),
+            tex_resource(8,&landscape[1])];
         bind(device,layout,&entries)
     }
 
-    fn load(&mut self, device:&wgpu::Device, queue:&wgpu::Queue, height:Option<wgpu::TextureView>)->io::Result<()> {
+    fn load(&mut self, device:&wgpu::Device, queue:&wgpu::Queue, landscape:Option<[wgpu::TextureView;2]>)->io::Result<()> {
         if self.loaded {return Ok(());}
-        if height.is_some() {self.height=height;}
+        if let Some(landscape)=landscape {self.landscape=landscape;}
         if !self.custom_art {
             let art=crate::decode_rgba(&include_bytes!("land-material.png")[..])?;
             self.art=material_texture(device,queue,art);
         }
-        self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,self.height.as_ref(),
+        self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,&self.landscape,
             &self.materials,&self.water,&self.water_pixels,&self.city_water);
         self.loaded=true;
         Ok(())
@@ -329,7 +333,7 @@ impl GroundSurface {
             self.water_pixels=water_pixels(device,if fits {bytes} else {4});
             raster.buffers=fits.then(||bind(device,&raster.pipeline.get_bind_group_layout(3),
                 &[buf_resource(3,&self.water),buf_resource(5,&self.water_pixels),buf_resource(7,&self.city_water)]));
-            self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,self.height.as_ref(),
+            self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,&self.landscape,
                 &self.materials,&self.water,&self.water_pixels,&self.city_water);
             raster.previous=None;
         }
@@ -1119,7 +1123,7 @@ impl Renderer {
         }
         let art=material_texture(&self.device,&self.queue,image);
         let surface=&mut self.surface;
-        surface.group=GroundSurface::bind(&self.device,&surface.layout,&surface.repeat,&art,surface.height.as_ref(),
+        surface.group=GroundSurface::bind(&self.device,&surface.layout,&surface.repeat,&art,&surface.landscape,
             &surface.materials,&surface.water,&surface.water_pixels,&surface.city_water);
         surface.art=art;
         surface.custom_art=true;
@@ -1251,8 +1255,8 @@ impl Renderer {
                 water.update(&self.queue,&self.surface.water,camera,size,now);
             }
             if terrain.view_demand()>=6 && !self.surface.loaded {
-                let height=terrain.enable_landscape(&self.device);
-                self.surface.load(&self.device,&self.queue,height)?;
+                let landscape=terrain.enable_landscape(&self.device);
+                self.surface.load(&self.device,&self.queue,landscape)?;
             }
         }
         Ok(())

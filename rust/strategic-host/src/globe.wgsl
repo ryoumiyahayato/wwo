@@ -45,6 +45,7 @@ struct Tile {
 @group(3) @binding(5) var<storage,read_write> water_output: array<u32>;
 @group(3) @binding(6) var surface_art: texture_2d_array<f32>;
 @group(3) @binding(7) var<storage,read> city_water: array<u32>;
+@group(3) @binding(8) var regional_cover: texture_2d_array<f32>;
 @group(2) @binding(0) var close_surface: texture_2d<f32>;
 @group(2) @binding(1) var<uniform> close_extent: vec4f;
 @group(1) @binding(0) var<uniform> tile: Tile;
@@ -243,7 +244,7 @@ fn natural_page(uv:vec2f, zoom:u32, exact:bool) -> NaturalPage {
     let position=uv*vec2f(f32(rows*2),f32(rows));
     let cell=vec2i(position);
     let index=textureLoad(terrain_index,cell+vec2i(0,rows-1),0).r;
-    let slot=i32(index&65535u)-1;
+    let slot=i32(index&511u)-1;
     let q=fract(position);
     let texel=q*256.+4.;
     if slot<0 {return NaturalPage(texel,slot,0.);}

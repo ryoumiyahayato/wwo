@@ -1,4 +1,4 @@
-use crate::{camera::{dot,frame,geographic,Camera},landscape_cover::CoverPack,render::write_texture_layer,terrain_detail};
+use crate::{camera::{dot,frame,geographic,Camera},landscape_cover::{CoverPack, RegionalCover, REGIONAL_BANKS, REGIONAL_SLOTS},render::write_texture_layer,terrain_detail};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
 use std::{collections::{HashMap,HashSet},fs,io::{self,Read,Seek,SeekFrom},path::{Path,PathBuf},sync::{mpsc,Arc},time::{Duration,Instant}};
@@ -299,7 +299,7 @@ impl Source {
                 let mut file=open_tile(&key.path(root),key,COLOR_MAGIC,1)?;
                 let mut bytes=vec![0;(PAGE_SIZE*PAGE_SIZE) as usize];
                 file.read_exact(&mut bytes)?;
-                Ok(DecodedTile{pixels:bytes,landscape:None,classified:false,decode_time:Duration::ZERO})
+                Ok(DecodedTile{pixels:bytes,landscape:None,regional:None,classified:false,decode_time:Duration::ZERO})
             }
             Self::Packs(packs,water)=>{
                 let override_frame=water.as_mut().map(|colors|colors.frame(key)).transpose()?.flatten();
@@ -452,7 +452,7 @@ impl LevelPack {
             }
             _=>(None,false),
         };
-        Ok(DecodedTile{pixels,landscape,classified,decode_time:started.elapsed()})
+        Ok(DecodedTile{pixels,landscape,regional:None,classified,decode_time:started.elapsed()})
     }
 }
 
@@ -502,7 +502,13 @@ fn landscape_pixels(residual:&[u8],classes:Option<&[u8]>)->io::Result<Vec<u8>> {
     Ok(pixels)
 }
 
-pub struct DecodedTile {pixels:Vec<u8>,landscape:Option<Vec<u8>>,classified:bool,pub decode_time:Duration}
+pub struct DecodedTile {
+    pixels:Vec<u8>,
+    landscape:Option<Vec<u8>>,
+    regional:Option<Vec<u8>>,
+    classified:bool,
+    pub decode_time:Duration,
+}
 pub struct Completion {pub key:Key,pub requested:Instant,pub result:io::Result<DecodedTile>}
 
 enum DecodeRequest {
@@ -512,6 +518,7 @@ enum DecodeRequest {
 
 struct Page {
     slot:u32,
+    regional_slot:Option<u32>,
     ready:Option<Instant>,
     used:Instant,
     fade:u8,
@@ -521,8 +528,9 @@ struct Page {
 
 impl Page {
     fn index(&self)->u32 {
+        // Nine bits for the QPK slot, seven for the regional cover slot.
         (u32::from(self.landscape_fade.unwrap_or(0))<<24)
-            | (u32::from(self.fade)<<16) | (self.slot+1)
+            | (u32::from(self.fade)<<16) | (self.regional_slot.map_or(0,|slot|slot+1)<<9) | (self.slot+1)
     }
 }
 
@@ -558,6 +566,8 @@ pub struct Terrain {
     atlas:wgpu::Texture,
     table:wgpu::Texture,
     landscape:Option<wgpu::Texture>,
+    regional:Option<wgpu::Texture>,
+    regional_slots:Vec<u32>,
     height_enabled:bool,
     landscape_cover_path:Option<PathBuf>,
     water_colors:bool,
@@ -623,20 +633,33 @@ impl Terrain {
                 dot(axis,frame([x,y])[2]).clamp(-1.,1.).acos()).fold(0.,f64::max);
             Visible {key,axis,radius}
         }).collect();
+        let mut regional_cover=if height_enabled {Some(RegionalCover::open(PAGE_SIZE)?)} else {None};
         let (sender,receiver)=mpsc::channel();
         std::thread::Builder::new().name("WWO natural terrain".into()).spawn(move||{
             while let Ok(request)=receiver.recv() {
                 let event=match request {
                     DecodeRequest::Page(key,requested)=>{
-                        crate::HostEvent::Terrain(Completion{key,requested,
-                            result:source.read(key,cover.as_mut(),height_enabled)})
+                        let result=source.read(key,cover.as_mut(),height_enabled).map(|mut tile|{
+                            if let Some(regional)=regional_cover.as_mut().filter(|_|tile.landscape.is_some()) {
+                                let start=Instant::now();
+                                let Key(z,x,y)=key;
+                                match regional.read(z,x,y,PAGE_SIZE as usize) {
+                                    Ok(page)=>tile.regional=page,
+                                    Err(error)=>eprintln!("Regional landscape unavailable at {z}/{x}/{y}: {error}"),
+                                }
+                                tile.decode_time+=start.elapsed();
+                            }
+                            tile
+                        });
+                        crate::HostEvent::Terrain(Completion{key,requested,result})
                     }
                     DecodeRequest::Detail(index,catalogue)=>crate::HostEvent::TerrainDetail(index,catalogue.read(index)),
                 };
                 if proxy.send_event(event).is_err(){break;}
             }
         })?;
-        Ok(Self{base,atlas,table,landscape:None,height_enabled,landscape_cover_path,water_colors,landscape_revision:0,keys,sender,inflight:None,requests_this_frame:0,pages:HashMap::new(),
+        Ok(Self{base,atlas,table,landscape:None,regional:None,regional_slots:(0..REGIONAL_SLOTS).rev().collect(),
+            height_enabled,landscape_cover_path,water_colors,landscape_revision:0,keys,sender,inflight:None,requests_this_frame:0,pages:HashMap::new(),
             slots:(0..capacity).rev().collect(),selected:Vec::new(),view:None,max_level,view_max:0,
             target_level:None,projected_lod:0.,version,selection,layer_candidate,required_pages:0,viewport_pages:0,
             transitions:Default::default()})
@@ -651,19 +674,22 @@ impl Terrain {
             self.table.create_view(&Default::default())]
     }
 
-    pub fn enable_landscape(&mut self, device:&wgpu::Device)->Option<wgpu::TextureView> {
+    pub fn enable_landscape(&mut self, device:&wgpu::Device)->Option<[wgpu::TextureView;2]> {
         if !self.height_enabled || self.landscape.is_some() {return None;}
-        let texture=device.create_texture(&wgpu::TextureDescriptor{
-            label:Some("Z6/Z7 elevation and landscape cover"),
-            size:wgpu::Extent3d{width:PAGE_SIZE,height:PAGE_SIZE,depth_or_array_layers:self.atlas.depth_or_array_layers()},
+        let create=|label,width,layers| device.create_texture(&wgpu::TextureDescriptor{
+            label:Some(label),
+            size:wgpu::Extent3d{width,height:PAGE_SIZE,depth_or_array_layers:layers},
             mip_level_count:1,sample_count:1,dimension:wgpu::TextureDimension::D2,
             format:wgpu::TextureFormat::Rgba8Unorm,usage:wgpu::TextureUsages::TEXTURE_BINDING|wgpu::TextureUsages::COPY_DST,
             view_formats:&[],
         });
-        let view=texture.create_view(&wgpu::TextureViewDescriptor{
-            dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()});
-        self.landscape=Some(texture);
-        Some(view)
+        let landscape=create("Z6/Z7 elevation and landscape cover",PAGE_SIZE,self.atlas.depth_or_array_layers());
+        let regional=create("Reconstructed regional landscape cover",PAGE_SIZE*REGIONAL_BANKS,REGIONAL_SLOTS);
+        let views=[&landscape,&regional].map(|texture|texture.create_view(&wgpu::TextureViewDescriptor{
+            dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()}));
+        self.landscape=Some(landscape);
+        self.regional=Some(regional);
+        Some(views)
     }
 
     pub fn landscape_cover(&self)->bool {self.landscape_cover_path.is_some()}
@@ -733,6 +759,11 @@ impl Terrain {
             "landscape_cover_path": self.landscape_cover_path,
             "landscape_height_enabled": self.height_enabled,
             "landscape_cover_classified_pages": self.pages.values().filter(|p|p.classified).count(),
+            "landscape_regional_pages_by_level": ([6,7].map(|level|[self.selected.iter().filter(|key|key.0==level)
+                .filter(|key|self.pages.get(key).is_some_and(|page|page.regional_slot.is_some())).count(),
+                self.selected.iter().filter(|key|key.0==level).count()])),
+            "landscape_regional_texture_bytes": self.regional.as_ref().map_or(0,|texture|
+                texture.width()*texture.height()*texture.depth_or_array_layers()*4),
             "landscape_texture_bytes": self.landscape.as_ref().map_or(0,|texture|
                 texture.width()*texture.height()*texture.depth_or_array_layers()*4),
             "texture_payload_bytes": PAGE_SIZE * PAGE_SIZE * (2 + self.atlas.depth_or_array_layers()) + 4 * self.table.width() * self.table.height(),
@@ -988,6 +1019,7 @@ impl Terrain {
             let Some((&key,_))=self.pages.iter().filter(|(key,_)|!self.selected.contains(key))
                 .min_by_key(|(_,page)|page.used) else {return Ok(());};
             let page=self.pages.remove(&key).unwrap();
+            if let Some(slot)=page.regional_slot {self.regional_slots.push(slot);}
             if page.landscape_fade.is_some() {self.landscape_revision=self.landscape_revision.wrapping_add(1);}
             Self::write_index(&self.table,queue,key,0);
             page.slot
@@ -1003,10 +1035,19 @@ impl Terrain {
             );
             1 // Available to instance builds while the surface fade is still zero.
         });
+        let regional_slot=tile.regional.zip(self.regional.as_ref()).and_then(|(pixels,texture)|{
+            let slot=self.regional_slots.pop()?;
+            let width=PAGE_SIZE*REGIONAL_BANKS;
+            queue.write_texture(wgpu::TexelCopyTextureInfo{texture,mip_level:0,
+                origin:wgpu::Origin3d{x:0,y:0,z:slot},aspect:wgpu::TextureAspect::All},
+                &pixels,wgpu::TexelCopyBufferLayout{offset:0,bytes_per_row:Some(4*width),rows_per_image:None},
+                wgpu::Extent3d{width,height:PAGE_SIZE,depth_or_array_layers:1});
+            Some(slot)
+        });
         let now=Instant::now();
         let fade=if self.exact() {255} else {0};
         let ready=(landscape_fade.is_none() || self.exact()).then_some(now);
-        let page=Page{slot,ready,used:now,fade,landscape_fade,classified:tile.classified};
+        let page=Page{slot,regional_slot,ready,used:now,fade,landscape_fade,classified:tile.classified};
         Self::write_index(&self.table,queue,completion.key,page.index());
         self.pages.insert(completion.key,page);
         if !self.exact() && self.view_max>=GROUPED_LOD_START && self.requests_this_frame<GROUPED_LOADS_PER_FRAME {
