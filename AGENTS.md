@@ -60,7 +60,7 @@
 
 当前 Windows 正式入口是 [`rust/strategic-host`](rust/strategic-host/README.md) 的 `wwo-map-lab --play`。启动、世界模拟、地图和原生存档的模块归属见 [Rust 宿主运行核实](docs/RUST_HOST_RUNTIME_REVIEW.md)。全球地图验收按 [七大洲抽样规程](rust/strategic-host/README.md#全球地图验收) 执行。
 
-旧 Godot 4.6.3 项目在 [R68 源码归档](https://github.com/ryoumiyahayato/wwo/tree/archive/godot-r68-source-20261120) 保留作对照、迁移来源和局部回归。恢复步骤见 [README](README.md#恢复-r68-源码)。旧入口为 `scenes/formal/formal_world_menu.tscn` → `scenes/formal/formal_world_main.tscn`。`FormalWorldApplication` 的旧版说明见 `docs/ARCHITECTURE.md` 与 `docs/UI_INFORMATION_ARCHITECTURE.md`。不恢复旧 FormalWorldSimulation、EconomyService、组件注册表、启动版本互锁或核验入口。
+旧 Godot 4.6.3 项目在 [R68 源码归档](https://github.com/ryoumiyahayato/wwo/tree/archive/godot-r68-source-20261120) 保留作对照、迁移来源和局部回归。恢复步骤见 [构建与恢复](docs/BUILD_AND_RECOVERY.md#恢复-r68-源码)。旧入口为 `scenes/formal/formal_world_menu.tscn` → `scenes/formal/formal_world_main.tscn`。`FormalWorldApplication` 的旧版说明见 `docs/ARCHITECTURE.md` 与 `docs/UI_INFORMATION_ARCHITECTURE.md`。不恢复旧 FormalWorldSimulation、EconomyService、组件注册表、启动版本互锁或核验入口。
 
 经济以补齐和整合为主。军事优先恢复已有连续战场并研究 Rust 原生 3D 接入。开工前核对 [Rust 沙盒迁移基线](docs/RUST_SANDBOX_MIGRATION_BASELINE.md) 的既有实现、来源和待接入范围。
 

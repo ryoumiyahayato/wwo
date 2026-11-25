@@ -1,6 +1,6 @@
 # WWO Rust Windows 游戏
 
-`wwo-map-lab` 是当前原生 Windows 游戏入口。正式 Windows 构建由 GitHub CI 执行。本机验证使用固定工作树内的 `tools/wwo-cargo.ps1`。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [仓库 README](../../README.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。界面字形更新使用归档项目和 Pillow，运行 `python tools/build_hud.py <R68 项目> <游戏数据目录>`。
+`wwo-map-lab` 是当前原生 Windows 游戏入口。正式 Windows 构建由 GitHub CI 执行。本机验证使用固定工作树内的 `tools/wwo-cargo.ps1`。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [构建与恢复](../../docs/BUILD_AND_RECOVERY.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。界面字形更新使用归档项目和 Pillow，运行 `python tools/build_hud.py <R68 项目> <游戏数据目录>`。
 
 ## 经济地图资源专题
 
@@ -304,4 +304,4 @@ Z7 水文按复杂度加密。QWG 含边界的单元、Natural Earth 的岸线�
 
 ## R68 对照
 
-按 [R68 源码恢复步骤](../../README.md#恢复-r68-源码) 获取旧项目。`--r68` 使用独立对照模式和旧项目自己的存档。将本目录 `tools/` 下的两个 `formal_*_bridge.gd` 放到 EXE 旁的 `tools/`。通过 `WWO_R68_PROJECT` 和 `WWO_GODOT_EXE` 指定对照项目和 Godot 4.6.3。Godot/R68 旧存档兼容已取消要求。`--play` 使用 Rust 原生槽位。
+按 [R68 源码恢复步骤](../../docs/BUILD_AND_RECOVERY.md#恢复-r68-源码) 获取旧项目。`--r68` 使用独立对照模式和旧项目自己的存档。将本目录 `tools/` 下的两个 `formal_*_bridge.gd` 放到 EXE 旁的 `tools/`。通过 `WWO_R68_PROJECT` 和 `WWO_GODOT_EXE` 指定对照项目和 Godot 4.6.3。Godot/R68 旧存档兼容已取消要求。`--play` 使用 Rust 原生槽位。
