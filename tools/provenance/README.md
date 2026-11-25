@@ -11,6 +11,10 @@ Generate the deterministic manifest from the repository root:
 & 'C:\Users\agcrf\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' tools/provenance/generate_manifest.py --base-revision <sha>
 ```
 
+The checked-in Batch 1 manifest records a historical inventory. Use its
+`audit_base_revision` as the checkout to validate that snapshot. Use a manifest
+generated for the current revision to validate current files.
+
 Validate syntax, references, hashes, duplicate hashes, missing sources,
 generators, and license warnings:
 

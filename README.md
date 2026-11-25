@@ -28,4 +28,4 @@ WWO 是一款从 **1900 年** 开始的历史沙盒。选一座城市和一种�
 
 WWO 仍在开发。截图来自开发版，Windows 阶段预览需要配套地图资源。
 
-[游戏实现与覆盖范围](docs/RUST_HOST_RUNTIME_REVIEW.md) · [源码构建与恢复](docs/BUILD_AND_RECOVERY.md) · [更新记录](CHANGELOG.md)
+[游戏实现与覆盖范围](docs/RUST_HOST_RUNTIME_REVIEW.md) · [源码构建与恢复](docs/BUILD_AND_RECOVERY.md)
