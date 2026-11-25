@@ -52,7 +52,8 @@ impl TileState {
     fn new(tile:&Tile,opacity:f32,edges:[f32;4],edge_ready:[f32;4])->Self {
         let cast=|values:[f64;4]| values.map(|a|a as f32);
         let city_style = if tile.city_ink_only {
-            if tile.city_streets { 4. } else if tile.city_area { 3. } else { 2. }
+            if tile.city_blocks { 5. } else if tile.city_streets { 4. }
+            else if tile.city_area { 3. } else { 2. }
         } else {
             u8::from(tile.city) as f32
         };
@@ -1384,9 +1385,9 @@ impl Renderer {
                     pass.set_bind_group(0,&self.globals,&[]);
                     pass.set_bind_group(2,&self.close_group,&[]);
                     pass.set_bind_group(3,&self.surface.group,&[]);
-                    for streets in [false,true] {
+                    for (blocks,streets) in [(false,false),(true,false),(false,true)] {
                         for (page,_,[x,y,w,h],_) in pages.iter()
-                            .filter(|(_,tile,_,_)|tile.city_ink_only && tile.city_streets==streets) {
+                            .filter(|(_,tile,_,_)|tile.city_ink_only && tile.city_blocks==blocks && tile.city_streets==streets) {
                             pass.set_scissor_rect(*x,*y,*w,*h);
                             pass.set_bind_group(1,&page.group,&[]);
                             pass.draw(0..3,0..1);

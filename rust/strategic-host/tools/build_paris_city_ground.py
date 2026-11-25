@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 from city_ground_pack import write_city_tile
 
@@ -18,6 +18,8 @@ STREETS_GROUP = (2.251, 48.815, 2.417, 48.903)
 STREETS_GRID = (4, 4)
 STREETS_PREFIX = "paris-ptm-1900-"
 STREETS_SOURCE = "Paris Time Machine / historical street reconstruction c. 1900"
+BLOCKS_PREFIX = "paris-ptm-blocks-1900-"
+BLOCKS_SOURCE = "Paris Time Machine / historical built block reconstruction c. 1900"
 
 
 def features(path):
@@ -83,6 +85,41 @@ def street_coverage(roads):
     return [band.resize(size, Image.Resampling.BOX) for band in bands]
 
 
+def block_coverage(blocks, land_use):
+    west, south, east, north = STREETS_GROUP
+    width, height = (dim * PIXELS for dim in STREETS_GRID)
+    size = (width + 2 * GUTTER, height + 2 * GUTTER)
+    draw_size = tuple(dim * SAMPLES for dim in size)
+
+    def project(coords):
+        return [((GUTTER + width * (x - west) / (east - west)) * SAMPLES,
+                 (GUTTER + height * (north - y) / (north - south)) * SAMPLES)
+                for x, y, *_ in coords]
+
+    def mask(rows):
+        result = Image.new("L", draw_size)
+        draw = ImageDraw.Draw(result)
+        for row in rows:
+            geometry = row["geometry"]
+            if not geometry or geometry["type"] not in {"Polygon", "MultiPolygon"}:
+                continue
+            polygons = [geometry["coordinates"]] if geometry["type"] == "Polygon" else geometry["coordinates"]
+            for shell, *holes in polygons:
+                points = project(shell)
+                xs, ys = zip(*points)
+                if max(xs) < 0 or min(xs) >= draw_size[0] or max(ys) < 0 or min(ys) >= draw_size[1]:
+                    continue
+                draw.polygon(points, fill=255)
+                for hole in holes:
+                    draw.polygon(project(hole), fill=0)
+        return result
+
+    built = mask(row for row in features(blocks) if row["properties"].get("Bati_nonBati") == "Bâti")
+    exclusions = mask(row for row in features(land_use) if str(row["properties"].get("codzon")) in {"1", "2", "4"})
+    built = ImageChops.subtract(built, exclusions).resize(size, Image.Resampling.BOX)
+    return [built, built.filter(ImageFilter.MinFilter(5))]
+
+
 def write_tiles(output, bands, group, grid, prefix, source, **style):
     west, south, east, north = group
     columns, rows = grid
@@ -106,7 +143,7 @@ def write_tiles(output, bands, group, grid, prefix, source, **style):
                        source=source, size=[size, size], cover=False, city=True, **style, ids=False)
 
 
-def build(land_use, roads, output, detailed_streets=None):
+def build(land_use, roads, output, detailed_streets=None, blocks=None):
     path = output / "catalogue.json"
     catalogue = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"tiles": []}
     tiles = [tile for tile in catalogue["tiles"] if not tile["path"].startswith(PREFIX)]
@@ -121,6 +158,16 @@ def build(land_use, roads, output, detailed_streets=None):
             "source": "https://doi.org/10.34847/nkl.cbf5ecd0",
             "license": "ODbL 1.0",
             "processing": "Rasterized reconstructed street centre lines. Display widths based on street type.",
+        }
+    if blocks is not None:
+        tiles = [tile for tile in tiles if not tile["path"].startswith(BLOCKS_PREFIX)]
+        tiles.extend(write_tiles(output, block_coverage(blocks, land_use), STREETS_GROUP, STREETS_GRID,
+                                 BLOCKS_PREFIX, BLOCKS_SOURCE, city_blocks=True))
+        catalogue["paris_blocks_1900"] = {
+            "creator": "Paris Time Machine",
+            "source": "https://doi.org/10.34847/nkl.cbf5ecd0",
+            "license": "ODbL 1.0",
+            "processing": "Reconstructed built blocks with historical non-built land use excluded. Interior shading is a display style.",
         }
     catalogue["tiles"] = tiles
     catalogue["paris_1900"] = {
@@ -140,5 +187,6 @@ if __name__ == "__main__":
     parser.add_argument("roads", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--detailed-streets", type=Path)
+    parser.add_argument("--blocks", type=Path)
     args = parser.parse_args()
-    build(args.land_use, args.roads, args.output, args.detailed_streets)
+    build(args.land_use, args.roads, args.output, args.detailed_streets, args.blocks)

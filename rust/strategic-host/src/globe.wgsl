@@ -892,7 +892,7 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let pixel_metres=(tile.extent.zw-tile.extent.xy)*du*111195.*vec2f(max(.08,cos(radians(ll.y))),1.);
     let mip=max(0.,log2(mpp/max(1.,min(pixel_metres.x,pixel_metres.y))));
     let buildings=textureSampleLevel(city_data,linear,uv,mip).rg;
-    if tile.options.z>3.5 {
+    if tile.options.z>3.5 && tile.options.z<4.5 {
         let major=pow(buildings.r,.74)*.68;
         let local=buildings.g*(1.-smoothstep(20.,76.,mpp))*.48;
         let road=max(major,local)*smoothstep(0.,160.,edge_distance);
@@ -909,6 +909,16 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     var terrain=vec4f(base.rgb,water_coverage(area,base.a));
     if view.map_style.z>=6. {
         terrain=close_terrain(ll,mpp/max(.3,view.chart_origin.z),terrain);
+    }
+    if tile.options.z>4.5 {
+        // The first channel is the reconstructed built block. The inset channel
+        // distinguishes block interiors from edges without introducing lots.
+        let coverage=smoothstep(.045,.69,buildings.r);
+        let interior=clamp(buildings.g/max(.05,buildings.r),0.,1.);
+        let shade=smoothstep(.05,.53,max(0.,edge-buildings.r));
+        let roofs=mix(vec3f(.65,.49,.36),vec3f(.48,.32,.27),interior);
+        let opacity=(1.-terrain.a)*coverage*smoothstep(7.,30.,mpp)*smoothstep(0.,200.,edge_distance);
+        return vec4f(mix(roofs,vec3f(.38,.29,.27),shade*.58),opacity);
     }
     if tile.options.z>2.5 {
         // This source maps generalized built-up areas and roads at 1:50,000.
@@ -951,7 +961,8 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let support=smoothstep(0.,mix(320.,670.,built),edge_distance);
     let facade=mix(vec3f(.52,.40,.35),vec3f(.77,.65,.55),max(0.,buildings.r-edge));
     let footprint_weight=select(detail,1.-smoothstep(24.,134.,mpp),historical);
-    let wall=buildings.r*footprint_weight*mix(.70,.96,built)*land;
+    let footprint=select(buildings.r,smoothstep(.028,.53,buildings.r),historical);
+    let wall=footprint*footprint_weight*mix(.70,.96,built)*land;
     // Wide mapped strokes survive the screen-space filter at the fringe.
     let stroke=smoothstep(.13,.48,buildings.g);
     let local_road=mix(terrain.rgb,vec3f(.76,.70,.59),mix(.39,.75,stroke));
@@ -964,7 +975,7 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let bridge=mix(road,buildings.g*road_weight*.88,terrain.a);
     let shading=shadow*land*mix(.45,1.,built);
     let ground=land*select(detail*smoothstep(.055,.36,blocks)*.57,density*.98,historical);
-    let aggregate=mix(vec3f(.66,.55,.43),vec3f(.61,.48,.38),density);
+    let aggregate=mix(vec3f(.68,.53,.40),vec3f(.49,.33,.28),density);
     let paving=mix(terrain.rgb,select(vec3f(.58,.52,.44),aggregate,historical),select(.82,1.,historical));
     let color=((paving*ground*(1.-shading)+vec3f(.36,.32,.31)*shading)*(1.-wall)+facade*wall)*(1.-bridge)
         +mix(road_color,vec3f(.69,.67,.59),terrain.a)*bridge;
