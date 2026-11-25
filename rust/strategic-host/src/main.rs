@@ -14,6 +14,7 @@ mod lobby;
 mod prologue_ui;
 mod landmarks;
 mod map_facilities;
+mod map_markers;
 mod map_release;
 mod menu_theme;
 mod interface;

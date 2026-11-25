@@ -22,7 +22,8 @@ impl Host {
         if let Some(object)=self.selected {
             let display_only=match object {
                 Object::Polity(i)=>self.world.polities[i].display_only,
-                Object::Place(i)=>self.landmarks.as_ref().is_some_and(|landmarks|landmarks.contains(i)),
+                Object::Place(i)=>self.world.places[i].transport_reference()
+                    || self.landmarks.as_ref().is_some_and(|landmarks|landmarks.contains(i)),
                 Object::Administration(_)=>false,
             };
             if !display_only {
@@ -114,7 +115,9 @@ impl Host {
         if !matches!(object,Object::Place(_)) {
             self.focus_on(object,(target,mpp));
         } else {
-            if landmark.is_none(){self.emit(Request::Locate{id:&self.id(object)});}
+            if landmark.is_none() && !matches!(object,Object::Place(index) if self.world.places[index].transport_reference()) {
+                self.emit(Request::Locate{id:&self.id(object)});
+            }
             self.locate(target,mpp);
         }
         self.search=None;
@@ -133,6 +136,7 @@ impl Host {
         }
         match action {
             Action::PlaceFilter(filter)=>{
+                if self.hud.place_filter != filter { self.select(None); }
                 self.hud.place_filter=filter;
                 self.hud.menu=HudMenu::None;
             }
@@ -326,7 +330,8 @@ impl Host {
                 Action::Select(Object::Polity(i)) if self.search.is_none()&&self.hud.menu==HudMenu::None&&self.hud.page==HudPage::Map=>{
                     self.click_country(i,p);
                 }
-                Action::Select(Object::Place(_)) if !in_country && self.pick_transport(p)=>{},
+                Action::Select(Object::Place(i)) if !in_country && self.mode!=Mode::Political
+                    && !matches!(self.world.places[i].symbol.as_str(),"station"|"bridge") && self.pick_transport(p)=>{},
                 _=>self.action(action),
             }
             return;

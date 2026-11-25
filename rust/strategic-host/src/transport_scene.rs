@@ -4,8 +4,10 @@ use crate::{
     landmarks::{
         ModelBounds, ModelKey, ModelPose, RegionalSource, VisibleModel, MISSISSIPPI, SHARDS,
     },
+    map_facilities::PlaceFilter,
+    map_markers,
     overlay::Mesh,
-    transport_ui::{MappedSite, ObjectId},
+    transport_ui::ObjectId,
     ui::{Layers, Mode},
 };
 use glam::{DVec3, Vec2};
@@ -25,7 +27,6 @@ use wwo_map_lab::{
 
 const MODEL_BUDGET: usize = 48;
 const MARKER_BUDGET: usize = 48;
-const PORT_INK: [u8; 4] = [138, 213, 222, 255];
 const DARK: [u8; 4] = [23, 32, 39, 244];
 const BLOCKED: [u8; 4] = [245, 110, 81, 250];
 const RESTRICTED: [u8; 4] = [249, 171, 102, 244];
@@ -136,9 +137,10 @@ struct Terminal {
 struct VisibleNode {
     position: Vec2,
     id: String,
-    terminal: Option<usize>,
+    terminal: usize,
     radius: f32,
     port: bool,
+    direct: bool,
     drawn: bool,
 }
 
@@ -167,17 +169,6 @@ struct Region {
 struct RegionalGeometry {
     period: Period,
     routes: BTreeMap<String, Path>,
-    references: Vec<RegionalPoint>,
-}
-
-struct RegionalPoint {
-    id: String,
-    name: String,
-    kind: String,
-    source: String,
-    note: String,
-    coordinates: [f64; 2],
-    period: Period,
 }
 
 #[derive(PartialEq)]
@@ -187,6 +178,7 @@ struct MapView {
     mpp: f64,
     pitch: f64,
     mode: Mode,
+    place_filter: PlaceFilter,
     picking: bool,
     date: String,
     availability: u64,
@@ -231,23 +223,6 @@ enum Reference {
         geometry: Line,
         geometry_status: String,
     },
-    #[serde(rename = "geographic_region")]
-    Place {
-        id: String,
-        display_name: String,
-        #[serde(default)]
-        display_kind: String,
-        #[serde(default)]
-        transport_symbol: String,
-        #[serde(default)]
-        source_reference: String,
-        #[serde(default)]
-        note_zh: String,
-        #[serde(default)]
-        geometry: Option<serde_json::Value>,
-        #[serde(flatten)]
-        period: Period,
-    },
     #[serde(other)]
     Other,
 }
@@ -266,7 +241,6 @@ impl Region {
         let mut geometry = RegionalGeometry {
             period: shard.metadata,
             routes: BTreeMap::new(),
-            references: Vec::new(),
         };
         for fact in shard.evidence_catalog.facts {
             match fact.value {
@@ -311,31 +285,6 @@ impl Region {
                     geometry
                         .routes
                         .insert(segment_id, Path::new(line.coordinates));
-                }
-                Reference::Place {
-                    id,
-                    display_name,
-                    display_kind,
-                    transport_symbol,
-                    source_reference,
-                    note_zh,
-                    geometry: Some(point),
-                    period,
-                } if display_kind == "transport_node" => {
-                    if let Some(coords) = point
-                        .get("coordinates")
-                        .and_then(|xy| serde_json::from_value::<[f64; 2]>(xy.clone()).ok())
-                    {
-                        geometry.references.push(RegionalPoint {
-                            id,
-                            name: display_name,
-                            kind: transport_symbol,
-                            source: source_reference,
-                            note: note_zh,
-                            coordinates: coords,
-                            period,
-                        });
-                    }
                 }
                 _ => {}
             }
@@ -555,6 +504,7 @@ impl TransportScene {
         size: [u32; 2],
         date: &str,
         mode: Mode,
+        place_filter: PlaceFilter,
         world: &InitialWorld,
         selection: Option<&ObjectId>,
         selected_route: Option<&Route>,
@@ -575,6 +525,7 @@ impl TransportScene {
             mpp: camera.mpp,
             pitch: camera.pitch(),
             mode,
+            place_filter,
             picking,
             date: date.to_owned(),
             availability: network.availability_revision(),
@@ -615,7 +566,6 @@ impl TransportScene {
                 region.loaded = Some(region.load(network, &self.rail_pairs)?);
             } else if !in_view && region.loaded.as_ref().is_some_and(|geometry| {
                 !selected_segment.is_some_and(|id| geometry.routes.contains_key(id))
-                    && !selected_node.is_some_and(|id| geometry.references.iter().any(|site| site.id == id))
             }) {
                 region.loaded = None;
             }
@@ -734,7 +684,6 @@ impl TransportScene {
                         let terminal = &self.terminals[index];
                         let Some(position) = project(camera, size, terminal.point).filter(|p| visible(*p, size, 12.))
                             else { continue; };
-                        let mut open_capacity = 0;
                         let mut status = None;
                         let mut international = false;
                         let mut water = false;
@@ -764,7 +713,6 @@ impl TransportScene {
                             if closed {
                                 status = Some(BLOCKED);
                             } else {
-                                open_capacity = open_capacity.max(access.capacity_units);
                                 if status.is_none() && access.capacity_units < edge.profile.capacity_units {
                                     status = Some(RESTRICTED);
                                 }
@@ -775,48 +723,36 @@ impl TransportScene {
                             continue;
                         }
                         let port = terminal.kind == NodeKind::Port;
+                        if mode == Mode::Political && !picking
+                            && !matches!(place_filter, PlaceFilter::Overview | PlaceFilter::Transport) { continue; }
                         let destination = picking && (port || terminal.kind == NodeKind::City && camera.mpp <= camera::ENTER)
                             && world.can_book_transport_to(&terminal.id);
                         let context = destination || match mode {
                             Mode::Geographic => water || camera.mpp <= camera::ENTER,
-                            Mode::Political => international || status.is_some(),
+                            Mode::Political => international || status.is_some() || port && camera.mpp <= 1200.
+                                || place_filter == PlaceFilter::Transport && camera.mpp <= camera::ENTER,
                             Mode::Economic => water || camera.mpp <= camera::ENTER,
                             Mode::Military => has_civil_capacity && (water || camera.mpp <= camera::ENTER),
                         };
-                        let radius = if mode == Mode::Military { capacity_radius(open_capacity) } else if port { 4. } else { 3. };
+                        let radius = map_markers::DIAMOND_RADIUS;
                         if context || highlighted_terminal {
-                            let ink = status.unwrap_or_else(|| {
-                                if highlighted_terminal { SELECTED } else if !has_direct_link { [170, 164, 147, 190] }
-                                else if mode == Mode::Political { [202, 205, 187, 204] }
-                                else if mode == Mode::Military { [181, 196, 143, 233] }
-                                else if port { PORT_INK } else { [218, 185, 130, 240] }
-                            });
-                            if !has_direct_link {
-                                hollow_marker(&mut self.overlay, position, radius, ink, false);
-                            } else {
-                                terminal_marker(&mut self.overlay, position, radius, ink, port);
+                            terminal_marker(&mut self.overlay, position, radius, port, has_direct_link);
+                            if let Some(ink) = status {
+                                self.overlay.rect(position.x + radius - 1., position.y - radius - 1., 2.7, 2.7, ink);
+                            }
+                            if highlighted_terminal {
+                                selection_corners(&mut self.overlay, position, radius + 3.);
                             }
                         }
                         if context || highlighted_terminal || mode == Mode::Economic {
                             self.visible.push(VisibleNode {
-                                position, id: terminal.id.clone(), terminal: Some(index), radius: radius + 1., port,
+                                position, id: terminal.id.clone(), terminal: index, radius: radius + 2., port,
+                                direct: has_direct_link,
                                 drawn: context || highlighted_terminal,
                             });
                         }
                     }
                 }
-            }
-        }
-
-        if mode == Mode::Geographic && camera.mpp <= 1200. {
-            for site in current.flat_map(|r| &r.references).filter(|site| site.period.contains(date)) {
-                let Some(position) = project(camera, size, radial(site.coordinates)).filter(|p| visible(*p, size, 8.))
-                    else { continue; };
-                let ink = if selected_node == Some(&site.id) { SELECTED } else { [239, 211, 158, 232] };
-                hollow_marker(&mut self.overlay, position, 4., ink, site.kind == "bridge");
-                self.visible.push(VisibleNode {
-                    position, id: site.id.clone(), terminal: None, radius: 5., port: false, drawn: true,
-                });
             }
         }
 
@@ -855,19 +791,6 @@ impl TransportScene {
         self.paths.iter().any(|path| self.sea.contains_key(&path.id))
     }
 
-    pub fn reference_site(&self, id: &str) -> Option<MappedSite<'_>> {
-        let date = &self.previous_view.as_ref()?.date;
-        let site = self.regions.iter().filter_map(|r| r.loaded.as_ref())
-            .filter(|r| r.period.contains(date))
-            .flat_map(|r| &r.references)
-            .find(|site| site.id == id && site.period.contains(date))?;
-        Some(MappedSite {
-            name: &site.name,
-            source: &site.source,
-            note: &site.note,
-        })
-    }
-
     pub fn node_corridors(&self, id: &str) -> &[String] {
         self.incident.get(id).map_or(&[], Vec::as_slice)
     }
@@ -901,7 +824,7 @@ impl TransportScene {
     pub fn pick_destination(&self, cursor: [f64; 2], world: &InitialWorld) -> Option<&str> {
         let pointer = Vec2::new(cursor[0] as f32, cursor[1] as f32);
         self.nearest_node_where(pointer, |node| {
-            node.terminal.is_some_and(|index| matches!(self.terminals[index].kind, NodeKind::City | NodeKind::Port))
+            matches!(self.terminals[node.terminal].kind, NodeKind::City | NodeKind::Port)
                 && world.can_book_transport_to(&node.id)
         }).map(|node| node.id.as_str())
     }
@@ -922,7 +845,7 @@ impl TransportScene {
     }
 
     fn nearest_terminal(&self, cursor: [f64; 2]) -> Option<usize> {
-        self.nearest_node(Vec2::new(cursor[0] as f32, cursor[1] as f32))?.terminal
+        self.nearest_node(Vec2::new(cursor[0] as f32, cursor[1] as f32)).map(|node| node.terminal)
     }
 
     fn update_flows(&mut self, world: &InitialWorld, mode: Mode) {
@@ -954,7 +877,7 @@ impl TransportScene {
             if let Some(&[out, incoming]) = self.flow_by_terminal.get(&node.id) {
                 self.flow_nodes.insert(node.id.clone());
                 if !node.drawn {
-                    hollow_marker(&mut self.flow_overlay, node.position, node.radius - 1., FLOW, false);
+                    terminal_marker(&mut self.flow_overlay, node.position, node.radius - 2., node.port, node.direct);
                 }
                 let r = 4.5 + node.radius;
                 if out > 0 {
@@ -1292,7 +1215,7 @@ fn with_alpha(mut color: [u8; 4], alpha: u8) -> [u8; 4] {
 
 fn mode_ink(mode: TransportMode) -> [u8; 4] {
     match mode {
-        TransportMode::Shipping => PORT_INK,
+        TransportMode::Shipping => map_markers::BLUE,
         TransportMode::InlandWaterway => RIVER,
         TransportMode::Rail => [209, 161, 99, 201],
         TransportMode::Road => [174, 147, 103, 147],
@@ -1451,38 +1374,9 @@ fn selection_corners(mesh: &mut Mesh, at: Vec2, r: f32) {
     }
 }
 
-fn hollow_marker(mesh: &mut Mesh, point: Vec2, r: f32, ink: [u8; 4], bridge: bool) {
-    let [x, y] = point.to_array();
-    if bridge {
-        mesh.line([x - r, y], [x + r, y], 3.5, DARK);
-        mesh.line([x - r, y], [x + r, y], 1.7, ink);
-        for dx in [-r, r] {
-            mesh.line([x + dx, y - 2.5], [x + dx, y + 2.5], 1.6, ink);
-        }
-    } else {
-        mesh.rect(x - r - 1., y - r - 1., 2. * r + 2., 2. * r + 2., DARK);
-        mesh.rect(x - r, y - r, 2. * r, 2. * r, ink);
-        mesh.rect(x - r + 1.4, y - r + 1.4, 2. * r - 2.8, 2. * r - 2.8, DARK);
-    }
-}
-
-fn terminal_marker(mesh: &mut Mesh, point: Vec2, r: f32, ink: [u8; 4], port: bool) {
-    let [x, y] = point.to_array();
-    if port {
-        mesh.shape(
-            &[
-                [x, y - r - 1.],
-                [x + r + 1., y],
-                [x, y + r + 1.],
-                [x - r - 1., y],
-            ],
-            DARK,
-        );
-        mesh.shape(&[[x, y - r], [x + r, y], [x, y + r], [x - r, y]], ink);
-    } else {
-        mesh.rect(x - r - 1., y - r - 1., 2. * r + 2., 2. * r + 2., DARK);
-        mesh.rect(x - r, y - r, 2. * r, 2. * r, ink);
-    }
+fn terminal_marker(mesh: &mut Mesh, point: Vec2, r: f32, port: bool, direct: bool) {
+    let ink = if port { map_markers::BLUE } else { map_markers::GOLD };
+    map_markers::diamond(mesh, point.to_array(), r, ink, port || direct);
 }
 fn marker_heading(
     camera: &Camera,

@@ -69,6 +69,18 @@ struct Metadata { landmark_visuals: Vec<Landmark> }
 struct Point { coordinates: [f64; 2] }
 
 #[derive(Deserialize)]
+struct TransportPlace {
+    id: String,
+    display_name: String,
+    transport_symbol: String,
+    geometry: Point,
+    valid_from: String,
+    valid_to: String,
+    max_mpp: f64,
+    rank: u32,
+}
+
+#[derive(Deserialize)]
 struct Landmark {
     id: String,
     display_name: String,
@@ -196,6 +208,22 @@ impl Landmarks {
         for source in SHARDS {
             let shard: Shard = serde_json::from_slice(source.bytes)?;
             for fact in shard.evidence_catalog.facts {
+                if fact.value.get("display_kind").and_then(serde_json::Value::as_str) == Some("transport_node")
+                    && matches!(fact.value.get("transport_symbol").and_then(serde_json::Value::as_str), Some("station"|"bridge"))
+                {
+                    let site: TransportPlace = serde_json::from_value(fact.value)?;
+                    if !world.places.iter().any(|place| place.id == site.id) {
+                        let (name, name_zh) = site.display_name.split_once(" · ")
+                            .unwrap_or((&site.display_name, &site.display_name));
+                        world.places.push(Place {
+                            id:site.id, name:name.into(), name_zh:name_zh.into(), symbol:site.transport_symbol,
+                            facility:None, facility_active:None, military_facility_active:false,
+                            reference:true, display_symbol:true, selectable:true, coordinates:site.geometry.coordinates,
+                            rank:site.rank, max_mpp:site.max_mpp, from_date:site.valid_from, to_date:site.valid_to,
+                        });
+                    }
+                    continue;
+                }
                 let Some(layout) = fact.value.get("miniature_layout") else { continue; };
                 if layout.get("model_path").and_then(serde_json::Value::as_str)
                     != Some("res://assets/settlements/urban_landscape_r40.glb") {
@@ -204,7 +232,7 @@ impl Landmarks {
                 let city: Settlement = serde_json::from_value(fact.value)?;
                 let index = install_place(world, Place {
                     id: city.id, name: city.display_name.clone(), name_zh: city.display_name,
-                    symbol: "city".into(), facility:None, military_facility_active:false,
+                    symbol: "city".into(), facility:None, facility_active:None, military_facility_active:false,
                     reference: true, display_symbol: false, selectable: true,
                     coordinates: city.geometry.coordinates, rank: 1, max_mpp: city.miniature_layout.max_mpp,
                     from_date: city.valid_from.clone(), to_date: city.valid_to.clone(),
@@ -218,7 +246,7 @@ impl Landmarks {
                 let place = Place {
                     id: landmark.id.clone(), name: model.name.into(),
                     name_zh: landmark.display_name.clone(), symbol: model.symbol.into(),
-                    facility:None, military_facility_active:false,
+                    facility:None, facility_active:None, military_facility_active:false,
                     reference: true, display_symbol: true, selectable: true,
                     coordinates: landmark.geometry.coordinates, rank: landmark.rank,
                     max_mpp: landmark.symbol_max_mpp, from_date: landmark.valid_from.clone(),
@@ -324,7 +352,7 @@ impl Landmarks {
 fn install_place(world: &mut World, place: Place) -> usize {
     if let Some(index) = world.places.iter().position(|row| row.id == place.id) {
         let saved=&world.places[index];
-        world.places[index] = Place { facility:saved.facility,
+        world.places[index] = Place { facility:saved.facility, facility_active:saved.facility_active,
             military_facility_active:saved.military_facility_active,..place };
         index
     } else {
