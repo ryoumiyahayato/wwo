@@ -7,7 +7,8 @@ use std::{collections::{HashMap, HashSet}, f64::consts::PI};
 use wgpu::util::DeviceExt;
 
 const KINDS: u64 = 4;
-const MODEL_LIMIT_MPP: f64 = 28.;
+// Beyond this footprint the continuous canopy material alone carries the woods.
+const MODEL_LIMIT_MPP: f64 = 23.5;
 const CHUNK_SIDE: i32 = 16;
 const LATITUDE_CELLS: i32 = 98_304;
 const CAPACITY: u64 = 65_536;

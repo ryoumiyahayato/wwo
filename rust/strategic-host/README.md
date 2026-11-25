@@ -195,7 +195,9 @@ LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样�
 
 覆盖包由现有 ESA WorldCover 2021 v200 分类缓存生成。运行 `python tools/build_landscape_cover.py <worldcover缓存目录> <输出目录>/landscape-cover-v2.qsc`，需 NumPy、Pillow 和 zstandard。树冠和岩块按固定 WGS84 区块缓存，实例精度由投影大小控制。树种、林隙和地表纹理为视觉推定。山脊、坡面光照和实例接地使用 QPK 的高程。Z6 色调可用 `python tools/build_natural_terrain.py --z6-from-z7 <原Z6.qpk> <配色Z7.qpk> <输出Z6.qpk>` 重建，并保留原 Z6 高程和水域覆盖。[覆盖来源和许可](https://doi.org/10.5281/zenodo.7254221) · [正式游戏实测及资源恢复](Z6_Z7_SURFACE.md)
 
-区域覆盖以现有 562 × 562 分类缓存做面积积分。邻域交换和小林地轮廓重建保留各类面积，隔开水域、建成区及未知资料。Z6、Z7 和林地近一级样点来自同一网格。用 `python tools/build_landscape_cover.py <worldcover缓存目录> src/regional-land-cover.qsc --regional-pilot --regional-overviews` 生成随宿主构建的样区包，另需 SciPy。样区使用 WorldCover 原 COG 的 16 倍概览，缓存为同目录下 2250 × 2250 的 `<分片>-overview.png`，本包使用 N45E000、N45E003、N45E006、N48W003、N51W003。缺少概览的区域沿用普通缓存。区域材质在比例尺小于 50 公里时逐步接入，景观实例使用同一覆盖。水域取 QWG 和 QPK，历史调查优先。重建用于地表表现，林缘细分属于美术推定。[覆盖来源和许可](https://doi.org/10.5281/zenodo.7254221)
+区域覆盖以现有 562 × 562 分类缓存做面积积分。邻域交换和小林地轮廓重建保留各类面积，隔开水域、建成区及未知资料。Z6、Z7 和林地近一级样点来自同一网格。用 `python tools/build_landscape_cover.py <worldcover缓存目录> src/regional-land-cover.qsc --regional-pilot --regional-overviews` 生成随宿主构建的样区包，另需 SciPy。样区使用 WorldCover 原 COG 的 16 倍概览，缓存为同目录下 2250 × 2250 的 `<分片>-overview.png`，本包使用 N45E000、N45E003、N45E006、N48W003、N48E000、N51W003、N51E000。缺少概览的区域沿用普通缓存。分片按 GPU 图集行序压缩。区域材质在比例尺小于 50 公里时逐步接入，景观实例使用同一覆盖。水域取 QWG 和 QPK，历史调查优先。重建用于地表表现，林缘细分属于美术推定。[覆盖来源和许可](https://doi.org/10.5281/zenodo.7254221)
+
+林地远景使用地表覆盖，中近景以共用锚点接替林丛与单体树。阔叶林和针叶林用不同近景轮廓，树干仅在近景绘制。样区内农田与林地交界用重建覆盖的梯度确定林带朝向。
 
 ### 近景地表候选
 

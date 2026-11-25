@@ -23,23 +23,107 @@ fn face(mesh: &mut Mesh, points: [Vec3; 3], edge: [f32; 3], tone: f32) {
         .normalize();
     let first = mesh.vertices.len() as u16;
     mesh.indices.extend([first, first + 1, first + 2]);
-    mesh.vertices.extend(points.into_iter().zip(edge).map(|(point, edge)| Vertex {
-        offset: point.to_array(),
-        normal: normal.to_array(),
-        tone,
-        edge,
-        crown: 0.,
-    }));
+    mesh.vertices
+        .extend(points.into_iter().zip(edge).map(|(point, edge)| Vertex {
+            offset: point.to_array(),
+            normal: normal.to_array(),
+            tone,
+            edge,
+            crown: 0.,
+        }));
 }
 
-fn stand(outline: &[(f32, f32)], group: &Mesh) -> Mesh {
+const GROVES: usize = 7;
+const TREES_PER_GROVE: usize = 4;
+
+fn stand(outline: &[(f32, f32)], group: &Mesh, conifer: bool) -> Mesh {
     // Keep the stand first so the indirect draw can omit subpixel crowns.
     let mut mesh = group.clone();
-    for tree in 1..=49 {
-        crown(&mut mesh, outline, Vec3::new(0.,0.,0.52), [1.,1.],
-            Vec3::new(0.12,-0.10,1.), 1., tree as f32);
+    for tree in 1..=GROVES * TREES_PER_GROVE {
+        let layer = tree as f32;
+        let anchor = tree % TREES_PER_GROVE == 1;
+        volume(&mut mesh, outline, layer, conifer, anchor);
+        if anchor {
+            trunk(&mut mesh, layer);
+        }
     }
     mesh
+}
+
+fn volume(mesh: &mut Mesh, outline: &[(f32, f32)], layer: f32, conifer: bool, anchor: bool) {
+    let first = mesh.vertices.len() as u16;
+    let rings: &[(f32, f32, f32)] = if conifer {
+        &[(0.61, 0.27, 0.87), (0.97, 0.45, 0.97), (0.46, 0.73, 1.06)]
+    } else {
+        &[(0.60, 0.33, 0.86), (1., 0.54, 0.98), (0.73, 0.78, 1.07)]
+    };
+    // Keep the flanks on the larger tree. The smaller crowns have a
+    // corrugated skirt below the apex to break the silhouette in oblique view.
+    let rings = if anchor { rings } else { &rings[1..2] };
+    for &(r, z, tone) in rings {
+        for (i, &(x, y)) in outline.iter().enumerate() {
+            let z = z - if anchor { 0. } else { (i % 2) as f32 * 0.16 };
+            mesh.vertices.push(Vertex {
+                offset: [x * r + z * 0.09, y * r - z * 0.06, z],
+                normal: Vec3::new(x, y, (z - 0.52) * 1.6).normalize().to_array(),
+                tone,
+                edge: 1.,
+                crown: layer,
+            });
+        }
+    }
+    let corners = outline.len() as u16;
+    let top = first + rings.len() as u16 * corners;
+    mesh.vertices.push(Vertex {
+        offset: [0.12, -0.07, 1.],
+        normal: Vec3::Z.to_array(),
+        tone: 1.08,
+        edge: 1.,
+        crown: layer,
+    });
+    for i in 0..corners {
+        let j = (i + 1) % corners;
+        for ring in 0..rings.len() as u16 - 1 {
+            let row = first + ring * corners;
+            mesh.indices.extend([
+                row + i,
+                row + j,
+                row + corners + i,
+                row + j,
+                row + corners + j,
+                row + corners + i,
+            ]);
+        }
+        mesh.indices
+            .extend([top - corners + i, top - corners + j, top]);
+    }
+}
+
+fn trunk(mesh: &mut Mesh, layer: f32) {
+    let first = mesh.vertices.len() as u16;
+    let corners = [(1., 0.), (-0.5, 0.866), (-0.5, -0.866)];
+    for (radius, z) in [(0.068, 0.), (0.031, 0.49)] {
+        for (x, y) in corners {
+            mesh.vertices.push(Vertex {
+                offset: [radius * x + z * 0.082, radius * y, z],
+                normal: [x, y, 0.],
+                tone: -1.,
+                edge: 1.,
+                crown: layer,
+            });
+        }
+    }
+    for i in 0..3 {
+        let j = (i + 1) % 3;
+        mesh.indices.extend([
+            first + i,
+            first + j,
+            first + 3 + i,
+            first + j,
+            first + 3 + j,
+            first + 3 + i,
+        ]);
+    }
 }
 
 fn crown(
@@ -59,19 +143,19 @@ fn crown(
         edge: 1.,
         crown: layer,
     });
-    let rise = if layer > 0. { 1.1 } else { 6.2 };
     for (i, &(x, y)) in outline.iter().enumerate() {
-        let rim = Vec3::new(x*radius[0], y*radius[1], 0.);
-        let normal = Vec3::new(x*rise,y*rise,1.).normalize();
+        let rim = Vec3::new(x * radius[0], y * radius[1], 0.);
+        let normal = Vec3::new(x * 6.2, y * 6.2, 1.).normalize();
         mesh.vertices.push(Vertex {
-            offset: (center+rim).to_array(),
+            offset: (center + rim).to_array(),
             normal: normal.to_array(),
             tone,
             edge: 0.,
             crown: layer,
         });
         let next = (i + 1) % outline.len();
-        mesh.indices.extend([apex + 1 + i as u16, apex + 1 + next as u16, apex]);
+        mesh.indices
+            .extend([apex + 1 + i as u16, apex + 1 + next as u16, apex]);
     }
 }
 
@@ -134,19 +218,69 @@ pub fn meshes() -> ([Mesh; 3], u32) {
             band * 1.10,
         );
     }
-    let outline = [(1., 0.05), (0.10, 0.97), (-0.81, 0.57), (-0.66, -0.58), (0.30, -0.88)];
+    let outline = [
+        (1., 0.05),
+        (0.10, 0.97),
+        (-0.81, 0.57),
+        (-0.66, -0.58),
+        (0.30, -0.88),
+    ];
     let mut group = Mesh::default();
     // Keep connected low foliage beneath overlapping crowns. No hidden bottom faces.
-    crown(&mut group, &lobed, Vec3::new(0.,0.,0.15), [1.16,1.13],
-        Vec3::new(-0.14,0.08,0.36), 0.76, -1.);
-    for (x, y, r, h, tone) in [(-0.59, 0.12, 0.55, 0.72, 0.90),
-        (-0.31, -0.47, 0.53, 1.02, 1.01), (-0.33, 0.49, 0.51, 0.66, 0.99),
-        (0.18, 0.23, 0.56, 1.19, 1.07), (0.27, -0.41, 0.51, 0.74, 0.91),
-        (0.62, -0.01, 0.53, 0.93, 1.03)] {
-        crown(&mut group, &outline, Vec3::new(x, y, 0.30), [r, r * 0.92],
-            Vec3::new(x - 0.04, y + 0.03, h), tone, 0.);
+    crown(
+        &mut group,
+        &lobed,
+        Vec3::new(0., 0., 0.15),
+        [1.16, 1.13],
+        Vec3::new(-0.14, 0.08, 0.36),
+        0.76,
+        -1.,
+    );
+    for (i, (r, h, tone)) in [
+        (0.32, 0.72, 0.90),
+        (0.39, 1.02, 1.01),
+        (0.28, 0.66, 0.99),
+        (0.43, 1.19, 1.07),
+        (0.34, 0.74, 0.91),
+        (0.40, 0.93, 1.03),
+        (0.31, 0.57, 0.93),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let layer = -(i as f32) - 2.;
+        crown(
+            &mut group,
+            &outline,
+            Vec3::new(-0.09, 0.02, 0.32),
+            [r, r * 0.92],
+            Vec3::new(-0.04, 0.03, h),
+            tone,
+            layer,
+        );
+        if i % 2 == 1 {
+            crown(
+                &mut group,
+                &outline,
+                Vec3::new(0.15, 0.07, 0.26),
+                [r * 0.68, r * 0.77],
+                Vec3::new(0.16, 0.07, h * 0.78),
+                tone * 0.94,
+                layer,
+            );
+        }
     }
-    let broadleaf = stand(&[lobed[0],lobed[2],lobed[4],lobed[6],lobed[8]], &group);
-    let conifer = stand(&[needles[0],needles[1],needles[2],needles[4],needles[6],needles[8]], &group);
+    let broadleaf = stand(
+        &[lobed[0], lobed[2], lobed[4], lobed[6], lobed[8]],
+        &group,
+        false,
+    );
+    let conifer = stand(
+        &[
+            needles[0], needles[1], needles[2], needles[4], needles[6], needles[8],
+        ],
+        &group,
+        true,
+    );
     ([broadleaf, conifer, rock], group.indices.len() as u32)
 }

@@ -28,7 +28,7 @@ impl RegionalCover {
         stream.read_exact(&mut header)?;
         let pages = u32::from_le_bytes(header[12..16].try_into().unwrap());
         let invalid = || io::Error::other("Invalid regional landscape cover pack");
-        if &header[..8] != b"WWOREGC2" || header[8..12] != page.to_le_bytes()
+        if &header[..8] != b"WWOREGC3" || header[8..12] != page.to_le_bytes()
             || pages > REGIONAL_SLOTS
         {
             return Err(invalid());
@@ -58,24 +58,11 @@ impl RegionalCover {
     pub fn read(&mut self, z: u32, x: u32, y: u32, width: usize) -> io::Result<Option<Vec<u8>>> {
         let Some(frame) = self.frames.get(&(z, x, y)) else { return Ok(None); };
         let size = width * width;
-        let planes = self.decoder.decompress(frame, size * REGIONAL_CHANNELS)?;
-        if planes.len() != size * REGIONAL_CHANNELS {
+        let mut banks = self.decoder.decompress(frame, size * REGIONAL_CHANNELS)?;
+        if banks.len() != size * REGIONAL_CHANNELS {
             return Err(io::Error::other(format!("Invalid regional landscape page: {z}/{x}/{y}")));
         }
-        let row = width * 4 * REGIONAL_BANKS as usize;
-        let mut banks = vec![0; width * row];
-        for channel in 0..REGIONAL_BANKS as usize * 4 {
-            let offset = channel / 4 * width * 4 + channel % 4;
-            for (source, target) in planes[channel * size..(channel + 1) * size]
-                .chunks_exact(width).zip(banks.chunks_exact_mut(row))
-            {
-                for (out, input) in target[offset..offset + (width - 1) * 4 + 1]
-                    .iter_mut().step_by(4).zip(source)
-                {
-                    *out = *input;
-                }
-            }
-        }
+        banks.truncate(size * 4 * REGIONAL_BANKS as usize);
         Ok(Some(banks))
     }
 }

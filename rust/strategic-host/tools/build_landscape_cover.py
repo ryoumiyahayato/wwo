@@ -289,11 +289,13 @@ def regional_build(source, output, parents, use_overviews):
             child = step // 2
             forest = crop[:, :, 0].reshape(PAGE, 2, child, PAGE, 2, child).mean(axis=(2, 5))
             forest = np.rint(forest.transpose(0, 2, 1, 3).reshape(PAGE, PAGE, 4) * 255).astype(np.uint8)
-            banks = np.dstack((forest, coverage[:, :, 1:8], support, coverage[:, :, 8]))
-            planar = np.ascontiguousarray(banks.transpose(2, 0, 1))
-            records.append((z, sx, sy, compressor.compress(planar.tobytes())))
+            layers = np.dstack((forest, coverage[:, :, 1:8], support))
+            banks = np.ascontiguousarray(layers.reshape(PAGE, PAGE, 3, 4).transpose(0, 2, 1, 3))
+            # Store the GPU row order and keep the source water share at the end.
+            payload = banks.tobytes() + coverage[:, :, 8].tobytes()
+            records.append((z, sx, sy, compressor.compress(payload)))
     with output.open("xb") as stream:
-        stream.write(pack("<8sII", b"WWOREGC2", PAGE, len(records)))
+        stream.write(pack("<8sII", b"WWOREGC3", PAGE, len(records)))
         for z, x, y, frame in records:
             stream.write(pack("<BBHI", z, x, y, len(frame)))
             stream.write(frame)
