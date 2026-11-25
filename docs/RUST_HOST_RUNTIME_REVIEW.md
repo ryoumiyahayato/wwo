@@ -30,7 +30,7 @@ Windows 正式入口 `wwo-map-lab --play` 使用 Rust 的 `NativeSession`、`Ini
 
 本轮 Windows `--play` 使用 v41 新局。F7 选择奥恩，人口 329,951。打开人物、组织关系、客运、货运和法国市场页面，法国市场显示 65 种商品。进入法国 25 公里军事格 `(0, -1)`，退出再进入，演习累计 5 步。F5 保存，F9 恢复该场演习。意大利人口分区的市场归属通过定向路网测试。交易和权限操作本轮未重跑。前一轮 v41 Windows 实跑已跨日，并恢复原生 v39 和 v40 存档。
 
-从[仓库 README](../README.md#构建与恢复)恢复代码和离线人口运行包。基础地图使用 [Windows 阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)，交通补充包见[交通归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-transport-1900-20261121)。Lynn Ø 修正 QWG 使用上表附件及其中的配套清单。原生候选在 48 米/像素载入视野所需的 9 页。归档文件已上传，本轮远端大文件回读中断，冷恢复未完成。七大洲验收本轮未运行。
+从[构建与恢复](BUILD_AND_RECOVERY.md#构建与恢复)恢复代码和离线人口运行包。基础地图使用 [Windows 阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)，交通补充包见[交通归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-transport-1900-20261121)。Lynn Ø 修正 QWG 使用上表附件及其中的配套清单。原生候选在 48 米/像素载入视野所需的 9 页。归档文件已上传，本轮远端大文件回读中断，冷恢复未完成。七大洲验收本轮未运行。
 
 本机验证使用固定工作树和共享 Cargo 缓存。旧工作树及用户存档保持原位。旧地貌树的 28 个改动文件可从[源码归档](https://github.com/ryoumiyahayato/wwo/tree/acbb72a5ba4d094c4d79ae2dfcec59d18bfdc37b)恢复，五个文件有行尾差异。[地貌附件](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115)保存相关 QDT、QPK 和耕地试制包。其他未发布试制文件仍在原工作树。
 
