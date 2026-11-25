@@ -27,6 +27,7 @@ use wwo_map_lab::{battlefield_terrain::BattlefieldTerrain, military_grid::Milita
 pub(crate) enum HostEvent {
     Map(Completion),
     Terrain(terrain::Completion),
+    TerrainRegional(terrain::Key,io::Result<Vec<u8>>),
     TerrainDetail(usize,io::Result<Vec<u8>>),
     Rivers(io::Result<hydrology::Rivers>),
     Model(u64,landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
