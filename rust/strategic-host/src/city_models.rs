@@ -1,16 +1,18 @@
-use crate::{camera::{self, Camera}, landmarks::{Landmarks, ModelBounds, ModelKey, ModelMesh, ModelPose, ModelVertex, VisibleModel}, HostEvent};
+use crate::{camera::{self, Camera}, landmarks::{FootprintModel, Landmarks, ModelBounds, ModelKey, ModelMesh, ModelPose, ModelVertex, VisibleModel}, HostEvent};
 use serde::Deserialize;
 use std::{
     collections::{BTreeMap, HashMap, HashSet},
     fs::File,
     io::{self, Read},
+    ops::Range,
     path::{Path, PathBuf},
     sync::Arc,
 };
 use winit::event_loop::EventLoopProxy;
 
 const MAX_MPP: f64 = 155.;
-const MAX_RESIDENT: usize = 192;
+pub(crate) const MAX_RESIDENT: usize = 192;
+pub(crate) const MODULES: usize=4;
 const MAX_PENDING: usize = 6;
 const RECORD: usize = 18;
 const MAX_BUILDINGS: usize = 12000;
@@ -72,13 +74,30 @@ struct Building {
 struct Block {
     bounds: [f64;4],
     apron: f64,
-    buildings: Vec<Building>,
+    instances: [Range<u32>;MODULES],
 }
 
 pub(crate) struct CityPage {
     blocks: Vec<Block>,
-    mesh: Arc<ModelMesh>,
+    mesh: Arc<CityGeometry>,
     mesh_bounds: ModelBounds,
+}
+
+pub(crate) struct CityGeometry {
+    pub(crate) mesh: ModelMesh,
+    pub(crate) instances: [Vec<FootprintModel>;MODULES],
+}
+
+pub(crate) struct CityBatch {
+    pub(crate) instances: Range<u32>,
+    pub(crate) fit: [[f32;4];4],
+    pub(crate) inverse_size: [f32;3],
+}
+
+pub(crate) struct CityDraw {
+    pub(crate) geometry: Arc<CityGeometry>,
+    pub(crate) preload: bool,
+    pub(crate) batches: [Option<CityBatch>;MODULES],
 }
 
 impl CityPage {
@@ -93,16 +112,20 @@ impl CityPage {
         }
         let mut mesh=ModelMesh {vertices:Vec::new(),indices:Vec::new()};
         let mut blocks=Vec::with_capacity(grouped.len());
+        let mut instances:[Vec<_>;MODULES]=std::array::from_fn(|_|Vec::new());
         for buildings in grouped.into_values() {
             let mut bounds=[180_f64,90.,-180.,-90.];
             let mut apron=0_f64;
-            for row in &buildings {
+            let starts=instances.each_ref().map(|rows|rows.len() as u32);
+            for row in buildings {
                 let [lon,lat]=row.anchor();
                 bounds=[bounds[0].min(lon),bounds[1].min(lat),bounds[2].max(lon),bounds[3].max(lat)];
                 apron=apron.max(row.dimensions[0].hypot(row.dimensions[2])*0.5+row.dimensions[1]);
                 row.extrude(row.offset,&mut mesh);
+                instances[row.module-1].push(FootprintModel::new(row.offset,row.heading,row.dimensions));
             }
-            blocks.push(Block {bounds,apron,buildings});
+            let ranges=std::array::from_fn(|module|starts[module]..instances[module].len() as u32);
+            blocks.push(Block {bounds,apron,instances:ranges});
         }
         let mut mesh_bounds=([f64::INFINITY;3],[f64::NEG_INFINITY;3]);
         for vertex in &mesh.vertices {
@@ -111,7 +134,28 @@ impl CityPage {
                 mesh_bounds.1[axis]=mesh_bounds.1[axis].max(coordinate);
             }
         }
-        Self{blocks,mesh:Arc::new(mesh),mesh_bounds}
+        Self{blocks,mesh:Arc::new(CityGeometry{mesh,instances}),mesh_bounds}
+    }
+
+    fn visible_batches(&self,camera:&Camera,size:[u32;2],landmarks:&Landmarks)->[Option<CityBatch>;MODULES] {
+        let mut visible:[Range<u32>;MODULES]=Default::default();
+        for block in self.blocks.iter().filter(|block|distance_to_view(block.bounds,camera,size,block.apron).is_some()) {
+            for (range,block_rows) in visible.iter_mut().zip(&block.instances) {
+                if !block_rows.is_empty() {
+                    range.start=if range.start==range.end {block_rows.start} else {range.start.min(block_rows.start)};
+                    range.end=range.end.max(block_rows.end);
+                }
+            }
+        }
+        // Keep one draw per kit and page. Intermediate off-screen rows clip on the GPU.
+        let mut module=0;
+        visible.map(|instances| {
+            module+=1;
+            (!instances.is_empty()).then(|| {
+                let (fit,inverse_size)=landmarks.footprint_fit(module);
+                CityBatch{instances,fit,inverse_size}
+            })
+        })
     }
 }
 
@@ -244,7 +288,8 @@ impl Catalogue {
         }
         let mut models = Vec::new();
         let opacity=(1.-camera::smooth(115.,155.,camera.mpp)) as f32;
-        let detail=(1.-camera::smooth(5.,9.,camera.mpp)) as f32*opacity;
+        // Keep the footprint shells until roof and wall geometry spans enough pixels to resolve.
+        let detail=(1.-camera::smooth(1.7,3.1,camera.mpp)) as f32*opacity;
         for (index,_) in visible {
             let tile=&self.tiles[index];
             let anchor=tile.anchor();
@@ -252,24 +297,10 @@ impl Catalogue {
                 let key=ModelKey::city_page(self.revision,index);
                 let pose=ModelPose{key,anchor,heading:0.,datum:0.,dimensions:[1.;3],bounds:page.mesh_bounds};
                 let Some(mut block_model)=pose.project(None,camera,camera.pitch(),size) else {continue;};
-                block_model.lod_range=[detail,opacity];
-                block_model.city_page=Some(Arc::clone(&page.mesh));
-                let start=models.len();
-                let mut mask=0;
-                if detail>0. {
-                    let page_transform=glam::Mat4::from_cols_array_2d(&block_model.clip_from_model);
-                    for block in page.blocks.iter().filter(|block|distance_to_view(block.bounds,camera,size,block.apron).is_some()) {
-                        for row in &block.buildings {
-                            let mut model=landmarks.footprint_model(row.module,row.offset,row.heading,row.dimensions,page_transform);
-                            mask|=1u8<<row.module;
-                            model.lod_range=[0.,detail];
-                            models.push(model);
-                        }
-                    }
-                }
-                for model in &mut models[start..] {model.city_detail_mask=mask;}
-                block_model.city_detail_mask=mask;
-                if mask==0 {block_model.lod_range[0]=0.;}
+                let batches=if detail>0. {page.visible_batches(camera,size,landmarks)} else {Default::default()};
+                let has_details=batches.iter().any(Option::is_some);
+                block_model.lod_range=[if has_details {detail} else {0.},opacity];
+                block_model.city_page=Some(CityDraw{geometry:Arc::clone(&page.mesh),preload:camera.mpp<6.,batches});
                 models.push(block_model);
             } else if self.pending.len()<MAX_PENDING && !self.failed.contains(&index) && self.pending.insert(index) {
                 let path=self.root.join(&tile.file);

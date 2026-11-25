@@ -1,5 +1,6 @@
 use crate::{camera::{Camera,EARTH},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,terrain::{self,Terrain},ui::Ink,world::{Pixels,Tile}};
 use crate::landmarks::{self, ModelKey, ModelMesh, ModelVertex, VisibleModel};
+use crate::city_models::{self, MODULES};
 use crate::terrain_detail;
 use crate::landscape::{Landscape,LandscapeCounts};
 use crate::hydrology::Rivers;
@@ -356,17 +357,39 @@ struct ModelInstance {
     model_scale:[f32;3],
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Pod, Zeroable)]
+struct CityBatchUniform {
+    clip_from_page: [[f32;4];4],
+    fit: [[f32;4];4],
+    inverse_size_and_opacity: [f32;4],
+    // Align each dynamic uniform to the WebGPU 256-byte offset alignment.
+    padding: [u32;28],
+}
+
+struct CityBatchDraw {
+    page: ModelKey,
+    module: usize,
+    instances: std::ops::Range<u32>,
+}
+
 struct ResidentModel {
     vertices: wgpu::Buffer,
     indices: wgpu::Buffer,
     count: u32,
     instance_buffer: wgpu::Buffer,
     transforms: Vec<ModelInstance>,
+    city_instances: Option<[Option<wgpu::Buffer>;MODULES]>,
     last_drawn: Instant,
 }
 
 struct ModelLayer {
     pipeline: wgpu::RenderPipeline,
+    city_pipeline: wgpu::RenderPipeline,
+    city_uniforms: wgpu::Buffer,
+    city_bindings: wgpu::BindGroup,
+    city_batches: Vec<CityBatchDraw>,
+    city_batch_uniforms: Vec<CityBatchUniform>,
     materials: wgpu::BindGroup,
     depth: Option<([u32; 2], wgpu::TextureView)>,
     residents: HashMap<ModelKey, ResidentModel>,
@@ -389,43 +412,70 @@ impl ModelLayer {
             sampler_entry(1),
         ]);
         let materials=bind(device,&material_layout,&[tex_resource(0,&surface.materials),sampler_resource(1,&surface.repeat)]);
-        let stages = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("WWO static model"), bind_group_layouts: &[&material_layout], push_constant_ranges: &[],
-        });
         let shader = device.create_shader_module(wgpu::include_wgsl!("landmark.wgsl"));
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("WWO static models"), layout: Some(&stages), primitive: Default::default(),
-            depth_stencil: Some(wgpu::DepthStencilState {
-                format: Self::DEPTH, depth_write_enabled: true, depth_compare: wgpu::CompareFunction::Less,
-                stencil: Default::default(), bias: Default::default(),
-            }),
-            multisample: Default::default(), multiview: None, cache: None,
-            vertex: wgpu::VertexState {
-                module: &shader, entry_point: Some("model_vertex"), compilation_options: Default::default(),
-                buffers: &[wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::<ModelVertex>() as u64,
-                    step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x4],
-                }, wgpu::VertexBufferLayout {
-                    array_stride: std::mem::size_of::<ModelInstance>() as u64,
-                    step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: &wgpu::vertex_attr_array![3=>Float32x4, 4=>Float32x4, 5=>Float32x4, 6=>Float32x4, 7=>Float32x4, 8=>Float32x3],
-                }],
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader, entry_point: Some("model_fragment"), compilation_options: Default::default(),
-                targets: &[Some(wgpu::ColorTargetState { format, blend: None, write_mask: wgpu::ColorWrites::ALL })],
-            }),
+        let city_layout=layout(device,&[entry(0,wgpu::ShaderStages::VERTEX,wgpu::BindingType::Buffer {
+            ty:wgpu::BufferBindingType::Uniform, has_dynamic_offset:true, min_binding_size:None,
+        })]);
+        let batch_bytes=std::mem::size_of::<CityBatchUniform>() as u64;
+        let city_uniforms=device.create_buffer(&wgpu::BufferDescriptor {
+            label:Some("WWO city batch transforms"), size:batch_bytes*(city_models::MAX_RESIDENT*MODULES) as u64,
+            usage:wgpu::BufferUsages::UNIFORM|wgpu::BufferUsages::COPY_DST,mapped_at_creation:false,
         });
-        Self { pipeline, materials, depth: None, residents: HashMap::new(), visible: HashSet::new(),
+        let city_bindings=bind(device,&city_layout,&[wgpu::BindGroupEntry{binding:0,
+            resource:wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+            buffer:&city_uniforms,offset:0,size:std::num::NonZeroU64::new(batch_bytes),
+        })}]);
+        let pipeline=|vertex_entry,instance_bytes,attributes:&[wgpu::VertexAttribute],groups:&[&wgpu::BindGroupLayout]| {
+            let stages=device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label:Some("WWO static model"),bind_group_layouts:groups,push_constant_ranges:&[],
+            });
+            device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: Some("WWO static models"), layout: Some(&stages), primitive: Default::default(),
+                depth_stencil: Some(wgpu::DepthStencilState {
+                    format: Self::DEPTH, depth_write_enabled: true, depth_compare: wgpu::CompareFunction::Less,
+                    stencil: Default::default(), bias: Default::default(),
+                }),
+                multisample: Default::default(), multiview: None, cache: None,
+                vertex: wgpu::VertexState {
+                    module: &shader, entry_point: Some(vertex_entry), compilation_options: Default::default(),
+                    buffers: &[wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::<ModelVertex>() as u64,
+                        step_mode: wgpu::VertexStepMode::Vertex,
+                        attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x4],
+                    }, wgpu::VertexBufferLayout {
+                        array_stride: instance_bytes,
+                        step_mode: wgpu::VertexStepMode::Instance,
+                        attributes,
+                    }],
+                },
+                fragment: Some(wgpu::FragmentState {
+                    module: &shader, entry_point: Some("model_fragment"), compilation_options: Default::default(),
+                    targets: &[Some(wgpu::ColorTargetState { format, blend: None, write_mask: wgpu::ColorWrites::ALL })],
+                }),
+            })
+        };
+        let city_pipeline=pipeline("city_vertex",std::mem::size_of::<landmarks::FootprintModel>() as u64,
+            &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x3],
+            &[&material_layout,&city_layout]);
+        let pipeline=pipeline("model_vertex",std::mem::size_of::<ModelInstance>() as u64,
+            &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x4,8=>Float32x3],
+            &[&material_layout]);
+        Self { pipeline, city_pipeline, city_uniforms, city_bindings, city_batches:Vec::new(),city_batch_uniforms:Vec::new(),
+            materials, depth: None, residents: HashMap::new(), visible: HashSet::new(),
             pending: HashSet::new(), failed: HashSet::new(), events, city_override:None,city_revision:0 }
     }
 
     fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel]) {
         let now = Instant::now();
+        self.city_batches.clear();
+        self.city_batch_uniforms.clear();
         self.visible.clear();
         self.visible.extend(models.iter().filter(|model| model.lod_range[0] < model.lod_range[1]
             || model.city_page.is_some()).map(|model| model.key));
+        for city in models.iter().filter_map(|model|model.city_page.as_ref()).filter(|city|city.preload) {
+            self.visible.extend(city.geometry.instances.iter().enumerate().filter(|(_,rows)|!rows.is_empty())
+                .map(|(module,_)|ModelKey::city_detail(module+1)));
+        }
         self.residents.retain(|key, model| {
             self.visible.contains(key) || (key.is_city() && now.duration_since(model.last_drawn) < Self::CITY_LOD_CACHE_TIME)
         });
@@ -443,14 +493,31 @@ impl ModelLayer {
             });
             self.depth = Some((size, texture.create_view(&Default::default())));
         }
-        let loaded_detail=self.loaded_city_details();
         for model in models {
             let key = model.key;
-            if let Some(mesh)=&model.city_page {
-                if !self.residents.contains_key(&key) {self.upload(device,key,mesh);}
+            if let Some(city)=&model.city_page {
+                if !self.residents.contains_key(&key) {self.upload(device,key,&city.geometry.mesh);}
             }
-            let lod_range=self.lod_range(model,loaded_detail);
+            let lod_range=self.lod_range(model);
             if let Some(resident) = self.residents.get_mut(&key) {
+                if let Some(city)=model.city_page.as_ref().filter(|city|city.preload) {
+                    resident.city_instances.get_or_insert_with(||city.geometry.instances.each_ref().map(|rows| {
+                        (!rows.is_empty()).then(||device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                            label:Some("WWO city footprints"), contents:bytemuck::cast_slice(rows), usage:wgpu::BufferUsages::VERTEX,
+                        }))
+                    }));
+                    if lod_range[0]>0. {
+                        for (module,batch) in city.batches.iter().enumerate().filter_map(|(i,b)|b.as_ref().map(|b|(i,b))) {
+                            let [x,y,z]=batch.inverse_size;
+                            self.city_batch_uniforms.push(CityBatchUniform {
+                                clip_from_page:model.clip_from_model,fit:batch.fit,
+                                inverse_size_and_opacity:[x,y,z,lod_range[0]],padding:[0;28],
+                            });
+                            self.city_batches.push(CityBatchDraw {page:key,module,instances:batch.instances.clone()});
+                        }
+                        resident.last_drawn=now;
+                    }
+                }
                 if lod_range[0]<lod_range[1] {
                     let [low,high]=lod_range;
                     let waterline=f32::from(u8::from(key.clips_at_waterline()));
@@ -459,18 +526,23 @@ impl ModelLayer {
                         style:[low,high,waterline,city],model_scale:model.model_scale});
                     resident.last_drawn = now;
                 }
-            } else if self.visible.contains(&key) && !self.failed.contains(&key) && self.pending.insert(key) {
-                let events = self.events.clone();
-                let revision=if key.is_city() {self.city_revision}else{0};
-                let bytes=self.city_override.clone().filter(|_|key.is_city());
-                let created = std::thread::Builder::new().name("WWO model loading".into()).spawn(move || {
-                    let _ = events.send_event(crate::HostEvent::Model(revision,key,landmarks::decode(key,bytes.as_deref())));
-                });
-                if let Err(error) = created {
-                    self.pending.remove(&key);
-                    self.failed.insert(key);
-                    let _ = self.events.send_event(crate::HostEvent::Model(revision,key,Err(error)));
-                }
+            }
+        }
+        if !self.city_batch_uniforms.is_empty() {
+            queue.write_buffer(&self.city_uniforms,0,bytemuck::cast_slice(&self.city_batch_uniforms));
+        }
+        for &key in &self.visible {
+            if self.residents.contains_key(&key) || self.failed.contains(&key) || !self.pending.insert(key) {continue;}
+            let events = self.events.clone();
+            let revision=if key.is_city() {self.city_revision}else{0};
+            let bytes=self.city_override.clone().filter(|_|key.is_city());
+            let created = std::thread::Builder::new().name("WWO model loading".into()).spawn(move || {
+                let _ = events.send_event(crate::HostEvent::Model(revision,key,landmarks::decode(key,bytes.as_deref())));
+            });
+            if let Err(error) = created {
+                self.pending.remove(&key);
+                self.failed.insert(key);
+                let _ = self.events.send_event(crate::HostEvent::Model(revision,key,Err(error)));
             }
         }
         for resident in self.residents.values_mut().filter(|model|!model.transforms.is_empty()) {
@@ -482,17 +554,12 @@ impl ModelLayer {
         }
     }
 
-    fn loaded_city_details(&self)->u8 {
-        (1..=4).filter(|&module|self.residents.contains_key(&ModelKey::city_detail(module)))
-            .fold(0,|mask,module|mask|(1u8<<module))
-    }
-
-    fn lod_range(&self,model:&VisibleModel,loaded_detail:u8)->[f32;2] {
-        if model.city_detail_mask & !loaded_detail != 0 {
-            return match &model.city_page {
-                Some(_)=>[0.,model.lod_range[1]],
-                None=>[0.,0.],
-            };
+    fn lod_range(&self,model:&VisibleModel)->[f32;2] {
+        if let Some(city)=&model.city_page {
+            if city.batches.iter().enumerate().any(|(i,batch)|batch.is_some()
+                && !self.residents.contains_key(&ModelKey::city_detail(i+1))) {
+                return [0.,model.lod_range[1]];
+            }
         }
         if let Some((key,opacity))=model.alternate {
             if !self.residents.contains_key(&key) {return [0.,opacity];}
@@ -523,7 +590,7 @@ impl ModelLayer {
             vertices: upload(bytemuck::cast_slice(&model.vertices), wgpu::BufferUsages::VERTEX),
             indices: upload(bytemuck::cast_slice(&model.indices), wgpu::BufferUsages::INDEX),
             count: model.indices.len() as u32, instance_buffer: Self::instance_buffer(device, std::mem::size_of::<ModelInstance>() as u64),
-            transforms: Vec::new(), last_drawn: Instant::now(),
+            transforms: Vec::new(), city_instances:None,last_drawn: Instant::now(),
         });
     }
 
@@ -547,6 +614,19 @@ impl ModelLayer {
             pass.set_vertex_buffer(1, model.instance_buffer.slice(..));
             pass.set_index_buffer(model.indices.slice(..), wgpu::IndexFormat::Uint32);
             pass.draw_indexed(0..model.count, 0, 0..model.transforms.len() as u32);
+        }
+        if !self.city_batches.is_empty() {
+            pass.set_pipeline(&self.city_pipeline);
+            for (slot,batch) in self.city_batches.iter().enumerate() {
+                let kit=&self.residents[&ModelKey::city_detail(batch.module+1)];
+                let page=&self.residents[&batch.page];
+                let instances=page.city_instances.as_ref().unwrap()[batch.module].as_ref().unwrap();
+                pass.set_bind_group(1,&self.city_bindings,&[(slot*std::mem::size_of::<CityBatchUniform>()) as u32]);
+                pass.set_vertex_buffer(0,kit.vertices.slice(..));
+                pass.set_vertex_buffer(1,instances.slice(..));
+                pass.set_index_buffer(kit.indices.slice(..),wgpu::IndexFormat::Uint32);
+                pass.draw_indexed(0..kit.count,0,batch.instances.clone());
+            }
         }
     }
 }
@@ -1137,15 +1217,23 @@ impl Renderer {
     }
 
     pub fn model_instances(&self) -> Vec<(&'static str, usize)> {
-        let mut models: Vec<_> = self.models.residents.iter()
-            .filter(|(_,model)|!model.transforms.is_empty())
-            .map(|(key, model)| (key.model(), model.transforms.len())).collect();
+        let mut batched=[0;MODULES];
+        for batch in &self.models.city_batches {
+            batched[batch.module]+=batch.instances.len();
+        }
+        let mut counts:HashMap<_,_>=self.models.residents.iter()
+            .map(|(key,model)|(*key,model.transforms.len())).collect();
+        for (i,count) in batched.into_iter().enumerate() {
+            *counts.entry(ModelKey::city_detail(i+1)).or_default()+=count;
+        }
+        let mut models:Vec<_>=counts.into_iter().filter(|&(_,count)|count>0)
+            .map(|(key,count)|(key.model(),count)).collect();
         models.sort_unstable();
         models
     }
 
     pub fn has_model(&self, model:&VisibleModel) -> bool {
-        let [low,high]=self.models.lod_range(model,self.models.loaded_city_details());
+        let [low,high]=self.models.lod_range(model);
         low<high && self.models.residents.contains_key(&model.key)
     }
     pub fn update_terrain(&mut self,camera:&Camera,size:[u32;2],now:Instant)->io::Result<()> {
