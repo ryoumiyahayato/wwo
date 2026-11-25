@@ -286,7 +286,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             }
         };
         skin.text(&mut hud_type,label,0,[x+15.,y+9.],230.,GOLD);
-        ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+width-40.,y+9.,27.,25.],"×",Some(Action::Close),false);
+        crate::formal_ui::close_button(&mut panels, &mut hits, [x + width - 15., y + 8.], Action::Close);
         if can_read_object(world, ui.formal.written_world, object) {
         skin.text(&mut hud_type,object_name(world,skin,object),1,[x+15.,y+35.],270.,LIGHT);
         let context=if ui.mode==Mode::Political { &extra } else { &desc };
@@ -308,11 +308,11 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     if ui.details {
         if let Some(object)=ui.selected {
             let readable = can_read_object(world, ui.formal.written_world, object);
-            let x=w/2.-252.;let y=105.;
-            panel(&mut panels,x,y,504.,detail_height);
+            let width=504.;let x=(w-width)*0.5;let y=105.;
+            panel(&mut panels,x,y,width,detail_height);
             if readable { skin.text(&mut hud_type,object_name(world,skin,object),1,[x+22.,y+16.],420.,LIGHT); }
             else { ui.formal.ink_block(&mut panels,[x+22.,y+23.,174.,11.]); }
-            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+454.,y+15.,29.,27.],"×",Some(Action::Details),false);
+            crate::formal_ui::close_button(&mut panels, &mut hits, [x + width - 15., y + 8.], Action::Details);
             let mut lines=match object {
                 Object::Polity(_)=>Vec::new(),
                 Object::Place(i)=>{
