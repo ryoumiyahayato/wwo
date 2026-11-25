@@ -10,6 +10,7 @@ use std::{
 };
 use winit::event_loop::EventLoopProxy;
 
+const COVERAGE_MPP: f64 = 24.;
 const MAX_MPP: f64 = 155.;
 pub(crate) const MAX_RESIDENT: usize = 192;
 pub(crate) const MODULES: usize=4;
@@ -81,6 +82,7 @@ pub(crate) struct CityPage {
     blocks: Vec<Block>,
     mesh: Arc<CityGeometry>,
     mesh_bounds: ModelBounds,
+    paris: bool,
 }
 
 pub(crate) struct CityGeometry {
@@ -97,11 +99,13 @@ pub(crate) struct CityBatch {
 pub(crate) struct CityDraw {
     pub(crate) geometry: Arc<CityGeometry>,
     pub(crate) preload: bool,
+    pub(crate) paris: bool,
     pub(crate) batches: [Option<CityBatch>;MODULES],
 }
 
 impl CityPage {
     fn pack(rows:Vec<Building>,anchor:[f64;2])->Self {
+        let paris=rows.first().is_some_and(|row|row.module>2);
         let longitude_metres=METRES_PER_DEGREE*anchor[1].to_radians().cos().max(0.01);
         let offset=|point:[f64;2]| [(point[0]-anchor[0])*longitude_metres,(anchor[1]-point[1])*METRES_PER_DEGREE];
         let mut grouped=BTreeMap::<[i32;2],Vec<_>>::new();
@@ -134,7 +138,7 @@ impl CityPage {
                 mesh_bounds.1[axis]=mesh_bounds.1[axis].max(coordinate);
             }
         }
-        Self{blocks,mesh:Arc::new(CityGeometry{mesh,instances}),mesh_bounds}
+        Self{blocks,mesh:Arc::new(CityGeometry{mesh,instances}),mesh_bounds,paris}
     }
 
     fn visible_batches(&self,camera:&Camera,size:[u32;2],landmarks:&Landmarks)->[Option<CityBatch>;MODULES] {
@@ -273,7 +277,8 @@ impl Catalogue {
     }
 
     pub(crate) fn visible(&mut self, date: &str, camera: &Camera, size: [u32;2],
-        landmarks: &Landmarks, events: &EventLoopProxy<HostEvent>) -> Vec<VisibleModel>
+        landmarks: &Landmarks, events: &EventLoopProxy<HostEvent>,
+        footprint_coverage: impl Fn([f64;2]) -> f32) -> Vec<VisibleModel>
     {
         if camera.mpp > MAX_MPP || !("1891-01-01".."1915-01-01").contains(&date) {
             return Vec::new();
@@ -287,12 +292,16 @@ impl Catalogue {
             self.cache.retain(|index,_|wanted.contains(index));
         }
         let mut models = Vec::new();
-        let opacity=(1.-camera::smooth(115.,155.,camera.mpp)) as f32;
-        // Keep the footprint shells until roof and wall geometry spans enough pixels to resolve.
-        let detail=(1.-camera::smooth(1.7,3.1,camera.mpp)) as f32*opacity;
+        let middle=camera::smooth(8.,COVERAGE_MPP,camera.mpp) as f32;
+        let fallback=(1.-camera::smooth(115.,MAX_MPP,camera.mpp)) as f32;
+        let details=(1.-camera::smooth(1.7,3.1,camera.mpp)) as f32;
         for (index,_) in visible {
             let tile=&self.tiles[index];
             let anchor=tile.anchor();
+            // Keep the mesh while the matching footprint or block page streams in.
+            let opacity=(1.-middle*footprint_coverage(anchor))*fallback;
+            if opacity<=0.03 {continue;}
+            let detail=details*opacity;
             if let Some(page) = self.cache.get(&index) {
                 let key=ModelKey::city_page(self.revision,index);
                 let pose=ModelPose{key,anchor,heading:0.,datum:0.,dimensions:[1.;3],bounds:page.mesh_bounds};
@@ -300,7 +309,7 @@ impl Catalogue {
                 let batches=if detail>0. {page.visible_batches(camera,size,landmarks)} else {Default::default()};
                 let has_details=batches.iter().any(Option::is_some);
                 block_model.lod_range=[if has_details {detail} else {0.},opacity];
-                block_model.city_page=Some(CityDraw{geometry:Arc::clone(&page.mesh),preload:camera.mpp<6.,batches});
+                block_model.city_page=Some(CityDraw{geometry:Arc::clone(&page.mesh),preload:camera.mpp<6.,paris:page.paris,batches});
                 models.push(block_model);
             } else if self.pending.len()<MAX_PENDING && !self.failed.contains(&index) && self.pending.insert(index) {
                 let path=self.root.join(&tile.file);

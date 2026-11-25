@@ -6,7 +6,8 @@ use crate::{
 use std::{collections::{HashMap, HashSet}, f64::consts::PI};
 use wgpu::util::DeviceExt;
 
-const KINDS: u64 = 5;
+const KINDS: u64 = 4;
+const MODEL_LIMIT_MPP: f64 = 28.;
 const CHUNK_SIDE: i32 = 16;
 const LATITUDE_CELLS: i32 = 98_304;
 const CAPACITY: u64 = 65_536;
@@ -18,14 +19,14 @@ const BUILDS_PER_FRAME: usize = 32;
 const KEEP_SITES: u32 = 1 << 31;
 const INSTANCE_FADE_SECONDS: f32 = 0.18;
 // End of the individual crown blend in landscape_vertex.
-const STAND_ONLY_MPP: f64 = 21.;
+const STAND_ONLY_MPP: f64 = 18.;
 
 type Chunk = [u32; 4];
 
 #[derive(Default)]
 pub struct LandscapeCounts {
     pub draw_calls: u32,
-    pub by_mesh: [u32; 5],
+    pub by_mesh: [u32; KINDS as usize],
     pub vertex_invocations: Option<u64>,
     pub gpu_ms: Option<f64>,
 }
@@ -87,7 +88,7 @@ impl Landscape {
         shader: &wgpu::ShaderModule,
     ) -> Self {
         use wgpu::BufferUsages as Usage;
-        let meshes = landscape_models::meshes();
+        let (meshes, stand_indices) = landscape_models::meshes();
         let query = |feature, ty, count| device.features().contains(feature).then(|| {
             device.create_query_set(&wgpu::QuerySetDescriptor { label: Some("Landscape observation"), ty, count })
         });
@@ -103,9 +104,8 @@ impl Landscape {
             base_vertex += mesh.vertices.len() as u32;
             command
         });
-        let commands = [mesh_commands[0], mesh_commands[1], mesh_commands[2], mesh_commands[0], mesh_commands[3]];
+        let commands = [mesh_commands[0], mesh_commands[1], mesh_commands[2], mesh_commands[0]];
         let crown_indices = [commands[0][0], commands[1][0], commands[3][0]];
-        let stand_indices = commands[4][0];
         let vertices = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Landscape shared meshes"),
             contents: bytemuck::cast_slice(&meshes.iter().flat_map(|mesh|mesh.vertices.iter().copied()).collect::<Vec<_>>()),
@@ -274,7 +274,7 @@ impl Landscape {
             .max(1.);
         let footprint = camera.mpp * scale;
         self.awaiting_pages.clear();
-        if !enabled || footprint >= 1460. {
+        if !enabled || footprint >= MODEL_LIMIT_MPP {
             self.active.clear();
             self.requested.clear();
             self.previous = None;
@@ -305,18 +305,8 @@ impl Landscape {
         self.page_revision = revision;
         if view_changed {
             self.requested.clear();
-            // Keep adjacent densities until their shader opacity reaches zero.
-            if view.level >= 7 && footprint < 72. {
-                visible_chunks(camera, size, 1, &mut self.requested);
-            }
-            if footprint < 300. {
-                visible_chunks(camera, size, 4, &mut self.requested);
-            }
-            if footprint > 143. && footprint < 650. {
-                visible_chunks(camera, size, 16, &mut self.requested);
-            }
-            if footprint > 500. {
-                visible_chunks(camera, size, 32, &mut self.requested);
+            if view.level >= 7 {
+                visible_chunks(camera, size, &mut self.requested);
             }
             self.requested.truncate(MAX_CHUNKS);
         }
@@ -538,11 +528,11 @@ impl Landscape {
     }
 }
 
-fn visible_chunks(camera: &Camera, size: [u32; 2], spacing: i32, output: &mut Vec<Chunk>) {
-    // Use the same wrapped WGS84 lattice at all three display densities.
-    let span=CHUNK_SIDE*spacing;
+fn visible_chunks(camera: &Camera, size: [u32; 2], output: &mut Vec<Chunk>) {
+    // The wrapped WGS84 lattice is fixed in space at every model scale.
+    let span=CHUNK_SIDE;
     let [lon, lat] = camera.coordinates().map(f64::to_radians);
-    let padding = f64::from(spacing)*2_500. / camera.mpp + 46.;
+    let padding = 2_500. / camera.mpp + 46.;
     let radius = camera.extent(size, padding);
     let stride = PI * f64::from(span) / f64::from(LATITUDE_CELLS);
     let rows = LATITUDE_CELLS / span;
@@ -577,7 +567,7 @@ fn visible_chunks(camera: &Camera, size: [u32; 2], spacing: i32, output: &mut Ve
                 && y <= f64::from(size[1]) + padding
             {
                 let distance = (x-midpoint[0]).powi(2)+(y-midpoint[1]).powi(2);
-                chunks.push((distance,[(column*span) as u32,(row*span) as u32,(columns*span) as u32,spacing as u32]));
+                chunks.push((distance,[(column*span) as u32,(row*span) as u32,(columns*span) as u32,1]));
             }
         }
     }

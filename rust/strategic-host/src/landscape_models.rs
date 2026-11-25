@@ -75,7 +75,7 @@ fn crown(
     }
 }
 
-pub fn meshes() -> [Mesh; 4] {
+pub fn meshes() -> ([Mesh; 3], u32) {
     let lobed = [
         (1., 0.),
         (0.64, 0.34),
@@ -148,5 +148,5 @@ pub fn meshes() -> [Mesh; 4] {
     }
     let broadleaf = stand(&[lobed[0],lobed[2],lobed[4],lobed[6],lobed[8]], &group);
     let conifer = stand(&[needles[0],needles[1],needles[2],needles[4],needles[6],needles[8]], &group);
-    [broadleaf, conifer, rock, group]
+    ([broadleaf, conifer, rock], group.indices.len() as u32)
 }

@@ -134,7 +134,7 @@ fn screen_vertex_layout() -> wgpu::VertexBufferLayout<'static> {
 fn map_shader(device:&wgpu::Device,globe:&str,scenery:&str) -> wgpu::ShaderModule {
     device.create_shader_module(wgpu::ShaderModuleDescriptor{
         label:Some("WWO globe and landscape"),
-        source:wgpu::ShaderSource::Wgsl(format!("{globe}\n{scenery}").into()),
+        source:wgpu::ShaderSource::Wgsl(format!("{globe}\n{scenery}\n{}",include_str!("city_material.wgsl")).into()),
     })
 }
 
@@ -354,7 +354,7 @@ impl GroundSurface {
 struct ModelInstance {
     clip_from_model:[[f32;4];4],
     style:[f32;4],
-    model_scale:[f32;3],
+    scale_and_mpp:[f32;4],
 }
 
 #[repr(C)]
@@ -364,7 +364,8 @@ struct CityBatchUniform {
     fit: [[f32;4];4],
     inverse_size_and_opacity: [f32;4],
     // Align each dynamic uniform to the WebGPU 256-byte offset alignment.
-    padding: [u32;28],
+    material: [f32;4],
+    padding: [u32;24],
 }
 
 struct CityBatchDraw {
@@ -412,7 +413,11 @@ impl ModelLayer {
             sampler_entry(1),
         ]);
         let materials=bind(device,&material_layout,&[tex_resource(0,&surface.materials),sampler_resource(1,&surface.repeat)]);
-        let shader = device.create_shader_module(wgpu::include_wgsl!("landmark.wgsl"));
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label:Some("WWO landmarks and city materials"),
+            source:wgpu::ShaderSource::Wgsl(format!("{}\n{}",include_str!("landmark.wgsl"),
+                include_str!("city_material.wgsl")).into()),
+        });
         let city_layout=layout(device,&[entry(0,wgpu::ShaderStages::VERTEX,wgpu::BindingType::Buffer {
             ty:wgpu::BufferBindingType::Uniform, has_dynamic_offset:true, min_binding_size:None,
         })]);
@@ -458,14 +463,14 @@ impl ModelLayer {
             &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x3],
             &[&material_layout,&city_layout]);
         let pipeline=pipeline("model_vertex",std::mem::size_of::<ModelInstance>() as u64,
-            &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x4,8=>Float32x3],
+            &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x4,8=>Float32x4],
             &[&material_layout]);
         Self { pipeline, city_pipeline, city_uniforms, city_bindings, city_batches:Vec::new(),city_batch_uniforms:Vec::new(),
             materials, depth: None, residents: HashMap::new(), visible: HashSet::new(),
             pending: HashSet::new(), failed: HashSet::new(), events, city_override:None,city_revision:0 }
     }
 
-    fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel]) {
+    fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel], mpp:f32) {
         let now = Instant::now();
         self.city_batches.clear();
         self.city_batch_uniforms.clear();
@@ -500,6 +505,8 @@ impl ModelLayer {
             }
             let lod_range=self.lod_range(model);
             if let Some(resident) = self.residents.get_mut(&key) {
+                let city_material = model.city_page.as_ref().map_or(0., |city|
+                    if city.paris {2.} else {1.});
                 if let Some(city)=model.city_page.as_ref().filter(|city|city.preload) {
                     resident.city_instances.get_or_insert_with(||city.geometry.instances.each_ref().map(|rows| {
                         (!rows.is_empty()).then(||device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -511,7 +518,8 @@ impl ModelLayer {
                             let [x,y,z]=batch.inverse_size;
                             self.city_batch_uniforms.push(CityBatchUniform {
                                 clip_from_page:model.clip_from_model,fit:batch.fit,
-                                inverse_size_and_opacity:[x,y,z,lod_range[0]],padding:[0;28],
+                                inverse_size_and_opacity:[x,y,z,lod_range[0]],
+                                material:[city_material,mpp,0.,0.],padding:[0;24],
                             });
                             self.city_batches.push(CityBatchDraw {page:key,module,instances:batch.instances.clone()});
                         }
@@ -521,9 +529,9 @@ impl ModelLayer {
                 if lod_range[0]<lod_range[1] {
                     let [low,high]=lod_range;
                     let waterline=f32::from(u8::from(key.clips_at_waterline()));
-                    let city=f32::from(u8::from(key.is_city()));
+                    let [x,y,z]=model.model_scale;
                     resident.transforms.push(ModelInstance{clip_from_model:model.clip_from_model,
-                        style:[low,high,waterline,city],model_scale:model.model_scale});
+                        style:[low,high,waterline,city_material],scale_and_mpp:[x,y,z,mpp]});
                     resident.last_drawn = now;
                 }
             }
@@ -1440,7 +1448,7 @@ impl Renderer {
         let [w,h]=[texture.width(),texture.height()];
         let format=texture.format();
         if battle.is_none() {
-            self.models.prepare(&self.device,&self.queue,[w,h],models);
+            self.models.prepare(&self.device,&self.queue,[w,h],models,camera.mpp as f32);
             let mut frame_view=*view;
             frame_view.projection_axes[0][3]=seconds;
             if let Some(water)=&self.water_pages {
