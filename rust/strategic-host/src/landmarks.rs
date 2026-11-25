@@ -23,6 +23,7 @@ pub(crate) const SHARDS: &[RegionalSource] = &[
     RegionalSource { center: [13.388, 52.5219], radius_km: 20., bytes: include_bytes!("../../../data/local/berlin_transport_1900.json") },
     RegionalSource { center: [31.1316, 29.9761], radius_km: 20., bytes: include_bytes!("../../../data/local/giza_pyramids_1900.json") },
 ];
+const BEIJING_LANDMARKS: &[u8] = include_bytes!("../../../data/local/beijing_forbidden_city_1900.json");
 pub(crate) const MISSISSIPPI: RegionalSource = RegionalSource {
     center: [-90., 34.4], radius_km: 550., bytes: include_bytes!("../../../data/local/mississippi_steamboat_1900.json")
 };
@@ -32,7 +33,7 @@ macro_rules! model {
         Asset {
             name: $name, symbol: $symbol,
             path: concat!("res://assets/landmarks/", $file),
-            bytes: include_bytes!(concat!("../../../assets/landmarks/", $file)),
+            mesh: LandmarkMesh::Glb(include_bytes!(concat!("../../../assets/landmarks/", $file))),
         }
     };
 }
@@ -45,13 +46,24 @@ static ASSETS: &[Asset] = &[
     model!("Westminster Bridge", "westminster_bridge_r41.glb", "bridge"),
     model!("Friedrichstraße station", "friedrichstrasse_1882_r41.glb", "station"),
     model!("Giza pyramids", "giza_pyramids_1900.glb", "pyramids"),
+    Asset {
+        name: "Forbidden City",
+        symbol: "government",
+        path: "procedural:forbidden_city_1900",
+        mesh: LandmarkMesh::Original(crate::capital_landmarks::forbidden_city),
+    },
 ];
+
+enum LandmarkMesh {
+    Glb(&'static [u8]),
+    Original(fn() -> ModelMesh),
+}
 
 struct Asset {
     name: &'static str,
     symbol: &'static str,
     path: &'static str,
-    bytes: &'static [u8],
+    mesh: LandmarkMesh,
 }
 
 #[derive(Deserialize)]
@@ -234,8 +246,8 @@ impl Landmarks {
     pub fn install(world: &mut World, ground_root: Option<&Path>) -> io::Result<Self> {
         let mut models = Vec::new();
         let mut cities = BTreeMap::new();
-        for source in SHARDS {
-            let shard: Shard = serde_json::from_slice(source.bytes)?;
+        for bytes in SHARDS.iter().map(|source| source.bytes).chain([BEIJING_LANDMARKS]) {
+            let shard: Shard = serde_json::from_slice(bytes)?;
             for fact in shard.evidence_catalog.facts {
                 if fact.value.get("display_kind").and_then(serde_json::Value::as_str) == Some("transport_node")
                     && matches!(fact.value.get("transport_symbol").and_then(serde_json::Value::as_str), Some("station"|"bridge"))
@@ -533,7 +545,10 @@ fn city_module_bounds(bytes:&[u8]) -> io::Result<Vec<[ModelBounds;2]>> {
 
 pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMesh> {
     let bytes = match key.asset {
-        ModelAsset::Landmark(asset) => ASSETS[asset].bytes,
+        ModelAsset::Landmark(asset) => match ASSETS[asset].mesh {
+            LandmarkMesh::Glb(bytes) => bytes,
+            LandmarkMesh::Original(build) => return Ok(build()),
+        },
         ModelAsset::City(_) => city_override.unwrap_or(R40_MODELS),
         ModelAsset::CityPage(..) => return Err(io::Error::other("City page mesh was not loaded")),
         ModelAsset::Park(site) => return Ok(crate::city_parks::mesh(site)),

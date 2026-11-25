@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "schema_id": "local_spatial_content_r1",
+    "shard_id": "beijing_forbidden_city_1900",
+    "anchor_lon_lat": [116.3909, 39.9162],
+    "radius_km": 2,
+    "status": "LANDMARK_REFERENCE_ONLY",
+    "landmark_visuals": [
+      {
+        "id": "landmark:forbidden_city_1900",
+        "display_name": "紫禁城",
+        "parent_country_id": "qing_empire",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [116.3909, 39.9162]
+        },
+        "valid_from": "1900-01-01",
+        "valid_to": "1912-02-13",
+        "model_path": "procedural:forbidden_city_1900",
+        "model_height_m": 65.0,
+        "model_base_width_m": 857.0,
+        "model_footprint_m": [857.0, 1980.0],
+        "model_heading_degrees": 2.2,
+        "model_max_mpp": 36.0,
+        "symbol_max_mpp": 230.0,
+        "rank": 0,
+        "reference_year": 1900,
+        "coordinate_role": "MODERN_LOCATOR_OF_FIXED_HISTORICAL_MONUMENT",
+        "coordinate_notice_zh": "以现存历史建筑定位，朝向为近似值。",
+        "historical_reference_zh": "保留 753 米×961 米城垣、52 米护城河、四门与中轴礼仪空间。景山按御苑、山体、五亭及寿皇殿院群关系布置。附属院落、屋顶、桥面、景山地形、园林植被及地坪为美术重建。",
+        "source_references": [
+          "https://www.dpm.org.cn/explore/building/236441.html",
+          "https://www.dpm.org.cn/explore/building/236454.html",
+          "https://www.dpm.org.cn/explore/building/236465.html",
+          "https://www.dpm.org.cn/explore/building/236472.html",
+          "https://wwj.beijing.gov.cn/bjww/resource/cms/article/bjww_362686/595826/2021012015112465464.pdf",
+          "https://www.beijing.gov.cn/zhengce/zhengcefagui/202309/W020230921615858870431.pdf",
+          "https://gygl.beijing.gov.cn/mlgy/mlgy_lsmy/201911/t20191129_732675.html",
+          "https://whc.unesco.org/en/list/439/"
+        ]
+      }
+    ],
+    "license_notice": "Original WWO game geometry based on historical dimensions and placement references. Source images are absent from runtime assets."
+  },
+  "evidence_catalog": {
+    "facts": []
+  }
+}
