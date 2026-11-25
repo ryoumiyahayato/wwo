@@ -204,7 +204,8 @@ impl Landmarks {
                 let city: Settlement = serde_json::from_value(fact.value)?;
                 let index = install_place(world, Place {
                     id: city.id, name: city.display_name.clone(), name_zh: city.display_name,
-                    symbol: "city".into(), reference: true, display_symbol: false, selectable: true,
+                    symbol: "city".into(), facility:None, military_facility_active:false,
+                    reference: true, display_symbol: false, selectable: true,
                     coordinates: city.geometry.coordinates, rank: 1, max_mpp: city.miniature_layout.max_mpp,
                     from_date: city.valid_from.clone(), to_date: city.valid_to.clone(),
                 });
@@ -217,6 +218,7 @@ impl Landmarks {
                 let place = Place {
                     id: landmark.id.clone(), name: model.name.into(),
                     name_zh: landmark.display_name.clone(), symbol: model.symbol.into(),
+                    facility:None, military_facility_active:false,
                     reference: true, display_symbol: true, selectable: true,
                     coordinates: landmark.geometry.coordinates, rank: landmark.rank,
                     max_mpp: landmark.symbol_max_mpp, from_date: landmark.valid_from.clone(),
@@ -229,10 +231,7 @@ impl Landmarks {
         if models.len() != ASSETS.len() {
             return Err(io::Error::other("R68 landmark catalogue and models differ"));
         }
-        let glb = gltf::Gltf::from_slice(R40_MODELS).map_err(io::Error::other)?;
-        let city_bounds: Vec<_> = (0..R40_MODULES.len()).map(|module| {
-            Ok([city_bounds(&glb, module, Lod::Near)?, city_bounds(&glb, module, Lod::Far)?])
-        }).collect::<io::Result<_>>()?;
+        let city_bounds = city_module_bounds(R40_MODELS)?;
         for city in cities.values_mut() {
             let [lon,lat]=city.center;
             let metres=camera::EARTH*std::f64::consts::PI/180.;
@@ -255,7 +254,8 @@ impl Landmarks {
         self.cities.contains_key(&place) || self.landmarks.iter().any(|(i, _, _)| *i == place)
     }
 
-    pub fn visible(&self, date: &str, camera: &Camera, size: [u32; 2]) -> Vec<VisibleModel> {
+    pub fn visible(&self, date: &str, camera: &Camera, size: [u32; 2],
+        covered: impl Fn([f64;2])->bool) -> Vec<VisibleModel> {
         let pitch = camera.pitch();
         let mut visible: Vec<_> = self.landmarks.iter().filter_map(|(place, asset, row)| {
             row.project(*place, *asset, date, camera, pitch, size)
@@ -267,6 +267,7 @@ impl Landmarks {
             let crossover=(opacity*(1.-far)) as f32;
             let opacity=opacity as f32;
             for model in &city.models {
+                if covered(model.anchor) {continue;}
                 let [near,far]=self.city_bounds[model.module];
                 let bounds=(std::array::from_fn(|i|near.0[i].min(far.0[i])),
                             std::array::from_fn(|i|near.1[i].max(far.1[i])));
@@ -286,6 +287,28 @@ impl Landmarks {
         visible
     }
 
+    pub(crate) fn footprint_model(&self, module: usize, anchor: [f64;2], heading: f64,
+        dimensions: [f64;3], camera: &Camera, size: [u32;2]) -> Option<VisibleModel> {
+        let low = camera.mpp > 7.;
+        let bounds = self.city_bounds[module][usize::from(low)];
+        let scale = std::array::from_fn(|i| dimensions[i]/(bounds.1[i]-bounds.0[i]).max(0.001));
+        // Translate the authored mesh's plan center to the measured footprint center.
+        let [sin,cos] = {let (sin,cos)=heading.to_radians().sin_cos();[sin,cos]};
+        let x = (bounds.0[0]+bounds.1[0])*0.5*scale[0];
+        let z = (bounds.0[2]+bounds.1[2])*0.5*scale[2];
+        let metres = camera::EARTH*std::f64::consts::PI/180.;
+        let origin = [anchor[0]-(x*cos+z*sin)/(metres*anchor[1].to_radians().cos().max(0.01)),
+            anchor[1]-(-z*cos+x*sin)/metres];
+        let pose = ModelPose {
+            key: ModelKey { asset:ModelAsset::City(module),lod:if low {Lod::Far}else{Lod::Near} },
+            anchor:origin,heading,datum:bounds.0[1]*scale[1],
+            dimensions:scale,bounds,
+        };
+        let mut model=pose.project(None,camera,camera.pitch(),size)?;
+        model.lod_range[1]=(1.-camera::smooth(115.,155.,camera.mpp)) as f32;
+        Some(model)
+    }
+
     pub fn focus(&self, place: usize) -> Option<([f64; 2], f64)> {
         if let Some(city) = self.cities.get(&place) {
             return Some((city.center,city.search_mpp));
@@ -300,7 +323,9 @@ impl Landmarks {
 
 fn install_place(world: &mut World, place: Place) -> usize {
     if let Some(index) = world.places.iter().position(|row| row.id == place.id) {
-        world.places[index] = place;
+        let saved=&world.places[index];
+        world.places[index] = Place { facility:saved.facility,
+            military_facility_active:saved.military_facility_active,..place };
         index
     } else {
         world.places.push(place);
@@ -434,10 +459,30 @@ pub struct ModelMesh {
     pub indices: Vec<u32>,
 }
 
-pub fn decode(key: ModelKey) -> io::Result<ModelMesh> {
+impl Landmarks {
+    pub(crate) fn reload_city_models(&mut self, bytes:&[u8]) -> io::Result<()> {
+        let bounds=city_module_bounds(bytes)?;
+        for module in 0..R40_MODULES.len() {
+            for lod in [Lod::Far,Lod::Near] {
+                decode(ModelKey{asset:ModelAsset::City(module),lod},Some(bytes))?;
+            }
+        }
+        self.city_bounds=bounds;
+        Ok(())
+    }
+}
+
+fn city_module_bounds(bytes:&[u8]) -> io::Result<Vec<[ModelBounds;2]>> {
+    let glb=gltf::Gltf::from_slice(bytes).map_err(io::Error::other)?;
+    (0..R40_MODULES.len()).map(|module| {
+        Ok([city_bounds(&glb,module,Lod::Near)?,city_bounds(&glb,module,Lod::Far)?])
+    }).collect()
+}
+
+pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMesh> {
     let bytes = match key.asset {
         ModelAsset::Landmark(asset) => ASSETS[asset].bytes,
-        ModelAsset::City(_) => R40_MODELS,
+        ModelAsset::City(_) => city_override.unwrap_or(R40_MODELS),
         ModelAsset::Transport(model, lod) => {
             let mesh = transport_models::decode(model, lod)?;
             return Ok(ModelMesh {

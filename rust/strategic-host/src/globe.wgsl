@@ -892,6 +892,12 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let pixel_metres=(tile.extent.zw-tile.extent.xy)*du*111195.*vec2f(max(.08,cos(radians(ll.y))),1.);
     let mip=max(0.,log2(mpp/max(1.,min(pixel_metres.x,pixel_metres.y))));
     let buildings=textureSampleLevel(city_data,linear,uv,mip).rg;
+    if tile.options.z>3.5 {
+        let major=pow(buildings.r,.74)*.68;
+        let local=buildings.g*(1.-smoothstep(20.,76.,mpp))*.48;
+        let road=max(major,local)*smoothstep(0.,160.,edge_distance);
+        return vec4f(mix(vec3f(.70,.60,.50),vec3f(.81,.72,.57),major),road);
+    }
     let edge=textureSampleLevel(city_data,linear,uv-du*.82,mip).r;
     let shadow=max(0.,edge-buildings.r)*detail*.49;
     // Aggregate the surveyed footprints over the screen footprint. At
@@ -907,11 +913,11 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     if tile.options.z>2.5 {
         // This source maps generalized built-up areas and roads at 1:50,000.
         let land=1.-terrain.a;
-        let browns=mix(vec3f(.54,.43,.34),vec3f(.62,.53,.43),buildings.r);
-        let ground=land*blocks*mix(.46,.86,smoothstep(24.,125.,mpp));
+        let browns=mix(vec3f(.57,.42,.34),vec3f(.69,.52,.41),buildings.r);
+        let ground=land*smoothstep(.06,.50,blocks)*mix(.77,.99,smoothstep(24.,125.,mpp));
         let survey_edge=smoothstep(480.,7200.,edge_distance);
-        let street=pow(buildings.g,.68)*(1.-smoothstep(90.,310.,mpp))*.92*survey_edge;
-        let top=mix(vec3f(.83,.75,.61),vec3f(.72,.67,.57),terrain.a);
+        let street=pow(buildings.g,1.5)*(1.-smoothstep(19.,67.,mpp))*.24*survey_edge;
+        let top=mix(vec3f(.65,.59,.47),vec3f(.67,.62,.49),terrain.a);
         let alpha=ground*(1.-street)+street;
         let color=browns*ground*(1.-street)+top*street;
         let support=smoothstep(0.,420.,edge_distance);
@@ -939,11 +945,11 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let land=1.-terrain.a;
     let urban=clamp(cover.x/max(.01,ready),0.,1.);
     let woods=clamp(cover.y/max(.01,ready),0.,1.);
-    let density=smoothstep(.018,.32,blocks);
+    let density=smoothstep(.026,.24,blocks);
     let built=density*select(mix(.75,1.,urban),1.,historical);
     // At the survey limit, attenuate the mapped features over a few source blocks.
     let support=smoothstep(0.,mix(320.,670.,built),edge_distance);
-    let facade=mix(vec3f(.68,.56,.48),vec3f(.80,.71,.62),max(0.,buildings.r-edge));
+    let facade=mix(vec3f(.52,.40,.35),vec3f(.77,.65,.55),max(0.,buildings.r-edge));
     let footprint_weight=select(detail,1.-smoothstep(24.,134.,mpp),historical);
     let wall=buildings.r*footprint_weight*mix(.70,.96,built)*land;
     // Wide mapped strokes survive the screen-space filter at the fringe.
@@ -951,13 +957,15 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     let local_road=mix(terrain.rgb,vec3f(.76,.70,.59),mix(.39,.75,stroke));
     let road_color=mix(local_road,vec3f(.81,.75,.65),built);
     let fringe=mix(mix(.54,.79,stroke),mix(.27,.51,stroke),woods);
-    let road_weight=select(detail,1.-smoothstep(58.,300.,mpp),historical);
+    let neighbourhood=1.-smoothstep(26.,77.,mpp);
+    let main_street=1.-smoothstep(65.,315.,mpp);
+    let road_weight=select(detail,mix(neighbourhood,main_street,stroke),historical);
     let road=buildings.g*road_weight*mix(fringe,.88,built);
     let bridge=mix(road,buildings.g*road_weight*.88,terrain.a);
     let shading=shadow*land*mix(.45,1.,built);
-    let ground=land*select(detail*smoothstep(.055,.36,blocks)*.57,density*.83,historical);
-    let aggregate=mix(vec3f(.59,.51,.42),vec3f(.48,.38,.31),density);
-    let paving=mix(terrain.rgb,select(vec3f(.58,.52,.44),aggregate,historical),.82);
+    let ground=land*select(detail*smoothstep(.055,.36,blocks)*.57,density*.98,historical);
+    let aggregate=mix(vec3f(.66,.55,.43),vec3f(.61,.48,.38),density);
+    let paving=mix(terrain.rgb,select(vec3f(.58,.52,.44),aggregate,historical),select(.82,1.,historical));
     let color=((paving*ground*(1.-shading)+vec3f(.36,.32,.31)*shading)*(1.-wall)+facade*wall)*(1.-bridge)
         +mix(road_color,vec3f(.69,.67,.59),terrain.a)*bridge;
     let alpha=((ground*(1.-shading)+shading)*(1.-wall)+wall)*(1.-bridge)+bridge;

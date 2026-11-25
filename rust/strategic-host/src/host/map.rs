@@ -127,7 +127,15 @@ impl Host {
     pub(super) fn action(&mut self,action:Action) {
         self.country_click=None;
         self.feedback.clear();
+        if matches!(action,Action::Home|Action::Back|Action::Search) && self.hud.menu==HudMenu::MapModes {
+            self.hud.menu=HudMenu::None;
+            self.hud.page=HudPage::Map;
+        }
         match action {
+            Action::PlaceFilter(filter)=>{
+                self.hud.place_filter=filter;
+                self.hud.menu=HudMenu::None;
+            }
             Action::Mode(mode)=>{
                 if self.hud.page==HudPage::Market{self.market_command("close",0);}
                 if mode==Mode::Military && self.mode!=Mode::Military && self.written_world().is_some(){self.hud.military_grid=true;}
@@ -280,7 +288,9 @@ impl Host {
         let contains=|[a,b,w,h]:[f32;4]| x>=a&&x<=a+w&&y>=b&&y<=b+h;
         let resource_map=self.resources_available()&&self.resources.open;
         if self.hud.menu==HudMenu::MapModes&&contains(formal_ui::map_modes_rect(self.size)) {
-            if let Some(hit)=self.hits.iter().find(|hit|matches!(hit.action,Action::Mode(_))&&contains(hit.area)) {
+            if let Some(hit)=self.hits.iter().rev().find(|hit|matches!(hit.action,
+                Action::Mode(_)|Action::PlaceFilter(_)|Action::Home|Action::Back|Action::Search|Action::Hud(HudCommand::Page(HudPage::Travel)))
+                &&contains(hit.area)) {
                 self.action(hit.action);
             }
             return;

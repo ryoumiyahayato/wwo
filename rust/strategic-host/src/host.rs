@@ -29,7 +29,8 @@ pub(crate) enum HostEvent {
     Terrain(terrain::Completion),
     TerrainDetail(usize,io::Result<Vec<u8>>),
     Rivers(io::Result<hydrology::Rivers>),
-    Model(landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
+    Model(u64,landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
+    CityTile(u64,usize,io::Result<Vec<crate::city_models::Building>>),
     BattleTerrain(MilitaryCell, io::Result<PreparedBattleTerrain>),
 }
 
@@ -63,12 +64,14 @@ struct Host {
     natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<HostEvent>)>,
     events:winit::event_loop::EventLoopProxy<HostEvent>,
     landmarks:Option<landmarks::Landmarks>,
+    city_models:Option<crate::city_models::Catalogue>,
     transport_scene:Option<transport_scene::TransportScene>,
     transport_selection:Option<transport_ui::ObjectId>,
     transport_detail:Option<(i64, transport_ui::Detail)>,
     resources: crate::resource_map::State,
     config:Config,window:Option<Arc<Window>>,renderer:Option<Renderer>,
     map_root:PathBuf,map_signature:Option<&'static [u8;8]>,fatal_error:Option<String>,
+    resource_warnings: Vec<String>,
     world:World,visuals:PoliticalVisuals,index:Index,base:Option<Page>,reader:Reader,cached:HashMap<usize,Resident>,
     failed:HashSet<usize>,candidate:Vec<usize>,visible:Vec<usize>,
     camera:Camera,size:[u32;2],mode:Mode,state:State,theme:bool,labels:bool,
@@ -145,11 +148,15 @@ impl Host {
         };
         let mut world=if map_signature.is_some() {map_release::open(&map_root)?}
             else {World::open(&map_root.join("world.json"))?};
-        if formal_map {
-            if let Err(error)=map_release::add_city_ground(&mut world,&config.root) {
-                eprintln!("City ground catalogue: {error}");
+        let mut resource_warnings = if formal_map {
+            map_release::add_city_ground(&mut world,&config.root).unwrap_or_else(|error|vec![format!("City ground: {error}")])
+        } else { Vec::new() };
+        let city_models = if formal_map && !config.terrain_review {
+            match crate::city_models::Catalogue::open(config.root.join("city-models")) {
+                Ok(catalogue)=>Some(catalogue),
+                Err(error)=>{resource_warnings.push(format!("Building models · {error}"));None}
             }
-        }
+        } else {None};
         let landmarks=if formal_map {Some(landmarks::Landmarks::install(&mut world)?)} else {None};
         let mut camera=Camera::new(VIEW_SIZE);
         camera.local_models=landmarks.is_some();
@@ -185,7 +192,7 @@ impl Host {
         let observation_id=config.observe.as_ref().filter(|_|!config.terrain_review).and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
         let resources=crate::resource_map::State::new(&config.root);
-        Ok(Self {natural,events:events.create_proxy(),landmarks,transport_scene:None,transport_selection:None,transport_detail:None,resources,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
+        Ok(Self {natural,events:events.create_proxy(),landmarks,city_models,transport_scene:None,transport_selection:None,transport_detail:None,resources,config,map_root,map_signature,fatal_error:None,resource_warnings,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
@@ -868,6 +875,10 @@ impl Host {
             camera:&self.camera,size:self.size,mode:self.mode,flags,cursor:self.cursor,source:&source,feedback:&self.feedback,labels:self.labels,managed:self.config.managed,
             written_world, modern_terrain:view.map_style[1]>0.,
             surveyed_terrain:view.close_sample[0]>0. && view.close_sample[2]>0.5,
+            sea_relation_visible: transport_world.is_some() && self.transport_scene.as_ref()
+                .is_some_and(transport_scene::TransportScene::sea_relation_visible),
+            resource_root:&self.config.root,resource_warnings:&self.resource_warnings,
+            city_sources:self.city_models.as_ref().map_or(&[],|catalogue|catalogue.sources.as_slice()),
             debug:self.debug.then_some(&self.perf),population_debug:self.population_debug.is_some()};
         let seconds=self.started.elapsed().as_secs_f32();
         let (mut meshes,hits)=if loading {
@@ -884,8 +895,6 @@ impl Host {
             resources:self.resources_available().then_some(&self.resources),year:self.state.date.year,
             mouse:&mouse,labels:self.labels,formal,
             transport_detail:self.transport_detail.as_ref().filter(|_|show_transport_detail).map(|(_, detail)|detail),
-            sea_relation_visible: transport_world.is_some() && self.transport_scene.as_ref()
-                .is_some_and(transport_scene::TransportScene::sea_relation_visible),
         },&mut self.shown_markers)};
         if let Some(panel)=self.population_debug.as_ref().filter(|_|!loading&&!self.in_lobby()) {
             let (layers,text)=meshes.split_at_mut(12);
@@ -935,8 +944,14 @@ impl Host {
             let scissor=self.index.scissor(id,&self.camera,self.size)?;
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
-        let mut models=if loading||self.in_lobby() {Vec::new()} else {
-            self.landmarks.as_ref().map_or_else(Vec::new,|catalogue|catalogue.visible(&date,&self.camera,self.size))
+        let mut models=if loading||self.in_lobby() {Vec::new()} else if let Some(landmarks)=&self.landmarks {
+            let mut models=self.city_models.as_mut().map_or_else(Vec::new,|catalogue|
+                catalogue.visible(&date,&self.camera,self.size,landmarks,&self.events));
+            models.extend(landmarks.visible(&date,&self.camera,self.size,|point|
+                self.city_models.as_ref().is_some_and(|catalogue|catalogue.covers(point))));
+            models
+        } else {
+            Vec::new()
         };
         let scene = self.prologue.as_ref().zip(self.opening_choice())
             .filter(|_| self.lobby_page == lobby::Page::Prologue)
@@ -975,13 +990,17 @@ impl Host {
         let timing_frame=self.trial.timing_frame(capture.is_some());
         if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,transport,
             (&self.camera,landscape_enabled&&!self.trial.hide_landscape_models,now),None,timing_frame)? {
+            #[cfg(windows)]
+            if !loading && self.config.native.is_some() {
+                crate::desktop_start::notify_program_update("ready");
+            }
             let presented=Instant::now();
             self.last_present=presented;
             if self.trial.first.is_none(){self.trial.first=Some(ms(self.started));}
             if player_capture {
                 let path=self.screenshot.take().unwrap();
                 let status=match result {Ok(())=>format!("F12  Saved: {}",path.display()),Err(e)=>format!("F12  Screenshot failed: {e}")};
-                if let Some(window)=&self.window{window.set_title(&status);}
+                if let Some(window)=&self.window{window.set_title(&format!("{} | {status}",crate::build_identity::window_title()));}
                 self.screenshot_status=Some((presented,status));redraw=true;
             }
             else if capture.is_some(){
@@ -1042,7 +1061,7 @@ impl Host {
                     Ok(()) => format!("F12  Saved: {}", path.display()),
                     Err(error) => format!("F12  Screenshot failed: {error}"),
                 };
-                if let Some(window) = &self.window { window.set_title(&status); }
+                if let Some(window) = &self.window { window.set_title(&format!("{} | {status}",crate::build_identity::window_title())); }
                 self.screenshot_status = Some((presented, status));
             } else if has_capture {
                 result?;
@@ -1064,25 +1083,25 @@ impl Host {
     }
 }
 
-fn record_error(target:&Path,text:&str) {
+fn record_error(target:Option<&Path>,text:&str) {
     eprintln!("{text}");
-    let _=fs::write(target,text);
+    if let Some(path)=target { let _=fs::write(path,text); }
+    #[cfg(windows)]
+    crate::desktop_start::write_runtime_log(text);
 }
 pub(super) fn run() -> Result<(),Box<dyn std::error::Error>> {
     let started=Instant::now();
     let args=Config::parse()?;
-    let error_log=args.observe.as_ref().filter(|_|args.background).map_or_else(
-        ||args.root.parent().unwrap_or(&args.root).join("startup-error.txt"),
-        |path|path.with_extension("error.txt"));
+    let error_log=args.observe.as_ref().filter(|_|args.background).map(|path|path.with_extension("error.txt"));
     let panic_log=error_log.clone();
-    std::panic::set_hook(Box::new(move |e|record_error(&panic_log,&e.to_string())));
+    std::panic::set_hook(Box::new(move |e|record_error(panic_log.as_deref(),&e.to_string())));
     let events=EventLoop::<HostEvent>::with_user_event().build()?;
     let mut app=match Host::new(args,&events,started) {
-        Ok(app)=>app,Err(e)=>{record_error(&error_log,&e.to_string());return Err(e.into());}
+        Ok(app)=>app,Err(e)=>{record_error(error_log.as_deref(),&e.to_string());return Err(e.into());}
     };
     events.run_app(&mut app)?;
     if let Some(error)=app.fatal_error {
-        record_error(&error_log,&error);
+        record_error(error_log.as_deref(),&error);
         return Err(io::Error::other(error).into());
     }
     Ok(())

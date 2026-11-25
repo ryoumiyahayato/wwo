@@ -118,6 +118,28 @@ impl Themes {
         (self.fixed.as_deref(), self.last.as_deref())
     }
 
+    pub fn reload(&self, root: &Path) -> std::io::Result<Option<(Self,Raster)>> {
+        let catalogue=root.join("menu-themes/catalogue.json");
+        let file=match File::open(&catalogue) {
+            Ok(file)=>file,
+            Err(error) if error.kind()==std::io::ErrorKind::NotFound && !Self::path(root,ORIGINAL).is_file()=>return Ok(None),
+            Err(error) if error.kind()==std::io::ErrorKind::NotFound=>{
+                let mut themes=Self::open(root,self.fixed.clone(),self.last.clone());
+                let image=themes.start(root).ok_or_else(||std::io::Error::other("Cannot read the menu painting"))?;
+                return Ok(Some((themes,image)));
+            }
+            Err(error)=>return Err(error),
+        };
+        let _:Vec<Work>=serde_json::from_reader(file)?;
+        let mut themes=Self::open(root,self.fixed.clone(),self.last.clone());
+        let image=match self.last.as_deref() {
+            Some(previous)=>themes.works.iter().position(|work|work.id==previous)
+                .and_then(|index|themes.select(root,index)),
+            None=>themes.start(root),
+        }.ok_or_else(||std::io::Error::other("Cannot read the current menu painting or catalogue"))?;
+        Ok(Some((themes,image)))
+    }
+
     pub fn can_change(&self) -> bool {
         self.works.len() > 1 && self.current.is_some()
     }

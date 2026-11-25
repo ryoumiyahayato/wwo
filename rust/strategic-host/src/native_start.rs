@@ -102,16 +102,15 @@ impl NativeSession {
         self.world.as_mut()
     }
 
-    pub fn start(data: &Path) -> io::Result<Self> {
-        let bootstrap = if let Some(population_data) = std::env::var_os("WWO_DATA_DIR") {
-            WorldBootstrap::load_from(Path::new(&population_data))?
-        } else {
-            WorldBootstrap::load_from(data)?
-        };
+    pub fn start(data: &Path, resume:bool) -> io::Result<Self> {
         let (profile, lock) = lock_profile()?;
         let preferences = profile.join("WWO_R68_Candidate/interface_settings.cfg");
         let save_dir = profile.join("formal-world");
-        fs::create_dir_all(&save_dir)?;
+        fs::create_dir_all(&save_dir)
+            .map_err(|error| io::Error::other(format!("无法创建存档目录 {} · {error}", save_dir.display())))?;
+        crate::desktop_start::require_writable_directory(&save_dir)?;
+        let bootstrap = WorldBootstrap::load_from(data)
+            .map_err(|error| io::Error::other(format!("无法读取正式世界资料 {} · {error}", data.display())))?;
         let mut session = Self {
             bootstrap, world: None, revision: 0, save_dir, preferences, _lock: lock,
             slots: Vec::new(), control: TimeControl::default(), next_tick: Instant::now(),
@@ -124,6 +123,11 @@ impl NativeSession {
             work_revision: 0,
         };
         session.refresh_slots();
+        if resume {
+            if let Err(error)=session.load(0) {
+                session.lobby_status=format!("无法恢复更新前的自动存档 · {error}");
+            }
+        }
         Ok(session)
     }
 

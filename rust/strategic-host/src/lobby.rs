@@ -492,14 +492,23 @@ impl Display<'_> {
         let ready=state.is_some_and(|s|s.ready);
         match page {
             Page::Home=>{
-                let x=48.;let y=(h-296.)*0.5;let width=350.;
-                formal_ui::panel(&mut panels,[x,y,width,296.],[6,14,23,241]);
+                let x=48.;let y=(h-326.)*0.5;let width=350.;
+                formal_ui::panel(&mut panels,[x,y,width,326.],[6,14,23,241]);
                 self.skin.text(&mut text,"1900",2,[x+24.,y+27.],width-48.,IVORY);
                 let rows=[("开始",ready.then_some(action(Command::Page(Page::Selection)))),("加载",ready.then_some(action(Command::Page(Page::Load)))),
                     row("主题管理",Page::Themes),row("设置",Page::Settings),
                     ("退出",Some(action(Command::Exit)))];
                 for (i,(label,command)) in rows.into_iter().enumerate(){
                     self.row(&mut panels,&mut text,&mut hits,[x+24.,y+79.+i as f32*40.,width-48.,32.],label,command,false);
+                }
+                self.skin.text(&mut text,crate::build_identity::display(),0,[x+24.,y+285.],width-48.,MUTED);
+                if let Some(status)=state.map(|state|state.status.as_str()).filter(|status|!status.is_empty()) {
+                    let lines=self.skin.wrapped_lines(status,0,width-36.,1.);
+                    let height=18.+lines.len() as f32*17.;
+                    formal_ui::panel(&mut panels,[x,y+334.,width,height],[6,14,23,241]);
+                    for (i,line) in lines.iter().enumerate(){
+                        self.skin.text(&mut text,line,0,[x+18.,y+341.+i as f32*17.],width-36.,IVORY);
+                    }
                 }
             }
             Page::Selection => {

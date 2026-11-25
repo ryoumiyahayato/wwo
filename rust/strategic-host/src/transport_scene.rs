@@ -29,10 +29,10 @@ const PORT_INK: [u8; 4] = [138, 213, 222, 255];
 const DARK: [u8; 4] = [23, 32, 39, 244];
 const BLOCKED: [u8; 4] = [245, 110, 81, 250];
 const RESTRICTED: [u8; 4] = [249, 171, 102, 244];
-const RIVER: [u8; 4] = [76, 191, 155, 230];
+const RIVER: [u8; 4] = [77, 152, 204, 202];
 const SELECTED: [u8; 4] = [255, 219, 131, 252];
 const FLOW: [u8; 4] = [255, 191, 88, 254];
-pub(crate) const SEA_RELATION_INK: [u8; 4] = [156, 176, 181, 158];
+const SEA_RELATION_INK: [u8; 4] = [183, 154, 110, 126];
 const SEA_GEOMETRY: &[u8] = include_bytes!("../../../data/world_map/shipping_geometry.json");
 const CELL_COUNT: usize = 12;
 static DRAW_REVISION: AtomicU64 = AtomicU64::new(0);
@@ -664,7 +664,12 @@ impl TransportScene {
                 continue;
             }
             let (mut width, mut ink) = match mode {
-                Mode::Geographic => (if edge.mode == TransportMode::Rail { 2.3 } else { 1.7 }, status.unwrap_or(color)),
+                Mode::Geographic => (match edge.mode {
+                    TransportMode::Rail => 1.65,
+                    TransportMode::Road if schematic => 0.95,
+                    TransportMode::Road => 1.05,
+                    _ => 1.25,
+                }, status.unwrap_or(color)),
                 Mode::Political => (1.1, status.map_or([177, 202, 204, 140], |c| with_alpha(c, 180))),
                 Mode::Economic => (1.3, status.map_or([161, 179, 175, 130], |c| with_alpha(c, 175))),
                 Mode::Military => {
@@ -709,7 +714,7 @@ impl TransportScene {
             }
             let mut path_hits = VisiblePath { id: id.clone(), fragments: Vec::new(), dash_strokes: Some(Vec::new()) };
             let (width, ink) = if highlight { (1.5, with_alpha(SEA_RELATION_INK, 198)) }
-                else { (1.1, SEA_RELATION_INK) };
+                else { (0.95, SEA_RELATION_INK) };
             draw_path(&mut self.overlay, camera, size, &view_reach, path, width, ink, &mut path_hits);
             if camera.mpp <= 1200. && mode != Mode::Military && geometry.navigation_path().is_some() {
                 self.vehicle_segments.push(id.clone());
@@ -1224,7 +1229,11 @@ impl TransportScene {
                 hits.push(VehicleHit { area: model.screen_bounds, id: object() });
             }
             if first_hit == hits.len() && markers_left > 0 && visible(position, size, 10.) {
-                vehicle_marker(&mut markers, position, heading, vehicle.mode, vehicle.freight);
+                if camera.mpp > 40. {
+                    activity_light(&mut markers, position, vehicle.freight);
+                } else {
+                    vehicle_marker(&mut markers, position, heading, vehicle.mode, vehicle.freight);
+                }
                 hits.push(VehicleHit { area: marker_bounds(position), id: object() });
                 markers_left -= 1;
             }
@@ -1285,9 +1294,9 @@ fn mode_ink(mode: TransportMode) -> [u8; 4] {
     match mode {
         TransportMode::Shipping => PORT_INK,
         TransportMode::InlandWaterway => RIVER,
-        TransportMode::Rail => [229, 183, 120, 242],
-        TransportMode::Road => [196, 179, 149, 194],
-        _ => [200, 188, 151, 208],
+        TransportMode::Rail => [209, 161, 99, 201],
+        TransportMode::Road => [174, 147, 103, 147],
+        _ => [185, 159, 115, 174],
     }
 }
 
@@ -1486,6 +1495,17 @@ fn marker_heading(
     project(camera, size, next)
         .and_then(|next| (next - position).try_normalize())
         .unwrap_or(Vec2::NEG_Y)
+}
+
+fn activity_light(mesh: &mut Mesh, position: Vec2, freight: bool) {
+    let core=if freight {[250,183,108,255]} else {[253,230,174,255]};
+    for (radius,ink) in [(4.,[238,170,89,44]),(2.6,[240,183,101,143]),(1.7,core)] {
+        let points = std::array::from_fn::<_,12,_>(|i| {
+            let angle=i as f32*std::f32::consts::TAU/12.;
+            (position+radius*Vec2::new(angle.cos(),angle.sin())).to_array()
+        });
+        mesh.shape(&points,ink);
+    }
 }
 
 fn vehicle_marker(

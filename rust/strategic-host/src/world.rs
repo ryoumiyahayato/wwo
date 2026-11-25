@@ -20,6 +20,8 @@ pub struct Tile {
     pub city_ink_only:bool,
     #[serde(default)]
     pub city_area:bool,
+    #[serde(default)]
+    pub city_streets:bool,
     pub ids:bool,
     #[serde(default)]
     pub surface_span:u32,
@@ -45,6 +47,7 @@ impl Tile {
             return (1.-smooth(self.surface_fade_mpp,self.surface_max_mpp,mpp)) as f32;
         }
         if self.city_ink_only {
+            if self.city_streets { return (1.-smooth(70.,self.city_ink_limit(),mpp)) as f32; }
             // The overview shows surveyed built density at the 50 km scale.
             return (1. - smooth(650., self.city_ink_limit(), mpp)) as f32;
         }
@@ -59,7 +62,7 @@ impl Tile {
     }
 
     fn city_ink_limit(&self) -> f64 {
-        if self.city_area { 950. } else { crate::camera::CITY_INK_MPP }
+        if self.city_streets { 145. } else if self.city_area { 950. } else { crate::camera::CITY_INK_MPP }
     }
 
     pub fn cover_size(&self)->usize {
@@ -107,6 +110,8 @@ pub struct Place {
     pub name:String,
     #[serde(default)] pub name_zh:String,
     #[serde(default)] pub symbol:String,
+    #[serde(default)] pub facility:Option<crate::map_facilities::Facility>,
+    #[serde(default)] pub military_facility_active:bool,
     #[serde(default)] pub reference:bool,
     #[serde(default)] pub display_symbol:bool,
     #[serde(default="selectable_place")] pub selectable:bool,

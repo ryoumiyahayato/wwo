@@ -22,6 +22,7 @@ impl Host {
         if key==Key::Named(NamedKey::F10){
             self.debug=!self.debug;self.perf_at=Instant::now();self.perf_frames=0;self.perf.rate=0.;self.dirty=true;return;
         }
+        if self.debug && key==Key::Named(NamedKey::F11) {self.reload_debug_resources();return;}
         if self.battle_view.is_some() && key==Key::Named(NamedKey::F5) {
             self.hud_action(HudCommand::Clock(0));
             self.battle_command(battle_view::Command::Back);
@@ -271,6 +272,51 @@ impl Host {
         }
         self.dirty=true;
     }
+    fn reload_debug_resources(&mut self) {
+        let Some(renderer)=self.renderer.as_mut()else{return;};
+        let data=&self.config.root;
+        let overrides=data.join("debug-resources");
+        let mut messages=Vec::new();
+        let mut failures=Vec::new();
+        let mut report=|name:&str,result:io::Result<bool>|match result {
+            Ok(true)=>messages.push(name.to_owned()),
+            Ok(false)=>{},
+            Err(error)=>failures.push(format!("{name} · {error}")),
+        };
+        report("Shader",renderer.reload_map_shader(&overrides));
+        report("地表贴图",renderer.reload_land_texture(&overrides));
+        report("主题",self.menu_themes.reload(data).and_then(|value|{
+            if let Some((themes,image))=value {
+                renderer.reload_menu_painting(image)?;
+                self.menu_themes=themes;
+                Ok(true)
+            } else {Ok(false)}
+        }));
+        let model=overrides.join("urban_landscape_r40.glb");
+        if let Some(landmarks)=&mut self.landmarks {
+            report("城市模型",match fs::read(&model) {
+                Ok(bytes)=>landmarks.reload_city_models(&bytes).map(|()|{renderer.replace_city_models(bytes);true}),
+                Err(error) if error.kind()==io::ErrorKind::NotFound=>Ok(false),
+                Err(error)=>Err(error),
+            });
+        }
+        let city_path=data.join("city-models");
+        if city_path.join("catalogue.json").is_file() || self.city_models.is_some() {
+            report("城市分片",crate::city_models::Catalogue::reload(city_path,self.city_models.as_ref(),&self.camera,self.size)
+                .map(|candidate|{self.city_models=Some(candidate);true}));
+        }
+        self.resource_warnings.retain(|warning|!warning.starts_with("Reload · "));
+        if !failures.is_empty() {
+            self.resource_warnings.extend(failures.iter().map(|error|format!("Reload · {error}")));
+            #[cfg(windows)] crate::desktop_start::write_runtime_log(&self.resource_warnings.join("\n"));
+        }
+        let status=if !failures.is_empty(){format!("热加载失败 · {} · F10",failures[0].lines().next().unwrap_or(""))}
+            else if messages.is_empty(){"没有可热加载的资源".into()}
+            else {format!("已热加载 · {}",messages.join("、"))};
+        self.screenshot_status=Some((Instant::now(),status));
+        self.dirty=true;
+    }
+
     pub(super) fn world_view_changed(&mut self, had_session:bool, loaded:bool, now:Instant) {
         self.last_palette=None;
         let connected=self.state.session.is_some();
@@ -446,7 +492,7 @@ impl ApplicationHandler<HostEvent> for Host {
         if self.renderer.is_some(){return;}
         let result=(|| -> Result<_,Box<dyn std::error::Error>>{
             let window=if self.config.terrain_review {None} else {
-                let mut attributes=Window::default_attributes().with_title("WWO | Rust strategic host")
+                let mut attributes=Window::default_attributes().with_title(crate::build_identity::window_title())
                     .with_inner_size(PhysicalSize::new(VIEW_SIZE[0],VIEW_SIZE[1])).with_min_inner_size(LogicalSize::new(800.,480.))
                     .with_fullscreen((self.hud.fullscreen&&!self.config.background).then_some(winit::window::Fullscreen::Borderless(None)));
                 if self.config.background {attributes=attributes.with_active(false).with_position(winit::dpi::PhysicalPosition::new(10000,10000));}
@@ -494,9 +540,8 @@ impl ApplicationHandler<HostEvent> for Host {
                 } else {
                     match terrain_detail::Catalogue::open(&default) {
                         Ok(catalogue)=>Some(catalogue),
-                        Err(error) if error.kind()==io::ErrorKind::NotFound=>None,
                         Err(error)=>{
-                            eprintln!("Terrain detail {}: {error}",default.display());
+                            self.resource_warnings.push(format!("Terrain detail {} · {error}",default.display()));
                             None
                         }
                     }
@@ -517,6 +562,14 @@ impl ApplicationHandler<HostEvent> for Host {
                 pollster::block_on(Renderer::new_offscreen(self.size,atlas,flags,hud,globe_art,&layouts,self.natural.take(),sample,detail,self.events.clone()))?
             };
             let pixels=Pixels::read_version(&self.map_root,&self.world.tiles[0],self.map_signature,self.reader.cover)?;
+            #[cfg(windows)]
+            if self.config.native.is_some() && !self.config.background {
+                let exe=std::env::current_exe()?.display().to_string();
+                crate::desktop_start::write_runtime_log(&format!(
+                    "EXE: {exe}\nData: {}\nMap: {}\n{}",self.config.root.display(),
+                    self.map_root.display(),self.resource_warnings.join("\n")
+                ));
+            }
             let base=renderer.upload(&self.world.tiles[0],pixels);
             Ok((window,renderer,base))
         })();
@@ -535,11 +588,20 @@ impl ApplicationHandler<HostEvent> for Host {
                 self.battle_terrain_ready(region,result);
                 return;
             }
-            HostEvent::Model(key,mesh)=>{
+            HostEvent::Model(revision,key,mesh)=>{
                 if let Some(renderer)=&mut self.renderer {
-                    if let Err(error)=renderer.model_ready(key,mesh) {
+                    if let Err(error)=renderer.model_ready(revision,key,mesh) {
                         let source=if key.is_transport() {"交通 GLB"}else{"R68 GLB"};
                         self.feedback=format!("{source} · {error}");
+                    }
+                    self.dirty=true;
+                }
+                return;
+            }
+            HostEvent::CityTile(revision,index,result)=>{
+                if let Some(catalogue)=&mut self.city_models {
+                    if let Err(error)=catalogue.ready(revision,index,result) {
+                        if self.resource_warnings.len()<24 { self.resource_warnings.push(error.to_string()); }
                     }
                     self.dirty=true;
                 }
@@ -591,13 +653,17 @@ impl ApplicationHandler<HostEvent> for Host {
                     }
                 }
             }
-            Err(e) if self.map_signature.is_some()=>{
+            Err(e) if self.map_signature.is_some() && !self.world.tiles[event.id].city_ink_only=>{
                 self.fatal_error=Some(format!("正式地图无法读取 {} · {e}",self.world.tiles[event.id].path));
                 event_loop.exit();
             }
             Err(e)=>{
                 self.failed.insert(event.id);
-                self.feedback=format!("Source tile unavailable: {e}");
+                if self.world.tiles[event.id].city_ink_only {
+                    self.resource_warnings.push(format!("City ground {} · {e}",self.world.tiles[event.id].path));
+                } else {
+                    self.feedback=format!("Source tile unavailable: {e}");
+                }
             }
         }
         self.dirty=true;
@@ -777,7 +843,7 @@ impl ApplicationHandler<HostEvent> for Host {
         if let Some(s)=self.state.session.as_ref(){self.hud.mechanical.update(now,formal_ui::clock_index(Some(s)),s.clock_ack,self.hud.clock_drag,if s.paused{0}else{s.speed});}
         if self.screenshot_status.as_ref().is_some_and(|(at,_)|at.elapsed()>Duration::from_secs(7)){
             self.screenshot_status=None;self.dirty=true;
-            if let Some(window)=&self.window{window.set_title("WWO | Rust strategic host");}
+            if let Some(window)=&self.window{window.set_title(&crate::build_identity::window_title());}
         }
         if self.battle_view.is_some() {
             let next = self.last_present + Duration::from_millis(16);

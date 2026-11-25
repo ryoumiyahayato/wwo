@@ -1,6 +1,7 @@
 use crate::{camera::Camera,overlay::{Atlas,Mesh},world::{Place,World}};
 use std::cmp::Ordering;
 use std::collections::HashSet;
+use crate::map_facilities::{self, Facility, PlaceFilter};
 #[derive(Clone,Copy)]
 pub enum Ink { HudArtGlass, ClockGears, Solid, Text, Flag, HudArt, HudText, Instrument, MenuArt, PrologueArt, ProloguePaper, OpeningCloud, Loading, HistoryLight }
 
@@ -37,6 +38,7 @@ pub enum CountryAction {Close,Back,Record,Directory,Page(i32),Region(usize),Boun
 #[derive(Clone,Copy)]
 pub enum Action {
     Mode(Mode),Home,Back,Search,Close,Details,Locate,Select(Object),Country(CountryAction),
+    PlaceFilter(PlaceFilter),
     Hud(crate::formal_ui::Command),
     Resources(crate::resource_map::Command),
 }
@@ -61,7 +63,6 @@ pub struct Ui<'a> {
     pub mouse:&'a str,
     pub labels:bool,
     pub transport_detail:Option<&'a crate::transport_ui::Detail>,
-    pub sea_relation_visible: bool,
     pub formal:crate::formal_ui::Display<'a>,
 }
 
@@ -99,13 +100,14 @@ fn panel(m:&mut Mesh,x:f32,y:f32,w:f32,h:f32) {
 }
 fn intersects([x,y,w,h]:[f32;4],[a,b,c,d]:[f32;4])->bool{x<a+c && x+w>a && y<b+d && y+h>b}
 
-fn place_visible(mode:Mode,place:&Place)->bool {
-    let kind=place.symbol.as_str();
-    match mode {
+fn place_visible(ui:&Ui<'_>,place:&Place,kind:&str,facility:Option<Facility>)->bool {
+    match ui.mode {
         Mode::Geographic=>true,
-        Mode::Political=>matches!(kind,"capital"|"admin_primary"|"city"|"town"|"settlement"|"village"),
-        Mode::Economic=>matches!(kind,"capital"|"city"|"town"|"settlement"|"station"|"port"),
-        Mode::Military=>matches!(kind,"capital"|"admin_primary"|"city"|"castle"|"fort"|"bridge"|"station"|"port"),
+        Mode::Political=>ui.formal.hud.place_filter.visible(place,kind,facility),
+        Mode::Economic=>matches!(kind,"capital"|"city"|"town"|"station"|"port")
+            || matches!(facility,Some(Facility::Industrial|Facility::Mining)),
+        Mode::Military=>place.military_facility_active ||
+            matches!(kind,"capital"|"admin_primary"|"admin_secondary"|"city"|"bridge"|"station"|"port"),
     }
 }
 
@@ -118,12 +120,17 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
     let regional=ui.camera.level!=crate::camera::Level::World;
     let mut candidates=Vec::new();
     for (index,place) in world.places.iter().enumerate() {
-        let ordinary_marker=ui.labels && place.display_symbol && place_visible(ui.mode,place);
+        let kind=map_facilities::symbol(&place.symbol);
+        let facility=Facility::for_place(place);
+        if kind=="settlement" && facility.is_none() {continue;}
+        if facility==Some(Facility::MilitaryBase) && !place.military_facility_active {continue;}
+        let ordinary_marker=ui.labels && place.display_symbol && place_visible(ui,place,kind,facility);
         let population_marker=ui.formal.population_debug && place.selectable &&
-            matches!(place.symbol.as_str(),"capital"|"admin_primary"|"city"|"town"|"settlement"|"village");
+            matches!(kind,"capital"|"admin_primary"|"admin_secondary"|"city"|"town"|"village");
         if !(ordinary_marker || population_marker) || !active(ui.date,&place.from_date,&place.to_date) {continue;}
         let chosen=ui.selected==Some(Object::Place(index));
-        let Some(spec)=skin.map_symbols.get(&place.symbol) else {continue;};
+        let generated=facility.map(Facility::symbol);
+        let Some(spec)=generated.as_ref().or_else(||skin.map_symbols.get(kind)) else {continue;};
         let mut limit=if regional {spec.region_max_mpp} else {spec.world_max_mpp};
         if place.reference {
             if !regional {continue;}
@@ -133,24 +140,27 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
         if !chosen && ((!regional&&!spec.world)||ui.camera.mpp>limit*if retained {1.12} else {1.}) {continue;}
         let Some(point)=ui.camera.project(place.coordinates,ui.size) else {continue;};
         let [x,y]=point.map(|n|n as f32);
-        let kind=if regional&&ui.camera.mpp<=300.&&place.symbol=="settlement" {"town"} else {place.symbol.as_str()};
         let px=spec.screen_px*if regional {1.} else {0.78};
         let area=[x-px/2.,y-px/2.,px,px];
         if area[0]<0.||area[1]<0.||area[0]+px>w||area[1]+px>h {continue;}
-        candidates.push((index,place,kind,area,chosen,retained,spec.priority));
+        candidates.push((index,place,kind,area,chosen,retained,spec.priority,facility));
     }
     candidates.sort_by(|a,b| b.4.cmp(&a.4).then(b.6.cmp(&a.6)).then(b.5.cmp(&a.5)).then(a.1.id.cmp(&b.1.id)));
     let mut placed=Vec::new();
     previous.clear();
-    for (i,place,kind,[x,y,px,_],chosen,_,_) in candidates {
+    for (i,place,kind,[x,y,px,_],chosen,_,_,facility) in candidates {
         if placed.len()>=(if regional {160} else {24}) {break;}
         if !chosen&&occupied.iter().any(|&old|intersects([x-2.,y-2.,px+4.,px+4.],old)) {continue;}
         occupied.push([x-2.,y-2.,px+4.,px+4.]);
         let pick=[x-4.,y-4.,px+8.,px+8.];
-        let asset=format!("map_{kind}");
-        skin.tinted_sprite(art,&asset,[x-1.25,y-1.25,px+2.5,px+2.5],[25,38,36,217]);
-        let color=if place.selectable {[255;4]} else {[184,184,184,153]};
-        skin.tinted_sprite(art,&asset,[x,y,px,px],color);
+        if let Some(facility)=facility {
+            facility.draw(map,[x,y,px,px],place.selectable);
+        } else {
+            let asset=format!("map_{kind}");
+            skin.tinted_sprite(art,&asset,[x-1.25,y-1.25,px+2.5,px+2.5],[25,38,36,217]);
+            let color=if place.selectable {[255;4]} else {[184,184,184,153]};
+            skin.tinted_sprite(art,&asset,[x,y,px,px],color);
+        }
         if chosen {map.line([x+px/2.-4.,y+px+2.],[x+px/2.+4.,y+px+2.],1.5,GOLD);}
         if place.selectable {hits.push(Hit{area:pick,action:Action::Select(Object::Place(i))});}
         previous.insert(i);
@@ -273,7 +283,16 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             _ => None,
         };
         let has_debug=ui.formal.debug.is_some();
-        panel(&mut panels,x,y,width,if has_debug {200.} else {148.});
+        let facilities=if let Object::Place(i)=object {
+            let place=&world.places[i];
+            Facility::for_place(place).map(Facility::mode).or(match map_facilities::symbol(&place.symbol) {
+                "historic_site"|"castle"|"fort"|"monument"|"religious"|"eiffel"|"clock_tower"|"pyramids"=>Some(Mode::Geographic),
+                "station"|"bridge"|"port"=>Some(Mode::Economic),
+                _=>None,
+            }).filter(|mode| *mode!=ui.mode)
+        } else {None};
+        let extra_row=if facilities.is_some() {32.} else {0.};
+        panel(&mut panels,x,y,width,if has_debug {200.+extra_row} else {148.+extra_row});
         let (label,id,desc,extra)=match object {
             Object::Polity(_)=>unreachable!(),
             Object::Place(i)=>{
@@ -291,10 +310,19 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         skin.text(&mut hud_type,object_name(world,skin,object),1,[x+15.,y+35.],270.,LIGHT);
         let context=if ui.mode==Mode::Political { &extra } else { &desc };
         skin.text(&mut hud_type,context,0,[x+15.,y+68.],270.,SUBTLE);
-        if has_debug { skin.text(&mut hud_type,&id,0,[x+15.,y+151.],270.,SUBTLE); }
+        if has_debug { skin.text(&mut hud_type,&id,0,[x+15.,y+151.+extra_row],270.,SUBTLE); }
         } else {
             ui.formal.ink_block(&mut panels,[x+15.,y+42.,123.,12.]);
             ui.formal.ink_block(&mut panels,[x+15.,y+72.,217.,12.]);
+        }
+        if let Some(mode)=facilities {
+            let label=match mode {
+                Mode::Economic=>skin.choose("在经济地图显示","Show in economic map"),
+                Mode::Military=>skin.choose("在军事地图显示","Show in military map"),
+                Mode::Geographic=>skin.choose("在地理地图显示","Show in geographic map"),
+                Mode::Political=>skin.choose("在政治地图显示","Show in political map"),
+            };
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+139.,267.,26.],label,Some(Action::Mode(mode)),false);
         }
         ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+103.,123.,28.],skin.choose("定位地点","Focus location"),Some(Action::Locate),false);
         if let Some(i) = transport {
@@ -415,37 +443,15 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         }
     }
     if ui.formal.hud.page==crate::formal_ui::Page::Map {
-        let y=h-45.;
-        if !ui.formal.population_debug && ui.sea_relation_visible && !ui.formal.hud.market_map && ui.formal.hud.menu==crate::formal_ui::Menu::None {
-            let x = w - 249.;
-            let legend_y = h - 136.;
-            panels.rect(x, legend_y, 223., 21., [15, 25, 34, 220]);
-            for offset in [9., 18.] {
-                panels.line([x+offset, legend_y+11.], [x+offset+5., legend_y+11.], 1.1,
-                    crate::transport_scene::SEA_RELATION_INK);
-            }
-            skin.text(&mut hud_type, skin.choose("海运联系 · 航迹待核实","Sea link · Track unconfirmed"),
-                0, [x+29.,legend_y+3.], 191., SUBTLE);
-        }
-        let transport=ui.formal.session.is_some_and(|s|s.transport.is_some())&&!ui.formal.hud.market_map;
-        let mut x=if transport {w-306.} else {w-233.};
-        if transport {
-            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x,y-35.,69.,25.],"运输",
-                Some(Action::Hud(crate::formal_ui::Command::Page(crate::formal_ui::Page::Travel))),false);
-            x+=73.;
-        }
-        for (label,action,width) in [(skin.choose("搜索","Search"),Action::Search,74.),(skin.choose("返回","Back"),Action::Back,62.),(skin.choose("全球","Globe"),Action::Home,62.)]{
-            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x,y-35.,width,25.],label,Some(action),false);
-            x+=width+4.;
-        }
         if readable {
-            skin.text(&mut hud_type,ui.mouse,0,[w-233.,h-49.],230.,SUBTLE);
+            let width=skin.width(ui.mouse,0).min(234.);
+            skin.text(&mut hud_type,ui.mouse,0,[w-width-18.,h-48.],width+1.,SUBTLE);
         }
     }
     if let Some(detail)=ui.transport_detail {
         ui.formal.transport_detail(detail,&mut panels,&mut hud_type,&mut hits);
     }
-    if readable && !ui.formal.population_debug && !ui.formal.hud.messages && ui.country.is_none() && ui.search.is_none() && !ui.details && ui.transport_detail.is_none() {
+    if !ui.formal.population_debug && !ui.formal.hud.messages && ui.country.is_none() && ui.search.is_none() && !ui.details && ui.transport_detail.is_none() {
         let left=match ui.selected{Some(Object::Polity(_))=>359.,Some(_)=>293.,None=>145.};
         ui.formal.diagnostics(&mut panels,&mut hud_type,left,debug_right);
     }

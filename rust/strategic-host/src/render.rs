@@ -52,7 +52,7 @@ impl TileState {
     fn new(tile:&Tile,opacity:f32,edges:[f32;4],edge_ready:[f32;4])->Self {
         let cast=|values:[f64;4]| values.map(|a|a as f32);
         let city_style = if tile.city_ink_only {
-            if tile.city_area { 3. } else { 2. }
+            if tile.city_streets { 4. } else if tile.city_area { 3. } else { 2. }
         } else {
             u8::from(tile.city) as f32
         };
@@ -123,6 +123,31 @@ struct RiverLayer {
     mesh: MeshBuffers,
 }
 
+fn screen_vertex_layout() -> wgpu::VertexBufferLayout<'static> {
+    const ATTRIBUTES:[wgpu::VertexAttribute;3]=wgpu::vertex_attr_array![0=>Float32x2,1=>Unorm8x4,2=>Float32x2];
+    wgpu::VertexBufferLayout{array_stride:std::mem::size_of::<Vertex>() as u64,
+        step_mode:wgpu::VertexStepMode::Vertex,attributes:&ATTRIBUTES}
+}
+
+fn map_shader(device:&wgpu::Device,globe:&str,scenery:&str) -> wgpu::ShaderModule {
+    device.create_shader_module(wgpu::ShaderModuleDescriptor{
+        label:Some("WWO globe and landscape"),
+        source:wgpu::ShaderSource::Wgsl(format!("{globe}\n{scenery}").into()),
+    })
+}
+
+fn render_pipeline(device:&wgpu::Device,format:wgpu::TextureFormat,groups:&[&wgpu::BindGroupLayout],
+    module:&wgpu::ShaderModule,vertex:&str,fragment:&str,buffers:&[wgpu::VertexBufferLayout]) -> wgpu::RenderPipeline {
+    let layout=device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor{label:None,bind_group_layouts:groups,push_constant_ranges:&[]});
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor{
+        label:Some(fragment),layout:Some(&layout),primitive:Default::default(),depth_stencil:None,
+        multisample:Default::default(),multiview:None,cache:None,
+        vertex:wgpu::VertexState{module,entry_point:Some(vertex),compilation_options:Default::default(),buffers},
+        fragment:Some(wgpu::FragmentState{module,entry_point:Some(fragment),compilation_options:Default::default(),
+            targets:&[Some(wgpu::ColorTargetState{format,blend:Some(wgpu::BlendState::ALPHA_BLENDING),write_mask:wgpu::ColorWrites::ALL})]}),
+    })
+}
+
 pub struct TransportOverlay<'a> {
     pub network: Option<(u64, &'a Mesh)>,
     pub economy: Option<(u64, &'a Mesh)>,
@@ -142,7 +167,8 @@ pub struct Renderer {
     transport_vehicles: Option<MeshBuffers>,
     battle: Option<crate::battle_render::Scene>,
     landscape: Option<Landscape>,
-    landscape_pipeline: Option<(wgpu::TextureFormat,wgpu::BindGroupLayout,wgpu::ShaderModule)>,
+    map_layout: wgpu::BindGroupLayout,
+    landscape_shader: wgpu::ShaderModule,
     surface: GroundSurface,
     view:wgpu::Buffer,
     globals:wgpu::BindGroup,
@@ -200,6 +226,7 @@ struct GroundSurface {
     water_pixels:wgpu::Buffer,
     water_raster:Option<WaterRaster>,
     loaded:bool,
+    custom_art:bool,
 }
 
 struct WaterRaster {
@@ -242,7 +269,7 @@ impl GroundSurface {
         let water=crate::hydrology::water_buffer(device,water_available);
         let water_pixels=water_pixels(device,4);
         let group=Self::bind(device,&layout,&repeat,&art,height.as_ref(),&water,&water_pixels);
-        Self{layout,group,repeat,height,art,water,water_pixels,water_raster:None,loaded:false}
+        Self{layout,group,repeat,height,art,water,water_pixels,water_raster:None,loaded:false,custom_art:false}
     }
 
     fn bind(device:&wgpu::Device, layout:&wgpu::BindGroupLayout, repeat:&wgpu::Sampler,
@@ -256,23 +283,25 @@ impl GroundSurface {
 
     fn load(&mut self, device:&wgpu::Device, queue:&wgpu::Queue, height:Option<wgpu::TextureView>)->io::Result<()> {
         if self.loaded {return Ok(());}
-        let art=crate::decode_rgba(&include_bytes!("land-material.png")[..])?;
         if height.is_some() {self.height=height;}
-        self.art=material_texture(device,queue,art);
+        if !self.custom_art {
+            let art=crate::decode_rgba(&include_bytes!("land-material.png")[..])?;
+            self.art=material_texture(device,queue,art);
+        }
         self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,self.height.as_ref(),
             &self.water,&self.water_pixels);
         self.loaded=true;
         Ok(())
     }
 
-    fn init_water_raster(&mut self,device:&wgpu::Device,shader:&wgpu::ShaderModule,view:&wgpu::Buffer) {
+    fn create_water_raster(device:&wgpu::Device,shader:&wgpu::ShaderModule,view:&wgpu::Buffer) -> WaterRaster {
         let pipeline=device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor{
             label:Some("Project visible water boundaries"),layout:None,module:shader,
             entry_point:Some("raster_water"),compilation_options:Default::default(),cache:None,
         });
         let view=bind(device,&pipeline.get_bind_group_layout(0),&[buf_resource(0,view)]);
         let gaps=[1,2].map(|i|bind(device,&pipeline.get_bind_group_layout(i),&[]));
-        self.water_raster=Some(WaterRaster{pipeline,view,gaps,buffers:None,size:[0,0],previous:None});
+        WaterRaster{pipeline,view,gaps,buffers:None,size:[0,0],previous:None}
     }
 
     fn project_water(&mut self,device:&wgpu::Device,encoder:&mut wgpu::CommandEncoder,
@@ -331,6 +360,8 @@ struct ModelLayer {
     pending: HashSet<ModelKey>,
     failed: HashSet<ModelKey>,
     events: winit::event_loop::EventLoopProxy<crate::HostEvent>,
+    city_override: Option<std::sync::Arc<[u8]>>,
+    city_revision: u64,
 }
 
 impl ModelLayer {
@@ -367,7 +398,7 @@ impl ModelLayer {
             }),
         });
         Self { pipeline, depth: None, residents: HashMap::new(), visible: HashSet::new(),
-            pending: HashSet::new(), failed: HashSet::new(), events }
+            pending: HashSet::new(), failed: HashSet::new(), events, city_override:None,city_revision:0 }
     }
 
     fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel]) {
@@ -403,13 +434,15 @@ impl ModelLayer {
                 }
             } else if self.visible.contains(&key) && !self.failed.contains(&key) && self.pending.insert(key) {
                 let events = self.events.clone();
+                let revision=if key.is_city() {self.city_revision}else{0};
+                let bytes=self.city_override.clone().filter(|_|key.is_city());
                 let created = std::thread::Builder::new().name("WWO model loading".into()).spawn(move || {
-                    let _ = events.send_event(crate::HostEvent::Model(key, landmarks::decode(key)));
+                    let _ = events.send_event(crate::HostEvent::Model(revision,key,landmarks::decode(key,bytes.as_deref())));
                 });
                 if let Err(error) = created {
                     self.pending.remove(&key);
                     self.failed.insert(key);
-                    let _ = self.events.send_event(crate::HostEvent::Model(key, Err(error)));
+                    let _ = self.events.send_event(crate::HostEvent::Model(revision,key,Err(error)));
                 }
             }
         }
@@ -715,7 +748,9 @@ impl Renderer {
         }).await.ok_or(if surface.is_some(){"A Vulkan adapter with window presentation is required"}else{"A Vulkan adapter is required"})?;
         let info=adapter.get_info();
         let mut features=if natural.is_some() {wgpu::Features::TEXTURE_COMPRESSION_BC}else{wgpu::Features::empty()};
-        if !adapter.features().contains(features) {return Err("自然地貌需要支持 BC7 纹理的 Vulkan 显卡。".into());}
+        if !adapter.features().contains(features) {
+            return Err(format!("Vulkan 显卡 {} 缺少 BC7 纹理支持。", info.name));
+        }
         if observe {
             features |= adapter.features() & (wgpu::Features::TIMESTAMP_QUERY|wgpu::Features::PIPELINE_STATISTICS_QUERY);
         }
@@ -728,7 +763,7 @@ impl Renderer {
                 max_sampled_textures_per_shader_stage:16,
                 ..wgpu::Limits::downlevel_defaults()},
             memory_hints:wgpu::MemoryHints::MemoryUsage
-        },None).await.map_err(|e|e.to_string())?;
+        },None).await.map_err(|e|format!("无法初始化 Vulkan 显卡 {} · {e}", info.name))?;
         let (target,format)=if let Some(surface)=surface {
             let caps=surface.get_capabilities(&adapter);
             let format=caps.formats.iter().copied().find(|f| matches!(f,wgpu::TextureFormat::Bgra8Unorm|wgpu::TextureFormat::Rgba8Unorm))
@@ -842,25 +877,12 @@ impl Renderer {
             write_texture(&queue,&tex,[1,1,1],n,&[0;4][..n as usize]);
             tex.create_view(&Default::default())
         });
-        let globe_source=include_str!("globe.wgsl");
-        let scenery_source=include_str!("landscape.wgsl");
-        let globe_shader=device.create_shader_module(wgpu::ShaderModuleDescriptor{
-            label:Some("WWO globe and Z7 landscape"),
-            source:wgpu::ShaderSource::Wgsl(format!("{globe_source}\n{scenery_source}").into()),
-        });
-        if water_pages.is_some() {surface.init_water_raster(&device,&globe_shader,&view);}
+        let globe_shader=map_shader(&device,include_str!("globe.wgsl"),include_str!("landscape.wgsl"));
+        if water_pages.is_some() {surface.water_raster=Some(GroundSurface::create_water_raster(&device,&globe_shader,&view));}
         let hud_shader=device.create_shader_module(wgpu::include_wgsl!("hud.wgsl"));
-        let mesh_layout=[wgpu::VertexBufferLayout {array_stride:std::mem::size_of::<Vertex>() as u64,
-            step_mode:wgpu::VertexStepMode::Vertex,attributes:&wgpu::vertex_attr_array![0=>Float32x2,1=>Unorm8x4,2=>Float32x2]}];
+        let mesh_layout=[screen_vertex_layout()];
         let pipeline=|groups:&[&wgpu::BindGroupLayout],module:&wgpu::ShaderModule,v,f,buffers:&[wgpu::VertexBufferLayout]| {
-            let layout=device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor{label:None,bind_group_layouts:groups,push_constant_ranges:&[]});
-            device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                label:Some(f),layout:Some(&layout),primitive:Default::default(),depth_stencil:None,
-                multisample:Default::default(),multiview:None,cache:None,
-                vertex:wgpu::VertexState{module,entry_point:Some(v),compilation_options:Default::default(),buffers},
-                fragment:Some(wgpu::FragmentState {module,entry_point:Some(f),compilation_options:Default::default(),
-                    targets:&[Some(wgpu::ColorTargetState{format,blend:Some(wgpu::BlendState::ALPHA_BLENDING),write_mask:wgpu::ColorWrites::ALL})]})
-            })
+            render_pipeline(&device,format,groups,module,v,f,buffers)
         };
         let globe=pipeline(&[&glob,&pages,&close_layout,&surface.layout],&globe_shader,"triangle","map",&[]);
         let rivers=river_source.map(|source| {
@@ -885,15 +907,69 @@ impl Renderer {
         let instrument=pipeline(&[&screen_layout,&font_layout,&instrument_layout],&hud_shader,"screen_vertex","instrument",&mesh_layout);
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
         let models=ModelLayer::new(&device,format,events);
-        let landscape_pipeline=Some((format,glob,globe_shader));
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),
                 frame_timer:None,frame_acquire_ms:0.,view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
                 solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,
                 prologue_art,prologue_texture,prologue_scene:None,prologue_paper,opening_cloud,
                 menu_layout:font_layout,menu_sampler:linear,instrument,instrument_view,screen,screen_size,meshes,models,
-                battle:None,landscape:None,landscape_pipeline,surface,transport_network:None,
+                battle:None,landscape:None,map_layout:glob,landscape_shader:globe_shader,surface,transport_network:None,
                 transport_economy:None,transport_vehicles:None})
+    }
+
+    pub fn reload_map_shader(&mut self, root: &Path) -> io::Result<bool> {
+        let read = |name| match std::fs::read_to_string(root.join(name)) {
+            Ok(value) => Ok(Some(value)),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(None),
+            Err(error) => Err(error),
+        };
+        let globe=read("globe.wgsl")?;
+        let scenery=read("landscape.wgsl")?;
+        if globe.is_none() && scenery.is_none() {return Ok(false);}
+        let format=match &self.target {
+            RenderTarget::Window(_, config)=>config.format,
+            RenderTarget::Offscreen(texture)=>texture.format(),
+        };
+        let device=&self.device;
+        let groups=[&self.map_layout,&self.pages,&self.close_layout,&self.surface.layout];
+        device.push_error_scope(wgpu::ErrorFilter::Validation);
+        let shader=map_shader(device,globe.as_deref().unwrap_or(include_str!("globe.wgsl")),
+            scenery.as_deref().unwrap_or(include_str!("landscape.wgsl")));
+        let map=render_pipeline(device,format,&groups,&shader,"triangle","map",&[]);
+        let rivers=self.rivers.as_ref().map(|_|render_pipeline(device,format,&groups,&shader,
+            "river_stroke","river_ink",&[screen_vertex_layout()]));
+        let water=self.water_pages.as_ref().map(|_|GroundSurface::create_water_raster(device,&shader,&self.view));
+        let landscape=Landscape::new(device,format,groups,&shader);
+        if let Some(error)=pollster::block_on(device.pop_error_scope()) {
+            return Err(io::Error::other(format!("{error}")));
+        }
+        self.globe=map;
+        if let (Some(layer),Some(pipeline))=(&mut self.rivers,rivers) {layer.pipeline=pipeline;}
+        self.surface.water_raster=water;
+        self.landscape_shader=shader;
+        self.landscape=Some(landscape);
+        Ok(true)
+    }
+
+    pub fn reload_land_texture(&mut self, root: &Path) -> io::Result<bool> {
+        let path=root.join("land-material.png");
+        let bytes=match std::fs::read(path) {
+            Ok(bytes)=>bytes,
+            Err(error) if error.kind()==io::ErrorKind::NotFound=>return Ok(false),
+            Err(error)=>return Err(error),
+        };
+        let image=crate::decode_rgba(bytes.as_slice())?;
+        let limit=self.device.limits().max_texture_dimension_2d;
+        if image.size.into_iter().any(|dimension| dimension==0||dimension>limit) {
+            return Err(io::Error::other(format!("Landscape texture dimensions exceed {limit} pixels")));
+        }
+        let art=material_texture(&self.device,&self.queue,image);
+        let surface=&mut self.surface;
+        surface.group=GroundSurface::bind(&self.device,&surface.layout,&surface.repeat,&art,surface.height.as_ref(),
+            &surface.water,&surface.water_pixels);
+        surface.art=art;
+        surface.custom_art=true;
+        Ok(true)
     }
 
     pub fn replace_menu_painting(&mut self,image:Raster) {
@@ -903,6 +979,15 @@ impl Renderer {
         self.menu_art=bind(&self.device,&self.menu_layout,&[
             tex_resource(0,&texture.create_view(&Default::default())),sampler_resource(1,&self.menu_sampler),
         ]);
+    }
+
+    pub fn reload_menu_painting(&mut self,image:Raster) -> io::Result<()> {
+        let limit=self.device.limits().max_texture_dimension_2d;
+        if image.size.into_iter().any(|dimension|dimension==0||dimension>limit) {
+            return Err(io::Error::other(format!("Theme texture dimensions exceed {limit} pixels")));
+        }
+        self.replace_menu_painting(image);
+        Ok(())
     }
 
     pub fn prepare_battle(&mut self, terrain: &wwo_map_lab::battlefield_terrain::BattlefieldTerrain, root: &Path) -> io::Result<()> {
@@ -965,7 +1050,17 @@ impl Renderer {
         self.detail.as_ref().map(terrain_detail::Stream::status)
     }
 
-    pub fn model_ready(&mut self, key: ModelKey, mesh: io::Result<ModelMesh>) -> io::Result<()> {
+    pub fn replace_city_models(&mut self, bytes:Vec<u8>) {
+        let layer=&mut self.models;
+        layer.city_revision+=1;
+        layer.city_override=Some(bytes.into());
+        layer.residents.retain(|key,_|!key.is_city());
+        layer.pending.retain(|key|!key.is_city());
+        layer.failed.retain(|key|!key.is_city());
+    }
+
+    pub fn model_ready(&mut self, revision:u64,key: ModelKey, mesh: io::Result<ModelMesh>) -> io::Result<()> {
+        if key.is_city() && self.models.city_revision!=revision {return Ok(());}
         self.models.complete(&self.device, key, mesh)
     }
 
@@ -1005,8 +1100,13 @@ impl Renderer {
         let Some(terrain)=&mut self.terrain else {return;};
         let enabled=enabled&&terrain.view_max().max(terrain.view_demand())>=6;
         if enabled && camera.mpp<1460. && terrain.landscape_cover() {
-            if let Some((format,glob,shader))=self.landscape_pipeline.take() {
-                self.landscape=Some(Landscape::new(&self.device,format,[&glob,&self.pages,&self.close_layout,&self.surface.layout],&shader));
+            if self.landscape.is_none() {
+                let format=match &self.target {
+                    RenderTarget::Window(_, config)=>config.format,
+                    RenderTarget::Offscreen(texture)=>texture.format(),
+                };
+                self.landscape=Some(Landscape::new(&self.device,format,
+                    [&self.map_layout,&self.pages,&self.close_layout,&self.surface.layout],&self.landscape_shader));
             }
         }
         if let Some(layer)=&mut self.landscape {
@@ -1284,10 +1384,13 @@ impl Renderer {
                     pass.set_bind_group(0,&self.globals,&[]);
                     pass.set_bind_group(2,&self.close_group,&[]);
                     pass.set_bind_group(3,&self.surface.group,&[]);
-                    for (page,_,[x,y,w,h],_) in pages.iter().filter(|(_,tile,_,_)|tile.city_ink_only) {
-                        pass.set_scissor_rect(*x,*y,*w,*h);
-                        pass.set_bind_group(1,&page.group,&[]);
-                        pass.draw(0..3,0..1);
+                    for streets in [false,true] {
+                        for (page,_,[x,y,w,h],_) in pages.iter()
+                            .filter(|(_,tile,_,_)|tile.city_ink_only && tile.city_streets==streets) {
+                            pass.set_scissor_rect(*x,*y,*w,*h);
+                            pass.set_bind_group(1,&page.group,&[]);
+                            pass.draw(0..3,0..1);
+                        }
                     }
                     pass.set_scissor_rect(0,0,w,h);
                 }
