@@ -691,7 +691,7 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
     if use_natural {
         terrain=water_surface(ll,area,natural_surface(ll),color,max(0.,-z)*data.a);
         color=terrain.rgb;
-        if view.settings.y<.5 && view.map_style.z>=6. && base_mpp<LAND_DETAIL_MPP {
+        if view.map_style.z>=6. && base_mpp<LAND_DETAIL_MPP {
             let foreshortening=mix(max(.25,dot(normal_world,view.chart_forward.xyz)),1.,view.viewport.w);
             let detail_footprint=base_mpp/(foreshortening*max(.3,view.chart_origin.z));
             terrain=close_terrain(ll,detail_footprint,terrain);
@@ -758,7 +758,7 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
         }
     }
     var bridges=0.;
-    if tile.options.z>.5 {
+    if tile.options.z>.5 && (!use_natural || view.selection.y>.5) {
         let buildings=textureSampleLevel(city_data,linear,uv,0.).rg;
         let detail=1.-smoothstep(16.,66.,base_mpp);
         let edge=textureSampleLevel(city_data,linear,uv-vec2f(du.x,du.y)*.82,0.).r;
@@ -882,9 +882,9 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
     }
     return color;
 }
-// Geographic city pages carry feature coverage. Let the QPK pass own the
+// City pages carry feature coverage. Let the QPK pass own the
 // continuous ground so loading a local page only reveals buildings and bridges.
-fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
+fn city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
     let historical=tile.options.z>1.5;
     let detail=1.-smoothstep(16.,CITY_INK_MPP,mpp);
     if !historical && detail<=0. {return vec4f(0.);}
@@ -937,10 +937,10 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> 
     var cover=vec2f(0.);
     var ready=0.;
     let fine=landscape_page(ll,7u,true);
-    let fine_weight=landscape_surface_weight(7u)*fine.fade;
+    let fine_weight=natural_lod_weight(7u)*fine.fade;
     if fine_weight<.999 {
         let regional=landscape_page(ll,6u,true);
-        let weight=landscape_surface_weight(6u)*regional.fade;
+        let weight=natural_lod_weight(6u)*regional.fade;
         if weight>.001 {
             let surface=landscape_material(regional);
             cover=vec2f(surface.urban,surface.forest+surface.shrub*.55)*weight;
@@ -1136,12 +1136,18 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
     let edge_fade=smoothstep(vec4f(0.),max(tile.edges,vec4f(.00001)),rim);
     let feather=select(vec4f(1.),mix(tile.edge_ready,vec4f(1.),edge_fade),tile.edges>vec4f(0.));
     let coverage=feather.x*feather.y*feather.z*feather.w;
-    if tile.options.z>.5 && view.map_style.y>.5 && view.settings.y<.5 && view.selection.y<.5 {
-        if tile.options.z<1.5 && view.viewport.z*EARTH>=CITY_INK_MPP {discard;}
-        let ink=geographic_city_ink(ll,uv,view.viewport.z*EARTH,edge_distance,screen_water(p.xy));
+    let area=screen_water(p.xy);
+    let mpp=view.viewport.z*EARTH;
+    let city_on_natural=view.map_style.y>.5 && tile.options.z>.5 && view.selection.y<.5;
+    if tile.options.z>1.5 || (city_on_natural && view.settings.y<.5 && view.selection.z<.5) {
+        let ink=city_ink(ll,uv,mpp,edge_distance,area);
         return vec4f(ink.rgb,ink.a*tile.options.x*coverage);
     }
-    var color=shade_map(ll,uv,v,normal_view,screen_water(p.xy));
+    var color=shade_map(ll,uv,v,normal_view,area);
+    if city_on_natural {
+        let ink=city_ink(ll,uv,mpp,edge_distance,area);
+        color=mix(color,ink.rgb,ink.a);
+    }
     if is_world {
         let edge=1.-smoothstep(0.,view.viewport.z*1.2,horizon-r);
         color=mix(color,sky(p.xy),edge*.47);

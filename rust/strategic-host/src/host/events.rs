@@ -1,6 +1,6 @@
 use super::{decode_rgba, font, hud_type_atlas, ms, Drag, Host, HostEvent, Resident, CACHE_TTL, VIEW_SIZE};
 use crate::{
-    battle_view, camera::{self, Camera, Level}, compact::Raster,
+    battle_view, camera::{Camera, Level}, compact::Raster,
     formal_ui::{self, Command as HudCommand, Hud, Menu as HudMenu, Page as HudPage},
     lobby, map_release, politics::PoliticalVisuals, pop_debug_ui, render::{self, Renderer},
     terrain, terrain_detail, timeline::Date, ui::{Action, CountryAction, Mode}, world::Pixels,
@@ -396,13 +396,11 @@ impl Host {
             self.camera=focus.camera.clone();
             self.camera.level=level;
             self.camera.screen_offset_x = screen_offset;
-            self.camera.focus_toward(focus.target,t,focus.mpp,self.size);
+            self.camera.focus_toward(focus.target,t,focus.mpp);
             self.dirty=true;
             if progress<1. {self.focus=Some(focus);}
         }
         if self.trial.timing&&self.trial.times.len()>=36_000 {self.trial.timing=false;}
-        let scripted=self.trial.movement.map(|(a,b,steps,_)|
-            std::array::from_fn(|i|(b[i]-a[i])/(f64::from(steps)*0.016)));
         if let Some((from,to,steps,mut i))=self.trial.movement.take() {
             let lerp=|t:f64|[from[0]+(to[0]-from[0])*t,from[1]+(to[1]-from[1])*t];
             let a=lerp(f64::from(i)/f64::from(steps));let b=lerp(f64::from(i+1)/f64::from(steps));self.rotate(a,b,false);
@@ -415,14 +413,6 @@ impl Host {
             self.rotate(center,end,false);
             self.velocity=self.velocity.map(|v|v*(-dt*7.8).exp());self.moved_at=now;
         }
-        let motion=scripted.unwrap_or_else(||match &self.drag {
-            Some(d) if !d.bearing && now.saturating_duration_since(d.last)<Duration::from_millis(100)=>self.velocity,
-            None=>self.velocity,
-            _=>[0.;2],
-        });
-        let pointer=if self.drag.as_ref().is_some_and(|d|d.moved&&!d.bearing) {self.cursor}
-            else {self.size.map(|n|f64::from(n)*0.5)};
-        if self.focus.is_none() && self.camera.track_scale(self.size,motion,pointer,now) {self.dirty=true;}
         if self.animate&&now>=self.next_date {
             self.next_date=now+Duration::from_millis(85);self.set_date(self.state.date.offset(1));
         }
@@ -547,14 +537,6 @@ impl ApplicationHandler<HostEvent> for Host {
                     }
                 }
             }else{None};
-            if self.map_signature.is_some()&&!self.config.terrain_review {
-                let mut precision=self.world.city_detail(&self.map_root);
-                if let Some(detail)=&detail {
-                    precision.extend(detail.regions.iter().filter(|r|matches!(r.surface,terrain_detail::Surface::Survey))
-                        .map(|r|camera::DetailRegion::new(r.extent,r.extent,r.size,false)));
-                }
-                self.camera.set_detail(precision);
-            }
             let renderer=if let Some(window)=&window {
                 pollster::block_on(Renderer::new(window.clone(),atlas,flags,hud,globe_art,&layouts,self.natural.take(),detail,self.events.clone(),self.config.observe.is_some()))?
             } else {

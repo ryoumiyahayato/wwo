@@ -255,30 +255,6 @@ impl World {
     pub fn open(path:&Path)->io::Result<Self> {Ok(serde_json::from_reader(File::open(path)?)?)}
     pub fn active_politics(date:&str)->bool { ("1900-01-01".."1901-01-01").contains(&date) }
 
-    pub fn city_detail(&self,root:&Path)->Vec<crate::camera::DetailRegion> {
-        let mut groups:Vec<([f64;4],Vec<&Tile>)>=Vec::new();
-        for tile in self.tiles.iter().filter(|tile|tile.city&&root.join(&tile.path).is_file()) {
-            if let Some((_,tiles))=groups.iter_mut().find(|(extent,_)|*extent==tile.group) {
-                tiles.push(tile);
-            } else {
-                groups.push((tile.group,vec![tile]));
-            }
-        }
-        let area=|[w,s,e,n]:[f64;4]|(e-w)*(n-s);
-        let mut detail=Vec::new();
-        for (extent,tiles) in groups {
-            if tiles.iter().map(|tile|area(tile.core)).sum::<f64>()>=area(extent)*0.9999 {
-                let minimum=tiles.iter().map(|tile|
-                    crate::camera::DetailRegion::new(tile.core,tile.bounds,tile.size,true).minimum)
-                    .fold(0.,f64::max);
-                detail.push(crate::camera::DetailRegion{extent,minimum,city:true});
-            } else {
-                detail.extend(tiles.iter().map(|tile|
-                    crate::camera::DetailRegion::new(tile.core,tile.bounds,tile.size,true)));
-            }
-        }
-        detail
-    }
 }
 pub struct Index {
     cells:HashMap<(i32,i32),Vec<usize>>,

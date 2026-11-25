@@ -31,11 +31,6 @@ fn landscape_coverage(page: LandscapePage) -> f32 {
     return textureSampleLevel(terrain_detail, linear, page.texel / 264., page.slot, 0.).a;
 }
 
-fn landscape_surface_weight(level: u32) -> f32 {
-    if view.settings.y >= .5 { return 0.; }
-    return natural_lod_weight(level);
-}
-
 fn landscape_slope(page: LandscapePage, latitude: f32, radius: f32, level: u32) -> vec2f {
     let longitude_scale = max(.025, cos(radians(latitude)));
     let polar = 1.-smoothstep(.12,.37,longitude_scale);
@@ -349,15 +344,15 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
 }
 
 fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) -> vec3f {
-    if water > .65 || mpp >= LAND_MATERIAL_MPP || view.settings.y >= .5
+    if water > .65 || mpp >= LAND_MATERIAL_MPP
         || all(base==vec3f(1.,0.,1.)) { return base; }
     let strength = ground_material_weight(water,mpp);
     if strength <= .001 { return base; }
     // Keep the world-aligned detail when color temporarily falls back farther
     // than Z5 while zooming or when a nearby page has yet to load.
     let coarse=max(natural_lod_weight(5u),1.-smoothstep(240.,480.,mpp));
-    let regional_weight=landscape_surface_weight(6u);
-    let fine_weight=landscape_surface_weight(7u);
+    let regional_weight=natural_lod_weight(6u);
+    let fine_weight=natural_lod_weight(7u);
     let modern = 1. - landscape_survey_mask(ll,mpp);
     if modern <= .001 || max(regional_weight,fine_weight)<=0. {
         return mix(base,natural_land_material(vec4f(base,water),world,mpp),strength*coarse);
@@ -672,7 +667,7 @@ fn landscape_fragment(input: LandscapeVertex) -> @location(0) vec4f {
     let mpp = view.viewport.z*EARTH;
     var fine = 0.;
     var strength = 0.;
-    let zoom_fine = landscape_surface_weight(7u);
+    let zoom_fine = natural_lod_weight(7u);
     if zoom_fine > .001 {
         let page = landscape_page(input.site.xy,7u,true);
         fine = zoom_fine*page.fade;
@@ -681,7 +676,7 @@ fn landscape_fragment(input: LandscapeVertex) -> @location(0) vec4f {
         }
     }
     if input.kind == 4u && (1.-fine)*input.lod.y > .001 {
-        let zoom_regional = landscape_surface_weight(6u);
+        let zoom_regional = natural_lod_weight(6u);
         if zoom_regional > .001 {
             let page = landscape_page(input.site.xy,6u,true);
             let regional = zoom_regional*page.fade;

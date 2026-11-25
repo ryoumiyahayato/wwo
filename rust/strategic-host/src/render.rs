@@ -1355,15 +1355,15 @@ impl Renderer {
                 pass.set_bind_group(2,&self.close_group,&[]);
                 pass.set_bind_group(3,&self.surface.group,&[]);
                 pass.draw(0..3,0..1);
-                if let Some(layer)=self.rivers.as_ref().filter(|layer|layer.rivers.as_ref().is_some_and(Rivers::visible)) {
-                    pass.set_pipeline(&layer.pipeline);
-                    layer.mesh.draw(&mut pass);
-                    pass.set_pipeline(&self.globe);
-                }
                 for (page,_,[x,y,w,h],_) in pages.iter().filter(|(_,tile,_,_)|!tile.city_ink_only) {
                     pass.set_scissor_rect(*x,*y,*w,*h);
                     pass.set_bind_group(1,&page.group,&[]);
                     pass.draw(0..3,0..1);
+                }
+                if let Some(layer)=self.rivers.as_ref().filter(|layer|layer.rivers.as_ref().is_some_and(Rivers::visible)) {
+                    pass.set_scissor_rect(0,0,w,h);
+                    pass.set_pipeline(&layer.pipeline);
+                    layer.mesh.draw(&mut pass);
                 }
             }
             drop(pass);
