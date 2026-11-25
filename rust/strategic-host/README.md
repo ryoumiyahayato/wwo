@@ -164,7 +164,7 @@ Windows 法国开局从巴黎商店买 1 千克面包，现金从 2500 降到 24
 - `7.qpk` 使用 [Z7 地表归档](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115) 的 `z7-land-material-7.qpk`。
 - 从 [全球海岸巡视归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-shoreline-audit-20261120) 下载 `water-geometry.qwg.zst` 和 `river-centrelines.qhl.zst`。分别解压为 `water-geometry.qwg` 和 `river-centrelines.qhl`。同一归档包含 Z4–Z7 巡视索引、实拍机位记录和汇总。
 - `hydrology-color.qhw` 取自 [水域几何阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-water-geometry-20261120)。
-- `regional-land-cover.qsc` 取自 [区域地表资源归档](https://github.com/ryoumiyahayato/wwo/releases/tag/regional-land-cover-20261126) 的同名附件。放入 QPK 所在目录后重启游戏。缺少该包时继续读取 `landscape-cover-v2.qsc` 和 QPK。
+- `regional-land-cover.qsc` 取自[区域地表资源归档](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-95fd9feaf3a6fd8c8c85)的同名附件。放入 QPK 所在目录后重启游戏。缺少该包时继续读取 `landscape-cover-v2.qsc` 和 QPK。
 
 Z4 至 Z7 共享水陆位置。复杂几何按视野和移动方向预取。缺页和远景使用 QPK。地表、城市和景观共用水陆状态和接替权重。已有明确边界的历史调查图层优先。实测水域覆盖对应河段时抑制重复的中心线符号。水面轮廓与原河段拓扑可分别追溯。
 
@@ -238,7 +238,9 @@ QPK 底色由高程、地类和矢量水域经项目调色与计算生成。现�
 
 GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景按视野解码和上传，桥梁、车站沿用原 GLB 两档网格。读取原件的材质底色、顶点色和法线。桥梁沿用 R68 的显示坐标和桥面基准。
 
-伦敦和巴黎先绘制历史城市地面分片，再随放大加入成组建筑和单体模型。同一 [R40 原创城市模块](../../assets/settlements/R40_SOURCE_AND_USAGE.md) 共享 GPU 网格，放置记录按视野加载。城市资料目录为 `data/city-models`，其中 `catalogue.json` 记录分片边界、数量、重建方法和署名。伦敦使用 1891–1896 年建筑外廓，屋顶和高度为重建估计。巴黎使用约 1900 年历史街区及街道重建资料约束单体放置，屋顶、高度及单栋位置为程序化重建。缺少分片时显示资源提示。其他城市仍使用原有地图资源。
+伦敦和巴黎先绘制历史城市地面分片，再随放大加入成组建筑和单体模型。同一 [R40 原创城市模块](../../assets/settlements/R40_SOURCE_AND_USAGE.md) 共享 GPU 网格，放置记录按视野加载。城市资料目录为 `data/city-models`，其中 `catalogue.json` 记录分片边界、数量、重建方法和署名。伦敦使用 1891–1896 年建筑外廓，屋顶和高度为重建估计。巴黎使用约 1900 年历史街区及街道重建资料约束单体放置，屋顶、高度及单栋位置为程序化重建。缺少分片时显示资源提示。
+
+北京首期接入紫禁城的城垣、护城河、宫殿、庭院及御花园，并沿中轴接入景山御苑及五亭。局部几何使用米制坐标，由地标工作线程首次生成并缓存。历史尺寸与位置来源见[地点记录](../../data/local/beijing_forbidden_city_1900.json)。其他首都按[1900 年首都景观施工清单](CAPITAL_LANDSCAPE_1900.md)逐步建设。
 
 使用 `tools/build_city_models.py <输入资料目录> <独立输出目录>` 生成分片。需要 GeoPandas、Shapely 2、NumPy、pyproj 和 zstandard。源码中的输入相对路径与资料包目录一致。通过 `--city london` 或 `--city paris` 可单独构建到暂存目录，再安装完整目录。授权与来源随目录保存。 [伦敦建筑资料](https://doi.org/10.5281/zenodo.19497435)，[巴黎历史重建资料](https://doi.org/10.34847/nkl.cbf5ecd0)
 
