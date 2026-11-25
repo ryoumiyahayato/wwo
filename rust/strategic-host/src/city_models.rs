@@ -155,7 +155,7 @@ impl Catalogue {
         let mut cells = HashSet::new();
         let [_,lat] = camera.coordinates();
         let step = [lat.to_radians().cos().max(0.05), 1.].map(|unit|
-            (camera.mpp*2.6/(0.111_195*unit)).round().max(1.) as i32);
+            (camera.mpp*1.45/(0.111_195*unit)).round().max(1.) as i32);
         let mut resident=visible.iter().filter(|(index,_)|self.cache.contains_key(index)).count();
         for (index,_) in visible {
             if let Some(rows) = self.cache.get(&index) {

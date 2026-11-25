@@ -22,6 +22,8 @@ pub struct Tile {
     pub city_area:bool,
     #[serde(default)]
     pub city_streets:bool,
+    #[serde(default)]
+    pub city_blocks:bool,
     pub ids:bool,
     #[serde(default)]
     pub surface_span:u32,
@@ -48,6 +50,7 @@ impl Tile {
         }
         if self.city_ink_only {
             if self.city_streets { return (1.-smooth(70.,self.city_ink_limit(),mpp)) as f32; }
+            if self.city_blocks { return (1.-smooth(125.,self.city_ink_limit(),mpp)) as f32; }
             // The overview shows surveyed built density at the 50 km scale.
             return (1. - smooth(650., self.city_ink_limit(), mpp)) as f32;
         }
@@ -62,7 +65,8 @@ impl Tile {
     }
 
     fn city_ink_limit(&self) -> f64 {
-        if self.city_streets { 145. } else if self.city_area { 950. } else { crate::camera::CITY_INK_MPP }
+        if self.city_streets { 145. } else if self.city_blocks { 220. }
+        else if self.city_area { 950. } else { crate::camera::CITY_INK_MPP }
     }
 
     pub fn cover_size(&self)->usize {

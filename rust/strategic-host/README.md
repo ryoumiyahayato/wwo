@@ -247,7 +247,7 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 伦敦瓦片由 `tools/build_london_city_ground.py` 从已有 GeoPackage 整理。巴黎及周边建成区与道路由 `tools/build_paris_city_ground.py` 从 Institut Paris Region 的约 1900 年、1∶50,000 资料整理。巴黎瓦片的建成区通道表示总体覆盖范围，道路笔画表示资料中的路线。数据版本、作者及许可见 [城市分片清单](../../data/city-overlays/catalogue.json)。画作来源与许可见 [主题清单](../../data/menu-themes/catalogue.json)。
 
-巴黎市内道路分片使用 `build_paris_city_ground.py` 的 `--detailed-streets` 选项，从 Paris Time Machine 重建线生成。道路按原始街道类别分层。显示宽度用于区分层级。政治地图「地点类别」按现有地点 ID 筛选，并可从地点卡片打开相应专题。 [编号地图标识图册](map-symbols.html)
+巴黎市内道路分片使用 `build_paris_city_ground.py` 的 `--detailed-streets` 选项，从 Paris Time Machine 重建线生成。道路按原始街道类别分层。显示宽度用于区分层级。`--blocks` 读取同一资料集的建成街区。街区层在中尺度显示，排除历史非建成地类，并随放大让位给单栋模型。政治地图「地点类别」按现有地点 ID 筛选，并可从地点卡片打开相应专题。 [编号地图标识图册](map-symbols.html)
 
 格陵兰和南极的接地冰川、浮冰架、季节性海冰与水域需要结合现有 QWG、QHW 和高程资料单独核对。本阶段继续使用现有极地分片。
 
