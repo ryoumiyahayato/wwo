@@ -173,7 +173,6 @@ struct LocalizedName {zh:String,en:String}
 pub struct AdminRecord<'a> {pub name:&'a str,pub original:&'a str,pub boundary:Option<usize>}
 #[derive(Deserialize)]
 pub struct MapSymbol {
-    pub screen_px:f32,
     pub priority:u32,
     pub region_max_mpp:f64,
     pub world:bool,
@@ -1322,10 +1321,14 @@ impl Display<'_> {
                 if self.mode==Mode::Political {
                     use crate::map_facilities::PlaceFilter;
                     for (i,(label,filter)) in [
+                        (say("全部地点","All places"),PlaceFilter::Overview),
                         (say("行政与聚落","Administration"),PlaceFilter::Settlements),
                         (say("历史文化","Heritage"),PlaceFilter::Heritage),
-                        (say("交通与经济","Infrastructure"),PlaceFilter::Infrastructure),
+                        (say("交通设施","Transport sites"),PlaceFilter::Transport),
+                        (say("工业与矿业","Industry & mining"),PlaceFilter::Economy),
+                        (say("政府建筑","Government"),PlaceFilter::Government),
                         (say("军事设施","Military sites"),PlaceFilter::Military),
+                        (say("航空设施","Aviation"),PlaceFilter::Aviation),
                     ].into_iter().enumerate() {
                         self.row(m,t,hits,[x+13.+(i%2) as f32*(button+4.),y+203.+(i/2) as f32*31.,button,26.],
                             label,Some(Action::PlaceFilter(filter)),self.hud.place_filter==filter);
@@ -1446,7 +1449,7 @@ pub fn page_rect(hud:&Hud,size:[u32;2])->Option<[f32;4]>{
 pub fn menu_rect(menu:Menu,size:[u32;2],radius:f32)->[f32;4]{
     let [w,h]=size.map(|v|v as f32);
     match menu {
-        Menu::MapModes=>[w*0.5-165.,h-radius-291.,330.,270.],
+        Menu::MapModes=>[w*0.5-165.,h-radius-353.,330.,332.],
         Menu::System=>[w-292.,145.,280.,252.],
         Menu::Settings=>[(w-340.)*0.5,(h-290.)*0.5,340.,290.],
         Menu::Save|Menu::Load=>[(w-500.)*0.5,(h-368.)*0.5,500.,368.],

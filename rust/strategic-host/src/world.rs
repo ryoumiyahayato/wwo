@@ -115,6 +115,7 @@ pub struct Place {
     #[serde(default)] pub name_zh:String,
     #[serde(default)] pub symbol:String,
     #[serde(default)] pub facility:Option<crate::map_facilities::Facility>,
+    #[serde(default)] pub facility_active:Option<bool>,
     #[serde(default)] pub military_facility_active:bool,
     #[serde(default)] pub reference:bool,
     #[serde(default)] pub display_symbol:bool,
@@ -124,6 +125,12 @@ pub struct Place {
     pub max_mpp:f64,
     pub from_date:String,
     pub to_date:String,
+}
+impl Place {
+    pub fn transport_reference(&self) -> bool {
+        self.reference && matches!(self.symbol.as_str(), "station" | "bridge")
+            && self.id.starts_with("transport_reference:")
+    }
 }
 fn selectable_place()->bool {true}
 #[derive(Deserialize)]

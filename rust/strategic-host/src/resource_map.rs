@@ -9,6 +9,7 @@ use wwo_map_lab::resource_geography::{
 use crate::{
     camera::Camera,
     formal_ui::{Display, Menu, Page},
+    map_markers,
     overlay::Mesh,
     ui::{Action, Hit, Mode},
     world::World,
@@ -278,12 +279,21 @@ pub fn draw_layer(state: &State, camera: &Camera, size: [u32; 2], year: i32, map
         let count = group.len();
         let ([x, y], record) = group[selected.unwrap_or(0)];
         let next = selected.map_or(0, |i| (i + 1) % count);
-        let radius = if count > 1 { 9. } else { 6. };
-        map.shape(&diamond([x, y], radius + 2.), if selected.is_some() { INK } else { DARK });
-        map.shape(&diamond([x, y], radius), symbol(record));
-        if count > 1 || record.kind != EntityKind::Working {
-            map.shape(&diamond([x, y], radius * 0.47), DARK);
-        }
+        let working = count == 1 && record.kind == EntityKind::Working;
+        let ink = symbol(record);
+        let radius = if kind.category() == Category::Renewable {
+            let radius = if count > 1 { 9. } else { 6. };
+            map.shape(&diamond([x, y], radius + 2.), if selected.is_some() { INK } else { DARK });
+            map.shape(&diamond([x, y], radius), ink);
+            if !working { map.shape(&diamond([x, y], radius * 0.47), DARK); }
+            radius
+        } else {
+            let radius = map_markers::DIAMOND_RADIUS + 1.;
+            if selected.is_some() { map_markers::diamond(map, [x, y], radius + 3., INK, false); }
+            map_markers::diamond(map, [x, y], radius, ink, working);
+            map_markers::glyph(map, "pick", [x, y], radius * 1.55, if working { DARK } else { ink });
+            radius
+        };
         hits.push(Hit {
             area: [x - radius - 4., y - radius - 4., radius * 2. + 8., radius * 2. + 8.],
             action: Action::Resources(Command::Site(&group[next].1.resource_id)),

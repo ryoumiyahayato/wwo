@@ -422,6 +422,7 @@ impl Host {
         let Some(link)=self.transport_detail.as_ref().and_then(|(_, detail)|detail.links.get(index)).map(|(_,link)|link.clone()) else{return;};
         match link {
             Link::Object(id)=>self.select_transport(Some(id)),
+            Link::MapMode(mode)=>self.action(Action::Mode(mode)),
             Link::Travel(id)=>{self.choose_transport_destination(&id);}
             Link::CurrentTravel=>{
                 self.hud_action(HudCommand::Page(HudPage::Travel));
@@ -858,7 +859,7 @@ impl Host {
             if self.transport_scene.is_none() {
                 self.transport_scene=Some(transport_scene::TransportScene::new(world.transport())?);
             }
-            self.transport_scene.as_mut().unwrap().update_map(&self.camera,self.size,&date,self.mode,world,
+            self.transport_scene.as_mut().unwrap().update_map(&self.camera,self.size,&date,self.mode,self.hud.place_filter,world,
                 self.transport_selection.as_ref(), transport_route, planning_transport)?;
         }
         let show_transport_detail=self.transport_detail_visible();

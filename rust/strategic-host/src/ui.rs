@@ -1,7 +1,7 @@
 use crate::{camera::Camera,overlay::{Atlas,Mesh},world::{Place,World}};
 use std::cmp::Ordering;
 use std::collections::HashSet;
-use crate::map_facilities::{self, Facility, PlaceFilter};
+use crate::{map_facilities::{self, Facility, PlaceFilter}, map_markers};
 #[derive(Clone,Copy)]
 pub enum Ink { HudArtGlass, ClockGears, Solid, Text, Flag, HudArt, HudText, Instrument, MenuArt, PrologueArt, ProloguePaper, OpeningCloud, Loading, HistoryLight }
 
@@ -68,7 +68,11 @@ pub struct Ui<'a> {
 
 pub fn can_read_object(world: &World, written: Option<&wwo_map_lab::formal_bootstrap::InitialWorld>, object: Object) -> bool {
     written.is_none_or(|written| match object {
-        Object::Place(index) => written.can_read_place_record(&world.places[index].id),
+        Object::Place(index) => {
+            let place=&world.places[index];
+            written.can_read_place_record(&place.id)
+                || (place.transport_reference() && written.can_read_opening_language())
+        }
         Object::Polity(index) => written.can_read_polity_record(&world.polities[index].id),
         Object::Administration(_) => written.can_read_polity_record("country_fra"),
     })
@@ -104,9 +108,9 @@ fn place_visible(ui:&Ui<'_>,place:&Place,kind:&str,facility:Option<Facility>)->b
     match ui.mode {
         Mode::Geographic=>true,
         Mode::Political=>ui.formal.hud.place_filter.visible(place,kind,facility),
-        Mode::Economic=>matches!(kind,"capital"|"city"|"town"|"station"|"port")
+        Mode::Economic=>matches!(kind,"capital"|"city"|"town"|"station"|"bridge"|"port")
             || matches!(facility,Some(Facility::Industrial|Facility::Mining)),
-        Mode::Military=>place.military_facility_active ||
+        Mode::Military=>(place.military_facility_active && place.facility_active != Some(false)) ||
             matches!(kind,"capital"|"admin_primary"|"admin_secondary"|"city"|"bridge"|"station"|"port"),
     }
 }
@@ -121,9 +125,8 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
     let mut candidates=Vec::new();
     for (index,place) in world.places.iter().enumerate() {
         let kind=map_facilities::symbol(&place.symbol);
-        let facility=Facility::for_place(place);
+        let facility=Facility::at(place, ui.date);
         if kind=="settlement" && facility.is_none() {continue;}
-        if facility==Some(Facility::MilitaryBase) && !place.military_facility_active {continue;}
         let ordinary_marker=ui.labels && place.display_symbol && place_visible(ui,place,kind,facility);
         let population_marker=ui.formal.population_debug && place.selectable &&
             matches!(kind,"capital"|"admin_primary"|"admin_secondary"|"city"|"town"|"village");
@@ -140,7 +143,7 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
         if !chosen && ((!regional&&!spec.world)||ui.camera.mpp>limit*if retained {1.12} else {1.}) {continue;}
         let Some(point)=ui.camera.project(place.coordinates,ui.size) else {continue;};
         let [x,y]=point.map(|n|n as f32);
-        let px=spec.screen_px*if regional {1.} else {0.78};
+        let px=map_markers::PLACE_SIZE*if regional {1.} else {0.78};
         let area=[x-px/2.,y-px/2.,px,px];
         if area[0]<0.||area[1]<0.||area[0]+px>w||area[1]+px>h {continue;}
         candidates.push((index,place,kind,area,chosen,retained,spec.priority,facility));
@@ -155,6 +158,10 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
         let pick=[x-4.,y-4.,px+8.,px+8.];
         if let Some(facility)=facility {
             facility.draw(map,[x,y,px,px],place.selectable);
+        } else if kind=="station" {
+            let mut ink=map_markers::GOLD;
+            if !place.selectable {ink[3]=158;}
+            map_markers::glyph(map,"station",[x+px/2.,y+px/2.],px,ink);
         } else {
             let asset=format!("map_{kind}");
             skin.tinted_sprite(art,&asset,[x-1.25,y-1.25,px+2.5,px+2.5],[25,38,36,217]);
@@ -283,15 +290,18 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             _ => None,
         };
         let has_debug=ui.formal.debug.is_some();
-        let facilities=if let Object::Place(i)=object {
+        let topic=if let Object::Place(i)=object {
             let place=&world.places[i];
-            Facility::for_place(place).map(Facility::mode).or(match map_facilities::symbol(&place.symbol) {
+            if ui.mode==Mode::Political && ui.formal.hud.place_filter == PlaceFilter::Military
+                && PlaceFilter::Military.visible(place,&place.symbol,Facility::at(place, ui.date)) {
+                Some(Mode::Military)
+            } else { Facility::at(place, ui.date).map(Facility::mode).or(match map_facilities::symbol(&place.symbol) {
                 "historic_site"|"castle"|"fort"|"monument"|"religious"|"eiffel"|"clock_tower"|"pyramids"=>Some(Mode::Geographic),
                 "station"|"bridge"|"port"=>Some(Mode::Economic),
                 _=>None,
-            }).filter(|mode| *mode!=ui.mode)
+            }) }.filter(|mode| *mode!=ui.mode)
         } else {None};
-        let extra_row=if facilities.is_some() {32.} else {0.};
+        let extra_row=if topic.is_some() {32.} else {0.};
         panel(&mut panels,x,y,width,if has_debug {200.+extra_row} else {148.+extra_row});
         let (label,id,desc,extra)=match object {
             Object::Polity(_)=>unreachable!(),
@@ -315,7 +325,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             ui.formal.ink_block(&mut panels,[x+15.,y+42.,123.,12.]);
             ui.formal.ink_block(&mut panels,[x+15.,y+72.,217.,12.]);
         }
-        if let Some(mode)=facilities {
+        if let Some(mode)=topic {
             let label=match mode {
                 Mode::Economic=>skin.choose("在经济地图显示","Show in economic map"),
                 Mode::Military=>skin.choose("在军事地图显示","Show in military map"),

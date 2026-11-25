@@ -18,15 +18,10 @@ pub enum ObjectId {
     Vehicle { segment: String, reservation: u64 },
 }
 
-pub struct MappedSite<'a> {
-    pub name: &'a str,
-    pub source: &'a str,
-    pub note: &'a str,
-}
-
 #[derive(Clone)]
 pub enum Link {
     Object(ObjectId),
+    MapMode(Mode),
     Travel(String),
     CurrentTravel,
     Market(String),
@@ -115,16 +110,13 @@ impl Context<'_> {
 
     fn node(&self, id: &str, d: &mut Detail) -> Option<()> {
         let network = self.world.transport();
-        if network.node(id).is_none() {
-            let site = self.scene.reference_site(id)?;
-            d.title = "历史地物".into();
-            if self.world.can_read_opening_language() {
-                d.title = site.name.into();
-                d.details.extend([site.source, site.note].into_iter().filter(|s| !s.is_empty()).map(str::to_owned));
-            }
-            return Some(());
+        let node = network.node(id)?;
+        d.title = if node.kind == wwo_map_lab::transport::NodeKind::Port {
+            self.skin.choose("港口", "Port")
+        } else { self.skin.choose("运输节点", "Transport node") }.into();
+        if self.mode == Mode::Political {
+            d.links.push((self.skin.choose("在经济地图显示", "Show in economic map").into(), Link::MapMode(Mode::Economic)));
         }
-        d.title = "交通地点".into();
         if !self.world.can_read_place_record(id) {
             if self.world.can_book_transport_to(id) {
                 d.title = self.place(id).into();
