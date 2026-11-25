@@ -630,7 +630,7 @@ impl Display<'_> {
             let flag_area = [x + 16., y + 13., 60., 33.];
             let fade = nav.previous_country.map_or(1., |(_, at)| (at.elapsed().as_secs_f32() / 0.3).clamp(0., 1.));
             if let Some((index, _)) = nav.previous_country.filter(|_| fade < 1.) {
-                flags.flag_wave(flag_area, view.visuals.record(index).flag, 0., (1. - fade) * 255.);
+                flags.flag_wave(flag_area, view.visuals.record(index).flag, elapsed, (1. - fade) * 255.);
             }
             flags.flag_wave(flag_area, slot, elapsed, fade * 255.);
         }

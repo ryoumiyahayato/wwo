@@ -50,14 +50,16 @@ fn output(p: vec2<f32>, v: Input) -> Output {
     let phase=local.x*7.5-camera.seconds*2.1;
     let wave=sin(phase)*0.065*local.x;
     let v=(local.y-0.1)/0.8-wave;
-    let edge=max(fwidth(v)*0.5,0.001);
+    // Helper pixels beyond the mesh can cross an atlas cell, where fract wraps.
+    let atlas_cloth_height=0.99*0.8/16.;
+    let edge=max(fwidth(o.uv.y)*0.5/atlas_cloth_height,0.001);
     let cloth=smoothstep(-edge,edge,v)*(1.-smoothstep(1.-edge,1.+edge,v));
     let span=vec2f(textureDimensions(atlas))/16.;
     let uv=(cell+(vec2f(0.5)+clamp(vec2f(local.x,v),vec2f(0.),vec2f(1.))*(span-1.))/span)/16.;
     let sample=textureSampleLevel(atlas,atlas_sampler,uv,0.);
     let neutral=dot(sample.rgb,vec3f(0.2126,0.7152,0.0722));
     let tone=mix(vec3f(neutral),sample.rgb,0.83)*(.94+cos(phase)*.055*local.x);
-    return vec4f(tone,sample.a*cloth);
+    return vec4f(tone,sample.a*cloth*o.color.a);
 }
 @fragment fn loading(o: Output) -> @location(0) vec4f {
     let sweep=fract(camera.seconds*0.24)*1.45-0.25;
