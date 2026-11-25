@@ -109,7 +109,8 @@ def road_lines(root, london):
                     or end.isdecimal() and int(end) <= 1900):
                 continue
             material = 0 if tags.get("surface") == "unpaved" else 2 if width >= 5 else 1
-            yield LineString([(p["lon"], p["lat"]) for p in points]), width, material, bool(tags.get("bridge"))
+            yield (f"ohm:{row['type']}:{row['id']}", LineString([(p["lon"], p["lat"]) for p in points]),
+                   width, material, bool(tags.get("bridge")))
     else:
         road_file = root / "paris_1900_ptm/PTM_Paris1900_rues_epsg4326.geojson"
         for row in json.loads(road_file.read_text(encoding="utf-8-sig"))["features"]:
@@ -118,23 +119,30 @@ def road_lines(root, london):
                 continue
             width = float(fields.get("largeur") or 4)
             material = 2 if width >= 5 or fields.get("typvoie") in ("rue", "quai", "pont") else 1
-            yield shape(row["geometry"]), min(width, 28.), material, fields.get("franchisst") == "Pont"
+            yield (f"ptm:road:{fields['id_ptm']}", shape(row["geometry"]),
+                   min(width, 28.), material, fields.get("franchisst") == "Pont")
+
+
+def prepared_roads(root, limits, values, london):
+    lon, lat, x_scale, y_scale = values[:4]
+    project = lambda x, y: ((x-lon)*x_scale, (y-lat)*y_scale)
+    for feature_id, geometry, full_width, material, bridge in road_lines(root, london):
+        clipped = transform(geometry, project, interleaved=False).intersection(limits)
+        lines = [part.simplify(.28) for part in getattr(clipped, "geoms", [clipped])
+                 if part.geom_type == "LineString" and not part.is_empty]
+        if lines:
+            yield feature_id, lines, max(.85, full_width*.5), material, bridge
 
 
 def pack_roads(root, words, limits, values, london):
-    lon, lat, x_scale, y_scale, west, south, east, north = values
+    west, south, east, north = values[4:]
     width, height = math.ceil((east-west)/ROAD_CELL), math.ceil((north-south)/ROAD_CELL)
     index = len(words)
     words.extend([width, height] + [0]*(2*width*height))
     cells = {}
-    project = lambda x, y: ((x-lon)*x_scale, (y-lat)*y_scale)
-    for geometry, full_width, material, bridge in road_lines(root, london):
-        clipped = transform(geometry, project, interleaved=False).intersection(limits)
-        radius = max(0.85, full_width*.5)
-        for part in getattr(clipped, "geoms", [clipped]):
-            if part.geom_type != "LineString":
-                continue
-            points = list(part.simplify(.28).coords)
+    for _, lines, radius, material, bridge in prepared_roads(root, limits, values, london):
+        for part in lines:
+            points = list(part.coords)
             for a, b in zip(points, points[1:]):
                 count = max(1, math.ceil(math.dist(a, b)/ROAD_CELL))
                 for i in range(count):
