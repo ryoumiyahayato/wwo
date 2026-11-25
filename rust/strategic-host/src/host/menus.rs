@@ -38,8 +38,14 @@ impl Host {
     pub(super) fn hud_action(&mut self,command:HudCommand) {
         match command {
             HudCommand::PlaceFilters => {
-                self.hud.place_filters_open = !self.hud.place_filters_open;
                 if self.hud.place_filters_open {
+                    self.hud.place_filters_open = false;
+                } else {
+                    if self.mode != Mode::Political {
+                        self.action(Action::Mode(Mode::Political));
+                        self.hud.menu = HudMenu::MapModes;
+                    }
+                    self.hud.place_filters_open = true;
                     let (_, visible) = formal_ui::place_filter_drawer(self.size);
                     let active = formal_ui::PLACE_FILTERS.iter()
                         .position(|(filter, _, _)| *filter == self.hud.place_filter).unwrap_or_default();
@@ -123,6 +129,8 @@ impl Host {
                 self.hud.menu=if previous==menu{HudMenu::None}else{menu};
                 self.hud.waiting_slot=false;
                 if menu==HudMenu::MapModes {
+                    self.hud.place_filters_open=false;
+                    self.search=None;
                     if self.hud.page==HudPage::Market{self.market_command("close",0);}
                     if self.hud.page==HudPage::Relations{self.emit(Request::Relations{verb:"close",id:""});}
                     if self.hud.page!=HudPage::Travel {self.hud.page=HudPage::Map;}

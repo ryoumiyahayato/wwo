@@ -130,10 +130,6 @@ impl Host {
     pub(super) fn action(&mut self,action:Action) {
         self.country_click=None;
         self.feedback.clear();
-        if matches!(action,Action::Home|Action::Back|Action::Search) && self.hud.menu==HudMenu::MapModes {
-            self.hud.menu=HudMenu::None;
-            self.hud.page=HudPage::Map;
-        }
         match action {
             Action::PlaceFilter(filter)=>{
                 if self.hud.place_filter != filter { self.select(None); }
@@ -161,6 +157,10 @@ impl Host {
                 self.velocity=[0.;2];self.details=false;self.country=None;self.search=None;
             }
             Action::Search=>{
+                if self.hud.page!=HudPage::Map {
+                    self.hud_action(HudCommand::Page(HudPage::Map));
+                }
+                self.hud.menu=HudMenu::None;
                 self.details=false;self.country=None;
                 self.search=if self.search.is_some(){None}else{Some(String::new())};
                 if self.search.is_some() { self.population_debug=None; }
@@ -289,17 +289,15 @@ impl Host {
         let [x,y]=p.map(|v|v as f32);
         let contains=|[a,b,w,h]:[f32;4]| x>=a&&x<=a+w&&y>=b&&y<=b+h;
         let resource_map=self.resources_available()&&self.resources.open;
-        if self.hud.menu==HudMenu::MapModes&&contains(formal_ui::map_modes_rect(self.size)) {
+        let in_menu=self.hud.menu!=HudMenu::None&&contains(formal_ui::menu_rect(&self.hud,self.size));
+        if self.hud.menu==HudMenu::MapModes&&in_menu {
             if let Some(hit)=self.hits.iter().rev().find(|hit|matches!(hit.action,
-                Action::Mode(_)|Action::PlaceFilter(_)|Action::Home|Action::Back|Action::Search|
-                Action::Hud(HudCommand::Page(HudPage::Travel)|HudCommand::PlaceFilters|HudCommand::PlaceFilterScroll(_)))
+                Action::Mode(_)|Action::PlaceFilter(_)|Action::Hud(HudCommand::PlaceFilters))
                 &&contains(hit.area)) {
                 self.action(hit.action);
             }
             return;
         }
-        let radius=(self.size[0] as f32*0.056).clamp(52.,78.);
-        let in_menu=self.hud.menu!=HudMenu::None&&contains(formal_ui::menu_rect(self.hud.menu,self.size,radius));
         let in_country=!self.hud.menu.modal()&&self.country.is_some_and(|panel|contains(panel.rect(self.size)));
         if let Some(hit)=self.hits.iter().rev().find(|h|{
             let gear=matches!(h.action,Action::Hud(HudCommand::Menu(HudMenu::System)))&&h.area[1]==0.;
@@ -311,7 +309,7 @@ impl Host {
                 &&(!resource_map||!matches!(h.action,Action::Select(_)))
                 &&(!matches!(h.action,Action::Resources(crate::resource_map::Command::Site(_)))
                     || resource_map&&!contains(crate::resource_map::bounds(self.size)))
-                &&(!in_country||in_menu||matches!(h.action,Action::Country(_)))
+                &&(!in_country||in_menu||matches!(h.action,Action::Country(_)|Action::Search))
                 &&(!self.details||!matches!(h.action,Action::Select(_))||self.search.is_some())
         }) {
             let action=hit.action;
@@ -329,7 +327,7 @@ impl Host {
                 Action::Select(Object::Polity(i)) if self.search.is_none()&&self.hud.menu==HudMenu::None&&self.hud.page==HudPage::Map=>{
                     self.click_country(i,p);
                 }
-                Action::Select(Object::Place(i)) if !in_country && self.mode!=Mode::Political
+                Action::Select(Object::Place(i)) if self.search.is_none() && !in_country && self.mode!=Mode::Political
                     && !matches!(self.world.places[i].symbol.as_str(),"station"|"bridge") && self.pick_transport(p)=>{},
                 _=>self.action(action),
             }
@@ -404,13 +402,12 @@ impl Host {
                 _=>true,
             };
         }
-        let radius=(w*0.056).clamp(52.,78.);
         let modal=self.hud.menu.modal();
         modal||self.search.is_some()||self.details||self.transport_panel_at(p)||
             (self.resources_available()&&self.resources.open&&contains(crate::resource_map::bounds(self.size)))||
             self.country.is_some_and(|country|contains(country.rect(self.size)))||
             formal_ui::page_rect(&self.hud,self.size).is_some_and(contains)||
-            (self.hud.menu!=HudMenu::None&&contains(formal_ui::menu_rect(self.hud.menu,self.size,radius)))||
+            (self.hud.menu!=HudMenu::None&&contains(formal_ui::menu_rect(&self.hud,self.size)))||
             (self.hud.messages&&contains(formal_ui::message_rect([w,h],((h+16.)*0.5).max(190.))))||
             self.hits.iter().any(|hit|{
                 let gear=matches!(hit.action,Action::Hud(HudCommand::Menu(HudMenu::System)))&&hit.area[1]==0.;

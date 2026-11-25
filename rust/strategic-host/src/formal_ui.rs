@@ -459,6 +459,7 @@ pub struct Display<'a> {
     pub managed:bool,
     pub debug:Option<&'a crate::Diagnostics>,
     pub population_debug:bool,
+    pub search_open:bool,
 }
 impl Display<'_> {
     pub(crate) fn can_read_world(&self) -> bool {
@@ -558,14 +559,14 @@ impl Display<'_> {
     }
     pub fn draw(&self, panels:&mut Mesh, art:&mut Mesh, text:&mut Mesh, clock:&mut Mesh, flags:&mut Mesh, instrument:&mut Mesh, hits:&mut Vec<Hit>){
         let [w,h]=self.size.map(|v|v as f32);
-        let radius=(w*0.056).clamp(52.,78.);
+        let radius=globe_radius(w);
         let cx=w*0.5;
         let s=self.session;
         let visual=self.skin;
         if let Some(slot)=self.flags {flags.flag([22.,19.,72.,50.],slot);}
         if s.is_some() {Self::hit(hits,[12.,12.,92.,64.],Command::PlayerCountry);}
         self.draw_clock(art,clock,text,hits);
-        if self.hud.menu.modal(){self.menu(panels,text,hits,radius);return;}
+        if self.hud.menu.modal(){self.menu(panels,text,hits);return;}
         if self.hud.menu==Menu::None && clock_hit(self.cursor,self.size[0],self.session,self.hud.mechanical.angle) && self.hud.clock_drag.is_none() {
             let hint=visual.choose("拖动指针调节速度 · 顶端暂停，向下加快 · 空格开始或暂停",
                 "Drag to set speed · Top to pause · Space to toggle");
@@ -635,6 +636,12 @@ impl Display<'_> {
             .max(visual.width(label,0)+20.).min((w-20.).max(1.));
         let height=if label.is_empty(){65.}else{85.};
         let right=w-10.;
+        let mut search=[cx+radius+26.,h-46.,34.,34.];
+        if search[0]+search[2]+6.>right-width {
+            search[0]=cx+173.;
+            search[1]=h-height-46.;
+        }
+        self.map_search(panels,text,hits,search);
         panels.rect(right-width,h-height-6.,width,height,[11,20,27,203]);
         let right_line=|label:&str|right-visual.width(label,0).min(width-16.)-9.;
         visual.text(text,version,0,[right_line(version),h-66.],width-16.,IVORY);
@@ -701,7 +708,7 @@ impl Display<'_> {
             }
         }
         if self.hud.messages {self.messages(panels,text,hits,center);}
-        self.menu(panels,text,hits,radius);
+        self.menu(panels,text,hits);
     }
 
     pub(crate) fn diagnostics(&self,m:&mut Mesh,t:&mut Mesh,left:f32,right:f32){
@@ -1283,12 +1290,82 @@ impl Display<'_> {
         }
         self.row(m,t,hits,[x+14.,y+height-45.,width-49.,26.],"百科 / 帮助 · 未迁移",None,false);
     }
-    fn menu(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,radius:f32){
+    fn map_search(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,area:[f32;4]) {
+        let [x,y,w,h]=area;
+        let [px,py]=self.cursor.map(|value|value as f32);
+        let hovered=px>=x && px<=x+w && py>=y && py<=y+h;
+        let active=self.search_open || hovered;
+        m.shape(&cornered(area,6.),if active{[63,66,60,255]}else{[9,14,20,245]});
+        rim(m,area,6.,1.,if active{BRASS}else{RIM});
+        arc(m,[x+15.,y+14.],6.,0.,std::f32::consts::TAU,1.7,IVORY);
+        m.line([x+19.,y+18.],[x+25.,y+24.],2.,IVORY);
+        hits.push(Hit{area,action:Action::Search});
+        if hovered {
+            let label=self.skin.choose("搜索地图","Search map");
+            let width=self.skin.width(label,0)+20.;
+            let left=(x+w*0.5-width*0.5).min(self.size[0] as f32-width-8.);
+            panel(m,[left,y-33.,width,28.],[8,13,20,249]);
+            self.skin.text(t,label,0,[left+10.,y-30.],width-20.,IVORY);
+        }
+    }
+
+    fn map_modes(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,[x,y,width,_]:[f32;4]) {
+        let options=[
+            (self.skin.choose("政治地图","Political"),Mode::Political),
+            (self.skin.choose("经济地图","Economic"),Mode::Economic),
+            (self.skin.choose("军事地图","Military"),Mode::Military),
+        ];
+        let mut top=y+37.;
+        for (label,mode) in options {
+            let active=self.mode==mode;
+            let target=if active{Mode::Geographic}else{mode};
+            self.row(m,t,hits,[x+13.,top,width-26.,27.],label,Some(Action::Mode(target)),active);
+            if mode!=Mode::Political {
+                top+=32.;
+                continue;
+            }
+            let right=x+width-13.;
+            let open=self.hud.place_filters_open;
+            if active && self.hud.place_filter!=PlaceFilter::Overview {
+                if let Some(&(_,zh,en))=PLACE_FILTERS.iter().find(|(filter,_,_)|*filter==self.hud.place_filter) {
+                    let selected=self.skin.choose(zh,en);
+                    let span=self.skin.width(selected,0).min(150.);
+                    self.skin.text(t,selected,0,[right-40.-span,top+4.],span+1.,MUTED);
+                }
+            }
+            let [cx,cy]=[right-15.,top+13.5];
+            let direction=if open{-1.}else{1.};
+            m.line([right-31.,top+4.],[right-31.,top+23.],1.,RIM);
+            m.line([cx-4.5,cy-2.*direction],[cx,cy+2.5*direction],1.5,IVORY);
+            m.line([cx,cy+2.5*direction],[cx+4.5,cy-2.*direction],1.5,IVORY);
+            Self::hit(hits,[right-31.,top,31.,27.],Command::PlaceFilters);
+            top+=32.;
+            if open {
+                let (drawer,visible)=place_filter_drawer(self.size);
+                let offset=self.hud.place_filter_offset.min(PLACE_FILTERS.len()-visible);
+                let [left,drawer_top,span,_]=drawer;
+                let scrollbar=drawer_scrollbar(drawer,visible,PLACE_FILTERS.len(),offset);
+                let row_width=span-if scrollbar.is_some(){20.}else{0.};
+                for (i,&(filter,zh,en)) in PLACE_FILTERS.iter().skip(offset).take(visible).enumerate() {
+                    self.row(m,t,hits,[left,drawer_top+i as f32*PLACE_FILTER_ROW,row_width,24.],
+                        self.skin.choose(zh,en),Some(Action::PlaceFilter(filter)),filter==self.hud.place_filter);
+                }
+                if let Some((track,thumb))=scrollbar {
+                    m.rect(track[0],track[1],track[2],track[3],[34,42,46,255]);
+                    m.rect(thumb[0]+3.,thumb[1],thumb[2]-6.,thumb[3],BRASS);
+                }
+                top+=place_filter_height(visible);
+            }
+        }
+    }
+
+    fn menu(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>){
         let [w,h]=self.size.map(|v|v as f32);
         let menu=self.hud.menu;
         if menu==Menu::None{return;}
         let dark=[8,13,20,if menu==Menu::MapModes{255}else{249}];
-        let [x,y,width,height]=menu_rect(self.hud.menu,self.size,radius);
+        let area=menu_rect(self.hud,self.size);
+        let [x,y,width,height]=area;
         if menu.modal(){
             m.rect(0.,0.,w,h,[0,0,0,130]);hits.clear();
         }
@@ -1303,50 +1380,7 @@ impl Display<'_> {
         m.rect(x+13.,y+31.,width-26.,1.5,BRASS);
         let action=|command|Some(Action::Hud(command));
         match menu {
-            Menu::MapModes=>{
-                let say=|zh,en|self.skin.choose(zh,en);
-                let rows=[(say("政治地图","Political"),Mode::Political),(say("经济地图","Economic"),Mode::Economic),
-                    (say("军事地图","Military"),Mode::Military)];
-                for (i,(label,mode)) in rows.into_iter().enumerate(){
-                    let active=self.mode==mode;
-                    let action=if active{Mode::Geographic}else{mode};
-                    self.row(m,t,hits,[x+13.,y+37.+i as f32*32.,width-26.,27.],label,Some(Action::Mode(action)),active);
-                }
-                let button=(width-30.)/2.;
-                let commands=[
-                    (say("搜索","Search"),Some(Action::Search)),
-                    (say("返回视图","Previous view"),Some(Action::Back)),
-                    (say("全球","Globe"),Some(Action::Home)),
-                    (say("运输","Transport"),self.session.is_some_and(|s|s.transport.is_some())
-                        .then_some(Action::Hud(Command::Page(Page::Travel)))),
-                ];
-                for (i,(label,action)) in commands.into_iter().enumerate() {
-                    if action.is_some() {
-                        self.row(m,t,hits,[x+13.+(i%2) as f32*(button+4.),y+139.+(i/2) as f32*31.,button,26.],label,action,false);
-                    }
-                }
-                if self.mode==Mode::Political {
-                    let open=self.hud.place_filters_open;
-                    let active=PLACE_FILTERS.iter().find(|(filter,_,_)|*filter==self.hud.place_filter).unwrap();
-                    let label=format!("{} · {}",say("地点分类","Place filters"),say(active.1,active.2));
-                    self.row(m,t,hits,[x+13.,y+203.,width-26.,26.],&label,action(Command::PlaceFilters),open);
-                    let marker=if open {"-"} else {"+"};
-                    self.skin.text(t,marker,0,[x+width-30.,y+205.],16.,IVORY);
-                    if open {
-                        let (rows,visible)=place_filter_drawer(self.size);
-                        let offset=self.hud.place_filter_offset.min(PLACE_FILTERS.len()-visible);
-                        let [left,top,span,_]=rows;
-                        for (i,&(filter,zh,en)) in PLACE_FILTERS.iter().skip(offset).take(visible).enumerate() {
-                            self.row(m,t,hits,[left,top+i as f32*PLACE_FILTER_ROW,span-20.,24.],
-                                say(zh,en),Some(Action::PlaceFilter(filter)),filter==self.hud.place_filter);
-                        }
-                        if let Some((track,thumb))=drawer_scrollbar(rows,visible,PLACE_FILTERS.len(),offset) {
-                            m.rect(track[0],track[1],track[2],track[3],[34,42,46,255]);
-                            m.rect(thumb[0]+3.,thumb[1],thumb[2]-6.,thumb[3],BRASS);
-                        }
-                    }
-                }
-            },
+            Menu::MapModes=>self.map_modes(m,t,hits,area),
             Menu::System=>{
                 let connected=self.session.is_some();
                 let rows=[("保存",connected.then_some(Command::Menu(Menu::Save))),("加载",connected.then_some(Command::Menu(Menu::Load))),
@@ -1458,10 +1492,10 @@ pub fn page_rect(hud:&Hud,size:[u32;2])->Option<[f32;4]>{
         }
     }
 }
-pub fn menu_rect(menu:Menu,size:[u32;2],radius:f32)->[f32;4]{
+pub fn menu_rect(hud:&Hud,size:[u32;2])->[f32;4]{
     let [w,h]=size.map(|v|v as f32);
-    match menu {
-        Menu::MapModes=>[w*0.5-165.,h-radius-353.,330.,332.],
+    match hud.menu {
+        Menu::MapModes=>map_modes_rect(size,hud.place_filters_open),
         Menu::System=>[w-292.,145.,280.,252.],
         Menu::Settings=>[(w-340.)*0.5,(h-290.)*0.5,340.,290.],
         Menu::Save|Menu::Load=>[(w-500.)*0.5,(h-368.)*0.5,500.,368.],
@@ -1470,9 +1504,15 @@ pub fn menu_rect(menu:Menu,size:[u32;2],radius:f32)->[f32;4]{
         Menu::None=>[0.;4],
     }
 }
-pub fn map_modes_rect(size:[u32;2])->[f32;4] {
-    menu_rect(Menu::MapModes,size,(size[0] as f32*0.056).clamp(52.,78.))
+fn globe_radius(width:f32)->f32 {
+    (width*0.056).clamp(52.,78.)
 }
+pub fn map_modes_rect(size:[u32;2],expanded:bool)->[f32;4] {
+    let [w,h]=size.map(|value|value as f32);
+    let height=MAP_MODES_HEIGHT+if expanded{place_filter_height(place_filter_rows(size))}else{0.};
+    [w*0.5-165.,h-globe_radius(w)-21.-height,330.,height]
+}
+const MAP_MODES_HEIGHT:f32=141.;
 const PLACE_FILTER_ROW:f32=28.;
 use crate::map_facilities::PlaceFilter;
 pub const PLACE_FILTERS:[(PlaceFilter,&str,&str);8]=[
@@ -1486,11 +1526,20 @@ pub const PLACE_FILTERS:[(PlaceFilter,&str,&str);8]=[
     (PlaceFilter::Aviation,"航空设施","Aviation"),
 ];
 
+fn place_filter_rows(size:[u32;2])->usize {
+    let [w,h]=size.map(|value|value as f32);
+    let available=h-globe_radius(w)-21.-MAP_MODES_HEIGHT-54.-4.;
+    ((available/PLACE_FILTER_ROW).floor() as usize).clamp(1,PLACE_FILTERS.len())
+}
+
+fn place_filter_height(visible:usize)->f32 {
+    visible as f32*PLACE_FILTER_ROW+4.
+}
+
 pub fn place_filter_drawer(size:[u32;2])->([f32;4],usize) {
-    let [x,y,w,h]=map_modes_rect(size);
-    let visible=((h-240.)/PLACE_FILTER_ROW).floor().max(1.) as usize;
-    let visible=visible.min(PLACE_FILTERS.len());
-    ([x+13.,y+236.,w-26.,visible as f32*PLACE_FILTER_ROW-4.],visible)
+    let [x,y,w,_]=map_modes_rect(size,true);
+    let visible=place_filter_rows(size);
+    ([x+24.,y+69.,w-37.,visible as f32*PLACE_FILTER_ROW-4.],visible)
 }
 
 pub(crate) fn drawer_scrollbar([x,y,w,h]:[f32;4],visible:usize,rows:usize,offset:usize)->Option<([f32;4],[f32;4])> {

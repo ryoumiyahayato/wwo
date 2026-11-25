@@ -878,7 +878,7 @@ impl Host {
                 .is_some_and(transport_scene::TransportScene::sea_relation_visible),
             resource_root:&self.config.root,resource_warnings:&self.resource_warnings,
             city_sources:self.city_models.as_ref().map_or(&[],|catalogue|catalogue.sources.as_slice()),
-            debug:self.debug.then_some(&self.perf),population_debug:self.population_debug.is_some()};
+            debug:self.debug.then_some(&self.perf),population_debug:self.population_debug.is_some(),search_open:self.search.is_some()};
         let seconds=self.started.elapsed().as_secs_f32();
         let (mut meshes,hits)=if loading {
             let status=self.state.lobby.as_ref().map(|s|s.status.as_str()).filter(|s|!s.is_empty())
