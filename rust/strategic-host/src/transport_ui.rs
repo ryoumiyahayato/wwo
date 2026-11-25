@@ -221,8 +221,8 @@ impl Display<'_> {
         panel.rect(x, y, w, h, [13, 24, 31, 246]);
         panel.rect(x, y, w, 1., BRASS);
         self.skin.paragraph(text, &d.title, 1, [left, y + 10., width - 38., 38.], IVORY, 0.94);
-        self.row(panel, text, hits, [x + w - 43., y + 10., 29., 26.], "×",
-            Some(Action::Hud(Command::CloseTransportDetail)), false);
+        crate::formal_ui::close_button(panel, hits, [x + w - 15., y + 8.],
+            Action::Hud(Command::CloseTransportDetail));
         let mut top = y + 48.;
         for value in &d.summary {
             self.skin.text(text, value, 0, [left, top], width, MUTED);

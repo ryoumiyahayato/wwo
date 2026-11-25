@@ -424,6 +424,15 @@ pub(crate) fn panel(m:&mut Mesh,area:[f32;4],fill:[u8;4]){
     rim(m,area,13.,2.,BRASS);
     rim(m,inset(area,5.),10.,1.,BRASS);
 }
+pub(crate) fn close_button(m: &mut Mesh, hits: &mut Vec<Hit>, [right, top]: [f32; 2], action: Action) {
+    let area = [right - 28., top, 28., 26.];
+    m.shape(&cornered(area, 5.), [9, 14, 20, 245]);
+    rim(m, area, 5., 1., RIM);
+    let [cx, cy] = [right - 14., top + 13.];
+    m.line([cx - 4., cy - 4.], [cx + 4., cy + 4.], 1.5, IVORY);
+    m.line([cx - 4., cy + 4.], [cx + 4., cy - 4.], 1.5, IVORY);
+    hits.push(Hit { area, action });
+}
 fn arc(m:&mut Mesh,[x,y]:[f32;2],r:f32,a:f32,b:f32,width:f32,color:[u8;4]){
     let mut previous=[x+r*a.cos(),y+r*a.sin()];
     for i in 1..=40 {
@@ -669,7 +678,7 @@ impl Display<'_> {
                 let [x,y,w,h] = country.rect(self.size);
                 panel(panels,[x,y,w,h],FACE);
                 if let Some(slot) = flag { flags.flag([x+18.,y+14.,44.,30.],slot); }
-                self.row(panels,text,hits,[x+w-45.,y+9.,28.,26.],"×",Some(Action::Country(CountryAction::Close)),false);
+                close_button(panels, hits, [x + w - 15., y + 8.], Action::Country(CountryAction::Close));
                 self.mask_record(panels,text,[x,y,w,h]);
             }
         }
@@ -719,7 +728,7 @@ impl Display<'_> {
             CountryView::Region{..}=>say("历史行政区资料","Historical division record"),
         };
         skin.text(t,heading,0,[x+18.,y+12.],w-72.,BRASS);
-        self.row(m,t,hits,[x+w-40.,y+9.,26.,25.],"×",Some(Action::Country(Go::Close)),false);
+        close_button(m, hits, [x + w - 15., y + 8.], Action::Country(Go::Close));
         let bottom=y+h-45.;
         match country.view {
             CountryView::Summary|CountryView::Record=>{
@@ -875,8 +884,8 @@ impl Display<'_> {
         rim(m,[x+15.,y+8.,w-30.,38.],10.,1.7,BRASS);
         m.line([x+13.,y+52.],[x+w-13.,y+52.],1.4,BRASS);
         arc(m,[x+w*0.5,y+h-5.],13.,3.142,6.283,5.,BRASS);
-        self.center(t,title,1,[x+w*0.5,y+12.],w-65.,IVORY);
-        self.row(m,t,hits,[x+w-39.,y-35.,28.,26.],"×",Some(Action::Hud(Command::Page(Page::Map))),false);
+        self.center(t,title,1,[x+w*0.5,y+12.],w-118.,IVORY);
+        close_button(m, hits, [x + w - 25., y + 14.], Action::Hud(Command::Page(Page::Map)));
     }
     pub fn page_rect(&self)->Option<[f32;4]>{page_rect(self.hud,self.size)}
     fn relations(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>){
@@ -985,7 +994,7 @@ impl Display<'_> {
         let say=|zh,en|skin.choose(zh,en);
         self.folio(m,art,t,hits,[x,y,w,h],say("人物资料","Character record"));
         if self.session.is_some_and(|session| session.transport.is_some()) {
-            self.row(m,t,hits,[x+w-193.,y+16.,141.,27.],say("旅行与通勤","Travel & commute"),
+            self.row(m,t,hits,[x+w-202.,y+14.,141.,26.],say("旅行与通勤","Travel & commute"),
                 Some(Action::Hud(Command::Page(Page::Travel))),false);
         }
         let Some(character) = self.session.and_then(|s| s.character.as_ref()) else { return; };
