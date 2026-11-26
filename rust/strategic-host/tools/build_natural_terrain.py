@@ -1883,14 +1883,65 @@ def correct_shoreline_page(x, y, existing, coverage, land):
     return 0,np.asarray(words,dtype="<u4").tobytes()
 
 
+def water_pages_touching(coverage):
+    w,s,e,n = coverage.bounds
+    return [(x,y) for y in range(WATER_ROWS) for x in range(WATER_COLUMNS)
+            if (bounds := water_page_bounds(x,y))[0] < e and bounds[2] > w
+            and bounds[1] < n and bounds[3] > s and coverage.intersection(box(*bounds)).area]
+
+
 def write_shoreline_candidate(original, correction, destination, *, scratch=None, audit=None):
     coverage,land = shoreline_correction(correction)
-    w,s,e,n = coverage.bounds
-    pages = [(x,y) for y in range(WATER_ROWS) for x in range(WATER_COLUMNS)
-             if (bounds := water_page_bounds(x,y))[0] < e and bounds[2] > w
-             and bounds[1] < n and bounds[3] > s and coverage.intersection(box(*bounds)).area]
     build_page = partial(correct_shoreline_page,coverage=coverage,land=land)
-    write_water_pack(destination,build_page,scratch,original,pages,audit)
+    write_water_pack(destination,build_page,scratch,original,water_pages_touching(coverage),audit)
+
+
+def add_surveyed_lake_page(x, y, existing, coverage):
+    west,south,_,_ = water_page_bounds(x,y)
+    step = WATER_STEP/WATER_GRID
+    words = [0]*(WATER_GRID**2)
+    for at,cell in enumerate(water_payload_cells(*existing)):
+        row,col = divmod(at,WATER_GRID)
+        bounds = (west+col*step,south+row*step,west+(col+1)*step,south+(row+1)*step)
+        lake = coverage.intersection(box(*bounds))
+        if isinstance(cell,int):
+            if not lake.area:
+                words[at] = cell
+                continue
+            bits = {1:1,2:0,3:3}[cell]
+            bands = [[] for _ in range(WATER_BANDS)]
+        else:
+            bits,edges = cell
+            bands = [band.ravel().tolist() for band in edges]
+        if lake.area:
+            # Give the survey its own parity bit so overlap with existing water
+            # adds coverage without cancelling any crossings from the old page.
+            used = bits
+            for band in bands:
+                for flag in band[2::3]:
+                    used |= flag
+            layer = next((1 << i for i in range(4,32) if not used & (1 << i)),None)
+            if layer is None:
+                raise ValueError(f"No free water source bit in page 7/{x}/{y}, cell {at}")
+            bits,parts = clipped_water(((layer,part) for part in polygon_parts(lake)),bounds,bits)
+            encoded = water_cell(parts,bits,(west,south),row)
+            offsets = encoded[1:WATER_BANDS+2]
+            for band,start,end in zip(bands,offsets,offsets[1:]):
+                band.extend(encoded[start:end])
+        if any(bands):
+            words[at] = len(words)+4
+            words.extend(encode_water_cell(bits,bands))
+        else:
+            words[at] = water_class(bits)
+    if words[0] <= 3 and all(word == words[0] for word in words):
+        return words[0],b""
+    return 0,np.asarray(words,dtype="<u4").tobytes()
+
+
+def write_surveyed_lake_candidate(original, survey, destination, *, scratch=None):
+    coverage = union_all(sourced_water_polygons(survey,"Surveyed lakes"))
+    build_page = partial(add_surveyed_lake_page,coverage=coverage)
+    write_water_pack(destination,build_page,scratch,original,water_pages_touching(coverage),None)
 
 
 def write_water_geometry(shoreline, destination, *, measured_rivers=None, documented_widths=None,
@@ -2591,6 +2642,9 @@ def main():
     terrain_candidate.add_argument("--shoreline-candidate", type=Path, nargs=3,
                         metavar=("EXISTING_QWG", "SURVEY_GEOJSON", "CANDIDATE_QWG"),
                         help="Replace surveyed marine shorelines in the affected pages of an existing QWG")
+    terrain_candidate.add_argument("--surveyed-lake-candidate", type=Path, nargs=3,
+                        metavar=("EXISTING_QWG", "LAKES_GEOJSON", "CANDIDATE_QWG"),
+                        help="Add surveyed lakes to existing QWG pages while retaining other water sources")
     parser.add_argument("--measured-river-mask",type=Path,metavar="GRWL_MASK_ZIP",
                         help="Add WGS84 Landsat GRWL water polygons and tidal channels to --water-geometry")
     parser.add_argument("--confirmed-grounded-ice",type=Path,metavar="ICE_GEOJSON",
@@ -2669,6 +2723,11 @@ def main():
         original, survey, output = args.shoreline_candidate
         with generation_disk_usage(output,original.stat().st_size+100_000_000) as (scratch, _):
             write_shoreline_candidate(original,survey,output,scratch=scratch,audit=args.audit_water_pages)
+        return
+    if args.surveyed_lake_candidate is not None:
+        original, survey, output = args.surveyed_lake_candidate
+        with generation_disk_usage(output,original.stat().st_size+100_000_000) as (scratch, _):
+            write_surveyed_lake_candidate(original,survey,output,scratch=scratch)
         return
     if args.water_geometry is not None:
         with generation_disk_usage(args.water_geometry[-1], 1_500_000_000) as (scratch, _):
