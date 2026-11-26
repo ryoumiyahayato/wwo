@@ -203,6 +203,29 @@ fn landscape_wood(cover: LandCover) -> vec2f {
     return vec2f(cover.forest*.94,cover.shrub*.38);
 }
 
+// The ground and cached stands share one continuous, world-space structure.
+// Its variations describe canopy closure inside the recorded woodland.
+fn woodland_structure(world: vec3f) -> f32 {
+    let point = world*(EARTH/830.);
+    let cell = bitcast<vec3u>(vec3i(floor(point)));
+    let f = fract(point);
+    let weights = f*f*(3.-2.*f);
+    let seed = cell.x*116831u+cell.y*24571u+cell.z*72139u;
+    let south = mix(landscape_random(seed),landscape_random(seed+116831u),weights.x);
+    let north = mix(landscape_random(seed+24571u),landscape_random(seed+141402u),weights.x);
+    let upper_south = mix(landscape_random(seed+72139u),landscape_random(seed+188970u),weights.x);
+    let upper_north = mix(landscape_random(seed+96710u),landscape_random(seed+213541u),weights.x);
+    return mix(mix(south,north,weights.y),mix(upper_south,upper_north,weights.y),weights.z);
+}
+
+fn landscape_conifers(latitude: f32, height: f32) -> f32 {
+    return smoothstep(34.,67.,abs(latitude)+smoothstep(400.,1950.,height)*20.);
+}
+
+fn woodland_palette(conifers: f32) -> vec3f {
+    return FOREST_GROUND+mix(vec3f(.022,.027,.010),vec3f(-.022,-.010,-.008),conifers);
+}
+
 struct LandscapeLayer {
     page: LandscapePage,
     weight: f32,
@@ -799,6 +822,15 @@ fn material_grain(world: vec3f, mpp: f32, layer: i32, span: f32, fade: f32) -> f
     return dot(paint-average,light)/max(.18,dot(average,light))*(1.-smoothstep(fade*.45,fade,mpp));
 }
 
+fn woodland_ground(world: vec3f, latitude: f32, height: f32, mpp: f32, original: vec3f) -> vec3f {
+    let detail = 1.-smoothstep(34.,103.,mpp);
+    if detail <= .001 { return original; }
+    let closure = woodland_structure(world);
+    let needles = landscape_conifers(latitude,height);
+    let palette = woodland_palette(needles)-FOREST_GROUND;
+    return (original+palette*(detail*.67))*(1.+(.5-closure)*detail*.079);
+}
+
 fn rock_share(land: LandCover, grade: f32, height: f32) -> vec2f {
     let bare = land.bare*max(smoothstep(.13,.48,grade),smoothstep(1550.,3550.,height)*.70);
     return vec2f(bare,smoothstep(.43,.95,grade)*.47);
@@ -834,6 +866,7 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, land: LandCover,
         let crowns = material_grain(world,mpp,WOODLAND,mix(1320.,410.,land.regional),mix(84.,55.,land.regional));
         let leaves = material_grain(world,mpp,WOODLAND,315.,16.);
         forest *= 1.+(crowns*mix(1.32,.60,land.regional)+leaves*.48)*(landscape_wood(land).x/max(.001,land.forest));
+        forest = woodland_ground(world,ll.y,height,mpp,forest);
     }
     let exposure = clamp(slope.y*.19+height*.00007,-.08,.15);
     var grass = GRASS_GROUND+vec3f(-.09,-.012,.09)*exposure;
@@ -906,6 +939,11 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, land: LandCover,
         var surface = CROP_GROUND;
         if front<.999 { surface = cultivated_fields(CROP_GROUND,ll,world,mpp,elevation,site); }
         if front>.001 { surface = mix(surface,field_frontage(road,mpp,site.pasture),front); }
+        if enclosure>.001 && road.clearance<25. && mpp<28. {
+            let verge = verge_habitat(land,road)*(1.-smoothstep(12.,28.,mpp));
+            let hedge = field_margin(abs(road.clearance-8.5),1.8,mpp);
+            surface = mix(surface,vec3f(.372,.444,.302),hedge*verge*enclosure);
+        }
         let grain = material_grain(world,mpp,FIELD,44.,6.3);
         let road_edge = smoothstep(-.8,5.5,road.clearance);
         let verge = mix(GRASS_GROUND,surface,road_edge);
@@ -1158,7 +1196,7 @@ fn landscape_relief(base:vec3f,ll:vec2f,world:vec3f,water:f32,mpp:f32) -> vec3f 
     }
     if open.y>.001 {
         let crown=material_grain(world,mpp,WOODLAND,485.,97.);
-        color+=FOREST_GROUND*(1.+crown*.64)*open.y;
+        color+=woodland_ground(world,ll.y,0.,mpp,FOREST_GROUND*(1.+crown*.64))*open.y;
     }
     if street>.001 {
         let mineral=select(vec3f(.554,.523,.468),vec3f(.625,.610,.568),page.paris);
@@ -1197,10 +1235,6 @@ fn landscape_seed(cell: vec2u) -> u32 {
     return cell.x * 116831u + cell.y * 24571u;
 }
 
-fn landscape_conifers(latitude: f32, height: f32) -> f32 {
-    return smoothstep(30.,66.,abs(latitude)+smoothstep(550.,2150.,height)*18.);
-}
-
 fn landscape_coordinates(cell: vec2u, columns: u32) -> vec2f {
     let seed = landscape_seed(cell);
     let jitter = .32 + .36 * vec2f(landscape_random(seed),landscape_random(seed+5221u));
@@ -1237,6 +1271,27 @@ fn farm_ground(cover: LandCover) -> f32 {
         *(1.-smoothstep(.25,.37,cover.urban))*(1.-smoothstep(.13,.26,cover.forest));
 }
 
+struct LandscapeHabitat {
+    wood: vec2f,
+    unassigned: f32,
+}
+
+fn landscape_habitat(cover: LandCover, historic: HistoricSurfacePage) -> LandscapeHabitat {
+    let wood = vec2f(cover.forest,cover.shrub);
+    if historic.weight <= .001 { return LandscapeHabitat(wood,1.); }
+    let land = historic_surface_use(historic,0.);
+    let assigned = min(1.,dot(land.built+land.open,vec3f(1.))+land.garden);
+    let unassigned = 1.-assigned*historic.weight;
+    return LandscapeHabitat(wood*unassigned+vec2f(land.open.y*historic.weight,0.),unassigned);
+}
+
+fn verge_habitat(cover: LandCover, road: FieldRoad) -> f32 {
+    let farmland = smoothstep(.39,.72,cover.crop+cover.grass)*smoothstep(.11,.29,cover.crop);
+    let boundary = smoothstep(3.,10.,road.clearance)*(1.-smoothstep(12.,25.,road.clearance));
+    return farmland*boundary*(1.-smoothstep(.08,.27,cover.urban))
+        *(1.-smoothstep(.13,.39,cover.forest));
+}
+
 @compute @workgroup_size(8,8,1)
 fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     let chunk = landscape_chunks[LANDSCAPE_VISIBLE+id.z];
@@ -1256,21 +1311,36 @@ fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     let height = landscape_elevation(page,vec2f(0.));
     let slope = landscape_slope(page,ll.y,.83,7u);
     let cover = rural_cover(landscape_material(page,1.,1.,1.),length(slope),height,1.);
-    let wood = landscape_wood(cover);
+    let historic = historic_surface_page(ll,0.);
+    let habitat = landscape_habitat(cover,historic);
+    let closure = woodland_structure(landscape_world(ll));
+    let wood = habitat.wood*vec2f(mix(.80,1.03,closure),mix(.31,.45,closure));
     let share = rock_share(cover,length(slope),height);
-    let rock = (share.x+(cover.grass+cover.shrub)*share.y)*.78;
+    let rock = (share.x+(cover.grass+cover.shrub)*share.y)*.78*habitat.unassigned;
     let seed = landscape_seed(cell);
     let choice = landscape_random(seed+1951u);
     let density = wood.x+wood.y+rock;
-    let farm = choice>=density && landscape_random(seed+3739u)<farm_ground(cover)*.22
-        && length(slope)<.17 && cover.regional>.5 && abs(ll.y)<65.;
-    if choice >= density && !farm { return; }
+    var verge = 0.;
+    var road = FieldRoad(26.,0.,0.,vec2f(0.));
+    if choice>=density && cover.crop>.11 && cover.urban<.27 && length(slope)<.19 {
+        road = field_road(ll,26.);
+        verge = verge_habitat(cover,road)*habitat.unassigned;
+    }
+    let planted = verge*(.35+closure*.65) > .24;
+    let farm = choice>=density && landscape_random(seed+3739u)<farm_ground(cover)*.22*habitat.unassigned
+        && !planted && length(slope)<.17 && cover.regional>.5 && abs(ll.y)<65.;
+    if choice >= density && !farm && !planted { return; }
 
-    let conifers = landscape_conifers(ll.y,height);
+    // Adjacent cells share a habitat. The stable site seed keeps some mixing
+    // where both crown forms are plausible.
+    let conifers = clamp(landscape_conifers(ll.y,height)+(closure-.5)*.36,0.,1.);
     let tree = select(0u,1u,landscape_random(seed+691u)<conifers);
-    let kind = select(select(select(2u,3u,choice<wood.x+wood.y),tree,choice<wood.x),4u,farm);
+    let species = select(select(2u,3u,choice<wood.x+wood.y),tree,choice<wood.x);
+    let kind = select(select(species,3u,planted),4u,farm);
     var hedgerow = 0u;
-    if kind < 4u && kind != 2u && cover.regional > .5 && cover.crop > .22 && cover.forest < .65 {
+    if planted {
+        hedgerow = u32(round(fract(atan2(road.along.y,road.along.x)/PI)*7.))%7u+1u;
+    } else if kind < 4u && kind != 2u && cover.regional > .5 && cover.crop > .22 && cover.forest < .65 {
         // Align planting at field margins with the reconstructed cover edge.
         let west = reconstructed_forest(page,vec2f(-.7,0.));
         let east = reconstructed_forest(page,vec2f(.7,0.));
@@ -1286,7 +1356,8 @@ fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     let packed_slope = vec2u(round(clamp(slope,-vec2f(1.),vec2f(1.))*127.+128.));
     let packed_height = u32(clamp(round(height)+32768.,0.,65535.));
     let packed_terrain = packed_height | (packed_slope.x<<16u) | (packed_slope.y<<24u);
-    let local_cover = select(select(select(cover.forest,cover.shrub,kind==3u),rock,kind==2u),1.,farm);
+    let shrub = max(habitat.wood.y,verge*select(0.,.80,planted));
+    let local_cover = select(select(select(habitat.wood.x,shrub,kind==3u),rock,kind==2u),1.,farm);
     let strength = u32(round(clamp(local_cover,0.,1.)*127.));
     let packed_style = columns | (kind<<18u) | (hedgerow<<21u) | (strength<<24u);
     // Another page can rebuild this chunk without changing its existing sites.
@@ -1338,9 +1409,10 @@ fn landscape_vertex(
     let grove = crown <= -2.;
     let trunk = tone < 0.;
     let stand = kind == 0u || kind == 1u || kind == 3u;
-    let stand_mix = smoothstep(7.,18.,mpp);
+    let stand_mix = smoothstep(5.5,15.5,mpp);
     let core = smoothstep(.35,.86,density);
-    let structure = select(stand_mix*mix(.23,.35,core),mix(core*.18,.26,stand_mix),understory);
+    let undergrowth = mix(core*.26,.28,stand_mix)*smoothstep(2.7,7.5,mpp);
+    let structure = select(stand_mix*mix(.29,.48,core),undergrowth,understory);
     let arrival = smoothstep(0.,LANDSCAPE_INSTANCE_FADE_SECONDS,view.chart_east.w-appeared);
     let trunk_visibility = select(1.,1.-smoothstep(2.8,6.0,mpp),trunk);
     let farm = kind==4u;
@@ -1360,6 +1432,11 @@ fn landscape_vertex(
     let site_hue = landscape_random(seed+8733u);
     let hue = landscape_random(variation+8733u);
     let shape = landscape_random(variation+6371u);
+    let group_seed = seed+grove_index*2917u;
+    let closure = landscape_random(group_seed+2183u);
+    if (grove || tree) && closure>mix(.67,.98,core) && grove_index!=3u {
+        return LandscapeVertex(vec4f(2.,2.,0.,1.),vec3f(0.),vec4f(0.),0.,kind,0.,0u,0.,0.);
+    }
     var bearing = landscape_random(seed+3191u)*(2.*PI);
     var radius = mix(91.,154.,site_shape)*mix(.84,1.16,density);
     var form = vec3f(radius,radius*mix(.77,1.11,site_hue),mix(11.,24.,site_shape));
@@ -1381,22 +1458,23 @@ fn landscape_vertex(
     }
     if hedgerow != 0u {
         bearing = f32(hedgerow-1u)*PI/7.;
-        form.y *= .42;
+        form *= vec3f(select(vec2f(.83,.24),vec2f(.32,.095),kind==3u),1.);
     }
     if grove || tree {
         let anchors = array<vec2f,7>(vec2f(-.70,.14),vec2f(-.35,-.56),vec2f(-.37,.58),
             vec2f(.08,.17),vec2f(.50,-.48),vec2f(.66,.16),vec2f(.37,.62));
-        let group_seed = seed+grove_index*2917u;
         let drift = vec2f(landscape_random(group_seed+613u),landscape_random(group_seed+1009u))-.5;
-        tree_center = (anchors[grove_index]+drift*.18)*form.xy;
+        tree_center = (anchors[grove_index]*(.64+.45*closure)+drift*.49)*form.xy;
+        if grove {
+            form *= vec3f(mix(.55,1.14,closure),mix(.59,1.25,shape),mix(.63,1.18,closure));
+        }
     }
     if tree {
-        let group_seed = seed+grove_index*2917u;
         let azimuth = (f32(index%4u)+landscape_random(group_seed+691u))*(PI*.5);
-        let spread = mix(18.,32.,landscape_random(variation+399u))*form.x/124.;
+        let spread = mix(9.,31.,landscape_random(variation+399u))*form.x/124.;
         tree_center += vec2f(cos(azimuth),sin(azimuth)*select(1.,.42,hedgerow!=0u))*spread;
-        let r = mix(6.6,12.8,shape);
-        form = vec3f(r,r*mix(.78,1.11,hue),mix(9.,23.,shape)*(1.+tropical*.17));
+        let r = mix(3.8,14.4,shape)*mix(.75,1.16,closure);
+        form = vec3f(r,r*mix(.68,1.16,hue),mix(7.5,27.,shape)*(1.+tropical*.17));
         if kind == 1u { form *= vec3f(.78,.78,1.17); }
         if kind == 3u { form *= vec3f(.52,.52,.29); }
     }
@@ -1420,8 +1498,8 @@ fn landscape_vertex(
     let z = height+ground+altitude;
     let depth = clamp(.56-(z+(pixels.y-view.viewport.y*.5)*mpp*pitch)/440000.,.002,.998);
     let clip = vec4f(pixels/view.viewport.xy*vec2f(2.,-2.)+vec2f(-1.,1.),depth,1.);
-    let bases = array<vec3f,5>(FOREST_GROUND+vec3f(.052,.056,.031),
-        FOREST_GROUND+vec3f(.021,.036,.020),ROCK_GROUND,SHRUB_GROUND-vec3f(.035,.032,.025),vec3f(0.));
+    let bases = array<vec3f,5>(woodland_palette(0.),woodland_palette(1.),
+        ROCK_GROUND,SHRUB_GROUND-vec3f(.065,.047,.037),vec3f(0.));
     let foliage = bases[kind]+vec3f(-.017,.008,-.010)*tropical*select(1.,0.,kind==2u);
     let pigment = vec3f(.086,.092,.061)*(hue-.5);
     let flat = rotate*(normal.xy/form.xy);
@@ -1429,7 +1507,7 @@ fn landscape_vertex(
     let facing = normalize(vec3f(flat-ground_grade*vertical,vertical));
     let sunlight = max(0.,dot(facing,LANDSCAPE_SUN));
     let light = select(.85+.30*sunlight,.88+.26*sunlight,kind==2u);
-    let canopy_light = select(vec3f(0.),vec3f(.024,.030,.016),tree);
+    let canopy_light = select(vec3f(0.),vec3f(.012,.018,.009),tree);
     let bark = vec3f(.184,.154,.111)+vec3f(.047)*(hue-.5);
     var color = clamp(select((foliage+pigment+canopy_light)*mix(1.,tone,.70),bark,trunk)*light,
         vec3f(0.),vec3f(1.));
@@ -1438,10 +1516,12 @@ fn landscape_vertex(
         let roof = mix(vec3f(.438,.334,.270),vec3f(.310,.342,.345),slate)+pigment;
         color = select(vec3f(.593,.542,.443)+pigment,roof,tone>.9)*light;
     }
-    return LandscapeVertex(clip,vec3f(site,z),vec4f(color,visibility),edge,kind,lod,select(0u,1u,tree),ground_offset,length(grade));
+    let flags = select(0u,1u,tree) | select(0u,2u,kind==3u && hedgerow!=0u);
+    return LandscapeVertex(clip,vec3f(site,z),vec4f(color,visibility),edge,kind,lod,flags,ground_offset,length(grade));
 }
 
-fn landscape_object_mask(page: LandscapePage, input: LandscapeVertex, sample: u32) -> f32 {
+fn landscape_object_mask(page: LandscapePage, historic: HistoricSurfacePage, input: LandscapeVertex,
+        sample: u32, road: FieldRoad) -> f32 {
     var land = 1.;
     if water_weight(sample)<.999 {
         land = 1.-smoothstep(.10,.44,water_coverage(sample,landscape_coverage(page)));
@@ -1449,12 +1529,15 @@ fn landscape_object_mask(page: LandscapePage, input: LandscapeVertex, sample: u3
     let height = landscape_elevation(page,vec2f(0.));
     let clearance = input.site.z-height;
     let cover = rural_cover(landscape_material(page,1.,1.,1.),input.grade,height,1.);
+    let habitat = landscape_habitat(cover,historic);
     if input.kind==4u {
-        return land*farm_ground(cover)*smoothstep(-4.,0.,clearance)
-            *smoothstep(-.5,2.5,historic_road_clearance(input.site.xy));
+        return land*habitat.unassigned*farm_ground(cover)*smoothstep(-4.,0.,clearance);
     }
-    let vegetation = select(cover.forest,cover.shrub,input.kind==3u);
-    let exposed = cover.bare+cover.shrub+cover.grass;
+    var vegetation = select(habitat.wood.x,habitat.wood.y,input.kind==3u);
+    if (input.tree&2u)!=0u {
+        vegetation = max(vegetation,verge_habitat(cover,road)*habitat.unassigned*.68);
+    }
+    let exposed = (cover.bare+cover.shrub+cover.grass)*habitat.unassigned;
     return land*smoothstep(-4.,0.,clearance)*select(vegetation,exposed,input.kind==2u);
 }
 
@@ -1463,7 +1546,7 @@ fn landscape_fragment(input: LandscapeVertex) -> @location(0) vec4f {
     let rim = fwidth(input.edge)*select(.59,.68,input.kind==2u);
     // A subpixel crown spans several short triangles. Keep the rim filter
     // inside those triangles; the vertex shader already filters projected area.
-    let edge = smoothstep(0.,max(select(rim,min(rim,.55),input.tree!=0u),.001),input.edge);
+    let edge = smoothstep(0.,max(select(rim,min(rim,.55),(input.tree&1u)!=0u),.001),input.edge);
     if input.color.a*input.lod <= .012 { discard; }
     let ground_pixel=input.clip.xy+vec2f(0.,input.ground_offset);
     var sample=screen_water(ground_pixel);
@@ -1475,16 +1558,16 @@ fn landscape_fragment(input: LandscapeVertex) -> @location(0) vec4f {
     let page = landscape_page(input.site.xy,7u,true);
     let fine = natural_lod_weight(7u)*page.fade;
     if fine <= .001 { discard; }
-    let strength = fine*input.lod*landscape_object_mask(page,input,sample);
+    let historic = historic_surface_page(input.site.xy,0.);
+    let road = field_road(input.site.xy,select(12.,26.,(input.tree&2u)!=0u));
+    let verge = smoothstep(.5,3.5,road.clearance);
+    let strength = fine*input.lod*landscape_object_mask(page,historic,input,sample,road)*verge;
     if strength <= .001 { discard; }
     let modern = 1.-landscape_survey_mask(input.site.xy,mpp);
-    let historic=historic_surface_page(input.site.xy,mpp);
     var occupancy=park_coverage(input.site.xy,mpp).a;
     if historic.weight>.001 {
-        let land=historic_surface_use(historic,0.);
-        let managed=dot(land.built,vec3f(1.))+land.open.x*.78+land.open.z+land.garden;
         let planned=park_layout(input.site.xy,mpp).a;
-        occupancy=mix(occupancy,clamp(planned+managed*(1.-planned),0.,1.),historic.weight);
+        occupancy=mix(occupancy,planned,historic.weight);
     }
     let opacity = input.color.a*edge*modern*strength*(1.-occupancy);
     if opacity <= .012 { discard; }

@@ -63,21 +63,34 @@ def placements(sources):
                 point = line.interpolate(position)
                 if not region.covers(point) or not built.covers(point):
                     continue
-                before, after = line.interpolate(position - 4.), line.interpolate(position + 4.)
-                angle = math.atan2(after.y - before.y, after.x - before.x)
-                nx, ny = -math.sin(angle), math.cos(angle)
                 for side in (-1, 1):
                     choice, form, setback, stature = variations(road, part * 193 + i, side)
-                    for depth_limit, setback_base, density in [(0., 11., .92), (52., 34., .48)]:
-                        x, y = point.x + nx * side * (setback_base + 4. * setback), point.y + ny * side * (setback_base + 4. * setback)
+                    frontage, plot, yard, _ = variations(road, part * 193 + i // 4, side)
+                    # A run of neighbouring lots shares a frontage. Houses can sit
+                    # at its road end or beside a yard on the same built-up patch.
+                    for rear in (False, True):
+                        depth_limit = 52. if rear else 0.
+                        along = position + (frontage - .5) * 10. + (form - .5) * 7.
+                        if rear:
+                            along += (stature - .22) * 11.
+                        along = min(line.length - 3., max(3., along))
+                        entrance = line.interpolate(along)
+                        before, after = line.interpolate(along - 3.), line.interpolate(along + 3.)
+                        angle = math.atan2(after.y - before.y, after.x - before.x)
+                        nx, ny = -math.sin(angle), math.cos(angle)
+                        offset = 29. + 18. * yard + 8. * setback if rear else 8. + 10. * plot + 7. * setback
+                        x, y = entrance.x + nx * side * offset, entrance.y + ny * side * offset
                         center = Point(x, y)
                         if not built.covers(center) or central_survey.covers(center):
                             continue
                         depth = boundary.distance(center)
                         survey_edge = min(1., max(0., (RADIUS - math.hypot(x, y)) / 1200.))
-                        if depth < depth_limit or choice > density * min(1., .45 + depth / 44.) * survey_edge:
+                        density = .24 + .32 * yard if rear else .75 + .22 * frontage
+                        occupancy = setback if rear else choice
+                        if depth < depth_limit or occupancy > density * min(1., .56 + depth / 49.) * survey_edge:
                             continue
-                        width, length = 6. + form * 6., 6. + setback * 4.
+                        angle += (stature - .5) * (.35 if rear else .13)
+                        width, length = 5.5 + form * 8., 5.5 + setback * 5.5
                         plan = rectangle(x, y, angle, width, length)
                         if not built.covers(plan) or len(guards.query(plan, predicate="intersects")):
                             continue
