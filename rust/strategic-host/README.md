@@ -71,6 +71,14 @@ python tools/build_natural_terrain.py --shoreline-candidate `
 
 调查陆地按覆盖多边形写入第一层岸线。调查海域清除原岛屿、湖泊和湖中岛的冲突标记。其余嵌套层及 GRWL 水面沿用原值。Lynn Ø 候选改动七页。48 米/像素固定机位为 `(-19.19, 80.119)`。
 
+汝拉沙兰湖使用法国 IGN 的 [BD CARTO État-Major 湖面](../../data/world_map/historical/chalain-etat-major.geojson)。轮廓来自 19 世纪测绘，早于 1903–1906 年水电改造。湖面写入原有 QWG 的 7/132/30 页，其他各页直接复用。复查机位为 `(5.7937, 46.6695)`。[IGN 数据与许可](https://www.data.gouv.fr/datasets/bd-carto-r-etat-major) · [水电改造档案](https://inventaire-patrimoine.bourgognefranchecomte.fr/dossier/IA39000056)
+
+从 [Lynn Ø QWG 归档](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-717723abaf684f23b331) 恢复 `water-geometry.qwg` 后，在 `rust/strategic-host` 运行以下命令。将生成的 QWG 放在正式数据目录的 `worldcrs84quad-15s-v2-hydrology` 下，沿用其余地貌配套资源。
+
+```powershell
+python tools/build_natural_terrain.py --surveyed-lake-candidate "$baseline/water-geometry.qwg" ../../data/world_map/historical/chalain-etat-major.geojson "$candidate/water-geometry.qwg"
+```
+
 候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
 
 全局核查时为生成命令传入完整来源，再加 `--water-pages-from <现有QWG> --audit-water-pages <变更记录.jsonl>`。工具逐页计算当前水陆分类输入，保留等价的旧页。记录列出变化的小格和整格水陆类别变更。Basemap 2.0.0 的全精度包缺少湖中岛内池塘。使用该 wheel 时加 `--shoreline-ponds <GSHHG Shapefile 压缩包>` 补充官方第 4 层。主数据已有第 4 层时沿用主数据。
