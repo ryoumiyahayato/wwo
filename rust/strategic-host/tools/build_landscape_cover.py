@@ -30,7 +30,7 @@ def worldcover(source):
         lon = int(key[4:]) * (-1 if key[3] == "W" else 1)
         tiles[(87 - lat) // 3, (lon + 180) // 3] = source / f"{key}.png"
 
-    classes = np.zeros(256, dtype=np.uint8)
+    classes = np.full(256, 255, dtype=np.uint8)
     classes[list(CLASSES)] = np.arange(len(CLASSES), dtype=np.uint8)
 
     @lru_cache(maxsize=256)
@@ -39,7 +39,10 @@ def worldcover(source):
             samples = np.asarray(image)
             if samples.shape != (samples_per_tile, samples_per_tile):
                 raise ValueError(f"Unexpected WorldCover cache tile shape in {path}")
-            return classes[samples]
+            codes = classes[samples]
+            if np.any(codes == 255):
+                raise ValueError(f"Unexpected WorldCover class codes in {path}")
+            return codes
 
     return tiles, load
 
@@ -117,16 +120,15 @@ def regional_source(tiles, load, rows, cols, fine):
     fractions = cover_fractions(data, xe - x0, ye - y0)
     for y in range(y0 // SOURCE, (y1 - 1) // SOURCE + 1):
         for x in range(x0 // SOURCE, (x1 - 1) // SOURCE + 1):
-            path = fine.get((y, x % 120))
-            if path:
-                refine_source(fractions, load, fine, path, y, x, xe, ye)
+            if reference := fine.get((y, x % 120)):
+                refine_source(fractions, load, fine, reference, y, x, xe, ye)
     return fractions
 
 
-def refine_source(fractions, load, fine, path, y, x, xe, ye):
-    # Integrate the 16x COG overview of only the available regional tiles.
+def refine_source(fractions, load, fine, reference, y, x, xe, ye):
+    # Integrate locally available COG overviews at their native spacing.
     # Exact partial footprints make neighbouring source tiles composable.
-    width = 2250
+    path, width = reference
     slices, inputs, footprints, confidence = [], [], [], []
     for edges, coord, neighbours in ((xe, x, ((y, (x-1) % 120), (y, (x+1) % 120))),
                                      (ye, y, ((y-1, x % 120), (y+1, x % 120)))):
@@ -256,8 +258,16 @@ def regional_frames(source, parents, coverage_parents, use_overviews):
     from scipy.ndimage import distance_transform_edt
 
     tiles, load = worldcover(source)
-    overviews = {key: path.with_name(path.stem + "-overview.png") for key, path in tiles.items()}
-    fine = {key: path for key, path in overviews.items() if use_overviews and path.is_file()}
+    fine = {}
+    if use_overviews:
+        for key, path in tiles.items():
+            overview = path.with_name(path.stem + "-overview.png")
+            if not overview.is_file():
+                continue
+            with Image.open(overview) as image:
+                if image.width not in (1125, 2250) or image.width != image.height:
+                    raise ValueError(f"Unexpected WorldCover overview tile shape in {overview}")
+                fine[key] = (overview, image.width)
     compressor = ZstdCompressor(level=12)
     span = CORE * 4
     feather = 64
@@ -299,20 +309,23 @@ def regional_frames(source, parents, coverage_parents, use_overviews):
 
 def regional_directory(stream):
     magic, page, count = unpack("<8sII", stream.read(16))
-    if magic not in (b"WWOREGC3", b"WWOREGC4") or page != PAGE or count > WIDTH * HEIGHT * 5 // 4:
+    if magic not in (b"WWOREGC3", b"WWOREGC4", b"WWOREGC5") or page != PAGE or count > WIDTH * HEIGHT * 5 // 4:
         raise ValueError("Invalid regional landscape pack header")
     offset = 16 + count * 8
     frames = {}
     for _ in range(count):
         z, x, y, length = unpack("<BBHI", stream.read(8))
+        near_only = magic == b"WWOREGC5" and bool(z & 0x80)
+        if magic == b"WWOREGC5":
+            z &= 0x7f
         key = z, x, y
         if z not in (6, 7) or x >= 2 << z or y >= 1 << z or not length or key in frames:
             raise ValueError(f"Invalid regional landscape page {key}")
         if magic == b"WWOREGC3":
-            frames[key] = stream.tell(), length
+            frames[key] = stream.tell(), length, near_only
             stream.seek(length, 1)
         else:
-            frames[key] = offset, length
+            frames[key] = offset, length, near_only
             offset += length
     end = stream.tell() if magic == b"WWOREGC3" else offset
     if end != stream.seek(0, 2):
@@ -320,7 +333,7 @@ def regional_directory(stream):
     return frames
 
 
-def regional_build(source, output, parents, use_overviews, base):
+def regional_build(source, output, parents, use_overviews, base, near_only):
     def parent(key):
         z, x, y = key
         shift = z - 6
@@ -328,26 +341,36 @@ def regional_build(source, output, parents, use_overviews, base):
 
     def retained_frames():
         if base:
-            for key, (offset, length) in existing.items():
+            for key, (offset, length, near) in existing.items():
                 base.seek(offset)
-                yield key, base.read(length)
+                yield key, base.read(length), near
+
+    def rebuilt_frames():
+        for near in (False, True):
+            footprint = {key for key, is_near in policy.items() if is_near == near}
+            for key, frame in regional_frames(source, parents & footprint, footprint, use_overviews):
+                yield key, frame, near
 
     frames = regional_directory(base) if base else {}
-    existing_parents = {parent(key) for key in frames}
-    # The coverage feather of existing neighbours changes when a new page joins.
-    for x, y in tuple(parents - existing_parents):
+    policy = {parent(key): frame[2] for key, frame in frames.items()}
+    # Neighbours in the same scale band share their boundary feather. Keep
+    # old coverage in the other band unchanged when a supplemental page joins.
+    for x, y in parents - policy.keys():
         parents.update(((x+dx) % (WIDTH//2), y+dy)
                        for dy in (-1, 0, 1) for dx in (-1, 0, 1)
-                       if ((x+dx) % (WIDTH//2), y+dy) in existing_parents)
+                       if policy.get(((x+dx) % (WIDTH//2), y+dy)) == near_only)
+    for key in parents:
+        policy.setdefault(key, near_only)
     existing = {key: frame for key, frame in frames.items() if parent(key) not in parents}
     count = len(existing) + len(parents) * 5
     directory = bytearray()
     with output.open("xb") as stream:
-        stream.write(pack("<8sII", b"WWOREGC4", PAGE, count))
+        magic = b"WWOREGC5" if any(policy.values()) else b"WWOREGC4"
+        stream.write(pack("<8sII", magic, PAGE, count))
         stream.seek(count * 8, 1)
-        for frames in (retained_frames(), regional_frames(source, parents, existing_parents | parents, use_overviews)):
-            for (z, x, y), frame in frames:
-                directory.extend(pack("<BBHI", z, x, y, len(frame)))
+        for frames in (retained_frames(), rebuilt_frames()):
+            for (z, x, y), frame, near in frames:
+                directory.extend(pack("<BBHI", z | (0x80 if near else 0), x, y, len(frame)))
                 stream.write(frame)
         stream.seek(16)
         stream.write(directory)
@@ -363,10 +386,12 @@ if __name__ == "__main__":
                        help="Build selected Z6 parents and their Z7 children")
     parser.add_argument("--regional-overviews", action="store_true",
                         help="Use locally cached <tile>-overview.png WorldCover COG overviews")
-    parser.add_argument("--regional-base", type=Path, help="Retain pages from a prior WWOREGC3/4 pack")
+    parser.add_argument("--regional-base", type=Path, help="Retain pages from a prior WWOREGC3/4/5 pack")
+    parser.add_argument("--regional-near-only", action="store_true",
+                        help="Enable newly added regional pages below the 10 km ruler mark")
     args = parser.parse_args()
-    if args.regional_base and not (args.regional_pilot or args.regional_parent):
-        parser.error("--regional-base requires selected regional pages")
+    if (args.regional_base or args.regional_near_only) and not (args.regional_pilot or args.regional_parent):
+        parser.error("--regional-base and --regional-near-only require selected regional pages")
     if args.output.exists():
         parser.error(f"Output already exists: {args.output}")
     with TemporaryDirectory(dir=args.output.parent, prefix="landscape-cover-") as temp:
@@ -378,9 +403,11 @@ if __name__ == "__main__":
                 parser.error("Regional parents must be inside the Z6 grid")
             if args.regional_base:
                 with args.regional_base.open("rb") as base:
-                    regional_build(args.worldcover_cache, candidate, parents, args.regional_overviews, base)
+                    regional_build(args.worldcover_cache, candidate, parents, args.regional_overviews, base,
+                                   args.regional_near_only)
             else:
-                regional_build(args.worldcover_cache, candidate, parents, args.regional_overviews, None)
+                regional_build(args.worldcover_cache, candidate, parents, args.regional_overviews, None,
+                               args.regional_near_only)
         else:
             build(args.worldcover_cache, candidate)
         link(candidate, args.output)

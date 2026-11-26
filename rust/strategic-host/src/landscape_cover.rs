@@ -20,8 +20,14 @@ const REGIONAL_CHANNELS: usize = 13;
 
 pub struct RegionalCover {
     file: File,
-    frames: Arc<HashMap<Key, (u64, usize)>>,
+    frames: Arc<HashMap<Key, RegionalFrame>>,
     decoder: zstd::bulk::Decompressor<'static>,
+}
+
+pub struct RegionalFrame {
+    offset: u64,
+    length: usize,
+    pub near_only: bool,
 }
 
 impl RegionalCover {
@@ -35,7 +41,8 @@ impl RegionalCover {
         let pages = u32::from_le_bytes(header[12..16].try_into().unwrap());
         let invalid = || io::Error::other(format!("Invalid regional landscape cover pack: {}", path.display()));
         let mut offset = 16 + u64::from(pages) * 8;
-        if &header[..8] != b"WWOREGC4" || header[8..12] != page.to_le_bytes()
+        let tagged = &header[..8] == b"WWOREGC5";
+        if (!tagged && &header[..8] != b"WWOREGC4") || header[8..12] != page.to_le_bytes()
             || pages > PARENT_COUNT + WIDTH * HEIGHT || offset > file_len
         {
             return Err(invalid());
@@ -45,12 +52,13 @@ impl RegionalCover {
         let mut frames = HashMap::with_capacity(pages as usize);
         let max_frame = zstd::zstd_safe::compress_bound(page as usize * page as usize * REGIONAL_CHANNELS);
         for record in directory.chunks_exact(8) {
-            let z = u32::from(record[0]);
+            let near_only = tagged && record[0] & 0x80 != 0;
+            let z = u32::from(if tagged { record[0] & 0x7f } else { record[0] });
             let x = u32::from(record[1]);
             let y = u32::from(u16::from_le_bytes(record[2..4].try_into().unwrap()));
             let len = u32::from_le_bytes(record[4..8].try_into().unwrap()) as usize;
             if !(6..=7).contains(&z) || x >= 2 << z || y >= 1 << z || !(1..=max_frame).contains(&len)
-                || frames.insert(Key(z, x, y), (offset, len)).is_some()
+                || frames.insert(Key(z, x, y), RegionalFrame { offset, length: len, near_only }).is_some()
             {
                 return Err(invalid());
             }
@@ -62,12 +70,12 @@ impl RegionalCover {
         Ok(Self { file, frames: Arc::new(frames), decoder: zstd::bulk::Decompressor::new()? })
     }
 
-    pub fn index(&self) -> Arc<HashMap<Key, (u64, usize)>> {
+    pub fn index(&self) -> Arc<HashMap<Key, RegionalFrame>> {
         Arc::clone(&self.frames)
     }
 
     pub fn read(&mut self, key: Key, width: usize) -> io::Result<Vec<u8>> {
-        let &(offset, length) = self.frames.get(&key).ok_or(io::ErrorKind::NotFound)?;
+        let &RegionalFrame { offset, length, .. } = self.frames.get(&key).ok_or(io::ErrorKind::NotFound)?;
         self.file.seek(SeekFrom::Start(offset))?;
         let mut frame = vec![0; length];
         self.file.read_exact(&mut frame)?;

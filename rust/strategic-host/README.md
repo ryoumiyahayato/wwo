@@ -164,7 +164,7 @@ Windows 法国开局从巴黎商店买 1 千克面包，现金从 2500 降到 24
 - `7.qpk` 使用 [Z7 地表归档](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115) 的 `z7-land-material-7.qpk`。
 - 从 [全球海岸巡视归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-shoreline-audit-20261120) 下载 `water-geometry.qwg.zst` 和 `river-centrelines.qhl.zst`。分别解压为 `water-geometry.qwg` 和 `river-centrelines.qhl`。同一归档包含 Z4–Z7 巡视索引、实拍机位记录和汇总。
 - `hydrology-color.qhw` 取自 [水域几何阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-water-geometry-20261120)。
-- `regional-land-cover.qsc` 取自[区域地表资源归档](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-95fd9feaf3a6fd8c8c85)的同名附件。放入 QPK 所在目录后重启游戏。缺少该包时继续读取 `landscape-cover-v2.qsc` 和 QPK。
+- `regional-land-cover.qsc` 取自[区域地表资源归档](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-95fd9feaf3a6fd8c8c85)的 `regional-land-cover-rural.qsc` 附件。保存为 `regional-land-cover.qsc` 并放入 QPK 所在目录，再重启游戏。原 `regional-land-cover.qsc` 附件仍可加载。缺少区域包时继续读取 `landscape-cover-v2.qsc` 和 QPK。
 
 Z4 至 Z7 共享水陆位置。复杂几何按视野和移动方向预取。缺页和远景使用 QPK。地表、城市和景观共用水陆状态和接替权重。已有明确边界的历史调查图层优先。实测水域覆盖对应河段时抑制重复的中心线符号。水面轮廓与原河段拓扑可分别追溯。
 
@@ -192,13 +192,17 @@ LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样�
 
 将 `landscape-cover-v2.qsc` 放在 `worldcrs84quad-15s-v2` 的 QPK 和 `index.json` 同目录。正式入口 `wwo-map-lab --play` 按视野载入 Z6、Z7 的覆盖和高程。复验可用 `--terrain-candidate <QPK库目录>`。按 `G` 进入地理模式，按 `V` 可切换垂直俯视和斜视。已有 `landscape-cover-v1.qsc` 继续支持 Z7 覆盖。覆盖包缺失时，兼容的显卡仍可使用 QPK 高程增强地势。[Z6/Z7 地表归档](https://github.com/ryoumiyahayato/wwo/releases/tag/z6-z7-surface-20261119) · [上一阶段记录](Z7_LANDSCAPE.md)
 
-近景田块按经纬度生成。美国中西部参考约 400 米的测量方格，尼罗河三角洲沿 Rosetta、Damietta 两支分流展开狭长田块，波河平原参考下 Reno 河走向。其余区域沿用全球地理坐标采样。现有 QSC 或历史 QDT 决定耕地覆盖，湿地和水面压低田块材质权重。分流和河段用于确定方向。各田块形状、颜色和作物变化属于视觉推定。缩小时，窄田块先淡出，QDT 在地理模式随距离淡入淡出。[测量规格](https://www.blm.gov/sites/default/files/SpecificationsForDescriptionsOfLand.pdf) · [Natural Earth 河流](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/) · [HydroRIVERS](https://www.hydrosheds.org/products/hydrorivers)
+5 公里及以下，ESA WorldCover 提供现代耕地、草地和林地的覆盖比例。地表与景观实例共用重建覆盖。田群分界受 QPK 高程、坡度、水面及地类接触约束。较近尺度沿同一分界细化田块、田埂和树篱，位置使用固定世界坐标。海洋性农业带区分围合草场和耕地。西欧开阔农业带保留共享田头的分组条田。美国中西部以约 1.61 公里的测量区段为基准，相邻区段共用通道，近景沿通道细分田界和田头。东亚低地和坡地使用更细的田排。尼罗河和下波河平原沿用现有水系参照。
+
+巴黎和伦敦已装入的历史道路给两侧田地各自的临路边界。历史城镇用地、园林及调查样区优先。农庄仅在资料同时支持耕地与零散聚落的缓坡上推定。田界、田间小路、树篱和农庄是地表美术重建。历史道路与推定路径分开，推定路径不进入交通网络。 [美国土地测量规格](https://www.blm.gov/sites/default/files/SpecificationsForDescriptionsOfLand.pdf) · [Natural Earth 河流](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/) · [HydroRIVERS](https://www.hydrosheds.org/products/hydrorivers)
+
+爱荷华使用历史乡镇地籍图复核区段与排水关系。样区西侧缺页。测量区段以下的田界、道路和农场位置属于景观推定。 [爱荷华历史乡镇地籍图](https://www.arcgis.com/home/item.html?id=b2c44c6980fd4b13b1ad06d414dcd9b4)
 
 覆盖包由现有 ESA WorldCover 2021 v200 分类缓存生成。运行 `python tools/build_landscape_cover.py <worldcover缓存目录> <输出目录>/landscape-cover-v2.qsc`，需 NumPy、Pillow 和 zstandard。树冠和岩块按固定 WGS84 区块缓存，实例精度由投影大小控制。树种、林隙和地表纹理为视觉推定。山脊、坡面光照和实例接地使用 QPK 的高程。Z6 色调可用 `python tools/build_natural_terrain.py --z6-from-z7 <原Z6.qpk> <配色Z7.qpk> <输出Z6.qpk>` 重建，并保留原 Z6 高程和水域覆盖。[覆盖来源和许可](https://doi.org/10.5281/zenodo.7254221) · [正式游戏实测及资源恢复](Z6_Z7_SURFACE.md)
 
-区域覆盖以现有 562 × 562 分类缓存做面积积分。邻域交换和小林地轮廓重建保留各类面积，隔开水域、建成区及未知资料。Z6、Z7 和林地近一级样点来自同一网格。正式资源采用独立的 `WWOREGC4` 包。宿主启动时读取索引，在地貌工作线程按视野读取各页。磁盘目录最多容纳整个 Z6、Z7 网格，区域覆盖 GPU 图集固定为 80 页。区域材质在比例尺小于 50 公里时逐步接入，景观实例使用同一覆盖。水域取 QWG 和 QPK，历史调查优先。林缘细分属于美术推定。[覆盖来源和许可](https://doi.org/10.5281/zenodo.7254221)
+区域覆盖以现有分类缓存做面积积分。邻域交换和小林地轮廓重建保留各类面积，隔开水域、建成区及未知资料。Z6、Z7 和林地近一级样点来自同一网格。宿主读取独立 `regional-land-cover.qsc` 的索引，在地貌工作线程按视野读取各页。支持 `WWOREGC4` 及带近景页标记的 `WWOREGC5`。磁盘目录最多容纳整个 Z6、Z7 网格，区域覆盖 GPU 图集固定为 80 页。常规区域材质在小于 50 公里时接入，近景补充页在 10 至 5 公里间接入。景观实例使用同一覆盖。水域取 QWG 和 QPK，历史调查优先。林缘细分属于美术推定。[覆盖来源和许可](https://doi.org/10.5281/zenodo.7254221)
 
-首批外部资源共 190 页。保留主线的 70 页原始压缩帧，新增阿巴拉契亚、大平原、亚马孙、巴西高原、撒哈拉、东非裂谷、马达加斯加、喜马拉雅、泰国中部、日本关东、澳大利亚东南部和新西兰南岛的 24 个 Z6 父页及 Z7 子页。后续以 `python tools/build_landscape_cover.py <WorldCover缓存目录> <新包路径> --regional-base <现有包路径> --regional-overviews --regional-parent X/Y` 增量生成，可重复指定 `--regional-parent`。生成需 SciPy。旧包支持 `WWOREGC3` 和 `WWOREGC4`。生成器只重建指定父页及其受边缘变化影响的既有邻页。已有局部概览使用缓存中的 2250 × 2250 `<分片>-overview.png`，其余使用普通缓存。
+首批外部资源共 190 页。保留主线的 70 页原始压缩帧，新增阿巴拉契亚、大平原、亚马孙、巴西高原、撒哈拉、东非裂谷、马达加斯加、喜马拉雅、泰国中部、日本关东、澳大利亚东南部和新西兰南岛的 24 个 Z6 父页及 Z7 子页。后续以 `python tools/build_landscape_cover.py <WorldCover缓存目录> <新包路径> --regional-base <现有包路径> --regional-overviews --regional-parent X/Y` 增量生成，可重复指定 `--regional-parent`。巴伐利亚试区使用 `--regional-near-only --regional-parent 67/14 --regional-parent 68/14` 新增 10 页。生成需 SciPy，支持读取 `WWOREGC3`、`WWOREGC4` 和 `WWOREGC5` 基础包。生成器只重建指定父页及同尺度下受边缘变化影响的邻页。使用缓存中的 1125 × 1125 或 2250 × 2250 WorldCover 分类概览，其余使用普通缓存。
 
 林地远景使用地表覆盖，中近景以共用锚点接替林丛与单体树。阔叶林和针叶林用不同近景轮廓，树干仅在近景绘制。样区内农田与林地交界用重建覆盖的梯度确定林带朝向。
 
@@ -268,9 +272,9 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 `tools/build_city_parks.py <已有地图资料目录> src/city-parks.bin.zst` 生成杜乐丽园和圣詹姆斯公园的独立景观覆盖。杜乐丽园按主轴组织西侧开敞广场、林荫段和东侧花坛。圣詹姆斯公园沿 1827 年步道布置疏密不同的树列，保留湖面与小岛。地表林冠范围和近景模型取自同一份种植布局。现存边界与水面取自 OpenStreetMap，步道取自 OpenHistoricalMap。树位、花坛和历史边界细节属美术重建。单取圣詹姆斯公园湖关系的完整 XML，保存为资料目录的 `london_1890s/park-st-james-lake-reference.osm`。 [卢浮宫](https://www.louvre.fr/en/explore/the-palace/from-royal-garden-to-public-park) [英国皇家公园](https://www.royalparks.org.uk/visit/parks/st-jamess-park/history) [湖面关系 XML](https://api.openstreetmap.org/api/0.6/relation/276130/full) [OpenStreetMap 版权](https://www.openstreetmap.org/copyright) [OpenHistoricalMap 版权](https://www.openhistoricalmap.org/copyright)
 
-`tools/build_historical_city_surface.py <已有地图资料目录> <正式 data 目录> src/paris-fringe.bin src/historical-city-surface.bin.zst` 从现有历史资料生成两城地表覆盖并按面积聚合 mip。干地先分配给园林、屋顶、庭院、作业场、开放地、林地和道路，再给各用途选材。未分类面积沿用 QPK。接近 5 公里档启用历史覆盖，10 公里档沿用原有表现。原有道路矢量和建筑模型接替近景细节。
+`tools/build_historical_city_surface.py <已有地图资料目录> <正式 data 目录> src/paris-fringe.bin src/historical-city-surface.bin.zst` 从现有历史资料生成两城地表覆盖并按面积聚合 mip。干地先分配给园林、屋顶、庭院、作业场、开放地、林地和道路，再给各用途选材。未分类面积默认沿用 QPK。巴黎北缘依据拉库尔讷沃市的档案，在历史地类和街区留出的部分空地推定菜地。菜地范围及条田边界均为美术推定。接近 5 公里档启用历史覆盖，10 公里档沿用原有表现。原有道路矢量和建筑模型接替近景细节。[六路口历史调查](https://lacourneuve.fr/sites/default/files/2019-02/140317-Etude%20historique%20du%20carrefour%20des%20Six%20Routes%5B1%5D.pdf)
 
-巴黎资料采用 IPR 1900 年土地使用图及 Paris Time Machine 的街区、非建成地和道路。外围屋顶和相邻庭院由现有景观模型估算。现有 IPR 提取缺少耕地多边形，耕地沿用原景观分布。伦敦采用 1891 至 1896 年测绘建筑轮廓和已整理的同期道路。庭院和宅旁绿地根据历史建筑分布估算。已知公园保留其现有边界。萨里码头作业地根据 1895 年地图和附近测绘建筑布局估算。 [IPR 图例](https://www.institutparisregion.fr/fileadmin/DataStorage/IauEtVous/CartesEtDonnees/cartesetdonnees/opendata/MetaPDF/mos1900_ancien.pdf) [Paris Time Machine](https://doi.org/10.34847/nkl.cbf5ecd0) [伦敦建筑轮廓](https://doi.org/10.5281/zenodo.19497435) [萨里码头测绘图](https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~271015~90044134:London-Sheet-VII-89)
+巴黎资料采用 IPR 1900 年土地使用图及 Paris Time Machine 的街区、非建成地和道路。外围屋顶依据现有景观模型。庭院只在历史建成区内生成。IPR 图例列出第 0 类农业，但发布的矢量记录只含第 1 至 4 类。未分类区域保留资料缺口，现代覆盖仅提供美术参照。伦敦采用 1891 至 1896 年测绘建筑轮廓和已整理的同期道路。庭院和宅旁绿地根据历史建筑分布估算。已知公园保留其现有边界。萨里码头作业地根据 1895 年地图和附近测绘建筑布局估算。 [IPR 图例](https://www.institutparisregion.fr/fileadmin/DataStorage/IauEtVous/CartesEtDonnees/cartesetdonnees/opendata/MetaPDF/mos1900_ancien.pdf) [IPR 矢量资料](https://data.iledefrance.fr/explore/dataset/occupation-du-sol-en-5-postes-vers-1900-carte-de-france-type-1900-dile-de-franc1/) [Paris Time Machine](https://doi.org/10.34847/nkl.cbf5ecd0) [伦敦建筑轮廓](https://doi.org/10.5281/zenodo.19497435) [萨里码头测绘图](https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~271015~90044134:London-Sheet-VII-89)
 
 格陵兰和南极的接地冰川、浮冰架、季节性海冰与水域需要结合现有 QWG、QHW 和高程资料单独核对。本阶段继续使用现有极地分片。
 

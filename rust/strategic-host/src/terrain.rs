@@ -1,4 +1,4 @@
-use crate::{camera::{dot,frame,geographic,Camera},landscape_cover::{CoverPack, RegionalCover, REGIONAL_BANKS, REGIONAL_SLOTS},render::write_texture_layer,terrain_detail};
+use crate::{camera::{dot,frame,geographic,Camera},landscape_cover::{CoverPack, RegionalCover, RegionalFrame, REGIONAL_BANKS, REGIONAL_SLOTS},render::write_texture_layer,terrain_detail};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
 use std::{collections::{HashMap,HashSet},fs,io::{self,Read,Seek,SeekFrom},path::{Path,PathBuf},sync::{mpsc,Arc},time::{Duration,Instant}};
@@ -521,6 +521,7 @@ enum DecodeRequest {
 struct Page {
     slot:u32,
     regional_slot:Option<u32>,
+    regional_near_only:bool,
     ready:Option<Instant>,
     used:Instant,
     fade:u8,
@@ -529,10 +530,11 @@ struct Page {
 }
 
 impl Page {
-    fn index(&self)->u32 {
+    fn index(&self)->u64 {
         // Nine bits for the QPK slot, seven for the regional cover slot.
-        (u32::from(self.landscape_fade.unwrap_or(0))<<24)
-            | (u32::from(self.fade)<<16) | (self.regional_slot.map_or(0,|slot|slot+1)<<9) | (self.slot+1)
+        let slots=(u32::from(self.landscape_fade.unwrap_or(0))<<24)
+            | (u32::from(self.fade)<<16) | (self.regional_slot.map_or(0,|slot|slot+1)<<9) | (self.slot+1);
+        u64::from(slots) | (u64::from(self.regional_near_only && self.regional_slot.is_some())<<32)
     }
 }
 
@@ -571,7 +573,7 @@ pub struct Terrain {
     regional:Option<wgpu::Texture>,
     regional_slots:Vec<u32>,
     regional_path:Option<PathBuf>,
-    regional_index:Option<Arc<HashMap<Key,(u64,usize)>>>,
+    regional_index:Option<Arc<HashMap<Key,RegionalFrame>>>,
     regional_wanted:HashSet<Key>,
     regional_failed:HashSet<Key>,
     height_enabled:bool,
@@ -641,7 +643,7 @@ impl Terrain {
             })
         }).map_or((None,None),|(path,cover)|(Some(path),Some(cover)));
         let [width,height]=[2<<max_level,(2<<max_level)-1];
-        let table=texture("Natural terrain page indices",width,height,1,1,wgpu::TextureFormat::R32Uint);
+        let table=texture("Natural terrain page indices",width,height,1,1,wgpu::TextureFormat::Rg32Uint);
         let keys=pages.into_iter().map(|key|{
             let [w,s,e,n]=key.bounds();
             let axis=frame([(w+e)*0.5,(s+n)*0.5])[2];
@@ -1031,7 +1033,7 @@ impl Terrain {
         }
     }
 
-    fn write_index(table:&wgpu::Texture,queue:&wgpu::Queue,key:Key,value:u32) {
+    fn write_index(table:&wgpu::Texture,queue:&wgpu::Queue,key:Key,value:u64) {
         queue.write_texture(wgpu::TexelCopyTextureInfo{texture:table,mip_level:0,
             origin:key.texel(),aspect:wgpu::TextureAspect::All},&value.to_le_bytes(),
             wgpu::TexelCopyBufferLayout{offset:0,bytes_per_row:None,rows_per_image:None},
@@ -1065,7 +1067,7 @@ impl Terrain {
         let now=Instant::now();
         let fade=if self.exact() {255} else {0};
         let ready=(landscape_fade.is_none() || self.exact()).then_some(now);
-        let page=Page{slot,regional_slot:None,ready,used:now,fade,landscape_fade,classified:tile.classified};
+        let page=Page{slot,regional_slot:None,regional_near_only:false,ready,used:now,fade,landscape_fade,classified:tile.classified};
         Self::write_index(&self.table,queue,completion.key,page.index());
         self.pages.insert(completion.key,page);
         if !self.exact() && self.view_max>=GROUPED_LOD_START && self.requests_this_frame<GROUPED_LOADS_PER_FRAME {
@@ -1110,6 +1112,8 @@ impl Terrain {
             wgpu::Extent3d{width,height:PAGE_SIZE,depth_or_array_layers:1});
         let page=self.pages.get_mut(&key).unwrap();
         page.regional_slot=Some(slot);
+        page.regional_near_only=self.regional_index.as_ref().and_then(|index|index.get(&key))
+            .is_some_and(|frame|frame.near_only);
         Self::write_index(&self.table,queue,key,page.index());
         self.landscape_revision=self.landscape_revision.wrapping_add(1);
     }

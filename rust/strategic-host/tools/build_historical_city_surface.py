@@ -10,18 +10,18 @@ from PIL import Image, ImageDraw
 from rasterio.features import rasterize
 from rasterio.transform import from_bounds
 from scipy.ndimage import distance_transform_edt, uniform_filter
-from shapely import Polygon
+from shapely import Polygon, box
 from zstandard import ZstdCompressor, ZstdDecompressor
 
 from build_city_models import RECORD, features, london_parks, read
 from build_london_city_ground import GROUP as LONDON, GUTTER as LONDON_GUTTER
-from build_paris_city_ground import GUTTER as PARIS_GUTTER, STREETS_PREFIX
+from build_paris_city_ground import GUTTER as PARIS_GUTTER, STREETS_GROUP, STREETS_PREFIX
 from city_ground_pack import read_city_coverage
 
 PARIS = (1.966, 48.67, 2.692, 49.058)
 SIDE = 2048
 SAMPLES = 2
-UNKNOWN, ROOF, COURT, WORK, OPEN, WOOD = range(6)
+UNKNOWN, ROOF, COURT, WORK, OPEN, WOOD, MARKET_GARDEN = range(7)
 
 
 class Grid:
@@ -132,12 +132,27 @@ def paris_surface(grid, sources, overlays, models, fringe):
     blocks = grid.mask(features(block_map, lambda p: p["Bati_nonBati"] == "Bâti"))
     unbuilt = grid.mask(features(block_map, lambda p: str(p["Bati_nonBati"]).startswith("Non-bâti")))
     roofs = paris_roofs(grid, models, fringe)
-    outer_courts = historical_urban & (grid.distance(roofs) <= 17.)
     dry_land = ~water & (classes != WOOD) & (classes != WORK)
-    classes[(blocks | outer_courts) & dry_land & ~unbuilt] = COURT
+    # Preserve the existing courtyard infill within the detailed inner
+    # survey. Peripheral placements alone don't establish paved land use.
+    core = grid.mask([box(*STREETS_GROUP)])
+    core_courts = core & historical_urban & (grid.distance(roofs) <= 17.)
+    classes[(blocks | core_courts) & dry_land & ~unbuilt] = COURT
     classes[unbuilt & dry_land] = OPEN
     classes[roofs & dry_land & ~unbuilt] = ROOF
     classes[water] = UNKNOWN
+
+    # Approximate extent of the documented market gardens south of the
+    # Croult. The Six Routes study records the small NE–SW strips and
+    # successive industrial use. Only allocate ground the land-use and
+    # block sources leave free. Railroad and industrial ground stays WORK.
+    vertus = Polygon([
+        (2.3765, 48.9192), (2.38338, 48.92181), (2.38554, 48.92972),
+        (2.39330, 48.92723), (2.4020, 48.9235), (2.4050, 48.9182),
+        (2.4005, 48.9135), (2.3930, 48.9118), (2.38513, 48.91488),
+    ])
+    garden = grid.mask([vertus]) & (classes == UNKNOWN) & ~water & ~blocks & ~roofs
+    classes[garden] = MARKET_GARDEN
     streets = mosaic(grid, overlays, STREETS_PREFIX, PARIS_GUTTER).astype(np.float32) / 255.
     roads = streets[:, :, 0] + streets[:, :, 1] * (1. - streets[:, :, 0])
     return classes, roads
@@ -146,11 +161,14 @@ def paris_surface(grid, sources, overlays, models, fringe):
 def mip_words(classes, roads):
     bands = [(classes == kind) * (1. - roads) for kind in range(ROOF, WOOD + 1)]
     bands.append(roads)
+    garden = (classes == MARKET_GARDEN) * (1. - roads)
     for side in (SIDE >> level for level in range(SIDE.bit_length())):
         words = np.zeros((side, side), dtype="<u4")
         for index, band in enumerate(bands):
             bands[index] = area_average(band, side)
             words |= np.rint(bands[index] * 31.).astype(np.uint32) << (index * 5)
+        garden = area_average(garden, side)
+        words |= np.rint(garden * 3.).astype(np.uint32) << 30
         yield words.tobytes()
 
 
