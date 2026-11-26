@@ -1,4 +1,8 @@
 key,name,population,longitude,latitude,source,date,definition,locator,use
+reba:chandler:57,Amsterdam,510853,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Amsterdam, Gemeentecode 363, Totale bevolking",
+reba:chandler:1208,Rotterdam,318507,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Rotterdam, Gemeentecode 599, Totale bevolking",
+reba:chandler:1413,The Hague,206022,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Gravenhage ('s), Gemeentecode 518, Totale bevolking",
+reba:chandler:1483,Utrecht,102086,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Utrecht (gem.), Gemeentecode 344, Totale bevolking",
 reba:chandler:162,Berlin,1888326,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
 reba:chandler:544,Hamburg,705738,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
 reba:chandler:960,München,499959,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",

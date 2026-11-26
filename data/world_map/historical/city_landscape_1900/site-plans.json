@@ -150,6 +150,18 @@
       "version": "Grosser Plan von Hamburg, Altona-Ottensen und Wandsbek, circa 1900, 1:14,000",
       "rights": "Archive citation only; check scan usage with the digitizing library",
       "role": "Trace separately dated districts and shoreline from one shared sheet. Cross-check the municipal seam and distinguish planned docks or routes from completed features. Begin with a preview, then acquire only the necessary strips if permitted."
+    },
+    "amsterdam_scheltema_1900": {
+      "url": "https://www.commissiemer.nl/projectdocumenten/00007880.pdf",
+      "version": "H.J. Scheltema, Plattegrond der stad Amsterdam, 1900, D'Ailly 635; reproduced in the municipal Omgevingsvisie, figure 4-66",
+      "rights": "Reference to the published reproduction; verify usable scan rights before redistribution",
+      "role": "Compare built blocks, open land and waterways on the overview. The overview does not provide parcel or road-class coverage. Seek the complete archived edition where the cut omits a needed edge."
+    },
+    "amsterdam_schmull_1894": {
+      "url": "https://www.amsterdam.nl/stadsarchief/stukken/kaarten/amsterdam-1894/",
+      "version": "Amsterdam City Archives, J.H. Schmüll city plan, 1894",
+      "rights": "Archive reference; verify scan rights before redistribution",
+      "role": "Corroborate the near-date core and locate the Petroleumhaven and Vondelpark insets. Georeference insets separately. Check the post-1896 edge and any later transport or shoreline works against separately dated evidence."
     }
   },
   "profiles": {
@@ -1549,6 +1561,55 @@
         "Alster outer edge and harbour edge"
       ],
       "risks": "Separate port expansion works from completed berths and retain customs channels where supported."
+    },
+    "reba:chandler:57": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Dam and canal core",
+          "point": [
+            4.893,
+            52.373
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Centraal station and IJ waterfront",
+          "point": [
+            4.9,
+            52.379
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Oude Pijp housing",
+          "point": [
+            4.895,
+            52.354
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Vondelpark edge",
+          "point": [
+            4.868,
+            52.357
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "amsterdam_scheltema_1900",
+        "amsterdam_schmull_1894"
+      ],
+      "survey_limits": "Both plans are references for locating the work. Usable road geometry, individual building footprints and the continuous outer edge still need verification.",
+      "planned_units": [
+        "old core and canal belt",
+        "rail approach and IJ waterfront",
+        "ordinary housing in Oude Pijp",
+        "Vondelpark and the south-west polder transition"
+      ],
+      "risks": "Keep canals, park and unbuilt annexed land open. Verify dated crossings and port works. Preserve separate settlements around the IJ."
     },
     "landscape:altona": {
       "profile": "historic_port",
