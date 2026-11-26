@@ -6,7 +6,7 @@ use crate::{
 use std::{collections::{HashMap, HashSet}, f64::consts::PI};
 use wgpu::util::DeviceExt;
 
-const KINDS: u64 = 4;
+const KINDS: u64 = 5;
 // Beyond this footprint the continuous canopy material alone carries the woods.
 const MODEL_LIMIT_MPP: f64 = 23.5;
 const CHUNK_SIDE: i32 = 16;
@@ -105,7 +105,7 @@ impl Landscape {
             base_vertex += mesh.vertices.len() as u32;
             command
         });
-        let commands = [mesh_commands[0], mesh_commands[1], mesh_commands[2], mesh_commands[0]];
+        let commands = [mesh_commands[0], mesh_commands[1], mesh_commands[2], mesh_commands[0], mesh_commands[3]];
         let crown_indices = [commands[0][0], commands[1][0], commands[3][0]];
         let vertices = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Landscape shared meshes"),

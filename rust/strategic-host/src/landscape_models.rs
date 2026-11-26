@@ -183,7 +183,34 @@ fn crown(
     }
 }
 
-pub fn meshes() -> ([Mesh; 3], u32) {
+fn farm_building(mesh: &mut Mesh, center: [f32; 2], half_size: [f32; 2], eave: f32, ridge: f32) {
+    let [x, y] = center;
+    let [w, d] = half_size;
+    let corners = [[x-w, y-d], [x+w, y-d], [x+w, y+d], [x-w, y+d]];
+    let bottom = corners.map(|[x, y]| Vec3::new(x, y, -0.15));
+    let top = corners.map(|[x, y]| Vec3::new(x, y, eave));
+    let west = Vec3::new(x-w, y, ridge);
+    let east = Vec3::new(x+w, y, ridge);
+    for (i, j) in [(0, 1), (1, 2), (2, 3), (3, 0)] {
+        face(mesh, [bottom[i], bottom[j], top[j]], [1.; 3], 0.72);
+        face(mesh, [bottom[i], top[j], top[i]], [1.; 3], 0.72);
+    }
+    face(mesh, [top[0], top[1], east], [1.; 3], 1.);
+    face(mesh, [top[0], east, west], [1.; 3], 1.);
+    face(mesh, [west, east, top[2]], [1.; 3], 1.);
+    face(mesh, [west, top[2], top[3]], [1.; 3], 1.);
+    face(mesh, [top[1], top[2], east], [1.; 3], 0.72);
+    face(mesh, [top[3], top[0], west], [1.; 3], 0.72);
+}
+
+fn farmstead() -> Mesh {
+    let mut mesh = Mesh::default();
+    farm_building(&mut mesh, [-0.26, -0.23], [0.53, 0.18], 0.68, 0.96);
+    farm_building(&mut mesh, [0.38, 0.31], [0.26, 0.15], 0.53, 0.80);
+    mesh
+}
+
+pub fn meshes() -> ([Mesh; 4], u32) {
     let lobed = BROADLEAF;
     let needles = [
         (1., 0.),
@@ -295,5 +322,5 @@ pub fn meshes() -> ([Mesh; 3], u32) {
         &group,
         true,
     );
-    ([broadleaf, conifer, rock], group.indices.len() as u32)
+    ([broadleaf, conifer, rock, farmstead()], group.indices.len() as u32)
 }
