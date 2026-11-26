@@ -21,6 +21,7 @@ pub(super) struct Trial {
     pub(super) window_position:Option<winit::dpi::PhysicalPosition<i32>>,
     pub(super) terrain_capture:Option<(String,PathBuf)>,
     pub(super) hide_landscape_models:bool,
+    pub(super) road_layer:u32,
 }
 
 #[derive(serde::Serialize)]
@@ -329,6 +330,16 @@ impl Host {
             }
             "landscape-models" if matches!(input.value.as_str(),"show"|"hide")=>{
                 self.trial.hide_landscape_models=input.value=="hide";
+                self.dirty=true;
+            }
+            "road-layer" if matches!(input.value.as_str(),"composite"|"vector"|"fallback"|"ground"|"cover")=>{
+                self.trial.road_layer=match input.value.as_str() {
+                    "vector"=>1,
+                    "fallback"=>2,
+                    "ground"=>3,
+                    "cover"=>4,
+                    _=>0,
+                };
                 self.dirty=true;
             }
             "timing"=>{

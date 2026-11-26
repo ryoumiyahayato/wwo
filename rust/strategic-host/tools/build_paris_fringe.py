@@ -8,11 +8,12 @@ from pathlib import Path
 
 import shapely
 from shapely.geometry import Point, box, shape
+from shapely.ops import substring
 from zstandard import ZstdCompressor
 
 from build_city_models import PARIS_CENTER, RECORD, TILE, clean, features, read, rectangle, transform, transforms
-from build_paris_city_ground import STREETS_GROUP
-from build_city_water import METRES, encode, pack_road_cells
+from build_paris_city_ground import GROUP, STREETS_GROUP
+from build_city_water import METRES, encode, pack_road_levels
 
 RADIUS = 16_000.
 ROAD_CELL = 160
@@ -110,35 +111,106 @@ def build(sources, output):
     print(f"Paris fringe: {sum(map(len, pages.values())):,} placements in {len(pages)} pages, {len(pack):,} bytes")
 
 
+def route_ranks(lines):
+    # IPR has no road class. Follow mutual straight continuations through
+    # junctions to display routes by their reach, including through villages.
+    endpoints = defaultdict(list)
+    for index, line in enumerate(lines):
+        points = list(line.coords)
+        for side, start, next_point in [(0, points[0], points[1]), (1, points[-1], points[-2])]:
+            length = math.dist(start, next_point)
+            if length > .01:
+                key = tuple(round(value / 3.) for value in start)
+                direction = tuple((b - a) / length for a, b in zip(start, next_point))
+                endpoints[key].append((index, side, direction))
+    continuations = {}
+    for group in endpoints.values():
+        for index, side, tangent in group:
+            best = -.78
+            for other, other_side, direction in group:
+                alignment = sum(a * b for a, b in zip(tangent, direction))
+                if index != other and alignment < best:
+                    best = alignment
+                    continuations[index, side] = (other, other_side)
+    ranks = [0] * len(lines)
+    for index in range(len(lines)):
+        if ranks[index]:
+            continue
+        route = {index}
+        pending = [index]
+        while pending:
+            current = pending.pop()
+            for side in (0, 1):
+                end = (current, side)
+                other = continuations.get(end)
+                if other is not None and continuations.get(other) == end and other[0] not in route:
+                    route.add(other[0])
+                    pending.append(other[0])
+        reach = sum(lines[i].length for i in route)
+        rank = 3 if reach >= 5200. else 2 if reach >= 1500. else 1
+        for i in route:
+            ranks[i] = rank
+    return ranks
+
+
 def write_roads(sources, output):
     lon, lat = PARIS_CENTER
     east = METRES * math.cos(math.radians(lat))
     project = lambda x, y: ((x - lon) * east, (y - lat) * METRES)
-    region = Point(0, 0).buffer(RADIUS)
+    region = shapely.transform(box(*GROUP), project, interleaved=False)
     core = shapely.transform(box(*STREETS_GROUP), project, interleaved=False)
     limits = region.difference(core.buffer(20.))
     reference = sources / "paris_reference"
     land = reference / "ile-de-france-land-cover-1900.geojson"
     urban = shapely.transform(features(land, lambda row: str(row["codzon"]) == "3"), project, interleaved=False)
     built = shapely.union_all([poly for poly in clean(urban) if region.intersects(poly)])
+    water = shapely.transform(features(land, lambda row: str(row["codzon"]) == "1"), project, interleaved=False)
+    water_polygons = shapely.get_parts(clean(water))
+    water_index = shapely.STRtree(water_polygons)
+
+    source_lines = [part for row in read(reference / "ile-de-france-routes-1900.geojson")["features"]
+                    if row["geometry"] for part in shapely.get_parts(shape(row["geometry"]))
+                    if part.geom_type == "LineString" and not part.is_empty]
+    projected = shapely.transform(source_lines, project, interleaved=False)
+
+    def crossing_sections(road):
+        # A source line continuing across two dry banks supports a visual
+        # crossing over narrow water. Never join two separate road records.
+        hits = water_index.query(road, predicate="intersects")
+        if not len(hits):
+            return
+        wet = shapely.union_all(water_polygons[hits])
+        for run in shapely.get_parts(road.intersection(wet)):
+            if run.geom_type != "LineString" or not 3. <= run.length <= 48.:
+                continue
+            a, b = sorted(road.project(Point(p)) for p in [run.coords[0], run.coords[-1]])
+            if a < 9. or b > road.length-9. or b-a > 50.:
+                continue
+            banks = [substring(road, a-9., a-.4), substring(road, b+.4, b+9.)]
+            if any(wet.intersects(bank) for bank in banks):
+                continue
+            yield substring(road, a-2., b+2.)
 
     def road_sections():
-        for row in read(reference / "ile-de-france-routes-1900.geojson")["features"]:
-            if not row["geometry"]:
-                continue
-            road = shapely.transform(shape(row["geometry"]), project, interleaved=False)
+        for index, (road, rank) in enumerate(zip(projected, route_ranks(projected), strict=True)):
             if not limits.intersects(road):
                 continue
-            # Surveyed centrelines have display widths. Water crossings keep the map's existing bridges.
             road = road.intersection(limits)
             for geometry, radius, surface in [(road.intersection(built), 3.5, 1), (road.difference(built), 2.4, 0)]:
                 lines = [part.simplify(1.2) for part in shapely.get_parts(geometry) if part.geom_type == "LineString"]
                 if lines:
-                    yield row["properties"]["objectid"], lines, radius, surface, False
+                    yield index, lines, radius, surface, False, rank
+            bridges = [crossing for part in shapely.get_parts(road) if part.geom_type == "LineString"
+                       for crossing in crossing_sections(part)]
+            if bridges:
+                yield index, bridges, 3.0, 1, True, max(rank, 2)
 
-    values = [lon, lat, east, METRES, -RADIUS, -RADIUS, RADIUS, RADIUS]
-    words = [*(encode(value, "f") for value in values), ROAD_CELL]
-    pack_road_cells(words, values, road_sections(), ROAD_CELL)
+    # Keep the original 160 m cell lattice in the existing Paris outskirts.
+    west, south, xmax, ymax = region.bounds
+    values = [lon, lat, east, METRES, math.floor(west/ROAD_CELL)*ROAD_CELL,
+              math.floor(south/ROAD_CELL)*ROAD_CELL, xmax, ymax]
+    words = [*(encode(value, "f") for value in values), ROAD_CELL, 0, 0, 0]
+    pack_road_levels(words, values, list(road_sections()), ROAD_CELL, range(9, 12))
     payload = struct.pack(f"<{len(words)}I", *words)
     output.write_bytes(ZstdCompressor(level=12).compress(payload))
 

@@ -824,6 +824,7 @@ fn field_frontage(road: FieldRoad, mpp: f32, pasture: f32) -> vec3f {
 fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, land: LandCover,
                 slope: vec2f, height: f32, fine: LandscapeLayer, water: f32, mpp: f32,
                 unrecorded: f32) -> vec3f {
+    if view.road_layer.x==4u {return vec3f(land.urban,land.grass+land.crop,land.forest);}
     let share = rock_share(land,length(slope),height);
     let rock = share.x+(land.grass+land.shrub)*share.y;
     let sand = land_palette_weight(land_chroma(base),vec3f(.775,.632,.433),.074);
@@ -1111,7 +1112,18 @@ fn landscape_relief(base:vec3f,ll:vec2f,world:vec3f,water:f32,mpp:f32) -> vec3f 
     let share=support*(1.-park.a)/max(1.,dot(land.built+land.open,vec3f(1.)));
     let built=land.built*share;
     let open=land.open*share;
-    let street=open.z*historic_street_weight(mpp,page.paris);
+    let surveyed_street=open.z*historic_street_weight(mpp,page.paris);
+    var legacy_street=0.;
+    var street_ground=0.;
+    if surveyed_street>.001 {
+        let fallback=road_raster_fraction(ll);
+        legacy_street=surveyed_street*fallback;
+        // A mineral bed belongs only to streets inside the adjoining
+        // built fabric. Rural centrelines must leave no painted footprint.
+        let fabric=historic_surface_use(page,max(32.,mpp));
+        street_ground=surveyed_street*(1.-fallback)*smoothstep(.17,.48,fabric.built.x+fabric.built.y);
+    }
+    let street=legacy_street+street_ground;
     let unassigned=max(0.,1.-dot(built+vec3f(open.xy,street),vec3f(1.))-park.a*support);
     let garden=min(unassigned,land.garden*share);
     let natural=unassigned-garden;
@@ -1136,7 +1148,8 @@ fn landscape_relief(base:vec3f,ll:vec2f,world:vec3f,water:f32,mpp:f32) -> vec3f 
         color+=mix(lot,roof,near_roof)*built.x+court*built.y;
     }
     if built.z>.001 {
-        let yard=vec3f(.507,.475,.423)*(1.+material_grain(world,mpp,GRAVEL,34.,12.)*.5);
+        let ballast=select(vec3f(.507,.475,.423),vec3f(.533,.521,.481),page.paris);
+        let yard=ballast*(1.+material_grain(world,mpp,GRAVEL,34.,12.)*.5);
         color+=yard*built.z;
     }
     if open.x>.001 {
@@ -1148,8 +1161,9 @@ fn landscape_relief(base:vec3f,ll:vec2f,world:vec3f,water:f32,mpp:f32) -> vec3f 
         color+=FOREST_GROUND*(1.+crown*.64)*open.y;
     }
     if street>.001 {
-        let road=mix(city_road(page.paris,.2),vec3f(.682,.661,.615),smoothstep(6.,18.,mpp));
-        color+=road*(1.+material_grain(world,mpp,SETTS,5.,7.)*.52)*street;
+        let mineral=select(vec3f(.554,.523,.468),vec3f(.625,.610,.568),page.paris);
+        let legacy=mix(city_road(page.paris,.2),vec3f(.682,.661,.615),smoothstep(6.,18.,mpp));
+        color+=(mineral*street_ground+legacy*legacy_street)*(1.+material_grain(world,mpp,SETTS,9.,7.)*.39);
     }
     return color;
 }

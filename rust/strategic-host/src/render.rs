@@ -29,6 +29,7 @@ pub struct View {
     pub close_sample:[f32;3],
     water_clock:u32,
     pub military_cell:[f32;4],
+    pub road_layer:[u32;4],
 }
 impl View {
     pub fn new(camera:&Camera,size:[u32;2])->Self {
@@ -156,6 +157,23 @@ pub struct TransportOverlay<'a> {
     pub vehicles: &'a Mesh,
 }
 
+fn road_scissor(camera: &Camera, size: [u32; 2], [w,s,e,n]: [f64; 4]) -> Option<[u32; 4]> {
+    let mut low=[f64::INFINITY;2];
+    let mut high=[f64::NEG_INFINITY;2];
+    for point in [[w,s],[w,n],[e,s],[e,n]] {
+        let projected=camera.project(point,size)?;
+        for i in 0..2 {
+            low[i]=low[i].min(projected[i]);
+            high[i]=high[i].max(projected[i]);
+        }
+    }
+    // The projective bounds cover the small chart curvature between corners.
+    let pad=2.+180./camera.mpp;
+    let low: [u32;2]=std::array::from_fn(|i| (low[i]-pad).floor().clamp(0.,f64::from(size[i])) as u32);
+    let high: [u32;2]=std::array::from_fn(|i| (high[i]+pad).ceil().clamp(0.,f64::from(size[i])) as u32);
+    (high[0]>low[0] && high[1]>low[1]).then(|| [low[0],low[1],high[0]-low[0],high[1]-low[1]])
+}
+
 pub struct Renderer {
     target:RenderTarget,
     device:wgpu::Device,
@@ -172,6 +190,7 @@ pub struct Renderer {
     map_layout: wgpu::BindGroupLayout,
     landscape_shader: wgpu::ShaderModule,
     surface: GroundSurface,
+    roads: wgpu::RenderPipeline,
     view:wgpu::Buffer,
     globals:wgpu::BindGroup,
     pages:wgpu::BindGroupLayout,
@@ -1053,7 +1072,9 @@ impl Renderer {
         let pipeline=|groups:&[&wgpu::BindGroupLayout],module:&wgpu::ShaderModule,v,f,buffers:&[wgpu::VertexBufferLayout]| {
             render_pipeline(&device,format,groups,module,v,f,buffers)
         };
-        let globe=pipeline(&[&glob,&pages,&close_layout,&surface.layout],&globe_shader,"triangle","map",&[]);
+        let map_groups=[&glob,&pages,&close_layout,&surface.layout];
+        let globe=pipeline(&map_groups,&globe_shader,"triangle","map",&[]);
+        let roads=pipeline(&map_groups,&globe_shader,"triangle","map_roads",&[]);
         let rivers=river_source.map(|source| {
             let proxy=events.clone();
             std::thread::spawn(move || {
@@ -1078,7 +1099,7 @@ impl Renderer {
         let models=ModelLayer::new(&device,format,&surface,events);
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),
                 frame_timer:None,frame_acquire_ms:0.,view,globals,pages,palette,flag_poses,fallback,
-                globe,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
+                globe,roads,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
                 solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,
                 prologue_art,prologue_texture,prologue_scene:None,prologue_paper,opening_cloud,
                 menu_layout:font_layout,menu_sampler:linear,instrument,instrument_view,screen,screen_size,meshes,models,
@@ -1105,6 +1126,7 @@ impl Renderer {
         let shader=map_shader(device,globe.as_deref().unwrap_or(include_str!("globe.wgsl")),
             scenery.as_deref().unwrap_or(include_str!("landscape.wgsl")));
         let map=render_pipeline(device,format,&groups,&shader,"triangle","map",&[]);
+        let roads=render_pipeline(device,format,&groups,&shader,"triangle","map_roads",&[]);
         let rivers=self.rivers.as_ref().map(|_|render_pipeline(device,format,&groups,&shader,
             "river_stroke","river_ink",&[screen_vertex_layout()]));
         let water=self.water_pages.as_ref().map(|_|GroundSurface::create_water_raster(device,&shader,&self.view));
@@ -1113,6 +1135,7 @@ impl Renderer {
             return Err(io::Error::other(format!("{error}")));
         }
         self.globe=map;
+        self.roads=roads;
         if let (Some(layer),Some(pipeline))=(&mut self.rivers,rivers) {layer.pipeline=pipeline;}
         self.surface.water_raster=water;
         self.landscape_shader=shader;
@@ -1460,7 +1483,7 @@ impl Renderer {
             RenderTarget::Offscreen(texture)=>[texture.width(),texture.height()],
         };
         if battle.is_none() {self.prepare_landscape(camera,size,landscape_enabled,now,seconds);}
-        let [draw_network,draw_economy,draw_vehicles]=self.prepare_transport(transport.filter(|_|show_map && battle.is_none()));
+        let [draw_network,draw_economy,draw_vehicles]=self.prepare_transport(transport.filter(|_|show_map && battle.is_none() && view.road_layer[0]==0));
         let (texture,copy_src)=match &self.target {
             RenderTarget::Window(_,config)=>(&frame.as_ref().unwrap().texture,config.usage.contains(wgpu::TextureUsages::COPY_SRC)),
             RenderTarget::Offscreen(texture)=>(texture,true),
@@ -1552,7 +1575,12 @@ impl Renderer {
                 layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group,&self.surface.group],[w,h]);
             }
             let draw_city=show_map&&pages.iter().any(|(_,tile,_,_)|tile.city_ink_only);
-            if draw_city||draw_network||draw_economy||draw_vehicles {
+            let road_scissors=if show_map && camera.mpp<300. && view.road_layer[0]<2 {
+                // Extents of the compact road indices, in WGS84.
+                [[1.78,48.59,2.89,49.15],[-0.371,51.371,0.104,51.638]].map(|bounds| road_scissor(camera,size,bounds))
+            } else {[None;2]};
+            let draw_roads=road_scissors.iter().any(Option::is_some);
+            if draw_city||draw_roads||draw_network||draw_economy||draw_vehicles {
                 let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label:Some("WWO map overlays"),
                     color_attachments:&[Some(wgpu::RenderPassColorAttachment {
@@ -1573,6 +1601,18 @@ impl Renderer {
                             pass.set_bind_group(1,&page.group,&[]);
                             pass.draw(0..3,0..1);
                         }
+                    }
+                    pass.set_scissor_rect(0,0,w,h);
+                }
+                if draw_roads {
+                    pass.set_pipeline(&self.roads);
+                    pass.set_bind_group(0,&self.globals,&[]);
+                    pass.set_bind_group(1,&base.group,&[]);
+                    pass.set_bind_group(2,&self.close_group,&[]);
+                    pass.set_bind_group(3,&self.surface.group,&[]);
+                    for [x,y,width,height] in road_scissors.into_iter().flatten() {
+                        pass.set_scissor_rect(x,y,width,height);
+                        pass.draw(0..3,0..1);
                     }
                     pass.set_scissor_rect(0,0,w,h);
                 }
