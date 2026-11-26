@@ -1,5 +1,30 @@
 key,name,population,longitude,latitude,source,date,definition,locator,use
-reba:chandler:1362,Siracusa,23247,,,it_census_1901_centers,1901-02-10,"Population present in the principal centre. The distinct municipal total is 32030.","Tavola XI, Siracusa row 73, 1901 columns",
+reba:chandler:988,Napoli,492693,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 1, 1901 del centro principale",
+reba:chandler:988,Napoli,553540,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 1, 1901 totale",comparison
+reba:chandler:928,Milano,463971,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 2, 1901 del centro principale",
+reba:chandler:928,Milano,491460,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 2, 1901 totale",comparison
+reba:chandler:1202,Roma,424860,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 3, 1901 del centro principale",
+reba:chandler:1202,Roma,462783,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 3, 1901 totale",comparison
+reba:chandler:1463,Torino,282753,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 4, 1901 del centro principale",
+reba:chandler:1463,Torino,335656,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 4, 1901 totale",comparison
+reba:chandler:1074,Palermo,269537,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 5, 1901 del centro principale",
+reba:chandler:1074,Palermo,309694,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 5, 1901 totale",comparison
+reba:chandler:480,Genova,159236,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 6, 1901 del centro principale",
+reba:chandler:480,Genova,234710,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 6, 1901 totale",comparison
+reba:chandler:450,Firenze,158517,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 7, 1901 del centro principale",
+reba:chandler:450,Firenze,205589,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 7, 1901 totale",comparison
+reba:chandler:1501,Venezia,145471,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 8, 1901 del centro principale",
+reba:chandler:1501,Venezia,151840,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 8, 1901 totale",comparison
+reba:chandler:267,Catania,143184,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 9, 1901 del centro principale",
+reba:chandler:267,Catania,149295,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 9, 1901 totale",comparison
+reba:chandler:195,Bologna,124424,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 10, 1901 del centro principale",
+reba:chandler:195,Bologna,152009,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 10, 1901 totale",comparison
+reba:chandler:919,Messina,92410,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 11, 1901 del centro principale",
+reba:chandler:919,Messina,149778,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 11, 1901 totale",comparison
+reba:chandler:786,Livorno,85102,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 12, 1901 del centro principale",
+reba:chandler:786,Livorno,93321,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 12, 1901 totale",comparison
+reba:chandler:1362,Siracusa,23247,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 73, 1901 del centro principale",
+reba:chandler:1362,Siracusa,32030,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 73, 1901 totale",comparison
 reba:chandler:57,Amsterdam,510853,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Amsterdam, Gemeentecode 363, Totale bevolking",
 reba:chandler:1208,Rotterdam,318507,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Rotterdam, Gemeentecode 599, Totale bevolking",
 reba:chandler:1413,The Hague,206022,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Gravenhage ('s), Gemeentecode 518, Totale bevolking",
@@ -100,18 +125,18 @@ reba:chandler:575,Hiroshima,122306,,,jp_registration_1898,1898,"Town register, p
 reba:chandler:974,Nagasaki,107422,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
 reba:chandler:1275,Sendai,83325,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
 landscape:kanazawa,Kanazawa,83595,136.657,36.563,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
-reba:chandler:988,Napoli,564000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:928,Milano,491000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:1202,Roma,465000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:1463,Torino,336000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:1074,Palermo,310000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:480,Genova,235000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:450,Firenze,206000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:988,Napoli,564000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:928,Milano,491000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1202,Roma,465000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1463,Torino,336000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1074,Palermo,310000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:480,Genova,235000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:450,Firenze,206000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
 reba:chandler:1451,Trieste,179000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:195,Bologna,152000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:1501,Venezia,152000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:919,Messina,150000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
-reba:chandler:267,Catania,149000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:195,Bologna,152000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1501,Venezia,152000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:919,Messina,150000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:267,Catania,149000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
 reba:chandler:1139,Praha,202000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
 reba:chandler:226,Brünn,109000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
 reba:chandler:1508,Wien,1675000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",

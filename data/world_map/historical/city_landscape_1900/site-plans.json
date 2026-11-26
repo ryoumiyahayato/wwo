@@ -294,6 +294,30 @@
       "version": "Library of Congress Detroit Publishing collection, Erie Canal at Salina Street, Syracuse, circa 1900",
       "rights": "Reference link only. Verify reproduction rights before redistribution.",
       "role": "Corroborate the open canal and frontage near Salina Street. The photograph cannot establish the road network or municipal edge."
+    },
+    "napoli_cram_1901": {
+      "url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~273903~90047256",
+      "version": "Cram's Atlas, 1901, Naples map, Rumsey 1910.183",
+      "rights": "Reference link only. Verify reproduction rights before redistribution.",
+      "role": "Locate streets, rail approaches, waterfront and open areas. The atlas plan does not establish footprint accuracy or coverage of the entire municipality."
+    },
+    "genova_poggi_1898": {
+      "url": "https://puc.comune.genova.it/03_11_2014/DEF/3_STR/3_3_L2_VNC/3_3_1_RRD/01_doc.pdf",
+      "version": "Comune di Genova bibliography, M. Poggi 1898 city plan, inventory 3447, 1:2,000",
+      "rights": "Archive locator only. Verify reproduction rights before redistribution.",
+      "role": "Request the indexed sheet for Albaro and the Bisagno approaches. The municipal bibliography also lists proposals, which require separate evidence of execution."
+    },
+    "firenze_guide_1900": {
+      "url": "https://www.archiviodistatotorino.beniculturali.it/bibln_detl/?id=24072",
+      "version": "Archivio di Stato di Torino, Pianta-guida di Firenze, 1900, catalogue 24072",
+      "rights": "Archive locator only. Verify reproduction rights before redistribution.",
+      "role": "Locate the period city plan. Check its mapped extent and compare the built riverfront to the surrounding hills before assigning any coverage."
+    },
+    "messina_igm_1908": {
+      "url": "https://www.agenziademanio.it/export/sites/demanio/download/documentigare_2021_3/S0_INQ.CART.STORICO-1.pdf",
+      "version": "Agenzia del Demanio excerpt of IGM sheet 254 IV S.O., 1908 edition",
+      "rights": "Reference link only. Verify reproduction rights before redistribution.",
+      "role": "Use the 1908 excerpt to cross-check the port and the earlier open slope at the future Masotto site. Require earlier evidence before adopting features as of 1900. The comparison also contains later editions."
     }
   },
   "profiles": {
@@ -2230,6 +2254,50 @@
         "western edge and Hamburg-facing seam"
       ],
       "risks": "Keep separate page ownership and a shared geographic seam. Do not apply later Greater Hamburg boundaries."
+    },
+    "reba:chandler:988": {
+      "source_preference": [
+        "napoli_cram_1901"
+      ],
+      "survey_limits": "Overview available. The late nineteenth-century cadastral sheets still need to be located and dated by district before defining the effective coverage.",
+      "planned_units": [
+        "old core and ordinary blocks",
+        "port front and rail approach",
+        "open ground and slope transitions"
+      ]
+    },
+    "reba:chandler:480": {
+      "source_preference": [
+        "genova_poggi_1898"
+      ],
+      "survey_limits": "The dated sheet has an archive locator. Neither its effective extent nor the date of construction of later coastal proposals has been verified.",
+      "planned_units": [
+        "old harbour and core",
+        "Bisagno low ground",
+        "Albaro approach"
+      ]
+    },
+    "reba:chandler:450": {
+      "source_preference": [
+        "firenze_guide_1900"
+      ],
+      "survey_limits": "Catalogue entry located. Sheet access, mapped edge and dates of the changes to the central blocks remain to be verified.",
+      "planned_units": [
+        "historic centre and ordinary blocks",
+        "Arno banks and dated bridges",
+        "river plain and south-bank slope transitions"
+      ]
+    },
+    "reba:chandler:919": {
+      "source_preference": [
+        "messina_igm_1908"
+      ],
+      "survey_limits": "The 1908 excerpt identifies the port and a western open area. Date each road and developed edge to the 1900 scenario. Exclude post-earthquake reconstruction.",
+      "planned_units": [
+        "port and historic waterfront",
+        "pre-earthquake residential blocks",
+        "western slope transition"
+      ]
     }
   },
   "regional_source_search": {

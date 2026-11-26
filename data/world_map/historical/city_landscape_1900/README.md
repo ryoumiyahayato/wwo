@@ -24,7 +24,11 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 开局为 1900-01-01。政治底图元数据为 1900-03-12，两日期均保留。采用 1895–1905 的可比参照，保留原年与开局年的差。窄口径近年普查优先，异口径读数列在比较字段。单次编纂估计保留为 P。暂无可比的跨年边界，未插值。只有明列的区间上限或调度依据可提前排期。X 包括低于门槛、同城重复、无近年城市级依据及同名统计范围冲突。只有含 D 或 P 的施工卡计入预审分母。
 
-初审结果为 1,724 条候选，D 207、P 90、X 1,427。暂列第七批 38、第八批 99、第九批 160。运行态城市交付仍按后续批次核对。已有 40 张带地方锚点的卡。其余 257 张具备种子点、分档、资料查找入口及区域规则，外缘和逐城覆盖仍待核实。
+初审结果为 1,724 条候选，D 214、P 83、X 1,427。暂列第七批 38、第八批 99、第九批 160。运行态城市交付仍按后续批次核对。已有 40 张带地方锚点的卡。其余 257 张具备种子点、分档、资料查找入口及区域规则，外缘和逐城覆盖仍待核实。
+
+意大利 1901 年普查表 XI 以主城人口替换 11 个入选城市的旧选用值。七城改为 D。那不勒斯、热那亚、佛罗伦萨和墨西拿的市辖区人口跨过施工门槛，继续以 P 排在第七、第八、第八、第九批，连续建成范围仍待核。利沃诺主城 85,102 人，全市辖区 93,321 人，继续排除。保留原编纂值和原城市 ID。
+
+四座跨档城市的施工卡补录历史地图入口和待查单元。那不勒斯使用 1901 年城市图，热那亚和佛罗伦萨保留馆藏索引，墨西拿使用 1908 年测绘节选对照港口和西侧空地。四城仍待核实有效覆盖和外缘，墨西拿须剔除震后重建。[那不勒斯 1901 年地图](https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~273903~90047256) [墨西拿 1908 年图幅](https://www.agenziademanio.it/export/sites/demanio/download/documentigare_2021_3/S0_INQ.CART.STORICO-1.pdf)
 
 意大利 1901 年普查表 XI 列锡拉库萨（`reba:chandler:1362`）主城 23,247 人，全市辖区 32,030 人。该条由 P 改 X，原 108,000 人编纂值保留为比较。纽约州锡拉丘兹（`us_city_new_york_syracuse`）1900 年普查 108,374 人，保留第九批及独立 ID。第九批预审减少一城，正式分母待冻结。[意大利普查表 XI](https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf) [美国普查公告 65 表 2](https://www2.census.gov/library/publications/decennial/1900/bulletins/demographic/65-population-incorporated-places.pdf)
 
