@@ -1,0 +1,1646 @@
+{
+  "version": 1,
+  "sources": {
+    "qpk": {
+      "file": "worldcrs84quad-15s-v2-hydrology/{0..7}.qpk",
+      "version": "worldcrs84quad-15s-v2",
+      "role": "formal elevation, coast and geographic fallback",
+      "rights": "existing runtime package"
+    },
+    "qsc": {
+      "file": "worldcrs84quad-15s-v2-hydrology/{landscape-cover-v2,regional-land-cover}.qsc",
+      "version": "B4",
+      "role": "land context, with 200 regional catalogue pages",
+      "rights": "existing runtime package"
+    },
+    "water": {
+      "file": "worldcrs84quad-15s-v2-hydrology/{water-geometry.qwg,hydrology-color.qhw,river-centrelines.qhl}",
+      "version": "B4",
+      "role": "water geometry and terrain constraints",
+      "rights": "existing runtime package"
+    },
+    "modules": {
+      "file": "rust/strategic-host/src/{city_models.rs,landmarks}",
+      "version": "3dce67233",
+      "rights": "repository-authored modules"
+    },
+    "catalogue": {
+      "file": "city-models/catalogue.json",
+      "version": "wwo-city-models-v1",
+      "role": "runtime partitions",
+      "rights": "see input rights for redistributed fields"
+    },
+    "ptm_roads": {
+      "file": "offline-map-sources/paris_1900_ptm/PTM_Paris1900_rues_epsg4326.geojson",
+      "rights": "ODbL",
+      "url": "https://doi.org/10.34847/nkl.cbf5ecd0"
+    },
+    "ptm_blocks": {
+      "file": "offline-map-sources/paris_1900_ptm/PTM_Paris1900_ilots_epsg4326.geojson",
+      "rights": "ODbL",
+      "url": "https://doi.org/10.34847/nkl.cbf5ecd0"
+    },
+    "paris_land": {
+      "file": "offline-map-sources/paris_reference/ile-de-france-land-cover-1900.geojson",
+      "rights": "Licence Ouverte / Etalab",
+      "url": "https://data.iledefrance.fr/"
+    },
+    "ohm_roads": {
+      "file": "offline-map-sources/london_1890s/ohm-dated-roads.json",
+      "rights": "ODbL",
+      "url": "https://www.openhistoricalmap.org/copyright"
+    },
+    "os_buildings": {
+      "file": "offline-map-sources/london_1890s/london_buildings_1891-96_corr_v1.gpkg",
+      "version": "corrected v1, 1:1056",
+      "rights": "CC BY 4.0",
+      "url": "https://doi.org/10.5281/zenodo.19497435"
+    },
+    "thames": {
+      "file": "offline-map-sources/london_1890s/thames-presentation-union.geojson",
+      "version": "B4 shoreline combination",
+      "rights": "reuse existing package; components have separate attribution"
+    },
+    "fr_ign_modern": {
+      "file": "offline-map-sources/france_major_city_reference/source.json",
+      "version": "2026-11-09",
+      "rights": "Etalab-Open-Licence-2.0",
+      "role": "Modern reference tiles; use a separately dated feature to confirm alignment. Acquisition window has no historical boundary value."
+    },
+    "ib_openfreemap_modern": {
+      "file": "offline-map-sources/iberian_settlement_reference/source.json",
+      "version": "20261101_080013_pt",
+      "rights": "ODbL-1.0",
+      "role": "Modern overview, not evidence of a historical road or building."
+    },
+    "fr_ign_period": {
+      "url": "https://remonterletemps.ign.fr/actualites/cartes-anciennes",
+      "version": "État-major 1820–1866, older survey",
+      "rights": "Check each released scan before redistribution",
+      "role": "Compare dated old nucleus and road corridors with the nearest available census-era local plan. A pre-1866 map does not give the whole 1900 city."
+    },
+    "gb_os_period": {
+      "url": "https://www.nationalarchives.gov.uk/help-with-your-research/research-guides/ordnance-survey/",
+      "version": "County Series and town sheets, select 1890s or closest prior survey",
+      "rights": "Check rights at sheet level",
+      "role": "Find named town and county. Record revision date, then crop core and two sampled outer sheet edges."
+    },
+    "us_sanborn": {
+      "url": "https://guides.loc.gov/fire-insurance-maps/sanborn-searching",
+      "version": "Sheet by city and edition, prefer 1895–1900",
+      "rights": "Check digitized item and rights statement",
+      "role": "Use the index footprint, then city directory or topography for the gaps between mapped business blocks."
+    },
+    "jp_ndl": {
+      "url": "https://ndlsearch.ndl.go.jp/en/rnavi/maps/post_601020",
+      "version": "Army Land Survey and dated city plans",
+      "rights": "Check individual sheet usage conditions",
+      "role": "Search city and historic Japanese name; confirm initial survey date from marginalia."
+    },
+    "au_nla": {
+      "url": "https://www.library.gov.au/research/access-collection/using-maps-collection/map-search-historical-maps-overlaid-modern-maps",
+      "version": "Historical cadastral and city plans, date by sheet",
+      "rights": "Check individual map rights",
+      "role": "Search around period nucleus, use parish boundaries only as constraints."
+    },
+    "loc_cities": {
+      "url": "https://www.loc.gov/collections/cities-and-towns/about-this-collection/",
+      "version": "Dated city or topographic sheets only",
+      "rights": "Check individual map rights",
+      "role": "Look up city name plus aliases and point. Collection hit is not proof of period coverage."
+    },
+    "ru_1897_admin": {
+      "file": "data/world_map/historical/russian_empire_1897_index.json",
+      "version": "1897 population geography used by WWO",
+      "rights": "Existing repository source notice",
+      "role": "Use imperial district identity and separate adjoining civic units. Administrative geometry does not establish built-up extent."
+    }
+  },
+  "profiles": {
+    "anchored_evidence": {
+      "historic_range": {
+        "recipe": "Start at the recorded nucleus. Add connected blocks on evidenced period built land and corridors. Stop at period land-use breaks, slope, unbridged water or independently documented civic edges. Verify at least one dated map or independent wall, market, rail or street axis before drawing outer units.",
+        "representation": "anchor_plus_period_feature_union",
+        "version": "1900-01-01",
+        "precision": "locator and constrained inference",
+        "cutoff": "Connected period built surfaces and separable period occupied corridors. Preserve water, documented open land and known unbuilt land as holes. An unresolved perimeter segment is explicit unknown."
+      },
+      "survey_coverage": {
+        "buildings": "unknown",
+        "land_use": "QSC context; period extent unknown",
+        "water": "formal QWG/QHW; local date check required",
+        "roads": {
+          "coverage_mode": "unknown",
+          "effective_geometry": null,
+          "holes": "All unverified segments and types remain unknown.",
+          "date_range": null,
+          "types": [],
+          "width_source": null,
+          "surface_source": null,
+          "sidewalk_source": null,
+          "display_class": "Retain B4 fallback; derive class from local period evidence.",
+          "crossings": "Require separately dated bridge, ford, causeway or ferry. End the segment at the bank if unresolved.",
+          "fallback": "Existing B4 geographic raster; a modern alignment may georeference a separately attested older corridor.",
+          "verified_absence": "Require independently supported park, water, wall or other road-free area."
+        }
+      },
+      "runtime": {
+        "query": "Planned per-city spatial index over emitted WCB partitions",
+        "division": "1,024 m local metric pages with stable edge IDs",
+        "lod": "Existing QPK and QSC context stays active"
+      },
+      "inputs": [
+        "qpk",
+        "qsc",
+        "water",
+        "modules"
+      ],
+      "rules": [
+        "local morphology",
+        "independent extent and coverage masks",
+        "spatial index",
+        "byte-bounded loading",
+        "attested crossings",
+        "protected open space"
+      ],
+      "spaces": [
+        "historic nucleus",
+        "evidenced employment or transport zones",
+        "ordinary residences",
+        "two distinct edge transitions",
+        "period public space"
+      ],
+      "review": {
+        "core_km": 2,
+        "core_metres": 200,
+        "ordinary_block_metres": 100,
+        "two_edges_metres": 500
+      },
+      "gap_action": {
+        "mode": "constrained_reconstruction",
+        "transfer": "0 with local dated anchors. Otherwise obtain only the missing sheet index or cropped layer.",
+        "release": "Original modules and rights-cleared geometry only.",
+        "artifact": "Digitize named historical landmarks and extent from cited plans; use a minimal checked sheet strip when the boundary is unresolved. Open a local item-level acquisition record before obtaining any binary source."
+      }
+    },
+    "historic_port": {
+      "historic_range": {
+        "recipe": "Start at the recorded nucleus. Add connected blocks on evidenced period built land and corridors. Stop at period land-use breaks, slope, unbridged water or independently documented civic edges. Verify at least one dated map or independent wall, market, rail or street axis before drawing outer units. Partition period harbour, warehousing, residence and tidal zones by the contemporary banks.",
+        "representation": "anchor_plus_period_feature_union",
+        "version": "1900-01-01",
+        "precision": "locator and constrained inference"
+      },
+      "survey_coverage": {
+        "buildings": "unknown",
+        "land_use": "QSC context; period extent unknown",
+        "water": "formal QWG/QHW; local date check required",
+        "roads": {
+          "coverage_mode": "unknown",
+          "effective_geometry": null,
+          "holes": "All unverified segments and types remain unknown.",
+          "date_range": null,
+          "types": [],
+          "width_source": null,
+          "surface_source": null,
+          "sidewalk_source": null,
+          "display_class": "Retain B4 fallback; derive class from local period evidence.",
+          "crossings": "Require separately dated bridge, ford, causeway or ferry. End the segment at the bank if unresolved.",
+          "fallback": "Existing B4 geographic raster; a modern alignment may georeference a separately attested older corridor.",
+          "verified_absence": "Require independently supported park, water, wall or other road-free area."
+        }
+      },
+      "runtime": {
+        "query": "Planned per-city spatial index over emitted WCB partitions",
+        "division": "1,024 m local metric pages with stable edge IDs",
+        "lod": "Existing QPK and QSC context stays active"
+      },
+      "inputs": [
+        "qpk",
+        "qsc",
+        "water",
+        "modules"
+      ],
+      "rules": [
+        "local morphology",
+        "independent extent and coverage masks",
+        "spatial index",
+        "byte-bounded loading",
+        "attested crossings",
+        "protected open space",
+        "dated shoreline"
+      ],
+      "spaces": [
+        "historic nucleus",
+        "evidenced employment or transport zones",
+        "ordinary residences",
+        "two distinct edge transitions",
+        "period public space"
+      ],
+      "review": {
+        "core_km": 2,
+        "core_metres": 200,
+        "ordinary_block_metres": 100,
+        "two_edges_metres": 500
+      },
+      "gap_action": {
+        "mode": "constrained_reconstruction",
+        "transfer": "0 with local dated anchors. Otherwise obtain only the missing sheet index or cropped layer.",
+        "release": "Original modules and rights-cleared geometry only."
+      }
+    },
+    "split_industrial": {
+      "historic_range": {
+        "recipe": "Start at the recorded nucleus. Add connected blocks on evidenced period built land and corridors. Stop at period land-use breaks, slope, unbridged water or independently documented civic edges. Verify at least one dated map or independent wall, market, rail or street axis before drawing outer units. Separate historic centres and retain intervening yards, industrial works and countryside.",
+        "representation": "anchor_plus_period_feature_union",
+        "version": "1900-01-01",
+        "precision": "locator and constrained inference"
+      },
+      "survey_coverage": {
+        "buildings": "unknown",
+        "land_use": "QSC context; period extent unknown",
+        "water": "formal QWG/QHW; local date check required",
+        "roads": {
+          "coverage_mode": "unknown",
+          "effective_geometry": null,
+          "holes": "All unverified segments and types remain unknown.",
+          "date_range": null,
+          "types": [],
+          "width_source": null,
+          "surface_source": null,
+          "sidewalk_source": null,
+          "display_class": "Retain B4 fallback; derive class from local period evidence.",
+          "crossings": "Require separately dated bridge, ford, causeway or ferry. End the segment at the bank if unresolved.",
+          "fallback": "Existing B4 geographic raster; a modern alignment may georeference a separately attested older corridor.",
+          "verified_absence": "Require independently supported park, water, wall or other road-free area."
+        }
+      },
+      "runtime": {
+        "query": "Planned per-city spatial index over emitted WCB partitions",
+        "division": "1,024 m local metric pages with stable edge IDs",
+        "lod": "Existing QPK and QSC context stays active"
+      },
+      "inputs": [
+        "qpk",
+        "qsc",
+        "water",
+        "modules"
+      ],
+      "rules": [
+        "local morphology",
+        "independent extent and coverage masks",
+        "spatial index",
+        "byte-bounded loading",
+        "attested crossings",
+        "protected open space",
+        "adjacent city boundaries"
+      ],
+      "spaces": [
+        "historic nucleus",
+        "evidenced employment or transport zones",
+        "ordinary residences",
+        "two distinct edge transitions",
+        "period public space"
+      ],
+      "review": {
+        "core_km": 2,
+        "core_metres": 200,
+        "ordinary_block_metres": 100,
+        "two_edges_metres": 500
+      },
+      "gap_action": {
+        "mode": "constrained_reconstruction",
+        "transfer": "0 with local dated anchors. Otherwise obtain only the missing sheet index or cropped layer.",
+        "release": "Original modules and rights-cleared geometry only."
+      }
+    },
+    "relief": {
+      "historic_range": {
+        "recipe": "Start at the recorded nucleus. Add connected blocks on evidenced period built land and corridors. Stop at period land-use breaks, slope, unbridged water or independently documented civic edges. Verify at least one dated map or independent wall, market, rail or street axis before drawing outer units. Anchor each terrace to a historic corridor. Terminate across steep bands and unbridged cuts.",
+        "representation": "anchor_plus_period_feature_union",
+        "version": "1900-01-01",
+        "precision": "locator and constrained inference"
+      },
+      "survey_coverage": {
+        "buildings": "unknown",
+        "land_use": "QSC context; period extent unknown",
+        "water": "formal QWG/QHW; local date check required",
+        "roads": {
+          "coverage_mode": "unknown",
+          "effective_geometry": null,
+          "holes": "All unverified segments and types remain unknown.",
+          "date_range": null,
+          "types": [],
+          "width_source": null,
+          "surface_source": null,
+          "sidewalk_source": null,
+          "display_class": "Retain B4 fallback; derive class from local period evidence.",
+          "crossings": "Require separately dated bridge, ford, causeway or ferry. End the segment at the bank if unresolved.",
+          "fallback": "Existing B4 geographic raster; a modern alignment may georeference a separately attested older corridor.",
+          "verified_absence": "Require independently supported park, water, wall or other road-free area."
+        }
+      },
+      "runtime": {
+        "query": "Planned per-city spatial index over emitted WCB partitions",
+        "division": "1,024 m local metric pages with stable edge IDs",
+        "lod": "Existing QPK and QSC context stays active"
+      },
+      "inputs": [
+        "qpk",
+        "qsc",
+        "water",
+        "modules"
+      ],
+      "rules": [
+        "local morphology",
+        "independent extent and coverage masks",
+        "spatial index",
+        "byte-bounded loading",
+        "attested crossings",
+        "protected open space",
+        "terrain-following roads and retaining edges"
+      ],
+      "spaces": [
+        "historic nucleus",
+        "evidenced employment or transport zones",
+        "ordinary residences",
+        "two distinct edge transitions",
+        "period public space"
+      ],
+      "review": {
+        "core_km": 2,
+        "core_metres": 200,
+        "ordinary_block_metres": 100,
+        "two_edges_metres": 500
+      },
+      "gap_action": {
+        "mode": "constrained_reconstruction",
+        "transfer": "0 with local dated anchors. Otherwise obtain only the missing sheet index or cropped layer.",
+        "release": "Original modules and rights-cleared geometry only."
+      }
+    },
+    "compiled_paris": {
+      "historic_range": {
+        "recipe": "Use PTM street and block relations. Attach fringe settlements using documented 1900 land classes. Protect parks, rampart, rail, river and farmland gaps.",
+        "representation": "union_of_period_feature_units",
+        "version": "PTM and Paris Region 1900",
+        "precision": "block geometry; building solids inferred"
+      },
+      "survey_coverage": {
+        "buildings": "Block outline on mapped polygons only. Courtyards excluded. Heights and solids inferred.",
+        "land_use": "Class polygons of the historical land-use layer",
+        "water": "Existing bank geometry and independently dated local banks",
+        "roads": {
+          "coverage_mode": "line_by_kind_and_date",
+          "effective_geometry": "ptm_roads",
+          "holes": "Unmapped passages and boundary fragments retain fallback. Centreline does not establish width or parallel lanes.",
+          "date_range": [
+            1900,
+            1900
+          ],
+          "types": [
+            "PTM-documented streets"
+          ],
+          "width_source": null,
+          "surface_source": null,
+          "sidewalk_source": null,
+          "display_class": "Retain B4 fallback; derive class from local period evidence.",
+          "crossings": "Match mapped crossings and bridge-specific validity.",
+          "fallback": "Existing B4 geographic raster; a modern alignment may georeference a separately attested older corridor.",
+          "verified_absence": "Require independently supported park, water, wall or other road-free area."
+        }
+      },
+      "runtime": {
+        "query": "Catalog city=paris. B4 raster handoff [1.78,48.59,2.89,49.15], 480 m feather.",
+        "division": "1,024 m local metric pages with stable edge IDs",
+        "lod": "Existing QPK and QSC context stays active"
+      },
+      "inputs": [
+        "qpk",
+        "qsc",
+        "water",
+        "modules",
+        "ptm_roads",
+        "ptm_blocks",
+        "paris_land",
+        "catalogue"
+      ],
+      "rules": [
+        "local morphology",
+        "independent extent and coverage masks",
+        "spatial index",
+        "byte-bounded loading",
+        "attested crossings",
+        "protected open space"
+      ],
+      "spaces": [
+        "historic nucleus",
+        "evidenced employment or transport zones",
+        "ordinary residences",
+        "two distinct edge transitions",
+        "period public space"
+      ],
+      "review": {
+        "core_km": 2,
+        "core_metres": 200,
+        "ordinary_block_metres": 100,
+        "two_edges_metres": 500
+      },
+      "gap_action": {
+        "mode": "reuse_local",
+        "transfer": "0 using existing copies",
+        "release": "ODbL and Etalab obligations apply separately."
+      }
+    },
+    "compiled_london": {
+      "historic_range": {
+        "recipe": "Use actual OS footprints within the County of London. Reconcile parks, rail and docks. Keep West Ham and Croydon independent even where the runtime shares partitions.",
+        "representation": "union_of_building_blocks_and_independent_open_land",
+        "version": "OS 1891–95 and dated road sources",
+        "precision": "OS-derived footprints with inferred roof and height"
+      },
+      "survey_coverage": {
+        "buildings": "OS extraction from 753 sheets. Six missing sheets and extraction gaps stay unknown.",
+        "land_use": "Existing parks with independently supported historical extent.",
+        "water": "Thames union; period docks and crossings independently dated.",
+        "roads": {
+          "coverage_mode": "line_by_kind_and_date",
+          "effective_geometry": "ohm_roads",
+          "holes": "Only individually dated features. Preserve any gaps and uncovered road classes.",
+          "date_range": [
+            null,
+            1900
+          ],
+          "types": [
+            "OHM highway with known opening by target date and reviewed class"
+          ],
+          "width_source": null,
+          "surface_source": null,
+          "sidewalk_source": null,
+          "display_class": "OHM tag mapped to B4 visual class",
+          "crossings": "Use a separately attested period bridge or ferry.",
+          "fallback": "Existing B4 geographic raster; a modern alignment may georeference a separately attested older corridor.",
+          "verified_absence": "Require independently supported park, water, wall or other road-free area."
+        }
+      },
+      "runtime": {
+        "query": "Catalog city=london. B4 raster handoff [-0.371,51.371,0.104,51.638], 240 m feather.",
+        "division": "1,024 m local metric pages with stable edge IDs",
+        "lod": "Existing QPK and QSC context stays active"
+      },
+      "inputs": [
+        "qpk",
+        "qsc",
+        "water",
+        "modules",
+        "ohm_roads",
+        "os_buildings",
+        "thames",
+        "catalogue"
+      ],
+      "rules": [
+        "local morphology",
+        "independent extent and coverage masks",
+        "spatial index",
+        "byte-bounded loading",
+        "attested crossings",
+        "protected open space"
+      ],
+      "spaces": [
+        "historic nucleus",
+        "evidenced employment or transport zones",
+        "ordinary residences",
+        "two distinct edge transitions",
+        "period public space"
+      ],
+      "review": {
+        "core_km": 2,
+        "core_metres": 200,
+        "ordinary_block_metres": 100,
+        "two_edges_metres": 500
+      },
+      "gap_action": {
+        "mode": "reuse_local",
+        "transfer": "0 using existing copies",
+        "release": "CC BY footprints and ODbL roads. Check each independent park or bridge source."
+      }
+    }
+  },
+  "regional_styles": {
+    "Europe": "Check masonry or wood, roof pitch, local lot width and civic greens. Industrial yards require period footprints.",
+    "East Asia": "Compare precinct walls, gate axis, lanes and yard proportions. Select local tiled roof profile. Separate concessions and historic inhabited cores.",
+    "South Asia": "Establish bazaars, ward lanes and public tanks where present. Verify brick, stone or timber and preserve compound boundaries. Cantonments require distinct plans.",
+    "Southeast Asia": "Confirm waterfront frontage, attached or detached shophouses, shade and courtyards. Preserve drainage and elevated ground.",
+    "West Asia and North Africa": "Distinguish market, medina and planned expansion. Check enclosure, narrow lanes, flat or pitched roofs, courts and orchard edges.",
+    "Sub-Saharan Africa": "Check local compounds, materials and roofs separately. Keep markets and dispersed periphery. Rail, mine and colonial grids need independent evidence.",
+    "North America": "Confirm local grid, rail, industrial edges and separate municipalities. Match period parcel and storey scale, masonry cores and local timber or masonry houses.",
+    "Latin America and Caribbean": "Verify plaza, older grid, local roof/court form and separately dated port and hill expansion.",
+    "Oceania": "Verify grid and period rail or dock access. Check cottage, veranda and terrace proportions in local sources. Retain open suburban land.",
+    "Central Asia": "Confirm citadel, bazaars, irrigation and garden edges. Keep residential courtyard form apart from colonial wards."
+  },
+  "sites": {
+    "reba:chandler:1081": {
+      "profile": "compiled_paris",
+      "anchors": [
+        {
+          "name": "Tuileries",
+          "point": [
+            2.327,
+            48.8637
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Ordinary block near Oberkampf",
+          "point": [
+            2.371,
+            48.864
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Saint-Denis and La Courneuve countryside transition",
+          "point": [
+            2.407,
+            48.934
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Western edge and river",
+          "point": [
+            2.258,
+            48.843
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Track data edge separately from the historic city boundary.",
+      "grade": "B"
+    },
+    "reba:chandler:817": {
+      "profile": "compiled_london",
+      "anchors": [
+        {
+          "name": "St James's Park",
+          "point": [
+            -0.1339,
+            51.5031
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Bethnal Green",
+          "point": [
+            -0.0599,
+            51.527
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Surrey Docks",
+          "point": [
+            -0.039,
+            51.496
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "East transition across Lea",
+          "point": [
+            -0.016,
+            51.543
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Southern edges",
+          "point": [
+            -0.132,
+            51.45
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Respect historic dock edges. Keep County and West Ham identity separate.",
+      "grade": "A/B"
+    },
+    "reba:chandler:162": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Mitte",
+          "point": [
+            13.405,
+            52.522
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Potsdamer Bahnhof approach",
+          "point": [
+            13.376,
+            52.504
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Spree east and rail yards",
+          "point": [
+            13.441,
+            52.507
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Preserve pre-1920 city and neighbouring Charlottenburg. Reuse B4 blocks and station; city extent needs separate work.",
+      "grade": "B"
+    },
+    "reba:chandler:143": {
+      "profile": "anchored_evidence",
+      "anchors": [
+        {
+          "name": "Forbidden City",
+          "point": [
+            116.397,
+            39.918
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Zhengyangmen",
+          "point": [
+            116.397,
+            39.901
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Temple of Heaven park",
+          "point": [
+            116.407,
+            39.881
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Eastern wall corridor",
+          "point": [
+            116.439,
+            39.913
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Build inner and outer city separately. Reuse landmark footprint. Protect Jingshan and ceremonial space. Set extent from the circa-1900 map.",
+      "grade": "B",
+      "evidence": "https://www.loc.gov/item/2006635247/"
+    },
+    "reba:chandler:297": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Loop",
+          "point": [
+            -87.632,
+            41.88
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Chicago River fork",
+          "point": [
+            -87.638,
+            41.887
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Stock Yards",
+          "point": [
+            -87.657,
+            41.813
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Lake edge south of the river",
+          "point": [
+            -87.613,
+            41.86
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Use period harbour, grid dates and lake margin. Distinguish later fill."
+    },
+    "reba:chandler:996": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Lower Manhattan",
+          "point": [
+            -74.008,
+            40.714
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Brooklyn Heights",
+          "point": [
+            -73.996,
+            40.697
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Hudson rail and piers",
+          "point": [
+            -74.016,
+            40.722
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Long Island City",
+          "point": [
+            -73.948,
+            40.744
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Consolidated city has distinct nuclei. Keep harbour interruptions and independent New Jersey municipalities."
+    },
+    "reba:chandler:394": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Old town",
+          "point": [
+            7.467,
+            51.514
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Rail approach",
+          "point": [
+            7.456,
+            51.518
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Western industrial edge",
+          "point": [
+            7.416,
+            51.512
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Keep Essen and Dortmund separate."
+    },
+    "landscape:essen": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Essen market",
+          "point": [
+            7.013,
+            51.456
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Krupp area",
+          "point": [
+            6.991,
+            51.457
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Northern rail fringe",
+          "point": [
+            7.012,
+            51.482
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Stop at contemporary lines including pre-1901 Altendorf."
+    },
+    "landscape:elberfeld": {
+      "profile": "relief",
+      "anchors": [
+        {
+          "name": "Elberfeld",
+          "point": [
+            7.145,
+            51.257
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Wupper rail throat",
+          "point": [
+            7.156,
+            51.255
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Use separate Wupper valley nuclei."
+    },
+    "landscape:barmen": {
+      "profile": "relief",
+      "anchors": [
+        {
+          "name": "Barmen",
+          "point": [
+            7.201,
+            51.272
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Wupperfeld",
+          "point": [
+            7.213,
+            51.274
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Use cut, rail crossing and local blocks. Preserve distinction from Elberfeld."
+    },
+    "reba:chandler:1572": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Kannai",
+          "point": [
+            139.64,
+            35.445
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Yamate slope",
+          "point": [
+            139.647,
+            35.433
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Shinko water",
+          "point": [
+            139.641,
+            35.455
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Reconstruct pre-annexation port. Date reclamation."
+    },
+    "reba:chandler:1049": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Semba",
+          "point": [
+            135.502,
+            34.681
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Osaka Castle",
+          "point": [
+            135.526,
+            34.687
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Nakanoshima",
+          "point": [
+            135.51,
+            34.692
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Verify canal banks before suppressing fallback roads."
+    },
+    "reba:chandler:725": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Former settlement",
+          "point": [
+            135.193,
+            34.687
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Hyogo port",
+          "point": [
+            135.175,
+            34.667
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Rokko foothills",
+          "point": [
+            135.188,
+            34.701
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Narrow coast backed by steep land. Date any reclaimed islands."
+    },
+    "reba:chandler:1282": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Walled Chinese town",
+          "point": [
+            121.489,
+            31.224
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Bund",
+          "point": [
+            121.49,
+            31.24
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Suzhou Creek",
+          "point": [
+            121.473,
+            31.248
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Date concessions, shoreline and ferry or bridge geometry."
+    },
+    "reba:chandler:585": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Central and original shore",
+          "point": [
+            114.155,
+            22.284
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Sheung Wan",
+          "point": [
+            114.149,
+            22.285
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Mid-Levels",
+          "point": [
+            114.151,
+            22.276
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Protect Kowloon identity, water and steep edge. Date reclamation.",
+      "jurisdiction": {
+        "id": null,
+        "method": "city_of_victoria_separate_colonial_jurisdiction",
+        "controller_id": "british_isles_1900"
+      },
+      "region": "East Asia"
+    },
+    "reba:chandler:307": {
+      "profile": "relief",
+      "anchors": [
+        {
+          "name": "Old peninsula",
+          "point": [
+            106.58,
+            29.553
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Chaotianmen",
+          "point": [
+            106.588,
+            29.571
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "South-bank ferry",
+          "point": [
+            106.579,
+            29.545
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Separate terraces by contour and wet bank. Keep ferry topology distinct."
+    },
+    "reba:chandler:1250": {
+      "profile": "relief",
+      "anchors": [
+        {
+          "name": "Plaza de Armas",
+          "point": [
+            -70.65,
+            -33.437
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Mapocho bank",
+          "point": [
+            -70.648,
+            -33.432
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Santa Lucía",
+          "point": [
+            -70.643,
+            -33.44
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Rail and west edge",
+          "point": [
+            -70.679,
+            -33.453
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Keep park and river open. Survey street width near floodplain and foothills."
+    },
+    "reba:chandler:603": {
+      "profile": "relief",
+      "anchors": [
+        {
+          "name": "Oja'ba",
+          "point": [
+            3.904,
+            7.38
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Bere ridge",
+          "point": [
+            3.9,
+            7.385
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Start from ridge and market compounds. Verify agricultural folds.",
+      "jurisdiction": {
+        "id": null,
+        "method": "local_ibadan_historical_identity",
+        "controller_id": "british_isles_1900"
+      },
+      "region": "Sub-Saharan Africa"
+    },
+    "reba:chandler:576": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Saigon harbour",
+          "point": [
+            106.706,
+            10.772
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Civic core",
+          "point": [
+            106.698,
+            10.777
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Cholon separate nucleus",
+          "point": [
+            106.653,
+            10.751
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Keep colonial grid and Cholon distinct. Date canal crossings."
+    },
+    "reba:chandler:872": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Intramuros",
+          "point": [
+            120.974,
+            14.591
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Binondo",
+          "point": [
+            120.973,
+            14.6
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Pasig mouth",
+          "point": [
+            120.963,
+            14.595
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Use dated boroughs, wall edges and independently attested crossings."
+    },
+    "landscape:hankou": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "native city at Han confluence",
+          "point": [
+            114.286,
+            30.564
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "riverside concession strip",
+          "point": [
+            114.302,
+            30.587
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Han-side edge",
+          "point": [
+            114.275,
+            30.566
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Historic bank ends and concession dates. The Yangtze and Han isolate the other two cities. Reject filling later Hankou rail suburbs."
+    },
+    "landscape:wuchang": {
+      "profile": "relief",
+      "anchors": [
+        {
+          "name": "walled Wuchang, Sheshan",
+          "point": [
+            114.3,
+            30.547
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Old Yellow Crane river approach",
+          "point": [
+            114.294,
+            30.544
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "south of Ziyang Lake",
+          "point": [
+            114.308,
+            30.528
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Walled ridge city and documented shore extensions; keep lakes, school grounds and gaps between shore settlements. Wuhan Yangtze bridge opened in 1957."
+    },
+    "reba:chandler:847": {
+      "profile": "anchored_evidence",
+      "anchors": [
+        {
+          "name": "Puerta del Sol",
+          "point": [
+            -3.704,
+            40.417
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Atocha terminus",
+          "point": [
+            -3.69,
+            40.406
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Retiro western entrance",
+          "point": [
+            -3.689,
+            40.416
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Chamberí historic strip",
+          "point": [
+            -3.704,
+            40.435
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Separate Madrid’s planned expansion, pre-existing core and protected Retiro. Prove outer 1900 street occupancy independently of modern IGN or OSM."
+    },
+    "reba:chandler:128": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Old City",
+          "point": [
+            2.177,
+            41.383
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Eixample",
+          "point": [
+            2.163,
+            41.396
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Montjuïc",
+          "point": [
+            2.162,
+            41.364
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Barceloneta",
+          "point": [
+            2.191,
+            41.38
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Use dated Eixample built blocks, old city and lived-in post-annexation nuclei. Do not fill every projected block drawn in the plan."
+    },
+    "reba:chandler:561": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Old Havana",
+          "point": [
+            -82.35,
+            23.139
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Havana arsenal basin",
+          "point": [
+            -82.355,
+            23.126
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "west of city walls",
+          "point": [
+            -82.365,
+            23.139
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Period harbour, inland city blocks and separately attested westward extension. Across-bay settlements require their own evidence."
+    },
+    "reba:chandler:1194": {
+      "profile": "relief",
+      "anchors": [
+        {
+          "name": "central Rio commercial shore",
+          "point": [
+            -43.174,
+            22.903
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Saúde district",
+          "point": [
+            -43.189,
+            22.897
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Glória",
+          "point": [
+            -43.179,
+            22.92
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Reconstruct prior to Pereira Passos remodelling and the removal of Morro do Castelo. The present-day dock geometry is not a 1900 footprint."
+    },
+    "reba:chandler:516": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "historic walled Canton",
+          "point": [
+            113.267,
+            23.129
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Shamian edge",
+          "point": [
+            113.241,
+            23.11
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "historic street network west of core",
+          "point": [
+            113.251,
+            23.119
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Differentiate old walled core, western market and concession, with riverbank and ferries. Check Henan and each occupation zone separately."
+    },
+    "reba:chandler:1396": {
+      "profile": "anchored_evidence",
+      "anchors": [
+        {
+          "name": "old city Chorsu",
+          "point": [
+            69.234,
+            41.326
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "colonial new town",
+          "point": [
+            69.278,
+            41.31
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Anhor corridor",
+          "point": [
+            69.26,
+            41.32
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "risks": "Retain old nucleus, planned district and separating channel. Record the historical irrigation alignments and the dates of any crossing."
+    }
+  },
+  "regional_source_search": {
+    "Europe": [
+      "loc_cities"
+    ],
+    "East Asia": [
+      "loc_cities"
+    ],
+    "South Asia": [
+      "loc_cities"
+    ],
+    "Southeast Asia": [
+      "loc_cities"
+    ],
+    "West Asia and North Africa": [
+      "loc_cities"
+    ],
+    "Sub-Saharan Africa": [
+      "loc_cities"
+    ],
+    "North America": [
+      "loc_cities"
+    ],
+    "Latin America and Caribbean": [
+      "loc_cities"
+    ],
+    "Oceania": [
+      "au_nla",
+      "loc_cities"
+    ],
+    "Central Asia": [
+      "ru_1897_admin",
+      "loc_cities"
+    ]
+  },
+  "source_search_by_evidence": {
+    "jp_registration_1898": [
+      "jp_ndl"
+    ],
+    "fr_census_1901": [
+      "fr_ign_period"
+    ],
+    "es_census_1900": [
+      "loc_cities"
+    ],
+    "gb_census_1901": [
+      "gb_os_period"
+    ],
+    "gb_census_scotland": [
+      "gb_os_period"
+    ],
+    "gb_hansard_1901": [
+      "gb_os_period"
+    ],
+    "russian_empire_1897": [
+      "ru_1897_admin"
+    ]
+  },
+  "source_search_by_polity": {
+    "british_isles_1900": [
+      "gb_os_period"
+    ],
+    "united_states_1900": [
+      "us_sanborn"
+    ]
+  },
+  "local_reference": {
+    "landscape:nancy": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "nancy"
+      }
+    ],
+    "landscape:saint_etienne": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "saint_etienne"
+      }
+    ],
+    "landscape:toulon": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "toulon"
+      }
+    ],
+    "reba:chandler:1003": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "nice"
+      }
+    ],
+    "reba:chandler:1081": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "paris"
+      }
+    ],
+    "reba:chandler:1187": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "reims"
+      }
+    ],
+    "reba:chandler:1209": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "roubaix"
+      }
+    ],
+    "reba:chandler:1210": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "rouen"
+      }
+    ],
+    "reba:chandler:1440": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "toulouse"
+      }
+    ],
+    "reba:chandler:199": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "bordeaux"
+      }
+    ],
+    "reba:chandler:782": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "le_havre"
+      }
+    ],
+    "reba:chandler:803": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "lille"
+      }
+    ],
+    "reba:chandler:840": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "lyon"
+      }
+    ],
+    "reba:chandler:886": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "marseille"
+      }
+    ],
+    "reba:chandler:986": [
+      {
+        "source": "fr_ign_modern",
+        "window_id": "nantes"
+      }
+    ],
+    "reba:chandler:1041": [
+      {
+        "source": "ib_openfreemap_modern",
+        "window_id": "porto"
+      }
+    ],
+    "reba:chandler:128": [
+      {
+        "source": "ib_openfreemap_modern",
+        "window_id": "barcelona"
+      }
+    ],
+    "reba:chandler:1488": [
+      {
+        "source": "ib_openfreemap_modern",
+        "window_id": "valencia"
+      }
+    ],
+    "reba:chandler:242": [
+      {
+        "source": "ib_openfreemap_modern",
+        "window_id": "cadiz"
+      }
+    ],
+    "reba:chandler:811": [
+      {
+        "source": "ib_openfreemap_modern",
+        "window_id": "lisboa"
+      }
+    ],
+    "reba:chandler:847": [
+      {
+        "source": "ib_openfreemap_modern",
+        "window_id": "madrid"
+      }
+    ],
+    "reba:chandler:859": [
+      {
+        "source": "ib_openfreemap_modern",
+        "window_id": "malaga"
+      }
+    ]
+  }
+}
