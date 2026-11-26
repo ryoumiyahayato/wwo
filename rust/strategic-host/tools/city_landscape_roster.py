@@ -376,7 +376,8 @@ def compile_roster():
         if batch:
             quality = (plan or {}).get("grade", "C")
             preferred_sources = dict.fromkeys(
-                manual["source_search_by_evidence"].get(adopted["source_id"], [])
+                (plan or {}).get("source_preference", [])
+                + manual["source_search_by_evidence"].get(adopted["source_id"], [])
                 + manual["source_search_by_polity"].get(polity["id"], [])
                 + manual["regional_source_search"][region]
             )

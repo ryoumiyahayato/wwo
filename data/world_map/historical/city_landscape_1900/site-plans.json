@@ -114,6 +114,42 @@
       "version": "1897 population geography used by WWO",
       "rights": "Existing repository source notice",
       "role": "Use imperial district identity and separate adjoining civic units. Administrative geometry does not establish built-up extent."
+    },
+    "berlin_aisber": {
+      "url": "https://daten.berlin.de/datensaetze/berlin-um-1900-aisber-wfs-0fb89263",
+      "version": "Landesdenkmalamt Berlin, digitized inner-city surveys 1899–1913; WFS catalog 2010-08-25",
+      "rights": "Datenlizenz Deutschland – Zero – Version 2.0",
+      "role": "Buildings, parks and waters in the inner-city survey area. Request a bounded WFS subset per layer. Verify dates within the survey span and obtain a separate plan for the edge and independent Charlottenburg."
+    },
+    "beijing_army_1900": {
+      "url": "https://humazur.univ-cotedazur.fr/s/humazur/item/24162",
+      "version": "Service géographique de l’armée, Plan de Pékin, publication 1900, 1:15,000",
+      "rights": "Item marked public domain by the Université Côte d’Azur",
+      "role": "Read a reduced preview for inner and outer walls, major axes and southern ceremonial grounds. Obtain a targeted scan crop only where a control point or built edge cannot be resolved. Publication year alone does not prove opening-date presence."
+    },
+    "beijing_inner_city": {
+      "url": "https://digitalatlas.asdc.sinica.edu.tw/digitalatlasen/map_detail.jsp?id=A103000145",
+      "version": "京師九城全圖, dated 1900 or later, LOC G7824.B4 1900 .J5",
+      "rights": "Use for reference; verify scan rights at holding institution before redistribution",
+      "role": "Cross-check named gates, streets and water inside the inner city against the 1900 survey. Outer-city limits and opening-date changes require separate evidence."
+    },
+    "shanghai_stanford_1900": {
+      "url": "https://www.virtualshanghai.net/Maps/Collection?ID=342",
+      "version": "Stanford’s Geographical Establishment, foreign settlements, 1900, 1:12,000",
+      "rights": "Item metadata consulted; reproduction rights not cleared",
+      "role": "Start with the foreign-settlement street and river network. Check survey date before replacing the fallback. A settlement boundary is an administrative constraint, not a built-up limit."
+    },
+    "shanghai_french_1898": {
+      "url": "https://www.virtualshanghai.net/Maps/Collection?ID=75",
+      "version": "Plan of the French concession, circa 1898; archive item 75",
+      "rights": "Item metadata consulted; reproduction rights not cleared",
+      "role": "Use with the French-concession enlargement plan, archive item 142, to distinguish existing streets, the January 1900 extension and proposed geometry. Neither item establishes continuous road coverage inside the Chinese walled town."
+    },
+    "hamburg_altona_1900": {
+      "url": "https://dbs.herder-institut.de/karten/list/id/339400064",
+      "version": "Grosser Plan von Hamburg, Altona-Ottensen und Wandsbek, circa 1900, 1:14,000",
+      "rights": "Archive citation only; check scan usage with the digitizing library",
+      "role": "Trace separately dated districts and shoreline from one shared sheet. Cross-check the municipal seam and distinguish planned docks or routes from completed features. Begin with a preview, then acquire only the necessary strips if permitted."
     }
   },
   "profiles": {
@@ -653,7 +689,17 @@
         }
       ],
       "risks": "Preserve pre-1920 city and neighbouring Charlottenburg. Reuse B4 blocks and station; city extent needs separate work.",
-      "grade": "B"
+      "grade": "B",
+      "source_preference": [
+        "berlin_aisber"
+      ],
+      "survey_limits": "Digitized inner-city layers span 1899–1913. Road centreline validity and source holes require separate verification. Keep Tiergarten open and preserve the Spree banks at the dated cut.",
+      "planned_units": [
+        "Mitte and Spree crossing approaches",
+        "Potsdamer rail approach and yards",
+        "ordinary housing east of the centre",
+        "Tiergarten edge and distinct outer built-up edge"
+      ]
     },
     "reba:chandler:143": {
       "profile": "anchored_evidence",
@@ -693,7 +739,17 @@
       ],
       "risks": "Build inner and outer city separately. Reuse landmark footprint. Protect Jingshan and ceremonial space. Set extent from the circa-1900 map.",
       "grade": "B",
-      "evidence": "https://www.loc.gov/item/2006635247/"
+      "source_preference": [
+        "beijing_army_1900",
+        "beijing_inner_city"
+      ],
+      "survey_limits": "Compare the French sheet and the inner-city manuscript for gates and old street lines. Keep major corridors distinct from unreviewed hutong. The manuscript cannot establish outer-city coverage or the dates of alterations.",
+      "planned_units": [
+        "Imperial core and Jingshan",
+        "inner-city lanes and courtyard blocks",
+        "Qianmen gate and outer-city frontage",
+        "ceremonial grounds and outer wall transition"
+      ]
     },
     "reba:chandler:297": {
       "profile": "historic_port",
@@ -993,7 +1049,18 @@
           "precision": "approximate_locator"
         }
       ],
-      "risks": "Date concessions, shoreline and ferry or bridge geometry."
+      "risks": "Date concessions, shoreline and ferry or bridge geometry.",
+      "source_preference": [
+        "shanghai_french_1898",
+        "shanghai_stanford_1900"
+      ],
+      "survey_limits": "Treat French-concession and other foreign-settlement map coverage separately. Keep walled-town lanes unknown until checked. Georeference Suzhou Creek and the 1900 Huangpu shoreline before drawing crossings or the Bund.",
+      "planned_units": [
+        "walled town",
+        "Bund quay and commercial blocks",
+        "Suzhou Creek approaches",
+        "French concession and western built-to-open transition"
+      ]
     },
     "reba:chandler:585": {
       "profile": "historic_port",
@@ -1442,6 +1509,86 @@
         }
       ],
       "risks": "Retain old nucleus, planned district and separating channel. Record the historical irrigation alignments and the dates of any crossing."
+    },
+    "reba:chandler:544": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Altstadt and Rathaus",
+          "point": [
+            9.994,
+            53.55
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Speicherstadt",
+          "point": [
+            9.992,
+            53.543
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "St. Pauli transition",
+          "point": [
+            9.964,
+            53.551
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "hamburg_altona_1900"
+      ],
+      "survey_limits": "Period map located. Extent, date of the mapped works and validity by road class are unverified. Preserve distinct Hamburg and Altona identities even where built frontage touches.",
+      "planned_units": [
+        "old core around the Alster outflow",
+        "Speicherstadt warehouse and canal district",
+        "ordinary St. Pauli blocks",
+        "Alster outer edge and harbour edge"
+      ],
+      "risks": "Separate port expansion works from completed berths and retain customs channels where supported."
+    },
+    "landscape:altona": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Altona centre and rail approach",
+          "point": [
+            9.935,
+            53.551
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Palmaille",
+          "point": [
+            9.943,
+            53.545
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Ottensen",
+          "point": [
+            9.923,
+            53.552
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "hamburg_altona_1900"
+      ],
+      "survey_limits": "The same historical sheet also covers Hamburg. Derive a distinct Altona work area from mapped occupation and separately sourced civic boundaries. Unread sheet interiors remain unknown.",
+      "planned_units": [
+        "Altona town and rail approach",
+        "Palmaille and the Elbe slope",
+        "Ottensen working blocks",
+        "western edge and Hamburg-facing seam"
+      ],
+      "risks": "Keep separate page ownership and a shared geographic seam. Do not apply later Greater Hamburg boundaries."
     }
   },
   "regional_source_search": {
