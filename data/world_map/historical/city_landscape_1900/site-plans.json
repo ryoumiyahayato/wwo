@@ -222,6 +222,78 @@
       "version": "National Register of Historic Places, Four Corners Historic District, Newark",
       "rights": "Reference link. Verify archival scan rights before redistribution.",
       "role": "Corroborate the civic-commercial focus and nearby historical industrial development. Use period maps to identify occupied blocks and protected gaps."
+    },
+    "paterson_sanborn_1899": {
+      "url": "https://www.loc.gov/item/sanborn05590_003/",
+      "version": "Sanborn Fire Insurance Map from Paterson, New Jersey, 1899, vol. 2",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Check period block, rail and industrial detail within the mapped plates. Use the index to find adjoining sheets and identify gaps."
+    },
+    "paterson_raceways_nps": {
+      "url": "https://www.nps.gov/pagr/learn/historyculture/the-passaic-river-runs-through-it.htm",
+      "version": "National Park Service, Paterson Great Falls hydropower history",
+      "rights": "Reference link only. Verify reproduction rights before redistribution.",
+      "role": "Verify that raceways belong to the nineteenth-century mill system. Date individual channels and gatehouses against the period maps."
+    },
+    "scranton_sanborn_1898": {
+      "url": "https://www.loc.gov/item/sanborn07952_004/",
+      "version": "Sanborn Fire Insurance Map from Scranton, Pennsylvania, 1898, vol. 2",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Check the west-bank blocks and industrial land in the indexed sheets. Verify east-bank blocks and outlying areas separately."
+    },
+    "scranton_dunmore_atlas_1898": {
+      "url": "https://uwm.edu/libraries/agsl/collections/cartographic-collections/fire-insurance-atlas-holdings/",
+      "version": "American Geographical Society Library, 1898 Scranton and Dunmore atlas, At.873-c",
+      "rights": "Reference link only. Verify reproduction rights before redistribution.",
+      "role": "Locate the 1898 atlas and obtain the relevant city and borough boundary plates before tracing either extent."
+    },
+    "scranton_steamtown_nps": {
+      "url": "https://www.nps.gov/stea/planyourvisit/park-brochure.htm",
+      "version": "National Park Service, Steamtown, Delaware, Lackawanna and Western yard chronology",
+      "rights": "Reference link only. Verify reproduction rights before redistribution.",
+      "role": "Verify the rail yard and anthracite role. Compare period plans before using features of the twentieth-century roundhouse or short line."
+    },
+    "fall_river_sanborn_1893": {
+      "url": "https://www.loc.gov/item/sanborn03726_002/",
+      "version": "Sanborn Fire Insurance Map from Fall River, Massachusetts, 1893",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Identify mapped mill complexes, rail approaches and adjoining residential blocks. Check intervening changes through 1900."
+    },
+    "fall_river_sanborn_1905": {
+      "url": "https://www.loc.gov/item/sanborn03726_003/",
+      "version": "Sanborn Fire Insurance Map from Fall River, Massachusetts, 1905",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Use as a later comparison for changes. Exclude features without evidence that they existed by 1900."
+    },
+    "fall_river_quequechan_nrhp": {
+      "url": "https://npgallery.nps.gov/AssetDetail/NRIS/83000709",
+      "version": "National Register record, Quequechan Valley Mills Historic District",
+      "rights": "Reference link only. Verify reproduction rights before redistribution.",
+      "role": "Locate the mill belt and corroborate dates. The register covers multiple phases and the modern district does not define the city perimeter."
+    },
+    "rochester_lathrop_1900": {
+      "url": "https://gis.cityofrochester.gov/arcgis/rest/services/HistoricPlatMaps/ROC_HistoricPlatMaps_1900/MapServer",
+      "version": "City of Rochester georeferenced map service, 1900 J. M. Lathrop plat book",
+      "rights": "Reference link only. Verify reproduction rights before redistribution.",
+      "role": "Locate and compare period plates and footprints. Check sheet gaps, overlaps and georeferencing error before deriving the edge or an effective road mask."
+    },
+    "rochester_sanborn_1904": {
+      "url": "https://www.loc.gov/item/sanborn06217_004/",
+      "version": "Sanborn Fire Insurance Map from Rochester, New York, 1904 central business district",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Compare central business blocks with the 1900 plat book. This later single sheet does not establish suburban coverage."
+    },
+    "syracuse_ny_sanborn_1892": {
+      "url": "https://www.loc.gov/item/sanborn06296_001/",
+      "version": "Sanborn Fire Insurance Map from Syracuse, Onondaga County, New York, 1892, vol. 1",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Check the covered canal-side city blocks and compare the later changes to the urban edge. Georeference only the applicable plates."
+    },
+    "syracuse_ny_salina_canal_1900": {
+      "url": "https://www.loc.gov/item/2016794190/",
+      "version": "Library of Congress Detroit Publishing collection, Erie Canal at Salina Street, Syracuse, circa 1900",
+      "rights": "Reference link only. Verify reproduction rights before redistribution.",
+      "role": "Corroborate the open canal and frontage near Salina Street. The photograph cannot establish the road network or municipal edge."
     }
   },
   "profiles": {
@@ -1871,6 +1943,253 @@
         "West Bergen built edge and the Hackensack tidal meadow transition"
       ],
       "risks": "Preserve the separate Jersey City, Newark and New York City identities. Keep bay crossings and ferry water approaches distinct from built land. Include only period rail and port works."
+    },
+    "reba:chandler:1085": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Great Falls and mill raceways",
+          "point": [
+            -74.181,
+            40.916
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Market and Main streets",
+          "point": [
+            -74.172,
+            40.916
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Little Dublin mill housing",
+          "point": [
+            -74.181,
+            40.909
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "River bend and northern margin",
+          "point": [
+            -74.164,
+            40.931
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "paterson_sanborn_1899",
+        "paterson_raceways_nps"
+      ],
+      "survey_limits": "Compare blocks and mill parcels by 1899 plate. Trace the period raceways separately from the river. Check the independent north and west settlement edges against a dated boundary survey.",
+      "planned_units": [
+        "Market Street commercial core",
+        "Great Falls raceways and mill parcels",
+        "Little Dublin residential blocks",
+        "Passaic riverbanks and transitions to adjoining settlements"
+      ],
+      "risks": "Retain separately dated water channels, bridges and open banks. Do not use later hydroelectric works or current park limits as period geometry."
+    },
+    "reba:chandler:1269": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Lackawanna Avenue commercial axis",
+          "point": [
+            -75.665,
+            41.408
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Delaware, Lackawanna and Western yard",
+          "point": [
+            -75.675,
+            41.409
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Hyde Park residential blocks",
+          "point": [
+            -75.685,
+            41.412
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Dunmore approach",
+          "point": [
+            -75.641,
+            41.42
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "scranton_sanborn_1898",
+        "scranton_dunmore_atlas_1898",
+        "scranton_steamtown_nps"
+      ],
+      "survey_limits": "Use the indexed 1898 sheets to establish documented occupation and the atlas to check the city and borough boundary. Date mines, yard works and crossings individually.",
+      "planned_units": [
+        "Lackawanna Avenue commercial core",
+        "river valley rail and industrial corridor",
+        "Hyde Park housing and western slope",
+        "eastward approach to independent Dunmore and upland edge"
+      ],
+      "risks": "Protect valley breaks and steep slopes. Preserve Dunmore as a separate borough. Exclude the 1903 short line and later Steamtown works unless a period precursor is independently attested."
+    },
+    "reba:chandler:440": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Central civic and commercial blocks",
+          "point": [
+            -71.155,
+            41.702
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Quequechan mill corridor",
+          "point": [
+            -71.132,
+            41.693
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Corky Row worker housing",
+          "point": [
+            -71.155,
+            41.693
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Taunton River waterfront",
+          "point": [
+            -71.165,
+            41.705
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "fall_river_sanborn_1893",
+        "fall_river_sanborn_1905",
+        "fall_river_quequechan_nrhp"
+      ],
+      "survey_limits": "Constrain mapped blocks to indexed plates. Cross-date growth using the 1893 and 1905 records. Require positive evidence for the as-of-1900 mill, shore and terminal cut.",
+      "planned_units": [
+        "central civic-commercial streets",
+        "Quequechan mill belt and Corky Row residences",
+        "Taunton River rail and waterfront approaches",
+        "eastern pond margin and southward built edge"
+      ],
+      "risks": "Preserve the river and pond system. Treat twentieth-century road fill and mill redevelopment as later chronology."
+    },
+    "reba:chandler:1200": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Main Street and Genesee crossing",
+          "point": [
+            -77.612,
+            43.156
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "High Falls and mill district",
+          "point": [
+            -77.617,
+            43.161
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "South Wedge residential blocks",
+          "point": [
+            -77.602,
+            43.141
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Genesee Valley Park approach",
+          "point": [
+            -77.635,
+            43.118
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "rochester_lathrop_1900",
+        "rochester_sanborn_1904"
+      ],
+      "survey_limits": "Use the 1900 municipal plat sheets for candidate edge and period parcels. Audit seams and compare the central sheet where it overlaps. Classify the park, parcel boundaries, roads and rail separately.",
+      "planned_units": [
+        "Main Street commercial core and period river crossing",
+        "High Falls industrial and canal-related sites",
+        "South Wedge ordinary housing",
+        "southwestern park and Genesee floodplain edge"
+      ],
+      "risks": "Keep this identity in Monroe County, New York. Preserve period canal and mill-race geometry, the gorge and verified open parkland. Exclude later river infrastructure."
+    },
+    "us_city_new_york_syracuse": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Clinton Square and Salina Street",
+          "point": [
+            -76.151,
+            43.051
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Erie Canal near Onondaga Creek",
+          "point": [
+            -76.155,
+            43.05
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "North Side residential blocks",
+          "point": [
+            -76.145,
+            43.066
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Westward approach to Geddes and Solvay",
+          "point": [
+            -76.183,
+            43.048
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "syracuse_ny_sanborn_1892",
+        "syracuse_ny_salina_canal_1900"
+      ],
+      "survey_limits": "Cross-check canal-side blocks in the 1892 plates against the circa-1900 view. Obtain near-date evidence for outside wards and for the Syracuse-Solvay edge before defining geometry.",
+      "planned_units": [
+        "Clinton Square and canal-side commercial blocks",
+        "canal junction and freight approaches",
+        "North Side housing and the northward salt-works transition",
+        "westward industrial edge and separate Solvay"
+      ],
+      "risks": "Use Onondaga County records for this New York city. Retain the open canal at the 1900 cut and date crossings individually. Later street fill must not substitute for the canal."
     },
     "landscape:altona": {
       "profile": "historic_port",

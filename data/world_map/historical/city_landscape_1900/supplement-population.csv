@@ -1,4 +1,5 @@
 key,name,population,longitude,latitude,source,date,definition,locator,use
+reba:chandler:1362,Siracusa,23247,,,it_census_1901_centers,1901-02-10,"Population present in the principal centre. The distinct municipal total is 32030.","Tavola XI, Siracusa row 73, 1901 columns",
 reba:chandler:57,Amsterdam,510853,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Amsterdam, Gemeentecode 363, Totale bevolking",
 reba:chandler:1208,Rotterdam,318507,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Rotterdam, Gemeentecode 599, Totale bevolking",
 reba:chandler:1413,The Hague,206022,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Gravenhage ('s), Gemeentecode 518, Totale bevolking",
