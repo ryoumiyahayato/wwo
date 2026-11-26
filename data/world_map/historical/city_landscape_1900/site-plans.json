@@ -162,6 +162,66 @@
       "version": "Amsterdam City Archives, J.H. Schmüll city plan, 1894",
       "rights": "Archive reference; verify scan rights before redistribution",
       "role": "Corroborate the near-date core and locate the Petroleumhaven and Vondelpark insets. Georeference insets separately. Check the post-1896 edge and any later transport or shoreline works against separately dated evidence."
+    },
+    "pittsburgh_allegheny_cram_1899": {
+      "url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~353200~90120494",
+      "version": "G. F. Cram, Pittsburgh and Allegheny, 1899, pp. 500–501",
+      "rights": "Archive overview reference. Check scan reuse terms before redistribution.",
+      "role": "Compare the two cities, riverbanks, crossings, rail and parks. Use the overview to locate features and compare street skeletons. Verify the occupied edge and individual crossings with finer or separately dated evidence."
+    },
+    "pittsburgh_sanborn_1893": {
+      "url": "https://www.loc.gov/item/sanborn07911_004/",
+      "version": "Sanborn Fire Insurance Map from Pittsburgh, Pennsylvania, 1893, vol. 2",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Check indexed streets, building blocks and industrial parcels within mapped plates. Verify changes between 1893 and 1900."
+    },
+    "allegheny_sanborn_1893": {
+      "url": "https://www.loc.gov/item/sanborn07493_001/",
+      "version": "Sanborn Fire Insurance Map from Allegheny, Pennsylvania, 1893",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Check the separately surveyed city within indexed plates. Establish the near-date occupation limit with the overview and independently dated evidence."
+    },
+    "allegheny_commons_register": {
+      "url": "https://npgallery.nps.gov/AssetDetail/NRIS/13000740",
+      "version": "National Park Service, Allegheny Commons National Register record",
+      "rights": "Reference link. Verify archival scan rights before redistribution.",
+      "role": "Corroborate period park presence. Compare against the 1899 map and establish the 1900 park outline separately."
+    },
+    "newark_jersey_topography_1899": {
+      "url": "https://dep.nj.gov/njgws/technical/historical-maps/",
+      "version": "New Jersey Geological and Water Survey, index of the Newark and Jersey City 1899 topographic manuscripts",
+      "rights": "Reference link. Verify archival scan rights before redistribution.",
+      "role": "Locate the manuscript sheets for both cities. Obtain and date-check the sheets before tracing shore, wetlands, or transport corridors."
+    },
+    "newark_sanborn_1892": {
+      "url": "https://www.loc.gov/resource/g3814nm.g3814nm_g05571189201/?st=gallery",
+      "version": "Sanborn Fire Insurance Map from Newark, New Jersey, 1892, vol. 1",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Check the covered blocks and works by plate. Verify the post-1892 city limit and any area outside the indexed plates separately."
+    },
+    "jersey_city_sanborn_1896": {
+      "url": "https://www.loc.gov/item/sanborn05511_006/",
+      "version": "Sanborn Fire Insurance Map from Jersey City, New Jersey, 1896, vol. 6",
+      "rights": "Public domain. Credit Library of Congress, Geography and Map Division, Sanborn Maps Collection.",
+      "role": "Identify covered streets and block edges before checking the remaining volumes, gaps, and changes through 1900."
+    },
+    "jersey_city_haer_nj27": {
+      "url": "https://www.loc.gov/item/nj0195/",
+      "version": "Historic American Engineering Record, Central Railroad of New Jersey Terminal, HAER NJ-27",
+      "rights": "Reference link. Verify archival scan rights before redistribution.",
+      "role": "Identify the terminal opened in 1889 and its rail-to-ferry relationship. Date the platform and train-shed geometry separately and exclude the 1914 expansion."
+    },
+    "hackensack_njdot_history": {
+      "url": "https://nj.gov/transportation/works/environment/pdf/hackensackriververtliftbridgeshistdist.pdf",
+      "version": "New Jersey Department of Transportation, Hackensack River bridge district historical account",
+      "rights": "Reference link. Verify archival scan rights before redistribution.",
+      "role": "Corroborate the tidal setting and crossing chronology. Verify each 1900 crossing separately and exclude Port Newark works that began in 1915."
+    },
+    "newark_four_corners_register": {
+      "url": "https://npgallery.nps.gov/NRHP/GetAsset/15c362c5-5927-4550-bf2f-1004440b9647/",
+      "version": "National Register of Historic Places, Four Corners Historic District, Newark",
+      "rights": "Reference link. Verify archival scan rights before redistribution.",
+      "role": "Corroborate the civic-commercial focus and nearby historical industrial development. Use period maps to identify occupied blocks and protected gaps."
     }
   },
   "profiles": {
@@ -1610,6 +1670,207 @@
         "Vondelpark and the south-west polder transition"
       ],
       "risks": "Keep canals, park and unbuilt annexed land open. Verify dated crossings and port works. Preserve separate settlements around the IJ."
+    },
+    "reba:chandler:1116": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Commercial core at the confluence",
+          "point": [
+            -80.004,
+            40.441
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Strip District river and rail corridor",
+          "point": [
+            -79.985,
+            40.452
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Lawrenceville blocks",
+          "point": [
+            -79.961,
+            40.467
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Schenley Park approach",
+          "point": [
+            -79.944,
+            40.434
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "pittsburgh_allegheny_cram_1899",
+        "pittsburgh_sanborn_1893"
+      ],
+      "survey_limits": "Use the overview for the 1899 relationship between city, banks, rail and parks. Confirm period block occupation inside the indexed Sanborn plates. Determine the exterior boundary and missing crossing geometry separately.",
+      "planned_units": [
+        "confluence commercial core and river approaches",
+        "Strip District rail and industrial parcels",
+        "Lawrenceville housing and industrial transition",
+        "Schenley Park approach and occupied edge"
+      ],
+      "risks": "Preserve the unbuilt park edge and the separate Allegheny City on the north bank. Date shared crossings once and connect both approaches to the same crossing."
+    },
+    "us_city_pennsylvania_allegheny": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Allegheny civic core",
+          "point": [
+            -80.005,
+            40.452
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Allegheny Commons",
+          "point": [
+            -80.012,
+            40.452
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Manchester residential blocks",
+          "point": [
+            -80.024,
+            40.452
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Riverview Park edge",
+          "point": [
+            -80.024,
+            40.48
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "pittsburgh_allegheny_cram_1899",
+        "allegheny_sanborn_1893",
+        "allegheny_commons_register"
+      ],
+      "survey_limits": "Use separate Allegheny plates for dated coverage. Confirm the exact age of rail and river works, open-space boundaries and the edge of settlement independently.",
+      "planned_units": [
+        "civic core and Allegheny Commons",
+        "Manchester ordinary housing",
+        "north-bank works and landing approaches",
+        "Riverview Park and the northern urban edge"
+      ],
+      "risks": "Retain the independent city until its 1907 annexation. Protect the Commons and park land. Connect verified crossings to Pittsburgh without spreading occupied blocks across the river."
+    },
+    "us_city_new_jersey_newark": {
+      "profile": "split_industrial",
+      "anchors": [
+        {
+          "name": "Four Corners",
+          "point": [
+            -74.171,
+            40.736
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Military Park",
+          "point": [
+            -74.169,
+            40.74
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Ironbound rail and housing blocks",
+          "point": [
+            -74.157,
+            40.73
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Passaic tidal edge",
+          "point": [
+            -74.138,
+            40.714
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "newark_sanborn_1892",
+        "newark_jersey_topography_1899",
+        "newark_four_corners_register",
+        "hackensack_njdot_history"
+      ],
+      "survey_limits": "Register the 1892 plates only where indexed coverage exists. Obtain the 1899 manuscript to check Passaic banks, rail corridors and the wetland boundary. Verify the western municipal edge and post-1892 blocks separately.",
+      "planned_units": [
+        "Four Corners streets and Military Park",
+        "Ironbound housing and rail-bounded factory lots",
+        "Passaic banks and Newark Meadows",
+        "western residential blocks and municipal edge"
+      ],
+      "risks": "Retain Newark as an independent city and preserve wetland gaps toward Jersey City. Verify rights of way and dated crossings individually. Exclude the later Port Newark fill."
+    },
+    "us_city_new_jersey_jersey_city": {
+      "profile": "historic_port",
+      "anchors": [
+        {
+          "name": "Paulus Hook blocks",
+          "point": [
+            -74.039,
+            40.713
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Communipaw Terminal",
+          "point": [
+            -74.029,
+            40.707
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Bergen Hill blocks",
+          "point": [
+            -74.065,
+            40.717
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "West Bergen meadow transition",
+          "point": [
+            -74.087,
+            40.724
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "jersey_city_sanborn_1896",
+        "newark_jersey_topography_1899",
+        "jersey_city_haer_nj27",
+        "hackensack_njdot_history"
+      ],
+      "survey_limits": "Limit detailed inferences to checked plates. Obtain the topographic manuscript for the bay, tidal edge and westward corridors. Resolve the narrower 1900 terminal footprint from period sources.",
+      "planned_units": [
+        "Paulus Hook occupied blocks and Hudson waterfront",
+        "Communipaw rail yards and ferry approach",
+        "Bergen Hill residential streets",
+        "West Bergen built edge and the Hackensack tidal meadow transition"
+      ],
+      "risks": "Preserve the separate Jersey City, Newark and New York City identities. Keep bay crossings and ferry water approaches distinct from built land. Include only period rail and port works."
     },
     "landscape:altona": {
       "profile": "historic_port",
