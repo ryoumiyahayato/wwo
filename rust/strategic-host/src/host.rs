@@ -753,6 +753,11 @@ impl Host {
     fn refresh_tiles(&mut self,now:Instant) {
         self.candidate=self.index.visible(&self.world,&self.camera,self.size,true);
         self.visible=self.index.visible(&self.world,&self.camera,self.size,false);
+        if self.trial.road_layer!=2 {
+            let active=|id:&usize| !self.world.tiles[*id].city_streets;
+            self.candidate.retain(active);
+            self.visible.retain(active);
+        }
         for id in &self.candidate {if let Some(p)=self.cached.get_mut(id){p.used=now;}}
         self.cached.retain(|_,p|now.duration_since(p.used)<=CACHE_TTL);
         if self.reader.inflight.is_some(){return;}
@@ -782,6 +787,7 @@ impl Host {
         self.refresh_tiles(now);
         let date=self.state.date.to_string();
         let mut view=View::new(&self.camera,self.size);
+        view.road_layer[0]=self.trial.road_layer;
         let active=World::active_politics(&date);
         if self.camera.mpp<700.{self.grid_step=25000.;}else if self.camera.mpp>900.{self.grid_step=50000.;}
         view.settings=[self.state.date.season_day(),self.mode.index() as f32,u8::from(active) as f32,u8::from(self.theme) as f32];

@@ -15,6 +15,7 @@ struct View {
     close_sample: vec3f, // detail weight, streamed, historical survey
     water_clock: u32,
     military_cell: vec4f, // easting index, northing index, step metres, active
+    road_layer: vec4u, // observer road-layer isolation
 };
 struct LandEdit { area: vec4f, state: vec4f };
 struct Tile {
@@ -1028,7 +1029,6 @@ struct CityRoadCell {
     point: vec2f,
     low: vec2f,
     high: vec2f,
-    origin: vec2f,
     begin: u32,
     end: u32,
     page: u32,
@@ -1036,21 +1036,26 @@ struct CityRoadCell {
     cell_size: f32,
 }
 
-fn city_road_cell(ll: vec2f, site: u32) -> CityRoadCell {
+fn city_road_cell(ll: vec2f, site: u32, level: u32) -> CityRoadCell {
     let fringe=site==2u;
     let base=select(0u,city_water[arrayLength(&city_water)-2u],fringe);
-    let header=select(site*10u,base,fringe);
+    let header=select(select(0u,city_water[28u],site==1u),base,fringe);
     let origin=vec2f(bitcast<f32>(city_water[header]),bitcast<f32>(city_water[header+1u]));
     let scale=vec2f(bitcast<f32>(city_water[header+2u]),bitcast<f32>(city_water[header+3u]));
     let point=(ll-origin)*scale;
     let low=vec2f(bitcast<f32>(city_water[header+4u]),bitcast<f32>(city_water[header+5u]));
     let high=vec2f(bitcast<f32>(city_water[header+6u]),bitcast<f32>(city_water[header+7u]));
-    if any(point<low) || any(point>=high) {return CityRoadCell(point,low,high,origin,0u,0u,0u,0u,1.);}
-    let road=select(city_water[20u+site],base+9u,fringe);
-    let cell_size=select(64.,f32(city_water[header+8u]),fringe);
+    if any(point<low) || any(point>=high) {return CityRoadCell(point,low,high,0u,0u,0u,0u,1.);}
+    var road=select(city_water[20u+site],base+12u,fringe);
+    var cell_size=select(64.,f32(city_water[header+8u]),fringe);
+    if level>0u {
+        let offsets=select(22u+site*3u,base+9u,fringe);
+        road=base+city_water[offsets+level-1u];
+        cell_size=array<f32,3>(128.,256.,384.)[level-1u];
+    }
     let cell=vec2u((point-low)/cell_size);
     let at=road+2u+2u*(cell.y*city_water[road]+cell.x);
-    return CityRoadCell(point,low,high,origin,base+city_water[at],base+city_water[at+1u],road,base,cell_size);
+    return CityRoadCell(point,low,high,base+city_water[at],base+city_water[at+1u],road,base,cell_size);
 }
 
 fn city_road_edge(point: vec2f, segment: u32) -> f32 {
@@ -1091,7 +1096,8 @@ fn nearest_field_road(cell: CityRoadCell, begin: u32, end: u32, previous: FieldR
 fn field_road(ll: vec2f, radius: f32) -> FieldRoad {
     var result = FieldRoad(radius,0.,0.);
     for (var site=0u;site<3u;site++) {
-        let cell=city_road_cell(ll,site);
+        let cell=city_road_cell(ll,site,0u);
+        if site==2u && length(cell.point)>=16000. {continue;}
         if cell.page==0u {continue;}
         result=nearest_field_road(cell,cell.begin,cell.end,result);
         // The index includes a twelve-metre verge. A frontage that
@@ -1119,56 +1125,93 @@ fn historic_road_clearance(ll: vec2f) -> f32 {
     return field_road(ll,12.).clearance;
 }
 
+const ROAD_MPP: f32 = 300.;
+
+fn road_level(mpp: f32) -> u32 {
+    return u32(mpp>=12.)+u32(mpp>=42.)+u32(mpp>=86.);
+}
+
+fn road_coverage(mpp: f32) -> vec4f {
+    return 1.-smoothstep(vec4f(6.,24.,54.,156.),vec4f(12.,42.,86.,ROAD_MPP),vec4f(mpp));
+}
+
+fn road_pixel(distance: f32, radius: f32, footprint: f32) -> f32 {
+    // Integrate the strip across the pixel. A subpixel road keeps its
+    // position and loses coverage with distance.
+    let near=clamp((radius-distance+footprint)/(2.*footprint),0.,1.);
+    let far=clamp((-radius-distance+footprint)/(2.*footprint),0.,1.);
+    return near-far;
+}
+
+fn paris_road_coverage(ll: vec2f) -> f32 {
+    // Same source footprint as the Institut Paris Region raster (GROUP).
+    let edge=min(ll-vec2f(1.78,48.59),vec2f(2.89,49.15)-ll);
+    return smoothstep(0.,480.,min(edge.x*73000.,edge.y*111195.));
+}
+
+fn london_road_coverage(ll: vec2f) -> f32 {
+    let edge=min(ll-vec2f(-.371,51.371),vec2f(.104,51.638)-ll);
+    return smoothstep(0.,240.,min(edge.x*69200.,edge.y*111195.));
+}
+
+fn road_raster_fraction(ll: vec2f) -> f32 {
+    if view.road_layer.x==1u || view.road_layer.x>=3u {return 0.;}
+    if view.road_layer.x==2u {return 1.;}
+    // These footprints use the same source as the superseded raster.
+    return 1.-max(london_road_coverage(ll),paris_road_coverage(ll));
+}
+
 fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
-    if mpp>=13. {return vec4f(0.);}
+    let level=road_level(mpp);
+    let ranks=road_coverage(mpp);
+    let footprint=max(.25,mpp*.57);
+    var strength=0.;
+    var surface=0u;
+    var carriageway=0.;
+    var arterial=0.;
+    var on_bridge=false;
     for (var site=0u;site<3u;site++) {
-        let cell=city_road_cell(ll,site);
-        var strength=0.;
-        var surface=0u;
-        var carriageway=0.;
-        var arterial=0.;
+        let cell=city_road_cell(ll,site,level);
+        if cell.begin==cell.end {continue;}
+        let support=select(select(1.,london_road_coverage(ll),site==1u),paris_road_coverage(ll),site==2u);
         for (var i=cell.begin;i<cell.end;i+=6u) {
             let style=city_water[i+5u];
             let bridge=(style&4u)!=0u;
             if (area&3u)>1u && !bridge {continue;}
+            let rank=(style>>3u)&3u;
+            let weight=ranks[rank]*support;
+            if weight<=.001 {continue;}
             let width=bitcast<f32>(city_water[i+4u]);
-            let edge=city_road_edge(cell.point,i);
-            let opacity=1.-smoothstep(-mpp*.44,mpp*.44,edge);
-            let paved=(style&3u)==2u && !bridge;
+            let distance=city_road_edge(cell.point,i)+width;
+            let ink=1.+smoothstep(5.,42.,mpp)*select(.38,2.25,rank>=2u);
+            let opacity=clamp(road_pixel(distance,width,footprint)*weight*ink,0.,1.);
+            if opacity<=.001 {continue;}
+            let paved=(style&3u)==2u && !bridge && rank>0u;
             // Treat the verge of mapped paved streets as a walkable strip
             // within the mapped width. The carriageway wins at intersections.
-            let walk=select(0.,clamp(width*.25,.85,2.2)*(1.-smoothstep(2.2,6.,mpp)),paved && width>2.8);
-            let lane=1.-smoothstep(-mpp*.44,mpp*.44,edge+walk);
+            let walk=select(0.,clamp(width*.25,.65,2.2)*(1.-smoothstep(2.6,6.,mpp)),paved && width>2.5);
+            let lane=clamp(road_pixel(distance,width-walk,footprint)*weight*ink,0.,1.);
             if lane>carriageway || (lane==carriageway && opacity>strength) {
                 surface=style&3u;
-                arterial=smoothstep(4.,7.,width);
+                arterial=f32(rank)/3.;
+                on_bridge=bridge;
             }
             carriageway=max(carriageway,lane);
             strength=max(strength,opacity);
         }
-        if strength<=0. {continue;}
-        let paris=cell.origin.x>1.;
-        let layers=array<i32,3>(DIRT_ROAD,GRAVEL,SETTS);
-        let spans=array<f32,3>(18.,8.,5.);
-        let dirt=array<vec3f,3>(vec3f(.62,.549,.446),vec3f(.582,.558,.515),city_road(paris,arterial));
-        let lane_ink=dirt[surface]*(1.+material_grain(earth,mpp,layers[surface],spans[surface],7.)*.68);
-        let walk_ink=select(vec3f(.632,.611,.573),vec3f(.693,.661,.608),paris)
-            *(1.+material_grain(earth,mpp,SETTS,4.,4.)*.34);
-        let ink=mix(walk_ink,lane_ink,clamp(carriageway/strength,0.,1.));
-        let edge=min(cell.point-cell.low,cell.high-cell.point);
-        let handoff=select(smoothstep(0.,100.,min(edge.x,edge.y)),
-            smoothstep(0.,1200.,cell.high.x-length(cell.point)),site==2u);
-        return vec4f(ink,strength*(1.-smoothstep(6.,13.,mpp))*handoff);
     }
-    return vec4f(0.);
-}
-
-fn paris_fringe_coverage(ll: vec2f) -> f32 {
-    let header=city_water[arrayLength(&city_water)-2u];
-    let origin=vec2f(bitcast<f32>(city_water[header]),bitcast<f32>(city_water[header+1u]));
-    let scale=vec2f(bitcast<f32>(city_water[header+2u]),bitcast<f32>(city_water[header+3u]));
-    let radius=bitcast<f32>(city_water[header+6u]);
-    return smoothstep(0.,1200.,radius-length((ll-origin)*scale));
+    if strength<=.001 {return vec4f(0.);}
+    if !on_bridge && (area&3u)==0u && natural_surface(ll).a>.5 {return vec4f(0.);}
+    let paris=ll.x>1.;
+    let layers=array<i32,3>(DIRT_ROAD,GRAVEL,SETTS);
+    let spans=array<f32,3>(18.,8.,5.);
+    let setts=select(vec3f(.620,.601,.564),vec3f(.614,.607,.585),paris);
+    let paints=array<vec3f,3>(vec3f(.644,.589,.483),vec3f(.627,.607,.551),
+        mix(setts,city_road(paris,1.),arterial*.28));
+    let lane_ink=paints[surface]*(1.+material_grain(earth,mpp,layers[surface],spans[surface],7.)*.68);
+    let walk_ink=select(vec3f(.632,.611,.573),vec3f(.693,.661,.608),paris)
+        *(1.+material_grain(earth,mpp,SETTS,4.,4.)*.34);
+    return vec4f(mix(walk_ink,lane_ink,clamp(carriageway/strength,0.,1.)),strength);
 }
 
 fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
@@ -1182,25 +1225,21 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
     let pixel_metres=(tile.extent.zw-tile.extent.xy)*du*111195.*vec2f(max(.08,cos(radians(ll.y))),1.);
     let mip=max(0.,log2(mpp/max(1.,min(pixel_metres.x,pixel_metres.y))));
     var buildings=textureSampleLevel(city_data,linear,uv,mip).rg;
-    // The near Paris streets cover the historical central street network.
-    // Keep regional roads outside that survey and London's incomplete dated network.
-    if tile.options.z>2.5 && tile.options.z<3.5 && mpp<13. {
-        let interior=min(ll-vec2f(2.255,48.815),vec2f(2.42,48.91)-ll);
-        let fringe=paris_fringe_coverage(ll)
-            *(1.-smoothstep(-.0016,.0001,min(interior.x,interior.y)));
-        let vector_weight=(1.-smoothstep(6.,13.,mpp))*max(fringe,smoothstep(0.,.004,min(interior.x,interior.y)));
-        buildings.g*=1.-vector_weight;
-    }
     if tile.options.z>3.5 && tile.options.z<4.5 {
-        // The two mipped channels preserve surveyed arterial and local area.
         let major=buildings.r;
         let local=buildings.g*(1.-smoothstep(34.,98.,mpp));
         let road=major+local*(1.-major);
+        let fallback=road_raster_fraction(ll);
+        if fallback<=.001 || (area&3u)>1u {return vec4f(0.);}
         let surface=mix(city_road(true,major/max(.001,road)),vec3f(.674,.660,.631),
             smoothstep(5.,17.,mpp));
         let grain=material_grain(earth,mpp,SETTS,5.,7.);
         let legacy_street=1.-historic*historic_street_weight(mpp,true);
-        return vec4f(surface*(1.+grain*.52),road*smoothstep(0.,160.,edge_distance)*legacy_street);
+        let dry=1.-water_coverage(area,natural_surface(ll).a);
+        return vec4f(surface*(1.+grain*.52),road*smoothstep(0.,160.,edge_distance)*legacy_street*fallback*dry);
+    }
+    if buildings.g>.001 && tile.options.z<4.5 {
+        buildings.g*=road_raster_fraction(ll);
     }
     let offset=max(1.,exp2(mip)*.46);
     let edge=textureSampleLevel(city_data,linear,uv-du*offset,mip).r;
@@ -1229,7 +1268,7 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
         // The generalized historical survey supplies the outer built area.
         let support=smoothstep(0.,420.,edge_distance);
         let built=dry*buildings.r*mix(.17,.66,smoothstep(32.,155.,mpp))*(1.-park_coverage(ll,mpp).a)*legacy_ground;
-        let street=buildings.g*.43*(1.-smoothstep(54.,163.,mpp))*smoothstep(480.,7200.,edge_distance);
+        let street=dry*buildings.g*.43*(1.-smoothstep(54.,163.,mpp))*smoothstep(480.,7200.,edge_distance);
         let surface=mix(court,city_roof(true)*1.23,smoothstep(14.,95.,mpp));
         let alpha=built*(1.-street)+street;
         let color=surface*built*(1.-street)+city_road(true,.78)*street;
@@ -1245,20 +1284,7 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
     let main=smoothstep(.18,.67,buildings.g);
     let road_weight=mix(1.-smoothstep(45.,128.,mpp),1.-smoothstep(95.,315.,mpp),main);
     let legacy_street=1.-historic*historic_street_weight(mpp,false);
-    // The dated fringe network replaces the older cartographic grid.
-    // The established inner city still uses its surveyed street composite.
-    var fringe=0.;
-    if surveyed.paris && historic>.001 {
-        let core=paris_core_weight(ll);
-        var fabric=0.;
-        if core>.001 {
-            let land=historic_surface_use(surveyed,max(60.,mpp));
-            fabric=smoothstep(.06,.30,dot(land.built,vec3f(1.))+land.open.z);
-        }
-        fringe=historic*paris_fringe_coverage(ll)*(1.-core*fabric);
-    }
-    let road=buildings.g*road_weight*select(
-        1.-fringe,legacy_street,historical);
+    let road=dry*buildings.g*road_weight*select(1.,legacy_street,historical);
     let roof_color=mix(city_roof(false)*.91,city_roof(false)*1.10,buildings.r);
     let paving=mix(terrain.rgb,court-vec3f(.046,.044,.028),.74);
     let shadow_color=city_roof(false)*.72;
@@ -1267,8 +1293,7 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
     let alpha=covered*(1.-road)+road;
     let street_paint=smoothstep(5.,18.,mpp);
     let road_ink=mix(city_road(false,main),vec3f(.695,.672,.623),mix(street_paint,max(street_paint,.74),historic));
-    let road_color=mix(road_ink,vec3f(.63,.60,.56),terrain.a);
-    let color=base_color*(1.-road)+road_color*road;
+    let color=base_color*(1.-road)+road_ink*road;
     return vec4f(color/max(.0001,alpha),alpha*support);
 }
 
@@ -1429,12 +1454,7 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
     let mpp=view.viewport.z*EARTH;
     let city_on_natural=view.map_style.y>.5 && tile.options.z>.5 && view.selection.y<.5;
     if tile.options.z>1.5 || (city_on_natural && view.settings.y<.5 && view.selection.z<.5) {
-        var ink=city_ink(ll,v,uv,mpp,edge_distance,area);
-        let street=city_street(ll,v,mpp,area);
-        if street.a>0. {
-            let blend=ink.a*(1.-street.a);
-            ink=vec4f((ink.rgb*blend+street.rgb*street.a)/(blend+street.a),blend+street.a);
-        }
+        let ink=city_ink(ll,v,uv,mpp,edge_distance,area);
         return vec4f(ink.rgb,ink.a*tile.options.x*coverage);
     }
     var color=shade_map(ll,uv,v,normal_view,area);
@@ -1446,11 +1466,23 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
         color=park_ground(color,ll,v,mpp,area);
     }
     if is_world {
-        let street=city_street(ll,v,mpp,area);
-        color=mix(color,street.rgb,street.a);
         let edge=1.-smoothstep(0.,view.viewport.z*1.2,horizon-r);
         color=mix(color,sky(p.xy),edge*.47);
     }
     let page_blend=select(blend,coverage,tile.options.y>=5.);
     return vec4f(color,tile.options.x*page_blend);
+}
+
+@fragment fn map_roads(@builtin(position) p:vec4f) -> @location(0) vec4f {
+    let mpp=view.viewport.z*EARTH;
+    if mpp>=ROAD_MPP || view.road_layer.x>=2u {discard;}
+    let t=view.viewport.w;
+    let xy=(p.xy-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
+    let r=length(xy);
+    if r>=1.+t*(PI*.5-1.) {discard;}
+    let earth=chart_normal(xy,r,t);
+    let ll=degrees(vec2f(atan2(earth.x,earth.z),atan2(earth.y,length(earth.xz))));
+    let paint=city_street(ll,earth,mpp,screen_water(p.xy));
+    if paint.a<=.001 {discard;}
+    return paint;
 }

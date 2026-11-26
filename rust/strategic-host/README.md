@@ -268,7 +268,11 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 局部场景的资源制作可调用 `tools/local_scene_data.py` 的 `read_city_scene(sources, buildings, (lon, lat), size_km)`。输入沿用河岸原始资料目录和游戏 `data/city-models`。`size_km` 支持 5、25、50，输出 CRS84 的 GeoJSON FeatureCollection。建筑按中心选取，道路和水域按几何交集选取。同一地物在各范围内保持原坐标和 ID。道路沿用 PTM 与 OHM 源记录 ID，建筑 ID 由城市、记录坐标及朝向确定。建筑记录指向现有 GLB 节点，路面、屋顶和墙面指向现有材质图集层。接口提供现有近景资料，全球高程及水域仍由 QPK 和 QWG 提供。
 
-巴黎市内道路分片使用 `build_paris_city_ground.py` 的 `--detailed-streets` 选项，从 Paris Time Machine 重建线生成。道路按原始街道类别分层。显示宽度用于区分层级。`--blocks` 读取同一资料集的建成街区。街区层在中尺度显示，排除历史非建成地类，并随放大让位给单栋模型。政治地图「地点类别」按现有地点 ID 筛选，并可从地点卡片打开相应专题。 [编号地图标识图册](map-symbols.html)
+道路在四种地图模式中共用同一个基础渲染通道，专题交通线随后绘制。巴黎中心使用 PTM 街道。法兰西岛外围使用 IPR 约 1900 年的 1∶50,000 道路中心线，按交叉口的方向连续性推定道路等级。伦敦使用有年代记录的 OHM 道路，优先采用 1893–1896 年测绘和已整理的泰晤士河桥位。只有较晚底图线形的同期道路是位置参照。路面、部分路宽、人行道和 IPR 窄水道过河表现均为绘制推定。道路几何不提供给正式交通网络。
+
+`build_city_water.py` 和 `build_paris_fringe.py` 离线为道路制作四级空间索引。各级沿用同一批中心线，按投影米数逐级接入干道、连接道路、街道和小径。矢量资料接替范围内退出旧道路着色，范围外保留已有栅格回退。`build_paris_city_ground.py --detailed-streets` 的分片用于旧版兼容和分层调试。`--blocks` 仍提供中景街区。原生观察接口可用 `road-layer` 选择 `composite`、`vector`、`fallback`、`ground` 和 `cover`。
+
+政治地图「地点类别」按现有地点 ID 筛选，并可从地点卡片打开相应专题。 [编号地图标识图册](map-symbols.html)
 
 `tools/build_city_parks.py <已有地图资料目录> src/city-parks.bin.zst` 生成杜乐丽园和圣詹姆斯公园的独立景观覆盖。杜乐丽园按主轴组织西侧开敞广场、林荫段和东侧花坛。圣詹姆斯公园沿 1827 年步道布置疏密不同的树列，保留湖面与小岛。地表林冠范围和近景模型取自同一份种植布局。现存边界与水面取自 OpenStreetMap，步道取自 OpenHistoricalMap。树位、花坛和历史边界细节属美术重建。单取圣詹姆斯公园湖关系的完整 XML，保存为资料目录的 `london_1890s/park-st-james-lake-reference.osm`。 [卢浮宫](https://www.louvre.fr/en/explore/the-palace/from-royal-garden-to-public-park) [英国皇家公园](https://www.royalparks.org.uk/visit/parks/st-jamess-park/history) [湖面关系 XML](https://api.openstreetmap.org/api/0.6/relation/276130/full) [OpenStreetMap 版权](https://www.openstreetmap.org/copyright) [OpenHistoricalMap 版权](https://www.openhistoricalmap.org/copyright)
 
