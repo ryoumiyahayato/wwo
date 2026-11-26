@@ -20,7 +20,7 @@ const BUILDS_PER_FRAME: usize = 32;
 const KEEP_SITES: u32 = 1 << 31;
 const INSTANCE_FADE_SECONDS: f32 = 0.18;
 // End of the individual crown blend in landscape_vertex.
-const STAND_ONLY_MPP: f64 = 18.;
+const STAND_ONLY_MPP: f64 = 15.5;
 
 type Chunk = [u32; 4];
 

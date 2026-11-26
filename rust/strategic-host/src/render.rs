@@ -281,7 +281,7 @@ impl GroundSurface {
                 ..texture_entry(2,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)
             },water_storage(3,wgpu::ShaderStages::FRAGMENT,true),water_storage(4,wgpu::ShaderStages::FRAGMENT,true),
             texture_entry(6,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
-            water_storage(7,wgpu::ShaderStages::FRAGMENT,true),wgpu::BindGroupLayoutEntry{
+            water_storage(7,wgpu::ShaderStages::FRAGMENT|wgpu::ShaderStages::COMPUTE,true),wgpu::BindGroupLayoutEntry{
                 visibility:wgpu::ShaderStages::FRAGMENT|wgpu::ShaderStages::COMPUTE,
                 ..texture_entry(8,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)
             }];

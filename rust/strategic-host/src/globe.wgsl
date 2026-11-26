@@ -1070,6 +1070,7 @@ struct FieldRoad {
     clearance: f32,
     station: f32,
     side: f32,
+    along: vec2f,
 }
 
 fn nearest_field_road(cell: CityRoadCell, begin: u32, end: u32, previous: FieldRoad) -> FieldRoad {
@@ -1088,13 +1089,13 @@ fn nearest_field_road(cell: CityRoadCell, begin: u32, end: u32, previous: FieldR
         let unit = normalize(tangent);
         let along = select(-unit,unit,select(unit.y,unit.x,abs(unit.x)>=abs(unit.y))>=0.);
         let normal = vec2f(-along.y,along.x);
-        result=FieldRoad(clearance,dot(cell.point-offset,along),dot(offset,normal));
+        result=FieldRoad(clearance,dot(cell.point-offset,along),dot(offset,normal),along);
     }
     return result;
 }
 
 fn field_road(ll: vec2f, radius: f32) -> FieldRoad {
-    var result = FieldRoad(radius,0.,0.);
+    var result = FieldRoad(radius,0.,0.,vec2f(0.));
     for (var site=0u;site<3u;site++) {
         let cell=city_road_cell(ll,site,0u);
         if site==2u && length(cell.point)>=16000. {continue;}
@@ -1119,10 +1120,6 @@ fn field_road(ll: vec2f, radius: f32) -> FieldRoad {
         }
     }
     return result;
-}
-
-fn historic_road_clearance(ll: vec2f) -> f32 {
-    return field_road(ll,12.).clearance;
 }
 
 const ROAD_MPP: f32 = 300.;

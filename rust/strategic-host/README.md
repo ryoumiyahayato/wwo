@@ -206,6 +206,8 @@ LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样�
 
 林地远景使用地表覆盖，中近景以共用锚点接替林丛与单体树。阔叶林和针叶林用不同近景轮廓，树干仅在近景绘制。样区内农田与林地交界用重建覆盖的梯度确定林带朝向。
 
+林冠底色和实例疏密共用球面坐标中的冠层变化。历史地表分配建成地、作业区、绿地和林地，实测园林布局优先。道路邻接的农业用地可以产生灌木和树篱，道路和水面裁切模型。树种比例依据纬度、高程和冠层条件推定。树篱、树种和逐株位置均为景观推定。
+
 ### 近景地表候选
 
 用 `wwo-map-lab --play --data <游戏数据目录> --terrain-candidate <QPK目录> --terrain-detail <terrain-detail-v1.qdt>` 从正常游戏入口加载独立候选。候选 QPK 目录或默认正式 QPK 目录中已有同名 QDT 时也可自动发现。自动包缺失或无法读取时沿用原地貌。显式指定的无效包会报错。
@@ -248,7 +250,7 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 使用 `tools/build_city_models.py <输入资料目录> <独立输出目录>` 生成分片。需要 GeoPandas、Shapely 2、NumPy、pyproj 和 zstandard。源码中的输入相对路径与资料包目录一致。通过 `--city london` 或 `--city paris` 可单独构建到暂存目录，再安装完整目录。授权与来源随目录保存。 [伦敦建筑资料](https://doi.org/10.5281/zenodo.19497435)，[巴黎历史重建资料](https://doi.org/10.34847/nkl.cbf5ecd0)
 
-`tools/build_paris_fringe.py <输入资料目录> <建筑分片输出> <道路分片输出>` 从 Institut Paris Region 约 1900 年的 1∶50,000 建成区和道路离线生成巴黎外围景观。建筑位于建成区内，避开中央街区资料、水域、公园等开敞用地。建成区内部允许较深的沿街布局，边缘逐渐减疏。两份小型分片随 EXE 分发，沿用现有城市网格、道路材质及加载路径。道路宽度、逐栋建筑位置、高度和样式为景观重建。 [历史建成区](https://data.iledefrance.fr/explore/dataset/occupation-du-sol-en-5-postes-vers-1900-carte-de-france-type-1900-dile-de-franc1/) [历史道路](https://data.iledefrance.fr/explore/dataset/reseau-routier-vers-1900-carte-de-france-type-1900-dile-de-france1/)
+`tools/build_paris_fringe.py <输入资料目录> <建筑分片输出> <道路分片输出>` 从 Institut Paris Region 约 1900 年的 1∶50,000 建成区和道路离线生成巴黎外围景观。建筑位于建成区内，避开中央街区资料、水域、公园等开敞用地。相邻宅地共用部分临街关系，退距、方向和庭院后排按地块变化。较深的后排限于建成区内部。两份小型分片随 EXE 分发，沿用现有城市网格、道路材质及加载路径。道路宽度、逐栋建筑位置、高度和样式为景观重建。 [历史建成区](https://data.iledefrance.fr/explore/dataset/occupation-du-sol-en-5-postes-vers-1900-carte-de-france-type-1900-dile-de-franc1/) [历史道路](https://data.iledefrance.fr/explore/dataset/reseau-routier-vers-1900-carte-de-france-type-1900-dile-de-france1/)
 
 ## R68 地图与首页迁移
 
