@@ -60,6 +60,10 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 东亚预审 35 城均已有具名施工单元。本次补了 25 张卡。东京采用 1895–1897 年分区测图，天津采用 1899 年城厢图，首尔用晚 19 世纪城图与城墙档案。清末城市缺详细实测图时，以城墙、现存可追溯地物、水系和历史城史约束施工单元。晚期地形图只用于定位或对照。编制器优先用卡内具名核心作施工定位，保留原统计坐标。例如无锡的原坐标与旧城核心相差约 9 公里。
 
+西亚与北非 13 城、撒哈拉以南非洲 4 城、拉美 14 城均有具名施工卡。本次补 26 城。从市区测绘资料登记历史海岸、河道、旧城交通线及开放土地。里约热内卢采用 1900 年军用测绘图，修正旧卡纬度符号。[里约热内卢 1900 年图](https://www.loc.gov/item/2012593122/)
+
+欧洲大陆新增 102 张具名施工卡。新增德国原测地形图、奥匈第三及第四次军事测图、瑞士 Siegfried 图册、俄罗斯城市图、布加勒斯特实测图及伊斯坦布尔 Huber 图。全部施工城都登记了核心、普通街区和两个边缘。具名点作为施工与取景的定位，外围建成区依据同年或邻年可核实街廓、道路、墙体、水岸与地形逐单元识别。扫描页覆盖、测绘源内部缺口和历史边界各自记录。罗斯托夫原统计定位距历史核心约 23 公里，程序使用施工定位计算相邻目标。[德国地图索引](https://leibniz-ifl.de/forschung/infrastrukturen/bibliothek/kartensammlung/tk-125000-des-deutschen-reichs) [奥匈历史测图](https://www.bev.gv.at/Services/Produkte/Landkarten/Historische-Landkarten.html) [伊斯坦布尔市档案](https://sehirplanlama.ibb.istanbul/beyoglu-arsivi-haritalar/)
+
 ## B4 实测
 
 - 正式 EXE 为 Build 144，路径为 `D:/programs/WWO/wwo/local-artifacts/strategic-map-phase4/wwo-map-lab.exe`。实际启动的窗口标题和 GitHub Windows CI 一致。数据来自 `D:/programs/WWO/wwo-cold-restore/runtime-97ebaf1003/data`。

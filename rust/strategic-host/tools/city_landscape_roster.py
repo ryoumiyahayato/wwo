@@ -499,12 +499,12 @@ def compile_roster():
 
     targets = [row for row in candidates if row.get("batch")]
     for row in targets:
-        lon, lat = row["point"]
+        lon, lat = row["construction"]["seed"]
         near = []
         for other in targets:
             if other["city_id"] == row["city_id"]:
                 continue
-            x, y = other["point"]
+            x, y = other["construction"]["seed"]
             dx = ((x - lon + 180) % 360 - 180) * math.cos(math.radians((lat + y) / 2))
             kilometres = math.hypot(dx, y - lat) * 111.2
             if kilometres < 30:
@@ -573,6 +573,11 @@ def summarize(roster):
     print(f"Delivery {dict(sorted(Counter(r['phase'] for r in targets).items()))}")
     print(f"Extent reviews {dict(sorted(Counter(r['construction']['extent_state'] for r in targets).items()))}")
     print(f"Style requirements {dict(sorted(Counter(r['construction']['regional_style'] for r in targets).items()))}")
+    profiles = json_file(DATA / roster["site_plan_file"])["profiles"]
+    rules = Counter(rule for row in targets for rule in profiles[row["construction"]["profile"]]["rules"])
+    gaps = Counter(profiles[row["construction"]["profile"]]["gap_action"]["mode"] for row in targets)
+    print(f"Rule demand {dict(sorted(rules.items()))}")
+    print(f"Resource gap actions {dict(sorted(gaps.items()))}")
     print(f"Political coverage {dict(sorted(Counter(r['coverage'] for r in roster['coverage']).items()))}")
     print("Region | D | P | X | B7 | B8 | B9")
     for region in (*REGIONS, "unresolved"):
