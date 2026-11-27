@@ -1,6 +1,34 @@
 {
   "version": 1,
   "sources": {
+    "hanoi_anom_1900": {
+      "name": "Vietnam State Archives / ANOM, Plan de la ville de Hanoi, GGI7758-PL02001",
+      "url": "https://luutruquocgia1.org.vn/wp-content/uploads/2016/11/Kien-truc-cac-cong-trinh-xay-dung-tai-Ha-Noi.pdf",
+      "version": "1900 plan, reproduced p. 14",
+      "rights": "Cite or inspect. Check scan rights before redistribution.",
+      "role": "Dated plan for street alignment, core and outlying shore. Transcribe actual features separately from planned works."
+    },
+    "hanoi_kyoto_maps": {
+      "name": "Kyoto University CSEAS, HANOIDB",
+      "url": "https://archive-db.cseas.kyoto-u.ac.jp/hanoidb/A/index.html",
+      "version": "Maps 9 and 10, 1898 and 1902",
+      "rights": "Check individual sheet usage conditions",
+      "role": "Bracket 1900; use earlier alignment or feature dating to distinguish proposed and completed works."
+    },
+    "hanoi_long_bien": {
+      "name": "Hanoi Department of Culture and Sport, Long Bien Bridge",
+      "url": "https://sovhtt.hanoi.gov.vn/en/long-bien-bridge-symbol-historical-cultural-values-hanoi/",
+      "version": "1902 operation date",
+      "rights": "Reference only",
+      "role": "Exclude the completed bridge and passenger route from the opening-date reconstruction."
+    },
+    "abeokuta_burton": {
+      "name": "Richard F. Burton, Abeokuta and the Camaroons Mountains I, chapters V–VI",
+      "url": "https://www.gutenberg.org/cache/epub/79409/pg79409-images.html",
+      "version": "1863 field narrative",
+      "rights": "Historical factual observations only",
+      "role": "Use separate settlement quarters, Olumo rock, Ogun waterworks and walled approaches described by the observer. Exact later perimeter remains uncertain."
+    },
     "qpk": {
       "file": "worldcrs84quad-15s-v2-hydrology/{0..7}.qpk",
       "version": "worldcrs84quad-15s-v2",
@@ -766,6 +794,143 @@
     "Central Asia": "Confirm citadel, bazaars, irrigation and garden edges. Keep residential courtyard form apart from colonial wards."
   },
   "sites": {
+    "reba:chandler:5": {
+      "profile": "relief",
+      "grade": "C",
+      "region": "Sub-Saharan Africa",
+      "jurisdiction": {
+        "id": null,
+        "method": "documented_historical_jurisdiction",
+        "name": "Egba United Government",
+        "figure_source": "egba_treaty"
+      },
+      "anchors": [
+        {
+          "name": "Ake settlement nucleus",
+          "point": [
+            3.351,
+            7.154
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Olumo Rock and nearby Ikija",
+          "point": [
+            3.356,
+            7.164
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Ogun floodplain facing the town",
+          "point": [
+            3.333,
+            7.162
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Southern ridge transition, approximate",
+          "point": [
+            3.351,
+            7.143
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "abeokuta_burton"
+      ],
+      "scope": "Reconstruct the named quarters around Ake, Ikija and Olumo as a set of occupied compounds. Register Owu and Gbagura from the historical description and dated supplementary references. Walk outward from each documented compound toward the old gates and ridge breaks. Keep uncultivated land between nuclei where the source leaves a gap. Wall perimeter is an upper constraint, not built-up coverage.",
+      "road_basis": {
+        "attested": "Gate-to-quarter paths and market approaches in Burton's named descriptions",
+        "alignment": "Local historical linework unavailable; infer connector only between confirmed waypoints on buildable slopes",
+        "gaps": "Outer paths, wall circuit and individual compound approaches unresolved",
+        "crossings": "Keep the Ogun as a break at this scale; use a dated crossing only when a route can be tied to it.",
+        "width": "unknown",
+        "surface": "unknown",
+        "sidewalk": "unknown"
+      },
+      "morphology": "Low courtyard compounds and irregular lanes around the distinct Yoruba quarters. Preserve rock, slopes, market clearings and space between compounds. Use earth wall and roof variants only in inferred residential units; do not fill defensive enclosures uniformly.",
+      "risks": "Few georeferenced 1900 features. Leave unproven boundary segments unknown and keep the later formal railway out without a local period opening date.",
+      "units": [
+        "Ake civic and market area",
+        "Olumo and Ikija residences",
+        "Owu and Gbagura separately located",
+        "Ogun edge",
+        "Southern terrain break"
+      ]
+    },
+    "reba:chandler:550": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "anchors": [
+        {
+          "name": "Old Quarter, Hang Dao commercial spine",
+          "point": [
+            105.8513,
+            21.0338
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Thang Long citadel grounds",
+          "point": [
+            105.84,
+            21.0356
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Hoan Kiem south shore and French streets",
+          "point": [
+            105.854,
+            21.0259
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Red River west-bank approach",
+          "point": [
+            105.8575,
+            21.0426
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Hồ Tây south-shore transition",
+          "point": [
+            105.832,
+            21.046
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "source_preference": [
+        "hanoi_anom_1900",
+        "hanoi_kyoto_maps",
+        "hanoi_long_bien"
+      ],
+      "scope": "Use the 1900 plan to follow the Old Quarter block network between the citadel grounds, Hoan Kiem and the Red River. Extend separately into completed French streets south of the lake. Toward Hồ Tây and the floodplain, stop at the last dated contiguous street frontage or verified landed nucleus. Do not bridge lakes, military open space, footholds or cultivated breaks with inferred residential fabric.",
+      "road_basis": {
+        "attested": "Old Quarter lanes and depicted southern avenues",
+        "alignment": "1900 ANOM plan, checked against the 1898 and 1902 document pair",
+        "gaps": "Political plans include projects. Local vector coverage absent and outer lanes unresolved.",
+        "crossings": "Long Biên rail bridge under construction at the reference date; no open crossing or implied continuous east-bank coverage.",
+        "width": "Relative classes from the 1900 plan only",
+        "surface": "unknown",
+        "sidewalk": "unknown"
+      },
+      "morphology": "Short narrow-fronted merchant lots in the Old Quarter; regular larger plots for built French streets. Period-plan open water and former military tracts with distinct boundaries. Keep roof families separate for narrow lane houses and the villa or public compounds.",
+      "risks": "Red River channel and foreshore have shifted. Modern hydrography is a registration aid. Treat survey edge separately from the outer built limit.",
+      "units": [
+        "Hang Dao and ordinary market lanes",
+        "Citadel and occupied approaches",
+        "Hoan Kiem waterfront and known southern blocks",
+        "Red River bank",
+        "Hồ Tây open-land transition"
+      ]
+    },
     "reba:chandler:1081": {
       "profile": "compiled_paris",
       "anchors": [

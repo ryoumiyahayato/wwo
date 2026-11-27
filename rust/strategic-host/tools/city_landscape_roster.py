@@ -6,6 +6,7 @@ import gzip
 import json
 import math
 import sys
+import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -243,15 +244,18 @@ def evidence_and_identity(key, source_rows, registry_row, amendment, supplement,
             "population_value": int(supplement_row["population"]),
             "definition": supplement_row["definition"],
             "locator": supplement_row["locator"],
-            "method": "published_estimate" if use == "dated_publication" else "named_period_reference",
+            "method": "published_estimate" if use.startswith("dated_publication") else "named_period_reference",
             **{field: supplement_row[field] for field in ("longitude", "latitude")},
         }
+        if use.startswith("dated_publication"):
+            if not row["date"]:
+                raise ValueError(f"Missing publication year: {key}")
+            row["date_basis"] = "publication_year; observation year unspecified"
         if use == "dated_publication":
             if amendment.get("decision") not in {"P", "X"} or not row["date"]:
                 raise ValueError(f"Publication-dated reading requires an explicit decision: {key}")
-            row["date_basis"] = "publication_year; observation year unspecified"
         rows.append(row)
-        if use == "dated_publication" or (use != "comparison" and year(row["date"]) in CANDIDATE_YEARS):
+        if use == "dated_publication" or (not use and year(row["date"]) in CANDIDATE_YEARS):
             if selected_supplement:
                 raise ValueError(f"Multiple selected supplement rows for {key}")
             selected_supplement = row
@@ -308,6 +312,52 @@ def choose_scope(rows, adopted, amendment):
             if uncertain else "Use the nearest selected historical urban count in its published scope."
         ),
     )
+
+
+def place_name_key(name):
+    letters = unicodedata.normalize("NFKD", name.casefold())
+    return "".join(char for char in letters if char.isalnum())
+
+
+def screen_named_places(candidates, published_places, coverage):
+    """Compare historical spellings against the offline city and place catalogues."""
+    checks = {}
+    candidate_names = defaultdict(list)
+    geography_names = defaultdict(list)
+    for city in candidates:
+        for name in {city["name"], *city["aliases"]}:
+            candidate_names[place_name_key(name)].append(city)
+    for place in published_places.values():
+        geography_names[place_name_key(place["name"])].append(place)
+    for row in table(DATA / "political-screening.csv"):
+        unit = row["unit"]
+        if unit not in coverage or unit in checks:
+            raise ValueError(f"Invalid political screening unit: {unit}")
+        places = []
+        for entry in row["places"].split("|"):
+            aliases = entry.split("/")
+            names = {place_name_key(alias) for alias in aliases}
+            matches = {city["city_id"]: city for name in names for city in candidate_names[name]}
+            maps = {place["id"]: place for name in names for place in geography_names[name]}
+            places.append({
+                "aliases": aliases,
+                "same_unit": [
+                    {"id": key, "decision": city["decision"]}
+                    for key, city in sorted(matches.items()) if city["polity"]["id"] == unit
+                ],
+                "other_or_unassigned": [
+                    {"id": key, "polity": city["polity"]["id"], "decision": city["decision"]}
+                    for key, city in sorted(matches.items()) if city["polity"]["id"] != unit
+                ],
+                "map_places": sorted(key for key, place in maps.items() if place.get("historical_polity") == unit),
+            })
+        checks[unit] = {
+            "offline_sources": ["reba_chandler_1900", "historical_population_1900/geography"],
+            "comparison_sources": row["references"].split("|") if row["references"] else [],
+            "note": row["scope"],
+            "places": places,
+        }
+    return checks
 
 
 def compile_roster():
@@ -373,7 +423,8 @@ def compile_roster():
             region = district_region(units[polity["id"]], point) if polity["id"] in units else fallback_region(rows, point)
         if polity["id"] in units:
             for row in rows:
-                sources = "city_sources" if year(row.get("date")) in CANDIDATE_YEARS or row.get("date_basis") else "comparison_sources"
+                in_window = year(row.get("date")) in CANDIDATE_YEARS and not row.get("date_basis")
+                sources = "city_sources" if in_window else "comparison_sources"
                 coverage[polity["id"]][sources].add(row["source_id"])
         disposition, nominal, batch, reason = choose_scope(rows, adopted, amendment)
         if disposition != "X" and (point is None or region == "unresolved"):
@@ -454,6 +505,7 @@ def compile_roster():
             {"id": key, "km": km} for km, key in sorted(near)
         ]
 
+    checks = screen_named_places(candidates, published_places, coverage)
     by_unit = []
     for key, unit in units.items():
         city_sources = sorted(coverage[key]["city_sources"])
@@ -465,6 +517,7 @@ def compile_roster():
             "comparison_city_sources": sorted(coverage[key]["comparison_sources"] - set(city_sources)),
             "city_sources_only_compiled": city_sources == ["reba_chandler_1900"],
             "screened_city_records": coverage[key]["references"],
+            "historical_name_screen": checks.get(key),
             "target_count": sum(row["polity"]["id"] == key for row in targets),
         })
     return {
@@ -474,6 +527,7 @@ def compile_roster():
         "political_metadata_date": date,
         "sources": "supplement-sources.csv",
         "site_plan_file": "site-plans.json",
+        "political_screening_file": "political-screening.csv",
         "regional_gaps": REGIONAL_GAPS,
         "coverage": by_unit,
         "candidates": candidates,
@@ -527,6 +581,7 @@ def main():
     action = parser.add_mutually_exclusive_group()
     action.add_argument("--generate", action="store_true", help="Regenerate from local ledgers (requires Shapely).")
     action.add_argument("--city", metavar="ID", help="Print a single city card, resolving inherited rules.")
+    action.add_argument("--unit", metavar="ID", help="Print a political unit's sources and named-place screening.")
     options = parser.parse_args()
     if options.generate:
         roster = compile_roster()
@@ -547,6 +602,12 @@ def main():
             source_keys.update(row["source"] for row in city["construction"]["local_reference"])
             city["construction"]["inputs"] = {key: plans["sources"][key] for key in sorted(source_keys)}
         print(json.dumps(city, ensure_ascii=False, indent=2))
+    elif options.unit:
+        coverage = read_roster()["coverage"]
+        unit = next((row for row in coverage if row["id"] == options.unit), None)
+        if not unit:
+            parser.error(f"Unknown political unit: {options.unit}")
+        print(json.dumps(unit, ensure_ascii=False, indent=2))
     else:
         summarize(read_roster())
 

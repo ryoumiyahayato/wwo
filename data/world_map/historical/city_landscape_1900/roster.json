@@ -5,6 +5,7 @@
   "political_metadata_date": "1900-03-12",
   "sources": "supplement-sources.csv",
   "site_plan_file": "site-plans.json",
+  "political_screening_file": "political-screening.csv",
   "regional_gaps": {
     "Europe": "Missing comparable city limits for parts of Belgium, the Ottoman Balkans, and western Russia; industrial conurbations require municipal separation.",
     "East Asia": "Qing and Korean municipal totals and homogeneous boundaries are incomplete. Maritime Customs port districts can exceed the corresponding city.",

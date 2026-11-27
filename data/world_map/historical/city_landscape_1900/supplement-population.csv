@@ -207,3 +207,29 @@ landscape:bukhara,Bokhara,100000,64.417,39.775,hamilton_bukhara_1906,1906,Named 
 landscape:bukhara,Bukhara,78650,,,masalskii_protectorates_1909,1909,Retrospective series reports an estimate of the city.,"Table 1, protectorate estimates",comparison
 landscape:karshi,Karshi,60000,65.8,38.86,hamilton_bukhara_1906,1906,Named town estimate; year of observation unspecified.,"Distribution of population, p. 29",dated_publication
 landscape:khiva,Khiva,26070,60.361,41.378,masalskii_protectorates_1909,1909,Estimate for the named city in the protectorate.,"Table 1, protectorate estimates",comparison
+reba:chandler:5,Abbeokuta,150000,,,hammond_1909_cities,1909,Near-period published estimate; observation date and urban bounds unspecified.,"p. 75, Abbeokuta",dated_publication
+reba:chandler:5,Abeokuta,100000,,,large_cities_nyheritage,,Estimated city figure; date and bounds unspecified.,"Abeokuta, Yoruba, marked estimate",comparison
+reba:chandler:550,Hanoi,103000,,,hanoi_hitotsubashi_table6,1900,"Hanoi total, reconstructed series (a). Contemporary city perimeter unresolved.","Table 6, Hanoi total (a), 1900",
+reba:chandler:550,Hanoi,51000,,,hanoi_hitotsubashi_table6,1907,Hanoi total in a different series. Coverage not interchangeable.,"Table 6, Hanoi total (b), 1907",comparison
+reba:chandler:550,Hanoi,86000,,,hanoi_hitotsubashi_table6,1913,Hanoi total in a different series. Coverage not interchangeable.,"Table 6, Hanoi total (b), 1913",comparison
+reba:chandler:550,Hanoi,150000,,,large_cities_nyheritage,,Estimated city figure; date and bounds unspecified.,"Hanoi, Tongking, marked estimate",comparison
+reba:chandler:70,Tananarive,61068,,,gallieni_madagascar_1905,1905-01-01,"Named capital, excluding military per period summary.","p. 475, La capitale Tananarive",
+reba:chandler:70,Tananarive,260000,,,large_cities_nyheritage,,Secondary atlas estimate with unresolved perimeter and date.,"Tananarive, Madagascar, marked estimate",comparison
+landscape:pr_san_juan,San Juan,32048,-66.116,18.466,pr_census_1899,1899-11-10,Report treats whole municipality as the city.,"Population discussion, p. 43",
+landscape:pr_ponce,Ponce,27952,-66.614,18.011,pr_census_1899,1899-11-10,Ponce and its port form one city for this count.,"Population discussion, p. 43",
+landscape:pr_mayaguez,Mayagüez,15187,-67.14,18.201,pr_census_1899,1899-11-10,"Named urban locality, separate from district.","Population table, Mayaguez city",
+landscape:pr_arecibo,Arecibo,8008,-66.714,18.474,pr_census_1899,1899-11-10,"Named urban locality, separate from district.","Population table, Arecibo city",
+landscape:paramaribo,Paramaribo,31817,-55.15,5.823,suriname_report_1901,1900,Town and suburbs in the administrative series.,"Bijlage C(b), Paramaribo",
+landscape:nieuw_nickerie,Nieuw-Nickerie,1347,-56.99,5.936,suriname_report_1901,1900,"Named town, separate from the district.","Bijlage C(b), p. 2, footnote 3",
+landscape:totness,Totness,630,-56.327,5.877,suriname_report_1901,1900,"Named town, separate from the district.","Bijlage C(b), p. 2",
+landscape:albina,Albina,313,-54.055,5.502,suriname_report_1901,1900,"Named town, separate from the district.","Bijlage C(b), p. 2",
+landscape:ni_granada,Granada,25000,-85.956,11.93,hammond_1909_cities,1909,Named Nicaraguan city in period comparative index.,"Granada, Nicaragua, p. 77",dated_publication_comparison
+landscape:managua,Managua,30000,-86.273,12.156,hammond_1909_cities,1909,Named capital in period comparative index.,"Managua, Nicaragua, p. 78",dated_publication_comparison
+landscape:addis_ababa,Addis Ababa,35000,38.753,9.034,hammond_1909_cities,1909,Named capital in period comparative index.,"Adli Abeba, Abyssinia, p. 75",dated_publication_comparison
+landscape:muscat,Muscat,60000,58.59,23.613,hammond_1909_cities,1909,Named harbour town; whether Muttrah is included is unspecified.,"Maskat, Arabia, p. 78",dated_publication_comparison
+landscape:mombasa,Mombasa,27000,39.671,-4.06,hammond_1909_cities,1909,Named port in period comparative index.,"Mombasa, Br. E. Africa, p. 78",dated_publication_comparison
+landscape:porto_novo,Porto-Novo,50000,2.619,6.492,hammond_1909_cities,1909,Named town in period comparative index.,"Porto Novo, Dahomey, p. 79",dated_publication_comparison
+landscape:praia,Praia,20000,-23.509,14.915,hammond_1909_cities,1909,Named town in period comparative index.,"Praya, Cape Verde Islands, p. 79",dated_publication_comparison
+landscape:phnom_penh,Phnom Penh,50000,104.93,11.57,phnom_penh_1897,1897,Named city estimate quoted in the historical study.,"ASIEN 63, section on Phnom Penh",
+landscape:phnom_penh,Pnum Penh,60000,104.93,11.57,hammond_1909_cities,1909,Named city in period comparative index.,"Pnum Penh, Cambodia, p. 79",dated_publication_comparison
+landscape:rufisque,Rufisque,19200,-17.27,14.72,rufisque_returns,1904,"Reported local figure, separate from Dakar.","Perspectives historiques, Rufisque",

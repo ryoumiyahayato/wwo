@@ -7,6 +7,7 @@
 ```powershell
 python rust/strategic-host/tools/city_landscape_roster.py
 python rust/strategic-host/tools/city_landscape_roster.py --city landscape:hankou
+python rust/strategic-host/tools/city_landscape_roster.py --unit cshapes_gw_433
 python rust/strategic-host/tools/city_landscape_roster.py --generate
 ```
 
@@ -17,6 +18,7 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 | roster.json | 情景时点、区域缺口和各生成文件入口 |
 | candidates.jsonl | 候选身份、原统计和决定、采用值、档位及施工配置 |
 | coverage.jsonl | 按政治单位记录城市统计、仅有行政合计或仍未找到城市统计 |
+| political-screening.csv | 缺口单位分组、历史地名及别名、已查参照和口径限制 |
 | supplement-sources.csv / supplement-population.csv | 补查资料、原统计年、适用口径与来源 |
 | decisions.csv | 别名归并、跨档依据、历史辖区差异和排除理由 |
 | site-plans.json | 可复用资产、每层覆盖、历史范围、运行时分片和各等级的建造方法 |
@@ -27,6 +29,10 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 原检查点有 1,724 条候选，预审 297 城。按原始政治单位目录补核后，加入布哈拉为 P，暂列第九批。Hamilton 1906 年出版的资料估计其城区有 100,000 人，实际观察年未注明。Rickmers 的独立街区与住户估计为 80,000–100,000。1909 年另有 78,650 人的估计。原数与口径均保留。现行数字由上面的离线命令生成。分档和逐城边界继续核对。[Hamilton 第 29 页](https://www.gutenberg.org/cache/epub/73258/pg73258.txt) [Rickmers 第十二章](https://upload.wikimedia.org/wikipedia/commons/c/c2/The_Duab_of_Turkestan%3B_%28IA_duabofturkestan00rick%29.pdf)
 
 台北、基隆、台南、嘉义、宜兰归入台湾政治单位。台北的 69,672 人为城内、艋舺和大稻埕三处现住人口之和。英国帝国普查补录 Newfoundland、Belize、Bathurst、Freetown、Kingston、Perth、Hobart、Bloemfontein 的城镇读数。Kingston 保留与 Port Royal 的联合估计作为上界。波斯尼亚、黑塞哥维那、尼泊尔、利比里亚、卢森堡及希瓦另有城市读数或越窗比较。覆盖记录列出找到的候选 ID 和处置。未知政治单位仍需核查。[英帝国普查表 3](https://www.tradeshouselibrary.org/uploads/4/7/7/2/47723681/census_of_the_british_empire._1901.pdf) [波黑普查汇编](https://prilozi.iis.unsa.ba/wp-content/uploads/2023/05/32-Prilozi-Naucnerasprave-RobertJ.Donia_.pdf)
+
+原始 67 个未找到城市统计的单位均登记历史地名筛查。重算按同单位候选、其他辖区及地点目录分别列出匹配。检查英帝国普查、Hammond 城市索引、法属与德属殖民档案入口、马来亚普查目录及部分地方表。档案目录和无年份的汇编只作参照。没有匹配的城市仍保留未知记录。波多黎各和苏里南补录八个地方读数，最大分别为圣胡安 32,048 人和帕拉马里博 31,817 人。两者均保留原统计覆盖。[波多黎各 1899 普查](https://www2.census.gov/library/publications/decennial/island-areas/1899/1899-census-porto-rico.pdf) [苏里南殖民报告](https://repository.overheid.nl/frbr/sgd/19011902/0000365065/1/pdf/SGD_19011902_0001296.pdf)
+
+河内和阿贝奥库塔增加为 P。河内 1900 年序列值 103,000，Chandler 估计 72,000，分别保存。阿贝奥库塔的近时出版估计为 100,000 至 150,000，Chandler 为 60,000。保留 Egba 的历史归属；1900 年外缘用旧聚落、奥卢莫岩、奥贡河和地形约束。河内按老商业街区、升龙城址、还剑湖和红河区分施工单元，龙编桥当时尚未开通。塔那那利佛继续 X，采用 1905 年列为 61,068 人的首都范围，保留口径未明的高估比较。[河内人口表](https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP98.7/6.htm) [河内 1900 年档案图](https://luutruquocgia1.org.vn/wp-content/uploads/2016/11/Kien-truc-cac-cong-trinh-xay-dung-tai-Ha-Noi.pdf) [Hammond 城市表](https://www.columbia.edu/cu/lweb/digital/collections/cul/texts/ldpd_8527324_000/pages/ldpd_8527324_000_00000076.html) [马达加斯加行政统计摘要](https://www.persee.fr/doc/geo_0003-4010_1906_num_15_84_3531?pageId=T1_475)
 
 意大利 1901 年普查表 XI 以主城人口替换 11 个入选城市的旧选用值。七城改为 D。那不勒斯、热那亚、佛罗伦萨和墨西拿的市辖区人口跨过施工门槛，继续以 P 排在第七、第八、第八、第九批，连续建成范围仍待核。利沃诺主城 85,102 人，全市辖区 93,321 人，继续排除。保留原编纂值和原城市 ID。
 
@@ -95,7 +101,7 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 共用上限 5,000,000,000 字节。唯一累计入口为 Issue #296。计量使用开工时 WLAN 的累计收发计数。暂不能分辨本机后台流，按接口读数差的上界计入。网页与 GitHub 连接器的远端源站流量留在服务端。两次连接器工单读取早于本地计量。地图、历史图页和工具链未下载到构建机，境内外站点只做索引和相关表页的浏览。未从 CI 下载 EXE。
 
-B4 两城 WCB 含目录 5,685,672 字节，城市地表叠加层 2,884,596 字节。两城主要增量合计约 8.6 MB。以当前 297 个待排目标、每城与 B4 平均相近估算，最终资源约 1.27 GB，若全部走单次归档再正式回传，两次传输约 2.55 GB。资料等级、城市大小和共用模块比例会改变实际值，因此仅为预算估算。为必要页、CI 交付与返工留约 1 GB 规划余量；余下额度不预留多次。各批优先用本机瓦片、史料索引、原创建筑和地形。同一变更包只传所需最小增量。当前无已安排尚未完成的必要二进制传输。
+B4 两城 WCB 含目录 5,685,672 字节，城市地表叠加层 2,884,596 字节。两城主要增量合计约 8.6 MB。按现阶段约 300 城、每城与 B4 平均相近估算，最终资源约 1.29 GB。若全部走单次归档再正式回传，两次传输约 2.57 GB。资料等级、城市大小和共用模块比例会改变实际值。为必要页、CI 交付与返工留约 1 GB 规划余量。各批优先用本机瓦片、史料索引、原创建筑和地形。同一变更包只传所需最小增量。当前无已安排尚未完成的必要二进制传输。
 
 ## 恢复位置
 
