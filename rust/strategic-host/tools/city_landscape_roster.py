@@ -448,6 +448,10 @@ def compile_roster():
         }
         if batch:
             quality = (plan or {}).get("grade", "C")
+            core = next(
+                (anchor for anchor in (plan or {}).get("anchors", []) if anchor.get("role") == "core"),
+                None,
+            )
             preferred_sources = dict.fromkeys(
                 (plan or {}).get("source_preference", [])
                 + manual["source_search_by_evidence"].get(adopted["source_id"], [])
@@ -464,8 +468,10 @@ def compile_roster():
                 "construction": {
                     "profile": (plan or {}).get("profile", "anchored_evidence"),
                     "regional_style": region,
-                    "seed": point,
-                    "seed_precision": "locator_only" if quality == "C" else "see_source_mask",
+                    "seed": core["point"] if core else point,
+                    "seed_precision": core["precision"] if core else (
+                        "locator_only" if quality == "C" else "see_source_mask"
+                    ),
                     "site_plan": key if plan and plan.get("anchors") else None,
                     "extent_state": (plan or {}).get("extent_state") or (
                         "anchor_reviewed" if plan and plan.get("anchors") else "period_anchor_needed"

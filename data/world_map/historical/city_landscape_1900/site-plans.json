@@ -1,6 +1,62 @@
 {
   "version": 1,
   "sources": {
+    "jp_meiji_topographic": {
+      "name": "National Diet Library, historic Topographic Maps of Japan",
+      "version": "Meiji-era series; tentative surveys 1886–1901 where listed",
+      "url": "https://ndlsearch.ndl.go.jp/en/rnavi/maps/post_475",
+      "rights": "Citation only. Check reuse terms and extract permission at the sheet or catalogue level.",
+      "role": "Identify first date and edition for terrain, road hierarchy and occupied limits; later maps require feature-by-feature dating."
+    },
+    "tokyo_ward_1895": {
+      "name": "Tokyo Post and Telegraph Office, Tokyo City Fifteen Wards",
+      "version": "Surveyed 1895–1897, published 1897–1902",
+      "url": "https://ndlsearch.ndl.go.jp/en/rnavi/maps/post_546",
+      "rights": "Citation only. Check reuse terms and extract permission at the sheet or catalogue level.",
+      "role": "Use only the portions and physical objects shown in the dated large-scale wards. Check shoreline and transport amendments."
+    },
+    "qing_chmap": {
+      "name": "CHMap, historical land surveys of China",
+      "version": "Series 1895–1944, see first survey of each sheet",
+      "url": "https://mapping-project.org/resources/63/",
+      "rights": "Citation only. Check reuse terms and extract permission at the sheet or catalogue level.",
+      "role": "Record the individual survey year. A later sheet can help coordinate walls and terrain but cannot certify historical suburban occupation or road hierarchy."
+    },
+    "qing_loc_maps": {
+      "name": "Library of Congress, pre-1900 Chinese manuscript and woodcut maps",
+      "version": "Mostly late eighteenth and nineteenth century",
+      "url": "https://loc.gov/loc/lcib/0312/maps.html",
+      "rights": "Citation only. Check reuse terms and extract permission at the sheet or catalogue level.",
+      "role": "Select identifiable city, prefectural and river maps. A schematic gazetteer plan can establish topology, but not cartometric alignment."
+    },
+    "qing_pcl_ports": {
+      "name": "University of Texas, near-period plans and treaty port charts",
+      "version": "Individual plans from 1867, 1907 and 1912 among holdings",
+      "url": "https://maps.lib.utexas.edu/maps/historical/history_china.html",
+      "rights": "Citation only. Check reuse terms and extract permission at the sheet or catalogue level.",
+      "role": "Select named city and edition. Use old maps for dated location, later maps for comparison, never automatically backdate a feature."
+    },
+    "tianjin_1899": {
+      "name": "Library of Congress and Academia Sinica, Tianjin walled city and environs",
+      "version": "1899",
+      "url": "https://digitalatlas.asdc.sinica.edu.tw/digitalatlasen/map_detail.jsp?id=A103000149",
+      "rights": "Citation only. Check reuse terms and extract permission at the sheet or catalogue level.",
+      "role": "Use walled city, defended perimeter, administrative landmarks and docks independently. Non-metric lines require separate georeference."
+    },
+    "seoul_suseon": {
+      "name": "Smithsonian, Map of Seoul (Suseon Jeondo)",
+      "version": "Late nineteenth-century copy",
+      "url": "https://learninglab.si.edu/resources/view/4017467",
+      "rights": "Citation only. Check reuse terms and extract permission at the sheet or catalogue level.",
+      "role": "Read wall, gate, stream and district relationships. Avoid using schematic street widths or a measured footprint."
+    },
+    "seoul_wall": {
+      "name": "Seoul Metropolitan Government, Hanyangdoseong",
+      "version": "Wall, gateways and documented removal from 1907",
+      "url": "https://seoulcitywall.seoul.go.kr/en/content/53.do",
+      "rights": "Citation only. Check reuse terms and extract permission at the sheet or catalogue level.",
+      "role": "Use only attested pre-removal wall and watergates, not present reconstruction or modern streets."
+    },
     "india_constable_1893": {
       "name": "Constable's Hand Atlas of India",
       "version": "1893, town and provincial sheets",
@@ -1046,6 +1102,1263 @@
     "Central Asia": "Confirm citadel, bazaars, irrigation and garden edges. Keep residential courtyard form apart from colonial wards."
   },
   "sites": {
+    "reba:chandler:975": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Nagoya Castle south and Sakae streets",
+          "point": [
+            136.904,
+            35.176
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Osu temple and trade lanes",
+          "point": [
+            136.902,
+            35.158
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Hori River and west wholesale edge",
+          "point": [
+            136.889,
+            35.169
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Atsuta old port and shrine fringe",
+          "point": [
+            136.908,
+            35.126
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate castle town and Atsuta nucleus, allowing occupied road links with open spaces. Record older shoreline and canals.",
+      "morphology": "Timber machiya, tile rows and distinct shrine and castle enclosures.",
+      "risks": "No 1907 port or modern subway and waterfront fill; verify former station and rail.",
+      "source_preference": [
+        "jp_meiji_topographic",
+        "jp_ndl"
+      ]
+    },
+    "reba:chandler:981": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Old Nanchang near Youmin Temple",
+          "point": [
+            115.902,
+            28.679
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Shengjin Pagoda market lanes",
+          "point": [
+            115.899,
+            28.662
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Gan River and Tengwang landing",
+          "point": [
+            115.881,
+            28.683
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "East lake ground and fields",
+          "point": [
+            115.921,
+            28.685
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use walled city, river embankment, lakes and gate settlements. Keep flooded water margin and separate outlying patches.",
+      "morphology": "Grey tile and brick courtyard houses, temple compounds, and separate waterfront stores.",
+      "risks": "Use old shore and lake limits rather than modern flood-control works.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:983": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Foshan Zumiao and commercial heart",
+          "point": [
+            113.11,
+            23.027
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Liangyuan and old market lanes",
+          "point": [
+            113.113,
+            23.038
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Fenjiang landing and northern water fringe",
+          "point": [
+            113.115,
+            23.049
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Roads towards Shiwan and west yards",
+          "point": [
+            113.092,
+            23.015
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Define old craft and commercial wards, canal-front warehouses and separated pottery clusters. Keep wet fields and yards open.",
+      "morphology": "Low grey tiles and brick courtyard frontage; pottery and warehouse lots separately modeled.",
+      "risks": "Shiwan and Guangzhou independent spatial units until source shows occupied approach.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:984": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Confucius Temple and Qinhuai",
+          "point": [
+            118.789,
+            32.019
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Laomendong narrow lots",
+          "point": [
+            118.788,
+            32.01
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Zhonghua Gate and old southern wall",
+          "point": [
+            118.787,
+            32.003
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Xiaguan and river port edge",
+          "point": [
+            118.733,
+            32.092
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use occupied southern districts and dated separate river port, gates and ridge walls. Preserve extensive vacant and water areas inside wall.",
+      "morphology": "Grey brick courts, canal-front shops and distinct gate fortifications.",
+      "risks": "Do not fill all Ming wall enclosure, borrow 1912 roads or combine port suburbs without evidence.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps",
+        "qing_pcl_ports"
+      ]
+    },
+    "reba:chandler:521": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Daximen and old market",
+          "point": [
+            106.708,
+            26.58
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Old Nanming hillside courts",
+          "point": [
+            106.714,
+            26.579
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Nanming bridge and Jiaxiu Tower",
+          "point": [
+            106.718,
+            26.571
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Qianling hill and northwestern fringe",
+          "point": [
+            106.695,
+            26.595
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Follow basin floor and old wall streets; only documented roads extend over adjacent terrain. Retain steep and wet edges.",
+      "morphology": "Low timber and tile houses, dense market plots and river terrace sites.",
+      "risks": "Existing broad locator is not the historic nucleus. Exclude later avenues and basin expansion.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:548": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Southern city at Qinghefang",
+          "point": [
+            120.167,
+            30.242
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Zhongshan road predecessor and lanes",
+          "point": [
+            120.172,
+            30.247
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "West Lake and Wushan slope",
+          "point": [
+            120.153,
+            30.243
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Wulin Gate and canal north fringe",
+          "point": [
+            120.163,
+            30.28
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build long city between lake and eastern canals, preserving waterfront gardens and water; separate canal suburbs by evidence.",
+      "morphology": "Tile-roof shops and inward courts, distinct garden and canal fronts.",
+      "risks": "Avoid modern West Lake shore and later railway alignments. Historic urban core differs from prefectural extent.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps",
+        "qing_pcl_ports"
+      ]
+    },
+    "reba:chandler:575": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Castle terrace and eastern commercial routes",
+          "point": [
+            132.459,
+            34.402
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Hondori and market streets",
+          "point": [
+            132.458,
+            34.394
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Ota River delta channels",
+          "point": [
+            132.438,
+            34.39
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Ujina port and dated new land",
+          "point": [
+            132.469,
+            34.36
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Map castle, ordinary delta islands and pre-1900 port connections separately. Preserve wet gaps and channel edges.",
+      "morphology": "Narrow timber machiya, tiled roofs and detached castle and port compounds.",
+      "risks": "Exclude later reclamation and all postwar roads and bridges unless a dated precursor is shown.",
+      "source_preference": [
+        "jp_meiji_topographic",
+        "jp_ndl"
+      ]
+    },
+    "reba:chandler:650": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Jinan old city and commercial streets",
+          "point": [
+            117.037,
+            36.668
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Furong Street lanes",
+          "point": [
+            117.029,
+            36.671
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Daming Lake shore and gates",
+          "point": [
+            117.022,
+            36.682
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Baotu Spring and western old-city fringe",
+          "point": [
+            117.011,
+            36.662
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use walled city, lake, spring drains and mapped outer settlements. Leave water and near hills open.",
+      "morphology": "Tile courtyard houses and low shops around spring-fed lanes.",
+      "risks": "Historical core is west of record seed. No post-1904 railway-oriented commercial city unless evidence shows prior occupation.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:662": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Gulou market and old Kaifeng wards",
+          "point": [
+            114.351,
+            34.8
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Book Market Street area",
+          "point": [
+            114.347,
+            34.804
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "North wall and former water courses",
+          "point": [
+            114.346,
+            34.824
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "South gate and raised flood margins",
+          "point": [
+            114.346,
+            34.773
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use documented defensive wall, occupied wards and open water or flood strips. Add outer frontage only with source.",
+      "morphology": "Dense low courtyard shops, drainage cuts and wall setbacks.",
+      "risks": "Do not transplant modern Yellow River bank or unconstrained rebuilding after flooding.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:777": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Lanzhou old market and Drum Tower area",
+          "point": [
+            103.815,
+            36.055
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "South Gate inner lanes",
+          "point": [
+            103.812,
+            36.048
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Yellow River and historic floating crossing",
+          "point": [
+            103.813,
+            36.066
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Southern mountain foot and canal fields",
+          "point": [
+            103.81,
+            36.032
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build narrow left-to-right valley belts and old city streets, constrained by river and slopes.",
+      "morphology": "Low earthen or timber courtyard blocks, narrow river terrace roads.",
+      "risks": "Use dated floating crossing; 1909 iron bridge and later highways excluded.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:974": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Nagasaki harbour and Dejima",
+          "point": [
+            129.874,
+            32.745
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Teramachi hill-front streets",
+          "point": [
+            129.886,
+            32.748
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Oura treaty-port slope and wharves",
+          "point": [
+            129.866,
+            32.735
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Urakami northern valley fringe",
+          "point": [
+            129.863,
+            32.778
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build enclosed harbour, terraces and historic foreign district separately. Leave steep undeveloped slopes and tidal edges.",
+      "morphology": "Timber tiled rows, stone stair lanes and separate masonry port buildings.",
+      "risks": "Do not copy modern Dejima shoreline or rebuilt Urakami and port changes.",
+      "source_preference": [
+        "jp_meiji_topographic",
+        "qing_pcl_ports",
+        "jp_ndl"
+      ]
+    },
+    "reba:chandler:1549": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Chong’an and old Wuxi market",
+          "point": [
+            120.3,
+            31.574
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Nanchang Street canal plots",
+          "point": [
+            120.311,
+            31.553
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Grand Canal entry and south bank",
+          "point": [
+            120.304,
+            31.544
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Huishan hill foot and west fringe",
+          "point": [
+            120.268,
+            31.583
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build walled core, occupied canal ribbons and separately documented hillside skirts. Preserve wet fields beyond.",
+      "morphology": "Grey tile court houses and narrow wharf-linked merchant lots.",
+      "risks": "Inspect roster seed against old core. No modern radial rail or highway coverage.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:1551": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Old Amoy harbour and Zhongshan corridor site",
+          "point": [
+            118.075,
+            24.455
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Old town and Xiamen port hill lanes",
+          "point": [
+            118.085,
+            24.452
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Shapowei fishing inlet",
+          "point": [
+            118.082,
+            24.436
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Gulangyu ferry and north harbour",
+          "point": [
+            118.069,
+            24.466
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use old port embayments, island hill terraces, and separately dated Gulangyu as an independent geography, linked by period ferry.",
+      "morphology": "Tile-roof narrow port courts, stone ramps and timber wharves.",
+      "risks": "Do not backdate 1902 Gulangyu arrangement, modern Zhongshan Street width or fill.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_pcl_ports"
+      ]
+    },
+    "reba:chandler:1552": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Xi’an Bell Tower cross streets",
+          "point": [
+            108.947,
+            34.261
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Muslim quarter near Drum Tower",
+          "point": [
+            108.942,
+            34.267
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "South gate and moat",
+          "point": [
+            108.946,
+            34.25
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "North gate and outer fields",
+          "point": [
+            108.947,
+            34.282
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use Ming wall rectangle, separate dense named wards and open grounds, only documented occupation outside gates.",
+      "morphology": "Brick and timber courtyards, lower tile ranges and street markets.",
+      "risks": "Do not fill all intramural space or use present gate widening and 1930s railway.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:278": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Old Changsha main lanes near the eastern market",
+          "point": [
+            112.975,
+            28.195
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Taiping Street and river commerce",
+          "point": [
+            112.971,
+            28.195
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Xiang River wharf and flood edges",
+          "point": [
+            112.961,
+            28.193
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Tianxin wall and southeast slope",
+          "point": [
+            112.981,
+            28.182
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use east bank market strips and old wall edges. Keep wet stretches and opposite fields outside ordinary fabric.",
+      "morphology": "Compact tile-roof timber houses and courtyard shops; separate wharf use.",
+      "risks": "Exclude post-1938 rebuilding and later river bridges; verify outer occupation and historical street names.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:290": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Chengdu imperial city precinct",
+          "point": [
+            104.065,
+            30.658
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Shaocheng street grids",
+          "point": [
+            104.052,
+            30.661
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Jin River south gates and banks",
+          "point": [
+            104.065,
+            30.641
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "West river and garden fringe",
+          "point": [
+            104.037,
+            30.663
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use separate inner precinct and older grid, moat or water boundaries and documented gate suburbs.",
+      "morphology": "Low tile compounds, timber commercial frontage and open gardens.",
+      "risks": "Preserve internal voids and verify period canal alignments and river crossings.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:302": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Xijindu ferry and grain landings",
+          "point": [
+            119.426,
+            32.216
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Yunhe side streets and old town",
+          "point": [
+            119.441,
+            32.204
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Jinshan bank and fields",
+          "point": [
+            119.41,
+            32.221
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Grand Canal and southeast fringe",
+          "point": [
+            119.46,
+            32.194
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate port stairs, ridge settlement, canal approaches and concession lots. Keep flood edge open.",
+      "morphology": "Stone lanes and low tile-roof merchants' courts, separate wharf sheds.",
+      "risks": "Do not infer modern riverbank and later harbour works. Verify actual ferry landing.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_pcl_ports"
+      ]
+    },
+    "reba:chandler:467": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Fuzhou old city and Drum Tower",
+          "point": [
+            119.297,
+            26.087
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Sanfang Qixiang lane courts",
+          "point": [
+            119.296,
+            26.078
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Nantai wharves and Min River",
+          "point": [
+            119.31,
+            26.052
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Wushan hill and southwest older fringe",
+          "point": [
+            119.286,
+            26.068
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use walled old city, south-bank and Nantai units only where evidenced. Constrain at river branches, hill and unbuilt fields.",
+      "morphology": "Timber courtyards with tile roofs, narrow market frontage and detached quays.",
+      "risks": "No continuous modern corridor to Mawei. Confirm bridge and bank dates.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps",
+        "qing_pcl_ports"
+      ]
+    },
+    "landscape:kyoto": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Shijo Karasuma and Nishiki streets",
+          "point": [
+            135.76,
+            35.004
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Nishijin textile lanes",
+          "point": [
+            135.746,
+            35.034
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Kamo River and Higashiyama edge",
+          "point": [
+            135.78,
+            35.005
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Toji and south rail fringe",
+          "point": [
+            135.747,
+            34.981
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use historical grid, dense textile streets and detached temple compounds; preserve river, slopes and vacant south plots.",
+      "morphology": "Timber machiya rows on deep narrow plots, tile roofs and temple voids.",
+      "risks": "Only documented early Lake Biwa canal lengths and bridges; no later station footprint.",
+      "source_preference": [
+        "jp_meiji_topographic",
+        "jp_ndl"
+      ]
+    },
+    "reba:chandler:1010": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Old Ningbo Drum Tower",
+          "point": [
+            121.547,
+            29.873
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Moon Lake lanes and compounds",
+          "point": [
+            121.54,
+            29.867
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Sanjiang confluence and Jiangbei landing",
+          "point": [
+            121.563,
+            29.876
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "South Gate and old canal fringe",
+          "point": [
+            121.545,
+            29.855
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build wall-bounded core, river markets and attested treaty-port strips as separate units; leave lake and wet edges open.",
+      "morphology": "Low tile-roof courtyard houses, narrow canal plots and separate waterfront sheds.",
+      "risks": "Treat riverbanks and bridges individually; do not use modern estuary ports or fill.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps",
+        "qing_pcl_ports"
+      ]
+    },
+    "reba:chandler:1277": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Jongno and bell pavilion",
+          "point": [
+            126.983,
+            37.57
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Bukchon hanok lanes",
+          "point": [
+            126.985,
+            37.582
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Heunginjimun and stream watergates",
+          "point": [
+            127.009,
+            37.572
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Sungnyemun and Namsan edge",
+          "point": [
+            126.977,
+            37.559
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use the period gates, wall, slopes and stream as primary controls with palace and market units. Keep Han River gap open to the south.",
+      "morphology": "Tiled courtyard houses with low compounds and larger palace grounds.",
+      "risks": "Exclude post-1907 wall removal and current tunnel or road pattern. Locate dated streetcar sections separately.",
+      "source_preference": [
+        "seoul_suseon",
+        "seoul_wall"
+      ]
+    },
+    "reba:chandler:1286": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Mukden palace and Cross Streets",
+          "point": [
+            123.451,
+            41.796
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Small South Gate quarter",
+          "point": [
+            123.454,
+            41.788
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Outer east gate and outer settlement fringe",
+          "point": [
+            123.471,
+            41.795
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Western station approach gap",
+          "point": [
+            123.41,
+            41.794
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use separate inner city and outer earth-wall occupation. Include rail-only precincts only where their date and independent footprint are established.",
+      "morphology": "Courtyards and brick or tile market roofs, spacious palace in its own zone.",
+      "risks": "Current station and Japanese railway town reflect later development; date any pre-1900 rail work.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps"
+      ]
+    },
+    "reba:chandler:1355": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Xuanmiao and Guanqian lanes",
+          "point": [
+            120.624,
+            31.312
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Pingjiang canal housing",
+          "point": [
+            120.633,
+            31.317
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Changmen and west canal landing",
+          "point": [
+            120.597,
+            31.315
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Panmen canal and southern field fringe",
+          "point": [
+            120.616,
+            31.285
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Follow walls, canal-linked streets, gates, courtyards and named west commercial strips; preserve waterways and garden voids.",
+      "morphology": "Low masonry and timber townhouses with grey tiles and canal house fronts.",
+      "risks": "Do not carry current road widths or continuous suburb beyond canal and walls back to 1900.",
+      "source_preference": [
+        "qing_chmap",
+        "qing_loc_maps",
+        "qing_pcl_ports"
+      ]
+    },
+    "reba:chandler:1418": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Tianjin old city drum tower",
+          "point": [
+            117.19,
+            39.143
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Gongbei and market streets",
+          "point": [
+            117.199,
+            39.14
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Sancha river confluence and landing",
+          "point": [
+            117.197,
+            39.153
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Concession quays and Dazhigu fringe",
+          "point": [
+            117.224,
+            39.11
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate the old walled city, river-market wards and individual established concessions; preserve pre-1900 channel and perimeter.",
+      "morphology": "Tight brick courts and lane shops, detached concession compounds and warehouses.",
+      "risks": "Do not backdate wall demolition or concession expansion after 1900. Verify street and crossing dates.",
+      "source_preference": [
+        "tianjin_1899",
+        "qing_chmap"
+      ]
+    },
+    "reba:chandler:1429": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Nihonbashi east of palace",
+          "point": [
+            139.774,
+            35.684
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Asakusa and low town lanes",
+          "point": [
+            139.798,
+            35.713
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Sumida wharves and bridgeheads",
+          "point": [
+            139.79,
+            35.693
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Ueno and western ridge gardens",
+          "point": [
+            139.768,
+            35.717
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use dated ward sheets for lower city, upland plots, station network and waterways separately. Preserve palace, temple and former estate grounds.",
+      "morphology": "Deep machiya lots, small timber houses, upper compounds and big waterfront sheds.",
+      "risks": "Remove later Kanto earthquake reconstruction, bridges and Tokyo Bay fill. Date rail termini and Sumida crossings.",
+      "source_preference": [
+        "tokyo_ward_1895",
+        "jp_meiji_topographic",
+        "jp_ndl"
+      ]
+    },
     "reba:chandler:1561": {
       "profile": "historic_port",
       "grade": "C",

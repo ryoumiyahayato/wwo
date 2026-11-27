@@ -58,6 +58,8 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 南亚 28 城、东南亚 10 城和中亚 2 城均已有具名施工单元。本次补 28 张南亚卡及 7 张东南亚卡。印度图册按城图区分道路、街廓及外缘，省图只作主干和地形约束。南亚城镇与兵营各用独立建设范围，保留其间空地。曼谷、新加坡、巴达维亚、泗水、梭罗和仰光分别登记近年图源与水系约束。道路矢量及各图层边界待逐幅核实。
 
+东亚预审 35 城均已有具名施工单元。本次补了 25 张卡。东京采用 1895–1897 年分区测图，天津采用 1899 年城厢图，首尔用晚 19 世纪城图与城墙档案。清末城市缺详细实测图时，以城墙、现存可追溯地物、水系和历史城史约束施工单元。晚期地形图只用于定位或对照。编制器优先用卡内具名核心作施工定位，保留原统计坐标。例如无锡的原坐标与旧城核心相差约 9 公里。
+
 ## B4 实测
 
 - 正式 EXE 为 Build 144，路径为 `D:/programs/WWO/wwo/local-artifacts/strategic-map-phase4/wwo-map-lab.exe`。实际启动的窗口标题和 GitHub Windows CI 一致。数据来自 `D:/programs/WWO/wwo-cold-restore/runtime-97ebaf1003/data`。
