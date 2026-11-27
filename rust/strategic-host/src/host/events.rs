@@ -833,6 +833,8 @@ impl ApplicationHandler<HostEvent> for Host {
     }
     fn about_to_wait(&mut self,event_loop:&ActiveEventLoop) {
         let now=Instant::now();self.poll(event_loop,now);
+        let city_expired = self.city_models.as_mut().is_some_and(|catalogue| catalogue.expire(now));
+        self.dirty |= city_expired;
         self.animate_opening(now);
         if self.hud.menu!=HudMenu::None {self.hud.clock_drag=None;}
         if let Some(s)=self.state.session.as_ref(){self.hud.mechanical.update(now,formal_ui::clock_index(Some(s)),s.clock_ack,self.hud.clock_drag,if s.paused{0}else{s.speed});}

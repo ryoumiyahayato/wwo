@@ -950,7 +950,10 @@ impl Host {
             let scissor=self.index.scissor(id,&self.camera,self.size)?;
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
-        let mut models=if loading||self.in_lobby() {Vec::new()} else if let Some(landmarks)=&self.landmarks {
+        let mut models=if loading||self.in_lobby() {
+            if let Some(catalogue) = &mut self.city_models { catalogue.idle(now); }
+            Vec::new()
+        } else if let Some(landmarks)=&self.landmarks {
             let mut models=self.city_models.as_mut().map_or_else(Vec::new,|catalogue|
                 catalogue.visible(&date,&self.camera,self.size,landmarks,&self.events,|[lon,lat]| {
                     pages.iter().filter(|(_,tile,_,_)| {

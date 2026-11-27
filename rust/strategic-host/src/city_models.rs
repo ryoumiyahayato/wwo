@@ -6,7 +6,8 @@ use std::{
     io::{self, Read},
     ops::Range,
     path::{Path, PathBuf},
-    sync::Arc,
+    sync::{atomic::{AtomicBool, Ordering}, Arc},
+    time::{Duration, Instant},
 };
 use winit::event_loop::EventLoopProxy;
 
@@ -17,6 +18,11 @@ pub(crate) const MODULES: usize=4;
 const MAX_PENDING: usize = 6;
 const RECORD: usize = 18;
 const MAX_BUILDINGS: usize = 12000;
+const CPU_PAGE_BUDGET: usize = (1024 - 32) * 1024 * 1024;
+const PAGE_RETENTION: Duration = Duration::from_secs(2);
+const INDEX_CELLS_PER_DEGREE: f64 = 4.;
+const LONGITUDE_CELLS: i32 = 1440;
+const LATITUDE_CELLS: i32 = 720;
 const PARIS_FRINGE: &[u8] = include_bytes!("paris-fringe.bin");
 const METRES_PER_DEGREE:f64=camera::EARTH*std::f64::consts::PI/180.;
 const BLOCK_METRES:f64=96.;
@@ -55,11 +61,79 @@ impl Tile {
     }
 
     fn load(&self, root: &Path) -> io::Result<CityPage> {
+        self.load_for_view(root, &AtomicBool::new(false))
+    }
+
+    fn load_for_view(&self, root: &Path, cancelled: &AtomicBool) -> io::Result<CityPage> {
+        let check = || if cancelled.load(Ordering::Relaxed) {
+            Err(io::Error::new(io::ErrorKind::Interrupted, "City page no longer requested"))
+        } else { Ok(()) };
+        check()?;
         let rows = match self.embedded {
             Some(bytes) => read_tile(bytes, self.buildings),
             None => read_tile(File::open(root.join(&self.file))?, self.buildings),
         }?;
+        check()?;
         Ok(CityPage::pack(rows, self.anchor()))
+    }
+
+    fn cpu_reservation(&self) -> usize {
+        // Include the capped decoder window, decode rows and the peak builder allocations.
+        12 * 1024 * 1024 + self.buildings * 8192
+    }
+}
+
+struct TileIndex {
+    cells: HashMap<[i32; 2], Vec<usize>>,
+    largest_apron_m: f64,
+}
+
+impl TileIndex {
+    fn new(tiles: &[Tile]) -> Self {
+        let mut cells = HashMap::<_, Vec<_>>::new();
+        let mut largest_apron_m: f64 = 0.;
+        for (index, tile) in tiles.iter().enumerate() {
+            let [lon, lat] = tile.anchor();
+            let x = ((lon + 180.) * INDEX_CELLS_PER_DEGREE).floor() as i32;
+            let y = ((lat + 90.) * INDEX_CELLS_PER_DEGREE).floor() as i32;
+            let cell = [x.rem_euclid(LONGITUDE_CELLS), y.min(LATITUDE_CELLS - 1)];
+            cells.entry(cell).or_default().push(index);
+            largest_apron_m = largest_apron_m.max(view_apron(tile.bounds, 250.));
+        }
+        Self { cells, largest_apron_m }
+    }
+
+    fn visible(&self, tiles: &[Tile], camera: &Camera, size: [u32; 2]) -> Vec<(usize, f64)> {
+        let (axes, [x, y]) = camera.projection(size);
+        let [width, height] = size.map(f64::from);
+        let apron = self.largest_apron_m / camera.mpp;
+        let dx = x.abs().max((width - x).abs()) + apron;
+        let dy = (y.abs().max((height - y).abs()) + apron) / camera.pitch().cos();
+        let radius = dx.hypot(dy) * camera.mpp / camera::EARTH;
+        let angle = if camera.blend() > 0. { radius.min(std::f64::consts::FRAC_PI_2) }
+            else { radius.min(1.).asin() };
+        let [lon, lat] = camera::geographic(axes[2]);
+        let height_deg = angle.to_degrees();
+        let width_deg = if lat.abs() + height_deg >= 90. { 180. }
+            else { (angle.sin() / lat.to_radians().cos()).clamp(0., 1.).asin().to_degrees() };
+        let x_cell = |value: f64| ((value + 180.) * INDEX_CELLS_PER_DEGREE).floor() as i32;
+        let y_cell = |value: f64| (((value + 90.) * INDEX_CELLS_PER_DEGREE).floor() as i32)
+            .clamp(0, LATITUDE_CELLS - 1);
+        let west = x_cell(lon - width_deg);
+        let east = x_cell(lon + width_deg).min(west + LONGITUDE_CELLS - 1);
+        let mut result = Vec::new();
+        for y in y_cell(lat - height_deg)..=y_cell(lat + height_deg) {
+            for x in west..=east {
+                if let Some(indices) = self.cells.get(&[x.rem_euclid(LONGITUDE_CELLS), y]) {
+                    result.extend(indices.iter().filter_map(|&index| {
+                        tiles[index].distance_to_view(camera, size).map(|distance| (index, distance))
+                    }));
+                }
+            }
+        }
+        result.sort_unstable_by(|a, b| a.1.total_cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
+        result.truncate(MAX_RESIDENT);
+        result
     }
 }
 
@@ -98,12 +172,16 @@ fn distance_to_view(bounds:[f64;4],camera:&Camera,[width,height]:[u32;2],apron:f
     let [west, south, east, north] = bounds;
     let center = [(west + east) * 0.5, (south + north) * 0.5];
     let [x, y] = camera.project(center, [width,height])?;
-    let longitude = (east-west)*center[1].to_radians().cos();
-    let latitude = north-south;
-    let margin = (longitude.hypot(latitude)*56_000. + apron)/camera.mpp;
+    let margin = view_apron(bounds, apron) / camera.mpp;
     let [w,h] = [f64::from(width),f64::from(height)];
     (x >= -margin && x <= w+margin && y >= -margin && y <= h+margin)
         .then_some((x-w*0.5).hypot(y-h*0.5))
+}
+
+fn view_apron([west, south, east, north]: [f64; 4], metres: f64) -> f64 {
+    let mid_latitude = (north + south) * 0.5;
+    let longitude = (east - west) * mid_latitude.to_radians().cos();
+    longitude.hypot(north - south) * 56_000. + metres
 }
 
 struct Building {
@@ -146,6 +224,13 @@ pub(crate) struct CityDraw {
 }
 
 impl CityPage {
+    fn bytes(&self) -> usize {
+        size_of::<CityGeometry>() + self.blocks.capacity() * size_of::<Block>()
+            + self.mesh.mesh.vertices.capacity() * size_of::<ModelVertex>()
+            + self.mesh.mesh.indices.capacity() * size_of::<u32>()
+            + self.mesh.instances.iter().map(|rows| rows.capacity() * size_of::<FootprintModel>()).sum::<usize>()
+    }
+
     fn pack(rows:Vec<Building>,anchor:[f64;2])->Self {
         let paris=rows.first().is_some_and(|row|row.module>2);
         let longitude_metres=METRES_PER_DEGREE*anchor[1].to_radians().cos().max(0.01);
@@ -245,14 +330,28 @@ impl Building {
     }
 }
 
+struct ResidentPage {
+    page: CityPage,
+    bytes: usize,
+    last_needed: Instant,
+}
+
+struct PageRequest {
+    reservation: usize,
+    cancelled: Arc<AtomicBool>,
+}
+
 pub(crate) struct Catalogue {
     root: PathBuf,
     tiles: Vec<Tile>,
+    index: TileIndex,
     pub(crate) sources: Vec<String>,
-    cache: HashMap<usize, CityPage>,
-    pending: HashSet<usize>,
+    cache: HashMap<usize, ResidentPage>,
+    pending: HashMap<usize, PageRequest>,
+    wanted: HashSet<usize>,
     failed: HashSet<usize>,
     revision: u64,
+    discarded: u64,
 }
 
 impl Catalogue {
@@ -281,35 +380,87 @@ impl Catalogue {
         if tiles.is_empty() {return Err(io::Error::other("City model catalogue has no tiles"));}
         tiles.extend(paris_fringe()?);
         sources.push("Paris fringe · Institut Paris Region, c. 1900 land use and roads. Reconstructed building placements.".into());
-        Ok(Self { root, tiles, sources, cache:HashMap::new(),pending:HashSet::new(),failed:HashSet::new(),revision:0 })
+        let index = TileIndex::new(&tiles);
+        Ok(Self { root, tiles, index, sources, cache: HashMap::new(), pending: HashMap::new(),
+            wanted: HashSet::new(), failed: HashSet::new(), revision: 0, discarded: 0 })
     }
 
     pub(crate) fn reload(root: PathBuf, previous: Option<&Self>, camera:&Camera, size:[u32;2]) -> io::Result<Self> {
         let mut candidate=Self::open(root)?;
         candidate.revision=previous.map_or(1,|current|current.revision+1);
+        let now = Instant::now();
         if camera.mpp<=MAX_MPP {
-            let mut visible:Vec<_>=candidate.tiles.iter().enumerate().filter_map(|(index,tile)|
-                tile.distance_to_view(camera,size).map(|distance|(index,distance))).collect();
-            visible.sort_by(|a,b|a.1.total_cmp(&b.1));
-            for (index,_) in visible.into_iter().take(MAX_RESIDENT) {
+            for (index, _) in candidate.index.visible(&candidate.tiles, camera, size) {
                 let tile=&candidate.tiles[index];
+                if candidate.cpu_page_bytes() + tile.cpu_reservation() > CPU_PAGE_BUDGET { break; }
                 let buildings=tile.load(&candidate.root).map_err(|error|io::Error::other(format!("{} · {error}",tile.file)))?;
-                candidate.cache.insert(index,buildings);
+                candidate.wanted.insert(index);
+                candidate.insert(index, buildings, now);
             }
         }
         Ok(candidate)
     }
 
     pub(crate) fn ready(&mut self, revision: u64, index: usize, result: io::Result<CityPage>) -> io::Result<()> {
-        if revision!=self.revision {return Ok(());}
-        self.pending.remove(&index);
+        if revision != self.revision { return Ok(()); }
+        let Some(request) = self.pending.remove(&index) else { return Ok(()); };
+        if request.cancelled.load(Ordering::Relaxed) || !self.wanted.contains(&index) {
+            self.discarded += 1;
+            return Ok(());
+        }
         match result {
-            Ok(tile) => { self.cache.insert(index,tile); Ok(()) }
+            Ok(tile) => { self.insert(index, tile, Instant::now()); Ok(()) }
             Err(error) => {
                 self.failed.insert(index);
                 Err(io::Error::other(format!("City tile {} · {error}",self.tiles[index].file)))
             }
         }
+    }
+
+    fn insert(&mut self, index: usize, page: CityPage, now: Instant) {
+        let bytes = page.bytes();
+        self.cache.insert(index, ResidentPage { page, bytes, last_needed: now });
+    }
+
+    fn cpu_page_bytes(&self) -> usize {
+        self.cache.values().map(|resident| resident.bytes).sum()
+    }
+
+    fn reserved_bytes(&self) -> usize {
+        self.pending.values().map(|request| request.reservation).sum()
+    }
+
+    fn reserve(&mut self, bytes: usize) -> bool {
+        while self.cache.len() + self.pending.len() >= MAX_RESIDENT
+            || self.cpu_page_bytes() + self.reserved_bytes() + bytes > CPU_PAGE_BUDGET
+        {
+            let Some((&index, _)) = self.cache.iter().filter(|(index, _)| !self.wanted.contains(index))
+                .min_by_key(|(index, page)| (page.last_needed, **index)) else { return false; };
+            self.cache.remove(&index);
+        }
+        true
+    }
+
+    pub(crate) fn expire(&mut self, now: Instant) -> bool {
+        let previous = self.cache.len();
+        self.cache.retain(|index, resident| self.wanted.contains(index)
+            || now.saturating_duration_since(resident.last_needed) < PAGE_RETENTION);
+        self.cache.len() != previous
+    }
+
+    fn set_wanted(&mut self, wanted: HashSet<usize>, now: Instant) {
+        self.wanted = wanted;
+        for (index, request) in &self.pending {
+            if !self.wanted.contains(index) { request.cancelled.store(true, Ordering::Relaxed); }
+        }
+        for index in &self.wanted {
+            if let Some(resident) = self.cache.get_mut(index) { resident.last_needed = now; }
+        }
+        self.expire(now);
+    }
+
+    pub(crate) fn idle(&mut self, now: Instant) {
+        self.set_wanted(HashSet::new(), now);
     }
 
     pub(crate) fn covers(&self, [lon,lat]: [f64;2]) -> bool {
@@ -323,22 +474,17 @@ impl Catalogue {
         landmarks: &Landmarks, events: &EventLoopProxy<HostEvent>,
         footprint_coverage: impl Fn([f64;2]) -> f32) -> Vec<VisibleModel>
     {
+        let now = Instant::now();
         if camera.mpp > MAX_MPP || !("1891-01-01".."1915-01-01").contains(&date) {
+            self.idle(now);
             return Vec::new();
         }
-        let mut visible: Vec<_> = self.tiles.iter().enumerate()
-            .filter_map(|(index,tile)|tile.distance_to_view(camera,size).map(|distance|(index,distance))).collect();
-        visible.sort_by(|a,b|a.1.total_cmp(&b.1));
-        visible.truncate(MAX_RESIDENT);
-        let wanted: HashSet<_> = visible.iter().map(|&(index,_)|index).collect();
-        if self.cache.len() > MAX_RESIDENT {
-            self.cache.retain(|index,_|wanted.contains(index));
-        }
+        let visible = self.index.visible(&self.tiles, camera, size);
         let mut models = Vec::new();
         let middle=camera::smooth(8.,COVERAGE_MPP,camera.mpp) as f32;
         let fallback=(1.-camera::smooth(115.,MAX_MPP,camera.mpp)) as f32;
         let details=(1.-camera::smooth(1.7,3.1,camera.mpp)) as f32;
-        for (index,_) in visible {
+        let visible: Vec<_> = visible.into_iter().filter_map(|(index, _)| {
             let tile=&self.tiles[index];
             let anchor=tile.anchor();
             // Keep the mesh while the matching footprint or block page streams in.
@@ -348,9 +494,13 @@ impl Catalogue {
             } else {
                 (1.-middle*footprint_coverage(anchor))*fallback
             };
-            if opacity<=0.03 {continue;}
+            (opacity > 0.03).then_some((index, anchor, opacity))
+        }).collect();
+        self.set_wanted(visible.iter().map(|&(index, _, _)| index).collect(), now);
+        for (index, anchor, opacity) in visible {
             let detail=details*opacity;
-            if let Some(page) = self.cache.get(&index) {
+            if let Some(resident) = self.cache.get(&index) {
+                let page = &resident.page;
                 let key=ModelKey::city_page(self.revision,index);
                 let pose=ModelPose{key,anchor,heading:0.,datum:0.,dimensions:[1.;3],bounds:page.mesh_bounds};
                 let Some(mut block_model)=pose.project(None,camera,camera.pitch(),size) else {continue;};
@@ -359,13 +509,18 @@ impl Catalogue {
                 block_model.lod_range=[if has_details {detail} else {0.},opacity];
                 block_model.city_page=Some(CityDraw{geometry:Arc::clone(&page.mesh),preload:camera.mpp<6.,paris:page.paris,batches});
                 models.push(block_model);
-            } else if self.pending.len()<MAX_PENDING && !self.failed.contains(&index) && self.pending.insert(index) {
+            } else if self.pending.len() < MAX_PENDING && !self.failed.contains(&index) && !self.pending.contains_key(&index) {
+                let reservation = self.tiles[index].cpu_reservation();
+                if !self.reserve(reservation) {continue;}
                 let root=self.root.clone();
-                let tile=tile.clone();
+                let tile=self.tiles[index].clone();
                 let proxy=events.clone();
                 let revision=self.revision;
+                let cancelled = Arc::new(AtomicBool::new(false));
+                self.pending.insert(index, PageRequest { reservation, cancelled: Arc::clone(&cancelled) });
                 if let Err(error)=std::thread::Builder::new().name("WWO city tile".into()).spawn(move || {
-                    let _=proxy.send_event(HostEvent::CityTile(revision,index,tile.load(&root)));
+                    let result = tile.load_for_view(&root, &cancelled);
+                    let _=proxy.send_event(HostEvent::CityTile(revision,index,result));
                 }) {
                     let _=events.send_event(HostEvent::CityTile(revision,index,Err(error)));
                 }
@@ -383,7 +538,9 @@ fn read_tile(mut file: impl Read, count: usize) -> io::Result<Vec<Building>> {
     }
     let wanted=count*RECORD;
     let mut bytes=Vec::with_capacity(wanted);
-    zstd::stream::read::Decoder::new(file)?.take((wanted+1) as u64).read_to_end(&mut bytes)?;
+    let mut decoder = zstd::stream::read::Decoder::new(file)?;
+    decoder.window_log_max(23)?;
+    decoder.take((wanted+1) as u64).read_to_end(&mut bytes)?;
     if bytes.len()!=wanted {return Err(io::Error::other("Invalid building page length"));}
     bytes.chunks_exact(RECORD).map(|part| {
         let signed=|at| i32::from_le_bytes(part[at..at+4].try_into().unwrap());
