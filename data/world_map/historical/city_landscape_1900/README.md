@@ -1,6 +1,6 @@
 # 1900 年城市景观名录
 
-[Issue #296](https://github.com/ryoumiyahayato/wwo/issues/296) 的第五批工作记录。状态为 IN_PROGRESS，分母尚未冻结。运行基线为 Build 144、提交 `3dce67233c0acaf4d2b3e7c1466d9282e26288bc`。本批尚无运行代码或正式资源变更。[第四批主线 CI](https://github.com/ryoumiyahayato/wwo/actions/runs/45856908832) [施工草稿 #303](https://github.com/ryoumiyahayato/wwo/pull/303)
+第五批冻结版为 `1900-opening-v1`。运行基线为 Build 144、提交 `3dce67233c0acaf4d2b3e7c1466d9282e26288bc`。[Issue #296](https://github.com/ryoumiyahayato/wwo/issues/296) [第四批主线 CI](https://github.com/ryoumiyahayato/wwo/actions/runs/45856908832) [交付 PR #303](https://github.com/ryoumiyahayato/wwo/pull/303)
 
 ## 名录读取
 
@@ -24,9 +24,13 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 | site-plans.json | 可复用资产、每层覆盖、历史范围、运行时分片和各等级的建造方法 |
 | b4-timing.tsv | 七条实际路线各三次的引擎、GPU 和阻塞等待摘要 |
 
-开局为 1900-01-01。政治底图元数据为 1900-03-12，两日期均保留。采用 1895–1905 的可比参照，保留原年与开局年的差。窄口径近年普查优先，异口径读数列在比较字段。单次编纂估计保留为 P。暂无可比的跨年边界，未插值。只有明列的区间上限或调度依据可提前排期。X 包括低于门槛、同城重复、无近年城市级依据及同名统计范围冲突。只有含 D 或 P 的施工卡计入预审分母。
+开局为 1900-01-01。政治底图元数据为 1900-03-12，两日期均保留。采用 1895–1905 的可比参照，保留原年与开局年的差。窄口径近年普查优先，异口径读数列在比较字段。单次编纂估计保留为 P。暂无可比的跨年边界，未插值。只有明列的区间上限或调度依据可提前排期。X 包括低于门槛、同城重复、无近年城市级依据及同名统计范围冲突。D 与 P 共同计入施工分母。
 
-原检查点有 1,724 条候选，预审 297 城。按原始政治单位目录补核后，加入布哈拉为 P，暂列第九批。Hamilton 1906 年出版的资料估计其城区有 100,000 人，实际观察年未注明。Rickmers 的独立街区与住户估计为 80,000–100,000。1909 年另有 78,650 人的估计。原数与口径均保留。现行数字由上面的离线命令生成。分档和逐城边界继续核对。[Hamilton 第 29 页](https://www.gutenberg.org/cache/epub/73258/pg73258.txt) [Rickmers 第十二章](https://upload.wikimedia.org/wikipedia/commons/c/c2/The_Duab_of_Turkestan%3B_%28IA_duabofturkestan00rick%29.pdf)
+本版共 1,760 条候选，D 214、P 86、X 1,460。施工分母为 300 城，分配到第七批 38 城、第八批 99 城、第九批 163 城。归入 D 或 P 的 300 城都有施工定位、具名核心、普通街区及两个边缘单元。几何资料级别为 A/B 1 城、B 3 城、C 296 城。53 张卡有具名历史约束，仍缺可用的地方测图。历史道路有效覆盖和精确街廓按各层实际证据填写，缺测项保留未知。
+
+151 个政治单位中，86 个已找到城市统计、9 个只有非城市统计、56 个仍缺城市统计。原先登记的 67 个缺口单位全已筛查。另有 139 条 X 可按 1897 年普查归入俄罗斯帝国，点位不足以进一步区分地理区域。保留原普查辖区和人口。日后有新证据时提交版本化修订，逐城记录人口、身份与调度的变化。
+
+原检查点有 1,724 条候选，预审 297 城。按原始政治单位目录补核后，布哈拉以 P 纳入第九批。Hamilton 1906 年出版的资料估计其城区有 100,000 人，实际观察年未注明。Rickmers 的独立街区与住户估计为 80,000–100,000。1909 年另有 78,650 人的估计。原数与口径均保留。[Hamilton 第 29 页](https://www.gutenberg.org/cache/epub/73258/pg73258.txt) [Rickmers 第十二章](https://upload.wikimedia.org/wikipedia/commons/c/c2/The_Duab_of_Turkestan%3B_%28IA_duabofturkestan00rick%29.pdf)
 
 台北、基隆、台南、嘉义、宜兰归入台湾政治单位。台北的 69,672 人为城内、艋舺和大稻埕三处现住人口之和。英国帝国普查补录 Newfoundland、Belize、Bathurst、Freetown、Kingston、Perth、Hobart、Bloemfontein 的城镇读数。Kingston 保留与 Port Royal 的联合估计作为上界。波斯尼亚、黑塞哥维那、尼泊尔、利比里亚、卢森堡及希瓦另有城市读数或越窗比较。覆盖记录列出找到的候选 ID 和处置。未知政治单位仍需核查。[英帝国普查表 3](https://www.tradeshouselibrary.org/uploads/4/7/7/2/47723681/census_of_the_british_empire._1901.pdf) [波黑普查汇编](https://prilozi.iis.unsa.ba/wp-content/uploads/2023/05/32-Prilozi-Naucnerasprave-RobertJ.Donia_.pdf)
 
@@ -38,7 +42,7 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 四座跨档城市的施工卡补录历史地图入口和待查单元。那不勒斯使用 1901 年城市图，热那亚和佛罗伦萨保留馆藏索引，墨西拿使用 1908 年测绘节选对照港口和西侧空地。四城仍待核实有效覆盖和外缘，墨西拿须剔除震后重建。[那不勒斯 1901 年地图](https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~273903~90047256) [墨西拿 1908 年图幅](https://www.agenziademanio.it/export/sites/demanio/download/documentigare_2021_3/S0_INQ.CART.STORICO-1.pdf)
 
-意大利 1901 年普查表 XI 列锡拉库萨（`reba:chandler:1362`）主城 23,247 人，全市辖区 32,030 人。该条由 P 改 X，原 108,000 人编纂值保留为比较。纽约州锡拉丘兹（`us_city_new_york_syracuse`）1900 年普查 108,374 人，保留第九批及独立 ID。第九批预审减少一城，正式分母待冻结。[意大利普查表 XI](https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf) [美国普查公告 65 表 2](https://www2.census.gov/library/publications/decennial/1900/bulletins/demographic/65-population-incorporated-places.pdf)
+意大利 1901 年普查表 XI 列锡拉库萨（`reba:chandler:1362`）主城 23,247 人，全市辖区 32,030 人。该条由 P 改 X，原 108,000 人编纂值保留为比较。纽约州锡拉丘兹（`us_city_new_york_syracuse`）1900 年普查 108,374 人，保留第九批及独立 ID。[意大利普查表 XI](https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf) [美国普查公告 65 表 2](https://www2.census.gov/library/publications/decennial/1900/bulletins/demographic/65-population-incorporated-places.pdf)
 
 帕特森、斯克兰顿、福尔里弗、罗切斯特及纽约州锡拉丘兹已登记近年图源与施工单元。分别核对引水渠、铁路货场、纺织厂带、河谷与运河。历史外缘和道路有效覆盖待核。[帕特森 1899 年图](https://www.loc.gov/item/sanborn05590_003/) [罗切斯特 1900 年地图服务](https://gis.cityofrochester.gov/arcgis/rest/services/HistoricPlatMaps/ROC_HistoricPlatMaps_1900/MapServer)
 
@@ -117,4 +121,4 @@ B4 两城 WCB 含目录 5,685,672 字节，城市地表叠加层 2,884,596 字�
 
 ## 恢复位置
 
-名录分支为 `codex/global-city-roster-1900`，基于 `3dce67233`，使用草稿 #303。核查其余政治单位、历史独立城市及逐城外缘、资料空洞和施工单元。名录核对完毕后冻结分母，经必需 CI 与审阅后合入。Build 144 继续作为正式运行对照。
+名录由 `codex/global-city-roster-1900` 提交，保留基于 `3dce67233` 的原施工检查点。后续施工按冻结名录读取城市卡和测量交接，正式运行对照沿用 Build 144。[交付 PR #303](https://github.com/ryoumiyahayato/wwo/pull/303)

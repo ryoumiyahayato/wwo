@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[3]
 POPULATION = ROOT / "data/historical_population_1900"
 HISTORICAL_MAP = ROOT / "data/world_map/historical"
 DATA = HISTORICAL_MAP / "city_landscape_1900"
+ROSTER_VERSION = "1900-opening-v1"
 REFERENCE_DATE = "1900-01-01"
 CANDIDATE_YEARS = range(1895, 1906)
 MINIMUM = 100_000
@@ -191,6 +192,20 @@ def political_owner(point, refs, rows, population, indices):
             distance = polygon.distance(location)
             if distance <= 0.15:
                 return {"id": unit, "method": "coastal_snapshot_nearest", "distance_degrees": round(distance, 5)}
+    # The census return can establish the polity even without a city locator.
+    census_units = {
+        "egypt_historical_census_primary_tables": "khedivate_of_egypt",
+        "russia_first_census": "russian_empire",
+        "india_statistical_abstract_1905": "cshapes_gw_750",
+        "ceuta_1900_ine_municipal_census": "kingdom_of_spain",
+        "melilla_1900_ine_municipal_census": "kingdom_of_spain",
+    }
+    source_units = {census_units.get(row["source_id"]) for row in rows}
+    if "gold_coast_including_ashanti_north" in ancestry:
+        source_units.add("cshapes_gw_452")
+    source_units.intersection_update(units)
+    if not direct and len(source_units) == 1:
+        return {"id": source_units.pop(), "method": "census_jurisdiction"}
     return {"id": None, "method": "unresolved", "source_ancestry": sorted(direct)}
 
 
@@ -419,6 +434,12 @@ def compile_roster():
         elif plan and plan.get("jurisdiction"):
             polity = plan["jurisdiction"]
         region = plan.get("region") if plan else None
+        if region is None and polity["method"] == "census_jurisdiction":
+            if polity["id"] == "kingdom_of_spain":
+                region = "West Asia and North Africa"  # The two INE returns are Ceuta and Melilla.
+            elif polity["id"] == "russian_empire" and point is None:
+                # Keep the provincial statistical scope without inventing a city region.
+                region = fallback_region(rows, point)
         if not region:
             region = district_region(units[polity["id"]], point) if polity["id"] in units else fallback_region(rows, point)
         if polity["id"] in units:
@@ -530,7 +551,8 @@ def compile_roster():
         })
     return {
         "schema_version": 1,
-        "status": "review",
+        "roster_version": ROSTER_VERSION,
+        "status": "frozen",
         "reference_date": REFERENCE_DATE,
         "political_metadata_date": date,
         "sources": "supplement-sources.csv",
@@ -565,7 +587,7 @@ def read_roster():
 def summarize(roster):
     candidates = roster["candidates"]
     targets = [row for row in candidates if row.get("batch")]
-    print(f"Status {roster['status']}; world opening {roster['reference_date']}; political metadata {roster['political_metadata_date']}")
+    print(f"Roster {roster['roster_version']} ({roster['status']}); world opening {roster['reference_date']}; political metadata {roster['political_metadata_date']}")
     print(f"Candidate identities {len(candidates)}. Decisions {dict(sorted(Counter(r['decision'] for r in candidates).items()))}")
     print(f"N {len(targets)}. Batches {dict(sorted(Counter(r['batch'] for r in targets).items()))}")
     print(f"Grades {dict(sorted(Counter(r['grade'] for r in targets).items()))}")

@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
-  "status": "review",
+  "roster_version": "1900-opening-v1",
+  "status": "frozen",
   "reference_date": "1900-01-01",
   "political_metadata_date": "1900-03-12",
   "sources": "supplement-sources.csv",
