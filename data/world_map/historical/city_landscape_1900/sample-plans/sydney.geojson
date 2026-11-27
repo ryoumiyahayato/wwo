@@ -1,0 +1,5989 @@
+{
+  "type": "FeatureCollection",
+  "wwo": {
+    "city_id": "reba:chandler:1361",
+    "name": "Sydney",
+    "key": "sydney-harbour-and-ridge",
+    "revision": 2,
+    "status": "candidate_sample",
+    "origin": [
+      151.208,
+      -33.8705
+    ],
+    "method": "Sydney Cove core and lower Darling Harbour east bank use faint Health Map 1900 outlines on the State Library 1807–1900 overlay. Only interpreted 1900 water and dry ground are classified. The 1887 atlas supplies the surrounding Pyrmont, rail and Surry Hills corridors. Frontage lots, dimensions and paving are inferred outside directly traced building footprints.",
+    "registration": {
+      "model": "affine pixel to geographic degrees",
+      "matrix": [
+        [
+          6.833020422409108e-05,
+          -5.958962438633558e-06
+        ],
+        [
+          -7.176417964827042e-06,
+          -6.153758735996662e-05
+        ],
+        [
+          151.15222640010967,
+          -33.83418162733956
+        ]
+      ],
+      "controls": [
+        {
+          "name": "Dawes Point",
+          "pixel": [
+            850,
+            245
+          ],
+          "wgs84_approx": [
+            151.20964,
+            -33.85424
+          ],
+          "leave_one_out_m": 190.8
+        },
+        {
+          "name": "Fort Macquarie",
+          "pixel": [
+            951,
+            276
+          ],
+          "wgs84_approx": [
+            151.21513,
+            -33.85691
+          ],
+          "leave_one_out_m": 16.3
+        },
+        {
+          "name": "Mrs Macquarie’s Chair",
+          "pixel": [
+            1052,
+            303
+          ],
+          "wgs84_approx": [
+            151.2222,
+            -33.85947
+          ],
+          "leave_one_out_m": 66.2
+        },
+        {
+          "name": "Fort Denison",
+          "pixel": [
+            1109,
+            234
+          ],
+          "wgs84_approx": [
+            151.22551,
+            -33.85489
+          ],
+          "leave_one_out_m": 177.7
+        },
+        {
+          "name": "Victoria Barracks main grounds",
+          "pixel": [
+            1144,
+            726
+          ],
+          "wgs84_approx": [
+            151.22594,
+            -33.8857
+          ],
+          "leave_one_out_m": 250.7
+        },
+        {
+          "name": "George Street at Park Street",
+          "pixel": [
+            881,
+            550
+          ],
+          "wgs84_approx": [
+            151.20756,
+            -33.87335
+          ],
+          "leave_one_out_m": 143.4
+        },
+        {
+          "name": "Hyde Park southeast",
+          "pixel": [
+            942,
+            618
+          ],
+          "wgs84_approx": [
+            151.21188,
+            -33.87766
+          ],
+          "leave_one_out_m": 49.2
+        }
+      ],
+      "leave_one_out_rms_m": 150.5,
+      "leave_one_out_max_m": 250.7,
+      "limits": "Seven approximate feature matches. Independent registration of the peripheral areas is absent. Some waterfront features changed inside the date window. Stable street controls are approximate."
+    },
+    "sources": [
+      {
+        "id": "sands-1887",
+        "url": "https://www.cityofsydney.nsw.gov.au/history/house-and-building-histories-guide/historical-maps-plans",
+        "licence": "Historical facts and geographically interpreted lines. City Archives image excluded.",
+        "date": "John Sands & Co., 1887; City of Sydney Archives A-00880474",
+        "precision": "Manual reading of 2048 px directory facsimile. Mainland streets and waterfront schematic at this scale."
+      },
+      {
+        "id": "dove-1880",
+        "url": "https://www.sl.nsw.gov.au/stories/doves-plans-sydney",
+        "licence": "Reference for historical uses and morphology. No archive scan bundled.",
+        "date": "Dove’s Plans of Sydney, 1880",
+        "precision": "Block-plan context for compact central frontages, yards and buildings."
+      },
+      {
+        "id": "city-port-history",
+        "url": "https://www.cityofsydney.nsw.gov.au/-/media/corporate/files/publications/history/history-walks/walktourport.pdf?download=true",
+        "licence": "Historical land-use facts only.",
+        "date": "City heritage walk, chronology of the nineteenth-century port",
+        "precision": "Pyrmont industrial, Darling Harbour wharves and freight yard separated from later redevelopment."
+      },
+      {
+        "id": "commonwealth-reference",
+        "url": "https://www.dcceew.gov.au/sites/default/files/env/pages/a591988f-c06f-4436-a2f4-81ce82cd4179/files/governors-domain-civic-precinct-location-boundary-map.pdf",
+        "licence": "Locator map consulted for control selection; reference only.",
+        "date": "2021 map of the Governors’ Domain and Civic Precinct",
+        "precision": "Modern reference over surviving landforms, the park and intersections, with approximate WGS84 controls."
+      },
+      {
+        "id": "fort-denison-reference",
+        "url": "https://www.environment.nsw.gov.au/publications/fort-denison-conservation-management-plan",
+        "licence": "Context and surviving landmark position only.",
+        "date": "NSW conservation management plan, 2018",
+        "precision": "Island used as control only."
+      },
+      {
+        "id": "slnsw-sydney-1900",
+        "url": "https://www.sl.nsw.gov.au/collection-items/sydney-1807-and-1900",
+        "licence": "Trace of geographic facts; State Library of New South Wales Z/Cb 90/8 image omitted.",
+        "date": "Published 1900; faint lines use the 1900 Health Map",
+        "precision": "State Library 1500 px facsimile. Traced 1900 harbour headlands, dock fingers, some buildings and approach streets, excluding older Meehan coastline and blocks."
+      },
+      {
+        "id": "nsw-macquarie-locator",
+        "url": "https://www.nsw.gov.au/sites/default/files/2021-02/Macquarie-Street-East-Precinct-Review.pdf",
+        "licence": "Surviving landmark context; modern map omitted.",
+        "date": "2021 precinct plan",
+        "precision": "Landmarks and streets used to identify control points. Coordinates approximate."
+      }
+    ],
+    "road_validity": {
+      "start": 1887,
+      "end": 1901
+    },
+    "water_validity": {
+      "start": 1887,
+      "end": 1901
+    },
+    "ground_validity": {
+      "start": 1887,
+      "end": 1901
+    },
+    "ground_material": 0,
+    "harbour_registration": {
+      "image_width_px": 1500,
+      "model": "affine pixel to geographic degrees",
+      "matrix": [
+        [
+          1.3533156517881303e-05,
+          -1.3043121845821946e-06
+        ],
+        [
+          -2.104829497306948e-06,
+          -1.1139872200083278e-05
+        ],
+        [
+          151.20079203350446,
+          -33.850898968992034
+        ]
+      ],
+      "controls": [
+        {
+          "name": "Government House",
+          "pixel": [
+            1164,
+            676
+          ],
+          "wgs84_approx": [
+            151.21513,
+            -33.85992
+          ],
+          "leave_one_out_m": 8.0
+        },
+        {
+          "name": "Government Stables",
+          "pixel": [
+            1163,
+            985
+          ],
+          "wgs84_approx": [
+            151.21439,
+            -33.86347
+          ],
+          "leave_one_out_m": 17.1
+        },
+        {
+          "name": "Customs House",
+          "pixel": [
+            881,
+            916
+          ],
+          "wgs84_approx": [
+            151.210859,
+            -33.862199
+          ],
+          "leave_one_out_m": 12.2
+        },
+        {
+          "name": "New St Philip’s",
+          "pixel": [
+            485,
+            1133
+          ],
+          "wgs84_approx": [
+            151.2049356,
+            -33.86418184
+          ],
+          "leave_one_out_m": 33.9
+        },
+        {
+          "name": "St James’ Church",
+          "pixel": [
+            1007,
+            1550
+          ],
+          "wgs84_approx": [
+            151.21118,
+            -33.86945
+          ],
+          "leave_one_out_m": 39.3
+        }
+      ],
+      "leave_one_out_rms_m": 25.3,
+      "leave_one_out_max_m": 39.3,
+      "limits": "Five surviving buildings compared with modern approximate centre points. The headland, wharf edges and areas beyond the survey margins lack independent position checks."
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "sydney-sands:rocks-to-surry",
+      "properties": {
+        "kind": "coverage",
+        "source": "sands-1887"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2017458,
+              -33.8582059
+            ],
+            [
+              151.2050072,
+              -33.8568741
+            ],
+            [
+              151.2086209,
+              -33.8548892
+            ],
+            [
+              151.2111937,
+              -33.8606461
+            ],
+            [
+              151.2144848,
+              -33.8626115
+            ],
+            [
+              151.2168807,
+              -33.8657422
+            ],
+            [
+              151.2197478,
+              -33.868976
+            ],
+            [
+              151.2212411,
+              -33.8721523
+            ],
+            [
+              151.2219546,
+              -33.8778714
+            ],
+            [
+              151.2253146,
+              -33.882205
+            ],
+            [
+              151.2271355,
+              -33.8867153
+            ],
+            [
+              151.2253895,
+              -33.893401
+            ],
+            [
+              151.2195427,
+              -33.8961857
+            ],
+            [
+              151.2099331,
+              -33.8945396
+            ],
+            [
+              151.2053466,
+              -33.8894773
+            ],
+            [
+              151.2022418,
+              -33.8847308
+            ],
+            [
+              151.2008162,
+              -33.8791983
+            ],
+            [
+              151.2004518,
+              -33.8746286
+            ],
+            [
+              151.1998106,
+              -33.8706564
+            ],
+            [
+              151.2006868,
+              -33.865511
+            ],
+            [
+              151.2018188,
+              -33.8623151
+            ],
+            [
+              151.2017458,
+              -33.8582059
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-peninsula",
+      "properties": {
+        "kind": "coverage",
+        "source": "sands-1887"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.1917071,
+              -33.8661577
+            ],
+            [
+              151.1949577,
+              -33.8643276
+            ],
+            [
+              151.19763,
+              -33.8656796
+            ],
+            [
+              151.1992128,
+              -33.867496
+            ],
+            [
+              151.1979692,
+              -33.8698741
+            ],
+            [
+              151.1997788,
+              -33.872705
+            ],
+            [
+              151.2018764,
+              -33.8766177
+            ],
+            [
+              151.1995033,
+              -33.878027
+            ],
+            [
+              151.1957011,
+              -33.8745251
+            ],
+            [
+              151.192489,
+              -33.8718827
+            ],
+            [
+              151.1902407,
+              -33.8692623
+            ],
+            [
+              151.1917071,
+              -33.8661577
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:moore-park-and-ridges",
+      "properties": {
+        "kind": "coverage",
+        "source": "sands-1887"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2208919,
+              -33.8846167
+            ],
+            [
+              151.2262391,
+              -33.8831559
+            ],
+            [
+              151.2304725,
+              -33.8853279
+            ],
+            [
+              151.2347782,
+              -33.8892467
+            ],
+            [
+              151.2335782,
+              -33.8936178
+            ],
+            [
+              151.2297529,
+              -33.8980086
+            ],
+            [
+              151.2239667,
+              -33.8984986
+            ],
+            [
+              151.2213009,
+              -33.8947228
+            ],
+            [
+              151.2209474,
+              -33.8906514
+            ],
+            [
+              151.2208919,
+              -33.8846167
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-local-read",
+      "properties": {
+        "kind": "road_coverage",
+        "source": "sands-1887",
+        "categories": 1,
+        "coverage_state": "mapped_network",
+        "source_year": 1887,
+        "priority": 24,
+        "coverage_basis": "Selected clearly readable local centre lines. Coverage remains separate from the ward outline and unresolved neighbouring blocks."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2108645,
+              -33.880634
+            ],
+            [
+              151.2138745,
+              -33.8802749
+            ],
+            [
+              151.2161153,
+              -33.8817758
+            ],
+            [
+              151.2177346,
+              -33.8856468
+            ],
+            [
+              151.2170273,
+              -33.8899365
+            ],
+            [
+              151.2145534,
+              -33.8910262
+            ],
+            [
+              151.2114495,
+              -33.8898231
+            ],
+            [
+              151.2101219,
+              -33.8875937
+            ],
+            [
+              151.2108645,
+              -33.880634
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:market-street",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 10,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "setts",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2050072,
+            -33.8704879
+          ],
+          [
+            151.2068808,
+            -33.8704026
+          ],
+          [
+            151.2086178,
+            -33.8703055
+          ],
+          [
+            151.2101067,
+            -33.8705596
+          ],
+          [
+            151.2117251,
+            -33.8708873
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:park-street",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 13,
+        "display_rank": 2,
+        "source_year": 1887,
+        "display_surface": "setts",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2052056,
+            -33.8729296
+          ],
+          [
+            151.2070362,
+            -33.8732135
+          ],
+          [
+            151.2086904,
+            -33.8732335
+          ],
+          [
+            151.210316,
+            -33.8734996
+          ],
+          [
+            151.2117438,
+            -33.8736863
+          ],
+          [
+            151.2134305,
+            -33.8740198
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:central-bathurst-street",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 9,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "setts",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2056664,
+            -33.8748968
+          ],
+          [
+            151.2072452,
+            -33.8749724
+          ],
+          [
+            151.2088025,
+            -33.8752325
+          ],
+          [
+            151.2101691,
+            -33.8753517
+          ],
+          [
+            151.2114602,
+            -33.8755264
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-west-link",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 10,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "setts",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2097747,
+            -33.8799174
+          ],
+          [
+            151.2104405,
+            -33.8819025
+          ],
+          [
+            151.2107288,
+            -33.8841655
+          ],
+          [
+            151.2105784,
+            -33.8866389
+          ],
+          [
+            151.2107085,
+            -33.8890747
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-middle-street",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 10,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2128246,
+            -33.8809915
+          ],
+          [
+            151.2124763,
+            -33.8833855
+          ],
+          [
+            151.2124408,
+            -33.8848743
+          ],
+          [
+            151.2122938,
+            -33.8867264
+          ],
+          [
+            151.2121468,
+            -33.8885785
+          ],
+          [
+            151.2124601,
+            -33.8900355
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-east-ridge",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 10,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2150146,
+            -33.8805608
+          ],
+          [
+            151.2150404,
+            -33.8832983
+          ],
+          [
+            151.2151022,
+            -33.885728
+          ],
+          [
+            151.2150489,
+            -33.8879613
+          ],
+          [
+            151.2148913,
+            -33.8904962
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-eastern-lane",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 8,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2169212,
+            -33.8831515
+          ],
+          [
+            151.2174217,
+            -33.8853708
+          ],
+          [
+            151.2175409,
+            -33.8873083
+          ],
+          [
+            151.2174623,
+            -33.8891663
+          ],
+          [
+            151.2175203,
+            -33.8910363
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-foveaux-axis",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 11,
+        "display_rank": 2,
+        "source_year": 1887,
+        "display_surface": "setts",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2103659,
+            -33.8855015
+          ],
+          [
+            151.2118224,
+            -33.885442
+          ],
+          [
+            151.2132286,
+            -33.8858133
+          ],
+          [
+            151.2155556,
+            -33.8865757
+          ],
+          [
+            151.2175013,
+            -33.8870562
+          ],
+          [
+            151.2191125,
+            -33.8874453
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-middle-cross-street",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 8,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2104994,
+            -33.8873159
+          ],
+          [
+            151.2115927,
+            -33.8874112
+          ],
+          [
+            151.2136751,
+            -33.8879036
+          ],
+          [
+            151.2149843,
+            -33.8885151
+          ],
+          [
+            151.2175378,
+            -33.8891108
+          ],
+          [
+            151.2193143,
+            -33.8892657
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-terrace-close",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 8,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.210525,
+            -33.8888722
+          ],
+          [
+            151.2116723,
+            -33.8890965
+          ],
+          [
+            151.213413,
+            -33.8895592
+          ],
+          [
+            151.2151609,
+            -33.8899603
+          ],
+          [
+            151.2173583,
+            -33.8906492
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-short-lane",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 7,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2115054,
+            -33.8834251
+          ],
+          [
+            151.2125843,
+            -33.8836435
+          ],
+          [
+            151.2140589,
+            -33.8840208
+          ],
+          [
+            151.2152601,
+            -33.8843742
+          ],
+          [
+            151.216598,
+            -33.8847395
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-spine",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 12,
+        "display_rank": 2,
+        "source_year": 1887,
+        "display_surface": "setts",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.192635,
+            -33.8664873
+          ],
+          [
+            151.1936999,
+            -33.8680099
+          ],
+          [
+            151.194826,
+            -33.8696
+          ],
+          [
+            151.1959377,
+            -33.8713132
+          ],
+          [
+            151.1971645,
+            -33.8732229
+          ],
+          [
+            151.1983769,
+            -33.8752557
+          ],
+          [
+            151.1996253,
+            -33.8769809
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-quarry-edge",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 8,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.1916394,
+            -33.868514
+          ],
+          [
+            151.1926503,
+            -33.8699076
+          ],
+          [
+            151.193762,
+            -33.8716208
+          ],
+          [
+            151.1949492,
+            -33.8732784
+          ],
+          [
+            151.1963701,
+            -33.8747077
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-crossing-1",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 9,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.1915496,
+            -33.8686926
+          ],
+          [
+            151.1931461,
+            -33.8680238
+          ],
+          [
+            151.1942644,
+            -33.8673132
+          ],
+          [
+            151.1957782,
+            -33.8667614
+          ],
+          [
+            151.1970728,
+            -33.8663148
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-crossing-2",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 9,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.1924166,
+            -33.8701359
+          ],
+          [
+            151.1938082,
+            -33.8694491
+          ],
+          [
+            151.1951998,
+            -33.8687623
+          ],
+          [
+            151.1967423,
+            -33.8679644
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-crossing-3",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 9,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.194075,
+            -33.8718967
+          ],
+          [
+            151.1956175,
+            -33.8710988
+          ],
+          [
+            151.1970163,
+            -33.8703505
+          ],
+          [
+            151.1979907,
+            -33.8696895
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-crossing-4",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 8,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.1950391,
+            -33.8730998
+          ],
+          [
+            151.19665,
+            -33.8723078
+          ],
+          [
+            151.1981314,
+            -33.8714424
+          ],
+          [
+            151.1990088,
+            -33.8710216
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:moore-park-west-edge",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 12,
+        "display_rank": 2,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2195034,
+            -33.883501
+          ],
+          [
+            151.2204966,
+            -33.885639
+          ],
+          [
+            151.2219106,
+            -33.888311
+          ],
+          [
+            151.2231521,
+            -33.8912788
+          ],
+          [
+            151.2243539,
+            -33.8939945
+          ],
+          [
+            151.2252825,
+            -33.8966863
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:moore-park-south-link",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 9,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2227493,
+            -33.8911815
+          ],
+          [
+            151.224738,
+            -33.8912928
+          ],
+          [
+            151.2270828,
+            -33.8913108
+          ],
+          [
+            151.2289779,
+            -33.8910409
+          ],
+          [
+            151.2313046,
+            -33.8906222
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:paddington-lane",
+      "properties": {
+        "kind": "road",
+        "source": "sands-1887",
+        "width_m": 8,
+        "display_rank": 1,
+        "source_year": 1887,
+        "display_surface": "gravel",
+        "width_basis": "Historic corridor approximate, width inferred.",
+        "surface_basis": "Original paving not resolved; finish inferred from street hierarchy."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2223764,
+            -33.8819488
+          ],
+          [
+            151.2232248,
+            -33.880593
+          ],
+          [
+            151.2244005,
+            -33.8793901
+          ],
+          [
+            151.22645,
+            -33.8783877
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-terraces",
+      "properties": {
+        "kind": "zone",
+        "source": "sands-1887",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0,
+          2
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 0.5,
+        "form_reference": "dove-1880",
+        "use_basis": "Boundaries interpreted from period street and land-use relationships; building footprints inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2105915,
+              -33.8817913
+            ],
+            [
+              151.2132451,
+              -33.8803443
+            ],
+            [
+              151.215511,
+              -33.8810392
+            ],
+            [
+              151.2174641,
+              -33.8826393
+            ],
+            [
+              151.2181914,
+              -33.8858731
+            ],
+            [
+              151.2182569,
+              -33.8888627
+            ],
+            [
+              151.2172794,
+              -33.8913261
+            ],
+            [
+              151.2137047,
+              -33.8912009
+            ],
+            [
+              151.2111871,
+              -33.8902975
+            ],
+            [
+              151.2101547,
+              -33.8890885
+            ],
+            [
+              151.2097871,
+              -33.8863213
+            ],
+            [
+              151.2105915,
+              -33.8817913
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:surry-eastern-garden-edge",
+      "properties": {
+        "kind": "zone",
+        "source": "sands-1887",
+        "role": "low_home",
+        "frontage_m": [
+          6,
+          12
+        ],
+        "depth_m": [
+          8,
+          14
+        ],
+        "setback_m": [
+          2,
+          5
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 2.5,
+        "form_reference": "dove-1880",
+        "use_basis": "Boundaries interpreted from period street and land-use relationships; building footprints inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2171306,
+              -33.8860914
+            ],
+            [
+              151.2193062,
+              -33.8857838
+            ],
+            [
+              151.2210869,
+              -33.8876797
+            ],
+            [
+              151.2216519,
+              -33.8893452
+            ],
+            [
+              151.2200738,
+              -33.891632
+            ],
+            [
+              151.2178548,
+              -33.8911276
+            ],
+            [
+              151.2171306,
+              -33.8860914
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-workers-frontage",
+      "properties": {
+        "kind": "zone",
+        "source": "sands-1887",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          14
+        ],
+        "setback_m": [
+          0,
+          2
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 0.8,
+        "form_reference": "city-port-history",
+        "use_basis": "Boundaries interpreted from period street and land-use relationships; building footprints inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.1922865,
+              -33.8677001
+            ],
+            [
+              151.1942247,
+              -33.867061
+            ],
+            [
+              151.1962531,
+              -33.8674244
+            ],
+            [
+              151.1972712,
+              -33.8687565
+            ],
+            [
+              151.1972069,
+              -33.8704915
+            ],
+            [
+              151.1982899,
+              -33.8724508
+            ],
+            [
+              151.1981358,
+              -33.8743644
+            ],
+            [
+              151.1954671,
+              -33.8735722
+            ],
+            [
+              151.1938341,
+              -33.8721865
+            ],
+            [
+              151.1922728,
+              -33.8701855
+            ],
+            [
+              151.1922865,
+              -33.8677001
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-works",
+      "properties": {
+        "kind": "zone",
+        "source": "sands-1887",
+        "role": "workshop",
+        "frontage_m": [
+          10,
+          18
+        ],
+        "depth_m": [
+          12,
+          22
+        ],
+        "setback_m": [
+          1,
+          3
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 3,
+        "form_reference": "city-port-history",
+        "use_basis": "Boundaries interpreted from period street and land-use relationships; building footprints inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.1965115,
+              -33.8652091
+            ],
+            [
+              151.1978172,
+              -33.8664419
+            ],
+            [
+              151.1981592,
+              -33.8676528
+            ],
+            [
+              151.1972856,
+              -33.8686334
+            ],
+            [
+              151.195836,
+              -33.8674502
+            ],
+            [
+              151.194987,
+              -33.8664437
+            ],
+            [
+              151.1965115,
+              -33.8652091
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:domain-and-botanic-garden",
+      "properties": {
+        "kind": "park",
+        "source": "sands-1887",
+        "use_basis": "Approximate boundary read from the 1887 atlas; later reclamation and port works are outside this reconstruction."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2140711,
+              -33.862016
+            ],
+            [
+              151.2150053,
+              -33.8587406
+            ],
+            [
+              151.215667,
+              -33.8589848
+            ],
+            [
+              151.21675,
+              -33.8609442
+            ],
+            [
+              151.2181026,
+              -33.8623676
+            ],
+            [
+              151.2200623,
+              -33.8615439
+            ],
+            [
+              151.2213313,
+              -33.859541
+            ],
+            [
+              151.2219353,
+              -33.8590963
+            ],
+            [
+              151.2225902,
+              -33.8605832
+            ],
+            [
+              151.2224364,
+              -33.863678
+            ],
+            [
+              151.2212464,
+              -33.865004
+            ],
+            [
+              151.2200061,
+              -33.8667607
+            ],
+            [
+              151.2178779,
+              -33.8696211
+            ],
+            [
+              151.216565,
+              -33.8684498
+            ],
+            [
+              151.2154533,
+              -33.8667366
+            ],
+            [
+              151.2139535,
+              -33.8659842
+            ],
+            [
+              151.2140711,
+              -33.862016
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:hyde-park",
+      "properties": {
+        "kind": "park",
+        "source": "sands-1887",
+        "use_basis": "Approximate boundary read from the 1887 atlas; later reclamation and port works are outside this reconstruction."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2118399,
+              -33.8699027
+            ],
+            [
+              151.2128505,
+              -33.8701151
+            ],
+            [
+              151.2139981,
+              -33.8715206
+            ],
+            [
+              151.2140346,
+              -33.8735752
+            ],
+            [
+              151.213492,
+              -33.8752685
+            ],
+            [
+              151.2129313,
+              -33.876525
+            ],
+            [
+              151.2122411,
+              -33.8777081
+            ],
+            [
+              151.2112664,
+              -33.8771879
+            ],
+            [
+              151.2109388,
+              -33.8758539
+            ],
+            [
+              151.2111503,
+              -33.873448
+            ],
+            [
+              151.2118399,
+              -33.8699027
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:moore-park-reserve",
+      "properties": {
+        "kind": "park",
+        "source": "sands-1887",
+        "use_basis": "Approximate boundary read from the 1887 atlas; later reclamation and port works are outside this reconstruction."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2232085,
+              -33.8872431
+            ],
+            [
+              151.2254812,
+              -33.8866953
+            ],
+            [
+              151.2288906,
+              -33.8870548
+            ],
+            [
+              151.2318437,
+              -33.8895502
+            ],
+            [
+              151.2322219,
+              -33.8916346
+            ],
+            [
+              151.231,
+              -33.8950092
+            ],
+            [
+              151.2285408,
+              -33.8971569
+            ],
+            [
+              151.2264441,
+              -33.8967876
+            ],
+            [
+              151.2245985,
+              -33.8942644
+            ],
+            [
+              151.2237599,
+              -33.891394
+            ],
+            [
+              151.2232085,
+              -33.8872431
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:victoria-barracks-open-ground",
+      "properties": {
+        "kind": "open_ground",
+        "source": "sands-1887",
+        "use_basis": "Approximate boundary read from the 1887 atlas; later reclamation and port works are outside this reconstruction."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2237543,
+              -33.8837474
+            ],
+            [
+              151.2263221,
+              -33.88422
+            ],
+            [
+              151.2294834,
+              -33.8849308
+            ],
+            [
+              151.2294478,
+              -33.8864196
+            ],
+            [
+              151.2279736,
+              -33.8872235
+            ],
+            [
+              151.2255352,
+              -33.8868244
+            ],
+            [
+              151.2232622,
+              -33.886191
+            ],
+            [
+              151.2224419,
+              -33.8849384
+            ],
+            [
+              151.2237543,
+              -33.8837474
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:terminus-and-freight-reserve",
+      "properties": {
+        "kind": "rail",
+        "source": "sands-1887",
+        "use_basis": "Approximate boundary read from the 1887 atlas; later reclamation and port works are outside this reconstruction.",
+        "use_reference": "city-port-history"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2027089,
+              -33.8830931
+            ],
+            [
+              151.2044605,
+              -33.884054
+            ],
+            [
+              151.206507,
+              -33.8848541
+            ],
+            [
+              151.2081578,
+              -33.8854954
+            ],
+            [
+              151.2079425,
+              -33.8873415
+            ],
+            [
+              151.2061481,
+              -33.887931
+            ],
+            [
+              151.2043391,
+              -33.8874624
+            ],
+            [
+              151.20257,
+              -33.8884271
+            ],
+            [
+              151.2008583,
+              -33.8888994
+            ],
+            [
+              151.1999157,
+              -33.8875118
+            ],
+            [
+              151.2013538,
+              -33.8858345
+            ],
+            [
+              151.2027089,
+              -33.8830931
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:harbour-headlands",
+      "properties": {
+        "kind": "known_dry",
+        "source": "slnsw-sydney-1900",
+        "use_basis": "1900 plan shoreline and selected visible wharves; only the outlined survey window is classified."
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                151.2052194,
+                -33.8569462
+              ],
+              [
+                151.2051415,
+                -33.8569782
+              ],
+              [
+                151.2047923,
+                -33.8571487
+              ],
+              [
+                151.2044257,
+                -33.8571928
+              ],
+              [
+                151.2044043,
+                -33.8571916
+              ],
+              [
+                151.2044016,
+                -33.8562263
+              ],
+              [
+                151.2043204,
+                -33.8562185
+              ],
+              [
+                151.2041034,
+                -33.8571696
+              ],
+              [
+                151.2038324,
+                -33.8571242
+              ],
+              [
+                151.2038318,
+                -33.8571242
+              ],
+              [
+                151.2039195,
+                -33.8562252
+              ],
+              [
+                151.2038362,
+                -33.8562285
+              ],
+              [
+                151.2035204,
+                -33.8570757
+              ],
+              [
+                151.2033434,
+                -33.856941
+              ],
+              [
+                151.2030886,
+                -33.8567577
+              ],
+              [
+                151.2028414,
+                -33.856972
+              ],
+              [
+                151.2025864,
+                -33.8569361
+              ],
+              [
+                151.2023494,
+                -33.8567318
+              ],
+              [
+                151.2021335,
+                -33.8564161
+              ],
+              [
+                151.201787,
+                -33.8562806
+              ],
+              [
+                151.2014445,
+                -33.8562703
+              ],
+              [
+                151.2009582,
+                -33.8562914
+              ],
+              [
+                151.2005167,
+                -33.8562943
+              ],
+              [
+                151.2004984,
+                -33.856298
+              ],
+              [
+                151.2002869,
+                -33.8561247
+              ],
+              [
+                151.2001558,
+                -33.8560893
+              ],
+              [
+                151.1999898,
+                -33.8563115
+              ],
+              [
+                151.2000909,
+                -33.8567977
+              ],
+              [
+                151.20013,
+                -33.8567859
+              ],
+              [
+                151.200056,
+                -33.8570552
+              ],
+              [
+                151.2001321,
+                -33.8575276
+              ],
+              [
+                151.2001592,
+                -33.8580406
+              ],
+              [
+                151.2001499,
+                -33.8585275
+              ],
+              [
+                151.2002627,
+                -33.8588786
+              ],
+              [
+                151.2005944,
+                -33.8590921
+              ],
+              [
+                151.2008699,
+                -33.8591524
+              ],
+              [
+                151.200534,
+                -33.8596307
+              ],
+              [
+                151.2006275,
+                -33.8597191
+              ],
+              [
+                151.2010377,
+                -33.8592255
+              ],
+              [
+                151.2011029,
+                -33.8591942
+              ],
+              [
+                151.2015676,
+                -33.8592653
+              ],
+              [
+                151.2018388,
+                -33.8595069
+              ],
+              [
+                151.2020319,
+                -33.8597977
+              ],
+              [
+                151.202133,
+                -33.8602839
+              ],
+              [
+                151.2022214,
+                -33.8608369
+              ],
+              [
+                151.2022401,
+                -33.8613944
+              ],
+              [
+                151.2023475,
+                -33.8618472
+              ],
+              [
+                151.2021706,
+                -33.8622725
+              ],
+              [
+                151.2022094,
+                -33.8626505
+              ],
+              [
+                151.2023472,
+                -33.8630154
+              ],
+              [
+                151.2024616,
+                -33.8633444
+              ],
+              [
+                151.2013791,
+                -33.8633985
+              ],
+              [
+                151.2013809,
+                -33.8635348
+              ],
+              [
+                151.2025063,
+                -33.8635439
+              ],
+              [
+                151.2025947,
+                -33.8641849
+              ],
+              [
+                151.2027812,
+                -33.8646566
+              ],
+              [
+                151.2029878,
+                -33.8649487
+              ],
+              [
+                151.2031577,
+                -33.8653621
+              ],
+              [
+                151.2031379,
+                -33.8659046
+              ],
+              [
+                151.2030266,
+                -33.8663476
+              ],
+              [
+                151.2027719,
+                -33.8666747
+              ],
+              [
+                151.2023593,
+                -33.8668164
+              ],
+              [
+                151.2019672,
+                -33.8666312
+              ],
+              [
+                151.2017142,
+                -33.8665841
+              ],
+              [
+                151.2018959,
+                -33.8668625
+              ],
+              [
+                151.2021314,
+                -33.8672935
+              ],
+              [
+                151.202369,
+                -33.8677134
+              ],
+              [
+                151.2026565,
+                -33.8681608
+              ],
+              [
+                151.2029151,
+                -33.8684693
+              ],
+              [
+                151.2030854,
+                -33.8687353
+              ],
+              [
+                151.2031657,
+                -33.8691854
+              ],
+              [
+                151.2032944,
+                -33.8698897
+              ],
+              [
+                151.2033756,
+                -33.8704079
+              ],
+              [
+                151.2119692,
+                -33.8712362
+              ],
+              [
+                151.216987,
+                -33.8711526
+              ],
+              [
+                151.218494,
+                -33.8631765
+              ],
+              [
+                151.2179641,
+                -33.8631368
+              ],
+              [
+                151.2174917,
+                -33.8630118
+              ],
+              [
+                151.2170111,
+                -33.862784
+              ],
+              [
+                151.2167846,
+                -33.862524
+              ],
+              [
+                151.2165948,
+                -33.8621427
+              ],
+              [
+                151.2165184,
+                -33.8618178
+              ],
+              [
+                151.2165972,
+                -33.8614738
+              ],
+              [
+                151.2168345,
+                -33.8610202
+              ],
+              [
+                151.2170603,
+                -33.8605543
+              ],
+              [
+                151.2172029,
+                -33.8600916
+              ],
+              [
+                151.2171764,
+                -33.8597941
+              ],
+              [
+                151.2169764,
+                -33.8593212
+              ],
+              [
+                151.2168437,
+                -33.8590021
+              ],
+              [
+                151.2165475,
+                -33.8587467
+              ],
+              [
+                151.2162531,
+                -33.8586276
+              ],
+              [
+                151.2159045,
+                -33.8585033
+              ],
+              [
+                151.2157355,
+                -33.858158
+              ],
+              [
+                151.2156459,
+                -33.8576843
+              ],
+              [
+                151.2156486,
+                -33.8573783
+              ],
+              [
+                151.2157992,
+                -33.8570186
+              ],
+              [
+                151.2159382,
+                -33.8567937
+              ],
+              [
+                151.2158092,
+                -33.8567473
+              ],
+              [
+                151.2160094,
+                -33.8565624
+              ],
+              [
+                151.2160515,
+                -33.8563396
+              ],
+              [
+                151.2158518,
+                -33.8562296
+              ],
+              [
+                151.2155292,
+                -33.8561872
+              ],
+              [
+                151.2150041,
+                -33.8563408
+              ],
+              [
+                151.2147584,
+                -33.8563284
+              ],
+              [
+                151.214768,
+                -33.8562046
+              ],
+              [
+                151.2145764,
+                -33.8561975
+              ],
+              [
+                151.214356,
+                -33.8570723
+              ],
+              [
+                151.2141422,
+                -33.8577663
+              ],
+              [
+                151.2139401,
+                -33.8578148
+              ],
+              [
+                151.2130686,
+                -33.8588538
+              ],
+              [
+                151.2128701,
+                -33.8586645
+              ],
+              [
+                151.2126446,
+                -33.8589831
+              ],
+              [
+                151.2124774,
+                -33.8592845
+              ],
+              [
+                151.2125276,
+                -33.859675
+              ],
+              [
+                151.2125757,
+                -33.8600767
+              ],
+              [
+                151.2126091,
+                -33.8605563
+              ],
+              [
+                151.2125616,
+                -33.8608806
+              ],
+              [
+                151.2123466,
+                -33.8611435
+              ],
+              [
+                151.2119932,
+                -33.8613363
+              ],
+              [
+                151.2116264,
+                -33.8614396
+              ],
+              [
+                151.21155,
+                -33.8612028
+              ],
+              [
+                151.2114667,
+                -33.8612061
+              ],
+              [
+                151.2115254,
+                -33.861468
+              ],
+              [
+                151.211513,
+                -33.8614715
+              ],
+              [
+                151.2111998,
+                -33.8615245
+              ],
+              [
+                151.2111364,
+                -33.8612764
+              ],
+              [
+                151.2110531,
+                -33.8612797
+              ],
+              [
+                151.211098,
+                -33.8615365
+              ],
+              [
+                151.2108055,
+                -33.8615358
+              ],
+              [
+                151.2108117,
+                -33.8612451
+              ],
+              [
+                151.2107169,
+                -33.861236
+              ],
+              [
+                151.2106866,
+                -33.8615355
+              ],
+              [
+                151.2106466,
+                -33.8615354
+              ],
+              [
+                151.2103255,
+                -33.8614541
+              ],
+              [
+                151.2103485,
+                -33.8611437
+              ],
+              [
+                151.2102694,
+                -33.8611248
+              ],
+              [
+                151.2102126,
+                -33.8614256
+              ],
+              [
+                151.2098576,
+                -33.8612534
+              ],
+              [
+                151.2097783,
+                -33.8609527
+              ],
+              [
+                151.2096637,
+                -33.8609757
+              ],
+              [
+                151.2096981,
+                -33.8611411
+              ],
+              [
+                151.209544,
+                -33.8609528
+              ],
+              [
+                151.209523,
+                -33.8605538
+              ],
+              [
+                151.2095446,
+                -33.8601475
+              ],
+              [
+                151.209606,
+                -33.859677
+              ],
+              [
+                151.2096517,
+                -33.8592164
+              ],
+              [
+                151.2097079,
+                -33.8587
+              ],
+              [
+                151.2096868,
+                -33.858301
+              ],
+              [
+                151.2098125,
+                -33.8579275
+              ],
+              [
+                151.2099496,
+                -33.8575664
+              ],
+              [
+                151.2097012,
+                -33.8573496
+              ],
+              [
+                151.209399,
+                -33.8569802
+              ],
+              [
+                151.2090612,
+                -33.8566527
+              ],
+              [
+                151.208787,
+                -33.8563541
+              ],
+              [
+                151.2087479,
+                -33.8561234
+              ],
+              [
+                151.2089689,
+                -33.8559746
+              ],
+              [
+                151.2093562,
+                -33.8559666
+              ],
+              [
+                151.2098206,
+                -33.8559886
+              ],
+              [
+                151.2102287,
+                -33.8560166
+              ],
+              [
+                151.2105246,
+                -33.855909
+              ],
+              [
+                151.2105844,
+                -33.8556653
+              ],
+              [
+                151.2104557,
+                -33.8554714
+              ],
+              [
+                151.2102521,
+                -33.8552362
+              ],
+              [
+                151.2102308,
+                -33.8549846
+              ],
+              [
+                151.2101845,
+                -33.8549249
+              ],
+              [
+                151.2102097,
+                -33.8545856
+              ],
+              [
+                151.2100566,
+                -33.8545935
+              ],
+              [
+                151.2100152,
+                -33.8546241
+              ],
+              [
+                151.2099631,
+                -33.8545051
+              ],
+              [
+                151.209647,
+                -33.8542818
+              ],
+              [
+                151.2091685,
+                -33.8540429
+              ],
+              [
+                151.2086088,
+                -33.8537961
+              ],
+              [
+                151.2084245,
+                -33.8538237
+              ],
+              [
+                151.2082669,
+                -33.8540014
+              ],
+              [
+                151.2081653,
+                -33.8543205
+              ],
+              [
+                151.2080877,
+                -33.8545853
+              ],
+              [
+                151.2078339,
+                -33.8549805
+              ],
+              [
+                151.2075247,
+                -33.8554498
+              ],
+              [
+                151.2070649,
+                -33.8557684
+              ],
+              [
+                151.2066009,
+                -33.8561093
+              ],
+              [
+                151.2062015,
+                -33.8563998
+              ],
+              [
+                151.2058773,
+                -33.8565841
+              ],
+              [
+                151.2054999,
+                -33.8568313
+              ],
+              [
+                151.2053272,
+                -33.8569021
+              ],
+              [
+                151.2051252,
+                -33.8567725
+              ],
+              [
+                151.204813,
+                -33.8561639
+              ],
+              [
+                151.2047484,
+                -33.8562144
+              ],
+              [
+                151.2048167,
+                -33.8569469
+              ],
+              [
+                151.2052194,
+                -33.8569462
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                151.2014429,
+                -33.8643008
+              ],
+              [
+                151.2014802,
+                -33.8643951
+              ],
+              [
+                151.2025538,
+                -33.8643284
+              ],
+              [
+                151.2025051,
+                -33.8642216
+              ],
+              [
+                151.2014429,
+                -33.8643008
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                151.2016174,
+                -33.8650548
+              ],
+              [
+                151.2027941,
+                -33.8649528
+              ],
+              [
+                151.202709,
+                -33.8648198
+              ],
+              [
+                151.201605,
+                -33.8649743
+              ],
+              [
+                151.2016174,
+                -33.8650548
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                151.2016706,
+                -33.8655023
+              ],
+              [
+                151.2029211,
+                -33.8655208
+              ],
+              [
+                151.2028883,
+                -33.8652567
+              ],
+              [
+                151.2016489,
+                -33.8653982
+              ],
+              [
+                151.2016706,
+                -33.8655023
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                151.209712,
+                -33.856636
+              ],
+              [
+                151.2106377,
+                -33.8566232
+              ],
+              [
+                151.2106389,
+                -33.8565439
+              ],
+              [
+                151.2096832,
+                -33.8564971
+              ],
+              [
+                151.209712,
+                -33.856636
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                151.209789,
+                -33.8571766
+              ],
+              [
+                151.2105337,
+                -33.8571009
+              ],
+              [
+                151.2105192,
+                -33.8570314
+              ],
+              [
+                151.2095644,
+                -33.8570528
+              ],
+              [
+                151.209789,
+                -33.8571766
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:harbour-and-coves",
+      "properties": {
+        "kind": "water_surface",
+        "source": "slnsw-sydney-1900",
+        "basin": "coast",
+        "use_basis": "1900 plan shoreline and selected visible wharves; only the outlined survey window is classified."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2198516,
+              -33.8559913
+            ],
+            [
+              151.2173759,
+              -33.8542895
+            ],
+            [
+              151.2005677,
+              -33.8526695
+            ],
+            [
+              151.1991849,
+              -33.8599884
+            ],
+            [
+              151.1977594,
+              -33.8698666
+            ],
+            [
+              151.2033756,
+              -33.8704079
+            ],
+            [
+              151.2032944,
+              -33.8698897
+            ],
+            [
+              151.2031657,
+              -33.8691854
+            ],
+            [
+              151.2030854,
+              -33.8687353
+            ],
+            [
+              151.2029151,
+              -33.8684693
+            ],
+            [
+              151.2026565,
+              -33.8681608
+            ],
+            [
+              151.202369,
+              -33.8677134
+            ],
+            [
+              151.2021314,
+              -33.8672935
+            ],
+            [
+              151.2018959,
+              -33.8668625
+            ],
+            [
+              151.2017142,
+              -33.8665841
+            ],
+            [
+              151.2019672,
+              -33.8666312
+            ],
+            [
+              151.2023593,
+              -33.8668164
+            ],
+            [
+              151.2027719,
+              -33.8666747
+            ],
+            [
+              151.2030266,
+              -33.8663476
+            ],
+            [
+              151.2031379,
+              -33.8659046
+            ],
+            [
+              151.2031577,
+              -33.8653621
+            ],
+            [
+              151.2029878,
+              -33.8649487
+            ],
+            [
+              151.2027812,
+              -33.8646566
+            ],
+            [
+              151.2025947,
+              -33.8641849
+            ],
+            [
+              151.2025063,
+              -33.8635439
+            ],
+            [
+              151.2013809,
+              -33.8635348
+            ],
+            [
+              151.2013791,
+              -33.8633985
+            ],
+            [
+              151.2024616,
+              -33.8633444
+            ],
+            [
+              151.2023472,
+              -33.8630154
+            ],
+            [
+              151.2022094,
+              -33.8626505
+            ],
+            [
+              151.2021706,
+              -33.8622725
+            ],
+            [
+              151.2023475,
+              -33.8618472
+            ],
+            [
+              151.2022401,
+              -33.8613944
+            ],
+            [
+              151.2022214,
+              -33.8608369
+            ],
+            [
+              151.202133,
+              -33.8602839
+            ],
+            [
+              151.2020319,
+              -33.8597977
+            ],
+            [
+              151.2018388,
+              -33.8595069
+            ],
+            [
+              151.2015676,
+              -33.8592653
+            ],
+            [
+              151.2011029,
+              -33.8591942
+            ],
+            [
+              151.2010377,
+              -33.8592255
+            ],
+            [
+              151.2006275,
+              -33.8597191
+            ],
+            [
+              151.200534,
+              -33.8596307
+            ],
+            [
+              151.2008699,
+              -33.8591524
+            ],
+            [
+              151.2005944,
+              -33.8590921
+            ],
+            [
+              151.2002627,
+              -33.8588786
+            ],
+            [
+              151.2001499,
+              -33.8585275
+            ],
+            [
+              151.2001592,
+              -33.8580406
+            ],
+            [
+              151.2001321,
+              -33.8575276
+            ],
+            [
+              151.200056,
+              -33.8570552
+            ],
+            [
+              151.20013,
+              -33.8567859
+            ],
+            [
+              151.2000909,
+              -33.8567977
+            ],
+            [
+              151.1999898,
+              -33.8563115
+            ],
+            [
+              151.2001558,
+              -33.8560893
+            ],
+            [
+              151.2002869,
+              -33.8561247
+            ],
+            [
+              151.2004984,
+              -33.856298
+            ],
+            [
+              151.2005167,
+              -33.8562943
+            ],
+            [
+              151.2009582,
+              -33.8562914
+            ],
+            [
+              151.2014445,
+              -33.8562703
+            ],
+            [
+              151.201787,
+              -33.8562806
+            ],
+            [
+              151.2021335,
+              -33.8564161
+            ],
+            [
+              151.2023494,
+              -33.8567318
+            ],
+            [
+              151.2025864,
+              -33.8569361
+            ],
+            [
+              151.2028414,
+              -33.856972
+            ],
+            [
+              151.2030886,
+              -33.8567577
+            ],
+            [
+              151.2033434,
+              -33.856941
+            ],
+            [
+              151.2035204,
+              -33.8570757
+            ],
+            [
+              151.2038362,
+              -33.8562285
+            ],
+            [
+              151.2039195,
+              -33.8562252
+            ],
+            [
+              151.2038318,
+              -33.8571242
+            ],
+            [
+              151.2038324,
+              -33.8571242
+            ],
+            [
+              151.2041034,
+              -33.8571696
+            ],
+            [
+              151.2043204,
+              -33.8562185
+            ],
+            [
+              151.2044016,
+              -33.8562263
+            ],
+            [
+              151.2044043,
+              -33.8571916
+            ],
+            [
+              151.2044257,
+              -33.8571928
+            ],
+            [
+              151.2047923,
+              -33.8571487
+            ],
+            [
+              151.2051415,
+              -33.8569782
+            ],
+            [
+              151.2052194,
+              -33.8569462
+            ],
+            [
+              151.2048167,
+              -33.8569469
+            ],
+            [
+              151.2047484,
+              -33.8562144
+            ],
+            [
+              151.204813,
+              -33.8561639
+            ],
+            [
+              151.2051252,
+              -33.8567725
+            ],
+            [
+              151.2053272,
+              -33.8569021
+            ],
+            [
+              151.2054999,
+              -33.8568313
+            ],
+            [
+              151.2058773,
+              -33.8565841
+            ],
+            [
+              151.2062015,
+              -33.8563998
+            ],
+            [
+              151.2066009,
+              -33.8561093
+            ],
+            [
+              151.2070649,
+              -33.8557684
+            ],
+            [
+              151.2075247,
+              -33.8554498
+            ],
+            [
+              151.2078339,
+              -33.8549805
+            ],
+            [
+              151.2080877,
+              -33.8545853
+            ],
+            [
+              151.2081653,
+              -33.8543205
+            ],
+            [
+              151.2082669,
+              -33.8540014
+            ],
+            [
+              151.2084245,
+              -33.8538237
+            ],
+            [
+              151.2086088,
+              -33.8537961
+            ],
+            [
+              151.2091685,
+              -33.8540429
+            ],
+            [
+              151.209647,
+              -33.8542818
+            ],
+            [
+              151.2099631,
+              -33.8545051
+            ],
+            [
+              151.2100152,
+              -33.8546241
+            ],
+            [
+              151.2100566,
+              -33.8545935
+            ],
+            [
+              151.2102097,
+              -33.8545856
+            ],
+            [
+              151.2101845,
+              -33.8549249
+            ],
+            [
+              151.2102308,
+              -33.8549846
+            ],
+            [
+              151.2102521,
+              -33.8552362
+            ],
+            [
+              151.2104557,
+              -33.8554714
+            ],
+            [
+              151.2105844,
+              -33.8556653
+            ],
+            [
+              151.2105246,
+              -33.855909
+            ],
+            [
+              151.2102287,
+              -33.8560166
+            ],
+            [
+              151.2098206,
+              -33.8559886
+            ],
+            [
+              151.2093562,
+              -33.8559666
+            ],
+            [
+              151.2089689,
+              -33.8559746
+            ],
+            [
+              151.2087479,
+              -33.8561234
+            ],
+            [
+              151.208787,
+              -33.8563541
+            ],
+            [
+              151.2090612,
+              -33.8566527
+            ],
+            [
+              151.209399,
+              -33.8569802
+            ],
+            [
+              151.2097012,
+              -33.8573496
+            ],
+            [
+              151.2099496,
+              -33.8575664
+            ],
+            [
+              151.2098125,
+              -33.8579275
+            ],
+            [
+              151.2096868,
+              -33.858301
+            ],
+            [
+              151.2097079,
+              -33.8587
+            ],
+            [
+              151.2096517,
+              -33.8592164
+            ],
+            [
+              151.209606,
+              -33.859677
+            ],
+            [
+              151.2095446,
+              -33.8601475
+            ],
+            [
+              151.209523,
+              -33.8605538
+            ],
+            [
+              151.209544,
+              -33.8609528
+            ],
+            [
+              151.2096981,
+              -33.8611411
+            ],
+            [
+              151.2096637,
+              -33.8609757
+            ],
+            [
+              151.2097783,
+              -33.8609527
+            ],
+            [
+              151.2098576,
+              -33.8612534
+            ],
+            [
+              151.2102126,
+              -33.8614256
+            ],
+            [
+              151.2102694,
+              -33.8611248
+            ],
+            [
+              151.2103485,
+              -33.8611437
+            ],
+            [
+              151.2103255,
+              -33.8614541
+            ],
+            [
+              151.2106466,
+              -33.8615354
+            ],
+            [
+              151.2106866,
+              -33.8615355
+            ],
+            [
+              151.2107169,
+              -33.861236
+            ],
+            [
+              151.2108117,
+              -33.8612451
+            ],
+            [
+              151.2108055,
+              -33.8615358
+            ],
+            [
+              151.211098,
+              -33.8615365
+            ],
+            [
+              151.2110531,
+              -33.8612797
+            ],
+            [
+              151.2111364,
+              -33.8612764
+            ],
+            [
+              151.2111998,
+              -33.8615245
+            ],
+            [
+              151.211513,
+              -33.8614715
+            ],
+            [
+              151.2115254,
+              -33.861468
+            ],
+            [
+              151.2114667,
+              -33.8612061
+            ],
+            [
+              151.21155,
+              -33.8612028
+            ],
+            [
+              151.2116264,
+              -33.8614396
+            ],
+            [
+              151.2119932,
+              -33.8613363
+            ],
+            [
+              151.2123466,
+              -33.8611435
+            ],
+            [
+              151.2125616,
+              -33.8608806
+            ],
+            [
+              151.2126091,
+              -33.8605563
+            ],
+            [
+              151.2125757,
+              -33.8600767
+            ],
+            [
+              151.2125276,
+              -33.859675
+            ],
+            [
+              151.2124774,
+              -33.8592845
+            ],
+            [
+              151.2126446,
+              -33.8589831
+            ],
+            [
+              151.2128701,
+              -33.8586645
+            ],
+            [
+              151.2130686,
+              -33.8588538
+            ],
+            [
+              151.2139401,
+              -33.8578148
+            ],
+            [
+              151.2141422,
+              -33.8577663
+            ],
+            [
+              151.214356,
+              -33.8570723
+            ],
+            [
+              151.2145764,
+              -33.8561975
+            ],
+            [
+              151.214768,
+              -33.8562046
+            ],
+            [
+              151.2147584,
+              -33.8563284
+            ],
+            [
+              151.2150041,
+              -33.8563408
+            ],
+            [
+              151.2155292,
+              -33.8561872
+            ],
+            [
+              151.2158518,
+              -33.8562296
+            ],
+            [
+              151.2160515,
+              -33.8563396
+            ],
+            [
+              151.2160094,
+              -33.8565624
+            ],
+            [
+              151.2158092,
+              -33.8567473
+            ],
+            [
+              151.2159382,
+              -33.8567937
+            ],
+            [
+              151.2157992,
+              -33.8570186
+            ],
+            [
+              151.2156486,
+              -33.8573783
+            ],
+            [
+              151.2156459,
+              -33.8576843
+            ],
+            [
+              151.2157355,
+              -33.858158
+            ],
+            [
+              151.2159045,
+              -33.8585033
+            ],
+            [
+              151.2162531,
+              -33.8586276
+            ],
+            [
+              151.2165475,
+              -33.8587467
+            ],
+            [
+              151.2168437,
+              -33.8590021
+            ],
+            [
+              151.2169764,
+              -33.8593212
+            ],
+            [
+              151.2171764,
+              -33.8597941
+            ],
+            [
+              151.2172029,
+              -33.8600916
+            ],
+            [
+              151.2170603,
+              -33.8605543
+            ],
+            [
+              151.2168345,
+              -33.8610202
+            ],
+            [
+              151.2165972,
+              -33.8614738
+            ],
+            [
+              151.2165184,
+              -33.8618178
+            ],
+            [
+              151.2165948,
+              -33.8621427
+            ],
+            [
+              151.2167846,
+              -33.862524
+            ],
+            [
+              151.2170111,
+              -33.862784
+            ],
+            [
+              151.2174917,
+              -33.8630118
+            ],
+            [
+              151.2179641,
+              -33.8631368
+            ],
+            [
+              151.218494,
+              -33.8631765
+            ],
+            [
+              151.2198516,
+              -33.8559913
+            ]
+          ],
+          [
+            [
+              151.2025051,
+              -33.8642216
+            ],
+            [
+              151.2025538,
+              -33.8643284
+            ],
+            [
+              151.2014802,
+              -33.8643951
+            ],
+            [
+              151.2014429,
+              -33.8643008
+            ],
+            [
+              151.2025051,
+              -33.8642216
+            ]
+          ],
+          [
+            [
+              151.201605,
+              -33.8649743
+            ],
+            [
+              151.202709,
+              -33.8648198
+            ],
+            [
+              151.2027941,
+              -33.8649528
+            ],
+            [
+              151.2016174,
+              -33.8650548
+            ],
+            [
+              151.201605,
+              -33.8649743
+            ]
+          ],
+          [
+            [
+              151.2016489,
+              -33.8653982
+            ],
+            [
+              151.2028883,
+              -33.8652567
+            ],
+            [
+              151.2029211,
+              -33.8655208
+            ],
+            [
+              151.2016706,
+              -33.8655023
+            ],
+            [
+              151.2016489,
+              -33.8653982
+            ]
+          ],
+          [
+            [
+              151.2096832,
+              -33.8564971
+            ],
+            [
+              151.2106389,
+              -33.8565439
+            ],
+            [
+              151.2106377,
+              -33.8566232
+            ],
+            [
+              151.209712,
+              -33.856636
+            ],
+            [
+              151.2096832,
+              -33.8564971
+            ]
+          ],
+          [
+            [
+              151.2095644,
+              -33.8570528
+            ],
+            [
+              151.2105192,
+              -33.8570314
+            ],
+            [
+              151.2105337,
+              -33.8571009
+            ],
+            [
+              151.209789,
+              -33.8571766
+            ],
+            [
+              151.2095644,
+              -33.8570528
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:core-coverage",
+      "properties": {
+        "kind": "coverage",
+        "source": "slnsw-sydney-1900",
+        "use_basis": "Historical landward coverage for the reconstructed core."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2033756,
+              -33.8704079
+            ],
+            [
+              151.2032944,
+              -33.8698897
+            ],
+            [
+              151.2031657,
+              -33.8691854
+            ],
+            [
+              151.2030854,
+              -33.8687353
+            ],
+            [
+              151.2029151,
+              -33.8684693
+            ],
+            [
+              151.2026565,
+              -33.8681608
+            ],
+            [
+              151.202369,
+              -33.8677134
+            ],
+            [
+              151.2021314,
+              -33.8672935
+            ],
+            [
+              151.2018959,
+              -33.8668625
+            ],
+            [
+              151.2017142,
+              -33.8665841
+            ],
+            [
+              151.2019672,
+              -33.8666312
+            ],
+            [
+              151.2023593,
+              -33.8668164
+            ],
+            [
+              151.2027719,
+              -33.8666747
+            ],
+            [
+              151.2030266,
+              -33.8663476
+            ],
+            [
+              151.2031379,
+              -33.8659046
+            ],
+            [
+              151.2031577,
+              -33.8653621
+            ],
+            [
+              151.2029878,
+              -33.8649487
+            ],
+            [
+              151.2027812,
+              -33.8646566
+            ],
+            [
+              151.2025947,
+              -33.8641849
+            ],
+            [
+              151.2024901,
+              -33.8634262
+            ],
+            [
+              151.2023472,
+              -33.8630154
+            ],
+            [
+              151.2022094,
+              -33.8626505
+            ],
+            [
+              151.2021706,
+              -33.8622725
+            ],
+            [
+              151.2023475,
+              -33.8618472
+            ],
+            [
+              151.2022401,
+              -33.8613944
+            ],
+            [
+              151.2022214,
+              -33.8608369
+            ],
+            [
+              151.202133,
+              -33.8602839
+            ],
+            [
+              151.2020319,
+              -33.8597977
+            ],
+            [
+              151.2018388,
+              -33.8595069
+            ],
+            [
+              151.2015676,
+              -33.8592653
+            ],
+            [
+              151.2009649,
+              -33.8591731
+            ],
+            [
+              151.2005944,
+              -33.8590921
+            ],
+            [
+              151.2002627,
+              -33.8588786
+            ],
+            [
+              151.2001499,
+              -33.8585275
+            ],
+            [
+              151.2001592,
+              -33.8580406
+            ],
+            [
+              151.2001321,
+              -33.8575276
+            ],
+            [
+              151.200056,
+              -33.8570552
+            ],
+            [
+              151.2001441,
+              -33.8567347
+            ],
+            [
+              151.2001011,
+              -33.856379
+            ],
+            [
+              151.2005167,
+              -33.8562943
+            ],
+            [
+              151.2009582,
+              -33.8562914
+            ],
+            [
+              151.2014445,
+              -33.8562703
+            ],
+            [
+              151.201787,
+              -33.8562806
+            ],
+            [
+              151.2021335,
+              -33.8564161
+            ],
+            [
+              151.2023494,
+              -33.8567318
+            ],
+            [
+              151.2025864,
+              -33.8569361
+            ],
+            [
+              151.2028414,
+              -33.856972
+            ],
+            [
+              151.2030886,
+              -33.8567577
+            ],
+            [
+              151.2033434,
+              -33.856941
+            ],
+            [
+              151.2035482,
+              -33.8570969
+            ],
+            [
+              151.2038324,
+              -33.8571242
+            ],
+            [
+              151.2041529,
+              -33.8571778
+            ],
+            [
+              151.2044257,
+              -33.8571928
+            ],
+            [
+              151.2047923,
+              -33.8571487
+            ],
+            [
+              151.2051415,
+              -33.8569782
+            ],
+            [
+              151.2054999,
+              -33.8568313
+            ],
+            [
+              151.2058773,
+              -33.8565841
+            ],
+            [
+              151.2062015,
+              -33.8563998
+            ],
+            [
+              151.2066009,
+              -33.8561093
+            ],
+            [
+              151.2070649,
+              -33.8557684
+            ],
+            [
+              151.2075247,
+              -33.8554498
+            ],
+            [
+              151.2078339,
+              -33.8549805
+            ],
+            [
+              151.2080877,
+              -33.8545853
+            ],
+            [
+              151.2081653,
+              -33.8543205
+            ],
+            [
+              151.2082669,
+              -33.8540014
+            ],
+            [
+              151.2084245,
+              -33.8538237
+            ],
+            [
+              151.2086088,
+              -33.8537961
+            ],
+            [
+              151.2091685,
+              -33.8540429
+            ],
+            [
+              151.209647,
+              -33.8542818
+            ],
+            [
+              151.2099631,
+              -33.8545051
+            ],
+            [
+              151.2100978,
+              -33.854813
+            ],
+            [
+              151.2102308,
+              -33.8549846
+            ],
+            [
+              151.2102521,
+              -33.8552362
+            ],
+            [
+              151.2104557,
+              -33.8554714
+            ],
+            [
+              151.2105844,
+              -33.8556653
+            ],
+            [
+              151.2105246,
+              -33.855909
+            ],
+            [
+              151.2102287,
+              -33.8560166
+            ],
+            [
+              151.2098206,
+              -33.8559886
+            ],
+            [
+              151.2093562,
+              -33.8559666
+            ],
+            [
+              151.2089689,
+              -33.8559746
+            ],
+            [
+              151.2087479,
+              -33.8561234
+            ],
+            [
+              151.208787,
+              -33.8563541
+            ],
+            [
+              151.2090612,
+              -33.8566527
+            ],
+            [
+              151.209399,
+              -33.8569802
+            ],
+            [
+              151.2097012,
+              -33.8573496
+            ],
+            [
+              151.2099496,
+              -33.8575664
+            ],
+            [
+              151.2098125,
+              -33.8579275
+            ],
+            [
+              151.2096868,
+              -33.858301
+            ],
+            [
+              151.2097079,
+              -33.8587
+            ],
+            [
+              151.2096517,
+              -33.8592164
+            ],
+            [
+              151.209606,
+              -33.859677
+            ],
+            [
+              151.2095446,
+              -33.8601475
+            ],
+            [
+              151.209523,
+              -33.8605538
+            ],
+            [
+              151.209544,
+              -33.8609528
+            ],
+            [
+              151.2097455,
+              -33.8611991
+            ],
+            [
+              151.2102126,
+              -33.8614256
+            ],
+            [
+              151.2106466,
+              -33.8615354
+            ],
+            [
+              151.2111286,
+              -33.8615365
+            ],
+            [
+              151.211513,
+              -33.8614715
+            ],
+            [
+              151.2119932,
+              -33.8613363
+            ],
+            [
+              151.2123466,
+              -33.8611435
+            ],
+            [
+              151.2125616,
+              -33.8608806
+            ],
+            [
+              151.2126091,
+              -33.8605563
+            ],
+            [
+              151.2125757,
+              -33.8600767
+            ],
+            [
+              151.2125276,
+              -33.859675
+            ],
+            [
+              151.2124774,
+              -33.8592845
+            ],
+            [
+              151.2126446,
+              -33.8589831
+            ],
+            [
+              151.2128701,
+              -33.8586645
+            ],
+            [
+              151.2130686,
+              -33.8588538
+            ],
+            [
+              151.2139401,
+              -33.8578148
+            ],
+            [
+              151.2141422,
+              -33.8577663
+            ],
+            [
+              151.214356,
+              -33.8570723
+            ],
+            [
+              151.2145764,
+              -33.8561975
+            ],
+            [
+              151.214768,
+              -33.8562046
+            ],
+            [
+              151.2147584,
+              -33.8563284
+            ],
+            [
+              151.2150041,
+              -33.8563408
+            ],
+            [
+              151.2155292,
+              -33.8561872
+            ],
+            [
+              151.2158518,
+              -33.8562296
+            ],
+            [
+              151.2160515,
+              -33.8563396
+            ],
+            [
+              151.2160094,
+              -33.8565624
+            ],
+            [
+              151.2158092,
+              -33.8567473
+            ],
+            [
+              151.2159382,
+              -33.8567937
+            ],
+            [
+              151.2157992,
+              -33.8570186
+            ],
+            [
+              151.2156486,
+              -33.8573783
+            ],
+            [
+              151.2156459,
+              -33.8576843
+            ],
+            [
+              151.2157355,
+              -33.858158
+            ],
+            [
+              151.2159045,
+              -33.8585033
+            ],
+            [
+              151.2162531,
+              -33.8586276
+            ],
+            [
+              151.2165475,
+              -33.8587467
+            ],
+            [
+              151.2168437,
+              -33.8590021
+            ],
+            [
+              151.2169764,
+              -33.8593212
+            ],
+            [
+              151.2171764,
+              -33.8597941
+            ],
+            [
+              151.2172029,
+              -33.8600916
+            ],
+            [
+              151.2170603,
+              -33.8605543
+            ],
+            [
+              151.2168345,
+              -33.8610202
+            ],
+            [
+              151.2165972,
+              -33.8614738
+            ],
+            [
+              151.2165184,
+              -33.8618178
+            ],
+            [
+              151.2165948,
+              -33.8621427
+            ],
+            [
+              151.2167846,
+              -33.862524
+            ],
+            [
+              151.2170111,
+              -33.862784
+            ],
+            [
+              151.2174917,
+              -33.8630118
+            ],
+            [
+              151.2179641,
+              -33.8631368
+            ],
+            [
+              151.218494,
+              -33.8631765
+            ],
+            [
+              151.216987,
+              -33.8711526
+            ],
+            [
+              151.2119692,
+              -33.8712362
+            ],
+            [
+              151.2033756,
+              -33.8704079
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:argyle-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 10,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2024761,
+            -33.8584681
+          ],
+          [
+            151.2035548,
+            -33.8584473
+          ],
+          [
+            151.2050477,
+            -33.8585685
+          ],
+          [
+            151.2063063,
+            -33.8586898
+          ],
+          [
+            151.2074921,
+            -33.8587587
+          ],
+          [
+            151.2083834,
+            -33.8587085
+          ],
+          [
+            151.2091178,
+            -33.8585411
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:windmill-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 9,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2025043,
+            -33.857881
+          ],
+          [
+            151.2036444,
+            -33.8579001
+          ],
+          [
+            151.2049024,
+            -33.8578059
+          ],
+          [
+            151.205696,
+            -33.8576895
+          ],
+          [
+            151.2061402,
+            -33.8573807
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:dawes-ridge",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 10,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2059528,
+            -33.8573513
+          ],
+          [
+            151.2065077,
+            -33.8568944
+          ],
+          [
+            151.2070959,
+            -33.8564066
+          ],
+          [
+            151.207894,
+            -33.8556101
+          ],
+          [
+            151.2084516,
+            -33.8543368
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:cumberland-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 9,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2077284,
+            -33.8567057
+          ],
+          [
+            151.2073155,
+            -33.8575053
+          ],
+          [
+            151.2066978,
+            -33.8586595
+          ],
+          [
+            151.2061367,
+            -33.8596602
+          ],
+          [
+            151.2055473,
+            -33.8607377
+          ],
+          [
+            151.2051338,
+            -33.8618321
+          ],
+          [
+            151.2049257,
+            -33.8622771
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:gloucester-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 10,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2080358,
+            -33.8576314
+          ],
+          [
+            151.2076899,
+            -33.858222
+          ],
+          [
+            151.2071131,
+            -33.8592326
+          ],
+          [
+            151.206718,
+            -33.8600112
+          ],
+          [
+            151.2061999,
+            -33.8608573
+          ],
+          [
+            151.2057876,
+            -33.8618725
+          ],
+          [
+            151.2053206,
+            -33.8631772
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:george-street-north",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 12,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.209512,
+            -33.8566735
+          ],
+          [
+            151.2095454,
+            -33.8571531
+          ],
+          [
+            151.2095518,
+            -33.8576301
+          ],
+          [
+            151.2092841,
+            -33.8581714
+          ],
+          [
+            151.2093103,
+            -33.8586163
+          ],
+          [
+            151.2090147,
+            -33.8590869
+          ],
+          [
+            151.2086517,
+            -33.859914
+          ],
+          [
+            151.2083273,
+            -33.8607561
+          ],
+          [
+            151.207985,
+            -33.8616192
+          ],
+          [
+            151.2075833,
+            -33.8625786
+          ],
+          [
+            151.2074107,
+            -33.8634921
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:george-street-south",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 13,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2074107,
+            -33.8634921
+          ],
+          [
+            151.2071954,
+            -33.8649232
+          ],
+          [
+            151.2070517,
+            -33.866486
+          ],
+          [
+            151.2068596,
+            -33.8688155
+          ],
+          [
+            151.2067553,
+            -33.869951
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:harrington-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 9,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.208157,
+            -33.8589589
+          ],
+          [
+            151.207785,
+            -33.8596149
+          ],
+          [
+            151.2073351,
+            -33.8606832
+          ],
+          [
+            151.2071649,
+            -33.8614381
+          ],
+          [
+            151.2068603,
+            -33.8622481
+          ],
+          [
+            151.2065193,
+            -33.8630319
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:essex-link",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 9,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2052983,
+            -33.8628575
+          ],
+          [
+            151.2060877,
+            -33.8627634
+          ],
+          [
+            151.2068657,
+            -33.8626569
+          ],
+          [
+            151.2075761,
+            -33.8625439
+          ],
+          [
+            151.2082488,
+            -33.862484
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:bridge-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 14,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2043805,
+            -33.8636311
+          ],
+          [
+            151.2054917,
+            -33.8635113
+          ],
+          [
+            151.2067704,
+            -33.8634531
+          ],
+          [
+            151.2074107,
+            -33.8634921
+          ],
+          [
+            151.2083424,
+            -33.8635932
+          ],
+          [
+            151.2093928,
+            -33.8636491
+          ],
+          [
+            151.2107588,
+            -33.8632023
+          ],
+          [
+            151.2118273,
+            -33.8630898
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:pitt-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 12,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2090332,
+            -33.8633649
+          ],
+          [
+            151.2087749,
+            -33.8644403
+          ],
+          [
+            151.2084209,
+            -33.8654383
+          ],
+          [
+            151.2082739,
+            -33.8665811
+          ],
+          [
+            151.2079786,
+            -33.868946
+          ],
+          [
+            151.2077961,
+            -33.8701307
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:castlereagh-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 11,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2100362,
+            -33.8662973
+          ],
+          [
+            151.2098341,
+            -33.8673667
+          ],
+          [
+            151.2096405,
+            -33.8683916
+          ],
+          [
+            151.2096568,
+            -33.8691077
+          ],
+          [
+            151.2095975,
+            -33.8700775
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:king-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 13,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2047117,
+            -33.8687332
+          ],
+          [
+            151.2062608,
+            -33.8688485
+          ],
+          [
+            151.2079786,
+            -33.868946
+          ],
+          [
+            151.2096568,
+            -33.8691077
+          ],
+          [
+            151.2107809,
+            -33.8692841
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:quay-approach",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 10,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2091248,
+            -33.8617858
+          ],
+          [
+            151.2097994,
+            -33.8618621
+          ],
+          [
+            151.2107365,
+            -33.8618617
+          ],
+          [
+            151.2115644,
+            -33.8617827
+          ],
+          [
+            151.2123021,
+            -33.8615249
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:macquarie-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 15,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2128356,
+            -33.8613267
+          ],
+          [
+            151.2129785,
+            -33.8622479
+          ],
+          [
+            151.2130624,
+            -33.8629706
+          ],
+          [
+            151.213217,
+            -33.8637568
+          ],
+          [
+            151.2130652,
+            -33.8647063
+          ],
+          [
+            151.2128499,
+            -33.865627
+          ],
+          [
+            151.2125597,
+            -33.8665065
+          ],
+          [
+            151.2124707,
+            -33.8677796
+          ],
+          [
+            151.2124455,
+            -33.8689341
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:kent-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 10,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2037955,
+            -33.8630076
+          ],
+          [
+            151.2038792,
+            -33.8638777
+          ],
+          [
+            151.2040178,
+            -33.8648211
+          ],
+          [
+            151.2041505,
+            -33.8656506
+          ],
+          [
+            151.2042843,
+            -33.8669112
+          ],
+          [
+            151.2043803,
+            -33.8683723
+          ],
+          [
+            151.2046486,
+            -33.8695778
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:sussex-street",
+      "properties": {
+        "kind": "road",
+        "source": "slnsw-sydney-1900",
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_m": 10,
+        "width_basis": "Centre read from dated corridor; width is approximated from mapped space.",
+        "surface_basis": "Setts are visual inference. Paving records are incomplete."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            151.2032804,
+            -33.8628899
+          ],
+          [
+            151.2032272,
+            -33.8639736
+          ],
+          [
+            151.2034155,
+            -33.865092
+          ],
+          [
+            151.2035289,
+            -33.8661692
+          ],
+          [
+            151.2036817,
+            -33.8673295
+          ],
+          [
+            151.2038522,
+            -33.8684689
+          ],
+          [
+            151.204039,
+            -33.869814
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:millers-terraces",
+      "properties": {
+        "kind": "zone",
+        "source": "slnsw-sydney-1900",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0,
+          2
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 0.6,
+        "form_reference": "dove-1880",
+        "use_basis": "Mapped frontages and land use constrain inferential lot dimensions."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2023206,
+              -33.8571033
+            ],
+            [
+              151.2035912,
+              -33.8574526
+            ],
+            [
+              151.2049108,
+              -33.8572509
+            ],
+            [
+              151.2057706,
+              -33.8568573
+            ],
+            [
+              151.2064515,
+              -33.8569003
+            ],
+            [
+              151.2054807,
+              -33.8580998
+            ],
+            [
+              151.205426,
+              -33.8588998
+            ],
+            [
+              151.2051048,
+              -33.8596515
+            ],
+            [
+              151.2041374,
+              -33.8597398
+            ],
+            [
+              151.20355,
+              -33.8592748
+            ],
+            [
+              151.2026578,
+              -33.8597673
+            ],
+            [
+              151.202182,
+              -33.8592224
+            ],
+            [
+              151.2023206,
+              -33.8571033
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:rocks-ridge-lots",
+      "properties": {
+        "kind": "zone",
+        "source": "slnsw-sydney-1900",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          16
+        ],
+        "setback_m": [
+          0,
+          2
+        ],
+        "storeys": [
+          1,
+          3
+        ],
+        "gap_m": 0.6,
+        "form_reference": "dove-1880",
+        "use_basis": "Mapped frontages and land use constrain inferential lot dimensions."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2067203,
+              -33.8578109
+            ],
+            [
+              151.2075883,
+              -33.8575203
+            ],
+            [
+              151.208246,
+              -33.8576857
+            ],
+            [
+              151.2091765,
+              -33.8583766
+            ],
+            [
+              151.2089774,
+              -33.8589926
+            ],
+            [
+              151.2084472,
+              -33.8601211
+            ],
+            [
+              151.2078058,
+              -33.8616927
+            ],
+            [
+              151.2075304,
+              -33.8624941
+            ],
+            [
+              151.2067121,
+              -33.8629597
+            ],
+            [
+              151.2056652,
+              -33.8631764
+            ],
+            [
+              151.2046054,
+              -33.8636074
+            ],
+            [
+              151.2050625,
+              -33.8620635
+            ],
+            [
+              151.2057454,
+              -33.860564
+            ],
+            [
+              151.2067203,
+              -33.8578109
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:george-and-pitt-shops",
+      "properties": {
+        "kind": "zone",
+        "source": "slnsw-sydney-1900",
+        "role": "shop",
+        "frontage_m": [
+          6,
+          13
+        ],
+        "depth_m": [
+          10,
+          20
+        ],
+        "setback_m": [
+          0,
+          3
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.8,
+        "form_reference": "dove-1880",
+        "use_basis": "Mapped frontages and land use constrain inferential lot dimensions."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2058448,
+              -33.8639764
+            ],
+            [
+              151.2072471,
+              -33.8635557
+            ],
+            [
+              151.2081496,
+              -33.8636654
+            ],
+            [
+              151.208992,
+              -33.8636559
+            ],
+            [
+              151.2103694,
+              -33.8642423
+            ],
+            [
+              151.2114165,
+              -33.864899
+            ],
+            [
+              151.2105472,
+              -33.8689894
+            ],
+            [
+              151.2098315,
+              -33.869204
+            ],
+            [
+              151.2067249,
+              -33.869018
+            ],
+            [
+              151.2053872,
+              -33.8688777
+            ],
+            [
+              151.2058448,
+              -33.8639764
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:cockle-warehouses",
+      "properties": {
+        "kind": "zone",
+        "source": "slnsw-sydney-1900",
+        "role": "warehouse",
+        "frontage_m": [
+          9,
+          17
+        ],
+        "depth_m": [
+          15,
+          26
+        ],
+        "setback_m": [
+          1,
+          4
+        ],
+        "storeys": [
+          1,
+          3
+        ],
+        "gap_m": 2.3,
+        "form_reference": "dove-1880",
+        "use_basis": "Mapped frontages and land use constrain inferential lot dimensions."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2026591,
+              -33.8637714
+            ],
+            [
+              151.2034921,
+              -33.8637383
+            ],
+            [
+              151.2038503,
+              -33.8652701
+            ],
+            [
+              151.2039929,
+              -33.8668491
+            ],
+            [
+              151.2041521,
+              -33.8689969
+            ],
+            [
+              151.2037846,
+              -33.8694832
+            ],
+            [
+              151.2033942,
+              -33.8689238
+            ],
+            [
+              151.2030562,
+              -33.8682334
+            ],
+            [
+              151.2027172,
+              -33.8674748
+            ],
+            [
+              151.2030212,
+              -33.8664492
+            ],
+            [
+              151.2031132,
+              -33.8657435
+            ],
+            [
+              151.2028636,
+              -33.8650956
+            ],
+            [
+              151.2026591,
+              -33.8637714
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:government-house",
+      "properties": {
+        "kind": "building",
+        "source": "slnsw-sydney-1900",
+        "role": "civic",
+        "height_m": 13.0,
+        "use_basis": "Visible building footprint symbol; height and display model are approximate."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2149058,
+              -33.859632
+            ],
+            [
+              151.2151058,
+              -33.8595946
+            ],
+            [
+              151.2151981,
+              -33.8597623
+            ],
+            [
+              151.2152709,
+              -33.8598147
+            ],
+            [
+              151.2153545,
+              -33.8601743
+            ],
+            [
+              151.2150493,
+              -33.8602584
+            ],
+            [
+              151.2149738,
+              -33.8600015
+            ],
+            [
+              151.2148688,
+              -33.8599007
+            ],
+            [
+              151.2149058,
+              -33.859632
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:customs-house",
+      "properties": {
+        "kind": "building",
+        "source": "slnsw-sydney-1900",
+        "role": "civic",
+        "height_m": 17.0,
+        "use_basis": "Visible building footprint symbol; height and display model are approximate."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2106153,
+              -33.8620655
+            ],
+            [
+              151.211061,
+              -33.8620404
+            ],
+            [
+              151.2111031,
+              -33.8623281
+            ],
+            [
+              151.2107771,
+              -33.862376
+            ],
+            [
+              151.2106616,
+              -33.8623309
+            ],
+            [
+              151.2106153,
+              -33.8620655
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:mariners-church",
+      "properties": {
+        "kind": "building",
+        "source": "slnsw-sydney-1900",
+        "role": "civic",
+        "height_m": 10.0,
+        "use_basis": "Visible building footprint symbol; height and display model are approximate."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2091518,
+              -33.8582154
+            ],
+            [
+              151.209307,
+              -33.8581963
+            ],
+            [
+              151.2093431,
+              -33.85837
+            ],
+            [
+              151.2091702,
+              -33.85841
+            ],
+            [
+              151.2091518,
+              -33.8582154
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:st-philip",
+      "properties": {
+        "kind": "building",
+        "source": "slnsw-sydney-1900",
+        "role": "civic",
+        "height_m": 15.0,
+        "use_basis": "Visible building footprint symbol; height and display model are approximate."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2046638,
+              -33.8641008
+            ],
+            [
+              151.2048993,
+              -33.8640214
+            ],
+            [
+              151.2050785,
+              -33.8639479
+            ],
+            [
+              151.2052499,
+              -33.8641346
+            ],
+            [
+              151.2049727,
+              -33.8642893
+            ],
+            [
+              151.2047384,
+              -33.8642894
+            ],
+            [
+              151.2046638,
+              -33.8641008
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:st-james",
+      "properties": {
+        "kind": "building",
+        "source": "slnsw-sydney-1900",
+        "role": "civic",
+        "height_m": 16.0,
+        "use_basis": "Visible building footprint symbol; height and display model are approximate."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.2108317,
+              -33.8693798
+            ],
+            [
+              151.2113273,
+              -33.8693822
+            ],
+            [
+              151.2113884,
+              -33.8695695
+            ],
+            [
+              151.2108594,
+              -33.8695979
+            ],
+            [
+              151.2108317,
+              -33.8693798
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-health:rocks-local-read",
+      "properties": {
+        "kind": "road_coverage",
+        "source": "slnsw-sydney-1900",
+        "categories": 1,
+        "coverage_state": "mapped_network",
+        "source_year": 1900,
+        "priority": 25,
+        "coverage_basis": "Readable 1900 local streets on The Rocks ridge; footprint survey limit stays out of the quay water and out of unread corridors."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.206419,
+              -33.8580201
+            ],
+            [
+              151.2072571,
+              -33.8575224
+            ],
+            [
+              151.2083257,
+              -33.8579203
+            ],
+            [
+              151.2092559,
+              -33.8582481
+            ],
+            [
+              151.2088445,
+              -33.8593314
+            ],
+            [
+              151.2083928,
+              -33.8602633
+            ],
+            [
+              151.2078353,
+              -33.8610263
+            ],
+            [
+              151.2071908,
+              -33.86152
+            ],
+            [
+              151.2065908,
+              -33.8611219
+            ],
+            [
+              151.2060732,
+              -33.8601419
+            ],
+            [
+              151.206419,
+              -33.8580201
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-land",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.1911396,
+              -33.8686569
+            ],
+            [
+              151.1919018,
+              -33.8680396
+            ],
+            [
+              151.192236,
+              -33.8669498
+            ],
+            [
+              151.1927967,
+              -33.8656932
+            ],
+            [
+              151.1942279,
+              -33.8652586
+            ],
+            [
+              151.1957888,
+              -33.8660785
+            ],
+            [
+              151.1971018,
+              -33.8672498
+            ],
+            [
+              151.1978681,
+              -33.8683734
+            ],
+            [
+              151.1976347,
+              -33.8697828
+            ],
+            [
+              151.1983255,
+              -33.870962
+            ],
+            [
+              151.1991529,
+              -33.8721531
+            ],
+            [
+              151.2002431,
+              -33.8740509
+            ],
+            [
+              151.2012615,
+              -33.8765641
+            ],
+            [
+              151.2004384,
+              -33.878295
+            ],
+            [
+              151.1982949,
+              -33.8777351
+            ],
+            [
+              151.1964603,
+              -33.8757102
+            ],
+            [
+              151.1949314,
+              -33.8740228
+            ],
+            [
+              151.1930431,
+              -33.87305
+            ],
+            [
+              151.1913093,
+              -33.8713447
+            ],
+            [
+              151.1896223,
+              -33.86983
+            ],
+            [
+              151.1899206,
+              -33.8690479
+            ],
+            [
+              151.1911396,
+              -33.8686569
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "known_dry",
+        "source": "sands-1887",
+        "use_basis": "Atlas shore interpretation, with the 1900 mapped downtown priority. Local reclamation dates remain uncertain."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sydney-sands:pyrmont-inlets",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              151.1915231,
+              -33.8635929
+            ],
+            [
+              151.1979567,
+              -33.8634702
+            ],
+            [
+              151.2011039,
+              -33.8654852
+            ],
+            [
+              151.2018312,
+              -33.868719
+            ],
+            [
+              151.2037885,
+              -33.87206
+            ],
+            [
+              151.2041276,
+              -33.8762546
+            ],
+            [
+              151.2021541,
+              -33.8795636
+            ],
+            [
+              151.1979751,
+              -33.8787018
+            ],
+            [
+              151.1929611,
+              -33.8755294
+            ],
+            [
+              151.1887995,
+              -33.8727421
+            ],
+            [
+              151.1878419,
+              -33.8691153
+            ],
+            [
+              151.18906,
+              -33.8651809
+            ],
+            [
+              151.1915231,
+              -33.8635929
+            ]
+          ],
+          [
+            [
+              151.1899206,
+              -33.8690479
+            ],
+            [
+              151.1896223,
+              -33.86983
+            ],
+            [
+              151.1913093,
+              -33.8713447
+            ],
+            [
+              151.1930431,
+              -33.87305
+            ],
+            [
+              151.1949314,
+              -33.8740228
+            ],
+            [
+              151.1964603,
+              -33.8757102
+            ],
+            [
+              151.1982949,
+              -33.8777351
+            ],
+            [
+              151.2004384,
+              -33.878295
+            ],
+            [
+              151.2012615,
+              -33.8765641
+            ],
+            [
+              151.2002431,
+              -33.8740509
+            ],
+            [
+              151.1991529,
+              -33.8721531
+            ],
+            [
+              151.1983255,
+              -33.870962
+            ],
+            [
+              151.1976347,
+              -33.8697828
+            ],
+            [
+              151.1978681,
+              -33.8683734
+            ],
+            [
+              151.1971018,
+              -33.8672498
+            ],
+            [
+              151.1957888,
+              -33.8660785
+            ],
+            [
+              151.1942279,
+              -33.8652586
+            ],
+            [
+              151.1927967,
+              -33.8656932
+            ],
+            [
+              151.192236,
+              -33.8669498
+            ],
+            [
+              151.1919018,
+              -33.8680396
+            ],
+            [
+              151.1911396,
+              -33.8686569
+            ],
+            [
+              151.1899206,
+              -33.8690479
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "water_surface",
+        "source": "sands-1887",
+        "use_basis": "Atlas shore interpretation, with the 1900 mapped downtown priority. Local reclamation dates remain uncertain.",
+        "basin": "coast"
+      }
+    }
+  ]
+}
