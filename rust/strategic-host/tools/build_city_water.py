@@ -201,6 +201,29 @@ def pack_road_levels(words, values, roads, fine_cell, offsets, *, simplify=.8):
     return fine
 
 
+def pack_water_bands(words, south, north, layers):
+    rows = [[] for _ in range(math.ceil((north-south)/BAND_HEIGHT))]
+    for shapes, flag in layers:
+        for part in shapes:
+            for ring in [part.exterior, *part.interiors]:
+                points = list(ring.coords)
+                for a, b in zip(points, points[1:]):
+                    if a[1] == b[1]:
+                        continue
+                    a, b = sorted((a, b), key=lambda p:p[1])
+                    lo = max(0, math.floor((a[1]-south)/BAND_HEIGHT))
+                    hi = min(len(rows)-1, math.floor((b[1]-south)/BAND_HEIGHT))
+                    edge = [*(encode(v, "f") for v in (*a, *b)), flag]
+                    for row in rows[lo:hi+1]:
+                        row.extend(edge)
+    start = len(words)
+    words.extend([0] * (2*len(rows)))
+    for i, row in enumerate(rows):
+        words[start+2*i:start+2*i+2] = [len(words), len(words)+len(row)]
+        words.extend(row)
+    return start, len(rows)
+
+
 def planned_road_pages(plan):
     """Encode bounded display pages from the same CRS84 road features as the city plan."""
     lon, lat = plan["wwo"]["origin"]
@@ -210,8 +233,23 @@ def planned_road_pages(plan):
     width = ROAD_PAGE_METRES
     sources = []
     pages = {}
+    water = {}
     for feature in sorted(plan["features"], key=lambda row: row["id"]):
         props = feature["properties"]
+        if props["kind"] in ("water_surface", "known_dry"):
+            flag = 2 if props["kind"] == "known_dry" else {"river": 1, "coast": 4}.get(props.get("basin"))
+            if flag is None:
+                raise ValueError(f"Invalid historical basin for {feature['id']}")
+            geom = transform(shape(feature["geometry"]), lambda x, y: ((x-lon)*x_scale, (y-lat)*y_scale),
+                             interleaved=False)
+            sources.append(dict(id=feature["id"], geometry=feature["geometry"], properties=props))
+            west, south, east, north = geom.bounds
+            for x in range(math.floor(west/width), math.ceil(east/width)):
+                for y in range(math.floor(south/width), math.ceil(north/width)):
+                    clipped = geom.intersection(box(x*width,y*width,(x+1)*width,(y+1)*width))
+                    if clipped.area > 0.:
+                        water.setdefault((x,y), []).append((feature["id"], flag, clipped))
+            continue
         if props["kind"] != "road":
             continue
         category = props.get("display_rank", 1)
@@ -239,18 +277,35 @@ def planned_road_pages(plan):
                     pages.setdefault((x, y), []).append((feature["id"], lines, radius, surface_index, bridge, category))
 
     packed = []
-    for x, y in sorted(pages):
+    cells = [(x, y, False) for x, y in pages] + [(x, y, True) for x, y in water]
+    for x, y, wet_page in sorted(cells):
         west, south, east, north = x*width, y*width, (x+1)*width, (y+1)*width
         values = [lon, lat, x_scale, y_scale, west, south, east, north]
+        roads = [] if wet_page else pages[x, y]
+        wet = water[x, y] if wet_page else []
         words = [*(encode(v, "f") for v in values), 0, 0, 0, 0]
-        words[8] = pack_road_levels(words, values, pages[x, y], ROAD_CELL, (9, 10, 11), simplify=0.)
+        if wet_page:
+            words.append(0)
+            layers = []
+            for flag in (1, 2, 4):
+                merged = union_all([geom for _, kind, geom in wet if kind == flag])
+                layers.append(([part for part in getattr(merged, "geoms", [merged])
+                                if part.geom_type == "Polygon" and not part.is_empty], flag))
+            start, height = pack_water_bands(words, south, north, layers)
+            for i in range(height):
+                a, b = words[start+2*i:start+2*i+2]
+                if b-a > 5*192:
+                    raise ValueError(f"City shoreline band exceeds 192 edges in {x},{y}")
+            words[12] = start
+        else:
+            words[8] = pack_road_levels(words, values, roads, ROAD_CELL, (9, 10, 11), simplify=0.)
         if len(words)*4 > ROAD_PAGE_BYTES:
             raise ValueError(f"Road page {x},{y} exceeds {ROAD_PAGE_BYTES} bytes")
         bounds = [lon+west/x_scale, lat+south/y_scale, lon+east/x_scale, lat+north/y_scale]
         if not -180. <= bounds[0] < bounds[2] <= 180. or not -90. <= bounds[1] < bounds[3] <= 90.:
             raise ValueError(f"Road page {x},{y} crosses a world seam")
         payload = struct.pack(f"<{len(words)}I", *words)
-        packed.append((x, y, bounds, payload, sorted({r[0] for r in pages[x, y]})))
+        packed.append((x, y, bounds, payload, sorted({r[0] for r in roads}), sorted({r[0] for r in wet})))
     return sources, packed
 
 
@@ -259,33 +314,12 @@ def write(root, output):
     for index, (origin, extent, source) in enumerate(SITES):
         values, shapes, valid = sections(root, origin, extent, source)
         west, south, east, north = values[4:]
-        rows = [[] for _ in range(math.ceil((north-south)/BAND_HEIGHT))]
-
-        def add_rings(parts, flag):
-            for part in parts:
-                for ring in [part.exterior, *part.interiors]:
-                    points = list(ring.coords)
-                    for a, b in zip(points, points[1:]):
-                        if a[1] == b[1]:
-                            continue
-                        a, b = sorted((a, b), key=lambda p:p[1])
-                        lo = max(0, math.floor((a[1]-south)/BAND_HEIGHT))
-                        hi = min(len(rows)-1, math.floor((b[1]-south)/BAND_HEIGHT))
-                        edge = [*(encode(v, "f") for v in (*a, *b)), flag]
-                        for row in rows[lo:hi+1]:
-                            row.extend(edge)
-
-        add_rings(shapes, 1)
         # Limit dry overrides to the near-bank corridor. Other lakes, canals
         # and the riparian land use continue to come from the global layers.
         corridor = union_all(shapes).buffer(45, quad_segs=2).intersection(valid).simplify(1.0, preserve_topology=True)
-        add_rings([p for p in getattr(corridor, "geoms", [corridor]) if p.geom_type == "Polygon"], 2)
-        start = len(words)
-        words[index*10:(index+1)*10] = [*(encode(v, "f") for v in values), start, len(rows)]
-        words.extend([0] * (2*len(rows)))
-        for i, row in enumerate(rows):
-            words[start+2*i:start+2*i+2] = [len(words), len(words)+len(row)]
-            words.extend(row)
+        dry = [p for p in getattr(corridor, "geoms", [corridor]) if p.geom_type == "Polygon"]
+        start, height = pack_water_bands(words, south, north, [(shapes, 1), (dry, 2)])
+        words[index*10:(index+1)*10] = [*(encode(v, "f") for v in values), start, height]
         print(f"{source}: {len(shapes)} water polygons, {sum(len(p.interiors) for p in shapes)} interior rings")
         if index == 1:
             # The dated street survey extends beyond the Thames bank redraw.

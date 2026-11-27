@@ -7,6 +7,8 @@ pub(crate) const PAGE_BYTES: usize = 1024 * 1024;
 pub(crate) const PAGE_SLOTS: usize = 16;
 const CELL_METRES: [f32; 4] = [64., 128., 256., 384.];
 const DESCRIPTOR_WORDS: usize = 22;
+pub(crate) const PAGE_DESCRIPTOR_WORDS: usize = DESCRIPTOR_WORDS + 1;
+const WATER_BANDS: usize = 4096 / 32;
 
 #[derive(Clone, Deserialize)]
 pub(crate) struct RoadTile {
@@ -14,6 +16,8 @@ pub(crate) struct RoadTile {
     pub(crate) bounds: [f64; 4],
     pub(crate) bytes: usize,
     pub(crate) features: usize,
+    #[serde(default)]
+    pub(crate) water_features: usize,
     pub(crate) years: [u16; 2],
 }
 
@@ -23,7 +27,8 @@ impl RoadTile {
         self.file.ends_with(".wcr") && self.file.bytes().all(|c| c.is_ascii_alphanumeric() || b"-.".contains(&c))
             && -180. <= w && w < e && e <= 180. && -90. <= s && s < n && n <= 90.
             && (48..=PAGE_BYTES).contains(&self.bytes) && self.bytes % 4 == 0
-            && self.features != 0 && (1..self.years[1]).contains(&self.years[0]) && self.years[1] <= 9999
+            && ((self.features != 0) != (self.water_features != 0))
+            && (1..self.years[1]).contains(&self.years[0]) && self.years[1] <= 9999
     }
 
     pub(crate) fn read(&self, root: &Path) -> io::Result<RoadPage> {
@@ -31,7 +36,9 @@ impl RoadTile {
         let mut file = File::open(root.join(&self.file))?;
         let mut header = [0; 12];
         file.read_exact(&mut header)?;
-        if &header[..8] != b"WWOCRD01" || u32::from_le_bytes(header[8..].try_into().unwrap()) as usize != self.bytes {
+        let water = self.water_features != 0;
+        let expected = if water { b"WWOCRD02" } else { b"WWOCRD01" };
+        if &header[..8] != expected || u32::from_le_bytes(header[8..].try_into().unwrap()) as usize != self.bytes {
             return Err(invalid());
         }
         let mut decoder = zstd::stream::read::Decoder::new(file)?;
@@ -52,7 +59,27 @@ impl RoadTile {
             return Err(invalid());
         }
         let offsets = std::array::from_fn::<_, 4, _>(|i| word(8 + i));
-        for (level, cells) in CELL_METRES.into_iter().enumerate() {
+        let water_offset = if water {
+            if len < 13 { return Err(invalid()); }
+            let offset = word(12) as usize;
+            if offset != 13 || offsets != [0; 4] || offset + 2 * WATER_BANDS > len {
+                return Err(invalid());
+            }
+            let first_edge = offset + 2 * WATER_BANDS;
+            for band in (offset..first_edge).step_by(2) {
+                let (a, b) = (word(band) as usize, word(band + 1) as usize);
+                if a < first_edge || a > b || b > len || (b - a) % 5 != 0 || b - a > 5 * 192 {
+                    return Err(invalid());
+                }
+                for edge in (a..b).step_by(5) {
+                    let [ax, ay, bx, by] = std::array::from_fn(|i| f32::from_bits(word(edge + i)));
+                    if ![ax, ay, bx, by].iter().all(|v| v.is_finite()) || ay >= by
+                        || !matches!(word(edge + 4), 1 | 2 | 4) { return Err(invalid()); }
+                }
+            }
+            Some(offset as u32)
+        } else { None };
+        for (level, cells) in CELL_METRES.into_iter().enumerate().filter(|_| !water) {
             let first = offsets[level] as usize;
             let last = offsets.get(level + 1).map_or(len, |&end| end as usize);
             let side = (4096. / cells).ceil() as usize;
@@ -76,7 +103,7 @@ impl RoadTile {
                 }
             }
         }
-        Ok(RoadPage { data, offsets, scale: [xs, ys] })
+        Ok(RoadPage { data, offsets, scale: [xs, ys], water_offset })
     }
 }
 
@@ -84,17 +111,19 @@ pub(crate) struct RoadPage {
     pub(crate) data: Vec<u8>,
     offsets: [u32; 4],
     scale: [f32; 2],
+    pub(crate) water_offset: Option<u32>,
 }
 
 impl RoadPage {
-    pub(crate) fn descriptor(&self, base: u32, bounds: [f64; 4]) -> [u32; DESCRIPTOR_WORDS] {
-        let mut words = [0; DESCRIPTOR_WORDS];
+    pub(crate) fn descriptor(&self, base: u32, bounds: [f64; 4]) -> [u32; PAGE_DESCRIPTOR_WORDS] {
+        let mut words = [0; PAGE_DESCRIPTOR_WORDS];
         words[..2].copy_from_slice(&[base, base]);
         words[2..6].copy_from_slice(&self.offsets.map(|offset| base + offset));
         words[6..10].copy_from_slice(&CELL_METRES.map(f32::to_bits));
         words[10..14].copy_from_slice(&bounds.map(|coordinate| (coordinate as f32).to_bits()));
         words[14..16].copy_from_slice(&self.scale.map(f32::to_bits));
-        words[20] = State::ReadyVector as u32;
+        if self.water_offset.is_none() { words[20] = State::ReadyVector as u32; }
+        words[22] = self.water_offset.map_or(0, |offset| base + offset);
         words
     }
 }

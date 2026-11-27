@@ -262,6 +262,7 @@ struct RoadSlot {
     bytes:usize,
     written:usize,
     active:bool,
+    water:bool,
 }
 
 struct RoadStore {
@@ -270,38 +271,44 @@ struct RoadStore {
     registry:[u32;crate::city_roads::PAGE_SLOTS+1],
     slots:[Option<RoadSlot>;crate::city_roads::PAGE_SLOTS],
     uploading:bool,
+    water_revision:u64,
 }
 
 impl RoadStore {
     fn allocate(storage:&mut Vec<u8>, limit:u64) -> Self {
-        use crate::city_roads::{PAGE_BYTES,PAGE_SLOTS};
+        use crate::city_roads::{PAGE_BYTES,PAGE_DESCRIPTOR_WORDS,PAGE_SLOTS};
         let base=(storage.len()/4) as u32;
-        let total=storage.len()+4*((PAGE_SLOTS+1)+22*PAGE_SLOTS+5)+PAGE_BYTES*PAGE_SLOTS;
+        let total=storage.len()+4*((PAGE_SLOTS+1)+PAGE_DESCRIPTOR_WORDS*PAGE_SLOTS+5)+PAGE_BYTES*PAGE_SLOTS;
         let capacity=if total as u64<=limit {PAGE_SLOTS} else {0};
         let bytes=if capacity>0 {total-20} else {storage.len()+4};
         storage.resize(bytes,0);
-        Self{base,capacity,registry:[0;PAGE_SLOTS+1],slots:[None;PAGE_SLOTS],uploading:false}
+        Self{base,capacity,registry:[0;PAGE_SLOTS+1],slots:[None;PAGE_SLOTS],uploading:false,water_revision:0}
     }
 
     fn update(&mut self, queue:&wgpu::Queue, buffer:&wgpu::Buffer,
               wanted:&[crate::city_models::ReadyRoad<'_>], uploads:&mut CityUploads) {
-        use crate::city_roads::{PAGE_BYTES,PAGE_SLOTS};
+        use crate::city_roads::{PAGE_BYTES,PAGE_DESCRIPTOR_WORDS,PAGE_SLOTS};
+        let stride=PAGE_DESCRIPTOR_WORDS as u32;
         let descriptors=self.base+1+PAGE_SLOTS as u32;
-        let start=descriptors+22*PAGE_SLOTS as u32;
+        let start=descriptors+stride*PAGE_SLOTS as u32;
         if self.capacity==0 || (wanted.is_empty() && self.registry[0]==0 && !self.uploading) {return;}
         // Reserve the registry transfer so a removed slot cannot remain visible after reuse.
         let registry_bytes=std::mem::size_of_val(&self.registry) as u64;
         uploads.remaining-=registry_bytes;
         uploads.used+=registry_bytes;
+        let mut water_changed=false;
         for entry in &mut self.slots {
-            if entry.is_some_and(|slot| !wanted.iter().any(|road|road.key==slot.key)) {*entry=None;}
+            if let Some(slot)=entry.filter(|slot| !wanted.iter().any(|road|road.key==slot.key)) {
+                water_changed|=slot.active && slot.water;
+                *entry=None;
+            }
         }
         self.uploading=false;
         for road in wanted {
             let Some(index)=self.slots.iter().position(|slot|slot.is_some_and(|slot|slot.key==road.key))
                 .or_else(||self.slots.iter().position(Option::is_none)) else {break;};
             let slot=self.slots[index].get_or_insert(RoadSlot{key:road.key,bounds:road.bounds,
-                bytes:road.page.data.len(),written:0,active:false});
+                bytes:road.page.data.len(),written:0,active:false,water:road.page.water_offset.is_some()});
             if slot.active {continue;}
             let contents=start+(PAGE_BYTES/4*index) as u32;
             uploads.write(queue,buffer,u64::from(contents)*4,&road.page.data,&mut slot.written);
@@ -309,9 +316,10 @@ impl RoadStore {
             let data=bytemuck::cast_slice(&descriptor);
             let mut written=0;
             if slot.written==slot.bytes && uploads.remaining>=data.len() as u64 && uploads.can_allocate(data.len() as u64) {
-                uploads.write(queue,buffer,u64::from(descriptors+22*index as u32)*4,data,&mut written);
+                uploads.write(queue,buffer,u64::from(descriptors+stride*index as u32)*4,data,&mut written);
             }
             slot.active=written==data.len();
+            water_changed|=slot.active && slot.water;
             self.uploading|=!slot.active;
         }
         let mut registry=[0;PAGE_SLOTS+1];
@@ -319,7 +327,7 @@ impl RoadStore {
         for (index,slot) in self.slots.iter().enumerate() {
             if slot.is_some_and(|slot|slot.active) {
                 count+=1;
-                registry[count]=descriptors+22*index as u32;
+                registry[count]=descriptors+stride*index as u32;
             }
         }
         registry[0]=count as u32;
@@ -332,6 +340,7 @@ impl RoadStore {
             uploads.remaining+=registry_bytes;
             uploads.used-=registry_bytes;
         }
+        if water_changed {self.water_revision+=1;}
     }
 
     fn active(&self) -> impl Iterator<Item=RoadSlot> + '_ {
@@ -345,7 +354,7 @@ struct WaterRaster {
     gaps:[wgpu::BindGroup;2],
     buffers:Option<wgpu::BindGroup>,
     size:[u32;2],
-    previous:Option<([[f32;4];3],[f32;4],[f32;4],u64)>,
+    previous:Option<([[f32;4];3],[f32;4],[f32;4],u64,u64)>,
 }
 
 fn water_storage(binding:u32, visibility:wgpu::ShaderStages, read_only:bool)->wgpu::BindGroupLayoutEntry {
@@ -460,7 +469,7 @@ impl GroundSurface {
             raster.previous=None;
         }
         let Some(buffers)=&raster.buffers else {return;};
-        let key=(view.projection_axes,view.projection_origin,view.viewport,revision);
+        let key=(view.projection_axes,view.projection_origin,view.viewport,revision,self.road_store.water_revision);
         if raster.previous==Some(key) {return;}
         raster.previous=Some(key);
         let mut pass=encoder.begin_compute_pass(&wgpu::ComputePassDescriptor{
@@ -1554,7 +1563,7 @@ impl Renderer {
             "road_slot_capacity":roads.capacity,
             "road_reserved_bytes":roads.capacity*crate::city_roads::PAGE_BYTES,
             "road_active":roads.active().map(|slot|serde_json::json!({"revision":slot.key.0,"index":slot.key.1,
-                "payload_bytes":slot.bytes})).collect::<Vec<_>>(),
+                "payload_bytes":slot.bytes,"water":slot.water})).collect::<Vec<_>>(),
             "decoded_kit_cpu_bytes":self.models.city_meshes.values().map(|mesh| {
                 mesh.vertices.capacity()*std::mem::size_of::<ModelVertex>()
                     + mesh.indices.capacity()*std::mem::size_of::<u32>()

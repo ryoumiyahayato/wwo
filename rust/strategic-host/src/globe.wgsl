@@ -318,9 +318,47 @@ fn global_water_area(ll:vec2f) -> u32 {
     return (water_geometry[page]<<2u)|water_page_area(page+1u,q);
 }
 
+fn water_band_bits(base:u32,offset:u32,p:vec2f) -> u32 {
+    var bits=0u;
+    for (var i=base+city_water[offset];i<base+city_water[offset+1u];i+=5u) {
+        let ay=bitcast<f32>(city_water[i+1u]);
+        let by=bitcast<f32>(city_water[i+3u]);
+        if p.y<ay || p.y>=by {continue;}
+        let ax=bitcast<f32>(city_water[i]);
+        let bx=bitcast<f32>(city_water[i+2u]);
+        if p.x<mix(ax,bx,(p.y-ay)/(by-ay)) {bits^=city_water[i+4u];}
+    }
+    return bits;
+}
+
+fn paged_water_area(ll:vec2f,mpp:f32) -> u32 {
+    let registry=loaded_road_registry();
+    for (var i=0u;i<city_water[registry];i++) {
+        let page=city_water[registry+1u+i];
+        let offset=city_water[page+22u];
+        if offset==0u {continue;}
+        let base=city_water[page];
+        let origin=vec2f(bitcast<f32>(city_water[base]),bitcast<f32>(city_water[base+1u]));
+        let scale=vec2f(bitcast<f32>(city_water[base+2u]),bitcast<f32>(city_water[base+3u]));
+        let p=(ll-origin)*scale;
+        let low=vec2f(bitcast<f32>(city_water[base+4u]),bitcast<f32>(city_water[base+5u]));
+        let high=vec2f(bitcast<f32>(city_water[base+6u]),bitcast<f32>(city_water[base+7u]));
+        if any(p<low) || any(p>=high) {continue;}
+        if mpp>7. && (1.-smoothstep(7.,21.,mpp))<hash(floor(p*.34)) {continue;}
+        let band=min(u32((p.y-low.y)/32.),127u);
+        let bits=water_band_bits(base,offset+band*2u,p);
+        if (bits&4u)!=0u {return 2u;}
+        if (bits&1u)!=0u {return 3u;}
+        if (bits&2u)!=0u {return 1u;}
+    }
+    return 0u;
+}
+
 fn water_area(ll:vec2f) -> u32 {
     let mpp=view.viewport.z*EARTH;
     if mpp<21. {
+        let paged=paged_water_area(ll,mpp);
+        if paged!=0u {return paged;}
         for (var site=0u;site<20u;site+=10u) {
             let origin=vec2f(bitcast<f32>(city_water[site]),bitcast<f32>(city_water[site+1u]));
             let scale=vec2f(bitcast<f32>(city_water[site+2u]),bitcast<f32>(city_water[site+3u]));
@@ -333,15 +371,7 @@ fn water_area(ll:vec2f) -> u32 {
             if handoff<1. && handoff<hash(floor(p*.34)) {continue;}
             let band=min(u32((p.y-low.y)/32.),city_water[site+9u]-1u);
             let offset=city_water[site+8u]+band*2u;
-            var bits=0u;
-            for (var i=city_water[offset];i<city_water[offset+1u];i+=5u) {
-                let ay=bitcast<f32>(city_water[i+1u]);
-                let by=bitcast<f32>(city_water[i+3u]);
-                if p.y<ay || p.y>=by {continue;}
-                let ax=bitcast<f32>(city_water[i]);
-                let bx=bitcast<f32>(city_water[i+2u]);
-                if p.x<mix(ax,bx,(p.y-ay)/(by-ay)) {bits^=city_water[i+4u];}
-            }
+            let bits=water_band_bits(0u,offset,p);
             if (bits&1u)!=0u {return 3u;}
             if (bits&2u)!=0u {return 1u;}
         }
@@ -1067,7 +1097,7 @@ fn city_road_cell(ll: vec2f, source: u32, level: u32) -> CityRoadCell {
     if any(point<low) || any(point>=high) {return CityRoadCell(point,low,high,0u,0u,0u,0u,1.);}
     let road=city_water[source+2u+level];
     let cell_size=bitcast<f32>(city_water[source+6u+level]);
-    let cell=vec2u((point-low)/cell_size);
+    let cell=min(vec2u((point-low)/cell_size),vec2u(city_water[road],city_water[road+1u])-vec2u(1u));
     let at=road+2u+2u*(cell.y*city_water[road]+cell.x);
     return CityRoadCell(point,low,high,base+city_water[at],base+city_water[at+1u],road,base,cell_size);
 }

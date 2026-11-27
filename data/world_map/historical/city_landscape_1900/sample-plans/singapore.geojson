@@ -8,10 +8,14 @@
       1.29
     ],
     "key": "singapore-corridor",
-    "revision": 2,
+    "revision": 3,
     "status": "candidate_buildings",
-    "road_validity": {"start": 1890, "end": 1901, "basis": "1890 guide map used for a candidate opening-date reconstruction. No replacement of raster fallback."},
-    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence.",
+    "road_validity": {
+      "start": 1890,
+      "end": 1901,
+      "basis": "1890 guide map used for a candidate opening-date reconstruction. No replacement of raster fallback."
+    },
+    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence. Revised lower river and Tanjong Pagar harbour layout from the 1893 city atlas, with mapped work sheds and separate wet/dry coverage.",
     "registration": {
       "method": "local affine to stable landmarks; modern map used solely for locating controls",
       "working_scan_px": [
@@ -161,46 +165,3607 @@
         "licence": "Referential narrative only, no images copied",
         "date": "1890s Tanjong Pagar illustration and harbour history",
         "precision": "Differentiated river warehouses and docks; building location/dimensions are inferred"
+      },
+      {
+        "id": "bartholomew1893",
+        "url": "https://commons.wikimedia.org/wiki/File:Plan_map_of_the_City_of_Singapore_of_British_Malaya,_from_the_Constable%27s_Hand_Atlas_of_India_(1893).jpg",
+        "record": "John G. Bartholomew, Edinburgh Geographical Institute, Constable’s Hand Atlas of India, plate 60, 1893, Boston Public Library copy",
+        "licence": "Public domain map, Commons Public Domain Mark 1.0",
+        "date": "1893; candidate opening-date interpretation through 1900",
+        "precision": "Local tracing from a 1280 px facsimile; control residuals in shore_registration. Atlas symbols and dimensions are approximate, especially west of the town controls."
       }
-    ]
+    ],
+    "water_validity": {
+      "start": 1893,
+      "end": 1901
+    },
+    "shore_registration": {
+      "source": "bartholomew1893",
+      "scan_px": [
+        1280,
+        993
+      ],
+      "controls": [
+        {
+          "feature": "Coleman bridge crossing",
+          "scan_xy": [
+            785,
+            553
+          ],
+          "reference_lon_lat": [
+            103.84799998998642,
+            1.2897200029609757
+          ]
+        },
+        {
+          "feature": "Elgin bridge crossing",
+          "scan_xy": [
+            786,
+            600
+          ],
+          "reference_lon_lat": [
+            103.84931000232694,
+            1.2890600033791362
+          ]
+        },
+        {
+          "feature": "Cavenagh bridge crossing",
+          "scan_xy": [
+            766,
+            727
+          ],
+          "reference_lon_lat": [
+            103.85234999656677,
+            1.2865600008122262
+          ]
+        },
+        {
+          "feature": "St Andrew's Cathedral outline centre",
+          "scan_xy": [
+            929,
+            623
+          ],
+          "reference_lon_lat": [
+            103.85224,
+            1.29266
+          ]
+        },
+        {
+          "feature": "Telok Ayer Market outline centre",
+          "scan_xy": [
+            569,
+            798
+          ],
+          "reference_lon_lat": [
+            103.850396,
+            1.280629
+          ]
+        }
+      ],
+      "leave_one_out_rmse_m": 60,
+      "leave_one_out_max_m": 98,
+      "limits": "Controls surround the lower river; Tanjong Pagar is an extrapolation. Coast and shed outlines are traced from the atlas, with positional uncertainty. Tanjong Pagar Land Co. property limit did not establish dry land."
+    }
   },
   "features": [
-    {"type":"Feature","id":"singapore-1890:readable-city-corridor","properties":{"kind":"coverage","source":"aranjo1890","confidence":"selectively traced; unknown holes remain unknown","purpose":"building placement limit; coverage of complete historical road survey is not asserted"},"geometry":{"type":"Polygon","coordinates":[[[103.831942,1.268839],[103.836239,1.276607],[103.838221,1.282007],[103.837472,1.286852],[103.843709,1.291432],[103.847398,1.298168],[103.851032,1.30409],[103.856199,1.310785],[103.85967,1.316279],[103.864857,1.313324],[103.868493,1.311336],[103.869625,1.308159],[103.865829,1.30382],[103.861336,1.301117],[103.858776,1.299114],[103.856687,1.296111],[103.854443,1.292816],[103.852987,1.287229],[103.852884,1.283727],[103.848324,1.276053],[103.845652,1.270413],[103.845665,1.26465],[103.841873,1.264334],[103.836984,1.265727],[103.832021,1.266036],[103.831942,1.268839]]]}},
-    {"type":"Feature","id":"singapore-1890:south-bridge","properties":{"kind":"road","source":"aranjo1890","width_m":9,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.849167,1.289296],[103.848783,1.288003],[103.848198,1.286519],[103.847662,1.285364],[103.847151,1.284186],[103.846471,1.282901],[103.845919,1.281904],[103.845388,1.281233],[103.844502,1.28048]]}},
-    {"type":"Feature","id":"singapore-1890:new-bridge","properties":{"kind":"road","source":"aranjo1890","width_m":9,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.84708,1.288707],[103.845911,1.286167],[103.844273,1.28385],[103.842781,1.281716],[103.840462,1.279295],[103.837555,1.276541]]}},
-    {"type":"Feature","id":"singapore-1890:neil","properties":{"kind":"road","source":"aranjo1890","width_m":7,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.844502,1.28048],[103.842661,1.278748],[103.841076,1.277619],[103.837555,1.276541],[103.835353,1.275451]]}},
-    {"type":"Feature","id":"singapore-1890:tanjong-pagar","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.844502,1.28048],[103.844101,1.277736],[103.843314,1.274478],[103.842726,1.271759]]}},
-    {"type":"Feature","id":"singapore-1890:anseon-road-as-labelled","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.842726,1.271759],[103.844836,1.274283],[103.847034,1.276901],[103.848591,1.279205],[103.850052,1.28128],[103.85172,1.284031],[103.852323,1.285786]]}},
-    {"type":"Feature","id":"singapore-1890:cantonment","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.835239,1.269803],[103.836908,1.270569],[103.839312,1.271073],[103.841261,1.271212],[103.842726,1.271759]]}},
-    {"type":"Feature","id":"singapore-1890:havelock","properties":{"kind":"road","source":"aranjo1890","width_m":7,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.838543,1.286749],[103.840919,1.287624],[103.843076,1.287661],[103.844943,1.286581],[103.845911,1.286167],[103.847662,1.285364]]}},
-    {"type":"Feature","id":"singapore-1890:upper-cross-south","properties":{"kind":"road","source":"aranjo1890","width_m":6,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.847662,1.285364],[103.848679,1.284877],[103.849983,1.284246],[103.851286,1.283991]]}},
-    {"type":"Feature","id":"singapore-1890:pagoda","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.844867,1.284665],[103.845861,1.284228],[103.847071,1.283798]]}},
-    {"type":"Feature","id":"singapore-1890:temple","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.84404,1.2836],[103.845141,1.283152],[103.846529,1.282561]]}},
-    {"type":"Feature","id":"singapore-1890:smith","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.843183,1.282475],[103.844282,1.282001],[103.845791,1.281617]]}},
-    {"type":"Feature","id":"singapore-1890:sago","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.842115,1.281024],[103.843381,1.280629],[103.844943,1.280628]]}},
-    {"type":"Feature","id":"singapore-1890:pearl-hill-east-approach","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.839693,1.279874],[103.840462,1.279295],[103.841076,1.277619]]}},
-    {"type":"Feature","id":"singapore-1890:dock-approach","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.842726,1.271759],[103.841028,1.269755],[103.839724,1.268401],[103.839221,1.268136]]}},
-    {"type":"Feature","id":"singapore-1890:north-bridge","properties":{"kind":"road","source":"aranjo1890","width_m":9,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.849996,1.290791],[103.851077,1.292835],[103.852563,1.294484],[103.853771,1.296011],[103.85498,1.297565],[103.856234,1.299367],[103.858007,1.301678],[103.860063,1.304193],[103.861984,1.30591]]}},
-    {"type":"Feature","id":"singapore-1890:victoria","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.84894,1.290709],[103.850212,1.293184],[103.851571,1.294948],[103.853425,1.297272],[103.855298,1.299866],[103.857245,1.302365],[103.858889,1.304361],[103.860018,1.305125],[103.861023,1.307237]]}},
-    {"type":"Feature","id":"singapore-1890:beach","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.852365,1.289976],[103.853628,1.292315],[103.85416,1.293416],[103.855979,1.2956],[103.858086,1.298472],[103.859224,1.299773],[103.861423,1.301614],[103.863776,1.303343],[103.865186,1.305062]]}},
-    {"type":"Feature","id":"singapore-1890:bras-basah","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.849844,1.295702],[103.851571,1.294948],[103.852563,1.294484],[103.85416,1.293416]]}},
-    {"type":"Feature","id":"singapore-1890:rochor","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.850088,1.304481],[103.852387,1.303414],[103.853757,1.302177],[103.855298,1.299866],[103.856234,1.299367],[103.858086,1.298472]]}},
-    {"type":"Feature","id":"singapore-1890:arab","properties":{"kind":"road","source":"aranjo1890","width_m":6,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.855614,1.305332],[103.857346,1.303855],[103.858771,1.302627],[103.860249,1.301379]]}},
-    {"type":"Feature","id":"singapore-1890:jalan-sultan","properties":{"kind":"road","source":"aranjo1890","width_m":7,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.856553,1.30805],[103.858368,1.306211],[103.860018,1.305125],[103.86157,1.303781],[103.862682,1.302692]]}},
-    {"type":"Feature","id":"singapore-1890:serangoon","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.850414,1.303727],[103.852812,1.306509],[103.855693,1.310063],[103.857856,1.31297],[103.85968,1.315235],[103.86189,1.318042]]}},
-    {"type":"Feature","id":"singapore-1890:lavender","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.85968,1.315235],[103.860787,1.31369],[103.86182,1.31224],[103.863062,1.310688],[103.863968,1.309353]]}},
-    {"type":"Feature","id":"singapore-1890:kallang-road","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.860865,1.306488],[103.862425,1.308042],[103.863968,1.309353],[103.866268,1.310296],[103.868195,1.310915]]}},
-    {"type":"Feature","id":"singapore-1890:syed-alwi","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.855693,1.310063],[103.856614,1.308944],[103.857953,1.307649],[103.859115,1.306112],[103.860018,1.305125]]}},
-    {"type":"Feature","id":"singapore-1890:chinatown-frontages","properties":{"kind":"zone","source":"aranjo1890","role":"shop","gap_m":0.0,"origin":"inferred_parcels","use_reference":"ura-districts","form_reference":"ura-shophouse","storeys":[2,3]},"geometry":{"type":"Polygon","coordinates":[[[103.84076,1.279716],[103.843485,1.283353],[103.84577,1.286065],[103.847785,1.285597],[103.84906,1.284935],[103.849104,1.283199],[103.847083,1.281601],[103.845502,1.280526],[103.844108,1.279427],[103.842796,1.277965],[103.841489,1.277361],[103.84076,1.279716]]]}},
-    {"type":"Feature","id":"singapore-1890:tanjong-pagar-neil","properties":{"kind":"zone","source":"aranjo1890","role":"shop","gap_m":0.0,"origin":"inferred_parcels","use_reference":"ura-districts","form_reference":"ura-shophouse","storeys":[2,2]},"geometry":{"type":"Polygon","coordinates":[[[103.843782,1.280181],[103.845281,1.280439],[103.845216,1.279088],[103.844737,1.276789],[103.844207,1.274133],[103.843068,1.272831],[103.842198,1.273904],[103.842481,1.276093],[103.843087,1.278278],[103.842107,1.277724],[103.840616,1.2772],[103.839913,1.277548],[103.843782,1.280181]]]}},
-    {"type":"Feature","id":"singapore-1890:boat-quay-godowns","properties":{"kind":"zone","source":"aranjo1890","role":"warehouse","gap_m":2.0,"origin":"inferred_parcels","use_reference":"nlb-docks","frontage_m":[9,14],"depth_m":[16,25],"storeys":[2,3]},"geometry":{"type":"Polygon","coordinates":[[[103.849441,1.28856],[103.850555,1.287123],[103.851511,1.286519],[103.852275,1.286664],[103.852343,1.285682],[103.851284,1.283964],[103.850285,1.284319],[103.849066,1.285017],[103.848504,1.285869],[103.849441,1.28856]]]}},
-    {"type":"Feature","id":"singapore-1890:kampong-glam-shophouses","properties":{"kind":"zone","source":"aranjo1890","role":"shop","gap_m":0.0,"origin":"inferred_parcels","use_reference":"ura-districts","form_reference":"ura-shophouse","storeys":[2,2]},"geometry":{"type":"Polygon","coordinates":[[[103.854688,1.304385],[103.856598,1.305939],[103.858436,1.30523],[103.85963,1.305762],[103.861821,1.306287],[103.86319,1.305425],[103.863679,1.303891],[103.861442,1.301885],[103.859985,1.300266],[103.858114,1.299281],[103.856164,1.300321],[103.854492,1.301485],[103.854688,1.304385]]]}},
-    {"type":"Feature","id":"singapore-1890:little-india-frontages","properties":{"kind":"zone","source":"aranjo1890","role":"shop","gap_m":0.0,"origin":"inferred_parcels","use_reference":"ura-districts","form_reference":"ura-shophouse","storeys":[2,2]},"geometry":{"type":"Polygon","coordinates":[[[103.850767,1.304156],[103.852516,1.306919],[103.854338,1.309157],[103.8556,1.31029],[103.857319,1.309026],[103.858115,1.307647],[103.856847,1.306433],[103.855721,1.304919],[103.853643,1.302481],[103.852308,1.302651],[103.850767,1.304156]]]}},
-    {"type":"Feature","id":"singapore-1890:tanjong-pagar-dock-buildings","properties":{"kind":"zone","source":"aranjo1890","role":"warehouse","gap_m":4.0,"origin":"inferred_parcels","use_reference":"nlb-docks","frontage_m":[10,17],"depth_m":[14,24],"storeys":[1,2],"setback_m":[0,2]},"geometry":{"type":"Polygon","coordinates":[[[103.839167,1.268932],[103.840433,1.270119],[103.841757,1.271369],[103.842477,1.271668],[103.842572,1.270288],[103.842112,1.269064],[103.84106,1.267454],[103.840161,1.267691],[103.839066,1.267844],[103.839167,1.268932]]]}},
-    {"type":"Feature","id":"singapore-1890:pearl-hill-open-ground","properties":{"kind":"park","source":"aranjo1890","interpretation":"Pearl's Hill and printed People's Park; contemporary limits approximate"},"geometry":{"type":"Polygon","coordinates":[[[103.839047,1.286236],[103.841648,1.286851],[103.843136,1.286946],[103.845153,1.286104],[103.843485,1.284158],[103.842159,1.282479],[103.8402,1.280193],[103.839614,1.28029],[103.837616,1.280626],[103.837256,1.28167],[103.83729,1.283365],[103.837318,1.286158],[103.839047,1.286236]]]}},
-    {"type":"Feature","id":"singapore-1890:fort-canning-slope","properties":{"kind":"steep","source":"aranjo1890","interpretation":"Open Fort Canning hill envelope read from 1890 hachures"},"geometry":{"type":"Polygon","coordinates":[[[103.845482,1.296532],[103.847078,1.297421],[103.848432,1.297522],[103.849518,1.296858],[103.849905,1.295416],[103.849853,1.293451],[103.849149,1.291814],[103.848106,1.291519],[103.847347,1.291858],[103.846005,1.29192],[103.844691,1.292415],[103.84456,1.293655],[103.844672,1.295308],[103.845482,1.296532]]]}},
-    {"type":"Feature","id":"singapore-1890:padang","properties":{"kind":"park","source":"aranjo1890","interpretation":"Ground by the Esplanade; locate and confirm independently before terrain override"},"geometry":{"type":"Polygon","coordinates":[[[103.852231,1.293173],[103.85363,1.292745],[103.853404,1.291798],[103.852381,1.29022],[103.851264,1.290825],[103.851434,1.291736],[103.852231,1.293173]]]}},
-    {"type":"Feature","id":"singapore-1890:singapore-river","properties":{"kind":"water","source":"aranjo1890","purpose":"Historical visual planning exclusion only. Rough curve; present land/water alignment is unresolved"},"geometry":{"type":"Polygon","coordinates":[[[103.837965,1.287759],[103.840588,1.289102],[103.841813,1.289692],[103.843089,1.289835],[103.843417,1.289108],[103.844331,1.288686],[103.845177,1.289245],[103.84566,1.290016],[103.846695,1.29098],[103.847769,1.290931],[103.848575,1.290894],[103.84917,1.290932],[103.850114,1.290541],[103.850768,1.289462],[103.851237,1.288435],[103.851739,1.287493],[103.852702,1.2874],[103.853381,1.287075],[103.853245,1.285875],[103.851942,1.285728],[103.850935,1.285975],[103.850232,1.286725],[103.849701,1.288037],[103.849381,1.289275],[103.848485,1.289969],[103.847636,1.29016],[103.846596,1.289919],[103.845848,1.289214],[103.845147,1.288409],[103.843915,1.28771],[103.843068,1.28833],[103.842562,1.288815],[103.841811,1.288861],[103.840368,1.288236],[103.838022,1.287017],[103.837965,1.287759]]]}},
-    {"type":"Feature","id":"singapore-1890:reclamation-outside-shore","properties":{"kind":"water","source":"aranjo1890","purpose":"Historical near-shore exclusions, not replacement coastline surveying"},"geometry":{"type":"Polygon","coordinates":[[[103.86376,1.303099],[103.86524,1.30507],[103.866285,1.30499],[103.868221,1.306521],[103.868652,1.30573],[103.866345,1.302693],[103.861226,1.299492],[103.855967,1.293051],[103.854204,1.288489],[103.853176,1.285649],[103.852585,1.283681],[103.848051,1.276012],[103.846691,1.271834],[103.845914,1.269515],[103.846524,1.265399],[103.845339,1.2646],[103.844335,1.267288],[103.843619,1.269832],[103.844152,1.271738],[103.845422,1.272979],[103.846651,1.274026],[103.847465,1.277289],[103.849823,1.281084],[103.851551,1.283924],[103.852849,1.286779],[103.852476,1.287633],[103.853862,1.292191],[103.854291,1.293356],[103.856137,1.295946],[103.859302,1.299732],[103.86376,1.303099]]]}}
+    {
+      "type": "Feature",
+      "id": "singapore-1890:readable-city-corridor",
+      "properties": {
+        "kind": "coverage",
+        "source": "aranjo1890",
+        "confidence": "selectively traced; unknown holes remain unknown",
+        "purpose": "building placement limit; coverage of complete historical road survey is not asserted"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.831942,
+              1.268839
+            ],
+            [
+              103.836239,
+              1.276607
+            ],
+            [
+              103.838221,
+              1.282007
+            ],
+            [
+              103.837472,
+              1.286852
+            ],
+            [
+              103.843709,
+              1.291432
+            ],
+            [
+              103.847398,
+              1.298168
+            ],
+            [
+              103.851032,
+              1.30409
+            ],
+            [
+              103.856199,
+              1.310785
+            ],
+            [
+              103.85967,
+              1.316279
+            ],
+            [
+              103.864857,
+              1.313324
+            ],
+            [
+              103.868493,
+              1.311336
+            ],
+            [
+              103.869625,
+              1.308159
+            ],
+            [
+              103.865829,
+              1.30382
+            ],
+            [
+              103.861336,
+              1.301117
+            ],
+            [
+              103.858776,
+              1.299114
+            ],
+            [
+              103.856687,
+              1.296111
+            ],
+            [
+              103.854443,
+              1.292816
+            ],
+            [
+              103.852987,
+              1.287229
+            ],
+            [
+              103.852884,
+              1.283727
+            ],
+            [
+              103.848324,
+              1.276053
+            ],
+            [
+              103.845652,
+              1.270413
+            ],
+            [
+              103.845665,
+              1.26465
+            ],
+            [
+              103.841873,
+              1.264334
+            ],
+            [
+              103.836984,
+              1.265727
+            ],
+            [
+              103.832021,
+              1.266036
+            ],
+            [
+              103.831942,
+              1.268839
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:south-bridge",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 9,
+        "display_rank": 3,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.849167,
+            1.289296
+          ],
+          [
+            103.848783,
+            1.288003
+          ],
+          [
+            103.848198,
+            1.286519
+          ],
+          [
+            103.847662,
+            1.285364
+          ],
+          [
+            103.847151,
+            1.284186
+          ],
+          [
+            103.846471,
+            1.282901
+          ],
+          [
+            103.845919,
+            1.281904
+          ],
+          [
+            103.845388,
+            1.281233
+          ],
+          [
+            103.844502,
+            1.28048
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:new-bridge",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 9,
+        "display_rank": 3,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.84708,
+            1.288707
+          ],
+          [
+            103.845911,
+            1.286167
+          ],
+          [
+            103.844273,
+            1.28385
+          ],
+          [
+            103.842781,
+            1.281716
+          ],
+          [
+            103.840462,
+            1.279295
+          ],
+          [
+            103.837555,
+            1.276541
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:neil",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 7,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.844502,
+            1.28048
+          ],
+          [
+            103.842661,
+            1.278748
+          ],
+          [
+            103.841076,
+            1.277619
+          ],
+          [
+            103.837555,
+            1.276541
+          ],
+          [
+            103.835353,
+            1.275451
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:tanjong-pagar",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 8,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.844502,
+            1.28048
+          ],
+          [
+            103.844101,
+            1.277736
+          ],
+          [
+            103.843314,
+            1.274478
+          ],
+          [
+            103.842726,
+            1.271759
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:anseon-road-as-labelled",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "width_m": 8,
+        "display_rank": 2,
+        "source_year": 1893,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8441962,
+            1.2743128
+          ],
+          [
+            103.8449045,
+            1.2752609
+          ],
+          [
+            103.845629,
+            1.2761275
+          ],
+          [
+            103.8462905,
+            1.2768479
+          ],
+          [
+            103.8467923,
+            1.2773307
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:cantonment",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 8,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.835239,
+            1.269803
+          ],
+          [
+            103.836908,
+            1.270569
+          ],
+          [
+            103.839312,
+            1.271073
+          ],
+          [
+            103.841261,
+            1.271212
+          ],
+          [
+            103.842726,
+            1.271759
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:havelock",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 7,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.838543,
+            1.286749
+          ],
+          [
+            103.840919,
+            1.287624
+          ],
+          [
+            103.843076,
+            1.287661
+          ],
+          [
+            103.844943,
+            1.286581
+          ],
+          [
+            103.845911,
+            1.286167
+          ],
+          [
+            103.847662,
+            1.285364
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:upper-cross-south",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 6,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.847662,
+            1.285364
+          ],
+          [
+            103.848679,
+            1.284877
+          ],
+          [
+            103.849983,
+            1.284246
+          ],
+          [
+            103.851286,
+            1.283991
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:pagoda",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 5,
+        "display_rank": 1,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.844867,
+            1.284665
+          ],
+          [
+            103.845861,
+            1.284228
+          ],
+          [
+            103.847071,
+            1.283798
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:temple",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 5,
+        "display_rank": 1,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.84404,
+            1.2836
+          ],
+          [
+            103.845141,
+            1.283152
+          ],
+          [
+            103.846529,
+            1.282561
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:smith",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 5,
+        "display_rank": 1,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.843183,
+            1.282475
+          ],
+          [
+            103.844282,
+            1.282001
+          ],
+          [
+            103.845791,
+            1.281617
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:sago",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 5,
+        "display_rank": 1,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.842115,
+            1.281024
+          ],
+          [
+            103.843381,
+            1.280629
+          ],
+          [
+            103.844943,
+            1.280628
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:pearl-hill-east-approach",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 5,
+        "display_rank": 1,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.839693,
+            1.279874
+          ],
+          [
+            103.840462,
+            1.279295
+          ],
+          [
+            103.841076,
+            1.277619
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:dock-approach",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "width_m": 8,
+        "display_rank": 2,
+        "source_year": 1893,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8406464,
+            1.2690337
+          ],
+          [
+            103.8411886,
+            1.2698927
+          ],
+          [
+            103.8418453,
+            1.2708693
+          ],
+          [
+            103.8423971,
+            1.2717954
+          ],
+          [
+            103.8429473,
+            1.2726136
+          ],
+          [
+            103.8435234,
+            1.2734176
+          ],
+          [
+            103.8441962,
+            1.2743128
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:north-bridge",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 9,
+        "display_rank": 3,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.849996,
+            1.290791
+          ],
+          [
+            103.851077,
+            1.292835
+          ],
+          [
+            103.852563,
+            1.294484
+          ],
+          [
+            103.853771,
+            1.296011
+          ],
+          [
+            103.85498,
+            1.297565
+          ],
+          [
+            103.856234,
+            1.299367
+          ],
+          [
+            103.858007,
+            1.301678
+          ],
+          [
+            103.860063,
+            1.304193
+          ],
+          [
+            103.861984,
+            1.30591
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:victoria",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 8,
+        "display_rank": 3,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.84894,
+            1.290709
+          ],
+          [
+            103.850212,
+            1.293184
+          ],
+          [
+            103.851571,
+            1.294948
+          ],
+          [
+            103.853425,
+            1.297272
+          ],
+          [
+            103.855298,
+            1.299866
+          ],
+          [
+            103.857245,
+            1.302365
+          ],
+          [
+            103.858889,
+            1.304361
+          ],
+          [
+            103.860018,
+            1.305125
+          ],
+          [
+            103.861023,
+            1.307237
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:beach",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 8,
+        "display_rank": 3,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.852365,
+            1.289976
+          ],
+          [
+            103.853628,
+            1.292315
+          ],
+          [
+            103.85416,
+            1.293416
+          ],
+          [
+            103.855979,
+            1.2956
+          ],
+          [
+            103.858086,
+            1.298472
+          ],
+          [
+            103.859224,
+            1.299773
+          ],
+          [
+            103.861423,
+            1.301614
+          ],
+          [
+            103.863776,
+            1.303343
+          ],
+          [
+            103.865186,
+            1.305062
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:bras-basah",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 8,
+        "display_rank": 3,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.849844,
+            1.295702
+          ],
+          [
+            103.851571,
+            1.294948
+          ],
+          [
+            103.852563,
+            1.294484
+          ],
+          [
+            103.85416,
+            1.293416
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:rochor",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 8,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.850088,
+            1.304481
+          ],
+          [
+            103.852387,
+            1.303414
+          ],
+          [
+            103.853757,
+            1.302177
+          ],
+          [
+            103.855298,
+            1.299866
+          ],
+          [
+            103.856234,
+            1.299367
+          ],
+          [
+            103.858086,
+            1.298472
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:arab",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 6,
+        "display_rank": 1,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.855614,
+            1.305332
+          ],
+          [
+            103.857346,
+            1.303855
+          ],
+          [
+            103.858771,
+            1.302627
+          ],
+          [
+            103.860249,
+            1.301379
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:jalan-sultan",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 7,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.856553,
+            1.30805
+          ],
+          [
+            103.858368,
+            1.306211
+          ],
+          [
+            103.860018,
+            1.305125
+          ],
+          [
+            103.86157,
+            1.303781
+          ],
+          [
+            103.862682,
+            1.302692
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:serangoon",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 8,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.850414,
+            1.303727
+          ],
+          [
+            103.852812,
+            1.306509
+          ],
+          [
+            103.855693,
+            1.310063
+          ],
+          [
+            103.857856,
+            1.31297
+          ],
+          [
+            103.85968,
+            1.315235
+          ],
+          [
+            103.86189,
+            1.318042
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:lavender",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 8,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.85968,
+            1.315235
+          ],
+          [
+            103.860787,
+            1.31369
+          ],
+          [
+            103.86182,
+            1.31224
+          ],
+          [
+            103.863062,
+            1.310688
+          ],
+          [
+            103.863968,
+            1.309353
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:kallang-road",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 8,
+        "display_rank": 2,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.860865,
+            1.306488
+          ],
+          [
+            103.862425,
+            1.308042
+          ],
+          [
+            103.863968,
+            1.309353
+          ],
+          [
+            103.866268,
+            1.310296
+          ],
+          [
+            103.868195,
+            1.310915
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:syed-alwi",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "width_m": 5,
+        "display_rank": 1,
+        "source_year": 1890,
+        "width_basis": "Estimated by visual function; map scale cannot support measurements",
+        "surface_basis": "Unresolved; generic surface for review only"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.855693,
+            1.310063
+          ],
+          [
+            103.856614,
+            1.308944
+          ],
+          [
+            103.857953,
+            1.307649
+          ],
+          [
+            103.859115,
+            1.306112
+          ],
+          [
+            103.860018,
+            1.305125
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:chinatown-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "aranjo1890",
+        "role": "shop",
+        "gap_m": 0.0,
+        "origin": "inferred_parcels",
+        "use_reference": "ura-districts",
+        "form_reference": "ura-shophouse",
+        "storeys": [
+          2,
+          3
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84076,
+              1.279716
+            ],
+            [
+              103.843485,
+              1.283353
+            ],
+            [
+              103.84577,
+              1.286065
+            ],
+            [
+              103.847785,
+              1.285597
+            ],
+            [
+              103.84906,
+              1.284935
+            ],
+            [
+              103.849104,
+              1.283199
+            ],
+            [
+              103.847083,
+              1.281601
+            ],
+            [
+              103.845502,
+              1.280526
+            ],
+            [
+              103.844108,
+              1.279427
+            ],
+            [
+              103.842796,
+              1.277965
+            ],
+            [
+              103.841489,
+              1.277361
+            ],
+            [
+              103.84076,
+              1.279716
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:tanjong-pagar-neil",
+      "properties": {
+        "kind": "zone",
+        "source": "aranjo1890",
+        "role": "shop",
+        "gap_m": 0.0,
+        "origin": "inferred_parcels",
+        "use_reference": "ura-districts",
+        "form_reference": "ura-shophouse",
+        "storeys": [
+          2,
+          2
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.843782,
+              1.280181
+            ],
+            [
+              103.845281,
+              1.280439
+            ],
+            [
+              103.845216,
+              1.279088
+            ],
+            [
+              103.844737,
+              1.276789
+            ],
+            [
+              103.844207,
+              1.274133
+            ],
+            [
+              103.843068,
+              1.272831
+            ],
+            [
+              103.842198,
+              1.273904
+            ],
+            [
+              103.842481,
+              1.276093
+            ],
+            [
+              103.843087,
+              1.278278
+            ],
+            [
+              103.842107,
+              1.277724
+            ],
+            [
+              103.840616,
+              1.2772
+            ],
+            [
+              103.839913,
+              1.277548
+            ],
+            [
+              103.843782,
+              1.280181
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:boat-quay-godowns",
+      "properties": {
+        "kind": "zone",
+        "source": "aranjo1890",
+        "role": "warehouse",
+        "gap_m": 2.0,
+        "origin": "inferred_parcels",
+        "use_reference": "nlb-docks",
+        "frontage_m": [
+          9,
+          14
+        ],
+        "depth_m": [
+          16,
+          25
+        ],
+        "storeys": [
+          2,
+          3
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.849441,
+              1.28856
+            ],
+            [
+              103.850555,
+              1.287123
+            ],
+            [
+              103.851511,
+              1.286519
+            ],
+            [
+              103.852275,
+              1.286664
+            ],
+            [
+              103.852343,
+              1.285682
+            ],
+            [
+              103.851284,
+              1.283964
+            ],
+            [
+              103.850285,
+              1.284319
+            ],
+            [
+              103.849066,
+              1.285017
+            ],
+            [
+              103.848504,
+              1.285869
+            ],
+            [
+              103.849441,
+              1.28856
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:kampong-glam-shophouses",
+      "properties": {
+        "kind": "zone",
+        "source": "aranjo1890",
+        "role": "shop",
+        "gap_m": 0.0,
+        "origin": "inferred_parcels",
+        "use_reference": "ura-districts",
+        "form_reference": "ura-shophouse",
+        "storeys": [
+          2,
+          2
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.854688,
+              1.304385
+            ],
+            [
+              103.856598,
+              1.305939
+            ],
+            [
+              103.858436,
+              1.30523
+            ],
+            [
+              103.85963,
+              1.305762
+            ],
+            [
+              103.861821,
+              1.306287
+            ],
+            [
+              103.86319,
+              1.305425
+            ],
+            [
+              103.863679,
+              1.303891
+            ],
+            [
+              103.861442,
+              1.301885
+            ],
+            [
+              103.859985,
+              1.300266
+            ],
+            [
+              103.858114,
+              1.299281
+            ],
+            [
+              103.856164,
+              1.300321
+            ],
+            [
+              103.854492,
+              1.301485
+            ],
+            [
+              103.854688,
+              1.304385
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:little-india-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "aranjo1890",
+        "role": "shop",
+        "gap_m": 0.0,
+        "origin": "inferred_parcels",
+        "use_reference": "ura-districts",
+        "form_reference": "ura-shophouse",
+        "storeys": [
+          2,
+          2
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.850767,
+              1.304156
+            ],
+            [
+              103.852516,
+              1.306919
+            ],
+            [
+              103.854338,
+              1.309157
+            ],
+            [
+              103.8556,
+              1.31029
+            ],
+            [
+              103.857319,
+              1.309026
+            ],
+            [
+              103.858115,
+              1.307647
+            ],
+            [
+              103.856847,
+              1.306433
+            ],
+            [
+              103.855721,
+              1.304919
+            ],
+            [
+              103.853643,
+              1.302481
+            ],
+            [
+              103.852308,
+              1.302651
+            ],
+            [
+              103.850767,
+              1.304156
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:pearl-hill-open-ground",
+      "properties": {
+        "kind": "park",
+        "source": "aranjo1890",
+        "interpretation": "Pearl's Hill and printed People's Park; contemporary limits approximate"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.839047,
+              1.286236
+            ],
+            [
+              103.841648,
+              1.286851
+            ],
+            [
+              103.843136,
+              1.286946
+            ],
+            [
+              103.845153,
+              1.286104
+            ],
+            [
+              103.843485,
+              1.284158
+            ],
+            [
+              103.842159,
+              1.282479
+            ],
+            [
+              103.8402,
+              1.280193
+            ],
+            [
+              103.839614,
+              1.28029
+            ],
+            [
+              103.837616,
+              1.280626
+            ],
+            [
+              103.837256,
+              1.28167
+            ],
+            [
+              103.83729,
+              1.283365
+            ],
+            [
+              103.837318,
+              1.286158
+            ],
+            [
+              103.839047,
+              1.286236
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:fort-canning-slope",
+      "properties": {
+        "kind": "steep",
+        "source": "aranjo1890",
+        "interpretation": "Open Fort Canning hill envelope read from 1890 hachures"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.845482,
+              1.296532
+            ],
+            [
+              103.847078,
+              1.297421
+            ],
+            [
+              103.848432,
+              1.297522
+            ],
+            [
+              103.849518,
+              1.296858
+            ],
+            [
+              103.849905,
+              1.295416
+            ],
+            [
+              103.849853,
+              1.293451
+            ],
+            [
+              103.849149,
+              1.291814
+            ],
+            [
+              103.848106,
+              1.291519
+            ],
+            [
+              103.847347,
+              1.291858
+            ],
+            [
+              103.846005,
+              1.29192
+            ],
+            [
+              103.844691,
+              1.292415
+            ],
+            [
+              103.84456,
+              1.293655
+            ],
+            [
+              103.844672,
+              1.295308
+            ],
+            [
+              103.845482,
+              1.296532
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1890:padang",
+      "properties": {
+        "kind": "park",
+        "source": "aranjo1890",
+        "interpretation": "Ground by the Esplanade; locate and confirm independently before terrain override"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.852231,
+              1.293173
+            ],
+            [
+              103.85363,
+              1.292745
+            ],
+            [
+              103.853404,
+              1.291798
+            ],
+            [
+              103.852381,
+              1.29022
+            ],
+            [
+              103.851264,
+              1.290825
+            ],
+            [
+              103.851434,
+              1.291736
+            ],
+            [
+              103.852231,
+              1.293173
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:singapore-river-lower",
+      "properties": {
+        "kind": "water_surface",
+        "source": "bartholomew1893",
+        "basin": "river"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8387275,
+              1.2884654
+            ],
+            [
+              103.8391728,
+              1.2886535
+            ],
+            [
+              103.8396423,
+              1.2892991
+            ],
+            [
+              103.8402022,
+              1.2896048
+            ],
+            [
+              103.8406103,
+              1.2896322
+            ],
+            [
+              103.8407636,
+              1.2894386
+            ],
+            [
+              103.8406521,
+              1.2883773
+            ],
+            [
+              103.8408166,
+              1.2877789
+            ],
+            [
+              103.8409698,
+              1.2875853
+            ],
+            [
+              103.8413587,
+              1.2880583
+            ],
+            [
+              103.8421654,
+              1.2892054
+            ],
+            [
+              103.8426946,
+              1.2897817
+            ],
+            [
+              103.8434723,
+              1.2901479
+            ],
+            [
+              103.8440757,
+              1.2904657
+            ],
+            [
+              103.8444176,
+              1.2901313
+            ],
+            [
+              103.8444337,
+              1.2894702
+            ],
+            [
+              103.8446917,
+              1.2887476
+            ],
+            [
+              103.8450901,
+              1.2881283
+            ],
+            [
+              103.8456402,
+              1.2877873
+            ],
+            [
+              103.8458483,
+              1.2883604
+            ],
+            [
+              103.8458145,
+              1.288995
+            ],
+            [
+              103.845863,
+              1.2893305
+            ],
+            [
+              103.8461711,
+              1.2896307
+            ],
+            [
+              103.8467197,
+              1.2897615
+            ],
+            [
+              103.8471633,
+              1.2898418
+            ],
+            [
+              103.8479102,
+              1.2898989
+            ],
+            [
+              103.8481716,
+              1.2899715
+            ],
+            [
+              103.8487491,
+              1.289724
+            ],
+            [
+              103.8493685,
+              1.2893808
+            ],
+            [
+              103.8497363,
+              1.2890321
+            ],
+            [
+              103.8502444,
+              1.2882071
+            ],
+            [
+              103.8508121,
+              1.2873129
+            ],
+            [
+              103.8512331,
+              1.2864637
+            ],
+            [
+              103.8517251,
+              1.2862998
+            ],
+            [
+              103.8523123,
+              1.286699
+            ],
+            [
+              103.8524963,
+              1.2868145
+            ],
+            [
+              103.8529785,
+              1.2860039
+            ],
+            [
+              103.8525139,
+              1.2856816
+            ],
+            [
+              103.8518686,
+              1.2854595
+            ],
+            [
+              103.8511926,
+              1.2855079
+            ],
+            [
+              103.8504151,
+              1.2857214
+            ],
+            [
+              103.8498505,
+              1.2862516
+            ],
+            [
+              103.8495473,
+              1.2868543
+            ],
+            [
+              103.8492118,
+              1.2876199
+            ],
+            [
+              103.8490377,
+              1.2881511
+            ],
+            [
+              103.8488619,
+              1.2885746
+            ],
+            [
+              103.848215,
+              1.2888243
+            ],
+            [
+              103.8475939,
+              1.2890597
+            ],
+            [
+              103.8471261,
+              1.2891016
+            ],
+            [
+              103.8465195,
+              1.2891478
+            ],
+            [
+              103.846013,
+              1.2889213
+            ],
+            [
+              103.8459581,
+              1.2887343
+            ],
+            [
+              103.8460581,
+              1.2884615
+            ],
+            [
+              103.8459273,
+              1.2878456
+            ],
+            [
+              103.8460208,
+              1.2871417
+            ],
+            [
+              103.8456707,
+              1.2869371
+            ],
+            [
+              103.8455401,
+              1.2874805
+            ],
+            [
+              103.8449562,
+              1.2878765
+            ],
+            [
+              103.8442932,
+              1.2882076
+            ],
+            [
+              103.843919,
+              1.2887048
+            ],
+            [
+              103.8437803,
+              1.2892888
+            ],
+            [
+              103.8435351,
+              1.2897145
+            ],
+            [
+              103.8428979,
+              1.2894517
+            ],
+            [
+              103.8423864,
+              1.2889018
+            ],
+            [
+              103.8417071,
+              1.288155
+            ],
+            [
+              103.8414909,
+              1.2876227
+            ],
+            [
+              103.8411392,
+              1.2873104
+            ],
+            [
+              103.8407875,
+              1.2875776
+            ],
+            [
+              103.8404069,
+              1.2882233
+            ],
+            [
+              103.8403763,
+              1.2890735
+            ],
+            [
+              103.8403119,
+              1.2893991
+            ],
+            [
+              103.8399601,
+              1.2890867
+            ],
+            [
+              103.83951,
+              1.2885753
+            ],
+            [
+              103.8390808,
+              1.2883059
+            ],
+            [
+              103.8387275,
+              1.2884654
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:roadstead-and-dock-edge",
+      "properties": {
+        "kind": "water_surface",
+        "source": "bartholomew1893",
+        "basin": "coast"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8441902,
+              1.2652949
+            ],
+            [
+              103.8441129,
+              1.2659175
+            ],
+            [
+              103.8438323,
+              1.26687
+            ],
+            [
+              103.8434356,
+              1.2681767
+            ],
+            [
+              103.8430631,
+              1.2693613
+            ],
+            [
+              103.8426615,
+              1.2703446
+            ],
+            [
+              103.8429617,
+              1.2712652
+            ],
+            [
+              103.8436926,
+              1.272563
+            ],
+            [
+              103.844493,
+              1.2738586
+            ],
+            [
+              103.8450995,
+              1.2738123
+            ],
+            [
+              103.8459868,
+              1.2739728
+            ],
+            [
+              103.846958,
+              1.273942
+            ],
+            [
+              103.8480502,
+              1.2738803
+            ],
+            [
+              103.8483325,
+              1.2741948
+            ],
+            [
+              103.8480294,
+              1.2753772
+            ],
+            [
+              103.8477197,
+              1.2761285
+            ],
+            [
+              103.8475133,
+              1.2768225
+            ],
+            [
+              103.8486896,
+              1.2783083
+            ],
+            [
+              103.8496738,
+              1.2797194
+            ],
+            [
+              103.8504709,
+              1.2807994
+            ],
+            [
+              103.8512067,
+              1.281841
+            ],
+            [
+              103.8519682,
+              1.2828682
+            ],
+            [
+              103.8526831,
+              1.2842474
+            ],
+            [
+              103.8530526,
+              1.2851657
+            ],
+            [
+              103.8530091,
+              1.2857333
+            ],
+            [
+              103.8529785,
+              1.2860039
+            ],
+            [
+              103.8524963,
+              1.2868145
+            ],
+            [
+              103.8528513,
+              1.2873424
+            ],
+            [
+              103.8531498,
+              1.2881552
+            ],
+            [
+              103.8532789,
+              1.2886633
+            ],
+            [
+              103.853692,
+              1.2895938
+            ],
+            [
+              103.8541826,
+              1.2904814
+            ],
+            [
+              103.8546151,
+              1.291546
+            ],
+            [
+              103.8548781,
+              1.292306
+            ],
+            [
+              103.8551476,
+              1.2929175
+            ],
+            [
+              103.8557381,
+              1.2935323
+            ],
+            [
+              103.8550074,
+              1.2939734
+            ],
+            [
+              103.8556818,
+              1.2949764
+            ],
+            [
+              103.8567838,
+              1.2961411
+            ],
+            [
+              103.8573905,
+              1.2972542
+            ],
+            [
+              103.858065,
+              1.2982572
+            ],
+            [
+              103.8590073,
+              1.2991843
+            ],
+            [
+              103.8655372,
+              1.2955663
+            ],
+            [
+              103.8452679,
+              1.2654224
+            ],
+            [
+              103.8446548,
+              1.2650375
+            ],
+            [
+              103.8441902,
+              1.2652949
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:west-dock-inlet",
+      "properties": {
+        "kind": "water_surface",
+        "source": "bartholomew1893",
+        "basin": "coast"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.835431,
+              1.2706553
+            ],
+            [
+              103.8362151,
+              1.2708731
+            ],
+            [
+              103.8373282,
+              1.2710533
+            ],
+            [
+              103.8383107,
+              1.2711974
+            ],
+            [
+              103.8393529,
+              1.2712721
+            ],
+            [
+              103.8404015,
+              1.2711983
+            ],
+            [
+              103.8409967,
+              1.2709772
+            ],
+            [
+              103.8408595,
+              1.2705097
+            ],
+            [
+              103.8404901,
+              1.270171
+            ],
+            [
+              103.8396883,
+              1.2699269
+            ],
+            [
+              103.8385848,
+              1.2698137
+            ],
+            [
+              103.8371958,
+              1.26975
+            ],
+            [
+              103.8368248,
+              1.2698831
+            ],
+            [
+              103.835431,
+              1.2706553
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:mapped-nearshore-land",
+      "properties": {
+        "kind": "known_dry",
+        "source": "bartholomew1893"
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                103.8410961,
+                1.267589
+              ],
+              [
+                103.8441129,
+                1.2659175
+              ],
+              [
+                103.8438323,
+                1.26687
+              ],
+              [
+                103.8434356,
+                1.2681767
+              ],
+              [
+                103.8430631,
+                1.2693613
+              ],
+              [
+                103.8426615,
+                1.2703446
+              ],
+              [
+                103.8429617,
+                1.2712652
+              ],
+              [
+                103.8436926,
+                1.272563
+              ],
+              [
+                103.844493,
+                1.2738586
+              ],
+              [
+                103.8450995,
+                1.2738123
+              ],
+              [
+                103.8459868,
+                1.2739728
+              ],
+              [
+                103.846958,
+                1.273942
+              ],
+              [
+                103.8480502,
+                1.2738803
+              ],
+              [
+                103.8483325,
+                1.2741948
+              ],
+              [
+                103.8480294,
+                1.2753772
+              ],
+              [
+                103.8477197,
+                1.2761285
+              ],
+              [
+                103.8475133,
+                1.2768225
+              ],
+              [
+                103.8486896,
+                1.2783083
+              ],
+              [
+                103.8496738,
+                1.2797194
+              ],
+              [
+                103.8504709,
+                1.2807994
+              ],
+              [
+                103.8512067,
+                1.281841
+              ],
+              [
+                103.8519682,
+                1.2828682
+              ],
+              [
+                103.8526831,
+                1.2842474
+              ],
+              [
+                103.8530526,
+                1.2851657
+              ],
+              [
+                103.8530091,
+                1.2857333
+              ],
+              [
+                103.8529785,
+                1.2860039
+              ],
+              [
+                103.8525139,
+                1.2856816
+              ],
+              [
+                103.8518686,
+                1.2854595
+              ],
+              [
+                103.8511926,
+                1.2855079
+              ],
+              [
+                103.8504151,
+                1.2857214
+              ],
+              [
+                103.8498505,
+                1.2862516
+              ],
+              [
+                103.8495473,
+                1.2868543
+              ],
+              [
+                103.8492118,
+                1.2876199
+              ],
+              [
+                103.8490377,
+                1.2881511
+              ],
+              [
+                103.8488619,
+                1.2885746
+              ],
+              [
+                103.848215,
+                1.2888243
+              ],
+              [
+                103.8475939,
+                1.2890597
+              ],
+              [
+                103.8471261,
+                1.2891016
+              ],
+              [
+                103.8465195,
+                1.2891478
+              ],
+              [
+                103.846013,
+                1.2889213
+              ],
+              [
+                103.8459581,
+                1.2887343
+              ],
+              [
+                103.8460581,
+                1.2884615
+              ],
+              [
+                103.8459273,
+                1.2878456
+              ],
+              [
+                103.8460208,
+                1.2871417
+              ],
+              [
+                103.8456707,
+                1.2869371
+              ],
+              [
+                103.8455401,
+                1.2874805
+              ],
+              [
+                103.8449562,
+                1.2878765
+              ],
+              [
+                103.8442932,
+                1.2882076
+              ],
+              [
+                103.843919,
+                1.2887048
+              ],
+              [
+                103.8437803,
+                1.2892888
+              ],
+              [
+                103.8435351,
+                1.2897145
+              ],
+              [
+                103.8428979,
+                1.2894517
+              ],
+              [
+                103.8423864,
+                1.2889018
+              ],
+              [
+                103.8417071,
+                1.288155
+              ],
+              [
+                103.8414909,
+                1.2876227
+              ],
+              [
+                103.8411392,
+                1.2873104
+              ],
+              [
+                103.8407875,
+                1.2875776
+              ],
+              [
+                103.8404069,
+                1.2882233
+              ],
+              [
+                103.8403763,
+                1.2890735
+              ],
+              [
+                103.8403119,
+                1.2893991
+              ],
+              [
+                103.8399601,
+                1.2890867
+              ],
+              [
+                103.83951,
+                1.2885753
+              ],
+              [
+                103.8390808,
+                1.2883059
+              ],
+              [
+                103.8387819,
+                1.2884409
+              ],
+              [
+                103.8374661,
+                1.286484
+              ],
+              [
+                103.8375488,
+                1.2864093
+              ],
+              [
+                103.837902,
+                1.2862498
+              ],
+              [
+                103.8389185,
+                1.2860867
+              ],
+              [
+                103.8392122,
+                1.2857571
+              ],
+              [
+                103.8395638,
+                1.2854898
+              ],
+              [
+                103.8405353,
+                1.2850855
+              ],
+              [
+                103.8416406,
+                1.2851738
+              ],
+              [
+                103.8426347,
+                1.2857352
+              ],
+              [
+                103.8429865,
+                1.2860476
+              ],
+              [
+                103.8430738,
+                1.28617
+              ],
+              [
+                103.8435666,
+                1.2859238
+              ],
+              [
+                103.8440794,
+                1.2851289
+              ],
+              [
+                103.8453485,
+                1.2846867
+              ],
+              [
+                103.8467326,
+                1.2850476
+              ],
+              [
+                103.8470827,
+                1.2852521
+              ],
+              [
+                103.8474488,
+                1.2856313
+              ],
+              [
+                103.8477131,
+                1.2851058
+              ],
+              [
+                103.8481181,
+                1.2845638
+              ],
+              [
+                103.8486827,
+                1.2840336
+              ],
+              [
+                103.8495533,
+                1.2835512
+              ],
+              [
+                103.8497087,
+                1.2835086
+              ],
+              [
+                103.8493398,
+                1.283011
+              ],
+              [
+                103.8493048,
+                1.2829626
+              ],
+              [
+                103.8485846,
+                1.2819432
+              ],
+              [
+                103.8478036,
+                1.2808849
+              ],
+              [
+                103.8477631,
+                1.2808284
+              ],
+              [
+                103.8468239,
+                1.2794821
+              ],
+              [
+                103.8456969,
+                1.2780584
+              ],
+              [
+                103.8452153,
+                1.2770547
+              ],
+              [
+                103.8452455,
+                1.2760855
+              ],
+              [
+                103.845219,
+                1.2760807
+              ],
+              [
+                103.8449232,
+                1.2761032
+              ],
+              [
+                103.8435502,
+                1.2758138
+              ],
+              [
+                103.8425035,
+                1.2748478
+              ],
+              [
+                103.8417032,
+                1.2735522
+              ],
+              [
+                103.841651,
+                1.2734638
+              ],
+              [
+                103.8415437,
+                1.2732733
+              ],
+              [
+                103.8414455,
+                1.2733097
+              ],
+              [
+                103.8408179,
+                1.2734439
+              ],
+              [
+                103.8397693,
+                1.2735177
+              ],
+              [
+                103.8394259,
+                1.2735173
+              ],
+              [
+                103.8383837,
+                1.2734426
+              ],
+              [
+                103.8381993,
+                1.2734225
+              ],
+              [
+                103.8372168,
+                1.2732785
+              ],
+              [
+                103.837179,
+                1.2732726
+              ],
+              [
+                103.8360659,
+                1.2730923
+              ],
+              [
+                103.8357876,
+                1.2730313
+              ],
+              [
+                103.8350035,
+                1.2728136
+              ],
+              [
+                103.8340014,
+                1.2722871
+              ],
+              [
+                103.8338199,
+                1.2720553
+              ],
+              [
+                103.8356795,
+                1.2710249
+              ],
+              [
+                103.8357064,
+                1.2710081
+              ],
+              [
+                103.8357312,
+                1.2709886
+              ],
+              [
+                103.8357535,
+                1.2709667
+              ],
+              [
+                103.8357733,
+                1.2709426
+              ],
+              [
+                103.8357903,
+                1.2709164
+              ],
+              [
+                103.8358043,
+                1.2708886
+              ],
+              [
+                103.8358153,
+                1.2708592
+              ],
+              [
+                103.8358231,
+                1.2708286
+              ],
+              [
+                103.8358276,
+                1.2707971
+              ],
+              [
+                103.8358288,
+                1.2707658
+              ],
+              [
+                103.8362151,
+                1.2708731
+              ],
+              [
+                103.8373282,
+                1.2710533
+              ],
+              [
+                103.8383107,
+                1.2711974
+              ],
+              [
+                103.8393529,
+                1.2712721
+              ],
+              [
+                103.8404015,
+                1.2711983
+              ],
+              [
+                103.8409967,
+                1.2709772
+              ],
+              [
+                103.8408595,
+                1.2705097
+              ],
+              [
+                103.8404901,
+                1.270171
+              ],
+              [
+                103.8396883,
+                1.2699269
+              ],
+              [
+                103.8385848,
+                1.2698137
+              ],
+              [
+                103.8371958,
+                1.26975
+              ],
+              [
+                103.8405401,
+                1.267897
+              ],
+              [
+                103.8409591,
+                1.2680246
+              ],
+              [
+                103.8410961,
+                1.267589
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                103.8561293,
+                1.2993297
+              ],
+              [
+                103.8554548,
+                1.2983267
+              ],
+              [
+                103.855332,
+                1.2981244
+              ],
+              [
+                103.8548855,
+                1.2973054
+              ],
+              [
+                103.8540184,
+                1.296389
+              ],
+              [
+                103.8537461,
+                1.296049
+              ],
+              [
+                103.8530716,
+                1.2950459
+              ],
+              [
+                103.8526677,
+                1.2939383
+              ],
+              [
+                103.8528056,
+                1.2931665
+              ],
+              [
+                103.8527275,
+                1.2929892
+              ],
+              [
+                103.8526551,
+                1.292805
+              ],
+              [
+                103.8524127,
+                1.2921047
+              ],
+              [
+                103.8520593,
+                1.2912346
+              ],
+              [
+                103.8516515,
+                1.2904968
+              ],
+              [
+                103.8514755,
+                1.2907135
+              ],
+              [
+                103.8511077,
+                1.2910622
+              ],
+              [
+                103.8506997,
+                1.2913604
+              ],
+              [
+                103.8500803,
+                1.2917037
+              ],
+              [
+                103.8498908,
+                1.2917964
+              ],
+              [
+                103.8493132,
+                1.2920439
+              ],
+              [
+                103.8477441,
+                1.2921297
+              ],
+              [
+                103.8477251,
+                1.2921244
+              ],
+              [
+                103.8472245,
+                1.2920862
+              ],
+              [
+                103.8469678,
+                1.2920531
+              ],
+              [
+                103.8465241,
+                1.2919729
+              ],
+              [
+                103.8463848,
+                1.2919437
+              ],
+              [
+                103.8460941,
+                1.2918743
+              ],
+              [
+                103.8458366,
+                1.2921261
+              ],
+              [
+                103.8445741,
+                1.2927041
+              ],
+              [
+                103.8431181,
+                1.2924131
+              ],
+              [
+                103.8425682,
+                1.2921235
+              ],
+              [
+                103.8418452,
+                1.291783
+              ],
+              [
+                103.8417412,
+                1.2917067
+              ],
+              [
+                103.8417334,
+                1.2917125
+              ],
+              [
+                103.8410546,
+                1.2918208
+              ],
+              [
+                103.8388265,
+                1.2885072
+              ],
+              [
+                103.8391728,
+                1.2886535
+              ],
+              [
+                103.8396423,
+                1.2892991
+              ],
+              [
+                103.8402022,
+                1.2896048
+              ],
+              [
+                103.8406103,
+                1.2896322
+              ],
+              [
+                103.8407636,
+                1.2894386
+              ],
+              [
+                103.8406521,
+                1.2883773
+              ],
+              [
+                103.8408166,
+                1.2877789
+              ],
+              [
+                103.8409698,
+                1.2875853
+              ],
+              [
+                103.8413587,
+                1.2880583
+              ],
+              [
+                103.8421654,
+                1.2892054
+              ],
+              [
+                103.8426946,
+                1.2897817
+              ],
+              [
+                103.8434723,
+                1.2901479
+              ],
+              [
+                103.8440757,
+                1.2904657
+              ],
+              [
+                103.8444176,
+                1.2901313
+              ],
+              [
+                103.8444337,
+                1.2894702
+              ],
+              [
+                103.8446917,
+                1.2887476
+              ],
+              [
+                103.8450901,
+                1.2881283
+              ],
+              [
+                103.8456402,
+                1.2877873
+              ],
+              [
+                103.8458483,
+                1.2883604
+              ],
+              [
+                103.8458145,
+                1.288995
+              ],
+              [
+                103.845863,
+                1.2893305
+              ],
+              [
+                103.8461711,
+                1.2896307
+              ],
+              [
+                103.8467197,
+                1.2897615
+              ],
+              [
+                103.8471633,
+                1.2898418
+              ],
+              [
+                103.8479102,
+                1.2898989
+              ],
+              [
+                103.8481716,
+                1.2899715
+              ],
+              [
+                103.8487491,
+                1.289724
+              ],
+              [
+                103.8493685,
+                1.2893808
+              ],
+              [
+                103.8497363,
+                1.2890321
+              ],
+              [
+                103.8502444,
+                1.2882071
+              ],
+              [
+                103.8508121,
+                1.2873129
+              ],
+              [
+                103.8512331,
+                1.2864637
+              ],
+              [
+                103.8517251,
+                1.2862998
+              ],
+              [
+                103.8523123,
+                1.286699
+              ],
+              [
+                103.8524963,
+                1.2868145
+              ],
+              [
+                103.8528513,
+                1.2873424
+              ],
+              [
+                103.8531498,
+                1.2881552
+              ],
+              [
+                103.8532789,
+                1.2886633
+              ],
+              [
+                103.853692,
+                1.2895938
+              ],
+              [
+                103.8541826,
+                1.2904814
+              ],
+              [
+                103.8546151,
+                1.291546
+              ],
+              [
+                103.8548781,
+                1.292306
+              ],
+              [
+                103.8551476,
+                1.2929175
+              ],
+              [
+                103.8557381,
+                1.2935323
+              ],
+              [
+                103.8550074,
+                1.2939734
+              ],
+              [
+                103.8556818,
+                1.2949764
+              ],
+              [
+                103.8567838,
+                1.2961411
+              ],
+              [
+                103.8573905,
+                1.2972542
+              ],
+              [
+                103.858065,
+                1.2982572
+              ],
+              [
+                103.858913,
+                1.2990916
+              ],
+              [
+                103.8569289,
+                1.300191
+              ],
+              [
+                103.8564687,
+                1.2997381
+              ],
+              [
+                103.8561293,
+                1.2993297
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:dock-plan-extent",
+      "properties": {
+        "kind": "coverage",
+        "source": "bartholomew1893"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8389509,
+              1.2687776
+            ],
+            [
+              103.8402674,
+              1.2697872
+            ],
+            [
+              103.8410856,
+              1.2716888
+            ],
+            [
+              103.8422071,
+              1.2741469
+            ],
+            [
+              103.8440253,
+              1.2750597
+            ],
+            [
+              103.8456079,
+              1.2753059
+            ],
+            [
+              103.8455174,
+              1.2739069
+            ],
+            [
+              103.8443508,
+              1.2724881
+            ],
+            [
+              103.8436957,
+              1.2710396
+            ],
+            [
+              103.8438423,
+              1.2692556
+            ],
+            [
+              103.8441437,
+              1.2673858
+            ],
+            [
+              103.844079,
+              1.2659725
+            ],
+            [
+              103.8389509,
+              1.2687776
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tanjong-pagar-stores-a",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "warehouse",
+        "height_m": 6.5,
+        "use_reference": "nlb-docks",
+        "height_basis": "Low single- or two-storey dock service shape inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8428228,
+              1.2701103
+            ],
+            [
+              103.8428341,
+              1.2702852
+            ],
+            [
+              103.8436343,
+              1.2704215
+            ],
+            [
+              103.8436665,
+              1.2702587
+            ],
+            [
+              103.8428228,
+              1.2701103
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tanjong-pagar-stores-b",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "warehouse",
+        "height_m": 8.0,
+        "use_reference": "nlb-docks",
+        "height_basis": "Low single- or two-storey dock service shape inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8414096,
+              1.2701687
+            ],
+            [
+              103.8418356,
+              1.2708022
+            ],
+            [
+              103.8424389,
+              1.2705404
+            ],
+            [
+              103.8424615,
+              1.2703105
+            ],
+            [
+              103.8421242,
+              1.269809
+            ],
+            [
+              103.8414096,
+              1.2701687
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tanjong-pagar-west-shop",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "workshop",
+        "height_m": 6.0,
+        "use_reference": "nlb-docks",
+        "height_basis": "Low single- or two-storey dock service shape inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.840953,
+              1.2692262
+            ],
+            [
+              103.8410691,
+              1.2694516
+            ],
+            [
+              103.8417951,
+              1.2692668
+            ],
+            [
+              103.8416611,
+              1.2690149
+            ],
+            [
+              103.840953,
+              1.2692262
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tanjong-pagar-graving-dock-store",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "warehouse",
+        "height_m": 6.5,
+        "use_reference": "nlb-docks",
+        "height_basis": "Low single- or two-storey dock service shape inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8429209,
+              1.2679908
+            ],
+            [
+              103.8428695,
+              1.2691787
+            ],
+            [
+              103.8430695,
+              1.2692128
+            ],
+            [
+              103.843121,
+              1.2680249
+            ],
+            [
+              103.8429209,
+              1.2679908
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tanjong-pagar-yard-building",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "workshop",
+        "height_m": 6.5,
+        "use_reference": "nlb-docks",
+        "height_basis": "Low single- or two-storey dock service shape inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8405742,
+              1.2722982
+            ],
+            [
+              103.8406227,
+              1.2726336
+            ],
+            [
+              103.840997,
+              1.2727161
+            ],
+            [
+              103.8409824,
+              1.2723256
+            ],
+            [
+              103.8405742,
+              1.2722982
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tanjong-pagar-yard-store",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "warehouse",
+        "height_m": 6.5,
+        "use_reference": "nlb-docks",
+        "height_basis": "Low single- or two-storey dock service shape inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8412018,
+              1.2724939
+            ],
+            [
+              103.8415068,
+              1.2731582
+            ],
+            [
+              103.8416972,
+              1.2731252
+            ],
+            [
+              103.8413744,
+              1.2724345
+            ],
+            [
+              103.8412018,
+              1.2724939
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tanjong-pagar-yard-office",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "transport_auxiliary",
+        "height_m": 6.5,
+        "use_reference": "nlb-docks",
+        "height_basis": "Low single- or two-storey dock service shape inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8414389,
+              1.2721089
+            ],
+            [
+              103.8414341,
+              1.2723652
+            ],
+            [
+              103.8417132,
+              1.2724641
+            ],
+            [
+              103.8417616,
+              1.27222
+            ],
+            [
+              103.8414389,
+              1.2721089
+            ]
+          ]
+        ]
+      }
+    }
   ]
 }

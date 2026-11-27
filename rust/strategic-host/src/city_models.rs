@@ -628,8 +628,9 @@ impl Catalogue {
         let year = date.get(..4).and_then(|date| date.parse::<u16>().ok()).unwrap_or(0);
         let tiles = self.roads.index.visible(|i|self.roads.tiles[i].1.bounds, camera, size);
         let mut wanted = tiles.into_iter().map(|(i,_)| i).filter(|&i| {
-            let [start,end] = self.roads.tiles[i].1.years;
-            (start..end).contains(&year)
+            let tile = &self.roads.tiles[i].1;
+            let [start,end] = tile.years;
+            (start..end).contains(&year) && (tile.water_features == 0 || camera.mpp < 21.)
         }).collect::<Vec<_>>();
         self.roads.overflow = wanted.len().saturating_sub(city_roads::PAGE_SLOTS);
         wanted.truncate(city_roads::PAGE_SLOTS);
@@ -701,7 +702,8 @@ impl Catalogue {
                 else if self.roads.failed.contains(&index) { "missing_or_invalid" }
                 else if self.roads.pending.contains_key(&index) { "loading" }
                 else { "queued" };
-            serde_json::json!({"city":self.city_ids[*city],"tile":tile.file,"index":index,"cpu":state,"fallback":"retained"})
+            serde_json::json!({"city":self.city_ids[*city],"tile":tile.file,"index":index,"cpu":state,
+                "fallback":"retained","road_features":tile.features,"water_features":tile.water_features})
         }).collect::<Vec<_>>();
         serde_json::json!({
             "roads":{"wanted":roads,"pending":self.roads.pending.len(),"resident":self.roads.cache.len(),
