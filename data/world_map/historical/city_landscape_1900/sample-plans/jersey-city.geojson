@@ -4,13 +4,13 @@
     "city_id": "us_city_new_jersey_jersey_city",
     "name": "Jersey City",
     "key": "jersey-city-harrison-hudson",
-    "revision": 2,
+    "revision": 3,
     "status": "candidate_sample",
     "origin": [
       -74.048,
       40.722
     ],
-    "method": "Harrison street and land traces connect the Paulus Hook and Hamilton Park districts through Van Vorst toward the Bergen ridge. Historic wet margins, the Morris Canal basin and named railroad facilities are managed separately. Building parcels, track detail, surface materials and heights are inferred. The ridge uses an out-of-control extrapolation and its detailed coverage is provisional. Newark and West Bergen remain outside the confirmed corridor. No ferry crossing is authored as a road.",
+    "method": "Harrison street and land traces connect the Paulus Hook and Hamilton Park districts through Van Vorst toward the Bergen ridge. Historic wet margins, the Morris Canal basin and named railroad facilities are managed separately. Building parcels, track detail, surface materials and heights are inferred. Six independent surviving Bergen junctions check the east transform locally. Montgomery Street has one continuous alignment through the overlap, Church Street stays separate, and the Duncan and West Side Avenue intersection is connected. Detailed area coverage is provisional. Newark and West Bergen remain outside the confirmed corridor. No ferry crossing is authored as a road.",
     "registration": {
       "model": "Affine pixel to WGS84 fitted in the east crop",
       "matrix": [
@@ -223,7 +223,88 @@
       ],
       "leave_one_out_rms_m": 20.4,
       "leave_one_out_max_m": 44.7,
-      "limits": "Residuals apply around Paulus Hook and Hamilton Park only. The central and Bergen crops share the same 1894 sheet with an exact image-space offset. Geodetic registration westward and small port features lack independent control."
+      "limits": "Residuals apply around Paulus Hook and Hamilton Park only. The central and Bergen crops share the same 1894 sheet with an exact image-space offset. Geodetic registration westward and small port features lack independent control.",
+      "bergen_independent_controls": {
+        "reference": "NJ Office of GIS surviving street intersections matched to the Harrison Bergen crop. Modern streets were not copied into the historic plan.",
+        "crop_origin_in_sheet": [
+          360,
+          890
+        ],
+        "crop_display_multiplier": 2,
+        "controls": [
+          {
+            "name": "West Side Avenue and Pavonia Avenue",
+            "crop_pixel_2x": [
+              893,
+              275
+            ],
+            "wgs84_approx": [
+              -74.07134547082086,
+              40.73440968248431
+            ]
+          },
+          {
+            "name": "West Side Avenue and Montgomery Street",
+            "crop_pixel_2x": [
+              776,
+              652
+            ],
+            "wgs84_approx": [
+              -74.07545633030936,
+              40.728364249777414
+            ]
+          },
+          {
+            "name": "West Side Avenue and Duncan Avenue",
+            "crop_pixel_2x": [
+              744,
+              754
+            ],
+            "wgs84_approx": [
+              -74.07660868951089,
+              40.726678213781035
+            ]
+          },
+          {
+            "name": "West Side Avenue and Communipaw Avenue",
+            "crop_pixel_2x": [
+              589,
+              1132
+            ],
+            "wgs84_approx": [
+              -74.08133718589518,
+              40.72090035085041
+            ]
+          },
+          {
+            "name": "Bergen Avenue and Montgomery Street",
+            "crop_pixel_2x": [
+              1134,
+              776
+            ],
+            "wgs84_approx": [
+              -74.06807670017946,
+              40.725316398201194
+            ]
+          },
+          {
+            "name": "Summit Avenue and Montgomery Street",
+            "crop_pixel_2x": [
+              1268,
+              824
+            ],
+            "wgs84_approx": [
+              -74.06519305712148,
+              40.72413592147299
+            ]
+          }
+        ],
+        "existing_east_fit_rms_m": 11.1,
+        "existing_east_fit_max_m": 19.6,
+        "alternative_local_affine_leave_one_out_rms_m": 18.3,
+        "alternative_local_affine_leave_one_out_max_m": 30.0,
+        "limits": "Selected named junctions only. No independent parcel, shoreline, track or West Bergen occupation check."
+      }
     },
     "road_validity": {
       "start": 1894,
@@ -10907,68 +10988,88 @@
         "type": "LineString",
         "coordinates": [
           [
-            -74.0443054,
-            40.7175215
+            -74.0755139,
+            40.72846
           ],
           [
-            -74.0454514,
-            40.7177223
+            -74.0746936,
+            40.7281454
           ],
           [
-            -74.046535,
-            40.7180885
+            -74.071465,
+            40.7268588
           ],
           [
-            -74.0482362,
-            40.7186563
+            -74.0708228,
+            40.7265673
           ],
           [
-            -74.049265,
-            40.7189633
+            -74.0689147,
+            40.7257124
           ],
           [
-            -74.0507253,
-            40.7194825
+            -74.0679951,
+            40.7253328
           ],
           [
-            -74.0525623,
-            40.7201547
+            -74.0672536,
+            40.7249763
           ],
           [
-            -74.0541482,
-            40.7207248
+            -74.0651998,
+            40.7241545
           ],
           [
-            -74.0557805,
-            40.721197
-          ],
-          [
-            -74.05734,
-            40.7217811
-          ],
-          [
-            -74.058938,
-            40.7223008
+            -74.0629316,
+            40.7234611
           ],
           [
             -74.0602504,
             40.7227661
           ],
           [
-            -74.0618322,
-            40.7233531
+            -74.058938,
+            40.7223008
           ],
           [
-            -74.0648215,
-            40.7242963
+            -74.05734,
+            40.7217811
           ],
           [
-            -74.0664274,
-            40.7247823
+            -74.0557805,
+            40.721197
           ],
           [
-            -74.0679301,
-            40.7252202
+            -74.0541482,
+            40.7207248
+          ],
+          [
+            -74.0525623,
+            40.7201547
+          ],
+          [
+            -74.0507253,
+            40.7194825
+          ],
+          [
+            -74.049265,
+            40.7189633
+          ],
+          [
+            -74.0482362,
+            40.7186563
+          ],
+          [
+            -74.046535,
+            40.7180885
+          ],
+          [
+            -74.0454514,
+            40.7177223
+          ],
+          [
+            -74.0443054,
+            40.7175215
           ]
         ]
       },
@@ -10981,7 +11082,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Harrison centerline traced continuously across the central and west crops. The duplicate offset alignment at the overlap was removed.",
+        "name": "Montgomery Street"
       }
     },
     {
@@ -12117,62 +12219,6 @@
     },
     {
       "type": "Feature",
-      "id": "bergen-montgomery",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -74.0755139,
-            40.72846
-          ],
-          [
-            -74.0714588,
-            40.7267886
-          ],
-          [
-            -74.0688358,
-            40.7257542
-          ],
-          [
-            -74.0675172,
-            40.7252187
-          ],
-          [
-            -74.0655079,
-            40.7244027
-          ],
-          [
-            -74.0632393,
-            40.7235184
-          ],
-          [
-            -74.0604382,
-            40.7224608
-          ],
-          [
-            -74.0581214,
-            40.7217784
-          ],
-          [
-            -74.0548321,
-            40.7205534
-          ]
-        ]
-      },
-      "properties": {
-        "kind": "road",
-        "source": "harrison-1894",
-        "width_m": 16,
-        "display_surface": "setts",
-        "display_rank": 2,
-        "source_year": 1894,
-        "width_basis": "Interpreted width from the mapped street hierarchy.",
-        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
-      }
-    },
-    {
-      "type": "Feature",
       "id": "bergen-glenwood",
       "geometry": {
         "type": "LineString",
@@ -12304,6 +12350,10 @@
           [
             -74.0774732,
             40.7270835
+          ],
+          [
+            -74.0765781,
+            40.7267938
           ]
         ]
       },
@@ -12316,7 +12366,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Harrison axis west of West Side Avenue. The previous gap at the West Side Avenue junction was joined.",
+        "name": "Duncan Avenue"
       }
     },
     {
@@ -12330,24 +12381,28 @@
             40.730877
           ],
           [
-            -74.0743115,
-            40.729744
+            -74.0743378,
+            40.72973
           ],
           [
             -74.0755139,
             40.72846
           ],
           [
-            -74.0765221,
-            40.7272203
+            -74.076063,
+            40.7275077
           ],
           [
-            -74.077374,
-            40.7257694
+            -74.0765781,
+            40.7267938
           ],
           [
-            -74.0784001,
-            40.7243585
+            -74.0773518,
+            40.7257665
+          ],
+          [
+            -74.0783333,
+            40.7243498
           ],
           [
             -74.0795475,
@@ -12356,6 +12411,10 @@
           [
             -74.0807094,
             40.721518
+          ],
+          [
+            -74.0814716,
+            40.7209229
           ]
         ]
       },
@@ -12368,7 +12427,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Harrison axis with the mapped Duncan and Communipaw junctions. The terminal section follows the visible mapped street.",
+        "name": "West Side Avenue"
       }
     },
     {
@@ -12474,28 +12534,28 @@
         "type": "LineString",
         "coordinates": [
           [
-            -74.069961,
-            40.7269065
+            -74.07021,
+            40.7269215
           ],
           [
-            -74.0676909,
-            40.7263169
+            -74.0688595,
+            40.7267115
           ],
           [
-            -74.0661936,
-            40.7253765
+            -74.067681,
+            40.7264544
           ],
           [
-            -74.0647812,
-            40.7244645
+            -74.0664759,
+            40.7260204
           ],
           [
-            -74.0628248,
-            40.7238116
+            -74.0651595,
+            40.7255719
           ],
           [
-            -74.060346,
-            40.7230387
+            -74.0647747,
+            40.7254526
           ]
         ]
       },
@@ -12508,7 +12568,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Harrison axis north of Montgomery. The previous eastward extrapolation into Montgomery was removed.",
+        "name": "Church Street"
       }
     },
     {
