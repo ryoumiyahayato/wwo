@@ -158,6 +158,8 @@ B4 两城 WCB 含目录 5,685,672 字节，城市地表叠加层 2,884,596 字�
 
 里尔 r7 从 1898 年原图补绘 Porte de Béthune 城门通道、外廓和 Faubourg 初段。只在图示过沟处标跨越。沿街选绘 21 处印刷建筑图形，另保留军事外廓的开放地。共生成 4,779 处摆放、57 个建筑页和 12 个动态页。首段范围止于图内，Faubourg 其余方向未完成。原图可辨街线和建筑图形，七个近似控制点的留一 RMS 仍为 85.4 米，建筑高度与街面材质为推定。 [市档案馆 Faubourg 说明](https://www.calameo.com/books/002898805c2bd3735edd0)
 
+里尔 r8 补绘 Fives 东南铁路场及 Rue de Bavay，修正 Rue de Cambrai 和 Rue de Valenciennes 的内城走向，连接 Porte de Valenciennes 的图示过沟。内侧广场短段按端点推定，Bavay 与铁路的交会标高未定。绘入 Ronchin 演习场北部，开放地和铁路用地分别处理。4,758 处摆放，57 个建筑页，12 个动态页。新增原图房屋和工场的摆放。重新定位道路后，重叠的推定地块退出。Build 179 实机确认内城接到过沟通道，四种模式和重启加载实际 r8。演习场其余范围、铁路场以东的街坊及配准风险继续返工。 [1898 年地图](https://commons.wikimedia.org/wiki/File:Plan_de_la_ville_de_Lille_-_btv1b8441777f.jpg) [市档案馆街名](https://archives.lille.fr/media/fbfb6f71-917b-4114-9de8-7bf98509ef2c.pdf#page=96) [省档案馆演习场](https://archivesdepartementales.lenord.fr/media/f5f65562-7859-44e9-b68c-9995f57f5442.pdf)
+
 Build 171 以纽约和泽西城的同一视野复测分片重叠。两个近景分别加载 18 个道路、历史水面和地类页，双岸概览加载 24 页。按实际载荷分配同一 16 MiB GPU 页内容区，保留 1 MiB 单页格式上限。两个近景与概览均无页数溢出或存储碎片导致的页面延期。九城三轮共 27 次指定近景进入、27 次离场释放，实际目录为 1,209 个建筑页。两轮排空后每城的 CPU/GPU 观测值相同。第十城和全部走廊验收仍缺。
 
 曼彻斯特 Ancoats 候选 r1 使用 1893 年 Ordnance Survey Lancashire CIV.7 首版。四个近似控制点的留一误差 RMS 为 11.3 米，最大 18.6 米。已描绘 17 段道路、Rochdale 运河局部和四个厂房主段。71 处建筑摆放进入 4 个建筑页，另有 11 个道路、水岸和地表页。Build 178 在 1.76 米/像素核对了普通排屋、厂房与 Union Street Bridge。排屋体量和铺装为推定，部分排屋尚未补齐。Exchange 与 Market Street、Castlefield 和 Rusholme 不在此次覆盖内。 [曼彻斯特样区计划](sample-plans/manchester.geojson) [1893 年原图](https://maps.nls.uk/view/126522815)
