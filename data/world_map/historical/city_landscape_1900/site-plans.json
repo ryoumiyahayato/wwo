@@ -1,6 +1,139 @@
 {
   "version": 1,
   "sources": {
+    "buenos_aires_1895": {
+      "name": "Archivo General de la Nación, Plano de Buenos Aires de la Guía Nacional",
+      "version": "1895, AR-AGN-MAP01-II68",
+      "url": "https://www.argentina.gob.ar/sites/default/files/6._buenos_aires_1895.pdf",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Use period northern and western street/rail occupations and accompany the waterfront with nautical chart evidence."
+    },
+    "mx_mapoteca": {
+      "name": "Manuel Orozco y Berra Mapoteca",
+      "version": "Including 1900 Mexico City official plan, date other sheets independently",
+      "url": "https://patrimonio-cyt-cdmx.colmex.mx/mapoteca-manuel-orozco-y-berra/",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Identify plan sheets and historical built units. Keep measured road coverage separate from proposed grid."
+    },
+    "jalisco_mapoteca": {
+      "name": "Universidad de Guadalajara, Biblioteca Pública del Estado de Jalisco Mapoteca Histórica",
+      "version": "Select dated municipal plans",
+      "url": "https://virtual.bpej.udg.mx/coleccion/17",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Locate the original Guadalajara sheet, then separate grid and cross-ravine corridors."
+    },
+    "rosario_1890": {
+      "name": "Municipalidad de Rosario, Presentación Barese, plano de Rosario",
+      "version": "1890 plan reproduced by municipal archive",
+      "url": "https://www.rosario.gob.ar/ArchivosWeb/Presentacion_Barese_PDF.pdf",
+      "rights": "Citation only; verify reproduction rights before asset use.",
+      "role": "Use existing street grid and rail/port corridors, preserve the barranca edge."
+    },
+    "montevideo_1897": {
+      "name": "Armada Nacional, Catálogo de Cartografía Náutica Histórica Internacional",
+      "version": "Novísimo plano de la ciudad de Montevideo, 1897, ref. 15318",
+      "url": "https://sohma.armada.mil.uy/attachments/article/350/Cartografia%20Nautica%20Historica%20Internacional%20Actualizado%20al%2001-07-2024.pdf",
+      "rights": "Citation only; verify reproduction rights before asset use.",
+      "role": "Locate the catalogue plan, then distinguish shoreline and the urban area."
+    },
+    "latam_uchicago": {
+      "name": "University of Chicago Library, Late 19th- and Early 20th-Century Latin American Cities",
+      "version": "Individual plans, including Lima 1904",
+      "url": "https://www.lib.uchicago.edu/e/collections/maps/latam-cities/",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Use place-specific plans and survey dates; verify printed limits and planned proposals."
+    },
+    "brazil_mhn": {
+      "name": "Brasil Museu Histórico Nacional, Inventário da Coleção Mapas e Plantas",
+      "version": "São Paulo 1890 and Salvador 1894 entries",
+      "url": "https://atom-museuhistorico.museus.gov.br/downloads/mapas-e-plantas.pdf",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Obtain the specified map and verify year before geometry use. The inventory identifies kind of detail."
+    },
+    "recife_1875": {
+      "name": "Biblioteca Nacional do Brasil, Planta da cidade do Recife e seus arrabaldes",
+      "version": "1875",
+      "url": "https://bdlb.bn.gov.br/acervo/handle/20.500.12156.3/16915",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Establish pre-1900 islands, roads and crossings. Add changes only with a later dated corroborating source."
+    },
+    "valparaiso_1895": {
+      "name": "Biblioteca Nacional de Chile, Plano de Valparaíso",
+      "version": "1895",
+      "url": "https://www.memoriachilena.gob.cl/602/w3-article-68087.html",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Separate level commercial band, hill paths and historic shore."
+    },
+    "bogota_1890": {
+      "name": "Instituto Distrital de Patrimonio Cultural, historic Bogotá maps",
+      "version": "1890 plan reprinted in the city's urban history",
+      "url": "https://idpc.gov.co/publicaciones/descargas/bpf.pdf",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Confirm streams, streets and scope separately. Do not equate the preplanned grid with inhabited blocks."
+    },
+    "mena_uchicago": {
+      "name": "University of Chicago Library, 19th-Century Maps of the Middle East and North Africa",
+      "version": "Sheet-specific, Tunis 1896 G8254.T8",
+      "url": "https://www.lib.uchicago.edu/e/collections/maps/middleeast19/",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Use city plans rather than regional overview for street details. Observe harbour and map borders separately."
+    },
+    "baedeker_syria_1898": {
+      "name": "Baedeker, Palestine and Syria, Smithsonian Libraries",
+      "version": "1898, individual Beirut, Damascus and Aleppo city inserts",
+      "url": "https://www.si.edu/object/siris_sil_31163",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Use city inserts for streets, quarters and landmark layout. Confirm whether street width is shown and when measured."
+    },
+    "baedeker_egypt_1898": {
+      "name": "Baedeker, Egypt, Australian War Memorial library",
+      "version": "1898 city and environs plans",
+      "url": "https://www.awm.gov.au/collection/LIB35327",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Use local street and approach plans and confirm natural and historic engineered shoreline alignment."
+    },
+    "qajar_maps": {
+      "name": "ETH Library contents, cartography of Iran, early date plates",
+      "version": "Tabriz 1880 pl. 344; Naseri Tehran 1891 pl. 349",
+      "url": "https://toc.library.ethz.ch/objects/pdf/z01_978-90-04-18401-5_01.pdf",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Use the dated wall/gate and market sheet when available. Apply only the published historical city units."
+    },
+    "baku_1898": {
+      "name": "Plan for the City of Baku, 1898, reproduced in Urban Governance Under Socialism",
+      "version": "1898 plan",
+      "url": "https://uplopen.com/en/books/116/files/ef6098cb-7289-464c-b636-aa182ec081ba.pdf",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Separate proposed alignments from occupied streets. Check municipal and oil-field bounds independently."
+    },
+    "baghdad_reschid_1912": {
+      "name": "IRCICA, Plan von Baghdad after Reschid Bey",
+      "version": "1912 plan, later edition",
+      "url": "https://openaccess.ircica.org/items/f4ac8048-5c7c-4b60-84eb-8eda0a8a32c0/full",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Comparison only. Use documented old gates, bazaar and river relationships; no detail from later revisions without corroboration."
+    },
+    "smyrna_1876": {
+      "name": "Bibliothèque nationale de France, Plan of Smyrna",
+      "version": "1876 naval plan",
+      "url": "https://gallica.bnf.fr/ark:/12148/btv1b53239387c",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Use period waterfront features and district topology. Verify railway and quay completion dates independently."
+    },
+    "cape_thom": {
+      "name": "City of Cape Town, Historic Maps 1900 / Walter Thom",
+      "version": "1892–1900 municipal survey",
+      "url": "https://cityimg.capetown.gov.za/erdas-iws/esri/GeoSpatial%20Datasets/rest/services/Heritage%20Datasets_Historical%20Maps%201900_Cape%20Town/MapServer",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Review geographic extent for roads, buildings and drainage independently. Keep property limits distinct."
+    },
+    "joburg_1897": {
+      "name": "University of the Witwatersrand, Plan of Johannesburg and suburbs",
+      "version": "1897",
+      "url": "https://wiredspace.wits.ac.za/server/api/core/bitstreams/971b60b5-4739-4c1f-926b-784571aba9bf/content",
+      "rights": "Citation only. Verify the map's rights before using it in assets.",
+      "role": "Separate plotted property and mine claims from occupied streets and buildings."
+    },
     "jp_meiji_topographic": {
       "name": "National Diet Library, historic Topographic Maps of Japan",
       "version": "Meiji-era series; tentative surveys 1886–1901 where listed",
@@ -1102,6 +1235,1283 @@
     "Central Asia": "Confirm citadel, bazaars, irrigation and garden edges. Keep residential courtyard form apart from colonial wards."
   },
   "sites": {
+    "reba:chandler:231": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Plaza de Mayo and Montserrat grid",
+          "point": [
+            -58.3731,
+            -34.6084
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "La Boca Riachuelo housing and dock blocks",
+          "point": [
+            -58.362,
+            -34.6355
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Once rail terminus and western frontage",
+          "point": [
+            -58.4069,
+            -34.6086
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Palermo park and former floodplain margin",
+          "point": [
+            -58.4139,
+            -34.5749
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build occupied blocks around the original grid, Once and separate southern industrial strip; distinguish Riachuelo, Puerto Madero basins and the then open northeast lowland.",
+      "morphology": "Low continuous courtyard residences, commercial corners, limited civic volumes and port sheds follow distinct frontages.",
+      "risks": "1895 street openings may be proposals; limit reclamation to documented work installed by the reference date.",
+      "source_preference": [
+        "buenos_aires_1895"
+      ]
+    },
+    "reba:chandler:514": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Plaza de Armas and cathedral grid",
+          "point": [
+            -103.346,
+            20.6763
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "San Juan de Dios market quarter",
+          "point": [
+            -103.3385,
+            20.6742
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Mezquitán northern cemetery approach",
+          "point": [
+            -103.3498,
+            20.6964
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Agua Azul southern rail and park approach",
+          "point": [
+            -103.3478,
+            20.6544
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Connect the civic grid and San Juan de Dios only by established crossings; develop older barrios on occupied grids, thinning toward the cemetery and Agua Azul.",
+      "morphology": "Low courtyard blocks and arcaded market frontages contrast with garden and rail space.",
+      "risks": "Keep the San Juan de Dios ravine before modern covering; do not use Calzada Independencia width as a period surrogate.",
+      "source_preference": [
+        "jalisco_mapoteca"
+      ]
+    },
+    "reba:chandler:804": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "later_comparison_located",
+      "anchors": [
+        {
+          "name": "Plaza Mayor south of the Rímac",
+          "point": [
+            -77.0301,
+            -12.0459
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Barrios Altos parish streets",
+          "point": [
+            -77.0201,
+            -12.0474
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Rímac district and Alameda de los Descalzos",
+          "point": [
+            -77.0264,
+            -12.0331
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Exposición park and former wall corridor",
+          "point": [
+            -77.0368,
+            -12.0617
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Map the grid, former wall alignment and park approaches south of the river, and older suburbs on north-bank routes separately.",
+      "morphology": "Courtyard houses, continuous parapet roofs and small plaza fronts dominate dense core units; reserve irrigated margins and upper-foot slopes.",
+      "risks": "The 1904 plan is a nearest-year comparison; verify changes since 1900. Keep Callao distinct and retain river crossing uncertainty.",
+      "source_preference": [
+        "latam_uchicago"
+      ]
+    },
+    "reba:chandler:921": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Zócalo and cathedral grid",
+          "point": [
+            -99.1331,
+            19.4326
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "La Merced streets and canal approaches",
+          "point": [
+            -99.1236,
+            19.4297
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Buenavista railway and Colonia Guerrero edge",
+          "point": [
+            -99.1517,
+            19.4494
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Paseo de la Reforma and Chapultepec wooded approach",
+          "point": [
+            -99.1683,
+            19.4229
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use occupied older central blocks, documented Cuauhtémoc-era west frontage and discrete yards. Keep east-bank canal areas and southwest park open outside supported settlement.",
+      "morphology": "Dense flat-roof courtyard blocks and strong civic frontages contrast with early peripheral detached lots and the linear boulevard.",
+      "risks": "Verify canal reaches and occupied early colonies independently; planned grid and modern drainage cannot define the built extent.",
+      "source_preference": [
+        "mx_mapoteca"
+      ]
+    },
+    "reba:chandler:944": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Plaza Matriz and Ciudad Vieja peninsula",
+          "point": [
+            -56.2033,
+            -34.9067
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Cordón blocks along 18 de Julio",
+          "point": [
+            -56.178,
+            -34.9029
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Aguada and rail terminus north margin",
+          "point": [
+            -56.1924,
+            -34.8924
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Parque Urbano orientation and open eastern shore",
+          "point": [
+            -56.1606,
+            -34.916
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build the peninsula and documented Ciudad Nueva to Cordón frontage; separate port rail/industrial edges from low density coast and park. Treat detached suburbs independently.",
+      "morphology": "Regular party-wall blocks, small courtyard dwellings and shed yards distinguish core, east and harbour.",
+      "risks": "Outline the bay before port reconstruction and check La Rambla fills and 1900–1905 park works before placing streets.",
+      "source_preference": [
+        "montevideo_1897"
+      ]
+    },
+    "reba:chandler:1184": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Recife Antigo and Marco Zero",
+          "point": [
+            -34.8711,
+            -8.0643
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Santo Antônio and São José market blocks",
+          "point": [
+            -34.8827,
+            -8.0685
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Boa Vista across the Capibaribe",
+          "point": [
+            -34.8905,
+            -8.0589
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Pina tidal margin",
+          "point": [
+            -34.8783,
+            -8.0852
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Construct the port island, Santo Antônio and São José and the occupied Boa Vista corridor; build riverside fragments outward only where the plan shows crossings and settlement.",
+      "morphology": "Gabled colonial row houses, warehouse sheds and masonry civic blocks follow narrow streets on distinct islands.",
+      "risks": "Keep mangrove and tidal land open; verify 1875 through 1900 crossings and exclude later modern dredged and reclaimed blocks.",
+      "source_preference": [
+        "recife_1875"
+      ]
+    },
+    "reba:chandler:1203": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Plaza 25 de Mayo on the Paraná barranca",
+          "point": [
+            -60.6309,
+            -32.9467
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Mercado Central blocks west of the civic core",
+          "point": [
+            -60.6379,
+            -32.9521
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Central Argentino railway approach",
+          "point": [
+            -60.6456,
+            -32.9315
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Tablada southwest transition",
+          "point": [
+            -60.6516,
+            -32.9739
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Reconstruct civic and market grids above the barranca and separately stage the port ramps, rail yard and declining occupied frontage at the southwest edge.",
+      "morphology": "Low party-wall masonry and courtyard lots occupy regular blocks; sheds are limited to dated port and rail areas.",
+      "risks": "Document actual occupied streets separately from layout lines; keep twentieth-century port fills outside historical land.",
+      "source_preference": [
+        "rosario_1890"
+      ]
+    },
+    "reba:chandler:1230": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Praça da Sé and Pelourinho",
+          "point": [
+            -38.5096,
+            -12.9737
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Comércio lower town strip",
+          "point": [
+            -38.5129,
+            -12.9692
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Santo Antônio Além do Carmo crest",
+          "point": [
+            -38.5037,
+            -12.9643
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Campo Grande southwest ridge edge",
+          "point": [
+            -38.5212,
+            -12.9887
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Model the upper town on the ridge, lower strips at the shore, slope paths and the occupied ridge extensions independently.",
+      "morphology": "Steep irregular rows and courtyard institutions contrast with dense waterfront warehouse frontage.",
+      "risks": "Do not flatten the escarpment or extend the later reclaimed Cidade Baixa shore inland or outward.",
+      "source_preference": [
+        "brazil_mhn"
+      ]
+    },
+    "reba:chandler:1257": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Sé and the historical Triângulo",
+          "point": [
+            -46.6335,
+            -23.5508
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Brás and railway-side working blocks",
+          "point": [
+            -46.6154,
+            -23.5401
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Bom Retiro and Luz yards",
+          "point": [
+            -46.6386,
+            -23.5298
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Tamanduateí floodplain and Cambuci approach",
+          "point": [
+            -46.6198,
+            -23.5615
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build the plateau core and documented Viaduto do Chá connection; separately locate east-side rail industry and corridor settlement along the valleys.",
+      "morphology": "Contiguous central masonry, lower detached outer lots, gabled sheds and rails on the valley floor.",
+      "risks": "Preserve floodplain interruptions and confirm occupied Paulista and Brás sections as of the reference date separately.",
+      "source_preference": [
+        "brazil_mhn"
+      ]
+    },
+    "reba:chandler:1494": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Plaza Sotomayor and lower port",
+          "point": [
+            -71.6282,
+            -33.0381
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "El Almendral lower street grid",
+          "point": [
+            -71.6122,
+            -33.0455
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Cerro Concepción and Alegre slopes",
+          "point": [
+            -71.629,
+            -33.0419
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Barón eastern rail-foot margin",
+          "point": [
+            -71.6001,
+            -33.0447
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build the 1895 shore band, surveyed Almendral grid and only occupied hill spurs along documented climbing links.",
+      "morphology": "Dense lower commercial blocks and warehouses contrast with smaller terraces and staggered rooflines on hills.",
+      "risks": "Use pre-1906 geometry; confirm ascensor opening dates and exclude later seawalls and fills.",
+      "source_preference": [
+        "valparaiso_1895"
+      ]
+    },
+    "reba:chandler:194": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Plaza de Bolívar and La Candelaria",
+          "point": [
+            -74.076,
+            4.598
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Las Nieves parish blocks",
+          "point": [
+            -74.07,
+            4.6099
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "San Cristóbal stream approach",
+          "point": [
+            -74.0842,
+            4.5854
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Chapinero route north of San Diego",
+          "point": [
+            -74.0684,
+            4.6226
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Conserve the compact La Candelaria and parish block network on the foothill. Add only documented street-front continuation north of San Diego and keep separate settlement gaps.",
+      "morphology": "Courtyard masonry and tiled roofs sit in tight grids broken by streams and steep eastern slopes.",
+      "risks": "Do not read planned axes as occupied or use today's culverted river traces as complete period street geometry.",
+      "source_preference": [
+        "bogota_1890"
+      ]
+    },
+    "reba:chandler:33": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Mansheya and old customs",
+          "point": [
+            29.887,
+            31.199
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Anfushi and Ottoman street strips",
+          "point": [
+            29.876,
+            31.205
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Western harbour warehouses",
+          "point": [
+            29.858,
+            31.182
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mahmoudiyah canal and south fringe",
+          "point": [
+            29.922,
+            31.178
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate the two harbours, peninsula and documented mainland grid. Retain canal, wetland and rail land.",
+      "morphology": "Stone and plaster perimeter blocks, low waterfront warehouses and courtyards.",
+      "risks": "No Corniche motorway or later reclamation. Check dock and rail chronology.",
+      "source_preference": [
+        "baedeker_egypt_1898"
+      ]
+    },
+    "reba:chandler:34": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Kasbah lower souks and old gate",
+          "point": [
+            3.06,
+            36.784
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Upper Kasbah courtyard lanes",
+          "point": [
+            3.057,
+            36.786
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Marine quarter and historic port",
+          "point": [
+            3.064,
+            36.791
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mustapha slope and southeast fringe",
+          "point": [
+            3.058,
+            36.748
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Reconstruct hillside medina and dated French strips and harbour independently. Preserve steep dead ground and shore.",
+      "morphology": "Terraced courtyard masonry, lower city frontage and narrow docks.",
+      "risks": "Exclude later reclaimed sea and suburban roads. Locate a dated Algiers city sheet before tracing coverage.",
+      "source_preference": [
+        "mena_uchicago",
+        "loc_cities"
+      ]
+    },
+    "reba:chandler:355": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Umayyad Mosque and Hamidiyah",
+          "point": [
+            36.306,
+            33.512
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Bab Touma and quarter courts",
+          "point": [
+            36.318,
+            33.514
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Barada and western garden plots",
+          "point": [
+            36.285,
+            33.515
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Midan south road and Ghouta fringe",
+          "point": [
+            36.302,
+            33.487
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use walled core, linear Midan and dated northwestern extensions as separate blocks and gardens.",
+      "morphology": "Masonry courtyard houses with flat roofs and enclosed bazaar lanes.",
+      "risks": "Do not use later Hejaz terminus or modern enclosed streams. Confirm Barada bridges independently.",
+      "source_preference": [
+        "baedeker_syria_1898"
+      ]
+    },
+    "reba:chandler:656": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Market Square and old commercial blocks",
+          "point": [
+            28.041,
+            -26.204
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Jeppestown and east lots",
+          "point": [
+            28.069,
+            -26.203
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Rand railway and mining strip",
+          "point": [
+            28.05,
+            -26.223
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Braamfontein ridgeline and north fringe",
+          "point": [
+            28.033,
+            -26.186
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate occupied town grids, mining claims and compounds, and independent northern and southern works.",
+      "morphology": "Commercial masonry and shallow house lots, detached mining yards and dumps.",
+      "risks": "Use date from actual occupancy or opening. Mining claims do not show a built footprint.",
+      "source_preference": [
+        "joburg_1897"
+      ]
+    },
+    "reba:chandler:885": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Jemaa el-Fnaa and souks",
+          "point": [
+            -7.99,
+            31.626
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Mouassine lanes and riads",
+          "point": [
+            -7.989,
+            31.633
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Bab Doukkala wall and garden fringe",
+          "point": [
+            -8,
+            31.636
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Agdal orchard walls and south fringe",
+          "point": [
+            -7.983,
+            31.593
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use walled medina and palace/market belts. Keep Agdal, orchards and open peripheral land distinct.",
+      "morphology": "Low earthen courtyard houses and flat roofs, enclosed gardens and larger court precincts.",
+      "risks": "Exclude Ville Nouvelle and rail. Find dated Moroccan city plan and corroborate gate and circuit geometry.",
+      "source_preference": [
+        "mena_uchicago",
+        "loc_cities"
+      ]
+    },
+    "reba:chandler:1369": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Tabriz historic bazaar courts",
+          "point": [
+            46.29,
+            38.081
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Sheshgelan old quarters",
+          "point": [
+            46.305,
+            38.083
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Mehraneh Rud and bridge line",
+          "point": [
+            46.293,
+            38.088
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Arg and southwestern market fringe",
+          "point": [
+            46.286,
+            38.074
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build bazaar, period gates and adjacent residential courts with preserved wet and garden breaks.",
+      "morphology": "Brick arch ranges, dense courtyard housing and enclosed bazaars.",
+      "risks": "Use 1880 map as prior baseline; exclude later arterial cuts and new crossings.",
+      "source_preference": [
+        "qajar_maps"
+      ]
+    },
+    "reba:chandler:1401": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Golestan and grand bazaar",
+          "point": [
+            51.42,
+            35.678
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Sangelaj courtyard streets",
+          "point": [
+            51.406,
+            35.675
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Southern Qajar wall and garden fringe",
+          "point": [
+            51.411,
+            35.659
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Northern Naseri wall and gate sites",
+          "point": [
+            51.414,
+            35.706
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use expanded Qajar gates and documented districts separately. Preserve orchards, institutions and vacant tracts.",
+      "morphology": "Adobe and brick court houses, arcaded bazaar and garden compounds.",
+      "risks": "Use 1891 plan, no automobile boulevards or unified modern metropolitan fabric.",
+      "source_preference": [
+        "qajar_maps"
+      ]
+    },
+    "reba:chandler:1462": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Zaytuna medina and souks",
+          "point": [
+            10.171,
+            36.798
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Halfaouine lanes",
+          "point": [
+            10.167,
+            36.807
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Bab Bhar and Lake Tunis approach",
+          "point": [
+            10.178,
+            36.8
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Kasbah and southwest hill fringe",
+          "point": [
+            10.167,
+            36.794
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate medina, outside suburbs and dated French quarter plots. Keep lake flats and north and west garden gaps.",
+      "morphology": "Low courtyard roofs, compact bazaars and later aligned European perimeter streets.",
+      "risks": "Use the exact 1896 guide plan; port canal and lake reclamation dated independently.",
+      "source_preference": [
+        "mena_uchicago",
+        "loc_cities"
+      ]
+    },
+    "reba:chandler:165": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Old Beirut souks at port slope",
+          "point": [
+            35.505,
+            33.896
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Saifi and inner streets",
+          "point": [
+            35.511,
+            33.894
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Dock breakwater and foreshore",
+          "point": [
+            35.507,
+            33.909
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Achrafieh and southeastern gardens",
+          "point": [
+            35.524,
+            33.885
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate commercial slope nucleus, dated harbour and hillside or orchard settlement. Retain shoreline and open gaps.",
+      "morphology": "Stone courtyard houses and red tile on hillside; commercial blocks and harbour sheds.",
+      "risks": "Exclude later seafront fill and boulevard or postwar reconstruction.",
+      "source_preference": [
+        "baedeker_syria_1898"
+      ]
+    },
+    "reba:chandler:246": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Bab Zuwayla and al-Muizz spine",
+          "point": [
+            31.258,
+            30.043
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Gamaliya and Khan el-Khalili courts",
+          "point": [
+            31.264,
+            30.049
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Azbakeya and Ismailia urban grid",
+          "point": [
+            31.247,
+            30.053
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Citadel and cemetery edge",
+          "point": [
+            31.263,
+            30.029
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Divide historic market spine, planned west grid and cemetery/citadel margins. Add Nile corridors only with dated sheet evidence.",
+      "morphology": "Courtyard masonry, shaded bazaar lanes and larger late-period blocks.",
+      "risks": "No modern river outline or crossing assumptions. Preserve cemetery open areas and historic fields or gardens.",
+      "source_preference": [
+        "baedeker_egypt_1898"
+      ]
+    },
+    "reba:chandler:257": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Greenmarket Square and Company’s Garden",
+          "point": [
+            18.42,
+            -33.925
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Bo-Kaap hillside streets",
+          "point": [
+            18.415,
+            -33.921
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Old harbour, Woodstock shore and rail",
+          "point": [
+            18.443,
+            -33.925
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Table Mountain upper slope",
+          "point": [
+            18.407,
+            -33.943
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use Thom road and drainage layers independently. Split town terraces, upper slope, port and detached rail settlement.",
+      "morphology": "Masonry cottages and stepped streets, harbour warehouses and garden plots.",
+      "risks": "Retain pre-foreshore-reclamation tidal edge; no modern harbour road grid.",
+      "source_preference": [
+        "cape_thom"
+      ]
+    },
+    "reba:chandler:31": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Citadel slope and covered souks",
+          "point": [
+            37.163,
+            36.199
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Jdeideh courtyard lanes",
+          "point": [
+            37.157,
+            36.207
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Quweiq banks and western orchards",
+          "point": [
+            37.148,
+            36.198
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Eastern gates and old fringe",
+          "point": [
+            37.176,
+            36.196
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate sloping core, northern residential quarters and valley gardens. Extend only along attested suburban roads.",
+      "morphology": "Stone courtyard fabric, vaulted market lanes and large courtyards.",
+      "risks": "Do not copy recent damage, rebuilding, filled river or widened arteries.",
+      "source_preference": [
+        "baedeker_syria_1898"
+      ]
+    },
+    "reba:chandler:111": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "later_comparison_located",
+      "anchors": [
+        {
+          "name": "Rusafa old bazaar and river bend",
+          "point": [
+            44.386,
+            33.339
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Karkh market courts",
+          "point": [
+            44.38,
+            33.33
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Tigris landings and boat crossing",
+          "point": [
+            44.382,
+            33.334
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "South Gate and open ground",
+          "point": [
+            44.405,
+            33.319
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Reconstruct both banks separately within documented old quarters and near landings. Leave flood ground and peripheral orchards open.",
+      "morphology": "Brick courtyard houses, covered markets and informal shore steps.",
+      "risks": "1912 plan only comparison. Verify boat-bridge location and dates; no modern crossings.",
+      "source_preference": [
+        "baghdad_reschid_1912"
+      ]
+    },
+    "reba:chandler:114": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Icherisheher gates and bazaar",
+          "point": [
+            49.834,
+            40.369
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Bayir Sheher outer streets",
+          "point": [
+            49.831,
+            40.38
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Oil harbour and eastern industrial apron",
+          "point": [
+            49.874,
+            40.38
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Old wall and western hillside",
+          "point": [
+            49.82,
+            40.367
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate walled core, documented outside blocks and refinery strip. Retain hill and shore gaps.",
+      "morphology": "Stone courtyard lanes, perimeter blocks and separate oil sheds.",
+      "risks": "Modern seafront fill and later workers’ suburbs excluded.",
+      "source_preference": [
+        "baku_1898"
+      ]
+    },
+    "reba:chandler:1309": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Kemeraltı and Konak",
+          "point": [
+            27.136,
+            38.421
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Basmane streets and Kadifekale slope",
+          "point": [
+            27.147,
+            38.418
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Dated quay and Alsancak railway",
+          "point": [
+            27.147,
+            38.439
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Meles and northeastern wet margin",
+          "point": [
+            27.169,
+            38.436
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use occupied bay approach, old hillside market and distinct port or rail plots. Preserve wet and steep land.",
+      "morphology": "Stone and plaster courtyard blocks, shed plots and upper slope houses.",
+      "risks": "Exclude post-1922 rebuilding and later shoreline fill; date quays and station strips.",
+      "source_preference": [
+        "smyrna_1876"
+      ]
+    },
     "reba:chandler:975": {
       "profile": "anchored_evidence",
       "grade": "C",
