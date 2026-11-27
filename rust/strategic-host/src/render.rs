@@ -617,6 +617,26 @@ impl CityUploads {
     }
 }
 
+#[derive(serde::Serialize)]
+pub(crate) struct CityRenderMemory {
+    fixed_gpu_bytes: u64,
+    resident_page_gpu_bytes: u64,
+    resident_kit_gpu_bytes: u64,
+    submitted_upload_payload_bytes: u64,
+    retiring_buffer_gpu_bytes: u64,
+    shared_model_depth_gpu_bytes: u64,
+    road_active_payload_bytes: usize,
+    renderer_cpu_bytes: usize,
+    decoded_kit_cpu_bytes: usize,
+}
+
+struct SubmittedCityGpu {
+    upload_payload_bytes: u64,
+    retiring_bytes: u64,
+    _retiring_buffers: Vec<ResidentModel>,
+    done: std::sync::Arc<std::sync::atomic::AtomicBool>,
+}
+
 struct ModelLayer {
     pipeline: wgpu::RenderPipeline,
     city_pipeline: wgpu::RenderPipeline,
@@ -638,7 +658,7 @@ struct ModelLayer {
     city_meshes: HashMap<ModelKey, ModelMesh>,
     city_upload_due: bool,
     city_transfer_bytes: u64,
-    city_gpu_batches: Vec<(u64, Vec<ResidentModel>, std::sync::Arc<std::sync::atomic::AtomicBool>)>,
+    city_gpu_batches: Vec<SubmittedCityGpu>,
 }
 
 impl ModelLayer {
@@ -722,23 +742,33 @@ impl ModelLayer {
     fn city_usage(&self) -> (u64,u64) {
         let resident = self.residents.iter().filter(|(key, _)| key.is_city())
             .map(|(_, model)| model.gpu_bytes()).sum::<u64>();
-        let submitted = self.city_gpu_batches.iter().map(|(bytes, _, _)| bytes).sum::<u64>();
+        let submitted = self.city_gpu_batches.iter()
+            .map(|batch| batch.upload_payload_bytes + batch.retiring_bytes).sum::<u64>();
         (resident, submitted)
+    }
+
+    fn decoded_kit_cpu_bytes(&self) -> usize {
+        self.city_meshes.values().map(|mesh| {
+            mesh.vertices.capacity() * std::mem::size_of::<ModelVertex>()
+                + mesh.indices.capacity() * std::mem::size_of::<u32>()
+        }).sum::<usize>() + self.city_override.as_ref().map_or(0, |bytes| bytes.len())
     }
 
     fn retire_city_gpu(&mut self, queue: &wgpu::Queue, evicted: Vec<ResidentModel>, staging: u64) {
         if evicted.is_empty() && staging == 0 { return; }
-        let bytes = staging + evicted.iter().map(ResidentModel::gpu_bytes).sum::<u64>();
+        let retiring_bytes = evicted.iter().map(ResidentModel::gpu_bytes).sum::<u64>();
         let done = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
         let complete = done.clone();
         queue.on_submitted_work_done(move || complete.store(true, std::sync::atomic::Ordering::Release));
-        self.city_gpu_batches.push((bytes, evicted, done));
+        self.city_gpu_batches.push(SubmittedCityGpu {
+            upload_payload_bytes: staging, retiring_bytes, _retiring_buffers: evicted, done,
+        });
     }
 
     fn maintain_city_gpu(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, now: Instant) {
         if !self.city_gpu_batches.is_empty() {
             let _ = device.poll(wgpu::Maintain::Poll);
-            self.city_gpu_batches.retain(|(_, _, done)| !done.load(std::sync::atomic::Ordering::Acquire));
+            self.city_gpu_batches.retain(|batch| !batch.done.load(std::sync::atomic::Ordering::Acquire));
         }
         let expired = self.residents.iter().filter(|(key, model)|
             key.is_city() && !self.visible.contains(key)
@@ -1643,6 +1673,32 @@ impl Renderer {
         self.models.city_upload_due || self.surface.road_store.uploading
     }
 
+    pub(crate) fn city_render_memory(&self) -> CityRenderMemory {
+        let layer = &self.models;
+        let (mut resident_page_gpu_bytes, mut resident_kit_gpu_bytes, mut transform_bytes) = (0, 0, 0);
+        for (key, model) in layer.residents.iter().filter(|(key, _)| key.is_city()) {
+            if key.city_page_id().is_some() {
+                resident_page_gpu_bytes += model.gpu_bytes();
+            } else {
+                resident_kit_gpu_bytes += model.gpu_bytes();
+            }
+            transform_bytes += model.transforms.capacity() * std::mem::size_of::<ModelInstance>();
+        }
+        CityRenderMemory {
+            fixed_gpu_bytes: layer.city_fixed_bytes,
+            resident_page_gpu_bytes,
+            resident_kit_gpu_bytes,
+            submitted_upload_payload_bytes: layer.city_gpu_batches.iter().map(|batch| batch.upload_payload_bytes).sum(),
+            retiring_buffer_gpu_bytes: layer.city_gpu_batches.iter().map(|batch| batch.retiring_bytes).sum(),
+            shared_model_depth_gpu_bytes: layer.depth.as_ref().map_or(0, |([w,h],_)| u64::from(*w) * u64::from(*h) * 4),
+            road_active_payload_bytes: self.surface.road_store.active().map(|slot| slot.bytes).sum(),
+            renderer_cpu_bytes: transform_bytes
+                + layer.city_batches.capacity() * std::mem::size_of::<CityBatchDraw>()
+                + layer.city_batch_uniforms.capacity() * std::mem::size_of::<CityBatchUniform>(),
+            decoded_kit_cpu_bytes: layer.decoded_kit_cpu_bytes(),
+        }
+    }
+
     pub(crate) fn city_gpu_status(&self) -> serde_json::Value {
         let (resident, submitted) = self.models.city_usage();
         let roads=&self.surface.road_store;
@@ -1668,10 +1724,7 @@ impl Renderer {
             "road_active":roads.active().map(|slot|serde_json::json!({"revision":slot.key.0,"index":slot.key.1,
                 "payload_bytes":slot.bytes,"water":slot.water,"ground":slot.ground,
                 "active_coverage":slot.road_coverage})).collect::<Vec<_>>(),
-            "decoded_kit_cpu_bytes":self.models.city_meshes.values().map(|mesh| {
-                mesh.vertices.capacity()*std::mem::size_of::<ModelVertex>()
-                    + mesh.indices.capacity()*std::mem::size_of::<u32>()
-            }).sum::<usize>() + self.models.city_override.as_ref().map_or(0, |bytes| bytes.len()),
+            "decoded_kit_cpu_bytes":self.models.decoded_kit_cpu_bytes(),
         })
     }
 

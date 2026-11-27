@@ -467,6 +467,14 @@ struct PageRequest {
     cancelled: Arc<AtomicBool>,
 }
 
+#[derive(serde::Serialize)]
+pub(crate) struct CityPageMemory {
+    catalogue_bytes: usize,
+    resident_page_bytes: usize,
+    reserved_load_bytes: usize,
+    cancelled_load_reservation_bytes: usize,
+}
+
 pub(crate) struct Catalogue {
     root: PathBuf,
     tiles: Vec<Tile>,
@@ -611,6 +619,17 @@ impl Catalogue {
 
     fn reserved_bytes(&self) -> usize {
         self.pending.values().chain(self.roads.pending.values()).map(|request| request.reservation).sum()
+    }
+
+    pub(crate) fn memory(&self) -> CityPageMemory {
+        CityPageMemory {
+            catalogue_bytes: self.metadata_bytes(),
+            resident_page_bytes: self.cpu_page_bytes(),
+            reserved_load_bytes: self.reserved_bytes(),
+            cancelled_load_reservation_bytes: self.pending.values().chain(self.roads.pending.values())
+                .filter(|request| request.cancelled.load(Ordering::Relaxed))
+                .map(|request| request.reservation).sum(),
+        }
     }
 
     fn reserve(&mut self, bytes: usize) -> bool {
@@ -762,21 +781,6 @@ impl Catalogue {
                 "draw_target": draw_target,
                 "gpu": gpu(self.revision,index)})
         }).collect::<Vec<_>>();
-        let metadata_bytes = std::mem::size_of::<Self>()
-            + self.tiles.capacity() * std::mem::size_of::<Tile>()
-            + self.tiles.iter().map(|tile| tile.file.capacity()).sum::<usize>()
-            + self.root.capacity()
-            + self.index.bytes()
-            + self.site_index.bytes()
-            + self.sites.capacity() * std::mem::size_of::<CitySite>()
-            + self.sites.iter().map(|site| site.id.capacity() + site.name.capacity() + site.source.capacity()).sum::<usize>()
-            + self.sites_in_view.capacity() * std::mem::size_of::<(usize, f64)>()
-            + self.roads.tiles.capacity() * std::mem::size_of::<(usize,RoadTile)>()
-            + self.roads.tiles.iter().map(|(_,tile)| tile.file.capacity()).sum::<usize>()
-            + self.roads.index.bytes()
-            + [&self.sources, &self.city_ids].into_iter().map(|strings|
-                strings.capacity() * std::mem::size_of::<String>()
-                + strings.iter().map(String::capacity).sum::<usize>()).sum::<usize>();
         let roads = self.roads.wanted.iter().map(|&index| {
             let (city,tile) = &self.roads.tiles[index];
             let state = if self.roads.cache.contains_key(&index) { "ready" }
@@ -795,10 +799,28 @@ impl Catalogue {
             "catalogue_sites": self.sites.len(),
             "sites_in_view": self.sites_in_view.iter().map(|&(index, _)| &self.sites[index]).collect::<Vec<_>>(),
             "wanted": pages, "cpu_resident": self.cache.len(), "cpu_page_bytes": self.cpu_page_bytes(),
-            "cpu_metadata_bytes": metadata_bytes, "cpu_reserved_bytes": self.reserved_bytes(),
+            "cpu_metadata_bytes": self.metadata_bytes(), "cpu_reserved_bytes": self.reserved_bytes(),
             "pending": self.pending.len(), "discarded": self.discarded,
             "lookup_ms": self.lookup.as_secs_f64() * 1000.
         })
+    }
+
+    fn metadata_bytes(&self) -> usize {
+        size_of::<Self>()
+            + self.tiles.capacity() * size_of::<Tile>()
+            + self.tiles.iter().map(|tile| tile.file.capacity()).sum::<usize>()
+            + self.root.capacity()
+            + self.index.bytes()
+            + self.site_index.bytes()
+            + self.sites.capacity() * size_of::<CitySite>()
+            + self.sites.iter().map(|site| site.id.capacity() + site.name.capacity() + site.source.capacity()).sum::<usize>()
+            + self.sites_in_view.capacity() * size_of::<(usize, f64)>()
+            + self.roads.tiles.capacity() * size_of::<(usize,RoadTile)>()
+            + self.roads.tiles.iter().map(|(_,tile)| tile.file.capacity()).sum::<usize>()
+            + self.roads.index.bytes()
+            + [&self.sources, &self.city_ids].into_iter().map(|strings|
+                strings.capacity() * size_of::<String>()
+                + strings.iter().map(String::capacity).sum::<usize>()).sum::<usize>()
     }
 
     pub(crate) fn covers(&self, [lon,lat]: [f64;2]) -> bool {

@@ -204,7 +204,7 @@ impl Host {
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
             animate:false,next_date:Instant::now(),feedback:String::new(),dirty:true,last_input_check:Instant::now(),
-            version:None,last_palette:None,trial:Trial{last:observation_id,..Trial::default()},hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,..Hud::default()},skin,exit_requested:false,
+            version:None,last_palette:None,trial:Trial::new(observation_id),hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,..Hud::default()},skin,exit_requested:false,
             prologue: None,menu_themes,
             opening_nav: lobby::Selection::default(),
             lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,country_directory:lobby::Directory::default(),
@@ -1036,6 +1036,7 @@ impl Host {
             }
             else if self.trial.timing {
                 self.trial.record_frame(now,presented,&self.camera,renderer,false);
+                self.trial.record_city_memory(presented,&self.camera,self.city_models.as_ref(),renderer);
             }
             if self.debug {
                 self.perf.cpu_ms=ms(now);

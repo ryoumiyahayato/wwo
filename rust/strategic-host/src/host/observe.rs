@@ -1,6 +1,7 @@
 use super::Host;
 use crate::{
-    camera::{self, Camera, Level}, hydrology, market_ui, pop_debug_ui, render::Renderer,
+    camera::{self, Camera, Level}, city_models::{Catalogue, CityPageMemory}, hydrology, market_ui,
+    pop_debug_ui, render::{CityRenderMemory, Renderer},
     timeline, ui::{self, Action, Object},
 };
 #[cfg(windows)]
@@ -15,6 +16,8 @@ pub(super) struct Trial {
     pub(super) terrain_decodes:Vec<f64>,
     pub(super) profile_frames:bool,
     pub(super) frames:Vec<FrameTiming>,
+    city_memory_started:Option<Instant>,
+    city_memory_samples:Vec<CityMemorySample>,
     pub(super) load_frames:Vec<usize>,
     pub(super) battle_openings:Vec<BattleOpeningTiming>,
     pub(super) movement:Option<([f64;2],[f64;2],u32,u32)>,
@@ -49,7 +52,20 @@ pub(super) struct FrameTiming {
     battle:bool,
 }
 
+#[derive(serde::Serialize)]
+struct CityMemorySample {
+    elapsed_ms: f64,
+    center:[f64;2],
+    mpp:f64,
+    pages:Option<CityPageMemory>,
+    renderer:CityRenderMemory,
+}
+
 impl Trial {
+    pub(super) fn new(last: String) -> Self {
+        Self { last, ..Self::default() }
+    }
+
     pub(super) fn timing_frame(&self, capture:bool)->Option<usize> {
         (self.timing && self.profile_frames && !capture).then_some(self.frames.len())
     }
@@ -68,6 +84,16 @@ impl Trial {
                 terrain_view_level:renderer.terrain_view_level(),
                 qwg_upload:if battle {None} else {renderer.water_upload()},
                 battle,
+            });
+        }
+    }
+
+    pub(super) fn record_city_memory(&mut self, presented:Instant, camera:&Camera, catalogue:Option<&Catalogue>, renderer:&Renderer) {
+        if let Some(started) = self.city_memory_started {
+            self.city_memory_samples.push(CityMemorySample {
+                elapsed_ms:presented.duration_since(started).as_secs_f64()*1000.,
+                center:camera.coordinates(), mpp:camera.mpp,
+                pages:catalogue.map(Catalogue::memory), renderer:renderer.city_render_memory(),
             });
         }
     }
@@ -352,6 +378,8 @@ impl Host {
                 if self.trial.timing{
                     self.trial.passive_timing=input.value=="passive";
                     self.trial.profile_frames=matches!(input.value.as_str(),"profile"|"stages");
+                    self.trial.city_memory_started=(input.value=="city-memory").then(Instant::now);
+                    self.trial.city_memory_samples.clear();
                     self.trial.frames.clear();
                     self.trial.load_frames.clear();
                     self.trial.battle_openings.clear();
@@ -372,6 +400,9 @@ impl Host {
                         })),
                         "load_frame_indices":self.trial.load_frames,
                         "battle_openings":self.trial.battle_openings});
+                    if self.trial.city_memory_started.take().is_some() {
+                        extra["city_memory_samples"]=serde_json::json!(self.trial.city_memory_samples);
+                    }
                 }
             }
             "quit"=>event_loop.exit(),
