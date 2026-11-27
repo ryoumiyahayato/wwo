@@ -20,6 +20,8 @@ LONDON_ROAD_EXTENT = (-.371, 51.371, .104, 51.638)
 METRES = 6371008.8 * math.pi / 180
 BAND_HEIGHT = 32
 ROAD_CELL = 64
+ROAD_PAGE_METRES = 4096.
+ROAD_PAGE_BYTES = 1024 * 1024
 # Pixel footprints at the end of each blend band, in metres.
 ROAD_LEVELS = ((1, 128, 42.), (2, 256, 86.), (3, 384, 175.))
 
@@ -191,12 +193,65 @@ def pack_road_cells(words, values, roads, cell_size, *, minimum_rank=0, padding=
     return index
 
 
-def pack_road_levels(words, values, roads, fine_cell, offsets):
+def pack_road_levels(words, values, roads, fine_cell, offsets, *, simplify=.8):
     fine = pack_road_cells(words, values, roads, fine_cell)
     for offset, (rank, cell_size, padding) in zip(offsets, ROAD_LEVELS, strict=True):
         words[offset] = pack_road_cells(words, values, roads, cell_size, minimum_rank=rank,
-                                        padding=padding, simplify=.8)
+                                        padding=padding, simplify=simplify)
     return fine
+
+
+def planned_road_pages(plan):
+    """Encode bounded display pages from the same CRS84 road features as the city plan."""
+    lon, lat = plan["wwo"]["origin"]
+    x_scale, y_scale = METRES * math.cos(math.radians(lat)), METRES
+    if x_scale < 100.:
+        raise ValueError("Road plan origin is too close to a pole")
+    width = ROAD_PAGE_METRES
+    sources = []
+    pages = {}
+    for feature in sorted(plan["features"], key=lambda row: row["id"]):
+        props = feature["properties"]
+        if props["kind"] != "road":
+            continue
+        category = props.get("display_rank", 1)
+        surface = props.get("display_surface", "gravel")
+        surface_index = {"dirt": 0, "gravel": 1, "setts": 2}.get(surface)
+        if type(category) is not int or not 0 <= category <= 3 or surface_index is None:
+            raise ValueError(f"Invalid road style for {feature['id']}")
+        bridge = bool(props.get("bridge_reference"))
+        year = props.get("source_year")
+        if type(year) is not int or not all(props.get(k) for k in ("width_basis", "surface_basis")):
+            raise ValueError(f"Road alignment, width and surface need a dated record for {feature['id']}")
+        geo = shape(feature["geometry"])
+        geom = transform(geo, lambda x, y: ((x-lon)*x_scale, (y-lat)*y_scale), interleaved=False)
+        source = dict(id=feature["id"], geometry=feature["geometry"], properties=props)
+        sources.append(source)
+        west, south, east, north = geom.bounds
+        radius = float(props["width_m"]) / 2
+        apron = ROAD_LEVELS[-1][2] + radius
+        for x in range(math.floor((west-apron)/width), math.floor((east+apron)/width)+1):
+            for y in range(math.floor((south-apron)/width), math.floor((north+apron)/width)+1):
+                clipping = box(x*width, y*width, (x+1)*width, (y+1)*width).buffer(apron, quad_segs=1)
+                clipped = geom.intersection(clipping)
+                lines = [part for part in getattr(clipped, "geoms", [clipped]) if part.geom_type == "LineString" and part.length > 0.]
+                if lines:
+                    pages.setdefault((x, y), []).append((feature["id"], lines, radius, surface_index, bridge, category))
+
+    packed = []
+    for x, y in sorted(pages):
+        west, south, east, north = x*width, y*width, (x+1)*width, (y+1)*width
+        values = [lon, lat, x_scale, y_scale, west, south, east, north]
+        words = [*(encode(v, "f") for v in values), 0, 0, 0, 0]
+        words[8] = pack_road_levels(words, values, pages[x, y], ROAD_CELL, (9, 10, 11), simplify=0.)
+        if len(words)*4 > ROAD_PAGE_BYTES:
+            raise ValueError(f"Road page {x},{y} exceeds {ROAD_PAGE_BYTES} bytes")
+        bounds = [lon+west/x_scale, lat+south/y_scale, lon+east/x_scale, lat+north/y_scale]
+        if not -180. <= bounds[0] < bounds[2] <= 180. or not -90. <= bounds[1] < bounds[3] <= 90.:
+            raise ValueError(f"Road page {x},{y} crosses a world seam")
+        payload = struct.pack(f"<{len(words)}I", *words)
+        packed.append((x, y, bounds, payload, sorted({r[0] for r in pages[x, y]})))
+    return sources, packed
 
 
 def write(root, output):

@@ -245,7 +245,7 @@ def planned_site(path, city_id):
         kind = props["kind"]
         if key in ids or props["source"] not in source_notes:
             raise ValueError(f"Duplicate or unsourced feature {key}")
-        for field in ("use_reference", "form_reference"):
+        for field in ("use_reference", "form_reference", "bridge_reference"):
             if field in props and props[field] not in source_notes:
                 raise ValueError(f"Unknown {field} for {key}")
         ids.add(key)
@@ -335,11 +335,11 @@ def planned_site(path, city_id):
         if not 0. <= gap <= 50.:
             raise ValueError("Invalid parcel spacing")
         ranges = []
-        for key, minimum, maximum in (("frontage_m", 2., 160.), ("depth_m", 2., 160.),
-                                       ("setback_m", 0., 60.), ("storeys", 1., 30.)):
-            low, high = map(float, props.get(key, kit[key]))
+        for field, minimum, maximum in (("frontage_m", 2., 160.), ("depth_m", 2., 160.),
+                                         ("setback_m", 0., 60.), ("storeys", 1., 30.)):
+            low, high = map(float, props.get(field, kit[field]))
             if not minimum <= low <= high <= maximum:
-                raise ValueError(f"Invalid parcel range for {key}")
+                raise ValueError(f"Invalid parcel range for {field}")
             ranges.append((low, high))
         max_frontage, max_depth, max_setback = (high for _, high in ranges[:3])
         shapely.prepare(zone)
@@ -418,9 +418,12 @@ if __name__ == "__main__":
     cli.add_argument("output", type=Path)
     cli.add_argument("--city", choices=("london", "paris"), help="Update one city in the output catalogue")
     cli.add_argument("--site", help="Update one frozen city using a local CRS84 plan")
+    cli.add_argument("--with-roads", action="store_true", help="Pack candidate display roads from the same plan")
     args = cli.parse_args()
     if args.city and args.site:
         cli.error("--city and --site select different inputs")
+    if args.with_roads and not args.site:
+        cli.error("--with-roads requires --site")
     args.output.mkdir(parents=True, exist_ok=args.city is not None or args.site is not None)
     catalog = args.output/"catalogue.json"
     previous = read(catalog) if catalog.is_file() else {"version": "wwo-city-models-v1", "cities": []}
@@ -442,6 +445,32 @@ if __name__ == "__main__":
         write_revisioned(args.output/origins, ZstdCompressor(level=5).compress(provenance_json.encode("utf-8")))
         entry = dict(entries, id=args.site, name=meta["name"], kit=kit, revision=revision,
                      placement_origins=origins, source_records=meta["sources"])
+        if current and current.get("revision") == revision and "road_pages" in current:
+            entry.update(road_pages=current["road_pages"], road_origins=current["road_origins"])
+        if args.with_roads:
+            from build_city_water import planned_road_pages
+
+            plan = read(args.sources)
+            road_validity = meta.get("road_validity", {})
+            start, end = road_validity.get("start"), road_validity.get("end")
+            if not (type(start) is int and type(end) is int and 1 <= start < end <= 9999):
+                raise ValueError("Road pages require start and end years with end exclusive")
+            records, pages = planned_road_pages(plan)
+            if not pages:
+                raise ValueError("No sourced roads in the requested site")
+            road_entries = []
+            compressor = ZstdCompressor(level=5)
+            for x, y, bounds, payload, parents in pages:
+                name = f"{directory_key}-{x}-{y}.wcr"
+                header = b"WWOCRD01" + struct.pack("<I", len(payload))
+                write_revisioned(args.output/name, header + compressor.compress(payload))
+                road_entries.append(dict(file=name, bounds=bounds, bytes=len(payload),
+                                         features=len(parents), years=[start, end]))
+            road_origins = f"{directory_key}.roads.json.zst"
+            road_notes = dict(roads=records, pages={tile["file"]: parents for tile, (*_, parents) in zip(road_entries, pages)})
+            write_revisioned(args.output/road_origins, compressor.compress(
+                json.dumps(road_notes, ensure_ascii=False, separators=(",", ":")).encode("utf-8")))
+            entry.update(road_pages=road_entries, road_origins=road_origins)
         if current:
             cities[cities.index(current)] = entry
         else:

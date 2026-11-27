@@ -8,8 +8,9 @@
       1.29
     ],
     "key": "singapore-corridor",
-    "revision": 1,
+    "revision": 2,
     "status": "candidate_buildings",
+    "road_validity": {"start": 1890, "end": 1901, "basis": "1890 guide map used for a candidate opening-date reconstruction. No replacement of raster fallback."},
     "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence.",
     "registration": {
       "method": "local affine to stable landmarks; modern map used solely for locating controls",
