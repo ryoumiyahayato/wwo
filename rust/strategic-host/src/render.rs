@@ -543,12 +543,25 @@ struct CityBatchDraw {
     module: usize,
     opaque: bool,
     instances: [std::ops::Range<u32>;city_models::MAX_INSTANCE_RUNS],
+    depth_pixels: [f32;city_models::MAX_INSTANCE_RUNS],
+}
+
+impl CityBatchDraw {
+    fn indices(&self, kit: &ResidentModel, run: usize) -> std::ops::Range<u32> {
+        let Some(lod) = kit.facade_lod else { return 0..kit.count; };
+        if self.depth_pixels[run] * lod.relief_metres <= 0.25 {
+            lod.start..kit.count
+        } else {
+            0..lod.start
+        }
+    }
 }
 
 struct ResidentModel {
     vertices: wgpu::Buffer,
     indices: wgpu::Buffer,
     count: u32,
+    facade_lod: Option<landmarks::FacadeLod>,
     instance_buffer: wgpu::Buffer,
     transforms: Vec<ModelInstance>,
     city_instances: Option<[Option<wgpu::Buffer>;MODULES]>,
@@ -795,6 +808,12 @@ impl ModelLayer {
                     if city.paris {2.} else {1.});
                 if let Some(city)=model.city_page.as_ref().filter(|city|city.preload) {
                     if lod_range[0]>0. {
+                        // Bound screen displacement for any rotation of a
+                        // horizontal metre by the norm of the affine projection.
+                        let [east, _, south, _] = model.clip_from_model;
+                        let [half_width, half_height] = size.map(|v| v as f32 * 0.5);
+                        let pixels_per_metre = (east[0].hypot(south[0]) * half_width)
+                            .hypot(east[1].hypot(south[1]) * half_height);
                         for (module,batch) in city.batches.iter().enumerate().filter_map(|(i,b)|b.as_ref().map(|b|(i,b))) {
                             let [x,y,z]=batch.inverse_size;
                             self.city_batch_uniforms.push(CityBatchUniform {
@@ -803,7 +822,8 @@ impl ModelLayer {
                                 material:[city_material,mpp,0.,0.],padding:[0;24],
                             });
                             self.city_batches.push(CityBatchDraw {page:key,kit:ModelKey::city_detail(city.kit,module),
-                                module,opaque:lod_range[0] == 1.,instances:batch.instances.clone()});
+                                module,opaque:lod_range[0] == 1.,instances:batch.instances.clone(),
+                                depth_pixels:batch.max_depth.map(|depth| depth * z * pixels_per_metre)});
                         }
                         resident.last_drawn=now;
                     }
@@ -890,6 +910,7 @@ impl ModelLayer {
             vertices: upload(bytemuck::cast_slice(&model.vertices), wgpu::BufferUsages::VERTEX),
             indices: upload(bytemuck::cast_slice(&model.indices), wgpu::BufferUsages::INDEX),
             count: model.indices.len() as u32, instance_buffer: Self::instance_buffer(device, std::mem::size_of::<ModelInstance>() as u64),
+            facade_lod: None,
             transforms: Vec::new(), city_instances:None,last_drawn: Instant::now(),
             mesh_uploaded:[bytemuck::cast_slice::<_, u8>(&model.vertices).len(), bytemuck::cast_slice::<_, u8>(&model.indices).len()],
             instances_uploaded:[0;MODULES],
@@ -913,6 +934,7 @@ impl ModelLayer {
                 vertices:buffer(vertices.len() as u64,wgpu::BufferUsages::VERTEX),
                 indices:buffer(indices.len() as u64,wgpu::BufferUsages::INDEX),
                 count:mesh.indices.len() as u32,instance_buffer:Self::instance_buffer(device,instance_bytes),
+                facade_lod:mesh.facade_lod,
                 transforms:Vec::new(),city_instances:None,last_drawn:now,mesh_uploaded:[0;2],instances_uploaded:[0;MODULES],
             });
         }
@@ -961,7 +983,8 @@ impl ModelLayer {
             pass.set_vertex_buffer(0, model.vertices.slice(..));
             pass.set_vertex_buffer(1, model.instance_buffer.slice(..));
             pass.set_index_buffer(model.indices.slice(..), wgpu::IndexFormat::Uint32);
-            pass.draw_indexed(0..model.count, 0, 0..model.transforms.len() as u32);
+            let count = model.facade_lod.map_or(model.count, |lod| lod.start);
+            pass.draw_indexed(0..count, 0, 0..model.transforms.len() as u32);
         }
         if !self.city_batches.is_empty() {
             pass.set_pipeline(&self.city_pipeline);
@@ -980,8 +1003,8 @@ impl ModelLayer {
                 pass.set_vertex_buffer(0,kit.vertices.slice(..));
                 pass.set_vertex_buffer(1,instances.slice(..));
                 pass.set_index_buffer(kit.indices.slice(..),wgpu::IndexFormat::Uint32);
-                for rows in batch.instances.iter().take_while(|rows|!rows.is_empty()) {
-                    pass.draw_indexed(0..kit.count,0,rows.clone());
+                for (run,rows) in batch.instances.iter().take_while(|rows|!rows.is_empty()).enumerate() {
+                    pass.draw_indexed(batch.indices(kit,run),0,rows.clone());
                 }
             }
         }
@@ -1623,6 +1646,13 @@ impl Renderer {
     pub(crate) fn city_gpu_status(&self) -> serde_json::Value {
         let (resident, submitted) = self.models.city_usage();
         let roads=&self.surface.road_store;
+        let facade_lod_instances=self.models.city_batches.iter().filter_map(|batch| {
+            let kit=self.models.residents.get(&batch.kit)?;
+            kit.facade_lod?;
+            Some(batch.instances.iter().enumerate()
+                .filter(|(run,_)| batch.indices(kit,*run).start != 0)
+                .map(|(_,rows)| rows.len()).sum::<usize>())
+        }).sum::<usize>();
         serde_json::json!({
             "fixed_bytes": self.models.city_fixed_bytes, "resident_bytes":resident,
             "submitted_and_retiring_bytes":submitted,
@@ -1630,6 +1660,7 @@ impl Renderer {
                 .filter(|(key,model)| key.city_page_id().is_some() && model.mesh_ready()).count(),
             "detail_buffers_ready":self.models.residents.iter()
                 .filter(|(key,model)| key.city_page_id().is_some() && model.detail_ready()).count(),
+            "facade_lod_instances":facade_lod_instances,
             "upload_pending":self.models.city_upload_due || roads.uploading,
             "road_slot_capacity":roads.capacity,
             "road_reserved_bytes":if roads.capacity==0 {0} else {crate::city_roads::PAGE_STORAGE_BYTES},

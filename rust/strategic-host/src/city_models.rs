@@ -230,6 +230,7 @@ struct Block {
     center: Vec3,
     half_extent: Vec3,
     instances: [Range<u32>;MODULES],
+    max_depth: [f32;MODULES],
 }
 
 pub(crate) struct CityPage {
@@ -247,6 +248,7 @@ pub(crate) struct CityGeometry {
 
 pub(crate) struct CityBatch {
     pub(crate) instances: [Range<u32>;MAX_INSTANCE_RUNS],
+    pub(crate) max_depth: [f32;MAX_INSTANCE_RUNS],
     pub(crate) fit: [[f32;4];4],
     pub(crate) inverse_size: [f32;3],
 }
@@ -271,7 +273,7 @@ impl CityPage {
         let paris=kit.is_none() && rows.first().is_some_and(|row|row.module>2);
         let mut modules: [Option<ModelMesh>; MODULES] = Default::default();
         let mut counts = [0; MODULES];
-        let mut mesh=ModelMesh {vertices:Vec::new(),indices:Vec::new()};
+        let mut mesh=ModelMesh::default();
         if let Some(kit) = kit {
             for row in &rows { counts[row.module-1] += 1; }
             let mut vertices = 0;
@@ -299,10 +301,12 @@ impl CityPage {
             check()?;
             let mut min=Vec3::splat(f32::INFINITY);
             let mut max=Vec3::splat(f32::NEG_INFINITY);
+            let mut max_depth=[0.0_f32;MODULES];
             let starts=instances.each_ref().map(|rows|rows.len() as u32);
             for row in buildings {
                 let [east,south]=row.offset.map(|value|value as f32);
                 let [width,height,depth]=row.dimensions.map(|value|value as f32);
+                max_depth[row.module-1]=max_depth[row.module-1].max(depth);
                 // The extra margin includes the kit window faces.
                 let radius=width.hypot(depth)*0.502;
                 min=min.min(Vec3::new(east-radius,0.,south-radius));
@@ -315,7 +319,7 @@ impl CityPage {
                 instances[row.module-1].push(FootprintModel::new(row.offset,row.heading,row.dimensions));
             }
             let ranges=std::array::from_fn(|module|starts[module]..instances[module].len() as u32);
-            blocks.push(Block {center:(min+max)*0.5,half_extent:(max-min)*0.5,instances:ranges});
+            blocks.push(Block {center:(min+max)*0.5,half_extent:(max-min)*0.5,instances:ranges,max_depth});
         }
         let mut mesh_bounds=([f64::INFINITY;3],[f64::NEG_INFINITY;3]);
         for vertex in &mesh.vertices {
@@ -341,6 +345,7 @@ impl CityPage {
             })
         };
         let mut visible:[[Range<u32>;MAX_INSTANCE_RUNS];MODULES]=Default::default();
+        let mut depths=[[0.0_f32;MAX_INSTANCE_RUNS];MODULES];
         let mut current=[0;MODULES];
         for block in self.blocks.iter().filter(|block|intersects_screen(block)) {
             for (module,block_rows) in block.instances.iter().enumerate().filter(|(_,rows)|!rows.is_empty()) {
@@ -355,6 +360,7 @@ impl CityPage {
                     *slot+=1;
                     runs[*slot]=block_rows.clone();
                 }
+                depths[module][*slot]=depths[module][*slot].max(block.max_depth[module]);
             }
         }
         // Keep one binding per kit and page, with a fixed limit on draw runs.
@@ -367,7 +373,7 @@ impl CityPage {
                 } else {
                     landmarks.footprint_fit(module)
                 };
-                CityBatch{instances,fit,inverse_size}
+                CityBatch{instances,max_depth:depths[module-1],fit,inverse_size}
             })
         })
     }

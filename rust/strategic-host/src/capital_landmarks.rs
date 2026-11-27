@@ -206,7 +206,7 @@ pub(crate) fn hall_of_prayer() -> ModelMesh {
     const MARBLE: [f32; 3] = [0.67, 0.65, 0.59];
     const BLUE_TILE: [f32; 3] = [0.035, 0.116, 0.305];
     const BLUE_TRIM: [f32; 3] = [0.053, 0.194, 0.281];
-    let mut hall = Architecture(ModelMesh { vertices: Vec::new(), indices: Vec::new() });
+    let mut hall = Architecture(ModelMesh::default());
     let ring = |i: usize, r: f32, y: f32| {
         let (sin, cos) = (i as f32 * std::f32::consts::TAU / SEGMENTS as f32).sin_cos();
         [r * cos, y, r * sin]
@@ -258,10 +258,7 @@ pub(crate) fn hall_of_prayer() -> ModelMesh {
 }
 
 pub(crate) fn forbidden_city() -> ModelMesh {
-    let mut mesh = Architecture(ModelMesh {
-        vertices: Vec::new(),
-        indices: Vec::new(),
-    });
+    let mut mesh = Architecture(ModelMesh::default());
     let (half_w, half_d, moat) = (376.5, 480.5, 52.);
     let width = 2. * half_w;
     let depth = 2. * half_d;

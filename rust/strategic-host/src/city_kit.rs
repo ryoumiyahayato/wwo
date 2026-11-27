@@ -64,10 +64,7 @@ pub(crate) fn name(index: usize) -> &'static str {
 
 pub(crate) fn build(index: usize, role: usize, detail: bool) -> ModelMesh {
     let kit = &KITS[index];
-    let mut mesh = ModelMesh {
-        vertices: Vec::new(),
-        indices: Vec::new(),
-    };
+    let mut mesh = ModelMesh::default();
     let mut wing = |bounds, height, roof, public| {
         volume(&mut mesh, bounds, height, roof, kit, detail, public);
     };

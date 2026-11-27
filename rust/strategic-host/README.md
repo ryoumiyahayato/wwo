@@ -290,6 +290,8 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 建筑页按可见地块合并实例区间。每页每种建筑模块共用一组绑定，最多保留 12 个实例区间。`timing` 的 `stages` 值采集水面投影、基础地景、植被、叠加层、模型及界面六段 GPU 时间。结果附在 `gpu_stage_ms`，与引擎帧间隔分开。
 
+内置 R40 的两种孟莎屋顶模块共用原顶点和材质。运行时仅在立面凸饰厚度的投影上界不超过四分之一像素时使用外侧面索引。更近视角使用完整立面。通过调试热加载的模型使用完整索引。`city_gpu.facade_lod_instances` 记录应用此层级的建筑实例数。
+
 在现有离线 Python 环境运行 `tools/build_city_models.py PLAN.geojson DATA/city-models --site FROZEN_CITY_ID` 可增量生成一城。输入为 CRS84 FeatureCollection，顶层 `wwo` 记录 `city_id`、`name`、`key`、固定 `origin`、单调递增的 `revision`、`method` 和 `sources`。每条来源含 `id`、`url`、`licence`、`date` 和 `precision`，每条要素含稳定 `id` 和 `properties.source`。覆盖面用 `kind=coverage`，路中心线用 `kind=road` 和 `width_m`，历史建筑面用 `kind=building` 与可选 `role`、`height_m`。推定只在有资料依据的 `kind=zone` 面内沿道路进行，区内指定 `role` 和 `gap_m`。水面、公园、场坪、铁路用地和不宜施工的坡地分别用 `water`、`park`、`yard`、`rail`、`steep` 排除。先写新增页，再原子更新目录，其他城市文件可复用。v2 建筑使用 `profile` 和 `role`，局部场景导出继续保留旧 GLB 节点标识。
 
 [里尔 r5 候选](../../data/world_map/historical/city_landscape_1900/sample-plans/lille.geojson)依据 1898 年 Tallandier 图原有配准重划东侧五段沟渠。以蓝色填绘确定水面，浅色区域保留原有地类回退。去除相邻搜索范围描出的重复水面。七个配准控制点的留一误差 RMS 为 85.4 米，最大为 138.7 米。

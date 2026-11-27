@@ -540,9 +540,57 @@ pub struct ModelVertex {
     pub(crate) color: [f32; 4],
 }
 
+#[derive(Default)]
 pub struct ModelMesh {
     pub vertices: Vec<ModelVertex>,
     pub indices: Vec<u32>,
+    pub(crate) facade_lod: Option<FacadeLod>,
+}
+
+#[derive(Clone, Copy)]
+pub(crate) struct FacadeLod {
+    pub(crate) start: u32,
+    pub(crate) relief_metres: f32,
+}
+
+impl ModelMesh {
+    fn add_r40_facade_lod(&mut self) -> Option<FacadeLod> {
+        // The bundled R40 mansard meshes start with a base, three bands and a
+        // loft, followed by the 204 closed boxes from the authored facade.
+        const START: usize = (4 * 12 + 20) * 3;
+        const END: usize = START + 204 * 36;
+        let facade = self.indices.get(START..END)?;
+        let mut reduced = self.indices[..START].to_vec();
+        let mut relief_metres = 0.0_f32;
+        for solid in facade.chunks_exact(36) {
+            let z = |index: u32| self.vertices[index as usize].position[2];
+            let near = solid.iter().copied().map(z).reduce(f32::min)?;
+            let far = solid.iter().copied().map(z).reduce(f32::max)?;
+            let thickness = far - near;
+            if near * far <= 0.0 || thickness > 0.251 {
+                reduced.extend_from_slice(solid);
+                continue;
+            }
+            let outer = if near < 0.0 { near } else { far };
+            let before = reduced.len();
+            for face in solid.chunks_exact(3) {
+                if face.iter().all(|&index| z(index) == outer) {
+                    reduced.extend_from_slice(face);
+                }
+            }
+            if reduced.len() - before != 6 {
+                return None;
+            }
+            relief_metres = relief_metres.max(thickness);
+        }
+        if relief_metres == 0.0 {
+            return None;
+        }
+        reduced.extend_from_slice(&self.indices[END..]);
+        let start = self.indices.len() as u32;
+        self.indices.extend(reduced);
+        Some(FacadeLod { start, relief_metres })
+    }
 }
 
 impl Landmarks {
@@ -582,12 +630,13 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
                     position: vertex.position, normal: vertex.normal, color: vertex.color,
                 }).collect(),
                 indices: mesh.indices,
+                facade_lod: None,
             });
         }
     };
     let glb = gltf::Gltf::from_slice(bytes).map_err(io::Error::other)?;
     let blob = glb.blob.as_deref().ok_or_else(|| io::Error::other("GLB has no mesh buffer"))?;
-    let mut model = ModelMesh { vertices: Vec::new(), indices: Vec::new() };
+    let mut model = ModelMesh::default();
     match key.asset {
         ModelAsset::Landmark(_) => {
             let scene = glb.default_scene().or_else(|| glb.scenes().next())
@@ -598,6 +647,11 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
         }
         ModelAsset::City(module) => {
             append(city_node(&glb, module, key.lod)?, Mat4::IDENTITY, blob, key.lod, &mut model)?;
+            if city_override.is_none() && key.lod == Lod::Near
+                && matches!(R40_MODULES[module], "paris_mansard" | "paris_corner")
+            {
+                model.facade_lod = model.add_r40_facade_lod();
+            }
         }
         ModelAsset::Transport(..) | ModelAsset::CityKit(..) | ModelAsset::CityPage(..) | ModelAsset::Park(_) => unreachable!(),
     }

@@ -51,6 +51,7 @@ pub(crate) fn mesh(site: usize) -> ModelMesh {
     let mut mesh = ModelMesh {
         vertices: Vec::with_capacity(count * tree.len()),
         indices: Vec::with_capacity(count * triangles.len()),
+        facade_lod: None,
     };
     for i in (start..start + count * 5).step_by(5) {
         let [east, north, radius, height, phase] = std::array::from_fn(|offset| value(i + offset));
