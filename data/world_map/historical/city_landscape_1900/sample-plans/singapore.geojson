@@ -8,14 +8,14 @@
       1.29
     ],
     "key": "singapore-corridor",
-    "revision": 4,
+    "revision": 6,
     "status": "candidate_buildings",
     "road_validity": {
       "start": 1890,
       "end": 1901,
-      "basis": "1890 guide map used for a candidate opening-date reconstruction. No replacement of raster fallback."
+      "basis": "Guide map 1890 and Constable atlas 1893 reconstructed at opening date. Detailed core roads, partial mapped coverage, and an independently sourced open field."
     },
-    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence. Revised lower river and Tanjong Pagar harbour layout from the 1893 city atlas, with mapped work sheds and separate wet/dry coverage. Sourced open grounds and yard aprons precede placement; roof cover comes from the accepted footprints.",
+    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence. Revised lower river and Tanjong Pagar harbour layout from the 1893 city atlas, with mapped work sheds and separate wet/dry coverage. Sourced open grounds and yard aprons precede placement; roof cover comes from the accepted footprints. Selected river approaches, crossings, mapped Chinatown street blocks and local coverage use the same 1893 reference frame as the mapped riverbanks.",
     "registration": {
       "method": "local affine to stable landmarks; modern map used solely for locating controls",
       "working_scan_px": [
@@ -376,102 +376,6 @@
     },
     {
       "type": "Feature",
-      "id": "singapore-1890:south-bridge",
-      "properties": {
-        "kind": "road",
-        "source": "aranjo1890",
-        "width_m": 9,
-        "display_rank": 3,
-        "source_year": 1890,
-        "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            103.849167,
-            1.289296
-          ],
-          [
-            103.848783,
-            1.288003
-          ],
-          [
-            103.848198,
-            1.286519
-          ],
-          [
-            103.847662,
-            1.285364
-          ],
-          [
-            103.847151,
-            1.284186
-          ],
-          [
-            103.846471,
-            1.282901
-          ],
-          [
-            103.845919,
-            1.281904
-          ],
-          [
-            103.845388,
-            1.281233
-          ],
-          [
-            103.844502,
-            1.28048
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "singapore-1890:new-bridge",
-      "properties": {
-        "kind": "road",
-        "source": "aranjo1890",
-        "width_m": 9,
-        "display_rank": 3,
-        "source_year": 1890,
-        "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            103.84708,
-            1.288707
-          ],
-          [
-            103.845911,
-            1.286167
-          ],
-          [
-            103.844273,
-            1.28385
-          ],
-          [
-            103.842781,
-            1.281716
-          ],
-          [
-            103.840462,
-            1.279295
-          ],
-          [
-            103.837555,
-            1.276541
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
       "id": "singapore-1890:neil",
       "properties": {
         "kind": "road",
@@ -662,160 +566,6 @@
     },
     {
       "type": "Feature",
-      "id": "singapore-1890:upper-cross-south",
-      "properties": {
-        "kind": "road",
-        "source": "aranjo1890",
-        "width_m": 6,
-        "display_rank": 2,
-        "source_year": 1890,
-        "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            103.847662,
-            1.285364
-          ],
-          [
-            103.848679,
-            1.284877
-          ],
-          [
-            103.849983,
-            1.284246
-          ],
-          [
-            103.851286,
-            1.283991
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "singapore-1890:pagoda",
-      "properties": {
-        "kind": "road",
-        "source": "aranjo1890",
-        "width_m": 5,
-        "display_rank": 1,
-        "source_year": 1890,
-        "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            103.844867,
-            1.284665
-          ],
-          [
-            103.845861,
-            1.284228
-          ],
-          [
-            103.847071,
-            1.283798
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "singapore-1890:temple",
-      "properties": {
-        "kind": "road",
-        "source": "aranjo1890",
-        "width_m": 5,
-        "display_rank": 1,
-        "source_year": 1890,
-        "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            103.84404,
-            1.2836
-          ],
-          [
-            103.845141,
-            1.283152
-          ],
-          [
-            103.846529,
-            1.282561
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "singapore-1890:smith",
-      "properties": {
-        "kind": "road",
-        "source": "aranjo1890",
-        "width_m": 5,
-        "display_rank": 1,
-        "source_year": 1890,
-        "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            103.843183,
-            1.282475
-          ],
-          [
-            103.844282,
-            1.282001
-          ],
-          [
-            103.845791,
-            1.281617
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "singapore-1890:sago",
-      "properties": {
-        "kind": "road",
-        "source": "aranjo1890",
-        "width_m": 5,
-        "display_rank": 1,
-        "source_year": 1890,
-        "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            103.842115,
-            1.281024
-          ],
-          [
-            103.843381,
-            1.280629
-          ],
-          [
-            103.844943,
-            1.280628
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
       "id": "singapore-1890:pearl-hill-east-approach",
       "properties": {
         "kind": "road",
@@ -892,60 +642,6 @@
     },
     {
       "type": "Feature",
-      "id": "singapore-1890:north-bridge",
-      "properties": {
-        "kind": "road",
-        "source": "aranjo1890",
-        "width_m": 9,
-        "display_rank": 3,
-        "source_year": 1890,
-        "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            103.849996,
-            1.290791
-          ],
-          [
-            103.851077,
-            1.292835
-          ],
-          [
-            103.852563,
-            1.294484
-          ],
-          [
-            103.853771,
-            1.296011
-          ],
-          [
-            103.85498,
-            1.297565
-          ],
-          [
-            103.856234,
-            1.299367
-          ],
-          [
-            103.858007,
-            1.301678
-          ],
-          [
-            103.860063,
-            1.304193
-          ],
-          [
-            103.861984,
-            1.30591
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
       "id": "singapore-1890:victoria",
       "properties": {
         "kind": "road",
@@ -994,60 +690,6 @@
           [
             103.861023,
             1.307237
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "singapore-1890:beach",
-      "properties": {
-        "kind": "road",
-        "source": "aranjo1890",
-        "width_m": 8,
-        "display_rank": 3,
-        "source_year": 1890,
-        "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            103.852365,
-            1.289976
-          ],
-          [
-            103.853628,
-            1.292315
-          ],
-          [
-            103.85416,
-            1.293416
-          ],
-          [
-            103.855979,
-            1.2956
-          ],
-          [
-            103.858086,
-            1.298472
-          ],
-          [
-            103.859224,
-            1.299773
-          ],
-          [
-            103.861423,
-            1.301614
-          ],
-          [
-            103.863776,
-            1.303343
-          ],
-          [
-            103.865186,
-            1.305062
           ]
         ]
       }
@@ -1358,78 +1000,6 @@
     },
     {
       "type": "Feature",
-      "id": "singapore-1890:chinatown-frontages",
-      "properties": {
-        "kind": "zone",
-        "source": "aranjo1890",
-        "role": "shop",
-        "gap_m": 0.0,
-        "origin": "inferred_parcels",
-        "use_reference": "ura-districts",
-        "form_reference": "ura-shophouse",
-        "storeys": [
-          2,
-          3
-        ]
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              103.84076,
-              1.279716
-            ],
-            [
-              103.843485,
-              1.283353
-            ],
-            [
-              103.84577,
-              1.286065
-            ],
-            [
-              103.847785,
-              1.285597
-            ],
-            [
-              103.84906,
-              1.284935
-            ],
-            [
-              103.849104,
-              1.283199
-            ],
-            [
-              103.847083,
-              1.281601
-            ],
-            [
-              103.845502,
-              1.280526
-            ],
-            [
-              103.844108,
-              1.279427
-            ],
-            [
-              103.842796,
-              1.277965
-            ],
-            [
-              103.841489,
-              1.277361
-            ],
-            [
-              103.84076,
-              1.279716
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
       "id": "singapore-1890:tanjong-pagar-neil",
       "properties": {
         "kind": "zone",
@@ -1499,77 +1069,6 @@
             [
               103.843782,
               1.280181
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "singapore-1890:boat-quay-godowns",
-      "properties": {
-        "kind": "zone",
-        "source": "aranjo1890",
-        "role": "warehouse",
-        "gap_m": 2.0,
-        "origin": "inferred_parcels",
-        "use_reference": "nlb-docks",
-        "frontage_m": [
-          9,
-          14
-        ],
-        "depth_m": [
-          16,
-          25
-        ],
-        "storeys": [
-          2,
-          3
-        ]
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              103.849441,
-              1.28856
-            ],
-            [
-              103.850555,
-              1.287123
-            ],
-            [
-              103.851511,
-              1.286519
-            ],
-            [
-              103.852275,
-              1.286664
-            ],
-            [
-              103.852343,
-              1.285682
-            ],
-            [
-              103.851284,
-              1.283964
-            ],
-            [
-              103.850285,
-              1.284319
-            ],
-            [
-              103.849066,
-              1.285017
-            ],
-            [
-              103.848504,
-              1.285869
-            ],
-            [
-              103.849441,
-              1.28856
             ]
           ]
         ]
@@ -2493,943 +1992,6 @@
     },
     {
       "type": "Feature",
-      "id": "singapore-1893:mapped-nearshore-land",
-      "properties": {
-        "kind": "known_dry",
-        "source": "bartholomew1893"
-      },
-      "geometry": {
-        "type": "MultiPolygon",
-        "coordinates": [
-          [
-            [
-              [
-                103.8410961,
-                1.267589
-              ],
-              [
-                103.8441129,
-                1.2659175
-              ],
-              [
-                103.8438323,
-                1.26687
-              ],
-              [
-                103.8434356,
-                1.2681767
-              ],
-              [
-                103.8430631,
-                1.2693613
-              ],
-              [
-                103.8426615,
-                1.2703446
-              ],
-              [
-                103.8429617,
-                1.2712652
-              ],
-              [
-                103.8436926,
-                1.272563
-              ],
-              [
-                103.844493,
-                1.2738586
-              ],
-              [
-                103.8450995,
-                1.2738123
-              ],
-              [
-                103.8459868,
-                1.2739728
-              ],
-              [
-                103.846958,
-                1.273942
-              ],
-              [
-                103.8480502,
-                1.2738803
-              ],
-              [
-                103.8483325,
-                1.2741948
-              ],
-              [
-                103.8480294,
-                1.2753772
-              ],
-              [
-                103.8477197,
-                1.2761285
-              ],
-              [
-                103.8475133,
-                1.2768225
-              ],
-              [
-                103.8486896,
-                1.2783083
-              ],
-              [
-                103.8496738,
-                1.2797194
-              ],
-              [
-                103.8504709,
-                1.2807994
-              ],
-              [
-                103.8512067,
-                1.281841
-              ],
-              [
-                103.8519682,
-                1.2828682
-              ],
-              [
-                103.8526831,
-                1.2842474
-              ],
-              [
-                103.8530526,
-                1.2851657
-              ],
-              [
-                103.8530091,
-                1.2857333
-              ],
-              [
-                103.8529785,
-                1.2860039
-              ],
-              [
-                103.8525139,
-                1.2856816
-              ],
-              [
-                103.8518686,
-                1.2854595
-              ],
-              [
-                103.8511926,
-                1.2855079
-              ],
-              [
-                103.8504151,
-                1.2857214
-              ],
-              [
-                103.8498505,
-                1.2862516
-              ],
-              [
-                103.8495473,
-                1.2868543
-              ],
-              [
-                103.8492118,
-                1.2876199
-              ],
-              [
-                103.8490377,
-                1.2881511
-              ],
-              [
-                103.8488619,
-                1.2885746
-              ],
-              [
-                103.848215,
-                1.2888243
-              ],
-              [
-                103.8475939,
-                1.2890597
-              ],
-              [
-                103.8471261,
-                1.2891016
-              ],
-              [
-                103.8465195,
-                1.2891478
-              ],
-              [
-                103.846013,
-                1.2889213
-              ],
-              [
-                103.8459581,
-                1.2887343
-              ],
-              [
-                103.8460581,
-                1.2884615
-              ],
-              [
-                103.8459273,
-                1.2878456
-              ],
-              [
-                103.8460208,
-                1.2871417
-              ],
-              [
-                103.8456707,
-                1.2869371
-              ],
-              [
-                103.8455401,
-                1.2874805
-              ],
-              [
-                103.8449562,
-                1.2878765
-              ],
-              [
-                103.8442932,
-                1.2882076
-              ],
-              [
-                103.843919,
-                1.2887048
-              ],
-              [
-                103.8437803,
-                1.2892888
-              ],
-              [
-                103.8435351,
-                1.2897145
-              ],
-              [
-                103.8428979,
-                1.2894517
-              ],
-              [
-                103.8423864,
-                1.2889018
-              ],
-              [
-                103.8417071,
-                1.288155
-              ],
-              [
-                103.8414909,
-                1.2876227
-              ],
-              [
-                103.8411392,
-                1.2873104
-              ],
-              [
-                103.8407875,
-                1.2875776
-              ],
-              [
-                103.8404069,
-                1.2882233
-              ],
-              [
-                103.8403763,
-                1.2890735
-              ],
-              [
-                103.8403119,
-                1.2893991
-              ],
-              [
-                103.8399601,
-                1.2890867
-              ],
-              [
-                103.83951,
-                1.2885753
-              ],
-              [
-                103.8390808,
-                1.2883059
-              ],
-              [
-                103.8387819,
-                1.2884409
-              ],
-              [
-                103.8374661,
-                1.286484
-              ],
-              [
-                103.8375488,
-                1.2864093
-              ],
-              [
-                103.837902,
-                1.2862498
-              ],
-              [
-                103.8389185,
-                1.2860867
-              ],
-              [
-                103.8392122,
-                1.2857571
-              ],
-              [
-                103.8395638,
-                1.2854898
-              ],
-              [
-                103.8405353,
-                1.2850855
-              ],
-              [
-                103.8416406,
-                1.2851738
-              ],
-              [
-                103.8426347,
-                1.2857352
-              ],
-              [
-                103.8429865,
-                1.2860476
-              ],
-              [
-                103.8430738,
-                1.28617
-              ],
-              [
-                103.8435666,
-                1.2859238
-              ],
-              [
-                103.8440794,
-                1.2851289
-              ],
-              [
-                103.8453485,
-                1.2846867
-              ],
-              [
-                103.8467326,
-                1.2850476
-              ],
-              [
-                103.8470827,
-                1.2852521
-              ],
-              [
-                103.8474488,
-                1.2856313
-              ],
-              [
-                103.8477131,
-                1.2851058
-              ],
-              [
-                103.8481181,
-                1.2845638
-              ],
-              [
-                103.8486827,
-                1.2840336
-              ],
-              [
-                103.8495533,
-                1.2835512
-              ],
-              [
-                103.8497087,
-                1.2835086
-              ],
-              [
-                103.8493398,
-                1.283011
-              ],
-              [
-                103.8493048,
-                1.2829626
-              ],
-              [
-                103.8485846,
-                1.2819432
-              ],
-              [
-                103.8478036,
-                1.2808849
-              ],
-              [
-                103.8477631,
-                1.2808284
-              ],
-              [
-                103.8468239,
-                1.2794821
-              ],
-              [
-                103.8456969,
-                1.2780584
-              ],
-              [
-                103.8452153,
-                1.2770547
-              ],
-              [
-                103.8452455,
-                1.2760855
-              ],
-              [
-                103.845219,
-                1.2760807
-              ],
-              [
-                103.8449232,
-                1.2761032
-              ],
-              [
-                103.8435502,
-                1.2758138
-              ],
-              [
-                103.8425035,
-                1.2748478
-              ],
-              [
-                103.8417032,
-                1.2735522
-              ],
-              [
-                103.841651,
-                1.2734638
-              ],
-              [
-                103.8415437,
-                1.2732733
-              ],
-              [
-                103.8414455,
-                1.2733097
-              ],
-              [
-                103.8408179,
-                1.2734439
-              ],
-              [
-                103.8397693,
-                1.2735177
-              ],
-              [
-                103.8394259,
-                1.2735173
-              ],
-              [
-                103.8383837,
-                1.2734426
-              ],
-              [
-                103.8381993,
-                1.2734225
-              ],
-              [
-                103.8372168,
-                1.2732785
-              ],
-              [
-                103.837179,
-                1.2732726
-              ],
-              [
-                103.8360659,
-                1.2730923
-              ],
-              [
-                103.8357876,
-                1.2730313
-              ],
-              [
-                103.8350035,
-                1.2728136
-              ],
-              [
-                103.8340014,
-                1.2722871
-              ],
-              [
-                103.8338199,
-                1.2720553
-              ],
-              [
-                103.8356795,
-                1.2710249
-              ],
-              [
-                103.8357064,
-                1.2710081
-              ],
-              [
-                103.8357312,
-                1.2709886
-              ],
-              [
-                103.8357535,
-                1.2709667
-              ],
-              [
-                103.8357733,
-                1.2709426
-              ],
-              [
-                103.8357903,
-                1.2709164
-              ],
-              [
-                103.8358043,
-                1.2708886
-              ],
-              [
-                103.8358153,
-                1.2708592
-              ],
-              [
-                103.8358231,
-                1.2708286
-              ],
-              [
-                103.8358276,
-                1.2707971
-              ],
-              [
-                103.8358288,
-                1.2707658
-              ],
-              [
-                103.8362151,
-                1.2708731
-              ],
-              [
-                103.8373282,
-                1.2710533
-              ],
-              [
-                103.8383107,
-                1.2711974
-              ],
-              [
-                103.8393529,
-                1.2712721
-              ],
-              [
-                103.8404015,
-                1.2711983
-              ],
-              [
-                103.8409967,
-                1.2709772
-              ],
-              [
-                103.8408595,
-                1.2705097
-              ],
-              [
-                103.8404901,
-                1.270171
-              ],
-              [
-                103.8396883,
-                1.2699269
-              ],
-              [
-                103.8385848,
-                1.2698137
-              ],
-              [
-                103.8371958,
-                1.26975
-              ],
-              [
-                103.8405401,
-                1.267897
-              ],
-              [
-                103.8409591,
-                1.2680246
-              ],
-              [
-                103.8410961,
-                1.267589
-              ]
-            ]
-          ],
-          [
-            [
-              [
-                103.8561293,
-                1.2993297
-              ],
-              [
-                103.8554548,
-                1.2983267
-              ],
-              [
-                103.855332,
-                1.2981244
-              ],
-              [
-                103.8548855,
-                1.2973054
-              ],
-              [
-                103.8540184,
-                1.296389
-              ],
-              [
-                103.8537461,
-                1.296049
-              ],
-              [
-                103.8530716,
-                1.2950459
-              ],
-              [
-                103.8526677,
-                1.2939383
-              ],
-              [
-                103.8528056,
-                1.2931665
-              ],
-              [
-                103.8527275,
-                1.2929892
-              ],
-              [
-                103.8526551,
-                1.292805
-              ],
-              [
-                103.8524127,
-                1.2921047
-              ],
-              [
-                103.8520593,
-                1.2912346
-              ],
-              [
-                103.8516515,
-                1.2904968
-              ],
-              [
-                103.8514755,
-                1.2907135
-              ],
-              [
-                103.8511077,
-                1.2910622
-              ],
-              [
-                103.8506997,
-                1.2913604
-              ],
-              [
-                103.8500803,
-                1.2917037
-              ],
-              [
-                103.8498908,
-                1.2917964
-              ],
-              [
-                103.8493132,
-                1.2920439
-              ],
-              [
-                103.8477441,
-                1.2921297
-              ],
-              [
-                103.8477251,
-                1.2921244
-              ],
-              [
-                103.8472245,
-                1.2920862
-              ],
-              [
-                103.8469678,
-                1.2920531
-              ],
-              [
-                103.8465241,
-                1.2919729
-              ],
-              [
-                103.8463848,
-                1.2919437
-              ],
-              [
-                103.8460941,
-                1.2918743
-              ],
-              [
-                103.8458366,
-                1.2921261
-              ],
-              [
-                103.8445741,
-                1.2927041
-              ],
-              [
-                103.8431181,
-                1.2924131
-              ],
-              [
-                103.8425682,
-                1.2921235
-              ],
-              [
-                103.8418452,
-                1.291783
-              ],
-              [
-                103.8417412,
-                1.2917067
-              ],
-              [
-                103.8417334,
-                1.2917125
-              ],
-              [
-                103.8410546,
-                1.2918208
-              ],
-              [
-                103.8388265,
-                1.2885072
-              ],
-              [
-                103.8391728,
-                1.2886535
-              ],
-              [
-                103.8396423,
-                1.2892991
-              ],
-              [
-                103.8402022,
-                1.2896048
-              ],
-              [
-                103.8406103,
-                1.2896322
-              ],
-              [
-                103.8407636,
-                1.2894386
-              ],
-              [
-                103.8406521,
-                1.2883773
-              ],
-              [
-                103.8408166,
-                1.2877789
-              ],
-              [
-                103.8409698,
-                1.2875853
-              ],
-              [
-                103.8413587,
-                1.2880583
-              ],
-              [
-                103.8421654,
-                1.2892054
-              ],
-              [
-                103.8426946,
-                1.2897817
-              ],
-              [
-                103.8434723,
-                1.2901479
-              ],
-              [
-                103.8440757,
-                1.2904657
-              ],
-              [
-                103.8444176,
-                1.2901313
-              ],
-              [
-                103.8444337,
-                1.2894702
-              ],
-              [
-                103.8446917,
-                1.2887476
-              ],
-              [
-                103.8450901,
-                1.2881283
-              ],
-              [
-                103.8456402,
-                1.2877873
-              ],
-              [
-                103.8458483,
-                1.2883604
-              ],
-              [
-                103.8458145,
-                1.288995
-              ],
-              [
-                103.845863,
-                1.2893305
-              ],
-              [
-                103.8461711,
-                1.2896307
-              ],
-              [
-                103.8467197,
-                1.2897615
-              ],
-              [
-                103.8471633,
-                1.2898418
-              ],
-              [
-                103.8479102,
-                1.2898989
-              ],
-              [
-                103.8481716,
-                1.2899715
-              ],
-              [
-                103.8487491,
-                1.289724
-              ],
-              [
-                103.8493685,
-                1.2893808
-              ],
-              [
-                103.8497363,
-                1.2890321
-              ],
-              [
-                103.8502444,
-                1.2882071
-              ],
-              [
-                103.8508121,
-                1.2873129
-              ],
-              [
-                103.8512331,
-                1.2864637
-              ],
-              [
-                103.8517251,
-                1.2862998
-              ],
-              [
-                103.8523123,
-                1.286699
-              ],
-              [
-                103.8524963,
-                1.2868145
-              ],
-              [
-                103.8528513,
-                1.2873424
-              ],
-              [
-                103.8531498,
-                1.2881552
-              ],
-              [
-                103.8532789,
-                1.2886633
-              ],
-              [
-                103.853692,
-                1.2895938
-              ],
-              [
-                103.8541826,
-                1.2904814
-              ],
-              [
-                103.8546151,
-                1.291546
-              ],
-              [
-                103.8548781,
-                1.292306
-              ],
-              [
-                103.8551476,
-                1.2929175
-              ],
-              [
-                103.8557381,
-                1.2935323
-              ],
-              [
-                103.8550074,
-                1.2939734
-              ],
-              [
-                103.8556818,
-                1.2949764
-              ],
-              [
-                103.8567838,
-                1.2961411
-              ],
-              [
-                103.8573905,
-                1.2972542
-              ],
-              [
-                103.858065,
-                1.2982572
-              ],
-              [
-                103.858913,
-                1.2990916
-              ],
-              [
-                103.8569289,
-                1.300191
-              ],
-              [
-                103.8564687,
-                1.2997381
-              ],
-              [
-                103.8561293,
-                1.2993297
-              ]
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
       "id": "singapore-1893:dock-plan-extent",
       "properties": {
         "kind": "coverage",
@@ -4048,6 +2610,2076 @@
               103.8449794,
               1.2928633
             ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:south-bridge-road",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 2,
+        "width_m": 13,
+        "display_surface": "setts",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8440461,
+            1.2741424
+          ],
+          [
+            103.8430009,
+            1.2750114
+          ],
+          [
+            103.8426542,
+            1.2761817
+          ],
+          [
+            103.8423543,
+            1.2775796
+          ],
+          [
+            103.8428433,
+            1.278939
+          ],
+          [
+            103.8435726,
+            1.280129
+          ],
+          [
+            103.8442229,
+            1.2812542
+          ],
+          [
+            103.8451297,
+            1.2827081
+          ],
+          [
+            103.8461963,
+            1.2843997
+          ],
+          [
+            103.8471289,
+            1.2858393
+          ],
+          [
+            103.8482826,
+            1.2875551
+          ],
+          [
+            103.8489393,
+            1.2885317
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:elgin-span",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 2,
+        "width_m": 10,
+        "display_surface": "setts",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Crossing span of the 1893 atlas, display deck inferred.",
+        "bridge_reference": "nhb-river"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8489393,
+            1.2885317
+          ],
+          [
+            103.8495605,
+            1.2894555
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:north-bridge-road",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 2,
+        "width_m": 13,
+        "display_surface": "setts",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8495605,
+            1.2894555
+          ],
+          [
+            103.8502544,
+            1.2905928
+          ],
+          [
+            103.8511257,
+            1.2919939
+          ],
+          [
+            103.851989,
+            1.2934358
+          ],
+          [
+            103.8529765,
+            1.2950625
+          ],
+          [
+            103.8535461,
+            1.2960149
+          ],
+          [
+            103.8541625,
+            1.297195
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:coleman-south-approach",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8464854,
+            1.2874639
+          ],
+          [
+            103.8469647,
+            1.2881766
+          ],
+          [
+            103.8475423,
+            1.2890883
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:coleman-span",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Crossing span of the 1893 atlas, display deck inferred.",
+        "bridge_reference": "nhb-river"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8475423,
+            1.2890883
+          ],
+          [
+            103.8482442,
+            1.2901849
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:coleman-north-approach",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8482442,
+            1.2901849
+          ],
+          [
+            103.8490187,
+            1.2914948
+          ],
+          [
+            103.849732,
+            1.2927662
+          ],
+          [
+            103.8504952,
+            1.2939012
+          ],
+          [
+            103.8513374,
+            1.2951011
+          ],
+          [
+            103.8516166,
+            1.2957797
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:cavenagh-quay-approach",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8519363,
+            1.2853495
+          ],
+          [
+            103.8525494,
+            1.2857344
+          ],
+          [
+            103.8529269,
+            1.2860325
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:cavenagh-span",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Crossing span of the 1893 atlas, display deck inferred.",
+        "bridge_reference": "nhb-river"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8529269,
+            1.2860325
+          ],
+          [
+            103.852385,
+            1.2869124
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:cavenagh-civic-approach",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.852385,
+            1.2869124
+          ],
+          [
+            103.8519543,
+            1.2876944
+          ],
+          [
+            103.8515463,
+            1.2882466
+          ],
+          [
+            103.8510769,
+            1.2887603
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:boat-quay",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8488054,
+            1.2882798
+          ],
+          [
+            103.8488924,
+            1.2877244
+          ],
+          [
+            103.8491666,
+            1.2869204
+          ],
+          [
+            103.8494117,
+            1.2864947
+          ],
+          [
+            103.8496053,
+            1.2860976
+          ],
+          [
+            103.849894,
+            1.285684
+          ],
+          [
+            103.8502279,
+            1.2853903
+          ],
+          [
+            103.8511555,
+            1.2853474
+          ],
+          [
+            103.8519363,
+            1.2853495
+          ],
+          [
+            103.8525494,
+            1.2857344
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:north-boat-quay",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8495605,
+            1.2894555
+          ],
+          [
+            103.8500299,
+            1.2889419
+          ],
+          [
+            103.8504089,
+            1.2881884
+          ],
+          [
+            103.8509557,
+            1.2876318
+          ],
+          [
+            103.8515687,
+            1.2868575
+          ],
+          [
+            103.8518978,
+            1.28682
+          ],
+          [
+            103.852385,
+            1.2869124
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:new-bridge-road",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 2,
+        "width_m": 12,
+        "display_surface": "setts",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.842293,
+            1.2775411
+          ],
+          [
+            103.8432917,
+            1.278763
+          ],
+          [
+            103.8441211,
+            1.2796803
+          ],
+          [
+            103.845181,
+            1.280361
+          ],
+          [
+            103.8461362,
+            1.2809911
+          ],
+          [
+            103.8468461,
+            1.282047
+          ],
+          [
+            103.8470592,
+            1.2829434
+          ],
+          [
+            103.8462688,
+            1.2834538
+          ],
+          [
+            103.8457687,
+            1.2836584
+          ],
+          [
+            103.8446395,
+            1.2841391
+          ],
+          [
+            103.8436571,
+            1.2845748
+          ],
+          [
+            103.8428118,
+            1.2848982
+          ],
+          [
+            103.8421391,
+            1.2851622
+          ],
+          [
+            103.8421489,
+            1.2863886
+          ],
+          [
+            103.8420845,
+            1.2872938
+          ],
+          [
+            103.8416281,
+            1.2880901
+          ],
+          [
+            103.8421234,
+            1.2887214
+          ],
+          [
+            103.8425655,
+            1.2892735
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:upper-cross-street",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8419516,
+            1.2825126
+          ],
+          [
+            103.8424841,
+            1.2833045
+          ],
+          [
+            103.8429649,
+            1.284125
+          ],
+          [
+            103.8435216,
+            1.2847947
+          ],
+          [
+            103.8442186,
+            1.2855679
+          ],
+          [
+            103.8449511,
+            1.2863938
+          ],
+          [
+            103.8454981,
+            1.2869965
+          ],
+          [
+            103.8459676,
+            1.2876421
+          ],
+          [
+            103.8463581,
+            1.2882228
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:smith-street",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8427048,
+            1.281262
+          ],
+          [
+            103.8431131,
+            1.2818691
+          ],
+          [
+            103.8436197,
+            1.2826753
+          ],
+          [
+            103.8440893,
+            1.2833209
+          ],
+          [
+            103.8445959,
+            1.284127
+          ],
+          [
+            103.8448735,
+            1.2846978
+          ],
+          [
+            103.845272,
+            1.2852379
+          ],
+          [
+            103.8457754,
+            1.2858284
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:pagoda-local",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8419855,
+            1.2824576
+          ],
+          [
+            103.8430001,
+            1.2818592
+          ],
+          [
+            103.8434647,
+            1.2816018
+          ],
+          [
+            103.8442229,
+            1.2812542
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:temple-local",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8422872,
+            1.2829063
+          ],
+          [
+            103.8432761,
+            1.2823222
+          ],
+          [
+            103.8437665,
+            1.2820505
+          ],
+          [
+            103.8444988,
+            1.2817172
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:trengganu-local",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8426793,
+            1.2835948
+          ],
+          [
+            103.8437198,
+            1.2829821
+          ],
+          [
+            103.8442279,
+            1.2827368
+          ],
+          [
+            103.8449425,
+            1.2823771
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-cross-lane-a",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8430246,
+            1.2840557
+          ],
+          [
+            103.8440393,
+            1.2834572
+          ],
+          [
+            103.8446168,
+            1.2832097
+          ],
+          [
+            103.8451588,
+            1.2829094
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-cross-lane-b",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8432554,
+            1.2843988
+          ],
+          [
+            103.8442619,
+            1.2838411
+          ],
+          [
+            103.8447781,
+            1.2835551
+          ],
+          [
+            103.8454766,
+            1.2832768
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-cross-lane-c",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8439443,
+            1.2852127
+          ],
+          [
+            103.8448735,
+            1.2846978
+          ],
+          [
+            103.8454074,
+            1.2844382
+          ],
+          [
+            103.8460188,
+            1.2841357
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-cross-lane-d",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8444203,
+            1.2857098
+          ],
+          [
+            103.845272,
+            1.2852379
+          ],
+          [
+            103.8457366,
+            1.2849804
+          ],
+          [
+            103.8463738,
+            1.2846636
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-cross-lane-e",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8448188,
+            1.2862498
+          ],
+          [
+            103.8456705,
+            1.2857779
+          ],
+          [
+            103.8462481,
+            1.2855303
+          ],
+          [
+            103.8467384,
+            1.2852586
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:upper-hokkien-cross",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8434647,
+            1.2816018
+          ],
+          [
+            103.8437665,
+            1.2820505
+          ],
+          [
+            103.8442279,
+            1.2827368
+          ],
+          [
+            103.8446168,
+            1.2832097
+          ],
+          [
+            103.8447781,
+            1.2835551
+          ],
+          [
+            103.8450089,
+            1.2838982
+          ],
+          [
+            103.8454074,
+            1.2844382
+          ],
+          [
+            103.8457366,
+            1.2849804
+          ],
+          [
+            103.8462481,
+            1.2855303
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:china-street",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8449126,
+            1.2878644
+          ],
+          [
+            103.8459256,
+            1.2871582
+          ],
+          [
+            103.8466838,
+            1.2868106
+          ],
+          [
+            103.8476727,
+            1.2868061
+          ],
+          [
+            103.8485374,
+            1.2866168
+          ],
+          [
+            103.8494037,
+            1.2865354
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:cross-street-lower",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8460188,
+            1.2841357
+          ],
+          [
+            103.8468108,
+            1.2837331
+          ],
+          [
+            103.8472044,
+            1.2833701
+          ],
+          [
+            103.8477174,
+            1.2828685
+          ],
+          [
+            103.8482174,
+            1.2826639
+          ],
+          [
+            103.849284,
+            1.2843554
+          ],
+          [
+            103.8495858,
+            1.2853838
+          ],
+          [
+            103.849894,
+            1.285684
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:telok-ayer-street",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8482223,
+            1.2824076
+          ],
+          [
+            103.8487353,
+            1.2830653
+          ],
+          [
+            103.8491468,
+            1.283888
+          ],
+          [
+            103.849284,
+            1.2843554
+          ],
+          [
+            103.8501036,
+            1.2846259
+          ],
+          [
+            103.8509199,
+            1.2846809
+          ],
+          [
+            103.8515361,
+            1.2847017
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:market-approach",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8464167,
+            1.2800386
+          ],
+          [
+            103.8472072,
+            1.2795282
+          ],
+          [
+            103.8478427,
+            1.2791036
+          ],
+          [
+            103.8485476,
+            1.2786768
+          ],
+          [
+            103.849327,
+            1.2797304
+          ],
+          [
+            103.8498498,
+            1.2804552
+          ],
+          [
+            103.850329,
+            1.2811679
+          ],
+          [
+            103.8508695,
+            1.2819191
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:club-ground-front",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8508817,
+            1.2890496
+          ],
+          [
+            103.8514707,
+            1.2901362
+          ],
+          [
+            103.8521355,
+            1.2910722
+          ],
+          [
+            103.8528712,
+            1.2921137
+          ],
+          [
+            103.8534037,
+            1.2929056
+          ],
+          [
+            103.8536812,
+            1.2934764
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-mapped-blocks",
+      "properties": {
+        "kind": "block_ground",
+        "source": "bartholomew1893",
+        "use_basis": "Built blocks shaded on atlas; common hard ground within mapped blocks is inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8414434,
+              1.2821783
+            ],
+            [
+              103.8435152,
+              1.2849432
+            ],
+            [
+              103.8447527,
+              1.2864676
+            ],
+            [
+              103.846674,
+              1.2855842
+            ],
+            [
+              103.8473949,
+              1.2844964
+            ],
+            [
+              103.8469592,
+              1.2832161
+            ],
+            [
+              103.8466623,
+              1.2825111
+            ],
+            [
+              103.8459218,
+              1.2823055
+            ],
+            [
+              103.8450942,
+              1.2820757
+            ],
+            [
+              103.8442841,
+              1.280713
+            ],
+            [
+              103.8414434,
+              1.2821783
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-shops",
+      "properties": {
+        "kind": "zone",
+        "source": "bartholomew1893",
+        "role": "shop",
+        "gap_m": 0.45,
+        "frontage_m": [
+          4.5,
+          7
+        ],
+        "depth_m": [
+          14,
+          24
+        ],
+        "storeys": [
+          2,
+          3
+        ],
+        "use_reference": "ura-districts",
+        "form_reference": "ura-shophouse"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8414434,
+              1.2821783
+            ],
+            [
+              103.8434974,
+              1.2849168
+            ],
+            [
+              103.8448576,
+              1.2865181
+            ],
+            [
+              103.8469224,
+              1.2853741
+            ],
+            [
+              103.8475756,
+              1.2843963
+            ],
+            [
+              103.8469414,
+              1.2831897
+            ],
+            [
+              103.8466187,
+              1.282499
+            ],
+            [
+              103.845896,
+              1.2823198
+            ],
+            [
+              103.8451458,
+              1.2820471
+            ],
+            [
+              103.8442841,
+              1.280713
+            ],
+            [
+              103.8414434,
+              1.2821783
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:boat-quay-south-work-blocks",
+      "properties": {
+        "kind": "block_ground",
+        "source": "bartholomew1893",
+        "use_basis": "Mapped riverward warehousing and commerce."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8463156,
+              1.2842611
+            ],
+            [
+              103.8478792,
+              1.2866917
+            ],
+            [
+              103.8486842,
+              1.2865717
+            ],
+            [
+              103.8492035,
+              1.2859217
+            ],
+            [
+              103.8496019,
+              1.2853024
+            ],
+            [
+              103.8492485,
+              1.2843026
+            ],
+            [
+              103.8485111,
+              1.2831533
+            ],
+            [
+              103.84779,
+              1.2830819
+            ],
+            [
+              103.8463156,
+              1.2842611
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:boat-quay-godowns",
+      "properties": {
+        "kind": "zone",
+        "source": "bartholomew1893",
+        "role": "warehouse",
+        "gap_m": 1.2,
+        "frontage_m": [
+          8,
+          15
+        ],
+        "depth_m": [
+          16,
+          26
+        ],
+        "use_reference": "nlb-docks"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8463156,
+              1.2842611
+            ],
+            [
+              103.8478792,
+              1.2866917
+            ],
+            [
+              103.8486842,
+              1.2865717
+            ],
+            [
+              103.8492035,
+              1.2859217
+            ],
+            [
+              103.8496019,
+              1.2853024
+            ],
+            [
+              103.8492485,
+              1.2843026
+            ],
+            [
+              103.8485111,
+              1.2831533
+            ],
+            [
+              103.84779,
+              1.2830819
+            ],
+            [
+              103.8463156,
+              1.2842611
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-lanes-survey",
+      "properties": {
+        "kind": "road_coverage",
+        "source": "bartholomew1893",
+        "categories": 1,
+        "coverage_state": "mapped_network",
+        "coverage_basis": "Mapped local street passages of the retained Chinatown trunk and named local streets. Excludes an unreadable inner inset at the atlas label."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8418951,
+              1.2822179
+            ],
+            [
+              103.8437152,
+              1.2849773
+            ],
+            [
+              103.8449947,
+              1.2864059
+            ],
+            [
+              103.8468627,
+              1.2854434
+            ],
+            [
+              103.8467512,
+              1.284382
+            ],
+            [
+              103.8463994,
+              1.2834901
+            ],
+            [
+              103.8455556,
+              1.282762
+            ],
+            [
+              103.8443035,
+              1.2808472
+            ],
+            [
+              103.8418951,
+              1.2822179
+            ]
+          ],
+          [
+            [
+              103.8437781,
+              1.2845439
+            ],
+            [
+              103.8440169,
+              1.2848464
+            ],
+            [
+              103.8444911,
+              1.2846561
+            ],
+            [
+              103.8442523,
+              1.2843536
+            ],
+            [
+              103.8437781,
+              1.2845439
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:padang-open-playing-ground",
+      "properties": {
+        "kind": "park",
+        "source": "bartholomew1893",
+        "use_basis": "Atlas maps recreation grounds with precinct edges and no internal city street."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8516319,
+              1.2893223
+            ],
+            [
+              103.8518611,
+              1.2901373
+            ],
+            [
+              103.8524032,
+              1.2909962
+            ],
+            [
+              103.8530761,
+              1.2918915
+            ],
+            [
+              103.8537843,
+              1.2916803
+            ],
+            [
+              103.8539568,
+              1.2910412
+            ],
+            [
+              103.8534807,
+              1.2899645
+            ],
+            [
+              103.8530096,
+              1.2892111
+            ],
+            [
+              103.8524159,
+              1.2889604
+            ],
+            [
+              103.8516319,
+              1.2893223
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:padang-no-street-survey",
+      "properties": {
+        "kind": "road_coverage",
+        "source": "bartholomew1893",
+        "categories": 3,
+        "coverage_state": "confirmed_empty",
+        "coverage_basis": "Delineated historical recreation ground without an internal public street in the 1893 atlas. Paths outside the ground remain outside coverage."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8516319,
+              1.2893223
+            ],
+            [
+              103.8518611,
+              1.2901373
+            ],
+            [
+              103.8524032,
+              1.2909962
+            ],
+            [
+              103.8530761,
+              1.2918915
+            ],
+            [
+              103.8537843,
+              1.2916803
+            ],
+            [
+              103.8539568,
+              1.2910412
+            ],
+            [
+              103.8534807,
+              1.2899645
+            ],
+            [
+              103.8530096,
+              1.2892111
+            ],
+            [
+              103.8524159,
+              1.2889604
+            ],
+            [
+              103.8516319,
+              1.2893223
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:mapped-harbour-landward",
+      "properties": {
+        "kind": "known_dry",
+        "source": "bartholomew1893"
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                103.8579055,
+                1.2997585
+              ],
+              [
+                103.8555836,
+                1.2965163
+              ],
+              [
+                103.8532683,
+                1.2937052
+              ],
+              [
+                103.8508964,
+                1.2905993
+              ],
+              [
+                103.8499073,
+                1.2887545
+              ],
+              [
+                103.8502444,
+                1.2882071
+              ],
+              [
+                103.8508121,
+                1.2873129
+              ],
+              [
+                103.8512331,
+                1.2864637
+              ],
+              [
+                103.8517251,
+                1.2862998
+              ],
+              [
+                103.8523123,
+                1.286699
+              ],
+              [
+                103.8524963,
+                1.2868145
+              ],
+              [
+                103.8528513,
+                1.2873424
+              ],
+              [
+                103.8531498,
+                1.2881552
+              ],
+              [
+                103.8532789,
+                1.2886633
+              ],
+              [
+                103.853692,
+                1.2895938
+              ],
+              [
+                103.8541826,
+                1.2904814
+              ],
+              [
+                103.8546151,
+                1.291546
+              ],
+              [
+                103.8548781,
+                1.292306
+              ],
+              [
+                103.8551476,
+                1.2929175
+              ],
+              [
+                103.8557381,
+                1.2935323
+              ],
+              [
+                103.8550074,
+                1.2939734
+              ],
+              [
+                103.8556818,
+                1.2949764
+              ],
+              [
+                103.8567838,
+                1.2961411
+              ],
+              [
+                103.8573905,
+                1.2972542
+              ],
+              [
+                103.858065,
+                1.2982572
+              ],
+              [
+                103.8584749,
+                1.2986605
+              ],
+              [
+                103.8585507,
+                1.299401
+              ],
+              [
+                103.8579055,
+                1.2997585
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                103.8481804,
+                1.283083
+              ],
+              [
+                103.8457875,
+                1.2797351
+              ],
+              [
+                103.8419298,
+                1.2758946
+              ],
+              [
+                103.8391644,
+                1.2731518
+              ],
+              [
+                103.8350697,
+                1.2708556
+              ],
+              [
+                103.8354311,
+                1.2706553
+              ],
+              [
+                103.8362151,
+                1.2708731
+              ],
+              [
+                103.8373282,
+                1.2710533
+              ],
+              [
+                103.8383107,
+                1.2711974
+              ],
+              [
+                103.8393529,
+                1.2712721
+              ],
+              [
+                103.8404015,
+                1.2711983
+              ],
+              [
+                103.8409967,
+                1.2709772
+              ],
+              [
+                103.8408595,
+                1.2705097
+              ],
+              [
+                103.8404901,
+                1.270171
+              ],
+              [
+                103.8396883,
+                1.2699269
+              ],
+              [
+                103.8385848,
+                1.2698137
+              ],
+              [
+                103.8371958,
+                1.26975
+              ],
+              [
+                103.8368248,
+                1.2698831
+              ],
+              [
+                103.8441226,
+                1.2658396
+              ],
+              [
+                103.8441129,
+                1.2659175
+              ],
+              [
+                103.8438323,
+                1.26687
+              ],
+              [
+                103.8434356,
+                1.2681767
+              ],
+              [
+                103.8430631,
+                1.2693613
+              ],
+              [
+                103.8426615,
+                1.2703446
+              ],
+              [
+                103.8429617,
+                1.2712652
+              ],
+              [
+                103.8436926,
+                1.272563
+              ],
+              [
+                103.8440837,
+                1.273196
+              ],
+              [
+                103.8440589,
+                1.2732658
+              ],
+              [
+                103.8441217,
+                1.2732576
+              ],
+              [
+                103.844493,
+                1.2738586
+              ],
+              [
+                103.8450995,
+                1.2738123
+              ],
+              [
+                103.8459868,
+                1.2739728
+              ],
+              [
+                103.846958,
+                1.273942
+              ],
+              [
+                103.8480261,
+                1.2738817
+              ],
+              [
+                103.8480766,
+                1.2739097
+              ],
+              [
+                103.8483325,
+                1.2741948
+              ],
+              [
+                103.8480294,
+                1.2753772
+              ],
+              [
+                103.8477197,
+                1.2761285
+              ],
+              [
+                103.8475133,
+                1.2768225
+              ],
+              [
+                103.8486896,
+                1.2783083
+              ],
+              [
+                103.8496738,
+                1.2797194
+              ],
+              [
+                103.8504709,
+                1.2807994
+              ],
+              [
+                103.8512067,
+                1.281841
+              ],
+              [
+                103.8519682,
+                1.2828682
+              ],
+              [
+                103.8526831,
+                1.2842474
+              ],
+              [
+                103.8530526,
+                1.2851657
+              ],
+              [
+                103.8530091,
+                1.2857333
+              ],
+              [
+                103.8529785,
+                1.2860039
+              ],
+              [
+                103.8525139,
+                1.2856816
+              ],
+              [
+                103.8518686,
+                1.2854595
+              ],
+              [
+                103.8511926,
+                1.2855079
+              ],
+              [
+                103.8504151,
+                1.2857214
+              ],
+              [
+                103.8498505,
+                1.2862516
+              ],
+              [
+                103.8495473,
+                1.2868543
+              ],
+              [
+                103.849251,
+                1.2875304
+              ],
+              [
+                103.8490843,
+                1.2872195
+              ],
+              [
+                103.8481804,
+                1.283083
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:coastal-street-at-civic-block",
+      "properties": {
+        "kind": "road",
+        "source": "bartholomew1893",
+        "source_year": 1893,
+        "display_rank": 2,
+        "width_m": 12,
+        "display_surface": "setts",
+        "width_basis": "Display width inferred from mapped hierarchy and street block clearance.",
+        "surface_basis": "Visual reconstruction of paved main streets and local street surfaces."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.85477,
+            1.2920398
+          ],
+          [
+            103.8550685,
+            1.2928526
+          ],
+          [
+            103.8555316,
+            1.2936467
+          ],
+          [
+            103.8548864,
+            1.2940042
+          ],
+          [
+            103.8542847,
+            1.2943738
+          ],
+          [
+            103.8536991,
+            1.294662
+          ],
+          [
+            103.8529765,
+            1.2950625
+          ],
+          [
+            103.8523909,
+            1.2953507
+          ],
+          [
+            103.8517456,
+            1.2957082
+          ],
+          [
+            103.8514505,
+            1.2962702
           ]
         ]
       }

@@ -1187,7 +1187,7 @@ fn landscape_relief(base:vec3f,ll:vec2f,world:vec3f,water:f32,mpp:f32) -> vec3f 
     var legacy_street=0.;
     var street_ground=0.;
     if surveyed_street>.001 {
-        let fallback=road_raster_fraction(ll,3u);
+        let fallback=road_raster_fraction(ll,mpp).x;
         legacy_street=surveyed_street*fallback;
         // A mineral bed belongs only to streets inside the adjoining
         // built fabric. Rural centrelines must leave no painted footprint.

@@ -22,6 +22,8 @@ BAND_HEIGHT = 32
 ROAD_CELL = 64
 ROAD_PAGE_METRES = 4096.
 ROAD_PAGE_BYTES = 1024 * 1024
+ROAD_SUPPORT_STEP = 16.
+ROAD_SUPPORT_SIDE = 258
 # Pixel footprints at the end of each blend band, in metres.
 ROAD_LEVELS = ((1, 128, 42.), (2, 256, 86.), (3, 384, 175.))
 
@@ -224,6 +226,28 @@ def pack_water_bands(words, south, north, layers):
     return start, len(rows)
 
 
+def pack_road_support(words, west, south, layers):
+    from affine import Affine
+    import numpy as np
+    from rasterio.features import rasterize
+
+    step, side = ROAD_SUPPORT_STEP, ROAD_SUPPORT_SIDE
+    affine = Affine(step, 0, west-step, 0, step, south-step)
+    grid = np.zeros((side, side), dtype=np.uint32)
+    for channel, polygon in enumerate(layers):
+        if polygon.is_empty:
+            continue
+        shapes = [(polygon, 48)]
+        for inset, weight in ((12., 112), (24., 191), (36., 255)):
+            interior = polygon.buffer(-inset)
+            if not interior.is_empty:
+                shapes.append((interior, weight))
+        mask = rasterize(shapes, out_shape=(side, side), transform=affine, dtype="uint8")
+        grid |= mask.astype(np.uint32) << (8*channel)
+    words[12] = len(words)
+    words.extend(grid.ravel().tolist())
+
+
 def planned_road_pages(plan):
     """Encode bounded display pages from the same CRS84 road features as the city plan."""
     lon, lat = plan["wwo"]["origin"]
@@ -234,14 +258,27 @@ def planned_road_pages(plan):
     sources = []
     pages = {}
     water = {}
+    support = {}
+    road_geometry = {}
+    def project(feature):
+        return transform(shape(feature["geometry"]), lambda x, y: ((x-lon)*x_scale, (y-lat)*y_scale),
+                         interleaved=False)
+
     for feature in sorted(plan["features"], key=lambda row: row["id"]):
         props = feature["properties"]
+        if props["kind"] == "road_coverage":
+            categories, state = props.get("categories"), props.get("coverage_state")
+            if (type(categories) is not int or categories not in (1, 2, 3)
+                or state not in ("mapped_network", "confirmed_empty") or not props.get("coverage_basis")):
+                raise ValueError(f"Road coverage needs categories, state and evidence for {feature['id']}")
+            support[feature["id"]] = (categories, state, project(feature), props["source"])
+            sources.append(feature)
+            continue
         if props["kind"] in ("water_surface", "known_dry"):
             flag = 2 if props["kind"] == "known_dry" else {"river": 1, "coast": 4}.get(props.get("basin"))
             if flag is None:
                 raise ValueError(f"Invalid historical basin for {feature['id']}")
-            geom = transform(shape(feature["geometry"]), lambda x, y: ((x-lon)*x_scale, (y-lat)*y_scale),
-                             interleaved=False)
+            geom = project(feature)
             sources.append(dict(id=feature["id"], geometry=feature["geometry"], properties=props))
             west, south, east, north = geom.bounds
             for x in range(math.floor(west/width), math.ceil(east/width)):
@@ -261,8 +298,8 @@ def planned_road_pages(plan):
         year = props.get("source_year")
         if type(year) is not int or not all(props.get(k) for k in ("width_basis", "surface_basis")):
             raise ValueError(f"Road alignment, width and surface need a dated record for {feature['id']}")
-        geo = shape(feature["geometry"])
-        geom = transform(geo, lambda x, y: ((x-lon)*x_scale, (y-lat)*y_scale), interleaved=False)
+        geom = project(feature)
+        road_geometry[feature["id"]] = (1 if category < 2 else 2, geom, props["source"])
         source = dict(id=feature["id"], geometry=feature["geometry"], properties=props)
         sources.append(source)
         west, south, east, north = geom.bounds
@@ -276,13 +313,43 @@ def planned_road_pages(plan):
                 if lines:
                     pages.setdefault((x, y), []).append((feature["id"], lines, radius, surface_index, bridge, category))
 
+    support_pages = {}
+    for key, (categories, state, geom, source) in support.items():
+        for category in (1, 2):
+            if not categories & category:
+                continue
+            intersections = [mapped_source for mask, line, mapped_source in road_geometry.values()
+                             if mask & category and line.intersection(geom).length > 0.5]
+            if state == "confirmed_empty" and intersections:
+                raise ValueError(f"Road contradicts confirmed empty coverage {key}")
+            if state == "mapped_network" and source not in intersections:
+                raise ValueError(f"Covered road network lacks a route from the coverage source: {key}")
+        west, south, east, north = geom.bounds
+        margin = ROAD_SUPPORT_STEP
+        west, south, east, north = west-margin, south-margin, east+margin, north+margin
+        for x in range(math.floor(west/width), math.ceil(east/width)):
+            for y in range(math.floor(south/width), math.ceil(north/width)):
+                extent = box(x*width-margin, y*width-margin, (x+1)*width+margin, (y+1)*width+margin)
+                if not geom.intersects(extent):
+                    continue
+                local_categories = categories
+                if state == "mapped_network":
+                    mapped = 0
+                    for road in pages.get((x, y), []):
+                        mask, line, mapped_source = road_geometry[road[0]]
+                        if mapped_source == source and line.intersects(geom):
+                            mapped |= mask
+                    local_categories &= mapped
+                if local_categories:
+                    support_pages.setdefault((x, y), {})[key] = local_categories
     packed = []
-    cells = [(x, y, False) for x, y in pages] + [(x, y, True) for x, y in water]
+    cells = [(x, y, False) for x, y in pages.keys() | support_pages.keys()] + [(x, y, True) for x, y in water]
     for x, y, wet_page in sorted(cells):
         west, south, east, north = x*width, y*width, (x+1)*width, (y+1)*width
         values = [lon, lat, x_scale, y_scale, west, south, east, north]
-        roads = [] if wet_page else pages[x, y]
+        roads = [] if wet_page else pages.get((x, y), [])
         wet = water[x, y] if wet_page else []
+        support_ids = [] if wet_page else sorted(support_pages.get((x, y), []))
         words = [*(encode(v, "f") for v in values), 0, 0, 0, 0]
         if wet_page:
             words.append(0)
@@ -298,14 +365,26 @@ def planned_road_pages(plan):
                     raise ValueError(f"City shoreline band exceeds 192 edges in {x},{y}")
             words[12] = start
         else:
-            words[8] = pack_road_levels(words, values, roads, ROAD_CELL, (9, 10, 11), simplify=0.)
+            if support_ids:
+                words.extend([0, 0])
+            if roads:
+                words[8] = pack_road_levels(words, values, roads, ROAD_CELL, (9, 10, 11), simplify=0.)
+            if support_ids:
+                # The margin preserves the same samples on both sides of a page seam.
+                margin = ROAD_SUPPORT_STEP + 36.
+                extent = box(west-margin, south-margin, east+margin, north+margin)
+                layers = [union_all([support[key][2].intersection(extent)
+                                     for key, categories in support_pages[x, y].items()
+                                     if support[key][1] == state and categories & category])
+                          for state in ("mapped_network", "confirmed_empty") for category in (1, 2)]
+                pack_road_support(words, west, south, layers)
         if len(words)*4 > ROAD_PAGE_BYTES:
             raise ValueError(f"Road page {x},{y} exceeds {ROAD_PAGE_BYTES} bytes")
         bounds = [lon+west/x_scale, lat+south/y_scale, lon+east/x_scale, lat+north/y_scale]
         if not -180. <= bounds[0] < bounds[2] <= 180. or not -90. <= bounds[1] < bounds[3] <= 90.:
             raise ValueError(f"Road page {x},{y} crosses a world seam")
         payload = struct.pack(f"<{len(words)}I", *words)
-        packed.append((x, y, bounds, payload, sorted({r[0] for r in roads}), sorted({r[0] for r in wet})))
+        packed.append((x, y, bounds, payload, sorted({r[0] for r in roads}), sorted({r[0] for r in wet}), support_ids))
     return sources, packed
 
 

@@ -705,8 +705,9 @@ impl Catalogue {
                 else if self.roads.pending.contains_key(&index) { "loading" }
                 else { "queued" };
             serde_json::json!({"city":self.city_ids[*city],"tile":tile.file,"index":index,"cpu":state,
-                "fallback":"retained","road_features":tile.features,"water_features":tile.water_features,
-                "ground_features":tile.ground_features})
+                "coverage":if tile.coverage_features == 0 {"uncovered"} else if tile.features == 0 {"confirmed_empty"} else {"mapped_or_empty"},
+                "road_features":tile.features,"water_features":tile.water_features,
+                "ground_features":tile.ground_features,"coverage_features":tile.coverage_features})
         }).collect::<Vec<_>>();
         serde_json::json!({
             "roads":{"wanted":roads,"pending":self.roads.pending.len(),"resident":self.roads.cache.len(),

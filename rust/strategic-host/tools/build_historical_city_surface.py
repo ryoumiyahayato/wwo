@@ -199,7 +199,7 @@ def planned_surface_pages(plan, rows):
     style = meta.get("ground_material", 0)
     if type(style) is not int or not 0 <= style <= 2:
         raise ValueError("Invalid city ground material")
-    kind_classes = {"courtyard": COURT, "yard": WORK, "rail": WORK, "work_ground": WORK,
+    kind_classes = {"block_ground": COURT, "courtyard": COURT, "yard": WORK, "rail": WORK, "work_ground": WORK,
                     "park": OPEN, "open_ground": OPEN, "woodland": WOOD}
     water_kinds = {"water", "water_surface"}
     masks = []

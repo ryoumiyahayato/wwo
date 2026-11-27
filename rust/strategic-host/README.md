@@ -282,9 +282,11 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 推定区可指定 `frontage_m`、`depth_m`、`setback_m` 和 `storeys` 的取值范围。要素可通过 `use_reference` 和 `form_reference` 附加已登记的用途与形态来源。目录的 `placement_origins` 指向该修订的压缩记录，含每栋建筑的稳定 ID、坐标、角色、定位方法和来源。相同输入和修订可重复生成。`observe` 的 `draw_target` 区分已投影页面的中近景需求和视野周边的 CPU 预取。
 
-为同一输入加 `--with-roads` 可生成限于 1 MiB 解压量的 4096 米道路显示页及 `road_origins`。四档共用规划中心线和源 ID，跨页保留边缘余量。输入须登记中心线年代、宽度和铺装依据，经来源确认的桥位可指定 `bridge_reference`。`road_validity` 的结束年不含。候选页只附加现有历史道路层，栅格回退的接替仍需独立核实覆盖。
+为同一输入加 `--with-roads` 可生成限于 1 MiB 解压量的 4096 米道路显示页及 `road_origins`。四档共用规划中心线和源 ID，跨页保留边缘余量。输入须登记中心线年代、宽度和铺装依据。经来源确认的桥面路段可指定 `bridge_reference`。`road_validity` 的结束年不含。
 
-运行时按日期和视野调度道路显示页。道路和建筑共用六个页读取任务，每次最多两个道路任务。GPU 保留最多十六个道路页槽，分帧上传完成后才启用。离开视野后取消未开始任务并撤销绘制，CPU 页在宽限期后释放。`observe` 的 `city_models.roads` 记录所需页和回退状态，`city_gpu` 记录槽位容量、预留量和已启用页。
+`road_coverage` 可声明有效道路测绘范围，含面内空洞。`categories` 位 1 代表地方道路，位 2 代表干道。`coverage_state` 用 `mapped_network` 或 `confirmed_empty`，`coverage_basis` 登记证据。每类已测道路须有同源中心线。已证实无路面不得穿过同类中心线。16 米覆盖网格与本页道路一起启用，邻页保留一单元取样，覆盖内缘渐变。缺失、加载和测绘范围外保留旧道路。概览中的细类道路按矢量可读级别退回已有资料。只有明确无路的面可以单独成页。
+
+运行时按日期和视野调度道路显示页。道路和建筑共用六个页读取任务，每次最多两个道路任务。GPU 保留最多十六个道路页槽，分帧上传完成后才启用。离开视野后取消未开始任务并撤销绘制，CPU 页在宽限期后释放。`observe` 的 `city_models.roads` 记录所需页、CPU 状态和来源覆盖，`city_gpu` 记录槽位容量、预留量和已启用覆盖。
 
 在现有离线 Python 环境运行 `tools/build_city_models.py PLAN.geojson DATA/city-models --site FROZEN_CITY_ID` 可增量生成一城。输入为 CRS84 FeatureCollection，顶层 `wwo` 记录 `city_id`、`name`、`key`、固定 `origin`、单调递增的 `revision`、`method` 和 `sources`。每条来源含 `id`、`url`、`licence`、`date` 和 `precision`，每条要素含稳定 `id` 和 `properties.source`。覆盖面用 `kind=coverage`，路中心线用 `kind=road` 和 `width_m`，历史建筑面用 `kind=building` 与可选 `role`、`height_m`。推定只在有资料依据的 `kind=zone` 面内沿道路进行，区内指定 `role` 和 `gap_m`。水面、公园、场坪、铁路用地和不宜施工的坡地分别用 `water`、`park`、`yard`、`rail`、`steep` 排除。先写新增页，再原子更新目录，其他城市文件可复用。v2 建筑使用 `profile` 和 `role`，局部场景导出继续保留旧 GLB 节点标识。
 

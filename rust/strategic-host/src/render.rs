@@ -264,6 +264,7 @@ struct RoadSlot {
     active:bool,
     water:bool,
     ground:bool,
+    road_coverage:Option<&'static str>,
 }
 
 struct RoadStore {
@@ -310,7 +311,8 @@ impl RoadStore {
                 .or_else(||self.slots.iter().position(Option::is_none)) else {break;};
             let slot=self.slots[index].get_or_insert(RoadSlot{key:road.key,bounds:road.bounds,
                 bytes:road.page.data.len(),written:0,active:false,water:road.page.water_offset.is_some(),
-                ground:road.page.ground_material.is_some()});
+                ground:road.page.ground_material.is_some(),road_coverage:road.page.coverage_offset
+                    .map(|_|if road.page.has_vector {"mapped_or_empty"} else {"confirmed_empty"})});
             if slot.active {continue;}
             let contents=start+(PAGE_BYTES/4*index) as u32;
             uploads.write(queue,buffer,u64::from(contents)*4,&road.page.data,&mut slot.written);
@@ -1565,7 +1567,8 @@ impl Renderer {
             "road_slot_capacity":roads.capacity,
             "road_reserved_bytes":roads.capacity*crate::city_roads::PAGE_BYTES,
             "road_active":roads.active().map(|slot|serde_json::json!({"revision":slot.key.0,"index":slot.key.1,
-                "payload_bytes":slot.bytes,"water":slot.water,"ground":slot.ground})).collect::<Vec<_>>(),
+                "payload_bytes":slot.bytes,"water":slot.water,"ground":slot.ground,
+                "active_coverage":slot.road_coverage})).collect::<Vec<_>>(),
             "decoded_kit_cpu_bytes":self.models.city_meshes.values().map(|mesh| {
                 mesh.vertices.capacity()*std::mem::size_of::<ModelVertex>()
                     + mesh.indices.capacity()*std::mem::size_of::<u32>()

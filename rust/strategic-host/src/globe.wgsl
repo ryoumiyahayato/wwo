@@ -1226,19 +1226,52 @@ fn road_support(ll: vec2f, source: u32) -> f32 {
     return smoothstep(0.,fade,clearance);
 }
 
-fn road_raster_fraction(ll: vec2f, category: u32) -> f32 {
-    if view.road_layer.x==1u || view.road_layer.x>=3u {return 0.;}
-    if view.road_layer.x==2u {return 1.;}
+fn road_coverage_texel(at: u32) -> vec4f {
+    let value=city_water[at];
+    return vec4f(vec4u(value,value>>8u,value>>16u,value>>24u)&vec4u(255u))/255.;
+}
+
+fn loaded_road_support(ll: vec2f, source: u32, grid: u32) -> vec4f {
+    let header=city_water[source+1u];
+    let origin=vec2f(bitcast<f32>(city_water[header]),bitcast<f32>(city_water[header+1u]));
+    let scale=vec2f(bitcast<f32>(city_water[header+2u]),bitcast<f32>(city_water[header+3u]));
+    let low=vec2f(bitcast<f32>(city_water[header+4u]),bitcast<f32>(city_water[header+5u]));
+    let offset=(ll-origin)*scale-low;
+    if any(offset<vec2f(0.)) || any(offset>=vec2f(4096.)) {return vec4f(0.);}
+    // Cell centres are spaced 16 m. One shared neighbour on each side
+    // keeps interpolation continuous across adjacent loaded pages.
+    let pixel=offset/16.+vec2f(.5);
+    let cell=vec2u(pixel);
+    let weight=fract(pixel);
+    let at=grid+cell.x+258u*cell.y;
+    return mix(mix(road_coverage_texel(at),road_coverage_texel(at+1u),weight.x),
+        mix(road_coverage_texel(at+258u),road_coverage_texel(at+259u),weight.x),weight.y);
+}
+
+fn road_raster_fraction(ll: vec2f, mpp: f32) -> vec2f {
+    if view.road_layer.x==1u || view.road_layer.x>=3u {return vec2f(0.);}
+    if view.road_layer.x==2u {return vec2f(1.);}
     let range=road_source_bucket(ll);
-    var replaced=0.;
+    var replaced=vec2f(0.);
     for (var index=range.x;index<range.y;index++) {
         let source=road_source(index);
         let state=city_water[source+20u];
         if state!=ROAD_VECTOR_READY && state!=ROAD_EMPTY_READY {continue;}
-        if (city_water[source+19u]&category)==0u {continue;}
-        replaced=max(replaced,road_support(ll,source));
+        let categories=city_water[source+19u];
+        if categories==0u {continue;}
+        replaced=max(replaced,road_support(ll,source)*
+            vec2f(f32(categories&1u),f32((categories>>1u)&1u)));
     }
-    return 1.-replaced;
+    let registry=loaded_road_registry();
+    let network_lod=1.-smoothstep(vec2f(6.,54.),vec2f(12.,86.),vec2f(mpp));
+    for (var i=0u;i<city_water[registry];i++) {
+        let source=city_water[registry+1u+i];
+        let grid=city_water[source+24u];
+        if grid==0u {continue;}
+        let coverage=loaded_road_support(ll,source,grid);
+        replaced=max(replaced,max(coverage.xy*network_lod,coverage.zw));
+    }
+    return vec2f(1.)-replaced;
 }
 
 fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
@@ -1319,9 +1352,10 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
     if tile.options.z>3.5 && tile.options.z<4.5 {
         let major=buildings.r;
         let local=buildings.g*(1.-smoothstep(34.,98.,mpp));
-        let major_ink=major*road_raster_fraction(ll,2u);
-        let local_ink=local*road_raster_fraction(ll,1u);
-        let road=major_ink+local_ink*(1.-major);
+        let retained=road_raster_fraction(ll,mpp);
+        let major_ink=major*retained.y;
+        let local_ink=local*retained.x;
+        let road=major_ink+local_ink*(1.-major_ink);
         if road<=.001 || (area&3u)>1u {return vec4f(0.);}
         let surface=mix(city_road(true,major_ink/max(.001,road)),vec3f(.674,.660,.631),
             smoothstep(5.,17.,mpp));
@@ -1331,7 +1365,7 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
         return vec4f(surface*(1.+grain*.52),road*smoothstep(0.,160.,edge_distance)*legacy_street*dry);
     }
     if buildings.g>.001 && tile.options.z<4.5 {
-        buildings.g*=road_raster_fraction(ll,1u);
+        buildings.g*=road_raster_fraction(ll,mpp).x;
     }
     let offset=max(1.,exp2(mip)*.46);
     let edge=textureSampleLevel(city_data,linear,uv-du*offset,mip).r;
