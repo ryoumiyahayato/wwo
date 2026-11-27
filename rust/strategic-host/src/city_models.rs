@@ -28,7 +28,8 @@ const LATITUDE_CELLS: i32 = 720;
 const PARIS_FRINGE: &[u8] = include_bytes!("paris-fringe.bin");
 const METRES_PER_DEGREE:f64=camera::EARTH*std::f64::consts::PI/180.;
 const BLOCK_METRES:f64=96.;
-pub(crate) const MAX_INSTANCE_RUNS:usize=6;
+// Bound draw calls without folding broad strips of offscreen buildings into one run.
+pub(crate) const MAX_INSTANCE_RUNS:usize=12;
 
 #[derive(Deserialize)]
 struct Header {
