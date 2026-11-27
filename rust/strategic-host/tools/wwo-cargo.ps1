@@ -5,6 +5,7 @@ param(
     [string] $Command = 'check',
 
     [switch] $DebugSymbols,
+    [switch] $ReleaseProfile,
     [switch] $Restart,
 
     [Parameter(Position = 1, ValueFromRemainingArguments)]
@@ -12,6 +13,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+if ($ReleaseProfile -and ($DebugSymbols -or $Restart -or $Command -notin @('check', 'build'))) {
+    throw 'Use -ReleaseProfile with check or build for local performance comparison.'
+}
 if ($Restart -and ($Command -ne 'build' -or $CargoArguments)) {
     throw 'Use wwo-cargo.ps1 build -Restart to build and restart the configured game.'
 }
@@ -30,7 +34,7 @@ if (!$target.PSIsContainer -or $target.Attributes.HasFlag([IO.FileAttributes]::R
 foreach ($arg in $CargoArguments) {
     if ($arg -eq '--') { break }
     if ($arg -match '^(-r|--release|--profile|--target-dir|--manifest-path|--config|--target)(=|$)') {
-        throw "The shared build command manages Cargo option $arg. Use -DebugSymbols for debugger builds."
+        throw "The shared build command manages Cargo option $arg. Select -DebugSymbols or -ReleaseProfile."
     }
 }
 
@@ -42,6 +46,11 @@ $profileArguments = @()
 if ($DebugSymbols) {
     $profile = 'dev-debug'
     $output = 'dev-debug'
+    $budget = 6GB
+    $profileArguments = @('--profile', $profile)
+} elseif ($ReleaseProfile) {
+    $profile = 'release'
+    $output = 'release'
     $budget = 6GB
     $profileArguments = @('--profile', $profile)
 }

@@ -357,6 +357,8 @@ Z7 水文按复杂度加密。QWG 含边界的单元、Natural Earth 的岸线�
 
 `wwo-cargo.ps1 build` 分配共享 Build 编号。Cargo 复用现有产物时保留原编号，编号在链接前分配并随程序嵌入。远端 `wwo-build-sequence` 保留已分配编号。首页、窗口标题、地图右下角和 `--version` 读取同一构建身份。F10 可查看完整 Git 提交、资源路径和数据来源。F10 打开后，F11 可重新读取主题、城市分片和资源目录下 `debug-resources` 的 `globe.wgsl`、`landscape.wgsl`、`land-material.png` 及 `urban_landscape_r40.glb`。加载失败会报告对应资源并保留有效版本。
 
+`wwo-cargo.ps1 build -ReleaseProfile --offline --bin wwo-map-lab` 使用共享缓存构建本机性能候选。候选不会触发正式程序更新。正式 Windows 构建仍由 GitHub CI 执行。
+
 `wwo-cargo.ps1 build -Restart` 构建后请求已安装程序正常退出。旧程序通过原退出对话框保存。新版渲染首个就绪画面后删除临时回退文件。更新期间写入的自动存档可由新版恢复。读取失败时，首页显示原因。
 
 正式构建交付后，用独立档案确认启动、世界推进、地图切换和重启读档。保留当前发布、必要回退及对应数据，清理本次已退出的观察会话、重复打包和可再生构建输出。地貌构建的临时母栅格用于续建，只有当前预定层级生成并核验后才清理。移除已合并的临时工作树前，核对 `main`、远程引用、未提交和未跟踪文件，再用 `git worktree remove`。R68 和未合并的独立工作线保留原工程与资产。
