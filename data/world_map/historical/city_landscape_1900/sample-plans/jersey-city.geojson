@@ -4,13 +4,13 @@
     "city_id": "us_city_new_jersey_jersey_city",
     "name": "Jersey City",
     "key": "jersey-city-harrison-hudson",
-    "revision": 3,
+    "revision": 4,
     "status": "candidate_sample",
     "origin": [
       -74.048,
       40.722
     ],
-    "method": "Harrison street and land traces connect the Paulus Hook and Hamilton Park districts through Van Vorst toward the Bergen ridge. Historic wet margins, the Morris Canal basin and named railroad facilities are managed separately. Building parcels, track detail, surface materials and heights are inferred. Six independent surviving Bergen junctions check the east transform locally. Montgomery Street has one continuous alignment through the overlap, Church Street stays separate, and the Duncan and West Side Avenue intersection is connected. Detailed area coverage is provisional. Newark and West Bergen remain outside the confirmed corridor. No ferry crossing is authored as a road.",
+    "method": "Harrison street and land traces connect Paulus Hook and Hamilton Park through Van Vorst to Bergen. Historic wet margins, the Morris Canal basin and named railroad facilities are managed separately. Six surviving junctions check the east transform locally. The 1894 Belmont and Bentley axes and two adjoining sections of the Bergen ridge are traced from Harrison. Three residential rows use dated inventory entries and surviving parcel frontages as references. Roofs, parcel depths, heights and paving are interpreted. The wider West Bergen fringe remains provisional.",
     "registration": {
       "model": "Affine pixel to WGS84 fitted in the east crop",
       "matrix": [
@@ -347,6 +347,20 @@
         "date": "NJ Office of GIS road centerlines, retrieved 2026-11-27",
         "licence": "Control reference only; raw modern records omitted.",
         "precision": "Surviving junctions serve only to register historic map geometry."
+      },
+      {
+        "id": "west-bergen-national-register",
+        "url": "https://data.jerseycitynj.gov/api/datasets/1.0/west-bergen-east-lincoln-park-historic-district-2015/attachments/wbelp_designation_report_pdf/",
+        "date": "West Bergen–East Lincoln Park National Register nomination, 2015; listed 2016",
+        "licence": "Documentation reference; no report pages or photographs copied.",
+        "precision": "Section 7: four three-storey homes at 157–163 Belmont and 23 two-storey homes at 165–209 Belmont, c. 1885; five three-storey homes at 11–19 Bentley, c. 1890."
+      },
+      {
+        "id": "jersey-city-parcels-control",
+        "url": "https://data.jerseycitynj.gov/explore/assets/jersey-city-parcels/view/",
+        "date": "Jersey City public parcels, blocks 17801 and 17803, retrieved 2026-11-28",
+        "licence": "Parcel control reference only; raw polygons and tax data omitted.",
+        "precision": "Surviving frontage spans and spacing only. Present parcel boundaries are not historic building outlines."
       }
     ]
   },
@@ -12292,20 +12306,16 @@
         "type": "LineString",
         "coordinates": [
           [
-            -74.0790486,
-            40.7222219
+            -74.08003042,
+            40.722245279
           ],
           [
-            -74.0767353,
-            40.7211409
+            -74.078432192,
+            40.721534696
           ],
           [
-            -74.0743532,
-            40.7201551
-          ],
-          [
-            -74.0728927,
-            40.7194451
+            -74.076896754,
+            40.720849613
           ]
         ]
       },
@@ -12318,7 +12328,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "The west approach follows the labelled Harrison axis to Hudson County Boulevard.",
+        "name": "Bentley Avenue"
       }
     },
     {
@@ -12405,8 +12416,16 @@
             40.7243498
           ],
           [
+            -74.078676716,
+            40.723873916
+          ],
+          [
             -74.0795475,
             40.7228245
+          ],
+          [
+            -74.08003042,
+            40.722245279
           ],
           [
             -74.0807094,
@@ -12438,32 +12457,36 @@
         "type": "LineString",
         "coordinates": [
           [
-            -74.0690098,
-            40.7282924
+            -74.069009764,
+            40.728292442
           ],
           [
-            -74.0706484,
-            40.7263364
+            -74.070648376,
+            40.726336446
           ],
           [
-            -74.0721372,
-            40.7256796
+            -74.072137192,
+            40.725679567
           ],
           [
-            -74.073446,
-            40.7251034
+            -74.073445977,
+            40.725103418
           ],
           [
-            -74.0745463,
-            40.7245349
+            -74.074546277,
+            40.724534906
           ],
           [
-            -74.0757747,
-            40.7230462
+            -74.075238921,
+            40.723462395
           ],
           [
-            -74.0771485,
-            40.7213334
+            -74.075905272,
+            40.72240382
+          ],
+          [
+            -74.076896754,
+            40.720849613
           ]
         ]
       },
@@ -12476,7 +12499,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Harrison street line through Fairview, Belmont and Bentley.",
+        "name": "Hudson County Boulevard"
       }
     },
     {
@@ -18740,6 +18764,414 @@
         "gap_m": 0.75,
         "form_reference": "paulus-hook-national-register",
         "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-bentley-east",
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 14,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "The east approach follows visible Harrison alignments on either side of the fold.",
+        "name": "Bentley Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.076896754,
+            40.720849613
+          ],
+          [
+            -74.074044568,
+            40.719525182
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-belmont-west",
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "The labelled Harrison axis between West Side Avenue and Hudson County Boulevard.",
+        "name": "Belmont Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.078676716,
+            40.723873916
+          ],
+          [
+            -74.077400487,
+            40.723257177
+          ],
+          [
+            -74.075905272,
+            40.72240382
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-belmont-east",
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 14,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "The Harrison axis from Hudson County Boulevard to Bergen Avenue.",
+        "name": "Belmont Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.075905272,
+            40.72240382
+          ],
+          [
+            -74.072826352,
+            40.721067309
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-avenue-belmont",
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 16,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Harrison's ridge street from Montgomery through Belmont to Bentley.",
+        "name": "Bergen Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.068015175,
+            40.725248633
+          ],
+          [
+            -74.070143375,
+            40.724414503
+          ],
+          [
+            -74.07159078,
+            40.723162367
+          ],
+          [
+            -74.072279105,
+            40.7219158
+          ],
+          [
+            -74.072826352,
+            40.721067309
+          ],
+          [
+            -74.074044568,
+            40.719525182
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-belmont-bentley-coverage",
+      "properties": {
+        "kind": "coverage",
+        "source": "harrison-1894",
+        "use_basis": "Limited to the mapped Belmont and Bentley approaches and the documented residential corridors."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.080443961,
+              40.722628596
+            ],
+            [
+              -74.07863463,
+              40.724146046
+            ],
+            [
+              -74.075772537,
+              40.722959124
+            ],
+            [
+              -74.072525355,
+              40.721461977
+            ],
+            [
+              -74.07353047,
+              40.71956255
+            ],
+            [
+              -74.074292978,
+              40.719158387
+            ],
+            [
+              -74.077396329,
+              40.720584817
+            ],
+            [
+              -74.080584741,
+              40.722039637
+            ],
+            [
+              -74.080443961,
+              40.722628596
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-belmont-bentley-block-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "harrison-1894",
+        "use_basis": "Limited to the mapped Belmont and Bentley approaches and the documented residential corridors."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.080443961,
+              40.722628596
+            ],
+            [
+              -74.07863463,
+              40.724146046
+            ],
+            [
+              -74.075772537,
+              40.722959124
+            ],
+            [
+              -74.072525355,
+              40.721461977
+            ],
+            [
+              -74.07353047,
+              40.71956255
+            ],
+            [
+              -74.074292978,
+              40.719158387
+            ],
+            [
+              -74.077396329,
+              40.720584817
+            ],
+            [
+              -74.080584741,
+              40.722039637
+            ],
+            [
+              -74.080443961,
+              40.722628596
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-belmont-165-209",
+      "properties": {
+        "kind": "zone",
+        "source": "west-bergen-national-register",
+        "role": "street_row",
+        "frontage_m": [
+          4.1453,
+          4.1453
+        ],
+        "depth_m": [
+          12,
+          12
+        ],
+        "setback_m": [
+          6.2,
+          6.2
+        ],
+        "storeys": [
+          2,
+          2
+        ],
+        "gap_m": 0.1,
+        "form_reference": "west-bergen-national-register",
+        "use_reference": "jersey-city-parcels-control",
+        "use_basis": "165–209 Belmont Avenue; dated row of 23. Placement, depth and frontage are inferred inside the registered address span."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.075241362,
+              40.721978786
+            ],
+            [
+              -74.074236531,
+              40.721542609
+            ],
+            [
+              -74.074312195,
+              40.721441711
+            ],
+            [
+              -74.075317025,
+              40.721877887
+            ],
+            [
+              -74.075241362,
+              40.721978786
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-belmont-157-163",
+      "properties": {
+        "kind": "zone",
+        "source": "west-bergen-national-register",
+        "role": "street_row",
+        "frontage_m": [
+          5.7644,
+          5.7644
+        ],
+        "depth_m": [
+          13,
+          13
+        ],
+        "setback_m": [
+          6.2,
+          6.2
+        ],
+        "storeys": [
+          3,
+          3
+        ],
+        "gap_m": 0.1,
+        "form_reference": "west-bergen-national-register",
+        "use_reference": "jersey-city-parcels-control",
+        "use_basis": "157–163 Belmont Avenue; dated row of 4. Placement, depth and frontage are inferred inside the registered address span."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.074234931,
+              40.721541915
+            ],
+            [
+              -74.07399275,
+              40.721436787
+            ],
+            [
+              -74.074074281,
+              40.721328067
+            ],
+            [
+              -74.074316461,
+              40.721433195
+            ],
+            [
+              -74.074234931,
+              40.721541915
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-bentley-11-19",
+      "properties": {
+        "kind": "zone",
+        "source": "west-bergen-national-register",
+        "role": "street_row",
+        "frontage_m": [
+          5.981,
+          5.981
+        ],
+        "depth_m": [
+          13,
+          13
+        ],
+        "setback_m": [
+          3.2,
+          3.2
+        ],
+        "storeys": [
+          3,
+          3
+        ],
+        "gap_m": 0.1,
+        "form_reference": "west-bergen-national-register",
+        "use_reference": "jersey-city-parcels-control",
+        "use_basis": "11–19 Bentley Avenue; dated row of 5. Placement, depth and frontage are inferred inside the registered address span."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.075116877,
+              40.719915522
+            ],
+            [
+              -74.074809099,
+              40.719772601
+            ],
+            [
+              -74.074894806,
+              40.719665758
+            ],
+            [
+              -74.075202583,
+              40.719808679
+            ],
+            [
+              -74.075116877,
+              40.719915522
+            ]
+          ]
+        ]
       }
     }
   ]
