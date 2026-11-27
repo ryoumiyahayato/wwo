@@ -210,12 +210,14 @@ def pack_water_bands(words, south, north, layers):
             for ring in [part.exterior, *part.interiors]:
                 points = list(ring.coords)
                 for a, b in zip(points, points[1:]):
-                    if a[1] == b[1]:
-                        continue
                     a, b = sorted((a, b), key=lambda p:p[1])
+                    edge = [*(encode(v, "f") for v in (*a, *b)), flag]
+                    # The reader and shader use f32. Clipping can leave edges
+                    # whose distinct endpoints round to the same scanline.
+                    if edge[1] == edge[3] or (edge[1] | edge[3]) == 0x80000000:
+                        continue
                     lo = max(0, math.floor((a[1]-south)/BAND_HEIGHT))
                     hi = min(len(rows)-1, math.floor((b[1]-south)/BAND_HEIGHT))
-                    edge = [*(encode(v, "f") for v in (*a, *b)), flag]
                     for row in rows[lo:hi+1]:
                         row.extend(edge)
     start = len(words)
