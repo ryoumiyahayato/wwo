@@ -250,7 +250,8 @@ def planned_site(path, city_id):
                 raise ValueError(f"Unknown {field} for {key}")
         ids.add(key)
         if kind not in ("coverage", "road", "building", "water", "water_surface", "known_dry",
-                        "park", "yard", "rail", "steep", "zone"):
+                        "park", "yard", "rail", "steep", "zone", "courtyard", "open_ground",
+                        "woodland", "work_ground"):
             raise ValueError(f"Unknown site geometry {kind}")
         geom = transform(shape(row["geometry"]), forward)
         if geom.is_empty or not geom.is_valid or not all(math.isfinite(v) for v in geom.bounds):
@@ -265,7 +266,8 @@ def planned_site(path, city_id):
         raise ValueError("Site requires a historical plan coverage boundary")
     coverage = shapely.union_all([geom for _, geom, _ in geometry["coverage"]])
     shapely.prepare(coverage)
-    blockers = [geom for kind in ("water", "water_surface", "park", "yard", "rail", "steep")
+    blockers = [geom for kind in ("water", "water_surface", "park", "yard", "rail", "steep",
+                                 "courtyard", "open_ground", "woodland", "work_ground")
                 for _, geom, _ in geometry[kind]]
     for _, geom, props in geometry["road"]:
         width = float(props["width_m"])
@@ -453,30 +455,45 @@ if __name__ == "__main__":
 
             plan = read(args.sources)
             records, pages = planned_road_pages(plan)
-            if not pages:
-                raise ValueError("No sourced roads in the requested site")
+            layer_pages = [
+                ("water", x, y, bounds, payload, wet) if wet else ("road", x, y, bounds, payload, roads)
+                for x, y, bounds, payload, roads, wet in pages
+            ]
+            ground = []
+            if "ground_validity" in meta:
+                from build_historical_city_surface import planned_surface_pages
+                ground, ground_pages = planned_surface_pages(plan, rows)
+                layer_pages.extend(("ground", *page) for page in ground_pages)
+            if not layer_pages:
+                raise ValueError("No sourced roads, water or ground in the requested site")
             road_entries = []
+            page_origins = defaultdict(dict)
             compressor = ZstdCompressor(level=5)
-            for x, y, bounds, payload, parents, water_parents in pages:
-                layer = "water" if water_parents else "road"
+            for layer, x, y, bounds, payload, parents in layer_pages:
                 validity = meta.get(f"{layer}_validity", {})
                 start, end = validity.get("start"), validity.get("end")
                 if not (type(start) is int and type(end) is int and 1 <= start < end <= 9999):
                     raise ValueError(f"{layer} pages require start and end years with end exclusive")
-                suffix = "-water" if water_parents else ""
+                suffix = "" if layer == "road" else f"-{layer}"
                 name = f"{directory_key}-{x}-{y}{suffix}.wcr"
-                header = (b"WWOCRD02" if water_parents else b"WWOCRD01") + struct.pack("<I", len(payload))
+                magic = {"road": b"WWOCRD01", "water": b"WWOCRD02", "ground": b"WWOCRG01"}[layer]
+                header = magic + struct.pack("<I", len(payload))
                 write_revisioned(args.output/name, header + compressor.compress(payload))
-                tile = dict(file=name, bounds=bounds, bytes=len(payload), features=len(parents), years=[start, end])
-                if water_parents:
-                    tile["water_features"] = len(water_parents)
+                tile = dict(file=name, bounds=bounds, bytes=len(payload),
+                            features=len(parents) if layer == "road" else 0, years=[start, end])
+                if layer != "road":
+                    tile[f"{layer}_features"] = len(parents)
                 road_entries.append(tile)
+                page_origins[layer][name] = parents
             road_origins = f"{directory_key}.roads.json.zst"
             road_notes = dict(roads=[r for r in records if r["properties"]["kind"] == "road"],
-                              pages={tile["file"]: page[4] for tile, page in zip(road_entries, pages) if page[4]})
-            if any(page[5] for page in pages):
+                              pages=page_origins["road"])
+            if page_origins["water"]:
                 road_notes["water"] = [r for r in records if r["properties"]["kind"] != "road"]
-                road_notes["water_pages"] = {tile["file"]: page[5] for tile, page in zip(road_entries, pages) if page[5]}
+                road_notes["water_pages"] = page_origins["water"]
+            if page_origins["ground"]:
+                road_notes["ground"] = ground
+                road_notes["ground_pages"] = page_origins["ground"]
             write_revisioned(args.output/road_origins, compressor.compress(
                 json.dumps(road_notes, ensure_ascii=False, separators=(",", ":")).encode("utf-8")))
             entry.update(road_pages=road_entries, road_origins=road_origins)

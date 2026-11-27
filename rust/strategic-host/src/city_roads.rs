@@ -7,8 +7,9 @@ pub(crate) const PAGE_BYTES: usize = 1024 * 1024;
 pub(crate) const PAGE_SLOTS: usize = 16;
 const CELL_METRES: [f32; 4] = [64., 128., 256., 384.];
 const DESCRIPTOR_WORDS: usize = 22;
-pub(crate) const PAGE_DESCRIPTOR_WORDS: usize = DESCRIPTOR_WORDS + 1;
+pub(crate) const PAGE_DESCRIPTOR_WORDS: usize = DESCRIPTOR_WORDS + 2;
 const WATER_BANDS: usize = 4096 / 32;
+const GROUND_BYTES: usize = 4 * (9 + 258*258 + 130*130 + 66*66 + 34*34);
 
 #[derive(Clone, Deserialize)]
 pub(crate) struct RoadTile {
@@ -18,6 +19,8 @@ pub(crate) struct RoadTile {
     pub(crate) features: usize,
     #[serde(default)]
     pub(crate) water_features: usize,
+    #[serde(default)]
+    pub(crate) ground_features: usize,
     pub(crate) years: [u16; 2],
 }
 
@@ -27,7 +30,7 @@ impl RoadTile {
         self.file.ends_with(".wcr") && self.file.bytes().all(|c| c.is_ascii_alphanumeric() || b"-.".contains(&c))
             && -180. <= w && w < e && e <= 180. && -90. <= s && s < n && n <= 90.
             && (48..=PAGE_BYTES).contains(&self.bytes) && self.bytes % 4 == 0
-            && ((self.features != 0) != (self.water_features != 0))
+            && [self.features, self.water_features, self.ground_features].into_iter().filter(|&n| n != 0).count() == 1
             && (1..self.years[1]).contains(&self.years[0]) && self.years[1] <= 9999
     }
 
@@ -37,7 +40,8 @@ impl RoadTile {
         let mut header = [0; 12];
         file.read_exact(&mut header)?;
         let water = self.water_features != 0;
-        let expected = if water { b"WWOCRD02" } else { b"WWOCRD01" };
+        let ground = self.ground_features != 0;
+        let expected = if ground { b"WWOCRG01" } else if water { b"WWOCRD02" } else { b"WWOCRD01" };
         if &header[..8] != expected || u32::from_le_bytes(header[8..].try_into().unwrap()) as usize != self.bytes {
             return Err(invalid());
         }
@@ -57,6 +61,12 @@ impl RoadTile {
         let projected = [lon + w / xs, lat + s / ys, lon + e / xs, lat + n / ys];
         if projected.into_iter().zip(self.bounds).any(|(a, b)| (f64::from(a) - b).abs() > 0.00004) {
             return Err(invalid());
+        }
+        if ground {
+            if data.len() != GROUND_BYTES || word(8) > 2 { return Err(invalid()); }
+            let material = word(8);
+            return Ok(RoadPage { data, offsets: [0; 4], scale: [xs, ys], water_offset: None,
+                ground_material: Some(material) });
         }
         let offsets = std::array::from_fn::<_, 4, _>(|i| word(8 + i));
         let water_offset = if water {
@@ -103,7 +113,7 @@ impl RoadTile {
                 }
             }
         }
-        Ok(RoadPage { data, offsets, scale: [xs, ys], water_offset })
+        Ok(RoadPage { data, offsets, scale: [xs, ys], water_offset, ground_material: None })
     }
 }
 
@@ -112,6 +122,7 @@ pub(crate) struct RoadPage {
     offsets: [u32; 4],
     scale: [f32; 2],
     pub(crate) water_offset: Option<u32>,
+    pub(crate) ground_material: Option<u32>,
 }
 
 impl RoadPage {
@@ -122,8 +133,14 @@ impl RoadPage {
         words[6..10].copy_from_slice(&CELL_METRES.map(f32::to_bits));
         words[10..14].copy_from_slice(&bounds.map(|coordinate| (coordinate as f32).to_bits()));
         words[14..16].copy_from_slice(&self.scale.map(f32::to_bits));
-        if self.water_offset.is_none() { words[20] = State::ReadyVector as u32; }
+        if self.water_offset.is_none() && self.ground_material.is_none() {
+            words[20] = State::ReadyVector as u32;
+        }
         words[22] = self.water_offset.map_or(0, |offset| base + offset);
+        if let Some(material) = self.ground_material {
+            words[18] = material;
+            words[23] = base + 9;
+        }
         words
     }
 }

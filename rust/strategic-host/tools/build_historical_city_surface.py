@@ -9,11 +9,11 @@ import numpy as np
 from PIL import Image, ImageDraw
 from rasterio.features import rasterize
 from rasterio.transform import from_bounds
-from scipy.ndimage import distance_transform_edt, uniform_filter
-from shapely import Polygon, box
+from shapely import Polygon, STRtree, box, transform
+from shapely.geometry import shape
 from zstandard import ZstdCompressor, ZstdDecompressor
 
-from build_city_models import RECORD, features, london_parks, read
+from build_city_models import RECORD, features, london_parks, read, rectangle, transforms
 from build_london_city_ground import GROUP as LONDON, GUTTER as LONDON_GUTTER
 from build_paris_city_ground import GUTTER as PARIS_GUTTER, STREETS_GROUP, STREETS_PREFIX
 from city_ground_pack import read_city_coverage
@@ -25,10 +25,10 @@ UNKNOWN, ROOF, COURT, WORK, OPEN, WOOD, MARKET_GARDEN = range(7)
 
 
 class Grid:
-    def __init__(self, bounds):
+    def __init__(self, bounds, side=SIDE):
         self.bounds = bounds
         west, south, east, north = bounds
-        self.side = SIDE * SAMPLES
+        self.side = side * SAMPLES
         self.scale = (111195. * math.cos(math.radians((south + north) * .5)), 111195.)
         self.spacing = ((north - south) * self.scale[1] / self.side,
                         (east - west) * self.scale[0] / self.side)
@@ -43,6 +43,8 @@ class Grid:
         return ((lon - west) / (east - west) * self.side, (north - lat) / (north - south) * self.side)
 
     def distance(self, mask):
+        from scipy.ndimage import distance_transform_edt
+
         return distance_transform_edt(~mask, sampling=self.spacing)
 
 
@@ -66,6 +68,8 @@ def mosaic(grid, overlays, prefix, gutter):
 
 
 def london_surface(grid, sources, overlays):
+    from scipy.ndimage import uniform_filter
+
     survey = mosaic(grid, overlays, "london-os-1890s-", LONDON_GUTTER)
     coverage = survey[:, :, 0]
     roofs = coverage >= 48
@@ -158,23 +162,97 @@ def paris_surface(grid, sources, overlays, models, fringe):
     return classes, roads
 
 
-def mip_words(classes, roads):
+def mip_words(classes, roads, side=SIDE, collar=0):
     bands = [(classes == kind) * (1. - roads) for kind in range(ROOF, WOOD + 1)]
     bands.append(roads)
     garden = (classes == MARKET_GARDEN) * (1. - roads)
-    for side in (SIDE >> level for level in range(SIDE.bit_length())):
-        words = np.zeros((side, side), dtype="<u4")
+    levels = collar.bit_length() if collar else side.bit_length()
+    for level in range(levels):
+        inner = side >> level
+        padding = collar >> level
+        span = inner + 2 * padding
+        words = np.zeros((span, span), dtype="<u4")
         for index, band in enumerate(bands):
-            bands[index] = area_average(band, side)
+            bands[index] = area_average(band, span)
             words |= np.rint(bands[index] * 31.).astype(np.uint32) << (index * 5)
-        garden = area_average(garden, side)
+        garden = area_average(garden, span)
         words |= np.rint(garden * 3.).astype(np.uint32) << 30
+        if padding > 1:
+            words = words[padding - 1 : padding + inner + 1, padding - 1 : padding + inner + 1]
         yield words.tobytes()
 
 
 def area_average(band, side):
     factor = band.shape[0] // side
     return band.reshape(side, factor, side, factor).mean((1, 3))
+
+
+def planned_surface_pages(plan, rows):
+    """Rasterize sourced uses and the accepted site layout on one 16 m grid."""
+    from build_city_water import METRES, ROAD_PAGE_METRES
+
+    meta = plan["wwo"]
+    lon, lat = meta["origin"]
+    xs, ys = METRES * math.cos(math.radians(lat)), METRES
+    page_m = ROAD_PAGE_METRES
+    side, collar = 256, 8  # The fourth mip still has one texel past each edge.
+    style = meta.get("ground_material", 0)
+    if type(style) is not int or not 0 <= style <= 2:
+        raise ValueError("Invalid city ground material")
+    kind_classes = {"courtyard": COURT, "yard": WORK, "rail": WORK, "work_ground": WORK,
+                    "park": OPEN, "open_ground": OPEN, "woodland": WOOD}
+    water_kinds = {"water", "water_surface"}
+    masks = []
+    parents = []
+    forward, backward = transforms(meta["origin"])
+    for feature in sorted(plan["features"], key=lambda row: row["id"]):
+        props = feature["properties"]
+        kind = props["kind"]
+        if kind not in kind_classes and kind not in water_kinds and kind != "road":
+            continue
+        geom = shape(feature["geometry"])
+        if kind == "road":
+            geom = transform(geom, forward.transform, interleaved=False).buffer(props["width_m"] * .5)
+            geom = transform(geom, backward.transform, interleaved=False)
+        masks.append(("road" if kind == "road" else kind_classes.get(kind, UNKNOWN), feature["id"], geom))
+        parents.append(feature)
+    for x, y, _, _, angle, width, depth, _, _ in rows:
+        roof = transform(rectangle(x,y,angle,width,depth), backward.transform, interleaved=False)
+        masks.append((ROOF, "placement_origins", roof))
+    cells = set()
+    for kind, _, geom in masks:
+        if kind == UNKNOWN:
+            continue
+        w, s, e, n = geom.bounds
+        cells.update((x, y) for x in range(math.floor((w-lon)*xs/page_m), math.ceil((e-lon)*xs/page_m))
+                     for y in range(math.floor((s-lat)*ys/page_m), math.ceil((n-lat)*ys/page_m)))
+    tree = STRtree([row[2] for row in masks])
+    pages = []
+    for x, y in sorted(cells):
+        w, s, e, n = x*page_m, y*page_m, (x+1)*page_m, (y+1)*page_m
+        bounds = [lon+w/xs, lat+s/ys, lon+e/xs, lat+n/ys]
+        margin = collar * page_m / side
+        sample = (lon+(w-margin)/xs, lat+(s-margin)/ys, lon+(e+margin)/xs, lat+(n+margin)/ys)
+        grid = Grid(sample, side + 2 * collar)
+        by_use = {}
+        used = set()
+        for i in sorted(tree.query(box(*sample), predicate="intersects")):
+            kind, parent, geom = masks[i]
+            by_use.setdefault(kind, []).append(geom)
+            used.add(parent)
+        classes = np.zeros((grid.side, grid.side), dtype=np.uint8)
+        # The same protected areas already constrain placements. Leave all
+        # gaps between sourced features to the world surface.
+        for kind in (OPEN, COURT, WORK, WOOD, ROOF, UNKNOWN):
+            if kind in by_use:
+                classes[grid.mask(by_use[kind])] = kind
+        roads = grid.mask(by_use["road"]) if "road" in by_use else np.zeros_like(classes, dtype=bool)
+        if UNKNOWN in by_use:
+            roads &= ~grid.mask(by_use[UNKNOWN])
+        payload = struct.pack("<8fI", lon,lat,xs,ys,w,s,e,n,style)
+        payload += b"".join(mip_words(classes, roads, side, collar))
+        pages.append((x,y,bounds,payload,sorted(used)))
+    return parents, pages
 
 
 def build(sources, data, fringe, output):

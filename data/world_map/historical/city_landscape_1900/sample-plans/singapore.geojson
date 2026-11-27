@@ -8,14 +8,14 @@
       1.29
     ],
     "key": "singapore-corridor",
-    "revision": 3,
+    "revision": 4,
     "status": "candidate_buildings",
     "road_validity": {
       "start": 1890,
       "end": 1901,
       "basis": "1890 guide map used for a candidate opening-date reconstruction. No replacement of raster fallback."
     },
-    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence. Revised lower river and Tanjong Pagar harbour layout from the 1893 city atlas, with mapped work sheds and separate wet/dry coverage.",
+    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence. Revised lower river and Tanjong Pagar harbour layout from the 1893 city atlas, with mapped work sheds and separate wet/dry coverage. Sourced open grounds and yard aprons precede placement; roof cover comes from the accepted footprints.",
     "registration": {
       "method": "local affine to stable landmarks; modern map used solely for locating controls",
       "working_scan_px": [
@@ -245,6 +245,11 @@
       "leave_one_out_rmse_m": 60,
       "leave_one_out_max_m": 98,
       "limits": "Controls surround the lower river; Tanjong Pagar is an extrapolation. Coast and shed outlines are traced from the atlas, with positional uncertainty. Tanjong Pagar Land Co. property limit did not establish dry land."
+    },
+    "ground_material": 2,
+    "ground_validity": {
+      "start": 1893,
+      "end": 1901
     }
   },
   "features": [
@@ -3762,6 +3767,286 @@
             [
               103.8414389,
               1.2721089
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-back-lot-a",
+      "properties": {
+        "kind": "courtyard",
+        "source": "bartholomew1893",
+        "use_basis": "Narrow interior gaps visible in built rows; paved back-lot use is inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8433085,
+              1.2838984
+            ],
+            [
+              103.8434231,
+              1.284016
+            ],
+            [
+              103.8441103,
+              1.2835628
+            ],
+            [
+              103.8440393,
+              1.2834572
+            ],
+            [
+              103.8433085,
+              1.2838984
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-back-lot-b",
+      "properties": {
+        "kind": "courtyard",
+        "source": "bartholomew1893",
+        "use_basis": "Narrow interior gaps visible in built rows; paved back-lot use is inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8435635,
+              1.2841194
+            ],
+            [
+              103.8436958,
+              1.2842635
+            ],
+            [
+              103.8442974,
+              1.2838939
+            ],
+            [
+              103.8442087,
+              1.2837619
+            ],
+            [
+              103.8435635,
+              1.2841194
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-back-lot-c",
+      "properties": {
+        "kind": "courtyard",
+        "source": "bartholomew1893",
+        "use_basis": "Narrow interior gaps visible in built rows; paved back-lot use is inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8438116,
+              1.2821704
+            ],
+            [
+              103.8439004,
+              1.2823024
+            ],
+            [
+              103.8445973,
+              1.2819163
+            ],
+            [
+              103.8445263,
+              1.2818107
+            ],
+            [
+              103.8438116,
+              1.2821704
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:chinatown-back-lot-d",
+      "properties": {
+        "kind": "courtyard",
+        "source": "bartholomew1893",
+        "use_basis": "Narrow interior gaps visible in built rows; paved back-lot use is inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8443425,
+              1.2828545
+            ],
+            [
+              103.844457,
+              1.2829722
+            ],
+            [
+              103.8450587,
+              1.2826026
+            ],
+            [
+              103.8449877,
+              1.282497
+            ],
+            [
+              103.8443425,
+              1.2828545
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:dry-dock-apron",
+      "properties": {
+        "kind": "work_ground",
+        "source": "bartholomew1893",
+        "use_basis": "Dry apron adjoining mapped dock service fabric; gravel working surface is inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8416417,
+              1.2683011
+            ],
+            [
+              103.8414998,
+              1.2686696
+            ],
+            [
+              103.8417289,
+              1.2689049
+            ],
+            [
+              103.8421983,
+              1.2689709
+            ],
+            [
+              103.8423289,
+              1.2684275
+            ],
+            [
+              103.8423321,
+              1.2680635
+            ],
+            [
+              103.8416417,
+              1.2683011
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tanjong-pagar-inland-apron",
+      "properties": {
+        "kind": "work_ground",
+        "source": "bartholomew1893",
+        "use_basis": "Dry apron adjoining mapped dock service fabric; gravel working surface is inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8420276,
+              1.270877
+            ],
+            [
+              103.8425423,
+              1.2716425
+            ],
+            [
+              103.8429198,
+              1.2719405
+            ],
+            [
+              103.8431521,
+              1.2718118
+            ],
+            [
+              103.8427423,
+              1.2710969
+            ],
+            [
+              103.8423647,
+              1.2707989
+            ],
+            [
+              103.8420276,
+              1.270877
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:fort-canning-open-crest",
+      "properties": {
+        "kind": "open_ground",
+        "source": "bartholomew1893",
+        "use_basis": "Open summit patch from the mapped hill; boundaries are approximate."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8449794,
+              1.2928633
+            ],
+            [
+              103.8447988,
+              1.2935431
+            ],
+            [
+              103.844865,
+              1.2944846
+            ],
+            [
+              103.8452813,
+              1.295051
+            ],
+            [
+              103.8456475,
+              1.2945945
+            ],
+            [
+              103.845628,
+              1.2938807
+            ],
+            [
+              103.8456424,
+              1.2931119
+            ],
+            [
+              103.8449794,
+              1.2928633
             ]
           ]
         ]

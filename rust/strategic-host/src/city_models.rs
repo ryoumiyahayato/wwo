@@ -630,7 +630,9 @@ impl Catalogue {
         let mut wanted = tiles.into_iter().map(|(i,_)| i).filter(|&i| {
             let tile = &self.roads.tiles[i].1;
             let [start,end] = tile.years;
-            (start..end).contains(&year) && (tile.water_features == 0 || camera.mpp < 21.)
+            (start..end).contains(&year)
+                && (tile.water_features == 0 || camera.mpp < 21.)
+                && (tile.ground_features == 0 || camera.mpp < 115.)
         }).collect::<Vec<_>>();
         self.roads.overflow = wanted.len().saturating_sub(city_roads::PAGE_SLOTS);
         wanted.truncate(city_roads::PAGE_SLOTS);
@@ -703,7 +705,8 @@ impl Catalogue {
                 else if self.roads.pending.contains_key(&index) { "loading" }
                 else { "queued" };
             serde_json::json!({"city":self.city_ids[*city],"tile":tile.file,"index":index,"cpu":state,
-                "fallback":"retained","road_features":tile.features,"water_features":tile.water_features})
+                "fallback":"retained","road_features":tile.features,"water_features":tile.water_features,
+                "ground_features":tile.ground_features})
         }).collect::<Vec<_>>();
         serde_json::json!({
             "roads":{"wanted":roads,"pending":self.roads.pending.len(),"resident":self.roads.cache.len(),

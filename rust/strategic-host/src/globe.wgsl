@@ -1048,7 +1048,7 @@ fn park_pigment(cover:vec4f,earth:vec3f,mpp:f32) -> vec3f {
 
 fn park_ground(color:vec3f,ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec3f {
     if (area&3u)>1u {return color;}
-    let cover=park_coverage(ll,mpp)*(1.-historic_surface_page(ll,mpp).weight);
+    let cover=park_coverage(ll,mpp)*(1.-historic_ground_weight(historic_surface_page(ll,mpp),mpp));
     if cover.a<=.001 {return color;}
     return color*(1.-cover.a)+park_pigment(cover,earth,mpp);
 }
@@ -1308,7 +1308,7 @@ fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
 fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
     let historical=tile.options.z>1.5;
     let surveyed=historic_surface_page(ll,mpp);
-    let historic=surveyed.weight;
+    let historic=historic_ground_weight(surveyed,mpp);
     let legacy_ground=1.-historic;
     let detail=1.-smoothstep(16.,CITY_INK_MPP,mpp);
     if !historical && detail<=0. {return vec4f(0.);}
@@ -1326,7 +1326,7 @@ fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) ->
         let surface=mix(city_road(true,major_ink/max(.001,road)),vec3f(.674,.660,.631),
             smoothstep(5.,17.,mpp));
         let grain=material_grain(earth,mpp,SETTS,5.,7.);
-        let legacy_street=1.-historic*historic_street_weight(mpp,true);
+        let legacy_street=1.-select(historic,0.,surveyed.collar!=0u)*historic_street_weight(mpp,true);
         let dry=1.-water_coverage(area,natural_surface(ll).a);
         return vec4f(surface*(1.+grain*.52),road*smoothstep(0.,160.,edge_distance)*legacy_street*dry);
     }
