@@ -294,7 +294,7 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 在现有离线 Python 环境运行 `tools/build_city_models.py PLAN.geojson DATA/city-models --site FROZEN_CITY_ID` 可增量生成一城。输入为 CRS84 FeatureCollection，顶层 `wwo` 记录 `city_id`、`name`、`key`、固定 `origin`、单调递增的 `revision`、`method` 和 `sources`。每条来源含 `id`、`url`、`licence`、`date` 和 `precision`，每条要素含稳定 `id` 和 `properties.source`。覆盖面用 `kind=coverage`，路中心线用 `kind=road` 和 `width_m`，历史建筑面用 `kind=building` 与可选 `role`、`height_m`。推定只在有资料依据的 `kind=zone` 面内沿道路进行，区内指定 `role` 和 `gap_m`。水面、公园、场坪、铁路用地和不宜施工的坡地分别用 `water`、`park`、`yard`、`rail`、`steep` 排除。先写新增页，再原子更新目录，其他城市文件可复用。v2 建筑使用 `profile` 和 `role`，局部场景导出继续保留旧 GLB 节点标识。
 
-[里尔 r5 候选](../../data/world_map/historical/city_landscape_1900/sample-plans/lille.geojson)依据 1898 年 Tallandier 图原有配准重划东侧五段沟渠。以蓝色填绘确定水面，浅色区域保留原有地类回退。去除相邻搜索范围描出的重复水面。七个配准控制点的留一误差 RMS 为 85.4 米，最大为 138.7 米。
+[里尔 r6 候选](../../data/world_map/historical/city_landscape_1900/sample-plans/lille.geojson)保留 r5 的东侧五段沟渠。依 1898 年 Tallandier 图重描 Béthune 城门西沟、沿岸道路及 Cormontaigne 至 Porte des Postes 街段。Montebello 与沿城墙的 Metz 大道分别入图。水面采用地图蓝色填绘，旁侧园圃沟网未转录。原配准的南端控制点更正为 Porte d’Arras，保留其坐标。七点留一误差 RMS 为 85.4 米，最大 138.7 米。外围与配准精度仍待核对。[里尔 1892 年市议会记录](https://archives.lille.fr/media/187a90bc-669f-4304-b6cf-04a8c166626c.pdf)
 
 道路在四种地图模式中共用同一个基础渲染通道，专题交通线随后绘制。巴黎中心使用 PTM 街道。法兰西岛外围使用 IPR 约 1900 年的 1∶50,000 道路中心线，按交叉口的方向连续性推定道路等级。伦敦使用有年代记录的 OHM 道路，优先采用 1893–1896 年测绘和已整理的泰晤士河桥位。只有较晚底图线形的同期道路是位置参照。路面、部分路宽、人行道和 IPR 窄水道过河表现均为绘制推定。道路几何不提供给正式交通网络。
 
