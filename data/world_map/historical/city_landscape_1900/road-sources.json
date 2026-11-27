@@ -1,0 +1,47 @@
+[
+  {
+    "id": "paris-ptm-street-centrelines",
+    "pack": "core",
+    "state": "ready_vector",
+    "header_word": null,
+    "road_word": 20,
+    "lod_words": 22,
+    "cells": [64, 128, 256, 384],
+    "bounds": [1.78, 48.59, 2.89, 49.15],
+    "metres_per_degree": [73000, 111195],
+    "fade_m": 0,
+    "field_radius_m": 0,
+    "material": 1,
+    "raster_categories": 0
+  },
+  {
+    "id": "london-dated-streets",
+    "pack": "core",
+    "state": "ready_vector",
+    "header_word": 28,
+    "road_word": 21,
+    "lod_words": 25,
+    "cells": [64, 128, 256, 384],
+    "bounds": [-0.371, 51.371, 0.104, 51.638],
+    "metres_per_degree": [69200, 111195],
+    "fade_m": 240,
+    "field_radius_m": 0,
+    "material": 0,
+    "raster_categories": 3
+  },
+  {
+    "id": "paris-region-1900-group-roads",
+    "pack": "fringe",
+    "state": "ready_vector",
+    "header_word": null,
+    "road_word": 12,
+    "lod_words": 9,
+    "cells": [160, 128, 256, 384],
+    "bounds": [1.78, 48.59, 2.89, 49.15],
+    "metres_per_degree": [73000, 111195],
+    "fade_m": 480,
+    "field_radius_m": 16000,
+    "material": 1,
+    "raster_categories": 3
+  }
+]

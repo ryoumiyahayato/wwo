@@ -247,6 +247,7 @@ struct GroundSurface {
     material_bytes:u64,
     water:wgpu::Buffer,
     city_water:wgpu::Buffer,
+    city_roads:crate::city_roads::RoadSources,
     water_pixels:wgpu::Buffer,
     water_raster:Option<WaterRaster>,
     loaded:bool,
@@ -307,6 +308,8 @@ impl GroundSurface {
         let historic_surface_offset=(city_geometry.len()/4) as u32;
         city_geometry.extend_from_slice(&zstd::stream::decode_all(&include_bytes!("historical-city-surface.bin.zst")[..])
             .expect("embedded historical city surface"));
+        let (city_roads, road_sources_offset)=crate::city_roads::RoadSources::append(&mut city_geometry,fringe_offset);
+        city_geometry.extend_from_slice(&road_sources_offset.to_le_bytes());
         city_geometry.extend_from_slice(&historic_surface_offset.to_le_bytes());
         city_geometry.extend_from_slice(&fringe_offset.to_le_bytes());
         city_geometry.extend_from_slice(&park_offset.to_le_bytes());
@@ -317,7 +320,8 @@ impl GroundSurface {
         });
         let water_pixels=water_pixels(device,4);
         let group=Self::bind(device,&layout,&repeat,&art,&landscape,&materials,&water,&water_pixels,&city_water);
-        Self{layout,group,repeat,landscape,art,materials,material_bytes,water,city_water,water_pixels,water_raster:None,loaded:false,custom_art:false}
+        Self{layout,group,repeat,landscape,art,materials,material_bytes,water,city_water,city_roads,water_pixels,
+            water_raster:None,loaded:false,custom_art:false}
     }
 
     fn bind(device:&wgpu::Device, layout:&wgpu::BindGroupLayout, repeat:&wgpu::Sampler,
@@ -1768,11 +1772,15 @@ impl Renderer {
                 layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group,&self.surface.group],[w,h]);
             }
             let draw_city=show_map&&pages.iter().any(|(_,tile,_,_)|tile.city_ink_only);
-            let road_scissors=if show_map && camera.mpp<300. && view.road_layer[0]<2 {
-                // Extents of the compact road indices, in WGS84.
-                [[1.78,48.59,2.89,49.15],[-0.371,51.371,0.104,51.638]].map(|bounds| road_scissor(camera,size,bounds))
-            } else {[None;2]};
-            let draw_roads=road_scissors.iter().any(Option::is_some);
+            let road_area=if show_map && camera.mpp<300. && view.road_layer[0]<2 {
+                self.surface.city_roads.vector_bounds().filter_map(|bounds| road_scissor(camera,size,bounds))
+                    .reduce(|[ax,ay,aw,ah],[bx,by,bw,bh]| {
+                        let x=ax.min(bx);
+                        let y=ay.min(by);
+                        [x,y,(ax+aw).max(bx+bw)-x,(ay+ah).max(by+bh)-y]
+                    })
+            } else {None};
+            let draw_roads=road_area.is_some();
             if draw_city||draw_roads||draw_network||draw_economy||draw_vehicles {
                 let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label:Some("WWO map overlays"),
@@ -1797,16 +1805,14 @@ impl Renderer {
                     }
                     pass.set_scissor_rect(0,0,w,h);
                 }
-                if draw_roads {
+                if let Some([x,y,width,height])=road_area {
                     pass.set_pipeline(&self.roads);
                     pass.set_bind_group(0,&self.globals,&[]);
                     pass.set_bind_group(1,&base.group,&[]);
                     pass.set_bind_group(2,&self.close_group,&[]);
                     pass.set_bind_group(3,&self.surface.group,&[]);
-                    for [x,y,width,height] in road_scissors.into_iter().flatten() {
-                        pass.set_scissor_rect(x,y,width,height);
-                        pass.draw(0..3,0..1);
-                    }
+                    pass.set_scissor_rect(x,y,width,height);
+                    pass.draw(0..3,0..1);
                     pass.set_scissor_rect(0,0,w,h);
                 }
                 pass.set_pipeline(&self.solid);
