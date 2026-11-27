@@ -37,6 +37,22 @@ def read(path):
     return json.loads(path.read_text(encoding="utf-8-sig"))
 
 
+def catalogue_sites():
+    targets = read(HISTORICAL / "site-plans.json")["sites"]
+    with (HISTORICAL / "candidates.jsonl").open(encoding="utf-8") as source:
+        rows = [row for line in source if (row := json.loads(line))["city_id"] in targets]
+    if len(rows) != len(targets) or {row["city_id"] for row in rows} != targets.keys():
+        raise ValueError("Frozen city plans and roster identities differ")
+    sites = []
+    for row in rows:
+        point = row["point"]
+        if (point is None or len(point) != 2 or not -180 <= point[0] <= 180
+                or not -90 <= point[1] <= 90 or not row["point_source"]):
+            raise ValueError(f"Missing sourced city location: {row['city_id']}")
+        sites.append(dict(id=row["city_id"], name=row["name"], point=point, source=row["point_source"]))
+    return sorted(sites, key=lambda site: site["id"])
+
+
 def transforms(center):
     lon, lat = center
     local = CRS.from_proj4(f"+proj=aeqd +lat_0={lat} +lon_0={lon} +ellps=WGS84 +units=m")
@@ -427,6 +443,7 @@ if __name__ == "__main__":
         cli.error("--city and --site select different inputs")
     if args.with_roads and not args.site:
         cli.error("--with-roads requires --site")
+    sites = catalogue_sites()
     args.output.mkdir(parents=True, exist_ok=args.city is not None or args.site is not None)
     catalog = args.output/"catalogue.json"
     previous = read(catalog) if catalog.is_file() else {"version": "wwo-city-models-v1", "cities": []}
@@ -523,7 +540,7 @@ if __name__ == "__main__":
              "Paris Time Machine, https://doi.org/10.34847/nkl.cbf5ecd0 (ODbL 1.0). "
              "Institut Paris Region, land use c. 1900 (Licence Ouverte).",
              paris(args.sources)))
-    catalogue_text = json.dumps(dict(version=version, cities=cities), ensure_ascii=False, indent=2)
+    catalogue_text = json.dumps(dict(version=version, cities=cities, sites=sites), ensure_ascii=False, indent=2)
     if not catalog.exists() or catalog.read_text(encoding="utf-8") != catalogue_text:
         pending = catalog.with_suffix(".tmp")
         pending.write_text(catalogue_text, encoding="utf-8")

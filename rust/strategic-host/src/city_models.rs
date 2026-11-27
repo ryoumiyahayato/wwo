@@ -35,6 +35,23 @@ pub(crate) const MAX_INSTANCE_RUNS:usize=12;
 struct Header {
     version: String,
     cities: Vec<City>,
+    #[serde(default)]
+    sites: Vec<CitySite>,
+}
+
+#[derive(Deserialize, serde::Serialize)]
+struct CitySite {
+    id: String,
+    name: String,
+    point: [f64; 2],
+    source: String,
+}
+
+impl CitySite {
+    fn bounds(&self) -> [f64; 4] {
+        let [lon, lat] = self.point;
+        [lon, lat, lon, lat]
+    }
 }
 
 #[derive(Deserialize)]
@@ -146,6 +163,11 @@ impl TileIndex {
         result.sort_unstable_by(|a, b| a.1.total_cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
         result.truncate(MAX_RESIDENT);
         result
+    }
+
+    fn bytes(&self) -> usize {
+        self.cells.capacity() * std::mem::size_of::<([i32; 2], Vec<usize>)>()
+            + self.cells.values().map(|indices| indices.capacity() * std::mem::size_of::<usize>()).sum::<usize>()
     }
 }
 
@@ -449,6 +471,9 @@ pub(crate) struct Catalogue {
     root: PathBuf,
     tiles: Vec<Tile>,
     index: TileIndex,
+    sites: Vec<CitySite>,
+    site_index: TileIndex,
+    sites_in_view: Vec<(usize, f64)>,
     pub(crate) sources: Vec<String>,
     city_ids: Vec<String>,
     cache: HashMap<usize, ResidentPage>,
@@ -470,6 +495,16 @@ impl Catalogue {
         if !matches!(catalog.version.as_str(), "wwo-city-models-v1" | "wwo-city-models-v2") || catalog.cities.is_empty() {
             return Err(io::Error::other("Unsupported city model catalogue"));
         }
+        let mut site_ids = HashSet::with_capacity(catalog.sites.len());
+        for site in &catalog.sites {
+            let [lon, lat] = site.point;
+            if !(-180. ..=180.).contains(&lon) || !(-90. ..=90.).contains(&lat)
+                || site.id.trim().is_empty() || site.name.trim().is_empty()
+                || site.source.trim().is_empty() || !site_ids.insert(site.id.as_str()) {
+                return Err(io::Error::other(format!("Invalid city site: {}", site.id)));
+            }
+        }
+        let site_index = TileIndex::new(catalog.sites.iter().map(CitySite::bounds));
         let mut tiles = Vec::new();
         let mut sources = Vec::new();
         let mut city_ids = Vec::new();
@@ -512,7 +547,8 @@ impl Catalogue {
         let index = TileIndex::new(tiles.iter().map(|tile| tile.bounds));
         let roads = Roads { index: TileIndex::new(road_tiles.iter().map(|(_,tile)| tile.bounds)), tiles: road_tiles,
             wanted: Vec::new(), pending: HashMap::new(), cache: HashMap::new(), failed: HashSet::new(), overflow: 0 };
-        Ok(Self { root, tiles, index, sources, city_ids, cache: HashMap::new(), pending: HashMap::new(),
+        Ok(Self { root, tiles, index, sites: catalog.sites, site_index, sites_in_view: Vec::new(),
+            sources, city_ids, cache: HashMap::new(), pending: HashMap::new(),
             wanted: HashSet::new(), draw_wanted: HashMap::new(), failed: HashSet::new(), revision: 0,
             discarded: 0, lookup: Duration::ZERO, roads })
     }
@@ -611,6 +647,7 @@ impl Catalogue {
 
     pub(crate) fn idle(&mut self, now: Instant) {
         self.lookup = Duration::ZERO;
+        self.sites_in_view.clear();
         self.roads.overflow = 0;
         self.set_road_wanted(Vec::new(), now);
         self.set_wanted(HashSet::new(), now);
@@ -729,12 +766,14 @@ impl Catalogue {
             + self.tiles.capacity() * std::mem::size_of::<Tile>()
             + self.tiles.iter().map(|tile| tile.file.capacity()).sum::<usize>()
             + self.root.capacity()
-            + self.index.cells.capacity() * std::mem::size_of::<([i32; 2], Vec<usize>)>()
-            + self.index.cells.values().map(|indices| indices.capacity() * std::mem::size_of::<usize>()).sum::<usize>()
+            + self.index.bytes()
+            + self.site_index.bytes()
+            + self.sites.capacity() * std::mem::size_of::<CitySite>()
+            + self.sites.iter().map(|site| site.id.capacity() + site.name.capacity() + site.source.capacity()).sum::<usize>()
+            + self.sites_in_view.capacity() * std::mem::size_of::<(usize, f64)>()
             + self.roads.tiles.capacity() * std::mem::size_of::<(usize,RoadTile)>()
             + self.roads.tiles.iter().map(|(_,tile)| tile.file.capacity()).sum::<usize>()
-            + self.roads.index.cells.capacity() * std::mem::size_of::<([i32;2],Vec<usize>)>()
-            + self.roads.index.cells.values().map(|indices| indices.capacity() * std::mem::size_of::<usize>()).sum::<usize>()
+            + self.roads.index.bytes()
             + [&self.sources, &self.city_ids].into_iter().map(|strings|
                 strings.capacity() * std::mem::size_of::<String>()
                 + strings.iter().map(String::capacity).sum::<usize>()).sum::<usize>();
@@ -753,6 +792,8 @@ impl Catalogue {
             "roads":{"wanted":roads,"pending":self.roads.pending.len(),"resident":self.roads.cache.len(),
                 "outside_slot_budget":self.roads.overflow},
             "catalogue_cities": self.city_ids.len(), "catalogue_tiles": self.tiles.len(),
+            "catalogue_sites": self.sites.len(),
+            "sites_in_view": self.sites_in_view.iter().map(|&(index, _)| &self.sites[index]).collect::<Vec<_>>(),
             "wanted": pages, "cpu_resident": self.cache.len(), "cpu_page_bytes": self.cpu_page_bytes(),
             "cpu_metadata_bytes": metadata_bytes, "cpu_reserved_bytes": self.reserved_bytes(),
             "pending": self.pending.len(), "discarded": self.discarded,
@@ -774,11 +815,13 @@ impl Catalogue {
         let now = Instant::now();
         if camera.mpp > MAX_MPP || !("1891-01-01".."1915-01-01").contains(&date) {
             self.lookup = Duration::ZERO;
+            self.sites_in_view.clear();
             self.set_wanted(HashSet::new(),now);
             self.update_roads(date,camera,size,now,events);
             return Vec::new();
         }
         let visible = self.index.visible(|i|self.tiles[i].bounds, camera, size);
+        self.sites_in_view = self.site_index.visible(|i| self.sites[i].bounds(), camera, size);
         self.lookup = now.elapsed();
         let mut models = Vec::new();
         let middle=camera::smooth(8.,COVERAGE_MPP,camera.mpp) as f32;
