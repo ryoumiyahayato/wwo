@@ -607,6 +607,15 @@ impl ApplicationHandler<HostEvent> for Host {
                 }
                 return;
             }
+            HostEvent::CityRoad(revision,index,result)=>{
+                if let Some(catalogue)=&mut self.city_models {
+                    if let Err(error)=catalogue.ready_road(revision,index,result) {
+                        if self.resource_warnings.len()<24 { self.resource_warnings.push(error.to_string()); }
+                    }
+                    self.dirty=true;
+                }
+                return;
+            }
             HostEvent::CityCatalogue(result)=>{
                 self.city_reload_inflight = false;
                 let status = match result {

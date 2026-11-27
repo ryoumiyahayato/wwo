@@ -1047,6 +1047,10 @@ fn road_source_bucket(ll: vec2f) -> vec2u {
     return vec2u(city_water[slot],city_water[slot+1u]);
 }
 
+fn loaded_road_registry() -> u32 {
+    return city_water[arrayLength(&city_water)-5u];
+}
+
 fn road_source(index: u32) -> u32 {
     let catalogue=city_water[arrayLength(&city_water)-4u];
     return city_water[catalogue]+city_water[index]*ROAD_SOURCE_WORDS;
@@ -1218,8 +1222,14 @@ fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
     var on_bridge=false;
     var material=0u;
     let range=road_source_bucket(ll);
-    for (var index=range.x;index<range.y;index++) {
-        let source=road_source(index);
+    let registry=loaded_road_registry();
+    for (var index=range.x;index<range.y+city_water[registry];index++) {
+        var source=0u;
+        if index<range.y {
+            source=road_source(index);
+        } else {
+            source=city_water[registry+1u+index-range.y];
+        }
         if city_water[source+20u]!=ROAD_VECTOR_READY {continue;}
         let cell=city_road_cell(ll,source,level);
         if cell.begin==cell.end {continue;}

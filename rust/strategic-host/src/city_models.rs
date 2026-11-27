@@ -1,4 +1,5 @@
 use crate::{camera::{self, Camera}, city_kit, landmarks::{FootprintModel, Landmarks, ModelBounds, ModelKey, ModelMesh, ModelPose, ModelVertex, VisibleModel}, HostEvent};
+use crate::city_roads::{self, RoadPage, RoadTile};
 use serde::Deserialize;
 use std::{
     collections::{BTreeMap, HashMap, HashSet},
@@ -42,6 +43,8 @@ struct City {
     attribution: String,
     kit: Option<String>,
     tiles: Vec<Tile>,
+    #[serde(default)]
+    road_pages: Vec<RoadTile>,
 }
 
 #[derive(Clone, Deserialize)]
@@ -58,10 +61,6 @@ struct Tile {
 }
 
 impl Tile {
-    fn distance_to_view(&self, camera: &Camera, [width, height]: [u32; 2]) -> Option<f64> {
-        distance_to_view(self.bounds,camera,[width,height],250.)
-    }
-
     fn anchor(&self)->[f64;2] {
         let [w,s,e,n]=self.bounds;
         [(w+e)*0.5,(s+n)*0.5]
@@ -97,21 +96,23 @@ struct TileIndex {
 }
 
 impl TileIndex {
-    fn new(tiles: &[Tile]) -> Self {
+    fn new(bounds: impl IntoIterator<Item=[f64;4]>) -> Self {
         let mut cells = HashMap::<_, Vec<_>>::new();
         let mut largest_apron_m: f64 = 0.;
-        for (index, tile) in tiles.iter().enumerate() {
-            let [lon, lat] = tile.anchor();
+        for (index, bounds) in bounds.into_iter().enumerate() {
+            let [w, s, e, n] = bounds;
+            let (lon, lat) = ((w+e)*0.5, (s+n)*0.5);
             let x = ((lon + 180.) * INDEX_CELLS_PER_DEGREE).floor() as i32;
             let y = ((lat + 90.) * INDEX_CELLS_PER_DEGREE).floor() as i32;
             let cell = [x.rem_euclid(LONGITUDE_CELLS), y.min(LATITUDE_CELLS - 1)];
             cells.entry(cell).or_default().push(index);
-            largest_apron_m = largest_apron_m.max(view_apron(tile.bounds, 250.));
+            largest_apron_m = largest_apron_m.max(view_apron(bounds, 250.));
         }
         Self { cells, largest_apron_m }
     }
 
-    fn visible(&self, tiles: &[Tile], camera: &Camera, size: [u32; 2]) -> Vec<(usize, f64)> {
+    fn visible(&self, bounds: impl Fn(usize)->[f64;4], camera: &Camera, size: [u32; 2]) -> Vec<(usize, f64)> {
+        if self.cells.is_empty() { return Vec::new(); }
         let (axes, [x, y]) = camera.projection(size);
         let [width, height] = size.map(f64::from);
         let apron = self.largest_apron_m / camera.mpp;
@@ -134,7 +135,7 @@ impl TileIndex {
             for x in west..=east {
                 if let Some(indices) = self.cells.get(&[x.rem_euclid(LONGITUDE_CELLS), y]) {
                     result.extend(indices.iter().filter_map(|&index| {
-                        tiles[index].distance_to_view(camera, size).map(|distance| (index, distance))
+                        distance_to_view(bounds(index),camera,size,250.).map(|distance| (index, distance))
                     }));
                 }
             }
@@ -143,6 +144,28 @@ impl TileIndex {
         result.truncate(MAX_RESIDENT);
         result
     }
+}
+
+struct ResidentRoad {
+    page: RoadPage,
+    last_needed: Instant,
+}
+
+struct Roads {
+    tiles: Vec<(usize, RoadTile)>,
+    index: TileIndex,
+    wanted: Vec<usize>,
+    pending: HashMap<usize, PageRequest>,
+    cache: HashMap<usize, ResidentRoad>,
+    failed: HashSet<usize>,
+    overflow: usize,
+}
+
+#[derive(Clone, Copy)]
+pub(crate) struct ReadyRoad<'a> {
+    pub(crate) key: (u64, usize),
+    pub(crate) bounds: [f64; 4],
+    pub(crate) page: &'a RoadPage,
 }
 
 fn paris_fringe() -> io::Result<Vec<Tile>> {
@@ -404,6 +427,7 @@ pub(crate) struct Catalogue {
     revision: u64,
     discarded: u64,
     lookup: Duration,
+    roads: Roads,
 }
 
 impl Catalogue {
@@ -418,6 +442,7 @@ impl Catalogue {
         let mut sources = Vec::new();
         let mut city_ids = Vec::new();
         let mut files = HashSet::new();
+        let mut road_tiles = Vec::new();
         for city in catalog.cities {
             let id = if city.id.is_empty() { city.name.to_lowercase() } else { city.id };
             if id.trim().is_empty() || city_ids.contains(&id) {
@@ -426,6 +451,12 @@ impl Catalogue {
             let kit = city.kit.as_deref().map(|kit| city_kit::index(kit)
                 .ok_or_else(|| io::Error::other(format!("Unknown city kit {kit} for {id}")))).transpose()?;
             sources.push(format!("{} · {} {}", city.name, city.source, city.attribution));
+            for tile in city.road_pages {
+                if !tile.valid() || !files.insert(tile.file.clone()) {
+                    return Err(io::Error::other(format!("Invalid city road tile {}", tile.file)));
+                }
+                road_tiles.push((city_ids.len(), tile));
+            }
             for mut tile in city.tiles {
                 let [w,s,e,n] = tile.bounds;
                 if !tile.file.ends_with(".wcb") || !tile.file.bytes().all(|c|c.is_ascii_alphanumeric()||b"-.".contains(&c))
@@ -446,16 +477,18 @@ impl Catalogue {
         });
         tiles.extend(paris_fringe()?.into_iter().map(|mut tile| { tile.city = paris; tile }));
         sources.push("Paris fringe · Institut Paris Region, c. 1900 land use and roads. Reconstructed building placements.".into());
-        let index = TileIndex::new(&tiles);
+        let index = TileIndex::new(tiles.iter().map(|tile| tile.bounds));
+        let roads = Roads { index: TileIndex::new(road_tiles.iter().map(|(_,tile)| tile.bounds)), tiles: road_tiles,
+            wanted: Vec::new(), pending: HashMap::new(), cache: HashMap::new(), failed: HashSet::new(), overflow: 0 };
         Ok(Self { root, tiles, index, sources, city_ids, cache: HashMap::new(), pending: HashMap::new(),
             wanted: HashSet::new(), draw_wanted: HashMap::new(), failed: HashSet::new(), revision: 0,
-            discarded: 0, lookup: Duration::ZERO })
+            discarded: 0, lookup: Duration::ZERO, roads })
     }
 
     pub(crate) fn reload_capacity(&self) -> Option<(u64, usize, usize)> {
-        self.pending.is_empty().then(|| (
+        (self.pending.is_empty() && self.roads.pending.is_empty()).then(|| (
             self.revision + 1,
-            MAX_RESIDENT.saturating_sub(self.cache.len()),
+            MAX_RESIDENT.saturating_sub(self.cache.len() + self.roads.cache.len()),
             CPU_PAGE_BUDGET.saturating_sub(self.cpu_page_bytes()),
         ))
     }
@@ -467,7 +500,7 @@ impl Catalogue {
         let mut candidate=Self::open(root)?;
         candidate.revision = revision;
         if camera.mpp<=MAX_MPP {
-            for (index, _) in candidate.index.visible(&candidate.tiles, camera, size) {
+            for (index, _) in candidate.index.visible(|i|candidate.tiles[i].bounds, camera, size) {
                 let tile=&candidate.tiles[index];
                 if candidate.cache.len() >= max_pages
                     || candidate.cpu_page_bytes() + tile.cpu_reservation() > max_bytes
@@ -504,15 +537,16 @@ impl Catalogue {
     }
 
     fn cpu_page_bytes(&self) -> usize {
-        self.cache.values().map(|resident| resident.bytes).sum()
+        self.cache.values().map(|resident| resident.bytes).sum::<usize>()
+            + self.roads.cache.values().map(|resident| resident.page.data.capacity()).sum::<usize>()
     }
 
     fn reserved_bytes(&self) -> usize {
-        self.pending.values().map(|request| request.reservation).sum()
+        self.pending.values().chain(self.roads.pending.values()).map(|request| request.reservation).sum()
     }
 
     fn reserve(&mut self, bytes: usize) -> bool {
-        while self.cache.len() + self.pending.len() >= MAX_RESIDENT
+        while self.cache.len() + self.pending.len() + self.roads.cache.len() + self.roads.pending.len() >= MAX_RESIDENT
             || self.cpu_page_bytes() + self.reserved_bytes() + bytes > CPU_PAGE_BUDGET
         {
             let Some((&index, _)) = self.cache.iter().filter(|(index, _)| !self.wanted.contains(index))
@@ -523,10 +557,12 @@ impl Catalogue {
     }
 
     pub(crate) fn expire(&mut self, now: Instant) -> bool {
-        let previous = self.cache.len();
+        let previous = self.cache.len() + self.roads.cache.len();
         self.cache.retain(|index, resident| self.wanted.contains(index)
             || now.saturating_duration_since(resident.last_needed) < PAGE_RETENTION);
-        self.cache.len() != previous
+        self.roads.cache.retain(|index, resident| self.roads.wanted.contains(index)
+            || now.saturating_duration_since(resident.last_needed) < PAGE_RETENTION);
+        self.cache.len() + self.roads.cache.len() != previous
     }
 
     fn set_wanted(&mut self, wanted: HashSet<usize>, now: Instant) {
@@ -543,7 +579,90 @@ impl Catalogue {
 
     pub(crate) fn idle(&mut self, now: Instant) {
         self.lookup = Duration::ZERO;
+        self.roads.overflow = 0;
+        self.set_road_wanted(Vec::new(), now);
         self.set_wanted(HashSet::new(), now);
+    }
+
+    fn set_road_wanted(&mut self, wanted: Vec<usize>, now: Instant) {
+        self.roads.wanted = wanted;
+        for (index, request) in &self.roads.pending {
+            if !self.roads.wanted.contains(index) { request.cancelled.store(true, Ordering::Relaxed); }
+        }
+        for index in &self.roads.wanted {
+            if let Some(resident) = self.roads.cache.get_mut(index) { resident.last_needed = now; }
+        }
+    }
+
+    pub(crate) fn ready_road(&mut self, revision: u64, index: usize, result: io::Result<RoadPage>) -> io::Result<()> {
+        if revision != self.revision { return Ok(()); }
+        let Some(request) = self.roads.pending.remove(&index) else { return Ok(()); };
+        if request.cancelled.load(Ordering::Relaxed) || !self.roads.wanted.contains(&index) {
+            self.discarded += 1;
+            return Ok(());
+        }
+        match result {
+            Ok(page) => { self.roads.cache.insert(index, ResidentRoad { page, last_needed: Instant::now() }); Ok(()) }
+            Err(error) => {
+                self.roads.failed.insert(index);
+                Err(io::Error::other(format!("City road {} · {error}", self.roads.tiles[index].1.file)))
+            }
+        }
+    }
+
+    pub(crate) fn ready_roads(&self) -> Vec<ReadyRoad<'_>> {
+        self.roads.wanted.iter().filter_map(|&index| self.roads.cache.get(&index).map(|resident| ReadyRoad {
+            key: (self.revision,index), bounds: self.roads.tiles[index].1.bounds, page: &resident.page,
+        })).collect()
+    }
+
+    fn update_roads(&mut self, date: &str, camera: &Camera, size: [u32;2], now: Instant,
+        events: Option<&EventLoopProxy<HostEvent>>)
+    {
+        if camera.mpp >= 300. || self.roads.tiles.is_empty() {
+            self.roads.overflow = 0;
+            self.set_road_wanted(Vec::new(), now);
+            return;
+        }
+        let started = Instant::now();
+        let year = date.get(..4).and_then(|date| date.parse::<u16>().ok()).unwrap_or(0);
+        let tiles = self.roads.index.visible(|i|self.roads.tiles[i].1.bounds, camera, size);
+        let mut wanted = tiles.into_iter().map(|(i,_)| i).filter(|&i| {
+            let [start,end] = self.roads.tiles[i].1.years;
+            (start..end).contains(&year)
+        }).collect::<Vec<_>>();
+        self.roads.overflow = wanted.len().saturating_sub(city_roads::PAGE_SLOTS);
+        wanted.truncate(city_roads::PAGE_SLOTS);
+        self.lookup += started.elapsed();
+        self.set_road_wanted(wanted, now);
+        let Some(events) = events else { return; };
+        for index in self.roads.wanted.clone() {
+            if self.roads.pending.len() >= 2 || self.pending.len() + self.roads.pending.len() >= MAX_PENDING { break; }
+            if self.roads.cache.contains_key(&index) || self.roads.pending.contains_key(&index)
+                || self.roads.failed.contains(&index) { continue; }
+            while self.roads.cache.len() + self.roads.pending.len() >= city_roads::PAGE_SLOTS {
+                let Some((&stale,_)) = self.roads.cache.iter().filter(|(i,_)| !self.roads.wanted.contains(i))
+                    .min_by_key(|(i,page)| (page.last_needed,**i)) else { break; };
+                self.roads.cache.remove(&stale);
+            }
+            if self.roads.cache.len() + self.roads.pending.len() >= city_roads::PAGE_SLOTS { break; }
+            let reservation = city_roads::PAGE_BYTES * 3;
+            if !self.reserve(reservation) { break; }
+            let root = self.root.clone();
+            let tile = self.roads.tiles[index].1.clone();
+            let proxy = events.clone();
+            let revision = self.revision;
+            let cancelled = Arc::new(AtomicBool::new(false));
+            self.roads.pending.insert(index, PageRequest { reservation, cancelled: Arc::clone(&cancelled) });
+            if let Err(error) = std::thread::Builder::new().name("WWO city road tile".into()).spawn(move || {
+                let result = if cancelled.load(Ordering::Relaxed) {
+                    Err(io::Error::new(io::ErrorKind::Interrupted, "Road page no longer requested"))
+                } else { tile.read(&root) };
+                let _ = proxy.send_event(HostEvent::CityRoad(revision,index,result));
+            }) {
+                let _ = events.send_event(HostEvent::CityRoad(revision,index,Err(error)));
+            }
+        }
     }
 
     pub(crate) fn status(&self, gpu:impl Fn(u64,usize)->&'static str) -> serde_json::Value {
@@ -569,10 +688,24 @@ impl Catalogue {
             + self.root.capacity()
             + self.index.cells.capacity() * std::mem::size_of::<([i32; 2], Vec<usize>)>()
             + self.index.cells.values().map(|indices| indices.capacity() * std::mem::size_of::<usize>()).sum::<usize>()
+            + self.roads.tiles.capacity() * std::mem::size_of::<(usize,RoadTile)>()
+            + self.roads.tiles.iter().map(|(_,tile)| tile.file.capacity()).sum::<usize>()
+            + self.roads.index.cells.capacity() * std::mem::size_of::<([i32;2],Vec<usize>)>()
+            + self.roads.index.cells.values().map(|indices| indices.capacity() * std::mem::size_of::<usize>()).sum::<usize>()
             + [&self.sources, &self.city_ids].into_iter().map(|strings|
                 strings.capacity() * std::mem::size_of::<String>()
                 + strings.iter().map(String::capacity).sum::<usize>()).sum::<usize>();
+        let roads = self.roads.wanted.iter().map(|&index| {
+            let (city,tile) = &self.roads.tiles[index];
+            let state = if self.roads.cache.contains_key(&index) { "ready" }
+                else if self.roads.failed.contains(&index) { "missing_or_invalid" }
+                else if self.roads.pending.contains_key(&index) { "loading" }
+                else { "queued" };
+            serde_json::json!({"city":self.city_ids[*city],"tile":tile.file,"index":index,"cpu":state,"fallback":"retained"})
+        }).collect::<Vec<_>>();
         serde_json::json!({
+            "roads":{"wanted":roads,"pending":self.roads.pending.len(),"resident":self.roads.cache.len(),
+                "outside_slot_budget":self.roads.overflow},
             "catalogue_cities": self.city_ids.len(), "catalogue_tiles": self.tiles.len(),
             "wanted": pages, "cpu_resident": self.cache.len(), "cpu_page_bytes": self.cpu_page_bytes(),
             "cpu_metadata_bytes": metadata_bytes, "cpu_reserved_bytes": self.reserved_bytes(),
@@ -594,10 +727,12 @@ impl Catalogue {
     {
         let now = Instant::now();
         if camera.mpp > MAX_MPP || !("1891-01-01".."1915-01-01").contains(&date) {
-            self.idle(now);
+            self.lookup = Duration::ZERO;
+            self.set_wanted(HashSet::new(),now);
+            self.update_roads(date,camera,size,now,events);
             return Vec::new();
         }
-        let visible = self.index.visible(&self.tiles, camera, size);
+        let visible = self.index.visible(|i|self.tiles[i].bounds, camera, size);
         self.lookup = now.elapsed();
         let mut models = Vec::new();
         let middle=camera::smooth(8.,COVERAGE_MPP,camera.mpp) as f32;
@@ -616,6 +751,7 @@ impl Catalogue {
             (opacity > 0.03).then_some((index, anchor, opacity))
         }).collect();
         self.set_wanted(visible.iter().map(|&(index, _, _)| index).collect(), now);
+        self.update_roads(date,camera,size,now,events);
         for (index, anchor, opacity) in visible {
             let detail=details*opacity;
             if let Some(resident) = self.cache.get(&index) {
@@ -630,7 +766,7 @@ impl Catalogue {
                 block_model.city_page=Some(CityDraw{geometry:Arc::clone(&page.mesh),preload:camera.mpp<6.,
                     paris:page.paris,kit:page.kit,batches});
                 models.push(block_model);
-            } else if let Some(events) = events.filter(|_| self.pending.len() < MAX_PENDING
+            } else if let Some(events) = events.filter(|_| self.pending.len() + self.roads.pending.len() < MAX_PENDING
                 && !self.failed.contains(&index) && !self.pending.contains_key(&index)) {
                 let reservation = self.tiles[index].cpu_reservation();
                 if !self.reserve(reservation) {continue;}

@@ -248,10 +248,95 @@ struct GroundSurface {
     water:wgpu::Buffer,
     city_water:wgpu::Buffer,
     city_roads:crate::city_roads::RoadSources,
+    road_store:RoadStore,
     water_pixels:wgpu::Buffer,
     water_raster:Option<WaterRaster>,
     loaded:bool,
     custom_art:bool,
+}
+
+#[derive(Clone, Copy)]
+struct RoadSlot {
+    key:(u64,usize),
+    bounds:[f64;4],
+    bytes:usize,
+    written:usize,
+    active:bool,
+}
+
+struct RoadStore {
+    base:u32,
+    capacity:usize,
+    registry:[u32;crate::city_roads::PAGE_SLOTS+1],
+    slots:[Option<RoadSlot>;crate::city_roads::PAGE_SLOTS],
+    uploading:bool,
+}
+
+impl RoadStore {
+    fn allocate(storage:&mut Vec<u8>, limit:u64) -> Self {
+        use crate::city_roads::{PAGE_BYTES,PAGE_SLOTS};
+        let base=(storage.len()/4) as u32;
+        let total=storage.len()+4*((PAGE_SLOTS+1)+22*PAGE_SLOTS+5)+PAGE_BYTES*PAGE_SLOTS;
+        let capacity=if total as u64<=limit {PAGE_SLOTS} else {0};
+        let bytes=if capacity>0 {total-20} else {storage.len()+4};
+        storage.resize(bytes,0);
+        Self{base,capacity,registry:[0;PAGE_SLOTS+1],slots:[None;PAGE_SLOTS],uploading:false}
+    }
+
+    fn update(&mut self, queue:&wgpu::Queue, buffer:&wgpu::Buffer,
+              wanted:&[crate::city_models::ReadyRoad<'_>], uploads:&mut CityUploads) {
+        use crate::city_roads::{PAGE_BYTES,PAGE_SLOTS};
+        let descriptors=self.base+1+PAGE_SLOTS as u32;
+        let start=descriptors+22*PAGE_SLOTS as u32;
+        if self.capacity==0 || (wanted.is_empty() && self.registry[0]==0 && !self.uploading) {return;}
+        // Reserve the registry transfer so a removed slot cannot remain visible after reuse.
+        let registry_bytes=std::mem::size_of_val(&self.registry) as u64;
+        uploads.remaining-=registry_bytes;
+        uploads.used+=registry_bytes;
+        for entry in &mut self.slots {
+            if entry.is_some_and(|slot| !wanted.iter().any(|road|road.key==slot.key)) {*entry=None;}
+        }
+        self.uploading=false;
+        for road in wanted {
+            let Some(index)=self.slots.iter().position(|slot|slot.is_some_and(|slot|slot.key==road.key))
+                .or_else(||self.slots.iter().position(Option::is_none)) else {break;};
+            let slot=self.slots[index].get_or_insert(RoadSlot{key:road.key,bounds:road.bounds,
+                bytes:road.page.data.len(),written:0,active:false});
+            if slot.active {continue;}
+            let contents=start+(PAGE_BYTES/4*index) as u32;
+            uploads.write(queue,buffer,u64::from(contents)*4,&road.page.data,&mut slot.written);
+            let descriptor=road.page.descriptor(contents,road.bounds);
+            let data=bytemuck::cast_slice(&descriptor);
+            let mut written=0;
+            if slot.written==slot.bytes && uploads.remaining>=data.len() as u64 && uploads.can_allocate(data.len() as u64) {
+                uploads.write(queue,buffer,u64::from(descriptors+22*index as u32)*4,data,&mut written);
+            }
+            slot.active=written==data.len();
+            self.uploading|=!slot.active;
+        }
+        let mut registry=[0;PAGE_SLOTS+1];
+        let mut count=0;
+        for (index,slot) in self.slots.iter().enumerate() {
+            if slot.is_some_and(|slot|slot.active) {
+                count+=1;
+                registry[count]=descriptors+22*index as u32;
+            }
+        }
+        registry[0]=count as u32;
+        if registry!=self.registry {
+            let data=bytemuck::cast_slice(&registry);
+            queue.write_buffer(buffer,u64::from(self.base)*4,data);
+            uploads.written+=registry_bytes;
+            self.registry=registry;
+        } else {
+            uploads.remaining+=registry_bytes;
+            uploads.used-=registry_bytes;
+        }
+    }
+
+    fn active(&self) -> impl Iterator<Item=RoadSlot> + '_ {
+        self.slots.iter().filter_map(|&slot|slot.filter(|slot|slot.active))
+    }
 }
 
 struct WaterRaster {
@@ -309,6 +394,8 @@ impl GroundSurface {
         city_geometry.extend_from_slice(&zstd::stream::decode_all(&include_bytes!("historical-city-surface.bin.zst")[..])
             .expect("embedded historical city surface"));
         let (city_roads, road_sources_offset)=crate::city_roads::RoadSources::append(&mut city_geometry,fringe_offset);
+        let road_store=RoadStore::allocate(&mut city_geometry,u64::from(device.limits().max_storage_buffer_binding_size));
+        city_geometry.extend_from_slice(&road_store.base.to_le_bytes());
         city_geometry.extend_from_slice(&road_sources_offset.to_le_bytes());
         city_geometry.extend_from_slice(&historic_surface_offset.to_le_bytes());
         city_geometry.extend_from_slice(&fringe_offset.to_le_bytes());
@@ -316,11 +403,11 @@ impl GroundSurface {
         let city_water=device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label:Some("Near-map city banks, streets, parks, and ground coverage"),
             contents:&city_geometry,
-            usage:wgpu::BufferUsages::STORAGE,
+            usage:wgpu::BufferUsages::STORAGE|wgpu::BufferUsages::COPY_DST,
         });
         let water_pixels=water_pixels(device,4);
         let group=Self::bind(device,&layout,&repeat,&art,&landscape,&materials,&water,&water_pixels,&city_water);
-        Self{layout,group,repeat,landscape,art,materials,material_bytes,water,city_water,city_roads,water_pixels,
+        Self{layout,group,repeat,landscape,art,materials,material_bytes,water,city_water,city_roads,road_store,water_pixels,
             water_raster:None,loaded:false,custom_art:false}
     }
 
@@ -459,12 +546,12 @@ impl CityUploads {
         self.started.elapsed() < Self::TIME && bytes <= Self::GPU_LIMIT.saturating_sub(self.used)
     }
 
-    fn write(&mut self, queue: &wgpu::Queue, buffer: &wgpu::Buffer, bytes: &[u8], uploaded: &mut usize) {
+    fn write(&mut self, queue: &wgpu::Queue, buffer: &wgpu::Buffer, offset:u64, bytes: &[u8], uploaded: &mut usize) {
         while *uploaded < bytes.len() && self.remaining > 0 && self.started.elapsed() < Self::TIME {
             let count = (bytes.len() - *uploaded).min(Self::CHUNK).min(self.remaining as usize)
                 .min(Self::GPU_LIMIT.saturating_sub(self.used) as usize);
             if count == 0 { break; }
-            queue.write_buffer(buffer, *uploaded as u64, &bytes[*uploaded..*uploaded + count]);
+            queue.write_buffer(buffer, offset+*uploaded as u64, &bytes[*uploaded..*uploaded + count]);
             *uploaded += count;
             self.remaining -= count as u64;
             self.written += count as u64;
@@ -595,7 +682,8 @@ impl ModelLayer {
         self.retire_city_gpu(queue, evicted, 0);
     }
 
-    fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel], mpp:f32) {
+    fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel], mpp:f32,
+               uploads:&mut CityUploads) {
         let now = Instant::now();
         self.city_batches.clear();
         self.city_batch_uniforms.clear();
@@ -613,6 +701,7 @@ impl ModelLayer {
         for resident in self.residents.values_mut() { resident.transforms.clear(); }
         if models.is_empty() {
             self.depth = None;
+            self.city_transfer_bytes=uploads.written;
             return;
         }
         if self.depth.as_ref().is_none_or(|(previous, _)| *previous != size) {
@@ -624,16 +713,11 @@ impl ModelLayer {
             });
             self.depth = Some((size, texture.create_view(&Default::default())));
         }
-        let (resident_bytes, submitted_bytes) = self.city_usage();
-        let uniform_headroom = self.city_uniforms.size();
-        let mut uploads = CityUploads { started:Instant::now(),
-            used:self.city_fixed_bytes+resident_bytes+submitted_bytes+uniform_headroom,
-            written:0,remaining:CityUploads::FRAME_LIMIT };
         let mut kits = self.city_meshes.keys().copied().collect::<Vec<_>>();
         kits.sort_unstable_by_key(|key| key.model());
         for key in kits {
             let mesh = self.city_meshes.remove(&key).unwrap();
-            if !self.stage_city_mesh(device, queue, key, &mesh, &mut uploads, now) {
+            if !self.stage_city_mesh(device, queue, key, &mesh, uploads, now) {
                 self.city_meshes.insert(key, mesh);
                 self.city_upload_due = true;
             }
@@ -641,11 +725,11 @@ impl ModelLayer {
         for model in models {
             let key = model.key;
             if let Some(city)=&model.city_page {
-                if !self.stage_city_mesh(device, queue, key, &city.geometry.mesh, &mut uploads, now) {
+                if !self.stage_city_mesh(device, queue, key, &city.geometry.mesh, uploads, now) {
                     self.city_upload_due = true;
                     continue;
                 }
-                if city.preload && !self.stage_city_instances(device, queue, key, &city.geometry.instances, &mut uploads) {
+                if city.preload && !self.stage_city_instances(device, queue, key, &city.geometry.instances, uploads) {
                     self.city_upload_due = true;
                 }
             }
@@ -778,8 +862,8 @@ impl ModelLayer {
         }
         let resident = self.residents.get_mut(&key).unwrap();
         resident.last_drawn = now;
-        uploads.write(queue, &resident.vertices, vertices, &mut resident.mesh_uploaded[0]);
-        uploads.write(queue, &resident.indices, indices, &mut resident.mesh_uploaded[1]);
+        uploads.write(queue, &resident.vertices, 0, vertices, &mut resident.mesh_uploaded[0]);
+        uploads.write(queue, &resident.indices, 0, indices, &mut resident.mesh_uploaded[1]);
         resident.mesh_ready()
     }
 
@@ -796,7 +880,7 @@ impl ModelLayer {
         }
         for (module, buffer) in resident.city_instances.iter().flatten().enumerate() {
             if let Some(buffer) = buffer {
-                uploads.write(queue, buffer, bytemuck::cast_slice(&instances[module]), &mut resident.instances_uploaded[module]);
+                uploads.write(queue, buffer, 0, bytemuck::cast_slice(&instances[module]), &mut resident.instances_uploaded[module]);
             }
         }
         resident.detail_ready()
@@ -1453,11 +1537,12 @@ impl Renderer {
 
     pub(crate) fn maintain_city_gpu(&mut self, now: Instant) -> bool {
         self.models.maintain_city_gpu(&self.device, &self.queue, now);
-        self.models.city_upload_due
+        self.models.city_upload_due || self.surface.road_store.uploading
     }
 
     pub(crate) fn city_gpu_status(&self) -> serde_json::Value {
         let (resident, submitted) = self.models.city_usage();
+        let roads=&self.surface.road_store;
         serde_json::json!({
             "fixed_bytes": self.models.city_fixed_bytes, "resident_bytes":resident,
             "submitted_and_retiring_bytes":submitted,
@@ -1465,7 +1550,11 @@ impl Renderer {
                 .filter(|(key,model)| key.city_page_id().is_some() && model.mesh_ready()).count(),
             "detail_buffers_ready":self.models.residents.iter()
                 .filter(|(key,model)| key.city_page_id().is_some() && model.detail_ready()).count(),
-            "upload_pending":self.models.city_upload_due,
+            "upload_pending":self.models.city_upload_due || roads.uploading,
+            "road_slot_capacity":roads.capacity,
+            "road_reserved_bytes":roads.capacity*crate::city_roads::PAGE_BYTES,
+            "road_active":roads.active().map(|slot|serde_json::json!({"revision":slot.key.0,"index":slot.key.1,
+                "payload_bytes":slot.bytes})).collect::<Vec<_>>(),
             "decoded_kit_cpu_bytes":self.models.city_meshes.values().map(|mesh| {
                 mesh.vertices.capacity()*std::mem::size_of::<ModelVertex>()
                     + mesh.indices.capacity()*std::mem::size_of::<u32>()
@@ -1659,7 +1748,8 @@ impl Renderer {
     }
 
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
-                  meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel],
+                  meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,
+                  (models,roads):(&[VisibleModel],&[crate::city_models::ReadyRoad<'_>]),
                   transport:Option<TransportOverlay<'_>>,
                   (camera,landscape_enabled,now):(&Camera,bool,Instant),
                   battle:Option<BattleFrame<'_>>,timing_frame:Option<usize>)->io::Result<Option<io::Result<()>>> {
@@ -1690,7 +1780,11 @@ impl Renderer {
         let [w,h]=[texture.width(),texture.height()];
         let format=texture.format();
         if battle.is_none() {
-            self.models.prepare(&self.device,&self.queue,[w,h],models,camera.mpp as f32);
+            let (resident_bytes, submitted_bytes)=self.models.city_usage();
+            let mut uploads=CityUploads { started:Instant::now(),written:0,remaining:CityUploads::FRAME_LIMIT,
+                used:self.models.city_fixed_bytes+resident_bytes+submitted_bytes+self.models.city_uniforms.size() };
+            self.surface.road_store.update(&self.queue,&self.surface.city_water,roads,&mut uploads);
+            self.models.prepare(&self.device,&self.queue,[w,h],models,camera.mpp as f32,&mut uploads);
             let mut frame_view=*view;
             frame_view.projection_axes[0][3]=seconds;
             if let Some(water)=&self.water_pages {
@@ -1775,7 +1869,8 @@ impl Renderer {
             }
             let draw_city=show_map&&pages.iter().any(|(_,tile,_,_)|tile.city_ink_only);
             let road_area=if show_map && camera.mpp<300. && view.road_layer[0]<2 {
-                self.surface.city_roads.vector_bounds().filter_map(|bounds| road_scissor(camera,size,bounds))
+                self.surface.city_roads.vector_bounds().chain(self.surface.road_store.active().map(|slot|slot.bounds))
+                    .filter_map(|bounds| road_scissor(camera,size,bounds))
                     .reduce(|[ax,ay,aw,ah],[bx,by,bw,bh]| {
                         let x=ax.min(bx);
                         let y=ay.min(by);

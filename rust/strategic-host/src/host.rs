@@ -32,6 +32,7 @@ pub(crate) enum HostEvent {
     Rivers(io::Result<hydrology::Rivers>),
     Model(u64,landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
     CityTile(u64,usize,io::Result<crate::city_models::CityPage>),
+    CityRoad(u64,usize,io::Result<crate::city_roads::RoadPage>),
     CityCatalogue(io::Result<crate::city_models::Catalogue>),
     BattleTerrain(MilitaryCell, io::Result<PreparedBattleTerrain>),
 }
@@ -999,6 +1000,7 @@ impl Host {
         view.set_terrain_exact(renderer.terrain_exact());
         let landscape_enabled=!loading&&(!self.config.managed||self.state.session.is_some());
         renderer.prepare_rivers(&self.camera,self.size,landscape_enabled&&!renderer.terrain_exact());
+        let city_roads=self.city_models.as_ref().map_or_else(Vec::new,crate::city_models::Catalogue::ready_roads);
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
         }
@@ -1007,7 +1009,7 @@ impl Host {
             .or_else(||self.trial.terrain_capture.as_ref().map(|(_,path)|path)).map(PathBuf::as_path);
         let mut redraw=false;
         let timing_frame=self.trial.timing_frame(capture.is_some());
-        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,transport,
+        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,(&models,&city_roads),transport,
             (&self.camera,landscape_enabled&&!self.trial.hide_landscape_models,now),None,timing_frame)? {
             #[cfg(windows)]
             if !loading && self.config.native.is_some() {
@@ -1067,7 +1069,7 @@ impl Host {
         let has_capture=capture.is_some();
         let timing_frame=self.trial.timing_frame(has_capture);
         if let Some(result) = renderer.render(&map_view, self.base.as_ref().unwrap(), &[], &meshes, None,
-            self.started.elapsed().as_secs_f32(), false, capture, &[], None,
+            self.started.elapsed().as_secs_f32(), false, capture, (&[],&[]), None,
             (&self.camera, false, now), Some(battle_frame),timing_frame)?
         {
             let presented = Instant::now();
