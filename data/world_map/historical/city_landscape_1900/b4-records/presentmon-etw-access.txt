@@ -1,0 +1,7 @@
+warning: PresentMon requires elevated privilege in order to query processes that are
+         short-running or started on another account.  Without it, those processes will
+         be listed as '<unknown>' and they can't be targeted by --process_name nor trigger
+         --terminate_on_proc_exit.
+error: failed to start trace session: access denied.
+       PresentMon requires either administrative privileges or to be run by a user in the
+       "Performance Log Users" user group.  View the readme for more details.

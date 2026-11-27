@@ -23,6 +23,7 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 | decisions.csv | 别名归并、跨档依据、历史辖区差异和排除理由 |
 | site-plans.json | 可复用资产、每层覆盖、历史范围、运行时分片和各等级的建造方法 |
 | b4-timing.tsv | 七条实际路线各三次的引擎、GPU 和阻塞等待摘要 |
+| b4-records/ | 已有 B4 原始采样、加载探针、F11 日志和 ETW 权限拒绝记录 |
 
 开局为 1900-01-01。政治底图元数据为 1900-03-12，两日期均保留。采用 1895–1905 的可比参照，保留原年与开局年的差。窄口径近年普查优先，异口径读数列在比较字段。单次编纂估计保留为 P。暂无可比的跨年边界，未插值。只有明列的区间上限或调度依据可提前排期。X 包括低于门槛、同城重复、无近年城市级依据及同名统计范围冲突。D 与 P 共同计入施工分母。
 
@@ -93,7 +94,7 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 ## B4 测量交接
 
-以下三项交给 [第六批 #297](https://github.com/ryoumiyahayato/wwo/issues/297)。原始文件仅在本机 `D:/programs/WWO/WWO-landscape-review/batch5-b4`。固定路线见 `routes.json`、`run-1.json` 至 `run-3.json` 及 21 个路线采样归档。现有引擎和 GPU 汇总见 `b4-timing.tsv`。
+以下三项交给第六批。固定路线见 `routes.json`、`run-1.json` 至 `run-3.json` 及 21 个路线采样文件。本机原件位于 `D:/programs/WWO/WWO-landscape-review/batch5-b4`。[已归档的 B4 原始记录](b4-records) [引擎和 GPU 汇总](b4-timing.tsv) [第六批 #297](https://github.com/ryoumiyahayato/wwo/issues/297)
 
 | 专项 | 状态与原始记录 | 第六批执行条件 |
 |---|---|---|
