@@ -1,0 +1,205 @@
+{
+  "type": "FeatureCollection",
+  "wwo": {
+    "city_id": "reba:chandler:1302",
+    "name": "Singapore",
+    "origin": [
+      103.85,
+      1.29
+    ],
+    "key": "singapore-corridor",
+    "revision": 1,
+    "status": "candidate_buildings",
+    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence.",
+    "registration": {
+      "method": "local affine to stable landmarks; modern map used solely for locating controls",
+      "working_scan_px": [
+        3385,
+        3008
+      ],
+      "control_reference": "Singapore Land Authority OneMap Original, local viewing only",
+      "control_reference_url": "https://www.onemap.gov.sg/maps/json/raster/tilejson/2.2.0/Original.json",
+      "controls": [
+        {
+          "feature": "Neil/Tanjong Pagar",
+          "scan_xy": [
+            1597,
+            2313
+          ],
+          "position_global": [
+            566.832,
+            1778.519
+          ]
+        },
+        {
+          "feature": "Elgin",
+          "scan_xy": [
+            1761,
+            1986
+          ],
+          "position_global": [
+            816.626,
+            1360.381
+          ]
+        },
+        {
+          "feature": "Coleman",
+          "scan_xy": [
+            1687,
+            1990
+          ],
+          "position_global": [
+            755.575,
+            1329.615
+          ]
+        },
+        {
+          "feature": "Cavenagh",
+          "scan_xy": [
+            1869,
+            2131
+          ],
+          "position_global": [
+            958.3,
+            1476.919
+          ]
+        },
+        {
+          "feature": "North Bridge/Bras Basah",
+          "scan_xy": [
+            1861,
+            1837
+          ],
+          "position_global": [
+            992.0,
+            1081.0
+          ]
+        },
+        {
+          "feature": "Beach/Bras Basah",
+          "scan_xy": [
+            1923,
+            1886
+          ],
+          "position_global": [
+            1066.0,
+            1132.0
+          ]
+        },
+        {
+          "feature": "North Bridge/Rochor",
+          "scan_xy": [
+            1985,
+            1676
+          ],
+          "position_global": [
+            1119.0,
+            822.0
+          ]
+        },
+        {
+          "feature": "Lavender/Kallang",
+          "scan_xy": [
+            2247,
+            1348
+          ],
+          "position_global": [
+            1504.0,
+            445.0
+          ]
+        },
+        {
+          "feature": "Jalan Sultan/Victoria",
+          "scan_xy": [
+            2111,
+            1483
+          ],
+          "position_global": [
+            1296.0,
+            633.0
+          ]
+        }
+      ],
+      "reference_pixels": "OneMap z15 relative to top-left XYZ 25835/16264 at 512 px/tile; approximate",
+      "leave_one_out_rmse_m": 118,
+      "leave_one_out_max_m": 174
+    },
+    "sources": [
+      {
+        "id": "aranjo1890",
+        "url": "https://commons.wikimedia.org/wiki/File:Guide_map_of_Singapore_Town_from_The_Stranger%27s_Guide_to_Singapore_(1890).jpg",
+        "record": "D’Aranjo, B. E., The Stranger’s Guide to Singapore, plate / British Library 10055.c.4, scan page 43",
+        "licence": "Public domain historical map and British Library reproduction",
+        "date": "1890",
+        "precision": "Guide map; separately registered. Nine inlier controls, leave-one-out 118 m RMS, max 174 m. Centre lines and outlines are schematic."
+      },
+      {
+        "id": "ura-districts",
+        "url": "https://www.ura.gov.sg/conservation/conservation-areas/historic-districts/",
+        "licence": "Referential narrative only, no figures or current conservation boundary reproduced",
+        "date": "Historical district accounts and present conservation descriptions",
+        "precision": "Qualitative districts and trading uses"
+      },
+      {
+        "id": "ura-shophouse",
+        "url": "https://www.ura.gov.sg/conservation/conservation-resources/understanding-the-shophouse/",
+        "licence": "Referential narrative only, no assets copied",
+        "date": "Historical typology early phase 1840–1900",
+        "precision": "Two to three storeys, party-wall row, covered five-foot way; individual layouts and heights are inferred"
+      },
+      {
+        "id": "nhb-river",
+        "url": "https://www.roots.gov.sg/places/places-landing/Places/national-monuments/singapore-river-bridges",
+        "licence": "Referential narrative only, no assets copied",
+        "date": "Cavenagh (1869); predecessor at Elgin site (1862)",
+        "precision": "Bridges located for registration, not part of candidate road network"
+      },
+      {
+        "id": "nlb-docks",
+        "url": "https://curiocity.nlb.gov.sg/digital-stories/singapore-maritime-odyssey/singapore-maritime-odyssey-before-independence/",
+        "licence": "Referential narrative only, no images copied",
+        "date": "1890s Tanjong Pagar illustration and harbour history",
+        "precision": "Differentiated river warehouses and docks; building location/dimensions are inferred"
+      }
+    ]
+  },
+  "features": [
+    {"type":"Feature","id":"singapore-1890:readable-city-corridor","properties":{"kind":"coverage","source":"aranjo1890","confidence":"selectively traced; unknown holes remain unknown","purpose":"building placement limit; coverage of complete historical road survey is not asserted"},"geometry":{"type":"Polygon","coordinates":[[[103.831942,1.268839],[103.836239,1.276607],[103.838221,1.282007],[103.837472,1.286852],[103.843709,1.291432],[103.847398,1.298168],[103.851032,1.30409],[103.856199,1.310785],[103.85967,1.316279],[103.864857,1.313324],[103.868493,1.311336],[103.869625,1.308159],[103.865829,1.30382],[103.861336,1.301117],[103.858776,1.299114],[103.856687,1.296111],[103.854443,1.292816],[103.852987,1.287229],[103.852884,1.283727],[103.848324,1.276053],[103.845652,1.270413],[103.845665,1.26465],[103.841873,1.264334],[103.836984,1.265727],[103.832021,1.266036],[103.831942,1.268839]]]}},
+    {"type":"Feature","id":"singapore-1890:south-bridge","properties":{"kind":"road","source":"aranjo1890","width_m":9,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.849167,1.289296],[103.848783,1.288003],[103.848198,1.286519],[103.847662,1.285364],[103.847151,1.284186],[103.846471,1.282901],[103.845919,1.281904],[103.845388,1.281233],[103.844502,1.28048]]}},
+    {"type":"Feature","id":"singapore-1890:new-bridge","properties":{"kind":"road","source":"aranjo1890","width_m":9,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.84708,1.288707],[103.845911,1.286167],[103.844273,1.28385],[103.842781,1.281716],[103.840462,1.279295],[103.837555,1.276541]]}},
+    {"type":"Feature","id":"singapore-1890:neil","properties":{"kind":"road","source":"aranjo1890","width_m":7,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.844502,1.28048],[103.842661,1.278748],[103.841076,1.277619],[103.837555,1.276541],[103.835353,1.275451]]}},
+    {"type":"Feature","id":"singapore-1890:tanjong-pagar","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.844502,1.28048],[103.844101,1.277736],[103.843314,1.274478],[103.842726,1.271759]]}},
+    {"type":"Feature","id":"singapore-1890:anseon-road-as-labelled","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.842726,1.271759],[103.844836,1.274283],[103.847034,1.276901],[103.848591,1.279205],[103.850052,1.28128],[103.85172,1.284031],[103.852323,1.285786]]}},
+    {"type":"Feature","id":"singapore-1890:cantonment","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.835239,1.269803],[103.836908,1.270569],[103.839312,1.271073],[103.841261,1.271212],[103.842726,1.271759]]}},
+    {"type":"Feature","id":"singapore-1890:havelock","properties":{"kind":"road","source":"aranjo1890","width_m":7,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.838543,1.286749],[103.840919,1.287624],[103.843076,1.287661],[103.844943,1.286581],[103.845911,1.286167],[103.847662,1.285364]]}},
+    {"type":"Feature","id":"singapore-1890:upper-cross-south","properties":{"kind":"road","source":"aranjo1890","width_m":6,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.847662,1.285364],[103.848679,1.284877],[103.849983,1.284246],[103.851286,1.283991]]}},
+    {"type":"Feature","id":"singapore-1890:pagoda","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.844867,1.284665],[103.845861,1.284228],[103.847071,1.283798]]}},
+    {"type":"Feature","id":"singapore-1890:temple","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.84404,1.2836],[103.845141,1.283152],[103.846529,1.282561]]}},
+    {"type":"Feature","id":"singapore-1890:smith","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.843183,1.282475],[103.844282,1.282001],[103.845791,1.281617]]}},
+    {"type":"Feature","id":"singapore-1890:sago","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.842115,1.281024],[103.843381,1.280629],[103.844943,1.280628]]}},
+    {"type":"Feature","id":"singapore-1890:pearl-hill-east-approach","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.839693,1.279874],[103.840462,1.279295],[103.841076,1.277619]]}},
+    {"type":"Feature","id":"singapore-1890:dock-approach","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.842726,1.271759],[103.841028,1.269755],[103.839724,1.268401],[103.839221,1.268136]]}},
+    {"type":"Feature","id":"singapore-1890:north-bridge","properties":{"kind":"road","source":"aranjo1890","width_m":9,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.849996,1.290791],[103.851077,1.292835],[103.852563,1.294484],[103.853771,1.296011],[103.85498,1.297565],[103.856234,1.299367],[103.858007,1.301678],[103.860063,1.304193],[103.861984,1.30591]]}},
+    {"type":"Feature","id":"singapore-1890:victoria","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.84894,1.290709],[103.850212,1.293184],[103.851571,1.294948],[103.853425,1.297272],[103.855298,1.299866],[103.857245,1.302365],[103.858889,1.304361],[103.860018,1.305125],[103.861023,1.307237]]}},
+    {"type":"Feature","id":"singapore-1890:beach","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.852365,1.289976],[103.853628,1.292315],[103.85416,1.293416],[103.855979,1.2956],[103.858086,1.298472],[103.859224,1.299773],[103.861423,1.301614],[103.863776,1.303343],[103.865186,1.305062]]}},
+    {"type":"Feature","id":"singapore-1890:bras-basah","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":3,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.849844,1.295702],[103.851571,1.294948],[103.852563,1.294484],[103.85416,1.293416]]}},
+    {"type":"Feature","id":"singapore-1890:rochor","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.850088,1.304481],[103.852387,1.303414],[103.853757,1.302177],[103.855298,1.299866],[103.856234,1.299367],[103.858086,1.298472]]}},
+    {"type":"Feature","id":"singapore-1890:arab","properties":{"kind":"road","source":"aranjo1890","width_m":6,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.855614,1.305332],[103.857346,1.303855],[103.858771,1.302627],[103.860249,1.301379]]}},
+    {"type":"Feature","id":"singapore-1890:jalan-sultan","properties":{"kind":"road","source":"aranjo1890","width_m":7,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.856553,1.30805],[103.858368,1.306211],[103.860018,1.305125],[103.86157,1.303781],[103.862682,1.302692]]}},
+    {"type":"Feature","id":"singapore-1890:serangoon","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.850414,1.303727],[103.852812,1.306509],[103.855693,1.310063],[103.857856,1.31297],[103.85968,1.315235],[103.86189,1.318042]]}},
+    {"type":"Feature","id":"singapore-1890:lavender","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.85968,1.315235],[103.860787,1.31369],[103.86182,1.31224],[103.863062,1.310688],[103.863968,1.309353]]}},
+    {"type":"Feature","id":"singapore-1890:kallang-road","properties":{"kind":"road","source":"aranjo1890","width_m":8,"display_rank":2,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.860865,1.306488],[103.862425,1.308042],[103.863968,1.309353],[103.866268,1.310296],[103.868195,1.310915]]}},
+    {"type":"Feature","id":"singapore-1890:syed-alwi","properties":{"kind":"road","source":"aranjo1890","width_m":5,"display_rank":1,"source_year":1890,"width_basis":"Estimated by visual function; map scale cannot support measurements","surface_basis":"Unresolved; generic surface for review only"},"geometry":{"type":"LineString","coordinates":[[103.855693,1.310063],[103.856614,1.308944],[103.857953,1.307649],[103.859115,1.306112],[103.860018,1.305125]]}},
+    {"type":"Feature","id":"singapore-1890:chinatown-frontages","properties":{"kind":"zone","source":"aranjo1890","role":"shop","gap_m":0.0,"origin":"inferred_parcels","use_reference":"ura-districts","form_reference":"ura-shophouse","storeys":[2,3]},"geometry":{"type":"Polygon","coordinates":[[[103.84076,1.279716],[103.843485,1.283353],[103.84577,1.286065],[103.847785,1.285597],[103.84906,1.284935],[103.849104,1.283199],[103.847083,1.281601],[103.845502,1.280526],[103.844108,1.279427],[103.842796,1.277965],[103.841489,1.277361],[103.84076,1.279716]]]}},
+    {"type":"Feature","id":"singapore-1890:tanjong-pagar-neil","properties":{"kind":"zone","source":"aranjo1890","role":"shop","gap_m":0.0,"origin":"inferred_parcels","use_reference":"ura-districts","form_reference":"ura-shophouse","storeys":[2,2]},"geometry":{"type":"Polygon","coordinates":[[[103.843782,1.280181],[103.845281,1.280439],[103.845216,1.279088],[103.844737,1.276789],[103.844207,1.274133],[103.843068,1.272831],[103.842198,1.273904],[103.842481,1.276093],[103.843087,1.278278],[103.842107,1.277724],[103.840616,1.2772],[103.839913,1.277548],[103.843782,1.280181]]]}},
+    {"type":"Feature","id":"singapore-1890:boat-quay-godowns","properties":{"kind":"zone","source":"aranjo1890","role":"warehouse","gap_m":2.0,"origin":"inferred_parcels","use_reference":"nlb-docks","frontage_m":[9,14],"depth_m":[16,25],"storeys":[2,3]},"geometry":{"type":"Polygon","coordinates":[[[103.849441,1.28856],[103.850555,1.287123],[103.851511,1.286519],[103.852275,1.286664],[103.852343,1.285682],[103.851284,1.283964],[103.850285,1.284319],[103.849066,1.285017],[103.848504,1.285869],[103.849441,1.28856]]]}},
+    {"type":"Feature","id":"singapore-1890:kampong-glam-shophouses","properties":{"kind":"zone","source":"aranjo1890","role":"shop","gap_m":0.0,"origin":"inferred_parcels","use_reference":"ura-districts","form_reference":"ura-shophouse","storeys":[2,2]},"geometry":{"type":"Polygon","coordinates":[[[103.854688,1.304385],[103.856598,1.305939],[103.858436,1.30523],[103.85963,1.305762],[103.861821,1.306287],[103.86319,1.305425],[103.863679,1.303891],[103.861442,1.301885],[103.859985,1.300266],[103.858114,1.299281],[103.856164,1.300321],[103.854492,1.301485],[103.854688,1.304385]]]}},
+    {"type":"Feature","id":"singapore-1890:little-india-frontages","properties":{"kind":"zone","source":"aranjo1890","role":"shop","gap_m":0.0,"origin":"inferred_parcels","use_reference":"ura-districts","form_reference":"ura-shophouse","storeys":[2,2]},"geometry":{"type":"Polygon","coordinates":[[[103.850767,1.304156],[103.852516,1.306919],[103.854338,1.309157],[103.8556,1.31029],[103.857319,1.309026],[103.858115,1.307647],[103.856847,1.306433],[103.855721,1.304919],[103.853643,1.302481],[103.852308,1.302651],[103.850767,1.304156]]]}},
+    {"type":"Feature","id":"singapore-1890:tanjong-pagar-dock-buildings","properties":{"kind":"zone","source":"aranjo1890","role":"warehouse","gap_m":4.0,"origin":"inferred_parcels","use_reference":"nlb-docks","frontage_m":[10,17],"depth_m":[14,24],"storeys":[1,2],"setback_m":[0,2]},"geometry":{"type":"Polygon","coordinates":[[[103.839167,1.268932],[103.840433,1.270119],[103.841757,1.271369],[103.842477,1.271668],[103.842572,1.270288],[103.842112,1.269064],[103.84106,1.267454],[103.840161,1.267691],[103.839066,1.267844],[103.839167,1.268932]]]}},
+    {"type":"Feature","id":"singapore-1890:pearl-hill-open-ground","properties":{"kind":"park","source":"aranjo1890","interpretation":"Pearl's Hill and printed People's Park; contemporary limits approximate"},"geometry":{"type":"Polygon","coordinates":[[[103.839047,1.286236],[103.841648,1.286851],[103.843136,1.286946],[103.845153,1.286104],[103.843485,1.284158],[103.842159,1.282479],[103.8402,1.280193],[103.839614,1.28029],[103.837616,1.280626],[103.837256,1.28167],[103.83729,1.283365],[103.837318,1.286158],[103.839047,1.286236]]]}},
+    {"type":"Feature","id":"singapore-1890:fort-canning-slope","properties":{"kind":"steep","source":"aranjo1890","interpretation":"Open Fort Canning hill envelope read from 1890 hachures"},"geometry":{"type":"Polygon","coordinates":[[[103.845482,1.296532],[103.847078,1.297421],[103.848432,1.297522],[103.849518,1.296858],[103.849905,1.295416],[103.849853,1.293451],[103.849149,1.291814],[103.848106,1.291519],[103.847347,1.291858],[103.846005,1.29192],[103.844691,1.292415],[103.84456,1.293655],[103.844672,1.295308],[103.845482,1.296532]]]}},
+    {"type":"Feature","id":"singapore-1890:padang","properties":{"kind":"park","source":"aranjo1890","interpretation":"Ground by the Esplanade; locate and confirm independently before terrain override"},"geometry":{"type":"Polygon","coordinates":[[[103.852231,1.293173],[103.85363,1.292745],[103.853404,1.291798],[103.852381,1.29022],[103.851264,1.290825],[103.851434,1.291736],[103.852231,1.293173]]]}},
+    {"type":"Feature","id":"singapore-1890:singapore-river","properties":{"kind":"water","source":"aranjo1890","purpose":"Historical visual planning exclusion only. Rough curve; present land/water alignment is unresolved"},"geometry":{"type":"Polygon","coordinates":[[[103.837965,1.287759],[103.840588,1.289102],[103.841813,1.289692],[103.843089,1.289835],[103.843417,1.289108],[103.844331,1.288686],[103.845177,1.289245],[103.84566,1.290016],[103.846695,1.29098],[103.847769,1.290931],[103.848575,1.290894],[103.84917,1.290932],[103.850114,1.290541],[103.850768,1.289462],[103.851237,1.288435],[103.851739,1.287493],[103.852702,1.2874],[103.853381,1.287075],[103.853245,1.285875],[103.851942,1.285728],[103.850935,1.285975],[103.850232,1.286725],[103.849701,1.288037],[103.849381,1.289275],[103.848485,1.289969],[103.847636,1.29016],[103.846596,1.289919],[103.845848,1.289214],[103.845147,1.288409],[103.843915,1.28771],[103.843068,1.28833],[103.842562,1.288815],[103.841811,1.288861],[103.840368,1.288236],[103.838022,1.287017],[103.837965,1.287759]]]}},
+    {"type":"Feature","id":"singapore-1890:reclamation-outside-shore","properties":{"kind":"water","source":"aranjo1890","purpose":"Historical near-shore exclusions, not replacement coastline surveying"},"geometry":{"type":"Polygon","coordinates":[[[103.86376,1.303099],[103.86524,1.30507],[103.866285,1.30499],[103.868221,1.306521],[103.868652,1.30573],[103.866345,1.302693],[103.861226,1.299492],[103.855967,1.293051],[103.854204,1.288489],[103.853176,1.285649],[103.852585,1.283681],[103.848051,1.276012],[103.846691,1.271834],[103.845914,1.269515],[103.846524,1.265399],[103.845339,1.2646],[103.844335,1.267288],[103.843619,1.269832],[103.844152,1.271738],[103.845422,1.272979],[103.846651,1.274026],[103.847465,1.277289],[103.849823,1.281084],[103.851551,1.283924],[103.852849,1.286779],[103.852476,1.287633],[103.853862,1.292191],[103.854291,1.293356],[103.856137,1.295946],[103.859302,1.299732],[103.86376,1.303099]]]}}
+  ]
+}

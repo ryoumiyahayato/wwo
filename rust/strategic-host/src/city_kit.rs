@@ -113,6 +113,7 @@ pub(crate) fn build(index: usize, role: usize, detail: bool) -> ModelMesh {
         }
         _ => wing([-0.5, -0.5, 0.5, 0.5], 1., kit.roof, role == 3),
     }
+    debug_assert!(mesh.indices.len() / 3 <= if detail { 2_000 } else { 128 });
     mesh
 }
 

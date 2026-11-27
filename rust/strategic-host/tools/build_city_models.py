@@ -245,6 +245,9 @@ def planned_site(path, city_id):
         kind = props["kind"]
         if key in ids or props["source"] not in source_notes:
             raise ValueError(f"Duplicate or unsourced feature {key}")
+        for field in ("use_reference", "form_reference"):
+            if field in props and props[field] not in source_notes:
+                raise ValueError(f"Unknown {field} for {key}")
         ids.add(key)
         if kind not in ("coverage", "road", "building", "water", "park", "yard", "rail", "steep", "zone"):
             raise ValueError(f"Unknown site geometry {kind}")
@@ -295,6 +298,20 @@ def planned_site(path, city_id):
         return x, y, lon, lat, angle, width, depth, height, ROLES.index(role) + 1
 
     rows = []
+    provenance = []
+    def record(row, key, props, origin):
+        rows.append(row)
+        lon, lat = row[2:4]
+        provenance.append({
+            "id": f"{city_id}/{key}/{round(lon*1e6)}/{round(lat*1e6)}",
+            "anchor_e6": [round(lon*1e6), round(lat*1e6)],
+            "role": ROLES[row[-1]-1],
+            "origin": origin,
+            "feature": key,
+            "source": props["source"],
+            **{field: props[field] for field in ("use_reference", "form_reference") if field in props},
+        })
+
     for key, geom, props in geometry["building"]:
         role = props.get("role", "street_row")
         for part in shapely.get_parts(geom):
@@ -306,19 +323,28 @@ def planned_site(path, city_id):
                 height = float(props.get("height_m", kit["storeys"][0]*3.2))
                 row = placement(center.x, center.y, angle, width*scale, depth*scale, height, role, part, False)
                 if row:
-                    rows.append(row)
+                    record(row, key, props, "historical_footprint")
                     break
 
     # Inference is limited to expressly mapped use polygons and their streets.
     roads = [(line, props) for _, geom, props in geometry["road"] for line in shapely.get_parts(geom)]
     road_tree = STRtree([line for line, _ in roads])
-    for _, zone, props in geometry["zone"]:
+    for key, zone, props in geometry["zone"]:
         role = props["role"]
         gap = float(props["gap_m"])
         if not 0. <= gap <= 50.:
             raise ValueError("Invalid parcel spacing")
+        ranges = []
+        for key, minimum, maximum in (("frontage_m", 2., 160.), ("depth_m", 2., 160.),
+                                       ("setback_m", 0., 60.), ("storeys", 1., 30.)):
+            low, high = map(float, props.get(key, kit[key]))
+            if not minimum <= low <= high <= maximum:
+                raise ValueError(f"Invalid parcel range for {key}")
+            ranges.append((low, high))
+        max_frontage, max_depth, max_setback = (high for _, high in ranges[:3])
         shapely.prepare(zone)
-        for index in sorted(road_tree.query(zone.buffer(80.))):
+        reach = 40. + max_setback + math.hypot(max_frontage, max_depth) * 0.5 + 0.4
+        for index in sorted(road_tree.query(zone.buffer(reach))):
             line, road = roads[index]
             if line.length < 8.:
                 continue
@@ -327,11 +353,9 @@ def planned_site(path, city_id):
                 while distance < line.length:
                     point = line.interpolate(distance)
                     pattern = (round(point.x*10)*31 + round(point.y*10)*17 + side) % 97 / 96
-                    width, depth, setback = (low + pattern*(high-low) for low, high in
-                        (kit["frontage_m"], kit["depth_m"], kit["setback_m"]))
-                    stores = round(kit["storeys"][0] + pattern*(kit["storeys"][1]-kit["storeys"][0]))
+                    width, depth, setback, storeys = (low + pattern*(high-low) for low, high in ranges)
                     midpoint = distance + width*0.5
-                    distance += width + max(0.5, gap)
+                    distance += width + gap
                     if midpoint + width*0.5 > line.length:
                         break
                     at = line.interpolate(midpoint)
@@ -340,12 +364,22 @@ def planned_site(path, city_id):
                     offset = road["width_m"]*0.5 + setback + depth*0.5 + 0.4
                     x, y = at.x-side*math.sin(heading)*offset, at.y+side*math.cos(heading)*offset
                     facing = heading if side > 0 else heading+math.pi
-                    row = placement(x, y, facing, width, depth, stores*3.2, role, zone, True)
+                    row = placement(x, y, facing, width, depth, round(storeys)*3.2, role, zone, True)
                     if row:
-                        rows.append(row)
+                        record(row, key, props, "inferred_parcel")
     if not rows:
         raise ValueError("No source-constrained placements in the requested site")
-    return meta, kit["id"], sorted(rows)
+    return meta, kit["id"], sorted(rows), sorted(provenance, key=lambda rec: rec["id"])
+
+
+def write_revisioned(path, data):
+    if path.exists():
+        if path.read_bytes() != data:
+            raise ValueError(f"Page {path.name} has changed; increment the site revision")
+        return
+    temporary = path.with_suffix(".tmp")
+    temporary.write_bytes(data)
+    temporary.replace(path)
 
 
 def pack(output, key, source, attribution, rows, modern_format=False):
@@ -367,9 +401,8 @@ def pack(output, key, source, attribution, rows, modern_format=False):
         magic = b"WWOWCB02" if modern_format else b"WWOWCB01"
         data = magic + struct.pack("<I", len(records)) + compressor.compress(payload)
         path = output/name
-        if modern_format and path.exists():
-            if path.read_bytes() != data:
-                raise ValueError(f"Page {name} has changed; increment the site revision")
+        if modern_format:
+            write_revisioned(path, data)
         else:
             temporary = path.with_suffix(".tmp")
             temporary.write_bytes(data)
@@ -394,15 +427,25 @@ if __name__ == "__main__":
     cities = previous["cities"]
     version = previous["version"]
     if args.site:
-        meta, kit, rows = planned_site(args.sources, args.site)
+        meta, kit, rows, provenance = planned_site(args.sources, args.site)
         key, revision = meta["key"], meta["revision"]
         if not re.fullmatch("[a-z0-9]+(?:-[a-z0-9]+)*", key) or type(revision) is not int or revision < 1:
             raise ValueError("Invalid site key or revision")
-        entries = pack(args.output, f"{key}-r{revision}", meta["method"],
+        current = next((city for city in cities if city.get("id") == args.site), None)
+        if current and current.get("revision", 0) > revision:
+            raise ValueError("A newer site revision is already in the catalogue")
+        directory_key = f"{key}-r{revision}"
+        entries = pack(args.output, directory_key, meta["method"],
                        " · ".join(f'{r["url"]} ({r["licence"]})' for r in meta["sources"]), rows, True)
-        cities = [city for city in cities if city.get("id") != args.site]
-        cities.append(dict(entries, id=args.site, name=meta["name"], kit=kit, revision=revision,
-                           source_records=meta["sources"]))
+        origins = f"{directory_key}.origins.json.zst"
+        provenance_json = json.dumps(provenance, ensure_ascii=False, separators=(",", ":"))
+        write_revisioned(args.output/origins, ZstdCompressor(level=5).compress(provenance_json.encode("utf-8")))
+        entry = dict(entries, id=args.site, name=meta["name"], kit=kit, revision=revision,
+                     placement_origins=origins, source_records=meta["sources"])
+        if current:
+            cities[cities.index(current)] = entry
+        else:
+            cities.append(entry)
         version = "wwo-city-models-v2"
     if not args.site and args.city in (None, "london"):
         cities = [city for city in cities if city["name"] != "London"]
@@ -416,8 +459,8 @@ if __name__ == "__main__":
              "Paris Time Machine, https://doi.org/10.34847/nkl.cbf5ecd0 (ODbL 1.0). "
              "Institut Paris Region, land use c. 1900 (Licence Ouverte).",
              paris(args.sources)))
-    pending = catalog.with_suffix(".tmp")
-    pending.write_text(
-        json.dumps(dict(version=version, cities=cities), ensure_ascii=False, indent=2),
-        encoding="utf-8")
-    pending.replace(catalog)
+    catalogue_text = json.dumps(dict(version=version, cities=cities), ensure_ascii=False, indent=2)
+    if not catalog.exists() or catalog.read_text(encoding="utf-8") != catalogue_text:
+        pending = catalog.with_suffix(".tmp")
+        pending.write_text(catalogue_text, encoding="utf-8")
+        pending.replace(catalog)

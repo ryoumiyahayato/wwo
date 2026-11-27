@@ -399,6 +399,7 @@ pub(crate) struct Catalogue {
     cache: HashMap<usize, ResidentPage>,
     pending: HashMap<usize, PageRequest>,
     wanted: HashSet<usize>,
+    draw_wanted: HashMap<usize, &'static str>,
     failed: HashSet<usize>,
     revision: u64,
     discarded: u64,
@@ -447,7 +448,8 @@ impl Catalogue {
         sources.push("Paris fringe · Institut Paris Region, c. 1900 land use and roads. Reconstructed building placements.".into());
         let index = TileIndex::new(&tiles);
         Ok(Self { root, tiles, index, sources, city_ids, cache: HashMap::new(), pending: HashMap::new(),
-            wanted: HashSet::new(), failed: HashSet::new(), revision: 0, discarded: 0, lookup: Duration::ZERO })
+            wanted: HashSet::new(), draw_wanted: HashMap::new(), failed: HashSet::new(), revision: 0,
+            discarded: 0, lookup: Duration::ZERO })
     }
 
     pub(crate) fn reload_capacity(&self) -> Option<(u64, usize, usize)> {
@@ -529,6 +531,7 @@ impl Catalogue {
 
     fn set_wanted(&mut self, wanted: HashSet<usize>, now: Instant) {
         self.wanted = wanted;
+        self.draw_wanted.clear();
         for (index, request) in &self.pending {
             if !self.wanted.contains(index) { request.cancelled.store(true, Ordering::Relaxed); }
         }
@@ -552,8 +555,12 @@ impl Catalogue {
                 else if self.failed.contains(&index) { "missing_or_invalid" }
                 else if self.pending.contains_key(&index) { "loading" }
                 else { "queued" };
+            let draw_target = self.draw_wanted.get(&index).copied().unwrap_or(
+                if state == "ready" { "prefetch" } else { "pending_projection" }
+            );
             serde_json::json!({"city": self.city_ids[tile.city], "tile": tile.file, "cpu": state,
                 "kit": tile.kit.map(city_kit::name),
+                "draw_target": draw_target,
                 "gpu": gpu(self.revision,index)})
         }).collect::<Vec<_>>();
         let metadata_bytes = std::mem::size_of::<Self>()
@@ -618,6 +625,7 @@ impl Catalogue {
                 let Some(mut block_model)=pose.project(None,camera,camera.pitch(),size) else {continue;};
                 let batches=if detail>0. {page.visible_batches(camera,size,landmarks)} else {Default::default()};
                 let has_details=batches.iter().any(Option::is_some);
+                self.draw_wanted.insert(index, if has_details { "detail" } else { "overview" });
                 block_model.lod_range=[if has_details {detail} else {0.},opacity];
                 block_model.city_page=Some(CityDraw{geometry:Arc::clone(&page.mesh),preload:camera.mpp<6.,
                     paris:page.paris,kit:page.kit,batches});
