@@ -75,7 +75,7 @@ def reading(row):
         k: row[k] for k in (
             "record_id", "unit_id", "name", "source_id", "locator", "date",
             "population_value", "population_lower", "population_upper", "definition",
-            "method", "quality", "parent_id", "source_country_label",
+            "method", "quality", "parent_id", "source_country_label", "date_basis",
         ) if row.get(k) is not None
     }
 
@@ -223,35 +223,47 @@ def index_sources():
 
 def evidence_and_identity(key, source_rows, registry_row, amendment, supplement, place_links, names_zh):
     rows = list(source_rows)
+    comparable = [
+        row for row in source_rows
+        if year(row.get("date")) in CANDIDATE_YEARS and row.get("population_value") is not None
+    ]
+    source_frequency = Counter(row["source"] for row in supplement)
     selected_supplement = None
     for supplement_row in supplement:
+        use = supplement_row.get("use", "")
+        source = supplement_row["source"]
+        record_id = f"supplement:{source}:{key}"
+        if source_frequency[source] > 1:
+            record_id = f"{record_id}:{supplement_row['date']}"
         row = {
             "name": supplement_row["name"],
-            "record_id": f"supplement:{supplement_row['source']}:{key}",
+            "record_id": record_id,
             "date": supplement_row["date"],
-            "source_id": supplement_row["source"],
+            "source_id": source,
             "population_value": int(supplement_row["population"]),
             "definition": supplement_row["definition"],
             "locator": supplement_row["locator"],
-            "method": "named_period_reference",
+            "method": "published_estimate" if use == "dated_publication" else "named_period_reference",
             **{field: supplement_row[field] for field in ("longitude", "latitude")},
         }
+        if use == "dated_publication":
+            if amendment.get("decision") not in {"P", "X"} or not row["date"]:
+                raise ValueError(f"Publication-dated reading requires an explicit decision: {key}")
+            row["date_basis"] = "publication_year; observation year unspecified"
         rows.append(row)
-        if supplement_row.get("use", "") != "comparison" and year(row["date"]) in CANDIDATE_YEARS:
+        if use == "dated_publication" or (use != "comparison" and year(row["date"]) in CANDIDATE_YEARS):
             if selected_supplement:
                 raise ValueError(f"Multiple selected supplement rows for {key}")
             selected_supplement = row
-    comparable = [
-        row for row in rows
-        if year(row.get("date")) in CANDIDATE_YEARS and row.get("population_value") is not None
-    ]
     chosen = selected_supplement
     if not chosen and comparable:
         chosen = min(comparable, key=lambda row: preference(row, registry_row.get("representative_record")))
     name = amendment.get("historic_name") or (chosen or {}).get("name") or registry_row.get("name") or key
-    point = as_point(amendment) or as_point(chosen or {}) or as_point(registry_row)
+    locator = next((row for row in rows[len(source_rows):] if as_point(row)), None)
+    point = as_point(amendment) or as_point(chosen or {}) or as_point(registry_row) or as_point(locator or {})
     point_source = "decisions.csv" if as_point(amendment) else (
         chosen["record_id"] if as_point(chosen or {}) else registry_row.get("coordinate_record")
+        or (locator["record_id"] if locator else None)
     )
     aliases = {row["name"] for row in rows} - {name}
     for row in rows:
@@ -311,7 +323,11 @@ def compile_roster():
     }
     indices = political_index(geography)
     date, units, _, _, _ = indices
-    coverage = {key: {"city_sources": set(), "noncity_sources": set()} for key in units}
+    published_places = {row["id"]: row for row in geography if row["catalogue"] == "map_place"}
+    coverage = {
+        key: {"city_sources": set(), "comparison_sources": set(), "noncity_sources": set(), "references": []}
+        for key in units
+    }
     for key, rows in population.items():
         direct = indices[4].get(key)
         if direct in units:
@@ -338,21 +354,27 @@ def compile_roster():
                 raise ValueError(f"Unresolved related identity for {key}: {alias}")
     for key in sorted(keys):
         amendment = amendments.get(key, {})
+        if place_id := amendment.get("existing_place_id"):
+            places[key].append(published_places[place_id])
         identity = evidence_and_identity(
             key, observations[key], cities.get(key, {}), amendment, supplement[key], places[key], names_zh
         )
         name, aliases, point, point_source, rows, adopted = identity
         plan = manual["sites"].get(key)
         polity = political_owner(point, places[key], rows, population, indices)
-        if plan and plan.get("jurisdiction"):
+        if unit_id := amendment.get("polity"):
+            if unit_id not in units:
+                raise ValueError(f"Unknown political unit {unit_id} for {key}")
+            polity = {"id": unit_id, "method": "reviewed_historical_jurisdiction"}
+        elif plan and plan.get("jurisdiction"):
             polity = plan["jurisdiction"]
         region = plan.get("region") if plan else None
         if not region:
             region = district_region(units[polity["id"]], point) if polity["id"] in units else fallback_region(rows, point)
         if polity["id"] in units:
-            coverage[polity["id"]]["city_sources"].update(
-                row["source_id"] for row in rows if year(row.get("date")) in CANDIDATE_YEARS
-            )
+            for row in rows:
+                sources = "city_sources" if year(row.get("date")) in CANDIDATE_YEARS or row.get("date_basis") else "comparison_sources"
+                coverage[polity["id"]][sources].add(row["source_id"])
         disposition, nominal, batch, reason = choose_scope(rows, adopted, amendment)
         if disposition != "X" and (point is None or region == "unresolved"):
             raise ValueError(f"Target {key} has unresolved point or region")
@@ -383,7 +405,7 @@ def compile_roster():
             )
             item.update({
                 "reference_date": REFERENCE_DATE,
-                "observation_year_delta": year(adopted["date"]) - 1900,
+                "observation_year_delta": None if adopted.get("date_basis") else year(adopted["date"]) - 1900,
                 "nominal_batch": nominal,
                 "batch": batch,
                 "grade": quality,
@@ -403,7 +425,18 @@ def compile_roster():
                     "nearest_independent_targets": [],
                 },
             })
+            lower = int(amendment["lower"]) if amendment.get("lower") else adopted.get("population_lower")
+            upper = int(amendment["upper"]) if amendment.get("upper") else adopted.get("population_upper")
+            if lower is not None or upper is not None:
+                item["adopted_interval"] = {
+                    "lower": lower, "upper": upper,
+                    "source": amendment.get("interval_source") or adopted["source_id"],
+                }
         candidates.append(item)
+        if polity["id"] in units and rows:
+            coverage[polity["id"]]["references"].append({
+                "id": key, "decision": disposition,
+            })
 
     targets = [row for row in candidates if row.get("batch")]
     for row in targets:
@@ -429,7 +462,9 @@ def compile_roster():
             "id": key, "name": unit["source_name"], "region": district_region(unit),
             "coverage": "city_list" if city_sources else "noncity_only" if noncity else "no_city_statistics_located",
             "city_sources": city_sources, "noncity_sources": noncity,
+            "comparison_city_sources": sorted(coverage[key]["comparison_sources"] - set(city_sources)),
             "city_sources_only_compiled": city_sources == ["reba_chandler_1900"],
+            "screened_city_records": coverage[key]["references"],
             "target_count": sum(row["polity"]["id"] == key for row in targets),
         })
     return {

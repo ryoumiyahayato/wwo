@@ -1,6 +1,6 @@
 # 1900 年城市景观名录
 
-[Issue #296](https://github.com/ryoumiyahayato/wwo/issues/296) 的第五批工作记录。状态为 BLOCKED_EXTERNAL。分母尚未冻结。运行基线为 Build 144、提交 `3dce67233c0acaf4d2b3e7c1466d9282e26288bc`。本批尚无运行代码或正式资源变更。[第四批主线 CI](https://github.com/ryoumiyahayato/wwo/actions/runs/45856908832)
+[Issue #296](https://github.com/ryoumiyahayato/wwo/issues/296) 的第五批工作记录。状态为 IN_PROGRESS，分母尚未冻结。运行基线为 Build 144、提交 `3dce67233c0acaf4d2b3e7c1466d9282e26288bc`。本批尚无运行代码或正式资源变更。[第四批主线 CI](https://github.com/ryoumiyahayato/wwo/actions/runs/45856908832) [施工草稿 #303](https://github.com/ryoumiyahayato/wwo/pull/303)
 
 ## 名录读取
 
@@ -24,7 +24,9 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 开局为 1900-01-01。政治底图元数据为 1900-03-12，两日期均保留。采用 1895–1905 的可比参照，保留原年与开局年的差。窄口径近年普查优先，异口径读数列在比较字段。单次编纂估计保留为 P。暂无可比的跨年边界，未插值。只有明列的区间上限或调度依据可提前排期。X 包括低于门槛、同城重复、无近年城市级依据及同名统计范围冲突。只有含 D 或 P 的施工卡计入预审分母。
 
-初审结果为 1,724 条候选，D 214、P 83、X 1,427。暂列第七批 38、第八批 99、第九批 160。运行态城市交付仍按后续批次核对。已有 40 张带地方锚点的卡。其余 257 张具备种子点、分档、资料查找入口及区域规则，外缘和逐城覆盖仍待核实。
+原检查点有 1,724 条候选，预审 297 城。按原始政治单位目录补核后，加入布哈拉为 P，暂列第九批。Hamilton 1906 年出版的资料估计其城区有 100,000 人，实际观察年未注明。Rickmers 的独立街区与住户估计为 80,000–100,000。1909 年另有 78,650 人的估计。原数与口径均保留。现行数字由上面的离线命令生成。分档和逐城边界继续核对。[Hamilton 第 29 页](https://www.gutenberg.org/cache/epub/73258/pg73258.txt) [Rickmers 第十二章](https://upload.wikimedia.org/wikipedia/commons/c/c2/The_Duab_of_Turkestan%3B_%28IA_duabofturkestan00rick%29.pdf)
+
+台北、基隆、台南、嘉义、宜兰归入台湾政治单位。台北的 69,672 人为城内、艋舺和大稻埕三处现住人口之和。英国帝国普查补录 Newfoundland、Belize、Bathurst、Freetown、Kingston、Perth、Hobart、Bloemfontein 的城镇读数。Kingston 保留与 Port Royal 的联合估计作为上界。波斯尼亚、黑塞哥维那、尼泊尔、利比里亚、卢森堡及希瓦另有城市读数或越窗比较。覆盖记录列出找到的候选 ID 和处置。未知政治单位仍需核查。[英帝国普查表 3](https://www.tradeshouselibrary.org/uploads/4/7/7/2/47723681/census_of_the_british_empire._1901.pdf) [波黑普查汇编](https://prilozi.iis.unsa.ba/wp-content/uploads/2023/05/32-Prilozi-Naucnerasprave-RobertJ.Donia_.pdf)
 
 意大利 1901 年普查表 XI 以主城人口替换 11 个入选城市的旧选用值。七城改为 D。那不勒斯、热那亚、佛罗伦萨和墨西拿的市辖区人口跨过施工门槛，继续以 P 排在第七、第八、第八、第九批，连续建成范围仍待核。利沃诺主城 85,102 人，全市辖区 93,321 人，继续排除。保留原编纂值和原城市 ID。
 
@@ -67,6 +69,16 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 百分位为三次路线的中位数。最大值取三次最高值，长帧数取三次合计。巴黎稳态 GPU 时间已超过第六批的显示帧间隔目标。运动中有长帧与地表切换同时出现，观察接口没有逐帧 WCB 调度归因，不能据此把每个长帧归给读盘。不得按 GPU 的倒数报告实测帧率。
 
+## B4 测量交接
+
+以下三项交给 [第六批 #297](https://github.com/ryoumiyahayato/wwo/issues/297)。原始文件仅在本机 `D:/programs/WWO/WWO-landscape-review/batch5-b4`。固定路线见 `routes.json`、`run-1.json` 至 `run-3.json` 及 21 个路线采样归档。现有引擎和 GPU 汇总见 `b4-timing.tsv`。
+
+| 专项 | 状态与原始记录 | 第六批执行条件 |
+|---|---|---|
+| 实际显示间隔 | NOT_MEASURED。PresentMon 2.6.0 的 ETW 会话返回 access denied，见 `presentmon-etw-access.txt`。 | 在同设备用获授权的会话记录实际显示事件。沿用固定路线、分辨率、刷新率和 FIFO，分别保留 B4 引擎计时和显示事件。 |
+| 自然驱逐后折返 | NOT_MEASURED。`return-probes.json` 的 6 次样本使用 F11 强制重载。 | 从可触发常规驱逐的路线离城。观测目标城市页退出 CPU 目录缓存和 GPU 模型缓存。定位返城请求后分别计量概览和视域应有细节就绪。 |
+| 城市独立 CPU/GPU 工作集 | NOT_MEASURED。现有 `run-1.json` 至 `run-3.json` 有进程计数及 GPU 耗时。 | 在城市目录、页加载和渲染模型缓存按城归集驻留与临时字节。共享资源去重，区分读入、解压、待上传及待释放。 |
+
 ## 第六批需要的接口
 
 | 现状 | 最小修改 |
@@ -87,4 +99,4 @@ B4 两城 WCB 含目录 5,685,672 字节，城市地表叠加层 2,884,596 字�
 
 ## 恢复位置
 
-名录分支为 `codex/global-city-roster-1900`，基于 `3dce67233`。先补齐逐城历史外缘、资料内部孔洞及施工空间单元，复查未对上的政治单位以及独立历史城市。用有权启动 ETW 的同设备会话重采固定路线的实际显示节奏。补测自然驱逐后的城市细节就绪和独立城市资源工作集。前述检查完成后再冻结分母、发 PR、等必需 CI 与合入主线。正式 Build 144 继续作为本批只读对照。
+名录分支为 `codex/global-city-roster-1900`，基于 `3dce67233`，使用草稿 #303。核查其余政治单位、历史独立城市及逐城外缘、资料空洞和施工单元。名录核对完毕后冻结分母，经必需 CI 与审阅后合入。Build 144 继续作为正式运行对照。

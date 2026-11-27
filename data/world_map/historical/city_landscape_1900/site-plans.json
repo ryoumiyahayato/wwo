@@ -318,6 +318,30 @@
       "version": "Agenzia del Demanio excerpt of IGM sheet 254 IV S.O., 1908 edition",
       "rights": "Reference link only. Verify reproduction rights before redistribution.",
       "role": "Use the 1908 excerpt to cross-check the port and the earlier open slope at the future Masotto site. Require earlier evidence before adopting features as of 1900. The comparison also contains later editions."
+    },
+    "bukhara_unesco": {
+      "name": "UNESCO World Heritage Centre, Historic Centre of Bukhara and inscription maps",
+      "url": "https://whc.unesco.org/en/list/602/maps/",
+      "scope": "Historic monuments and surviving fabric. Modern property and buffer boundaries are registration aids only.",
+      "rights": "Citations and independently derived geometry only."
+    },
+    "bukhara_rickmers": {
+      "name": "W. Rickmer Rickmers, The Duab of Turkestan (1913), ch. XII, pp. 93-95",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c2/The_Duab_of_Turkestan%3B_%28IA_duabofturkestan00rick%29.pdf",
+      "scope": "Field narrative and photographs of gates, market, lanes, courtyard houses and tanks; precise dates of individual observations are uncertain.",
+      "rights": "Cite the period survey; no scan redistributed."
+    },
+    "chongqing_yale_qing": {
+      "name": "Zhang Yunxuan, Complete Map of Chongqing Prefecture, 1886-1890, Yale University Library; urban feature analysis in Mapping Spiritual Landscapes, section 2",
+      "url": "https://www.mdpi.com/2075-5309/15/21/3936",
+      "scope": "Pre-treaty-port peninsula, main alignments, walls, stairs, temple landmarks and riverfront. Hand-drawn mapping with local distortion.",
+      "rights": "Citations and independently derived geometry only."
+    },
+    "chongqing_1898_port": {
+      "name": "Chongqing Municipal Institute of Cultural Relics and Archaeology, Pin tie Chongqing",
+      "url": "https://www.cqkaogu.cn/web/article/1420159294026514432/web/content_1420159294026514432.html",
+      "scope": "Opening and Chaotianmen wharf chronology, including the arrival of a steamer in 1898. Qualitative context rather than continuous geometry.",
+      "rights": "Citations only."
     }
   },
   "profiles": {
@@ -1294,7 +1318,29 @@
           "precision": "approximate_locator"
         }
       ],
-      "risks": "Separate terraces by contour and wet bank. Keep ferry topology distinct."
+      "risks": "Separate terraces by contour and wet bank. Keep ferry topology distinct.",
+      "source_preference": [
+        "chongqing_yale_qing",
+        "chongqing_1898_port"
+      ],
+      "historic_range": {
+        "basis": "Qing mapped city wall and terraces on the Yuzhong peninsula, local chronology for the steamer wharf.",
+        "reconstruction": "Register the confluence, mapped walls and gates, then separate the ridge, stepped streets and occupied riverbank strips. Stop across the rivers and on steep banks unless a documented terrace is present.",
+        "excluded": "Modern reclamation, bridges and continuous city fabric on opposite banks."
+      },
+      "coverage": {
+        "roads": "Hand-drawn map supports named gates and street connections. Individual lane shapes, widths and surfaces remain unknown. Connect the opposite bank by verified ferry topology only.",
+        "water": "Use QWG/QHW and period bank outlines from the map to detect reclamation; preserve the actual Yangtze and Jialing bed as open water.",
+        "buildings": "Temple markers and named frontage localities anchor the reconstruction. Ordinary stepped housing is inferred.",
+        "land_use": "Distinguish dense ridge blocks, wharf landings and steep undeveloped banks."
+      },
+      "spaces": [
+        "walled ridge neighbourhoods",
+        "Chaotianmen gate and steamer landing",
+        "ordinary stepped street west of the confluence",
+        "Jialing bank transition",
+        "Yangtze bank and ferry approach"
+      ]
     },
     "reba:chandler:1250": {
       "profile": "relief",
@@ -2298,6 +2344,67 @@
         "pre-earthquake residential blocks",
         "western slope transition"
       ]
+    },
+    "landscape:bukhara": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "source_preference": [
+        "bukhara_rickmers",
+        "bukhara_unesco"
+      ],
+      "anchors": [
+        {
+          "name": "Ark and Registan",
+          "point": [
+            64.411,
+            39.778
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Kalyan and market domes",
+          "point": [
+            64.416,
+            39.776
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Lyabi-Hauz",
+          "point": [
+            64.42,
+            39.773
+          ],
+          "precision": "approximate_locator"
+        },
+        {
+          "name": "Samanid mausoleum",
+          "point": [
+            64.4,
+            39.777
+          ],
+          "precision": "approximate_locator"
+        }
+      ],
+      "historic_range": {
+        "basis": "Perimeter of the old walled town where surviving stretches, documented gates and period descriptions agree. Treat the western cemetery edge separately from dense market lanes.",
+        "reconstruction": "Georeference Ark, market domes and Lyabi-Hauz against the property map. Trace wall/gate segments only where their locations can be reconciled. Build connected courtyard blocks from the bazaar to documented gate approaches. Preserve pools, visible gardens and cemeteries as holes.",
+        "excluded": "Modern buffer, unsupported lengths of wall, planned roads, and the separate rail settlement of Kagan."
+      },
+      "coverage": {
+        "roads": "Text confirms covered market lanes, gate approaches and enclosed residential alleys. Line positions and widths between those anchors remain unverified.",
+        "water": "Use Lyabi-Hauz as a fixed period pool. Other tanks and canals require an individual dated reference; modern water lines are locators only.",
+        "buildings": "Only surviving dated monuments and the field-described courtyard form are confirmed. Ordinary parcels and roofs are inferred.",
+        "land_use": "Mark the bazaar, Ark forecourt, pool and documented cemetery separately. Unmatched peripheral land remains unknown."
+      },
+      "spaces": [
+        "Ark and Registan forecourt",
+        "Kalyan-to-Lyabi-Hauz market lanes",
+        "ordinary courtyard block southwest of the market",
+        "western cemetery and wall transition",
+        "southern old-wall and irrigated land transition"
+      ],
+      "risks": "Kagan is a separate settlement. Surviving fabric and reconstructed sections of wall are dated separately."
     }
   },
   "regional_source_search": {

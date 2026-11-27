@@ -186,3 +186,24 @@ landscape:hanyang,Hanyang,150000,114.264,30.549,zh_1918_urban,1918,Historical ci
 reba:chandler:1038,Omdurman,46000,,,sd_gleichen_1905,1904,Town proper after the 1898 battle,Vol. 1 pp. 46–47,comparison
 landscape:kano,Kano,30000,8.518,11.992,ng_kano_growth,1903,"Market alone, not a municipal population","Table 1, Lugard",comparison
 landscape:kano,Kano,83000,8.518,11.992,ng_kano_growth,1932,"Ancient city, colonial government estimate","Table 1, colonial government",comparison
+landscape:st_johns_newfoundland,St. John's,29594,-52.704,47.565,british_empire_1901_principal_towns,1901,Reported town population.,"Table 3, Newfoundland",
+landscape:belize_town,Belize,9113,-88.187,17.496,british_empire_1901_principal_towns,1901,Named town in British Honduras.,"Table 3, British Honduras",
+landscape:bathurst_gambia,Bathurst,8807,-16.581,13.454,british_empire_1901_principal_towns,1901,Named town; present-day Banjul.,"Table 3, Gambia",
+landscape:freetown,Freetown,34463,-13.233,8.489,british_empire_1901_principal_towns,1901,"Named town, distinct from the colony and protectorate.","Table 3, Sierra Leone",
+landscape:kingston_jamaica,Kingston,57000,-76.795,17.974,british_empire_1901_principal_towns,1901,Combined estimated population of Kingston and Port Royal. The total is an upper bound for Kingston only.,"Table 3, Jamaica",comparison
+landscape:perth_western_australia,Perth,27553,115.86,-31.955,british_empire_1901_principal_towns,1901,Principal town count in Western Australia.,"Table 3, Western Australia",
+landscape:hobart,Hobart,24654,147.329,-42.881,british_empire_1901_principal_towns,1901,Principal town count in Tasmania.,"Table 3, Tasmania",
+landscape:bloemfontein,Bloemfontein,25873,26.217,-29.116,british_empire_1901_principal_towns,1904,Civil population in the named town; excludes military.,"Table 3, Orange River Colony; 1904 returns",
+landscape:kathmandu,Katmandu,50000,85.307,27.705,statesman_1899_nepal,1899,Approximate capital population; observation year unspecified.,"Nepal, p. 803",dated_publication
+landscape:monrovia,Monrovia,5000,-10.807,6.317,statesman_1899_liberia,1897,Monrovia together with Krootown.,"Liberia, p. 781",
+landscape:luxembourg_city,Luxembourg-ville,32761,6.132,49.61,statec_luxembourg_localities,1890,Retrospective locality series.,"Table 4, Luxembourg-ville, 1890",comparison
+landscape:luxembourg_city,Luxembourg-ville,45744,6.132,49.61,statec_luxembourg_localities,1910,Retrospective locality series.,"Table 4, Luxembourg-ville, 1910",comparison
+landscape:sarajevo,Sarajevo,38083,18.429,43.859,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:travnik,Travnik,6261,17.664,44.227,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:banja_luka,Banja Luka,13566,17.191,44.769,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:bihac,Bihac,3943,15.868,44.811,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:mostar,Mostar,14370,17.815,43.337,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:bukhara,Bokhara,100000,64.417,39.775,hamilton_bukhara_1906,1906,Named town estimate; year of observation unspecified.,"Distribution of population, p. 29",dated_publication
+landscape:bukhara,Bukhara,78650,,,masalskii_protectorates_1909,1909,Retrospective series reports an estimate of the city.,"Table 1, protectorate estimates",comparison
+landscape:karshi,Karshi,60000,65.8,38.86,hamilton_bukhara_1906,1906,Named town estimate; year of observation unspecified.,"Distribution of population, p. 29",dated_publication
+landscape:khiva,Khiva,26070,60.361,41.378,masalskii_protectorates_1909,1909,Estimate for the named city in the protectorate.,"Table 1, protectorate estimates",comparison
