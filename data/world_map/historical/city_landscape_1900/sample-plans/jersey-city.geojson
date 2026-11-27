@@ -4,7 +4,7 @@
     "city_id": "us_city_new_jersey_jersey_city",
     "name": "Jersey City",
     "key": "jersey-city-harrison-hudson",
-    "revision": 1,
+    "revision": 2,
     "status": "candidate_sample",
     "origin": [
       -74.048,
@@ -13869,6 +13869,4816 @@
         "kind": "coverage",
         "source": "harrison-1894",
         "use_basis": "Selected mapped plan area. The ridge registration is provisional."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-first",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0488856,
+            40.7222799
+          ],
+          [
+            -74.0478914,
+            40.7221161
+          ],
+          [
+            -74.0462962,
+            40.7220652
+          ],
+          [
+            -74.0445507,
+            40.7216825
+          ],
+          [
+            -74.0429797,
+            40.7215306
+          ],
+          [
+            -74.041267,
+            40.7213951
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-bay",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0487758,
+            40.7219707
+          ],
+          [
+            -74.0478463,
+            40.7217286
+          ],
+          [
+            -74.0466087,
+            40.7212383
+          ],
+          [
+            -74.0447178,
+            40.7210796
+          ],
+          [
+            -74.0431063,
+            40.7209051
+          ],
+          [
+            -74.0414198,
+            40.7207556
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-morgan",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0478776,
+            40.7210213
+          ],
+          [
+            -74.0465896,
+            40.7206459
+          ],
+          [
+            -74.0457733,
+            40.7203144
+          ],
+          [
+            -74.0447977,
+            40.7203613
+          ],
+          [
+            -74.0432306,
+            40.7201926
+          ],
+          [
+            -74.0415059,
+            40.7201075
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-jersey",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0461752,
+            40.7226914
+          ],
+          [
+            -74.0462962,
+            40.7220652
+          ],
+          [
+            -74.0466087,
+            40.7212383
+          ],
+          [
+            -74.0457733,
+            40.7203144
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-erie",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0445644,
+            40.7225282
+          ],
+          [
+            -74.0445507,
+            40.7216825
+          ],
+          [
+            -74.0447178,
+            40.7210796
+          ],
+          [
+            -74.0447977,
+            40.7203613
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-grove",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0445644,
+            40.7225282
+          ],
+          [
+            -74.0429797,
+            40.7215306
+          ],
+          [
+            -74.0431063,
+            40.7209051
+          ],
+          [
+            -74.0432306,
+            40.7201926
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-henderson",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.042882,
+            40.7223618
+          ],
+          [
+            -74.041267,
+            40.7213951
+          ],
+          [
+            -74.0414198,
+            40.7207556
+          ],
+          [
+            -74.0415059,
+            40.7201075
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-first-bay-1",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0478914,
+              40.7221161
+            ],
+            [
+              -74.0462962,
+              40.7220652
+            ],
+            [
+              -74.0466087,
+              40.7212383
+            ],
+            [
+              -74.0478463,
+              40.7217286
+            ],
+            [
+              -74.0478914,
+              40.7221161
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-first-bay-2",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0462962,
+              40.7220652
+            ],
+            [
+              -74.0445507,
+              40.7216825
+            ],
+            [
+              -74.0447178,
+              40.7210796
+            ],
+            [
+              -74.0466087,
+              40.7212383
+            ],
+            [
+              -74.0462962,
+              40.7220652
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-first-bay-3",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0445507,
+              40.7216825
+            ],
+            [
+              -74.0429797,
+              40.7215306
+            ],
+            [
+              -74.0431063,
+              40.7209051
+            ],
+            [
+              -74.0447178,
+              40.7210796
+            ],
+            [
+              -74.0445507,
+              40.7216825
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-first-bay-4",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0429797,
+              40.7215306
+            ],
+            [
+              -74.041267,
+              40.7213951
+            ],
+            [
+              -74.0414198,
+              40.7207556
+            ],
+            [
+              -74.0431063,
+              40.7209051
+            ],
+            [
+              -74.0429797,
+              40.7215306
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-bay-morgan-2",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0466087,
+              40.7212383
+            ],
+            [
+              -74.0447178,
+              40.7210796
+            ],
+            [
+              -74.0447977,
+              40.7203613
+            ],
+            [
+              -74.0457733,
+              40.7203144
+            ],
+            [
+              -74.0466087,
+              40.7212383
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-bay-morgan-3",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0447178,
+              40.7210796
+            ],
+            [
+              -74.0431063,
+              40.7209051
+            ],
+            [
+              -74.0432306,
+              40.7201926
+            ],
+            [
+              -74.0447977,
+              40.7203613
+            ],
+            [
+              -74.0447178,
+              40.7210796
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-hamilton-bay-morgan-4",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0431063,
+              40.7209051
+            ],
+            [
+              -74.0414198,
+              40.7207556
+            ],
+            [
+              -74.0415059,
+              40.7201075
+            ],
+            [
+              -74.0432306,
+              40.7201926
+            ],
+            [
+              -74.0431063,
+              40.7209051
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "wayne-mill-block",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0478099,
+              40.72044
+            ],
+            [
+              -74.045837,
+              40.7196634
+            ],
+            [
+              -74.0463824,
+              40.7189188
+            ],
+            [
+              -74.0483593,
+              40.7196785
+            ],
+            [
+              -74.0478099,
+              40.72044
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "erie-newark-wedge",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0445493,
+              40.7207281
+            ],
+            [
+              -74.0432712,
+              40.7202152
+            ],
+            [
+              -74.0432789,
+              40.7199907
+            ],
+            [
+              -74.0439838,
+              40.7203077
+            ],
+            [
+              -74.0447698,
+              40.72067
+            ],
+            [
+              -74.0445493,
+              40.7207281
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "grove-railway-approach",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0431982,
+              40.7201363
+            ],
+            [
+              -74.0416231,
+              40.7200013
+            ],
+            [
+              -74.0417336,
+              40.7194431
+            ],
+            [
+              -74.042321,
+              40.7196755
+            ],
+            [
+              -74.0432201,
+              40.7199483
+            ],
+            [
+              -74.0431982,
+              40.7201363
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "newark-grove-wedge",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0444485,
+              40.7197087
+            ],
+            [
+              -74.043394,
+              40.7197974
+            ],
+            [
+              -74.0427414,
+              40.7192616
+            ],
+            [
+              -74.0434513,
+              40.7188853
+            ],
+            [
+              -74.0448423,
+              40.7191179
+            ],
+            [
+              -74.0444485,
+              40.7197087
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "newark-gregory-wedge",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0433743,
+              40.7188233
+            ],
+            [
+              -74.0426866,
+              40.7192025
+            ],
+            [
+              -74.0421679,
+              40.7188749
+            ],
+            [
+              -74.04224,
+              40.7183811
+            ],
+            [
+              -74.043163,
+              40.7183621
+            ],
+            [
+              -74.043562,
+              40.718518
+            ],
+            [
+              -74.0433743,
+              40.7188233
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "wayne-barow-east",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0447693,
+              40.719039
+            ],
+            [
+              -74.043601,
+              40.7188354
+            ],
+            [
+              -74.0437217,
+              40.7183305
+            ],
+            [
+              -74.0450882,
+              40.7184732
+            ],
+            [
+              -74.0447693,
+              40.719039
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "city-hall-west",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0462083,
+              40.7188788
+            ],
+            [
+              -74.0451408,
+              40.7184453
+            ],
+            [
+              -74.0455226,
+              40.717905
+            ],
+            [
+              -74.0466324,
+              40.7182573
+            ],
+            [
+              -74.0462083,
+              40.7188788
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mercer-coles",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0506977,
+              40.719982
+            ],
+            [
+              -74.0492232,
+              40.7194263
+            ],
+            [
+              -74.049708,
+              40.7187432
+            ],
+            [
+              -74.0510832,
+              40.719234
+            ],
+            [
+              -74.0506977,
+              40.719982
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mercer-jersey",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0490936,
+              40.7193921
+            ],
+            [
+              -74.0476881,
+              40.7189321
+            ],
+            [
+              -74.0480435,
+              40.7184057
+            ],
+            [
+              -74.0495743,
+              40.7187259
+            ],
+            [
+              -74.0490936,
+              40.7193921
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "newark-grove-connection",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0485969,
+            40.7228149
+          ],
+          [
+            -74.0464673,
+            40.7214455
+          ],
+          [
+            -74.0448385,
+            40.7205748
+          ],
+          [
+            -74.043613,
+            40.720034
+          ],
+          [
+            -74.0426971,
+            40.7194467
+          ],
+          [
+            -74.0418595,
+            40.7184358
+          ],
+          [
+            -74.040974,
+            40.7178177
+          ],
+          [
+            -74.0400337,
+            40.7171405
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 16,
+        "display_surface": "setts",
+        "display_rank": 2,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "wayne-mercantile-continuation",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0503367,
+            40.72082
+          ],
+          [
+            -74.0490122,
+            40.7204052
+          ],
+          [
+            -74.0475965,
+            40.7198918
+          ],
+          [
+            -74.046272,
+            40.719477
+          ],
+          [
+            -74.0448584,
+            40.7190506
+          ],
+          [
+            -74.0435667,
+            40.7188829
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "mercer-interior-continuation",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0507039,
+            40.7200522
+          ],
+          [
+            -74.0491078,
+            40.7194287
+          ],
+          [
+            -74.0476658,
+            40.7189292
+          ],
+          [
+            -74.0463596,
+            40.7185341
+          ],
+          [
+            -74.0451709,
+            40.7182237
+          ],
+          [
+            -74.0442497,
+            40.7181388
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-16th",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0474101,
+            40.7337359
+          ],
+          [
+            -74.0456841,
+            40.7335599
+          ],
+          [
+            -74.044115,
+            40.7334
+          ],
+          [
+            -74.0425459,
+            40.73324
+          ],
+          [
+            -74.0408871,
+            40.733071
+          ],
+          [
+            -74.0392283,
+            40.7329019
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-15th",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0493039,
+            40.733239
+          ],
+          [
+            -74.0475554,
+            40.7330608
+          ],
+          [
+            -74.0458294,
+            40.7328848
+          ],
+          [
+            -74.0442603,
+            40.7327249
+          ],
+          [
+            -74.0426912,
+            40.7325649
+          ],
+          [
+            -74.0410324,
+            40.7323958
+          ],
+          [
+            -74.0393736,
+            40.7322268
+          ],
+          [
+            -74.0377148,
+            40.7320577
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-14th",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0494653,
+            40.7324966
+          ],
+          [
+            -74.0477168,
+            40.7323183
+          ],
+          [
+            -74.0459908,
+            40.7321424
+          ],
+          [
+            -74.0444217,
+            40.7319824
+          ],
+          [
+            -74.0428526,
+            40.7318225
+          ],
+          [
+            -74.0411938,
+            40.7316534
+          ],
+          [
+            -74.039535,
+            40.7314843
+          ],
+          [
+            -74.0378762,
+            40.7313152
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-13th",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0496307,
+            40.7317373
+          ],
+          [
+            -74.0478822,
+            40.7315591
+          ],
+          [
+            -74.0461562,
+            40.7313831
+          ],
+          [
+            -74.0445871,
+            40.7312232
+          ],
+          [
+            -74.043018,
+            40.7310632
+          ],
+          [
+            -74.0413592,
+            40.7308942
+          ],
+          [
+            -74.0397004,
+            40.7307251
+          ],
+          [
+            -74.0380416,
+            40.730556
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-12th",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0497921,
+            40.7309949
+          ],
+          [
+            -74.0480436,
+            40.7308167
+          ],
+          [
+            -74.0463176,
+            40.7306407
+          ],
+          [
+            -74.0447485,
+            40.7304808
+          ],
+          [
+            -74.0431794,
+            40.7303208
+          ],
+          [
+            -74.0415206,
+            40.7301517
+          ],
+          [
+            -74.0398618,
+            40.7299826
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-brunswick",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0493039,
+            40.733239
+          ],
+          [
+            -74.0494653,
+            40.7324966
+          ],
+          [
+            -74.0496307,
+            40.7317373
+          ],
+          [
+            -74.0497921,
+            40.7309949
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-monmouth",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0474101,
+            40.7337359
+          ],
+          [
+            -74.0475554,
+            40.7330608
+          ],
+          [
+            -74.0477168,
+            40.7323183
+          ],
+          [
+            -74.0478822,
+            40.7315591
+          ],
+          [
+            -74.0480436,
+            40.7308167
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-coles",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0456841,
+            40.7335599
+          ],
+          [
+            -74.0458294,
+            40.7328848
+          ],
+          [
+            -74.0459908,
+            40.7321424
+          ],
+          [
+            -74.0461562,
+            40.7313831
+          ],
+          [
+            -74.0463176,
+            40.7306407
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-west-hamilton",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.044115,
+            40.7334
+          ],
+          [
+            -74.0442603,
+            40.7327249
+          ],
+          [
+            -74.0444217,
+            40.7319824
+          ],
+          [
+            -74.0445871,
+            40.7312232
+          ],
+          [
+            -74.0447485,
+            40.7304808
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-jersey",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0425459,
+            40.73324
+          ],
+          [
+            -74.0426912,
+            40.7325649
+          ],
+          [
+            -74.0428526,
+            40.7318225
+          ],
+          [
+            -74.043018,
+            40.7310632
+          ],
+          [
+            -74.0431794,
+            40.7303208
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 16,
+        "display_surface": "setts",
+        "display_rank": 2,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-erie",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0408871,
+            40.733071
+          ],
+          [
+            -74.0410324,
+            40.7323958
+          ],
+          [
+            -74.0411938,
+            40.7316534
+          ],
+          [
+            -74.0413592,
+            40.7308942
+          ],
+          [
+            -74.0415206,
+            40.7301517
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-grove",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0392283,
+            40.7329019
+          ],
+          [
+            -74.0393736,
+            40.7322268
+          ],
+          [
+            -74.039535,
+            40.7314843
+          ],
+          [
+            -74.0397004,
+            40.7307251
+          ],
+          [
+            -74.0398618,
+            40.7299826
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 16,
+        "display_surface": "setts",
+        "display_rank": 2,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-henderson-4",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0377148,
+            40.7320577
+          ],
+          [
+            -74.0378762,
+            40.7313152
+          ],
+          [
+            -74.0380416,
+            40.730556
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-16th-15th-monmouth",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0474101,
+              40.7337359
+            ],
+            [
+              -74.0456841,
+              40.7335599
+            ],
+            [
+              -74.0458294,
+              40.7328848
+            ],
+            [
+              -74.0475554,
+              40.7330608
+            ],
+            [
+              -74.0474101,
+              40.7337359
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-16th-15th-coles",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0456841,
+              40.7335599
+            ],
+            [
+              -74.044115,
+              40.7334
+            ],
+            [
+              -74.0442603,
+              40.7327249
+            ],
+            [
+              -74.0458294,
+              40.7328848
+            ],
+            [
+              -74.0456841,
+              40.7335599
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-16th-15th-west-hamilton",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.044115,
+              40.7334
+            ],
+            [
+              -74.0425459,
+              40.73324
+            ],
+            [
+              -74.0426912,
+              40.7325649
+            ],
+            [
+              -74.0442603,
+              40.7327249
+            ],
+            [
+              -74.044115,
+              40.7334
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-16th-15th-jersey",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0425459,
+              40.73324
+            ],
+            [
+              -74.0408871,
+              40.733071
+            ],
+            [
+              -74.0410324,
+              40.7323958
+            ],
+            [
+              -74.0426912,
+              40.7325649
+            ],
+            [
+              -74.0425459,
+              40.73324
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-16th-15th-erie",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0408871,
+              40.733071
+            ],
+            [
+              -74.0392283,
+              40.7329019
+            ],
+            [
+              -74.0393736,
+              40.7322268
+            ],
+            [
+              -74.0410324,
+              40.7323958
+            ],
+            [
+              -74.0408871,
+              40.733071
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-15th-14th-brunswick",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0493039,
+              40.733239
+            ],
+            [
+              -74.0475554,
+              40.7330608
+            ],
+            [
+              -74.0477168,
+              40.7323183
+            ],
+            [
+              -74.0494653,
+              40.7324966
+            ],
+            [
+              -74.0493039,
+              40.733239
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-15th-14th-monmouth",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0475554,
+              40.7330608
+            ],
+            [
+              -74.0458294,
+              40.7328848
+            ],
+            [
+              -74.0459908,
+              40.7321424
+            ],
+            [
+              -74.0477168,
+              40.7323183
+            ],
+            [
+              -74.0475554,
+              40.7330608
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-15th-14th-coles",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0458294,
+              40.7328848
+            ],
+            [
+              -74.0442603,
+              40.7327249
+            ],
+            [
+              -74.0444217,
+              40.7319824
+            ],
+            [
+              -74.0459908,
+              40.7321424
+            ],
+            [
+              -74.0458294,
+              40.7328848
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-15th-14th-west-hamilton",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0442603,
+              40.7327249
+            ],
+            [
+              -74.0426912,
+              40.7325649
+            ],
+            [
+              -74.0428526,
+              40.7318225
+            ],
+            [
+              -74.0444217,
+              40.7319824
+            ],
+            [
+              -74.0442603,
+              40.7327249
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-15th-14th-jersey",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0426912,
+              40.7325649
+            ],
+            [
+              -74.0410324,
+              40.7323958
+            ],
+            [
+              -74.0411938,
+              40.7316534
+            ],
+            [
+              -74.0428526,
+              40.7318225
+            ],
+            [
+              -74.0426912,
+              40.7325649
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-15th-14th-erie",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0410324,
+              40.7323958
+            ],
+            [
+              -74.0393736,
+              40.7322268
+            ],
+            [
+              -74.039535,
+              40.7314843
+            ],
+            [
+              -74.0411938,
+              40.7316534
+            ],
+            [
+              -74.0410324,
+              40.7323958
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-15th-14th-grove",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0393736,
+              40.7322268
+            ],
+            [
+              -74.0377148,
+              40.7320577
+            ],
+            [
+              -74.0378762,
+              40.7313152
+            ],
+            [
+              -74.039535,
+              40.7314843
+            ],
+            [
+              -74.0393736,
+              40.7322268
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-14th-13th-brunswick",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0494653,
+              40.7324966
+            ],
+            [
+              -74.0477168,
+              40.7323183
+            ],
+            [
+              -74.0478822,
+              40.7315591
+            ],
+            [
+              -74.0496307,
+              40.7317373
+            ],
+            [
+              -74.0494653,
+              40.7324966
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-14th-13th-monmouth",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0477168,
+              40.7323183
+            ],
+            [
+              -74.0459908,
+              40.7321424
+            ],
+            [
+              -74.0461562,
+              40.7313831
+            ],
+            [
+              -74.0478822,
+              40.7315591
+            ],
+            [
+              -74.0477168,
+              40.7323183
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-14th-13th-coles",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0459908,
+              40.7321424
+            ],
+            [
+              -74.0444217,
+              40.7319824
+            ],
+            [
+              -74.0445871,
+              40.7312232
+            ],
+            [
+              -74.0461562,
+              40.7313831
+            ],
+            [
+              -74.0459908,
+              40.7321424
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-14th-13th-west-hamilton",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0444217,
+              40.7319824
+            ],
+            [
+              -74.0428526,
+              40.7318225
+            ],
+            [
+              -74.043018,
+              40.7310632
+            ],
+            [
+              -74.0445871,
+              40.7312232
+            ],
+            [
+              -74.0444217,
+              40.7319824
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-14th-13th-jersey",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0428526,
+              40.7318225
+            ],
+            [
+              -74.0411938,
+              40.7316534
+            ],
+            [
+              -74.0413592,
+              40.7308942
+            ],
+            [
+              -74.043018,
+              40.7310632
+            ],
+            [
+              -74.0428526,
+              40.7318225
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-14th-13th-erie",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0411938,
+              40.7316534
+            ],
+            [
+              -74.039535,
+              40.7314843
+            ],
+            [
+              -74.0397004,
+              40.7307251
+            ],
+            [
+              -74.0413592,
+              40.7308942
+            ],
+            [
+              -74.0411938,
+              40.7316534
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-14th-13th-grove",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.039535,
+              40.7314843
+            ],
+            [
+              -74.0378762,
+              40.7313152
+            ],
+            [
+              -74.0380416,
+              40.730556
+            ],
+            [
+              -74.0397004,
+              40.7307251
+            ],
+            [
+              -74.039535,
+              40.7314843
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-13th-12th-brunswick",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0496307,
+              40.7317373
+            ],
+            [
+              -74.0478822,
+              40.7315591
+            ],
+            [
+              -74.0480436,
+              40.7308167
+            ],
+            [
+              -74.0497921,
+              40.7309949
+            ],
+            [
+              -74.0496307,
+              40.7317373
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-13th-12th-monmouth",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0478822,
+              40.7315591
+            ],
+            [
+              -74.0461562,
+              40.7313831
+            ],
+            [
+              -74.0463176,
+              40.7306407
+            ],
+            [
+              -74.0480436,
+              40.7308167
+            ],
+            [
+              -74.0478822,
+              40.7315591
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-13th-12th-coles",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0461562,
+              40.7313831
+            ],
+            [
+              -74.0445871,
+              40.7312232
+            ],
+            [
+              -74.0447485,
+              40.7304808
+            ],
+            [
+              -74.0463176,
+              40.7306407
+            ],
+            [
+              -74.0461562,
+              40.7313831
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-13th-12th-west-hamilton",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0445871,
+              40.7312232
+            ],
+            [
+              -74.043018,
+              40.7310632
+            ],
+            [
+              -74.0431794,
+              40.7303208
+            ],
+            [
+              -74.0447485,
+              40.7304808
+            ],
+            [
+              -74.0445871,
+              40.7312232
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-13th-12th-jersey",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.043018,
+              40.7310632
+            ],
+            [
+              -74.0413592,
+              40.7308942
+            ],
+            [
+              -74.0415206,
+              40.7301517
+            ],
+            [
+              -74.0431794,
+              40.7303208
+            ],
+            [
+              -74.043018,
+              40.7310632
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-hamilton-13th-12th-erie",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0413592,
+              40.7308942
+            ],
+            [
+              -74.0397004,
+              40.7307251
+            ],
+            [
+              -74.0398618,
+              40.7299826
+            ],
+            [
+              -74.0415206,
+              40.7301517
+            ],
+            [
+              -74.0413592,
+              40.7308942
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "setback_m": [
+          0.7,
+          2.1
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.55,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hamilton-north-plan-limit",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0492774,
+              40.733417
+            ],
+            [
+              -74.047513,
+              40.733882
+            ],
+            [
+              -74.0391879,
+              40.7329749
+            ],
+            [
+              -74.0376989,
+              40.7321917
+            ],
+            [
+              -74.0380646,
+              40.7304696
+            ],
+            [
+              -74.0399667,
+              40.7300051
+            ],
+            [
+              -74.0464714,
+              40.7305545
+            ],
+            [
+              -74.0498464,
+              40.7309405
+            ],
+            [
+              -74.0492774,
+              40.733417
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "coverage",
+        "source": "harrison-1894",
+        "use_basis": "Selected residential blocks north of the separate railroad cut."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hamilton-north-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0492774,
+              40.733417
+            ],
+            [
+              -74.047513,
+              40.733882
+            ],
+            [
+              -74.0391879,
+              40.7329749
+            ],
+            [
+              -74.0376989,
+              40.7321917
+            ],
+            [
+              -74.0380646,
+              40.7304696
+            ],
+            [
+              -74.0399667,
+              40.7300051
+            ],
+            [
+              -74.0464714,
+              40.7305545
+            ],
+            [
+              -74.0498464,
+              40.7309405
+            ],
+            [
+              -74.0492774,
+              40.733417
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "harrison-1894",
+        "use_basis": "Dated developed blocks between 12th and 16th Streets."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hamilton-north-coverage",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0492774,
+              40.733417
+            ],
+            [
+              -74.047513,
+              40.733882
+            ],
+            [
+              -74.0391879,
+              40.7329749
+            ],
+            [
+              -74.0376989,
+              40.7321917
+            ],
+            [
+              -74.0380646,
+              40.7304696
+            ],
+            [
+              -74.0399667,
+              40.7300051
+            ],
+            [
+              -74.0464714,
+              40.7305545
+            ],
+            [
+              -74.0498464,
+              40.7309405
+            ],
+            [
+              -74.0492774,
+              40.733417
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road_coverage",
+        "source": "harrison-1894",
+        "categories": 3,
+        "coverage_state": "mapped_network",
+        "source_year": 1894,
+        "priority": 31,
+        "coverage_basis": "Local street network inside the selected traced blocks. The railway cut is excluded."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-second",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0410292,
+            40.7221978
+          ],
+          [
+            -74.0392988,
+            40.72204
+          ],
+          [
+            -74.0382201,
+            40.7219417
+          ],
+          [
+            -74.0365572,
+            40.72179
+          ],
+          [
+            -74.0348718,
+            40.7216363
+          ],
+          [
+            -74.033119,
+            40.7214765
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-first",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0394169,
+            40.7214308
+          ],
+          [
+            -74.0383382,
+            40.7213324
+          ],
+          [
+            -74.0366753,
+            40.7211808
+          ],
+          [
+            -74.0349899,
+            40.7210271
+          ],
+          [
+            -74.033237,
+            40.7208672
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-bay",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0413055,
+            40.7208111
+          ],
+          [
+            -74.0395752,
+            40.7206533
+          ],
+          [
+            -74.0384965,
+            40.7205549
+          ],
+          [
+            -74.0368336,
+            40.7204032
+          ],
+          [
+            -74.0351482,
+            40.7202495
+          ],
+          [
+            -74.0333953,
+            40.7200897
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-morgan",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0414437,
+            40.7201177
+          ],
+          [
+            -74.0397134,
+            40.7199599
+          ],
+          [
+            -74.0386347,
+            40.7198615
+          ],
+          [
+            -74.0369718,
+            40.7197098
+          ],
+          [
+            -74.0352863,
+            40.7195561
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-steuben",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0398596,
+            40.7192328
+          ],
+          [
+            -74.0387809,
+            40.7191344
+          ],
+          [
+            -74.037118,
+            40.7189828
+          ],
+          [
+            -74.0354326,
+            40.7188291
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-pearl",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0389513,
+            40.7183064
+          ],
+          [
+            -74.0372884,
+            40.7181548
+          ],
+          [
+            -74.0356029,
+            40.7180011
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-henderson-4",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0413055,
+            40.7208111
+          ],
+          [
+            -74.0414437,
+            40.7201177
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-provost-5",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0392988,
+            40.72204
+          ],
+          [
+            -74.0394169,
+            40.7214308
+          ],
+          [
+            -74.0395752,
+            40.7206533
+          ],
+          [
+            -74.0397134,
+            40.7199599
+          ],
+          [
+            -74.0398596,
+            40.7192328
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-warren",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0382201,
+            40.7219417
+          ],
+          [
+            -74.0383382,
+            40.7213324
+          ],
+          [
+            -74.0384965,
+            40.7205549
+          ],
+          [
+            -74.0386347,
+            40.7198615
+          ],
+          [
+            -74.0387809,
+            40.7191344
+          ],
+          [
+            -74.0389513,
+            40.7183064
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-washington",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0365572,
+            40.72179
+          ],
+          [
+            -74.0366753,
+            40.7211808
+          ],
+          [
+            -74.0368336,
+            40.7204032
+          ],
+          [
+            -74.0369718,
+            40.7197098
+          ],
+          [
+            -74.037118,
+            40.7189828
+          ],
+          [
+            -74.0372884,
+            40.7181548
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 16,
+        "display_surface": "setts",
+        "display_rank": 2,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-greene",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0348718,
+            40.7216363
+          ],
+          [
+            -74.0349899,
+            40.7210271
+          ],
+          [
+            -74.0351482,
+            40.7202495
+          ],
+          [
+            -74.0352863,
+            40.7195561
+          ],
+          [
+            -74.0354326,
+            40.7188291
+          ],
+          [
+            -74.0356029,
+            40.7180011
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-hudson-3",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.033119,
+            40.7214765
+          ],
+          [
+            -74.033237,
+            40.7208672
+          ],
+          [
+            -74.0333953,
+            40.7200897
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "harrison-1894",
+        "width_m": 12,
+        "display_surface": "setts",
+        "display_rank": 1,
+        "source_year": 1894,
+        "width_basis": "Interpreted width from the mapped street hierarchy.",
+        "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-second-first-provost",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0392988,
+              40.72204
+            ],
+            [
+              -74.0382201,
+              40.7219417
+            ],
+            [
+              -74.0383382,
+              40.7213324
+            ],
+            [
+              -74.0394169,
+              40.7214308
+            ],
+            [
+              -74.0392988,
+              40.72204
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-second-first-warren",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0382201,
+              40.7219417
+            ],
+            [
+              -74.0365572,
+              40.72179
+            ],
+            [
+              -74.0366753,
+              40.7211808
+            ],
+            [
+              -74.0383382,
+              40.7213324
+            ],
+            [
+              -74.0382201,
+              40.7219417
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-second-first-washington",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0365572,
+              40.72179
+            ],
+            [
+              -74.0348718,
+              40.7216363
+            ],
+            [
+              -74.0349899,
+              40.7210271
+            ],
+            [
+              -74.0366753,
+              40.7211808
+            ],
+            [
+              -74.0365572,
+              40.72179
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-second-first-greene",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0348718,
+              40.7216363
+            ],
+            [
+              -74.033119,
+              40.7214765
+            ],
+            [
+              -74.033237,
+              40.7208672
+            ],
+            [
+              -74.0349899,
+              40.7210271
+            ],
+            [
+              -74.0348718,
+              40.7216363
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-first-bay-provost",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0394169,
+              40.7214308
+            ],
+            [
+              -74.0383382,
+              40.7213324
+            ],
+            [
+              -74.0384965,
+              40.7205549
+            ],
+            [
+              -74.0395752,
+              40.7206533
+            ],
+            [
+              -74.0394169,
+              40.7214308
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-first-bay-warren",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0383382,
+              40.7213324
+            ],
+            [
+              -74.0366753,
+              40.7211808
+            ],
+            [
+              -74.0368336,
+              40.7204032
+            ],
+            [
+              -74.0384965,
+              40.7205549
+            ],
+            [
+              -74.0383382,
+              40.7213324
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-first-bay-washington",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0366753,
+              40.7211808
+            ],
+            [
+              -74.0349899,
+              40.7210271
+            ],
+            [
+              -74.0351482,
+              40.7202495
+            ],
+            [
+              -74.0368336,
+              40.7204032
+            ],
+            [
+              -74.0366753,
+              40.7211808
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-first-bay-greene",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0349899,
+              40.7210271
+            ],
+            [
+              -74.033237,
+              40.7208672
+            ],
+            [
+              -74.0333953,
+              40.7200897
+            ],
+            [
+              -74.0351482,
+              40.7202495
+            ],
+            [
+              -74.0349899,
+              40.7210271
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-bay-morgan-henderson",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0413055,
+              40.7208111
+            ],
+            [
+              -74.0395752,
+              40.7206533
+            ],
+            [
+              -74.0397134,
+              40.7199599
+            ],
+            [
+              -74.0414437,
+              40.7201177
+            ],
+            [
+              -74.0413055,
+              40.7208111
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-bay-morgan-provost",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0395752,
+              40.7206533
+            ],
+            [
+              -74.0384965,
+              40.7205549
+            ],
+            [
+              -74.0386347,
+              40.7198615
+            ],
+            [
+              -74.0397134,
+              40.7199599
+            ],
+            [
+              -74.0395752,
+              40.7206533
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-bay-morgan-warren",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0384965,
+              40.7205549
+            ],
+            [
+              -74.0368336,
+              40.7204032
+            ],
+            [
+              -74.0369718,
+              40.7197098
+            ],
+            [
+              -74.0386347,
+              40.7198615
+            ],
+            [
+              -74.0384965,
+              40.7205549
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-bay-morgan-washington",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0368336,
+              40.7204032
+            ],
+            [
+              -74.0351482,
+              40.7202495
+            ],
+            [
+              -74.0352863,
+              40.7195561
+            ],
+            [
+              -74.0369718,
+              40.7197098
+            ],
+            [
+              -74.0368336,
+              40.7204032
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-morgan-steuben-provost",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0397134,
+              40.7199599
+            ],
+            [
+              -74.0386347,
+              40.7198615
+            ],
+            [
+              -74.0387809,
+              40.7191344
+            ],
+            [
+              -74.0398596,
+              40.7192328
+            ],
+            [
+              -74.0397134,
+              40.7199599
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-morgan-steuben-warren",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0386347,
+              40.7198615
+            ],
+            [
+              -74.0369718,
+              40.7197098
+            ],
+            [
+              -74.037118,
+              40.7189828
+            ],
+            [
+              -74.0387809,
+              40.7191344
+            ],
+            [
+              -74.0386347,
+              40.7198615
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-morgan-steuben-washington",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0369718,
+              40.7197098
+            ],
+            [
+              -74.0352863,
+              40.7195561
+            ],
+            [
+              -74.0354326,
+              40.7188291
+            ],
+            [
+              -74.037118,
+              40.7189828
+            ],
+            [
+              -74.0369718,
+              40.7197098
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-steuben-pearl-warren",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0387809,
+              40.7191344
+            ],
+            [
+              -74.037118,
+              40.7189828
+            ],
+            [
+              -74.0372884,
+              40.7181548
+            ],
+            [
+              -74.0389513,
+              40.7183064
+            ],
+            [
+              -74.0387809,
+              40.7191344
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bay-street-steuben-pearl-washington",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.037118,
+              40.7189828
+            ],
+            [
+              -74.0354326,
+              40.7188291
+            ],
+            [
+              -74.0356029,
+              40.7180011
+            ],
+            [
+              -74.0372884,
+              40.7181548
+            ],
+            [
+              -74.037118,
+              40.7189828
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "shop",
+        "frontage_m": [
+          5.2,
+          9.5
+        ],
+        "depth_m": [
+          8,
+          17
+        ],
+        "setback_m": [
+          0.5,
+          2.6
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "gap_m": 0.75,
+        "form_reference": "paulus-hook-national-register",
+        "use_basis": "Street block or port-side tract traced from Harrison. Lot divisions, buildings and operating details are inferred."
       }
     }
   ]
