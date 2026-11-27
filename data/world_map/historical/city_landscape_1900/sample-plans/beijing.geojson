@@ -8,9 +8,9 @@
       116.394,
       39.912
     ],
-    "revision": 1,
+    "revision": 2,
     "status": "candidate_sample",
-    "method": "Partial 1900 plan. Historic centerline and land-use boundaries reconstructed in a jointly registered local frame. Building massing is inferred at mapped residential and commercial edges. Original civic modules indicate selected mapped building locations.",
+    "method": "Partial 1900 plan. Historic centerline and land-use boundaries reconstructed in a jointly registered local frame. Building massing is inferred at mapped residential and commercial edges. Street-side massing is inferred along readable routes in the Outer City. The separate original Forbidden City landmark remains the palace model; plan geometry supplies its surroundings.",
     "sources": [
       {
         "id": "plan1900",
@@ -6899,209 +6899,6 @@
     },
     {
       "type": "Feature",
-      "id": "beijing-1900:palace-supreme-hall",
-      "properties": {
-        "kind": "building",
-        "source": "plan1900",
-        "role": "civic",
-        "height_m": 11.0,
-        "use_reference": "central-axis",
-        "height_basis": "Original representative civic massing at the mapped building envelope; approximate."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              116.3901041,
-              39.9163623
-            ],
-            [
-              116.3915019,
-              39.9163777
-            ],
-            [
-              116.3914165,
-              39.9155324
-            ],
-            [
-              116.3900186,
-              39.9155154
-            ],
-            [
-              116.3901041,
-              39.9163623
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "beijing-1900:palace-preserving-harmony",
-      "properties": {
-        "kind": "building",
-        "source": "plan1900",
-        "role": "civic",
-        "height_m": 11.0,
-        "use_reference": "central-axis",
-        "height_basis": "Original representative civic massing at the mapped building envelope; approximate."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              116.3903081,
-              39.9177402
-            ],
-            [
-              116.3917049,
-              39.9177526
-            ],
-            [
-              116.3916196,
-              39.9172193
-            ],
-            [
-              116.3902224,
-              39.9172057
-            ],
-            [
-              116.3903081,
-              39.9177402
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "beijing-1900:palace-south-gate",
-      "properties": {
-        "kind": "building",
-        "source": "plan1900",
-        "role": "civic",
-        "height_m": 11.0,
-        "use_reference": "central-axis",
-        "height_basis": "Original representative civic massing at the mapped building envelope; approximate."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              116.389625,
-              39.912955
-            ],
-            [
-              116.3906381,
-              39.9129703
-            ],
-            [
-              116.3916651,
-              39.9129863
-            ],
-            [
-              116.3916702,
-              39.9123659
-            ],
-            [
-              116.3906445,
-              39.912349
-            ],
-            [
-              116.389631,
-              39.9123331
-            ],
-            [
-              116.389625,
-              39.912955
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "beijing-1900:palace-east-court-hall",
-      "properties": {
-        "kind": "building",
-        "source": "plan1900",
-        "role": "civic",
-        "height_m": 11.0,
-        "use_reference": "central-axis",
-        "height_basis": "Original representative civic massing at the mapped building envelope; approximate."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              116.3942115,
-              39.918229
-            ],
-            [
-              116.395451,
-              39.9182408
-            ],
-            [
-              116.3953699,
-              39.9177126
-            ],
-            [
-              116.3941274,
-              39.9176997
-            ],
-            [
-              116.3942115,
-              39.918229
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "beijing-1900:palace-west-court-hall",
-      "properties": {
-        "kind": "building",
-        "source": "plan1900",
-        "role": "civic",
-        "height_m": 11.0,
-        "use_reference": "central-axis",
-        "height_basis": "Original representative civic massing at the mapped building envelope; approximate."
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              116.3867982,
-              39.9163249
-            ],
-            [
-              116.3877185,
-              39.9163358
-            ],
-            [
-              116.3876481,
-              39.9156411
-            ],
-            [
-              116.3867284,
-              39.9156297
-            ],
-            [
-              116.3867982,
-              39.9163249
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
       "id": "beijing-1900:qianmen-gate",
       "properties": {
         "kind": "building",
@@ -7212,6 +7009,2602 @@
             [
               116.3921647,
               39.8714208
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-hutong-a",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4019126,
+            39.8965665
+          ],
+          [
+            116.4021688,
+            39.8955782
+          ],
+          [
+            116.4024286,
+            39.8946089
+          ],
+          [
+            116.4024533,
+            39.8939133
+          ],
+          [
+            116.4024798,
+            39.8932252
+          ],
+          [
+            116.4025329,
+            39.8923381
+          ],
+          [
+            116.4025888,
+            39.8914596
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-hutong-b",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.406594,
+            39.8968531
+          ],
+          [
+            116.4066625,
+            39.8961243
+          ],
+          [
+            116.4067349,
+            39.8954059
+          ],
+          [
+            116.406811,
+            39.8946973
+          ],
+          [
+            116.4070178,
+            39.8938033
+          ],
+          [
+            116.40723,
+            39.8929221
+          ],
+          [
+            116.407301,
+            39.8923672
+          ],
+          [
+            116.4073739,
+            39.891816
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-hutong-c",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4092435,
+            39.8977067
+          ],
+          [
+            116.4093025,
+            39.8969663
+          ],
+          [
+            116.4093669,
+            39.896237
+          ],
+          [
+            116.4094365,
+            39.8955181
+          ],
+          [
+            116.4095431,
+            39.8945177
+          ],
+          [
+            116.4096582,
+            39.8935345
+          ],
+          [
+            116.4098847,
+            39.8925687
+          ],
+          [
+            116.4101178,
+            39.8916144
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-hutong-d",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4134103,
+            39.8981775
+          ],
+          [
+            116.4134706,
+            39.8972189
+          ],
+          [
+            116.4135436,
+            39.8962786
+          ],
+          [
+            116.4136103,
+            39.8955387
+          ],
+          [
+            116.4136838,
+            39.8948087
+          ],
+          [
+            116.4137634,
+            39.8940878
+          ],
+          [
+            116.4137813,
+            39.8933545
+          ],
+          [
+            116.4138044,
+            39.8926287
+          ],
+          [
+            116.4138317,
+            39.891909
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-post-road",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 8,
+        "display_rank": 2,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.3948825,
+            39.8964074
+          ],
+          [
+            116.3962538,
+            39.8964232
+          ],
+          [
+            116.3976214,
+            39.8964417
+          ],
+          [
+            116.3989309,
+            39.8964889
+          ],
+          [
+            116.4002385,
+            39.8965347
+          ],
+          [
+            116.4016429,
+            39.8966466
+          ],
+          [
+            116.4030464,
+            39.8967537
+          ],
+          [
+            116.404229,
+            39.8967916
+          ],
+          [
+            116.4054114,
+            39.8968249
+          ],
+          [
+            116.406594,
+            39.8968531
+          ],
+          [
+            116.4079515,
+            39.8968714
+          ],
+          [
+            116.4093096,
+            39.8968824
+          ],
+          [
+            116.4106695,
+            39.8968754
+          ],
+          [
+            116.4120308,
+            39.896861
+          ],
+          [
+            116.4133937,
+            39.8968394
+          ],
+          [
+            116.4147906,
+            39.8968531
+          ],
+          [
+            116.4161908,
+            39.8968601
+          ],
+          [
+            116.4175948,
+            39.8968613
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-central-lane",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4020623,
+            39.8932012
+          ],
+          [
+            116.4032551,
+            39.893328
+          ],
+          [
+            116.404446,
+            39.8934498
+          ],
+          [
+            116.4057916,
+            39.893573
+          ],
+          [
+            116.4071359,
+            39.8936886
+          ],
+          [
+            116.4083827,
+            39.8937335
+          ],
+          [
+            116.4096296,
+            39.8937714
+          ],
+          [
+            116.4109807,
+            39.8938048
+          ],
+          [
+            116.4123329,
+            39.8938302
+          ],
+          [
+            116.4136869,
+            39.8938482
+          ],
+          [
+            116.4147822,
+            39.8938577
+          ],
+          [
+            116.4158796,
+            39.8938631
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-foot-lane",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4063384,
+            39.8925327
+          ],
+          [
+            116.4075866,
+            39.892583
+          ],
+          [
+            116.408834,
+            39.892626
+          ],
+          [
+            116.4100812,
+            39.8926616
+          ],
+          [
+            116.4113632,
+            39.8926908
+          ],
+          [
+            116.4126461,
+            39.8927126
+          ],
+          [
+            116.4139305,
+            39.8927276
+          ],
+          [
+            116.4154918,
+            39.8927669
+          ],
+          [
+            116.4170576,
+            39.8927982
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-market-south",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4025046,
+            39.8896478
+          ],
+          [
+            116.403976,
+            39.8897408
+          ],
+          [
+            116.4054433,
+            39.8898228
+          ],
+          [
+            116.4069595,
+            39.889895
+          ],
+          [
+            116.4084726,
+            39.8899539
+          ],
+          [
+            116.4098274,
+            39.8899954
+          ],
+          [
+            116.4111814,
+            39.8900267
+          ],
+          [
+            116.4123747,
+            39.8900749
+          ],
+          [
+            116.4135685,
+            39.8901164
+          ],
+          [
+            116.4151329,
+            39.8901239
+          ],
+          [
+            116.4167006,
+            39.8901224
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-before-grove",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.399086,
+            39.887918
+          ],
+          [
+            116.4004659,
+            39.8880643
+          ],
+          [
+            116.4018411,
+            39.8882027
+          ],
+          [
+            116.4030121,
+            39.8882304
+          ],
+          [
+            116.4041804,
+            39.8882512
+          ],
+          [
+            116.405338,
+            39.8883212
+          ],
+          [
+            116.4064929,
+            39.8883823
+          ],
+          [
+            116.407907,
+            39.8884448
+          ],
+          [
+            116.409318,
+            39.8884936
+          ],
+          [
+            116.4108878,
+            39.888504
+          ],
+          [
+            116.4124563,
+            39.8884995
+          ],
+          [
+            116.413873,
+            39.8884526
+          ],
+          [
+            116.4152909,
+            39.8883963
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-side-lane",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4105108,
+            39.8910464
+          ],
+          [
+            116.4105852,
+            39.8905303
+          ],
+          [
+            116.4106607,
+            39.8900158
+          ],
+          [
+            116.4108235,
+            39.8892752
+          ],
+          [
+            116.4109878,
+            39.8885346
+          ],
+          [
+            116.4110918,
+            39.8878484
+          ],
+          [
+            116.4111958,
+            39.8871592
+          ],
+          [
+            116.4112776,
+            39.8866102
+          ],
+          [
+            116.4113587,
+            39.8860572
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-park-lane",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.413721,
+            39.8912124
+          ],
+          [
+            116.4138004,
+            39.8906648
+          ],
+          [
+            116.4138812,
+            39.8901187
+          ],
+          [
+            116.4140283,
+            39.8894876
+          ],
+          [
+            116.4141766,
+            39.8888562
+          ],
+          [
+            116.414269,
+            39.8882523
+          ],
+          [
+            116.4143615,
+            39.8876462
+          ],
+          [
+            116.4143625,
+            39.8869498
+          ],
+          [
+            116.4143624,
+            39.886248
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-hutong-a",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.3743218,
+            39.895961
+          ],
+          [
+            116.374344,
+            39.8951055
+          ],
+          [
+            116.3743656,
+            39.8942556
+          ],
+          [
+            116.3743866,
+            39.8934107
+          ],
+          [
+            116.3744075,
+            39.8922868
+          ],
+          [
+            116.3744271,
+            39.8911692
+          ],
+          [
+            116.3744341,
+            39.8902243
+          ],
+          [
+            116.37444,
+            39.8892817
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-hutong-b",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.3763544,
+            39.8967511
+          ],
+          [
+            116.3763647,
+            39.8958491
+          ],
+          [
+            116.3763743,
+            39.8949544
+          ],
+          [
+            116.3764306,
+            39.8941693
+          ],
+          [
+            116.3764862,
+            39.893389
+          ],
+          [
+            116.3765459,
+            39.8925457
+          ],
+          [
+            116.3766047,
+            39.8917065
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-cross-lane",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.3673755,
+            39.8955846
+          ],
+          [
+            116.3689844,
+            39.8956081
+          ],
+          [
+            116.3705898,
+            39.895631
+          ],
+          [
+            116.3724124,
+            39.8956564
+          ],
+          [
+            116.3742309,
+            39.8956815
+          ],
+          [
+            116.3752186,
+            39.8957298
+          ],
+          [
+            116.376205,
+            39.8957778
+          ],
+          [
+            116.3775242,
+            39.8957616
+          ],
+          [
+            116.3788415,
+            39.895746
+          ],
+          [
+            116.3804273,
+            39.8957697
+          ],
+          [
+            116.3820099,
+            39.8957949
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-south-lane",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.3688338,
+            39.8917046
+          ],
+          [
+            116.3703397,
+            39.8916721
+          ],
+          [
+            116.3718431,
+            39.8916414
+          ],
+          [
+            116.3731202,
+            39.8916409
+          ],
+          [
+            116.3743955,
+            39.891642
+          ],
+          [
+            116.3760001,
+            39.8916547
+          ],
+          [
+            116.3776015,
+            39.8916705
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-market-link",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.3853824,
+            39.8891588
+          ],
+          [
+            116.3855167,
+            39.8881462
+          ],
+          [
+            116.38565,
+            39.8871311
+          ],
+          [
+            116.3856701,
+            39.8861349
+          ],
+          [
+            116.3856882,
+            39.8851316
+          ],
+          [
+            116.3858074,
+            39.8842273
+          ],
+          [
+            116.3859248,
+            39.8833157
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-before-grove",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.3818906,
+            39.887263
+          ],
+          [
+            116.3834292,
+            39.8873621
+          ],
+          [
+            116.3849641,
+            39.887467
+          ],
+          [
+            116.386495,
+            39.8875775
+          ],
+          [
+            116.3880218,
+            39.8876935
+          ],
+          [
+            116.3894338,
+            39.8878264
+          ],
+          [
+            116.3908417,
+            39.8879627
+          ],
+          [
+            116.3922453,
+            39.8881017
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-frontage-lane",
+      "properties": {
+        "kind": "road",
+        "source": "plan1900",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "dirt",
+        "source_year": 1900,
+        "width_basis": "Display reconstruction preserving the street hierarchy and mapped clearances.",
+        "surface_basis": "Display material inferred from urban use. No road surface survey represented."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.3836321,
+            39.8860774
+          ],
+          [
+            116.3848976,
+            39.8861395
+          ],
+          [
+            116.3861607,
+            39.8862062
+          ],
+          [
+            116.387799,
+            39.8863729
+          ],
+          [
+            116.3894325,
+            39.8865454
+          ],
+          [
+            116.3909036,
+            39.8866455
+          ],
+          [
+            116.3923709,
+            39.8867497
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-residential-north-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "plan1900",
+        "use_basis": "Historical built-up ink. Ground finish inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4013245,
+              39.8961553
+            ],
+            [
+              116.4028871,
+              39.8962408
+            ],
+            [
+              116.4044487,
+              39.8963192
+            ],
+            [
+              116.40601,
+              39.8963891
+            ],
+            [
+              116.4061657,
+              39.895866
+            ],
+            [
+              116.4063233,
+              39.8953483
+            ],
+            [
+              116.4077237,
+              39.8954328
+            ],
+            [
+              116.4091245,
+              39.895509
+            ],
+            [
+              116.4090354,
+              39.8964352
+            ],
+            [
+              116.4104214,
+              39.8965141
+            ],
+            [
+              116.4118091,
+              39.8965852
+            ],
+            [
+              116.4131991,
+              39.8966487
+            ],
+            [
+              116.4143554,
+              39.8965987
+            ],
+            [
+              116.4155134,
+              39.8965441
+            ],
+            [
+              116.4155586,
+              39.895595
+            ],
+            [
+              116.4156161,
+              39.894662
+            ],
+            [
+              116.4156844,
+              39.8937432
+            ],
+            [
+              116.4152452,
+              39.8930601
+            ],
+            [
+              116.4148111,
+              39.8923827
+            ],
+            [
+              116.4134343,
+              39.8922741
+            ],
+            [
+              116.4120596,
+              39.8921582
+            ],
+            [
+              116.4106861,
+              39.8920343
+            ],
+            [
+              116.4095268,
+              39.8921211
+            ],
+            [
+              116.4083677,
+              39.8922015
+            ],
+            [
+              116.4074305,
+              39.8929887
+            ],
+            [
+              116.4063871,
+              39.8929763
+            ],
+            [
+              116.405343,
+              39.8929591
+            ],
+            [
+              116.4049974,
+              39.8936557
+            ],
+            [
+              116.4046547,
+              39.8943603
+            ],
+            [
+              116.4033438,
+              39.8943848
+            ],
+            [
+              116.4020316,
+              39.8944041
+            ],
+            [
+              116.4016766,
+              39.8952722
+            ],
+            [
+              116.4013245,
+              39.8961553
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-residential-north",
+      "properties": {
+        "kind": "zone",
+        "source": "plan1900",
+        "role": "courtyard_home",
+        "gap_m": 1.7,
+        "use_reference": "central-axis",
+        "frontage_m": [
+          10,
+          16
+        ],
+        "depth_m": [
+          15,
+          24
+        ],
+        "storeys": [
+          1,
+          2
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4013245,
+              39.8961553
+            ],
+            [
+              116.4028871,
+              39.8962408
+            ],
+            [
+              116.4044487,
+              39.8963192
+            ],
+            [
+              116.40601,
+              39.8963891
+            ],
+            [
+              116.4061657,
+              39.895866
+            ],
+            [
+              116.4063233,
+              39.8953483
+            ],
+            [
+              116.4077237,
+              39.8954328
+            ],
+            [
+              116.4091245,
+              39.895509
+            ],
+            [
+              116.4090354,
+              39.8964352
+            ],
+            [
+              116.4104214,
+              39.8965141
+            ],
+            [
+              116.4118091,
+              39.8965852
+            ],
+            [
+              116.4131991,
+              39.8966487
+            ],
+            [
+              116.4143554,
+              39.8965987
+            ],
+            [
+              116.4155134,
+              39.8965441
+            ],
+            [
+              116.4155586,
+              39.895595
+            ],
+            [
+              116.4156161,
+              39.894662
+            ],
+            [
+              116.4156844,
+              39.8937432
+            ],
+            [
+              116.4152452,
+              39.8930601
+            ],
+            [
+              116.4148111,
+              39.8923827
+            ],
+            [
+              116.4134343,
+              39.8922741
+            ],
+            [
+              116.4120596,
+              39.8921582
+            ],
+            [
+              116.4106861,
+              39.8920343
+            ],
+            [
+              116.4095268,
+              39.8921211
+            ],
+            [
+              116.4083677,
+              39.8922015
+            ],
+            [
+              116.4074305,
+              39.8929887
+            ],
+            [
+              116.4063871,
+              39.8929763
+            ],
+            [
+              116.405343,
+              39.8929591
+            ],
+            [
+              116.4049974,
+              39.8936557
+            ],
+            [
+              116.4046547,
+              39.8943603
+            ],
+            [
+              116.4033438,
+              39.8943848
+            ],
+            [
+              116.4020316,
+              39.8944041
+            ],
+            [
+              116.4016766,
+              39.8952722
+            ],
+            [
+              116.4013245,
+              39.8961553
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-market-side-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "plan1900",
+        "use_basis": "Historical built-up ink. Ground finish inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4000415,
+              39.8906473
+            ],
+            [
+              116.4016739,
+              39.8907487
+            ],
+            [
+              116.4033013,
+              39.8908408
+            ],
+            [
+              116.4049241,
+              39.8909216
+            ],
+            [
+              116.4065433,
+              39.8909897
+            ],
+            [
+              116.4081597,
+              39.8910444
+            ],
+            [
+              116.4097743,
+              39.8910854
+            ],
+            [
+              116.4113349,
+              39.8911216
+            ],
+            [
+              116.412896,
+              39.891146
+            ],
+            [
+              116.4144068,
+              39.8911596
+            ],
+            [
+              116.4159205,
+              39.8911643
+            ],
+            [
+              116.4162222,
+              39.8905278
+            ],
+            [
+              116.4165259,
+              39.8898921
+            ],
+            [
+              116.4153762,
+              39.8898938
+            ],
+            [
+              116.4142284,
+              39.8898908
+            ],
+            [
+              116.4142849,
+              39.8891727
+            ],
+            [
+              116.4143425,
+              39.888454
+            ],
+            [
+              116.4130561,
+              39.8883329
+            ],
+            [
+              116.41177,
+              39.8882039
+            ],
+            [
+              116.4113702,
+              39.8887706
+            ],
+            [
+              116.4100145,
+              39.8887417
+            ],
+            [
+              116.4086573,
+              39.8887013
+            ],
+            [
+              116.4075512,
+              39.8887168
+            ],
+            [
+              116.4064435,
+              39.8887242
+            ],
+            [
+              116.4065908,
+              39.8880713
+            ],
+            [
+              116.4067386,
+              39.8874169
+            ],
+            [
+              116.4050175,
+              39.8872043
+            ],
+            [
+              116.4032879,
+              39.8869673
+            ],
+            [
+              116.4030932,
+              39.887625
+            ],
+            [
+              116.4028987,
+              39.8882806
+            ],
+            [
+              116.4015688,
+              39.8882403
+            ],
+            [
+              116.4002354,
+              39.8881927
+            ],
+            [
+              116.4001701,
+              39.8890115
+            ],
+            [
+              116.4001053,
+              39.889829
+            ],
+            [
+              116.4000415,
+              39.8906473
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-market-side",
+      "properties": {
+        "kind": "zone",
+        "source": "plan1900",
+        "role": "courtyard_home",
+        "gap_m": 1.7,
+        "use_reference": "central-axis",
+        "frontage_m": [
+          10,
+          16
+        ],
+        "depth_m": [
+          15,
+          24
+        ],
+        "storeys": [
+          1,
+          2
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4000415,
+              39.8906473
+            ],
+            [
+              116.4016739,
+              39.8907487
+            ],
+            [
+              116.4033013,
+              39.8908408
+            ],
+            [
+              116.4049241,
+              39.8909216
+            ],
+            [
+              116.4065433,
+              39.8909897
+            ],
+            [
+              116.4081597,
+              39.8910444
+            ],
+            [
+              116.4097743,
+              39.8910854
+            ],
+            [
+              116.4113349,
+              39.8911216
+            ],
+            [
+              116.412896,
+              39.891146
+            ],
+            [
+              116.4144068,
+              39.8911596
+            ],
+            [
+              116.4159205,
+              39.8911643
+            ],
+            [
+              116.4162222,
+              39.8905278
+            ],
+            [
+              116.4165259,
+              39.8898921
+            ],
+            [
+              116.4153762,
+              39.8898938
+            ],
+            [
+              116.4142284,
+              39.8898908
+            ],
+            [
+              116.4142849,
+              39.8891727
+            ],
+            [
+              116.4143425,
+              39.888454
+            ],
+            [
+              116.4130561,
+              39.8883329
+            ],
+            [
+              116.41177,
+              39.8882039
+            ],
+            [
+              116.4113702,
+              39.8887706
+            ],
+            [
+              116.4100145,
+              39.8887417
+            ],
+            [
+              116.4086573,
+              39.8887013
+            ],
+            [
+              116.4075512,
+              39.8887168
+            ],
+            [
+              116.4064435,
+              39.8887242
+            ],
+            [
+              116.4065908,
+              39.8880713
+            ],
+            [
+              116.4067386,
+              39.8874169
+            ],
+            [
+              116.4050175,
+              39.8872043
+            ],
+            [
+              116.4032879,
+              39.8869673
+            ],
+            [
+              116.4030932,
+              39.887625
+            ],
+            [
+              116.4028987,
+              39.8882806
+            ],
+            [
+              116.4015688,
+              39.8882403
+            ],
+            [
+              116.4002354,
+              39.8881927
+            ],
+            [
+              116.4001701,
+              39.8890115
+            ],
+            [
+              116.4001053,
+              39.889829
+            ],
+            [
+              116.4000415,
+              39.8906473
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-temple-edge-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "plan1900",
+        "use_basis": "Historical built-up ink. Ground finish inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.407981,
+              39.8875874
+            ],
+            [
+              116.4090718,
+              39.8876837
+            ],
+            [
+              116.4101608,
+              39.8877714
+            ],
+            [
+              116.4112179,
+              39.887707
+            ],
+            [
+              116.4122745,
+              39.8876353
+            ],
+            [
+              116.4128661,
+              39.8871783
+            ],
+            [
+              116.4137402,
+              39.8872691
+            ],
+            [
+              116.4146143,
+              39.8873564
+            ],
+            [
+              116.414824,
+              39.8866569
+            ],
+            [
+              116.4150324,
+              39.8859504
+            ],
+            [
+              116.4134344,
+              39.8858071
+            ],
+            [
+              116.4118359,
+              39.8856512
+            ],
+            [
+              116.4101201,
+              39.8859176
+            ],
+            [
+              116.4084008,
+              39.886158
+            ],
+            [
+              116.4081912,
+              39.8868753
+            ],
+            [
+              116.407981,
+              39.8875874
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-east-temple-edge",
+      "properties": {
+        "kind": "zone",
+        "source": "plan1900",
+        "role": "courtyard_home",
+        "gap_m": 1.7,
+        "use_reference": "central-axis",
+        "frontage_m": [
+          10,
+          16
+        ],
+        "depth_m": [
+          15,
+          24
+        ],
+        "storeys": [
+          1,
+          2
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.407981,
+              39.8875874
+            ],
+            [
+              116.4090718,
+              39.8876837
+            ],
+            [
+              116.4101608,
+              39.8877714
+            ],
+            [
+              116.4112179,
+              39.887707
+            ],
+            [
+              116.4122745,
+              39.8876353
+            ],
+            [
+              116.4128661,
+              39.8871783
+            ],
+            [
+              116.4137402,
+              39.8872691
+            ],
+            [
+              116.4146143,
+              39.8873564
+            ],
+            [
+              116.414824,
+              39.8866569
+            ],
+            [
+              116.4150324,
+              39.8859504
+            ],
+            [
+              116.4134344,
+              39.8858071
+            ],
+            [
+              116.4118359,
+              39.8856512
+            ],
+            [
+              116.4101201,
+              39.8859176
+            ],
+            [
+              116.4084008,
+              39.886158
+            ],
+            [
+              116.4081912,
+              39.8868753
+            ],
+            [
+              116.407981,
+              39.8875874
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-traced-yard-blocks-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "plan1900",
+        "use_basis": "Historical built-up ink. Ground finish inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.3680501,
+              39.8954536
+            ],
+            [
+              116.3693808,
+              39.8954732
+            ],
+            [
+              116.3707092,
+              39.8954925
+            ],
+            [
+              116.3720353,
+              39.8955115
+            ],
+            [
+              116.3736991,
+              39.8953961
+            ],
+            [
+              116.3737648,
+              39.8944284
+            ],
+            [
+              116.3738298,
+              39.8934673
+            ],
+            [
+              116.3747729,
+              39.893419
+            ],
+            [
+              116.375715,
+              39.8933715
+            ],
+            [
+              116.3757599,
+              39.8927281
+            ],
+            [
+              116.3758043,
+              39.8920871
+            ],
+            [
+              116.374962,
+              39.8914554
+            ],
+            [
+              116.3741173,
+              39.8908217
+            ],
+            [
+              116.374217,
+              39.8901495
+            ],
+            [
+              116.3743161,
+              39.889479
+            ],
+            [
+              116.3729834,
+              39.8894542
+            ],
+            [
+              116.3716486,
+              39.8894318
+            ],
+            [
+              116.3703118,
+              39.8894115
+            ],
+            [
+              116.3701999,
+              39.890331
+            ],
+            [
+              116.3700873,
+              39.8912535
+            ],
+            [
+              116.3690217,
+              39.8913642
+            ],
+            [
+              116.3679551,
+              39.8914765
+            ],
+            [
+              116.3679795,
+              39.8924642
+            ],
+            [
+              116.3680033,
+              39.8934559
+            ],
+            [
+              116.3680268,
+              39.8944522
+            ],
+            [
+              116.3680501,
+              39.8954536
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-traced-yard-blocks",
+      "properties": {
+        "kind": "zone",
+        "source": "plan1900",
+        "role": "courtyard_home",
+        "gap_m": 1.7,
+        "use_reference": "central-axis",
+        "frontage_m": [
+          10,
+          16
+        ],
+        "depth_m": [
+          15,
+          24
+        ],
+        "storeys": [
+          1,
+          2
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.3680501,
+              39.8954536
+            ],
+            [
+              116.3693808,
+              39.8954732
+            ],
+            [
+              116.3707092,
+              39.8954925
+            ],
+            [
+              116.3720353,
+              39.8955115
+            ],
+            [
+              116.3736991,
+              39.8953961
+            ],
+            [
+              116.3737648,
+              39.8944284
+            ],
+            [
+              116.3738298,
+              39.8934673
+            ],
+            [
+              116.3747729,
+              39.893419
+            ],
+            [
+              116.375715,
+              39.8933715
+            ],
+            [
+              116.3757599,
+              39.8927281
+            ],
+            [
+              116.3758043,
+              39.8920871
+            ],
+            [
+              116.374962,
+              39.8914554
+            ],
+            [
+              116.3741173,
+              39.8908217
+            ],
+            [
+              116.374217,
+              39.8901495
+            ],
+            [
+              116.3743161,
+              39.889479
+            ],
+            [
+              116.3729834,
+              39.8894542
+            ],
+            [
+              116.3716486,
+              39.8894318
+            ],
+            [
+              116.3703118,
+              39.8894115
+            ],
+            [
+              116.3701999,
+              39.890331
+            ],
+            [
+              116.3700873,
+              39.8912535
+            ],
+            [
+              116.3690217,
+              39.8913642
+            ],
+            [
+              116.3679551,
+              39.8914765
+            ],
+            [
+              116.3679795,
+              39.8924642
+            ],
+            [
+              116.3680033,
+              39.8934559
+            ],
+            [
+              116.3680268,
+              39.8944522
+            ],
+            [
+              116.3680501,
+              39.8954536
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-south-traced-blocks-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "plan1900",
+        "use_basis": "Historical built-up ink. Ground finish inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.3839324,
+              39.8894568
+            ],
+            [
+              116.3857364,
+              39.8895308
+            ],
+            [
+              116.3875343,
+              39.8896127
+            ],
+            [
+              116.3889837,
+              39.889668
+            ],
+            [
+              116.3904286,
+              39.8897282
+            ],
+            [
+              116.3918689,
+              39.8897926
+            ],
+            [
+              116.3919636,
+              39.8887866
+            ],
+            [
+              116.3920579,
+              39.8877768
+            ],
+            [
+              116.3921513,
+              39.8867604
+            ],
+            [
+              116.3922431,
+              39.8857344
+            ],
+            [
+              116.3923324,
+              39.884696
+            ],
+            [
+              116.3924184,
+              39.8836424
+            ],
+            [
+              116.3909606,
+              39.8834847
+            ],
+            [
+              116.3894999,
+              39.883332
+            ],
+            [
+              116.3880365,
+              39.883185
+            ],
+            [
+              116.3870753,
+              39.883488
+            ],
+            [
+              116.3861138,
+              39.8837946
+            ],
+            [
+              116.3857892,
+              39.8844877
+            ],
+            [
+              116.385464,
+              39.8851781
+            ],
+            [
+              116.3837967,
+              39.8853064
+            ],
+            [
+              116.3837512,
+              39.8859559
+            ],
+            [
+              116.383705,
+              39.8866029
+            ],
+            [
+              116.3826835,
+              39.8869881
+            ],
+            [
+              116.3828332,
+              39.887972
+            ],
+            [
+              116.3833839,
+              39.8887167
+            ],
+            [
+              116.3839324,
+              39.8894568
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:outer-west-south-traced-blocks",
+      "properties": {
+        "kind": "zone",
+        "source": "plan1900",
+        "role": "courtyard_home",
+        "gap_m": 1.7,
+        "use_reference": "central-axis",
+        "frontage_m": [
+          10,
+          16
+        ],
+        "depth_m": [
+          15,
+          24
+        ],
+        "storeys": [
+          1,
+          2
+        ]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.3839324,
+              39.8894568
+            ],
+            [
+              116.3857364,
+              39.8895308
+            ],
+            [
+              116.3875343,
+              39.8896127
+            ],
+            [
+              116.3889837,
+              39.889668
+            ],
+            [
+              116.3904286,
+              39.8897282
+            ],
+            [
+              116.3918689,
+              39.8897926
+            ],
+            [
+              116.3919636,
+              39.8887866
+            ],
+            [
+              116.3920579,
+              39.8877768
+            ],
+            [
+              116.3921513,
+              39.8867604
+            ],
+            [
+              116.3922431,
+              39.8857344
+            ],
+            [
+              116.3923324,
+              39.884696
+            ],
+            [
+              116.3924184,
+              39.8836424
+            ],
+            [
+              116.3909606,
+              39.8834847
+            ],
+            [
+              116.3894999,
+              39.883332
+            ],
+            [
+              116.3880365,
+              39.883185
+            ],
+            [
+              116.3870753,
+              39.883488
+            ],
+            [
+              116.3861138,
+              39.8837946
+            ],
+            [
+              116.3857892,
+              39.8844877
+            ],
+            [
+              116.385464,
+              39.8851781
+            ],
+            [
+              116.3837967,
+              39.8853064
+            ],
+            [
+              116.3837512,
+              39.8859559
+            ],
+            [
+              116.383705,
+              39.8866029
+            ],
+            [
+              116.3826835,
+              39.8869881
+            ],
+            [
+              116.3828332,
+              39.887972
+            ],
+            [
+              116.3833839,
+              39.8887167
+            ],
+            [
+              116.3839324,
+              39.8894568
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:tiantan-altar-open-platform",
+      "properties": {
+        "kind": "courtyard",
+        "source": "plan1900",
+        "use_reference": "temple",
+        "use_basis": "Clear altar precinct around the surviving Hall of Prayer."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4036155,
+              39.8834391
+            ],
+            [
+              116.4048662,
+              39.8835557
+            ],
+            [
+              116.4061108,
+              39.8836531
+            ],
+            [
+              116.4073486,
+              39.8837278
+            ],
+            [
+              116.4074726,
+              39.8829672
+            ],
+            [
+              116.4075889,
+              39.8821798
+            ],
+            [
+              116.4076953,
+              39.8813585
+            ],
+            [
+              116.4064146,
+              39.8812994
+            ],
+            [
+              116.4051252,
+              39.8812111
+            ],
+            [
+              116.403829,
+              39.8811008
+            ],
+            [
+              116.4037647,
+              39.8819045
+            ],
+            [
+              116.4036933,
+              39.8826832
+            ],
+            [
+              116.4036155,
+              39.8834391
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:tiantan-ceremonial-elbow",
+      "properties": {
+        "kind": "courtyard",
+        "source": "plan1900",
+        "use_reference": "temple",
+        "use_basis": "Historical route towards the southern circular altar."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4052207,
+              39.8813799
+            ],
+            [
+              116.4069343,
+              39.8815183
+            ],
+            [
+              116.4069991,
+              39.8806483
+            ],
+            [
+              116.4070583,
+              39.8797593
+            ],
+            [
+              116.4071131,
+              39.8788568
+            ],
+            [
+              116.4069969,
+              39.8780525
+            ],
+            [
+              116.406878,
+              39.8772416
+            ],
+            [
+              116.4055837,
+              39.8771293
+            ],
+            [
+              116.4055007,
+              39.8782161
+            ],
+            [
+              116.4054137,
+              39.8792912
+            ],
+            [
+              116.4053211,
+              39.8803487
+            ],
+            [
+              116.4052207,
+              39.8813799
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:south-city-ponds-east",
+      "properties": {
+        "kind": "water_surface",
+        "source": "plan1900",
+        "basin": "river",
+        "use_basis": "Historical shaded water rectangle; no inferred current pond."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4021434,
+              39.8875235
+            ],
+            [
+              116.4034957,
+              39.8876103
+            ],
+            [
+              116.4048438,
+              39.8876858
+            ],
+            [
+              116.4061878,
+              39.8877488
+            ],
+            [
+              116.4075281,
+              39.8877985
+            ],
+            [
+              116.4076686,
+              39.8872004
+            ],
+            [
+              116.407809,
+              39.8865993
+            ],
+            [
+              116.4064453,
+              39.8865044
+            ],
+            [
+              116.4050767,
+              39.8863926
+            ],
+            [
+              116.4037027,
+              39.8862644
+            ],
+            [
+              116.4023232,
+              39.8861213
+            ],
+            [
+              116.4022337,
+              39.8868249
+            ],
+            [
+              116.4021434,
+              39.8875235
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "beijing-1900:south-city-pond-east-edge",
+      "properties": {
+        "kind": "water_surface",
+        "source": "plan1900",
+        "basin": "river",
+        "use_basis": "Historical shaded pond east of the Temple of Heaven wall."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4166321,
+              39.888506
+            ],
+            [
+              116.4182126,
+              39.8884343
+            ],
+            [
+              116.4194751,
+              39.8877193
+            ],
+            [
+              116.4196692,
+              39.8871306
+            ],
+            [
+              116.4198629,
+              39.8865382
+            ],
+            [
+              116.418689,
+              39.8859659
+            ],
+            [
+              116.4170026,
+              39.88605
+            ],
+            [
+              116.4160606,
+              39.8867663
+            ],
+            [
+              116.4160815,
+              39.8873208
+            ],
+            [
+              116.416102,
+              39.8878726
+            ],
+            [
+              116.4166321,
+              39.888506
             ]
           ]
         ]

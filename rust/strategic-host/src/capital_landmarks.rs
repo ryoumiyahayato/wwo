@@ -201,6 +201,62 @@ fn rectangle([x, z]: [f32; 2], [w, d]: [f32; 2], y: f32, lift: f32) -> [Point; 4
     ]
 }
 
+pub(crate) fn hall_of_prayer() -> ModelMesh {
+    const SEGMENTS: usize = 48;
+    const MARBLE: [f32; 3] = [0.67, 0.65, 0.59];
+    const BLUE_TILE: [f32; 3] = [0.035, 0.116, 0.305];
+    const BLUE_TRIM: [f32; 3] = [0.053, 0.194, 0.281];
+    let mut hall = Architecture(ModelMesh { vertices: Vec::new(), indices: Vec::new() });
+    let ring = |i: usize, r: f32, y: f32| {
+        let (sin, cos) = (i as f32 * std::f32::consts::TAU / SEGMENTS as f32).sin_cos();
+        [r * cos, y, r * sin]
+    };
+    let mut band = |lower: [f32; 2], upper: [f32; 2], color| {
+        for i in 0..SEGMENTS {
+            hall.face(&[
+                ring(i, lower[0], lower[1]), ring(i, upper[0], upper[1]),
+                ring(i + 1, upper[0], upper[1]), ring(i + 1, lower[0], lower[1]),
+            ], color);
+        }
+    };
+    for (radius, y, inner) in [(45.5, 0., 40.), (40., 1.9, 34.), (34., 3.75, 16.36)] {
+        let summit = if y == 3.75 { 5.6 } else { y + 1.9 };
+        band([radius, y], [radius, summit], MARBLE);
+        band([radius, summit], [inner, summit], MARBLE);
+    }
+    band([13.8, 5.6], [13.8, 15.], LACQUER);
+    for (eave, peak, radius, crown) in [
+        (15., 21.4, 16.36, 10.5), (22.8, 27.6, 12.8, 7.6), (29.3, 36.2, 9.1, 0.95),
+    ] {
+        band([radius, eave - 0.55], [radius, eave], BLUE_TRIM);
+        band([radius, eave], [radius * 0.82 + crown * 0.18, eave + 0.8], BLUE_TILE);
+        band([radius * 0.82 + crown * 0.18, eave + 0.8], [crown, peak], BLUE_TILE);
+        if crown > 1. {
+            band([crown, peak], [crown, if eave < 20. { 22.8 } else { 29.3 }], LACQUER);
+        }
+    }
+    band([0.95, 36.2], [0.85, 37.2], GOLD_TILE);
+    band([0.85, 37.2], [0.27, 38.], GOLD_TILE);
+    for i in 0..12 {
+        let [x, _, z] = ring(i * 4, 14.15, 0.);
+        hall.block([x, z], [0.72; 2], 5.6, 8.8, BRICK);
+    }
+    for angle in [0., std::f32::consts::FRAC_PI_2, std::f32::consts::PI, -std::f32::consts::FRAC_PI_2] {
+        let first = hall.0.vertices.len();
+        for (base, z, riser) in [(0., 44.8, 0.19), (1.9, 39.4, 0.185), (3.75, 33.4, 0.185)] {
+            for step in 1..=10 {
+                hall.block([0., z + 1.85 - step as f32 * 0.37], [6.8, 0.39], base, step as f32 * riser, MARBLE);
+            }
+        }
+        let rotate = Quat::from_rotation_y(angle);
+        for vertex in &mut hall.0.vertices[first..] {
+            vertex.position = (rotate * Vec3::from_array(vertex.position)).to_array();
+            vertex.normal = (rotate * Vec3::from_array(vertex.normal)).to_array();
+        }
+    }
+    hall.0
+}
+
 pub(crate) fn forbidden_city() -> ModelMesh {
     let mut mesh = Architecture(ModelMesh {
         vertices: Vec::new(),

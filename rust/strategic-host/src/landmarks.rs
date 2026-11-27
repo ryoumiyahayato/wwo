@@ -52,6 +52,12 @@ static ASSETS: &[Asset] = &[
         path: "procedural:forbidden_city_1900",
         mesh: LandmarkMesh::Original(crate::capital_landmarks::forbidden_city),
     },
+    Asset {
+        name: "Hall of Prayer for Good Harvests",
+        symbol: "government",
+        path: "procedural:hall_of_prayer_1900",
+        mesh: LandmarkMesh::Original(crate::capital_landmarks::hall_of_prayer),
+    },
 ];
 
 enum LandmarkMesh {
