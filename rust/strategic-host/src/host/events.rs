@@ -871,6 +871,8 @@ impl ApplicationHandler<HostEvent> for Host {
         let now=Instant::now();self.poll(event_loop,now);
         let city_expired = self.city_models.as_mut().is_some_and(|catalogue| catalogue.expire(now));
         self.dirty |= city_expired;
+        let city_upload = self.renderer.as_mut().is_some_and(|renderer| renderer.maintain_city_gpu(now));
+        self.dirty |= city_upload && self.battle_view.is_none();
         self.start_city_reload();
         self.animate_opening(now);
         if self.hud.menu!=HudMenu::None {self.hud.clock_drag=None;}

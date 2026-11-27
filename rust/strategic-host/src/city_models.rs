@@ -495,7 +495,7 @@ impl Catalogue {
         self.set_wanted(HashSet::new(), now);
     }
 
-    pub(crate) fn status(&self) -> serde_json::Value {
+    pub(crate) fn status(&self, gpu:impl Fn(u64,usize)->&'static str) -> serde_json::Value {
         let mut wanted = self.wanted.iter().copied().collect::<Vec<_>>();
         wanted.sort_unstable();
         let pages = wanted.into_iter().map(|index| {
@@ -504,7 +504,8 @@ impl Catalogue {
                 else if self.failed.contains(&index) { "missing_or_invalid" }
                 else if self.pending.contains_key(&index) { "loading" }
                 else { "queued" };
-            serde_json::json!({"city": self.city_ids[tile.city], "tile": tile.file, "cpu": state})
+            serde_json::json!({"city": self.city_ids[tile.city], "tile": tile.file, "cpu": state,
+                "gpu": gpu(self.revision,index)})
         }).collect::<Vec<_>>();
         let metadata_bytes = std::mem::size_of::<Self>()
             + self.tiles.capacity() * std::mem::size_of::<Tile>()

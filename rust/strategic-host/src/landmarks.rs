@@ -209,6 +209,12 @@ impl ModelKey {
     }
 
     pub fn is_city(self) -> bool { matches!(self.asset, ModelAsset::City(_) | ModelAsset::CityPage(..)) }
+    pub(crate) fn city_page_id(self) -> Option<(u64, usize)> {
+        match self.asset {
+            ModelAsset::CityPage(revision, index) => Some((revision, index)),
+            _ => None,
+        }
+    }
     pub fn city_page(revision:u64,index:usize)->Self {
         Self {asset:ModelAsset::CityPage(revision,index),lod:Lod::Far}
     }

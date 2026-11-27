@@ -229,7 +229,9 @@ impl Host {
             "pitch_degrees":self.camera.pitch().to_degrees(),
             "landmarks":self.renderer.as_ref().map(Renderer::resident_models),
             "model_instances":self.renderer.as_ref().map(Renderer::model_instances),
-            "city_models":self.city_models.as_ref().map(crate::city_models::Catalogue::status),
+            "city_models":self.city_models.as_ref().map(|catalogue| catalogue.status(|revision,index|
+                self.renderer.as_ref().map_or("absent",|renderer|renderer.city_page_gpu(revision,index)))),
+            "city_gpu":self.renderer.as_ref().map(Renderer::city_gpu_status),
             "city_reload_inflight":self.city_reload_inflight,
             "city_reload_queued":self.city_reload_queued,
             "selection":self.selected.map_or(String::new(),|o|self.id(o)),"date":self.state.date.to_string(),
