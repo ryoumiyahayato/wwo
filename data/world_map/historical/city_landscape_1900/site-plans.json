@@ -1,6 +1,62 @@
 {
   "version": 1,
   "sources": {
+    "nls_os_gb_1888_1913": {
+      "name": "Ordnance Survey, National Library of Scotland georeferenced collection",
+      "version": "Six-inch county sheets 1888–1913",
+      "url": "https://mapseries-tilesets.s3.amazonaws.com/maps/explore/index.html",
+      "rights": "Reference only. Record reuse permission for each plate before choosing production inputs.",
+      "role": "Use nearest surveyed edition. Confirm minor roads and building occupation with the 25-inch county sheets. Delineate effective coverage by layer."
+    },
+    "nls_scotland_town": {
+      "name": "Ordnance Survey, Scotland town plans",
+      "version": "1847–1895",
+      "url": "https://maps.nls.uk/townplans/",
+      "rights": "Reference only. Record reuse permission for each plate before choosing production inputs.",
+      "role": "Locate streets and building occupation on the large-scale sheets and bracket later development with dated County Series revisions."
+    },
+    "osi_county_1897_1913": {
+      "name": "Tailte Éireann, Irish Ordnance Survey",
+      "version": "25-inch sheets, 1897–1913",
+      "url": "https://tailte.ie/map-shop/professional-map-products/historic-maps-and-data/",
+      "rights": "Reference only. Record reuse permission for each plate before choosing production inputs.",
+      "role": "Later surveys are comparisons until independent evidence confirms the features in 1900."
+    },
+    "dublin_ucd": {
+      "name": "UCD Library, Ordnance Survey Dublin",
+      "version": "Suburb sheets 1860s–1890s, city sheets 1906–1909",
+      "url": "https://libguides.ucd.ie/findingmaps/mapshistDublin",
+      "rights": "Reference only. Record reuse permission for each plate before choosing production inputs.",
+      "role": "Compare earlier town sheets with second edition by feature, independently on quay and outer residential plots."
+    },
+    "sydney_slnsw": {
+      "name": "State Library of New South Wales, Sydney by Decade",
+      "version": "1890s mapping and 1906 directory, 1907–1908 chart for comparison",
+      "url": "https://guides.sl.nsw.gov.au/maps/sydney",
+      "rights": "Reference only. Record reuse permission for each plate before choosing production inputs.",
+      "role": "Use earlier ward charts and date individual foreshore and outer changes independently."
+    },
+    "brisbane_mckellar": {
+      "name": "Queensland Government, McKellar official suburban sheets",
+      "version": "1895 cadastral series",
+      "url": "https://www.data.qld.gov.au/article/case-studies/maps-windows-into-the-history-of-our-homes%2C-streets%2C-towns-and-suburbs",
+      "rights": "Reference only. Record reuse permission for each plate before choosing production inputs.",
+      "role": "Distinguish mapped roads, surveyed property and occupied parcels. Compare the 1899 map for extensions."
+    },
+    "melbourne_mmbw": {
+      "name": "State Library Victoria, Melbourne and Metropolitan Board of Works",
+      "version": "1890s series onwards, dated sheets and 1895 example",
+      "url": "https://www.slv.vic.gov.au/search-discover/explore-collections-format/maps/maps-melbourne-city-suburbs/mmbw-plans",
+      "rights": "Reference only. Record reuse permission for each plate before choosing production inputs.",
+      "role": "Use early detailed service plans and illustration index. Record separate road and building completeness."
+    },
+    "adelaide_1894": {
+      "name": "City of Adelaide Archives, Plan of the City of Adelaide",
+      "version": "1894 city plan",
+      "url": "https://www.experienceadelaide.com.au/visit/things-to-do/heritage/historical-maps-of-adelaide/",
+      "rights": "Reference only. Record reuse permission for each plate before choosing production inputs.",
+      "role": "Resolve the two planned nuclei, open belts and occupied blocks. Use separate references for suburb and port."
+    },
     "omaha_1890": {
       "name": "Sanborn, Omaha vol. 1",
       "version": "1890",
@@ -906,6 +962,1971 @@
     "Central Asia": "Confirm citadel, bazaars, irrigation and garden edges. Keep residential courtyard form apart from colonial wards."
   },
   "sites": {
+    "reba:chandler:540": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Piece Hall and Market Street",
+          "point": [
+            -1.857,
+            53.722
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "West Hill terraces",
+          "point": [
+            -1.872,
+            53.723
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Hebble mills and rail",
+          "point": [
+            -1.851,
+            53.719
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Beacon Hill escarpment",
+          "point": [
+            -1.839,
+            53.726
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use hillside fronts above mills and stop at open or steep breaks.",
+      "morphology": "Stone terrace and warehouse courts, isolated mill plots.",
+      "risks": "Do not bridge Hebble cuts with buildings; separate outlying mills.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:599": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Old Town Market Place",
+          "point": [
+            -0.333,
+            53.741
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Sculcoates terraces",
+          "point": [
+            -0.339,
+            53.76
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Hull River and Humber dock mouths",
+          "point": [
+            -0.324,
+            53.738
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "West Park and dock approaches",
+          "point": [
+            -0.374,
+            53.746
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate Old Town and dock chains from Sculcoates streets and north strips.",
+      "morphology": "Brick terraces, port basins, warehouses and rail clearances.",
+      "risks": "Time-limit dock and reclaimed land additions.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:6": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Castlegate and Union Street",
+          "point": [
+            -2.092,
+            57.148
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Rosemount terraces",
+          "point": [
+            -2.115,
+            57.15
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Dee harbour and Torry crossing",
+          "point": [
+            -2.087,
+            57.136
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Links and Don fringe",
+          "point": [
+            -2.084,
+            57.166
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate upper town, harbour and established south bank. Leave links and marsh unbuilt.",
+      "morphology": "Granite terraces and upright tenements; dock and fishery plots independent.",
+      "risks": "Map Old Aberdeen and the open gap independently even after 1891 incorporation.",
+      "source_preference": [
+        "nls_scotland_town",
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:785": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Briggate and Leeds Bridge",
+          "point": [
+            -1.542,
+            53.792
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Holbeck back-to-back lots",
+          "point": [
+            -1.555,
+            53.787
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Aire and canal mills",
+          "point": [
+            -1.54,
+            53.787
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Woodhouse Moor",
+          "point": [
+            -1.563,
+            53.811
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate mills, rail, and housing rows; keep Moor and industrial gaps.",
+      "morphology": "Brick back-to-backs and broad manufactories.",
+      "risks": "Date Aire crossings and independent outlying streets.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:788": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Clock Tower and High Street",
+          "point": [
+            -1.134,
+            52.636
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Highfields terraces",
+          "point": [
+            -1.115,
+            52.629
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Soar and western mills",
+          "point": [
+            -1.145,
+            52.634
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Victoria Park fringe",
+          "point": [
+            -1.116,
+            52.619
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate footwear and textile streets from floodplain and individual factories.",
+      "morphology": "Dense brick terraces and work courts; detached park-front structures.",
+      "risks": "Exclude modern ring road and verify covered water routes.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:813": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Castle Street and Exchange",
+          "point": [
+            -2.992,
+            53.406
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Scotland Road terraces",
+          "point": [
+            -2.98,
+            53.422
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Mersey quays",
+          "point": [
+            -3,
+            53.41
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Sefton Park fringe",
+          "point": [
+            -2.94,
+            53.381
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build port, yards, working terraces and outer occupied roads as distinct units. Preserve river and park.",
+      "morphology": "Dock warehouses, brick rows and wide dock aprons.",
+      "risks": "Birkenhead separate; verify dock opening dates.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:866": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Exchange and Market Street",
+          "point": [
+            -2.244,
+            53.484
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Ancoats mill streets",
+          "point": [
+            -2.229,
+            53.486
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Castlefield canal and rail",
+          "point": [
+            -2.254,
+            53.474
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Rusholme and Platt Fields edge",
+          "point": [
+            -2.223,
+            53.449
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Resolve canals, railway cuts and existing dwelling clusters before adding fabric.",
+      "morphology": "Brick mills, courts, terrace rows and warehouse streets.",
+      "risks": "Salford independent. Date river crossings and leave open estate fringe.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:999": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Grey Street and Grainger Town",
+          "point": [
+            -1.612,
+            54.972
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Byker and Ouseburn terraces",
+          "point": [
+            -1.58,
+            54.977
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Quayside terraces",
+          "point": [
+            -1.602,
+            54.97
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Town Moor fringe",
+          "point": [
+            -1.616,
+            54.995
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate Quayside, upper planned streets and Ouseburn industry. Preserve Moor and unbuilt steep banks.",
+      "morphology": "Stone planned blocks and workers’ terraces stepped over industry.",
+      "risks": "Gateshead independent. Exclude the 1928 Tyne Bridge.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:222": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Bristol Bridge and Corn Street",
+          "point": [
+            -2.592,
+            51.453
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Clifton and Hotwells",
+          "point": [
+            -2.617,
+            51.455
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Floating Harbour and gorge",
+          "point": [
+            -2.616,
+            51.449
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Totterdown rail slope",
+          "point": [
+            -2.58,
+            51.437
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Distinguish harbour industries from terrace plots; preserve gorge and hillside open spaces.",
+      "morphology": "Masonry terraces and wharf sheds.",
+      "risks": "Avonmouth detached port; date locks, wharves and routes.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:261": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Castle and High Street",
+          "point": [
+            -3.18,
+            51.482
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Grangetown brick rows",
+          "point": [
+            -3.185,
+            51.468
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Bute Docks and canal",
+          "point": [
+            -3.166,
+            51.462
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Taff meadow and park",
+          "point": [
+            -3.188,
+            51.492
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate castle town, worker terraces and dated dock basins with parks and flood gaps.",
+      "morphology": "Brick rows and coal-port yards.",
+      "risks": "No Cardiff Bay impoundment; date docks and railway sidings.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:372": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Market Place and cathedral",
+          "point": [
+            -1.477,
+            52.925
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Friar Gate and West End",
+          "point": [
+            -1.485,
+            52.925
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Derwent and rail works",
+          "point": [
+            -1.459,
+            52.913
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Little Chester meadow edge",
+          "point": [
+            -1.474,
+            52.936
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Split early west-bank district from river industry and rail; use dated lots at outer ends.",
+      "morphology": "Brick terraces and workers’ houses, stone civic fabric and rail workshops.",
+      "risks": "Open Darley and meadows; verify historic crossings.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:397": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "College Green",
+          "point": [
+            -6.257,
+            53.344
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Liberties Thomas Street",
+          "point": [
+            -6.275,
+            53.343
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Liffey Custom House and docks",
+          "point": [
+            -6.252,
+            53.348
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Phoenix Park west edge",
+          "point": [
+            -6.316,
+            53.354
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build both banks separately with distinct quays and open fringe outside the pre-extension borough.",
+      "morphology": "Georgian brick rows and irregular older courts, separate dock lots.",
+      "risks": "Rathmines/Pembroke require own 1900 scope; date bridges.",
+      "source_preference": [
+        "osi_county_1897_1913",
+        "dublin_ucd"
+      ]
+    },
+    "reba:chandler:402": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "High Street and Murraygate",
+          "point": [
+            -2.97,
+            56.462
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Hawkhill and West Port",
+          "point": [
+            -2.984,
+            56.459
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Camperdown docks and Tay",
+          "point": [
+            -2.958,
+            56.463
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Law slope and outer mills",
+          "point": [
+            -2.983,
+            56.478
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate waterfront, central lanes and rising tenement streets with hill and park breaks.",
+      "morphology": "Jute mill sheds and tight stone tenements.",
+      "risks": "Exclude infill; use the 1887 Tay rail bridge and then-current right of way.",
+      "source_preference": [
+        "nls_scotland_town",
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:417": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Castle ridge and High Street",
+          "point": [
+            -3.194,
+            55.949
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "New Town George Street",
+          "point": [
+            -3.202,
+            55.954
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Holyrood Park",
+          "point": [
+            -3.171,
+            55.946
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Water of Leith and Dean gorge",
+          "point": [
+            -3.22,
+            55.955
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep ridge, valley and New Town separate. Protect park and gorge slopes.",
+      "morphology": "Stepped stone tenements and closes, Georgian blocks and gardens.",
+      "risks": "Leith separate in 1900; preserve rail cuts.",
+      "source_preference": [
+        "nls_scotland_town",
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:488": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Cross and High Street",
+          "point": [
+            -4.244,
+            55.857
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Anderston tenement streets",
+          "point": [
+            -4.272,
+            55.86
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Clyde docks and bridgeheads",
+          "point": [
+            -4.264,
+            55.851
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Kelvingrove Park and terraces",
+          "point": [
+            -4.288,
+            55.868
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate stone housing, west terraces and dock works, conserving park and cut margins.",
+      "morphology": "Sandstone tenements and industrial sheds.",
+      "risks": "Date docks, bridges, and independent burgh boundaries.",
+      "source_preference": [
+        "nls_scotland_town",
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:1349": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "High Street old quays",
+          "point": [
+            -1.363,
+            54.907
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Bishopwearmouth streets",
+          "point": [
+            -1.389,
+            54.901
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Wear bridge and Monkwearmouth yards",
+          "point": [
+            -1.384,
+            54.913
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Hendon works",
+          "point": [
+            -1.364,
+            54.887
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use Wear banks and dock pockets as independent units; stop building at yards and steep cuts.",
+      "morphology": "Tight working terraces and open work plots.",
+      "risks": "Verify period Wear bridge and approach; Roker shore distinct.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:147": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Donegall Place",
+          "point": [
+            -5.929,
+            54.598
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Falls Road textile terraces",
+          "point": [
+            -5.963,
+            54.594
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Lagan and shipyard islands",
+          "point": [
+            -5.905,
+            54.606
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Northern hill fringe",
+          "point": [
+            -5.948,
+            54.633
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Differentiate river city, Shankill/Falls and east bank and period port, preserving wet gaps.",
+      "morphology": "Brick mills and terraces, shipyards with open aprons.",
+      "risks": "Date dock land-water limits and street approaches.",
+      "source_preference": [
+        "osi_county_1897_1913"
+      ]
+    },
+    "reba:chandler:186": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Bull Ring and High Street",
+          "point": [
+            -1.894,
+            52.477
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Jewellery Quarter",
+          "point": [
+            -1.914,
+            52.49
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Digbeth canal and yards",
+          "point": [
+            -1.878,
+            52.475
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Edgbaston period fringe",
+          "point": [
+            -1.935,
+            52.46
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate market, workshops and docks, using estate, park and rail land as breaks.",
+      "morphology": "Terraces with rear workshops and industrial bars.",
+      "risks": "Later Greater Birmingham limits excluded.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:189": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Darwen Street and cathedral site",
+          "point": [
+            -2.482,
+            53.745
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Audley mill terraces",
+          "point": [
+            -2.474,
+            53.739
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Canal basins",
+          "point": [
+            -2.488,
+            53.732
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Corporation Park hillside",
+          "point": [
+            -2.498,
+            53.756
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Map mills by canal and rows on slope benches, stopping at park or late streets.",
+      "morphology": "Small brick terraces and large textile sheds.",
+      "risks": "Darwen independent and do not infill between towns.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:196": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Market and Deansgate",
+          "point": [
+            -2.429,
+            53.581
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Chorley Old Road terraces",
+          "point": [
+            -2.453,
+            53.591
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Croal and train approaches",
+          "point": [
+            -2.425,
+            53.573
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Great Lever outer road",
+          "point": [
+            -2.434,
+            53.557
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use valley mills separate from hillside terraces and preserve rail cuts.",
+      "morphology": "Brick courtyard and row houses plus large mills.",
+      "risks": "Buried streams and modern roads cannot establish prior geometry.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:206": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Kirkgate and Exchange",
+          "point": [
+            -1.752,
+            53.794
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Manningham blocks",
+          "point": [
+            -1.776,
+            53.814
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Canal and Forster Square",
+          "point": [
+            -1.752,
+            53.799
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Bowling Beck mill fringe",
+          "point": [
+            -1.732,
+            53.777
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Differentiate basin and hillside plots, stopping at slope and park or mill yard.",
+      "morphology": "Sandstone terraces and warehouse blocks.",
+      "risks": "Use dated cut, culvert and yard chronology.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:220": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Old Steine and Lanes",
+          "point": [
+            -0.138,
+            50.821
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Kemptown hillside terraces",
+          "point": [
+            -0.116,
+            50.819
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Pier frontage and shingle",
+          "point": [
+            -0.136,
+            50.817
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Preston valley rail fringe",
+          "point": [
+            -0.144,
+            50.846
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate seafront band from slopes. Stop at open valley and dated outer roads.",
+      "morphology": "Fishing lanes and formal stucco terraces.",
+      "risks": "Hove independent; check sea defences and pier status.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:1020": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Norwich Market and castle",
+          "point": [
+            1.294,
+            52.629
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Colegate textile streets",
+          "point": [
+            1.296,
+            52.634
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Wensum bend and station",
+          "point": [
+            1.308,
+            52.625
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mousehold slope",
+          "point": [
+            1.316,
+            52.644
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep river loops, lanes and former wall edge; extend only along occupied streets.",
+      "morphology": "Brick and flint lanes, court plots and mills.",
+      "risks": "Keep heath and flood meadow clear.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:1021": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Old Market and Lace Market",
+          "point": [
+            -1.147,
+            52.953
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Sneinton hillside",
+          "point": [
+            -1.132,
+            52.949
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Canal and rail yards",
+          "point": [
+            -1.144,
+            52.941
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Forest recreation ground",
+          "point": [
+            -1.163,
+            52.967
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate lace warehouses and sandstone slopes from rail bottoms; keep Forest open.",
+      "morphology": "Tall lace warehouses and terrace rows.",
+      "risks": "Date rail crossings and retain Trent meadow gaps.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:1120": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Barbican and Sutton Pool",
+          "point": [
+            -4.136,
+            50.367
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Stonehouse streets",
+          "point": [
+            -4.16,
+            50.371
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Millbay docks",
+          "point": [
+            -4.157,
+            50.365
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Plymouth Hoe escarpment",
+          "point": [
+            -4.142,
+            50.361
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Treat inlet, ridge town and docks independently; preserve Hoe.",
+      "morphology": "Dense masonry port and steep terrace lots.",
+      "risks": "Devonport and East Stonehouse have independent period identities; later rebuilding excluded.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:1135": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Old Portsmouth harbour gate",
+          "point": [
+            -1.107,
+            50.791
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Portsea and Landport rows",
+          "point": [
+            -1.097,
+            50.803
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Royal Dockyard",
+          "point": [
+            -1.111,
+            50.804
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Southsea Common",
+          "point": [
+            -1.091,
+            50.779
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate older town, dockyard, Landport and dated outer occupation.",
+      "morphology": "Brick terraces, workshop ranges and open forts.",
+      "risks": "No road crossing to Gosport; document dated ferry and later extensions.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:1142": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Market and Church Street",
+          "point": [
+            -2.698,
+            53.759
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Ribbleton mill lots",
+          "point": [
+            -2.681,
+            53.765
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Ribble docks and floodplain",
+          "point": [
+            -2.737,
+            53.757
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Moor Park",
+          "point": [
+            -2.702,
+            53.777
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Link town to shipping works along confirmed alignments only; preserve meadows and park.",
+      "morphology": "Attached brick houses and mills above lower dock.",
+      "risks": "Check river re-engineering dates.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:1285": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Castle Market and cathedral",
+          "point": [
+            -1.466,
+            53.385
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Walkley terrace streets",
+          "point": [
+            -1.493,
+            53.39
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Don works toward Attercliffe",
+          "point": [
+            -1.433,
+            53.396
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Porter valley fringe",
+          "point": [
+            -1.511,
+            53.368
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Divide slope housing from Don and Sheaf industry. Preserve valley corridors and fringe.",
+      "morphology": "Brick terrace rows and large ironworks lots.",
+      "risks": "Date culverts, mills and bridges independently.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:1322": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Bargate and High Street",
+          "point": [
+            -1.404,
+            50.903
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "St Mary’s rows",
+          "point": [
+            -1.392,
+            50.905
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Town Quay",
+          "point": [
+            -1.405,
+            50.894
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Common northern fringe",
+          "point": [
+            -1.406,
+            50.93
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build walled core and wharves; extend to dated streets only.",
+      "morphology": "Compact masonry core and brick rows around open dock areas.",
+      "risks": "Exclude later Western Docks; document Itchen crossings separately.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "landscape:birkenhead": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Hamilton Square",
+          "point": [
+            -3.018,
+            53.394
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Conway Street grid",
+          "point": [
+            -3.025,
+            53.393
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Wallasey Pool docks",
+          "point": [
+            -3.035,
+            53.404
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Birkenhead Park perimeter",
+          "point": [
+            -3.042,
+            53.394
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Follow surveyed grid and dock aprons south of the pool; stop at park and yards.",
+      "morphology": "Terrace rows and separate dock sheds.",
+      "risks": "Liverpool stays separate; date ferry and rail tunnel.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "landscape:croydon": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Surrey Street market",
+          "point": [
+            -0.101,
+            51.373
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "South End roads",
+          "point": [
+            -0.1,
+            51.365
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Wandle valley west edge",
+          "point": [
+            -0.119,
+            51.37
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "East station approaches",
+          "point": [
+            -0.091,
+            51.375
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep market and station-belt streets separate from wet valley and unoccupied slopes.",
+      "morphology": "Market courts, narrow terraces, spaced suburban houses.",
+      "risks": "Preserve gaps to villages and verify railway crossings.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "landscape:gateshead": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "High Street and Oakwellgate",
+          "point": [
+            -1.602,
+            54.963
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Bensham uphill rows",
+          "point": [
+            -1.611,
+            54.948
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Tyne bridge and works landings",
+          "point": [
+            -1.608,
+            54.969
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Saltwell Park fringe",
+          "point": [
+            -1.609,
+            54.936
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use ridge occupation distinct from works and park.",
+      "morphology": "Brick terrace steps and below-slope works.",
+      "risks": "Newcastle stays separate. Use then-current High Level and swing approaches.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "landscape:oldham": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Market Place",
+          "point": [
+            -2.111,
+            53.542
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Werneth lots",
+          "point": [
+            -2.126,
+            53.534
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Glodwick mills",
+          "point": [
+            -2.096,
+            53.533
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Derker outer mill fringe",
+          "point": [
+            -2.103,
+            53.558
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep ridge housing apart from valley mills and yards.",
+      "morphology": "Brick terraces across benches and tall mill ranges.",
+      "risks": "Preserve Chadderton and Royton boundaries.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "landscape:salford": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Greengate and Chapel Street",
+          "point": [
+            -2.259,
+            53.483
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Ordsall rows",
+          "point": [
+            -2.272,
+            53.473
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Irwell and canal docks",
+          "point": [
+            -2.283,
+            53.467
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Peel Park and Pendleton fringe",
+          "point": [
+            -2.278,
+            53.496
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Date docks by ship-canal phase and stop housing at park, banks and yards.",
+      "morphology": "Brick court rows and tall mills.",
+      "risks": "Manchester independent; exclude later dock fills.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "landscape:south_shields": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Market Place",
+          "point": [
+            -1.436,
+            54.998
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Westoe lanes",
+          "point": [
+            -1.43,
+            54.984
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Tyne dock and ballast ground",
+          "point": [
+            -1.447,
+            54.993
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Marine sands and park",
+          "point": [
+            -1.417,
+            54.993
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate lower port, Westoe routes and the coast. Preserve beach and dock clearance.",
+      "morphology": "Brick dockworker terraces and maritime sheds.",
+      "risks": "North Shields independent; verify the ferry and river mouth works.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "landscape:west_ham": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Stratford Broadway",
+          "point": [
+            0,
+            51.542
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Plaistow lots",
+          "point": [
+            0.018,
+            51.526
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Canning Town dock gates",
+          "point": [
+            0.023,
+            51.51
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Lea marsh",
+          "point": [
+            -0.012,
+            51.538
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Split Stratford, Plaistow and docks; leave unbuilt marsh open.",
+      "morphology": "Terrace lots, industrial ranges and rail aprons.",
+      "risks": "London and East Ham stay separate; do not backdate later docks.",
+      "source_preference": [
+        "nls_os_gb_1888_1913"
+      ]
+    },
+    "reba:chandler:1361": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Rocks and Circular Quay",
+          "point": [
+            151.209,
+            -33.86
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Surry Hills terraces",
+          "point": [
+            151.211,
+            -33.885
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Pyrmont and Darling Harbour",
+          "point": [
+            151.195,
+            -33.869
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Moore Park southeast fringe",
+          "point": [
+            151.225,
+            -33.893
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build harbour inlets and ridge streets separately. Leave Domain, park and wet shore open.",
+      "morphology": "Sandstone core, narrow brick terrace plots and port warehouses.",
+      "risks": "No Harbour Bridge. North Shore and pre/post-1900 harbour and street renewal separated.",
+      "source_preference": [
+        "sydney_slnsw"
+      ]
+    },
+    "reba:chandler:15": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Victoria Square",
+          "point": [
+            138.6,
+            -34.93
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "North Adelaide O’Connell Street",
+          "point": [
+            138.596,
+            -34.906
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Torrens open belt",
+          "point": [
+            138.587,
+            -34.918
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "South Terrace park boundary",
+          "point": [
+            138.601,
+            -34.937
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Retain Light’s two grids separated by parklands. Add outer suburbs only where dated.",
+      "morphology": "Stone and brick cottages, civic squares and broad parkland.",
+      "risks": "Keep Park Lands interruption and Port Adelaide as a separate nucleus.",
+      "source_preference": [
+        "adelaide_1894"
+      ]
+    },
+    "reba:chandler:221": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Queen Street",
+          "point": [
+            153.026,
+            -27.469
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Spring Hill ridge cottages",
+          "point": [
+            153.026,
+            -27.458
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "South Brisbane wharf and bridge",
+          "point": [
+            153.021,
+            -27.475
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Breakfast Creek yards",
+          "point": [
+            153.044,
+            -27.439
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate the city bend and South Brisbane from upstream industry. Preserve low riparian gaps.",
+      "morphology": "Timber verandah houses and commercial warehouses.",
+      "risks": "Use the 1897 bridge and dated approaches; preserve period bank.",
+      "source_preference": [
+        "brisbane_mckellar"
+      ]
+    },
+    "reba:chandler:910": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Hoddle Grid Town Hall",
+          "point": [
+            144.966,
+            -37.815
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Carlton terraces",
+          "point": [
+            144.967,
+            -37.8
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Yarra docks and rail",
+          "point": [
+            144.946,
+            -37.821
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Royal Park fringe",
+          "point": [
+            144.952,
+            -37.787
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate CBD, inner suburban nuclei and documented roads from river and rail yards and park.",
+      "morphology": "Brick and bluestone blocks, terrace houses and distinct port sheds.",
+      "risks": "Check sheet dates and preserve gaps between outer suburbs.",
+      "source_preference": [
+        "melbourne_mmbw"
+      ]
+    },
     "reba:chandler:1037": {
       "profile": "split_industrial",
       "grade": "C",

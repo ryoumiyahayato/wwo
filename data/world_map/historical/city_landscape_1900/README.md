@@ -54,6 +54,8 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 北美预审 40 城均登记具名施工单元。本次补 29 城，15 城已登记有测绘年代的地方图源，14 城已有具名空间约束并保留图幅核对待办。具体将港岸、铁路堆场、台地住宅与空地分开。未量出的道路有效覆盖仍为未知，Sanborn 图幅拼接线不作历史郊缘。
 
+不列颠群岛及大洋洲预审城市均登记具名核心、普通街区和两个边缘样区。本次补 36 张不列颠群岛卡及 4 张澳大利亚卡。不列颠群岛按六英寸图定位路网和地物，用二十五英寸图核实小路、房屋及实际覆盖。每幅图单独核对测绘与修订时间。澳大利亚分别登记悉尼、阿德莱德、布里斯班、墨尔本的城市测绘档案，明确水岸、港口、开敞公园和独立近郊边界。图源已登记，未数字化其有效覆盖。
+
 ## B4 实测
 
 - 正式 EXE 为 Build 144，路径为 `D:/programs/WWO/wwo/local-artifacts/strategic-map-phase4/wwo-map-lab.exe`。实际启动的窗口标题和 GitHub Windows CI 一致。数据来自 `D:/programs/WWO/wwo-cold-restore/runtime-97ebaf1003/data`。
