@@ -1,0 +1,83 @@
+unit,places,references,scope
+cshapes_gw_6,San Juan|Ponce|Mayagüez/Mayaguez|Arecibo,pr_census_1899,Separate named urban places and San Juan municipal reporting.
+colony_of_newfoundland,St. John's/Saint John's|Harbour Grace,british_empire_1901_principal_towns,Keep Newfoundland separate from the Canada census returns.
+cshapes_gw_31,Nassau|Dunmore Town,british_empire_1901_principal_towns,Island and colony totals are wider than the port.
+dominican_republic_1900,Santo Domingo|Santiago de los Caballeros/Santiago|Puerto Plata,,Check historic Santo Domingo and Cibao separately from colonial-era island totals.
+cshapes_gw_51,Kingston|Port Royal|Spanish Town,british_empire_1901_principal_towns,Separate Kingston and the harbour occupations.
+cshapes_gw_53,Bridgetown|Speightstown,british_empire_1901_principal_towns,Parish and colony totals are wider than the towns.
+cshapes_gw_65,Pointe-à-Pitre/Pointe a Pitre|Basse-Terre/Basse Terre,fr_overseas_stats,Separate the two ports and the territory total.
+cshapes_gw_66,Saint-Pierre/St Pierre|Fort-de-France/Fort de France,fr_overseas_stats,Keep pre-1902 Saint-Pierre distinct from Fort-de-France and later depopulation.
+cshapes_gw_80,Belize City/Belize|Corozal,british_empire_1901_principal_towns,Distinguish Belize town from the colony and its districts.
+honduras_1900,Tegucigalpa|Comayagua|La Ceiba|San Pedro Sula,,Check department and cabecera totals separately.
+nicaragua_1900,León/Leon|Granada|Managua,hammond_1909_cities,Near-period city comparison below the threshold; Nicaragua is not represented by a single town.
+costa_rica_1900,San José/San Jose|Cartago|Alajuela,,Distinguish the capital from municipality and province; common names need jurisdiction.
+cshapes_gw_115,Paramaribo|Nieuw-Nickerie/Nieuw Nickerie|Totness|Albina,suriname_report_1901,Official town figures with Paramaribo suburbs identified separately from the colony.
+cshapes_gw_120,Cayenne|Saint-Laurent-du-Maroni/Saint Laurent du Maroni,fr_overseas_stats,Distinguish penal and canton counts from ordinary towns.
+grand_duchy_of_luxembourg,Luxembourg City/Luxembourg/Luxemburg|Esch-sur-Alzette/Esch,statec_luxembourg_localities|hammond_1909_cities,Evidence brackets the census window without interpolating.
+principality_of_montenegro,Cetinje/Cettigne|Podgorica/Podgoritza|Nikšić/Niksic,,Old royal capital and other settlements checked separately.
+iceland_under_denmark,Reykjavík/Reykjavik|Akureyri,,Iceland-only counts do not locate a city.
+cshapes_gw_402,Praia/Praya|Mindelo/Porto Grande,hammond_1909_cities,Do not treat Santiago or São Vicente totals as the port population.
+cshapes_gw_404,Bolama|Bissau,,Separate the two Portuguese administrative seats and the colony total.
+cshapes_gw_411,Santa Isabel/Malabo|Bata,,Fernando Póo island does not stand for Santa Isabel.
+cshapes_gw_420,Bathurst/Banjul,british_empire_1901_principal_towns,Distinguish the town from the protectorate.
+cshapes_gw_430,Kayes|Bamako|Dakar|Saint-Louis/St Louis,fr_overseas_stats|aof_annuaire,The federation and member territories overlap as sources; record named town ownership once.
+cshapes_gw_433,Dakar|Saint-Louis/St Louis|Rufisque|Gorée/Goree,senegal_1904_census|senegal_returns|aof_annuaire,Refer to four communes; dates and coverage differ among returns.
+cshapes_gw_434,Porto-Novo/Porto Novo|Abomey/Agbome|Ouidah/Whydah|Cotonou,fr_overseas_stats|aof_annuaire|hammond_1909_cities,Separate royal and port settlements from Dahomey total.
+cshapes_gw_437,Grand-Bassam/Grand Bassam|Bingerville|Bondoukou,fr_overseas_stats|aof_annuaire,Keep late colonial totals and successors out of the period city counts.
+cshapes_gw_438,Conakry/Konakry|Timbo|Kankan,fr_overseas_stats|aof_annuaire,Check separate coastal and inland settlements.
+republic_of_liberia,Monrovia|Krootown/Kru Town|Buchanan,statesman_1899_liberia,Use joint capital count as published; retain difference from country total.
+cshapes_gw_451,Freetown|Waterloo,british_empire_1901_principal_towns,Keep named Freetown return separate from Sierra Leone colony and protectorate totals.
+cshapes_gw_452,Accra|Cape Coast/Cape Coast Castle|Elmina|Kumasi/Coomassie/Kumassi,british_empire_1901_principal_towns,Gold Coast and Ashanti sources overlap but political units differ in the snapshot.
+cshapes_gw_460,Lomé/Lome|Aného/Anecho/Little Popo|Sokodé/Sokode,de_colonial_yearbook_1914,Later official administrative geography is a name reference only.
+cshapes_gw_470,Duala/Douala|Victoria/Limbe|Buea/Buéa,de_colonial_yearbook_1914,Later official administrative geography is a name reference only.
+cshapes_gw_481,Libreville|Port-Gentil/Port Gentil,fr_overseas_stats,Port names are independent of concession or colony totals.
+cshapes_gw_484,Brazzaville|Loango,fr_overseas_stats,Do not combine Brazzaville and the opposite-bank settlement.
+congo_free_state,Léopoldville/Leopoldville/Kinshasa|Boma|Matadi,,Separate the three river settlements from the Free State.
+cshapes_gw_500,Mengo|Kampala|Entebbe,british_empire_1901_principal_towns,Keep distinct nuclei and the Buganda and protectorate totals separate.
+cshapes_gw_501,Mombasa|Nairobi,british_empire_1901_principal_towns|hammond_1909_cities,The principal coastal town and rail settlement are separate.
+cshapes_gw_510,Dar es Salaam/Dar-es-Salaam|Bagamoyo|Tabora|Ujiji,de_colonial_yearbook_1914,Distinguish mainland settlements from Zanzibar and later administrative districts.
+sultanate_of_zanzibar,Zanzibar/Zanzibar City/Stone Town,british_empire_1901_principal_towns,Island and sultanate totals include settlement outside the port.
+cshapes_gw_521,Berbera|Zeila/Zayla,british_empire_1901_principal_towns,Check harbour towns separately from British Somaliland.
+cshapes_gw_522,Djibouti/Jibuti|Obock,fr_overseas_stats,Check the succession of French administrative seats without merging them.
+ethiopian_empire,Addis Ababa/Addi Abeba/Adli Abeba|Harar/Harrar|Gondar/Gondar City,hammond_1909_cities,Near-date named city comparisons are distinct from province counts.
+cshapes_gw_531,Massawa/Massaua|Asmara/Asmera|Keren/Cheren,,Port and highland seats checked separately from colonial totals.
+cshapes_gw_540,Luanda/Loanda/São Paulo de Loanda|Benguela,,A provincial or territory count cannot stand for the town.
+cshapes_gw_541,Lourenço Marques/Lourenco Marques/Maputo|Ilha de Moçambique/Mozambique Island|Quelimane|Beira,,The port of Moçambique is neither the colony nor Lourenço Marques.
+cshapes_gw_552,Salisbury/Harare|Bulawayo,british_empire_1901_principal_towns,Check the South African census source coverage and separate two towns.
+cshapes_gw_553,Zomba|Blantyre|Limbe,british_empire_1901_principal_towns,Distinguish the old seat and settlement nuclei from the British Central Africa territory.
+orange_free_state,Bloemfontein|Kroonstad,british_empire_1901_principal_towns,Keep named towns distinct from Orange River Colony totals.
+cshapes_gw_565,Windhoek/Windhuk|Swakopmund|Lüderitz/Luderitz/Angra Pequena,de_colonial_yearbook_1914,Use later official geography to identify named settlements only.
+cshapes_gw_570,Maseru|Mafeteng,british_empire_1901_principal_towns,Whole Basutoland returns cannot determine city size.
+cshapes_gw_571,Kanye|Molepolole|Palapye/Old Palapye,british_empire_1901_principal_towns,Do not transfer the later seat at Serowe into the 1900 candidate screen.
+cshapes_gw_572,Mbabane|Manzini/Bremersdorp,,Use historic town names; protectorate or district counts are wider.
+cshapes_gw_585,Saint-Denis/St Denis|Saint-Pierre/St Pierre,fr_overseas_stats,Several colonies use these names; only same-island matches count.
+cshapes_gw_610,Villa Cisneros/Dakhla,,Identify the dated coastal post independently of the later territory.
+trucial_states,Dubai/Debai|Sharjah/Shargah|Abu Dhabi/Abu Thabi|Ras al-Khaimah/Ras el Khaimah,,Compare separate pearling ports; modern municipality totals are inadmissible.
+sultanate_of_muscat_oman,Muscat/Maskat|Muttrah/Matrah|Sur,hammond_1909_cities,Keep harbour settlements separate; source does not specify the perimeter.
+taiwan_under_japan,Taipei/Taihoku/Taipeh|Tainan/Taiwanfu|Keelung/Kirun|Tamsui/Danshui,,See the corrected Taiwan identity and principal urban nuclei records.
+kingdom_of_bhutan,Punakha|Thimphu/Thimbu|Paro,,Different seats and districts; no qualifying city figure established.
+cshapes_gw_781,Malé/Male,,The atolls and sultanate are distinct from the capital island.
+kingdom_of_nepal,Kathmandu/Katmandu|Patan/Lalitpur|Bhaktapur/Bhatgaon,statesman_1899_nepal,Keep separate valley nuclei; the capital estimate does not represent the valley.
+cshapes_gw_811,Phnom Penh/Pnom Penh/Pnompenh|Kampot|Battambang/Battambong,fr_overseas_stats|phnom_penh_1897,Period Phnom Penh estimate is separate from Cambodia and Battambang recorded separately before 1907.
+cshapes_gw_812,Luang Prabang/Luang Phrabang|Vientiane/Vien Chan,fr_overseas_stats,Keep the protectorate and named city returns separate.
+cshapes_gw_821,Kuala Lumpur|Taiping|Ipoh|Seremban,malaya_census_catalogue|british_empire_1901_principal_towns,Hold the state-level and city-level census returns separately.
+cshapes_gw_822,Johor Bahru/Johore Bahru|Kota Bharu/Kota Baharu|Alor Setar|Kuala Terengganu/Trengganu,malaya_census_catalogue,Later Malayan boundaries cannot stand for the snapshot jurisdictions.
+cshapes_gw_823,Sandakan/Elopura|Jesselton/Kota Kinabalu|Kudat,malaya_census_catalogue|british_empire_1901_principal_towns,Separate North Borneo company counts from port totals.
+cshapes_gw_824,Kuching|Sibu,malaya_census_catalogue|british_empire_1901_principal_towns,Do not conflate the Raj territory with the capital.
+sultanate_of_brunei,Brunei Town/Bandar Brunei/Bandar Seri Begawan|Kampong Ayer,,Treat current city name as a locator only; river settlement scope is unresolved.
+cshapes_gw_860,Dili/Dilly/Díli,,Keep Portuguese Timor distinct from Dutch Timor and from Dili.
+cshapes_gw_902,Perth|Fremantle|Kalgoorlie,british_empire_1901_principal_towns,Distinguish the principal towns and combined suburbs from the state.
+cshapes_gw_906,Hobart|Launceston,british_empire_1901_principal_towns,Distinguish the principal towns and combined suburbs from the island.
+cshapes_gw_911,Port Moresby|Samarai,british_empire_1901_principal_towns,Separate posts from British New Guinea territory.
+cshapes_gw_912,Herbertshöhe/Herbertshohe/Kokopo|Finschhafen|Stephansort,de_colonial_yearbook_1914,Use official administrative geography for names; the snapshot may split mainland and islands differently.
+cshapes_gw_930,Nouméa/Noumea|Bourail,fr_overseas_stats,Keep municipal and colonial returns distinct.
+cshapes_gw_940,Tulagi|Gizo/Ghizo,british_empire_1901_principal_towns,Keep the island-group totals separate from individual administrative posts.
+cshapes_gw_950,Suva|Levuka|Lautoka,british_empire_1901_principal_towns,The colonial capital and other settlements are separate from the archipelago total.
+cshapes_gw_3461,Sarajevo/Serajevo|Travnik|Banja Luka|Bihać/Bihac,donia_bosnia_census_1895,Use named 1895 settlements and keep the other Bosnia and Herzegovina administrative entries distinct.
+cshapes_gw_3462,Mostar|Trebinje,donia_bosnia_census_1895,Separate named towns from the combined territorial figure.
+cshapes_gw_4783,Old Calabar/Calabar|Bonny|Benin City|Opobo|Abeokuta/Abbeokuta,egba_treaty|hammond_1909_cities,Separate the Egba jurisdiction from the coastal protectorate; any name match needs jurisdiction.
+cshapes_gw_5200,Mogadishu/Mogadiscio|Barawa/Brava|Merca/Marka,,Check ports by their historic names; later Italian administration is not 1900 population data.
+cshapes_gw_5518,Fort Jameson/Chipata|Fort Rosebery/Mansa,british_empire_1901_principal_towns,Later town names are locators; territory or later administrative totals are not city evidence.
+cshapes_gw_5519,Livingstone|Sesheke|Lealui/Lealui Royal Village,british_empire_1901_principal_towns,Keep Barotseland seats distinct from the later railway site at Livingstone.
+emirate_of_bukhara,Bukhara/Bokhara|Kagan/New Bukhara|Karshi/Qarshi|Shahrisabz/Shahr-i-Sabz,hamilton_bukhara_1906|rickmers_bukhara_1913|masalskii_protectorates_1909,Keep the walled city and railway town separate.
+khanate_of_khiva,Khiva/Chiwa|Kunya Urgench/Konye-Urgench|Urgench/New Urgench|Hazarasp,masalskii_protectorates_1909,Khiva has a separate later urban estimate; Kunya Urgench and New Urgench need distinct locators.

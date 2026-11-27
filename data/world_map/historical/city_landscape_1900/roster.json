@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "roster_version": "1900-opening-v1",
+  "status": "frozen",
+  "reference_date": "1900-01-01",
+  "political_metadata_date": "1900-03-12",
+  "sources": "supplement-sources.csv",
+  "site_plan_file": "site-plans.json",
+  "political_screening_file": "political-screening.csv",
+  "regional_gaps": {
+    "Europe": "Missing comparable city limits for parts of Belgium, the Ottoman Balkans, and western Russia; industrial conurbations require municipal separation.",
+    "East Asia": "Qing and Korean municipal totals and homogeneous boundaries are incomplete. Maritime Customs port districts can exceed the corresponding city.",
+    "South Asia": "Some princely jurisdictions and cantonments need smaller-unit returns. Combined civilian and military town counts do not establish a continuous urban footprint.",
+    "Southeast Asia": "Java city versus regency, Saigon versus Cholon, and Bangkok city versus province remain uneven. Burmese cities use the Indian census while their region is Southeast Asia.",
+    "West Asia and North Africa": "Province and registration totals must not stand in for cities. Some Moroccan and Arabian urban estimates are broad or disagree.",
+    "Sub-Saharan Africa": "Local counts often omit people and settlements. City limits for Yoruba and Hausa centres and urban counts in Portuguese and Ottoman territories are incomplete.",
+    "North America": "Primary returns are strongest for the US and Canada. Canadian province totals do not imply the presence or absence of a major city.",
+    "Latin America and Caribbean": "1900–1905 city-specific returns are uneven. Separate federal districts, municipal rural hinterland and built-up settlements. Rio's 1900 return was annulled.",
+    "Oceania": "Australian comparisons combine cities and suburbs; New Zealand returns list principal towns and suburbs. Island-wide returns are not urban counts.",
+    "Central Asia": "1897 Russian city returns cover some cities. Separate Bukhara and Khiva and avoid replacing absent counts with district totals."
+  },
+  "coverage": "coverage.jsonl",
+  "candidates": "candidates.jsonl"
+}

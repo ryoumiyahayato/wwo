@@ -1,0 +1,235 @@
+key,name,population,longitude,latitude,source,date,definition,locator,use
+reba:chandler:988,Napoli,492693,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 1, 1901 del centro principale",
+reba:chandler:988,Napoli,553540,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 1, 1901 totale",comparison
+reba:chandler:928,Milano,463971,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 2, 1901 del centro principale",
+reba:chandler:928,Milano,491460,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 2, 1901 totale",comparison
+reba:chandler:1202,Roma,424860,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 3, 1901 del centro principale",
+reba:chandler:1202,Roma,462783,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 3, 1901 totale",comparison
+reba:chandler:1463,Torino,282753,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 4, 1901 del centro principale",
+reba:chandler:1463,Torino,335656,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 4, 1901 totale",comparison
+reba:chandler:1074,Palermo,269537,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 5, 1901 del centro principale",
+reba:chandler:1074,Palermo,309694,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 5, 1901 totale",comparison
+reba:chandler:480,Genova,159236,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 6, 1901 del centro principale",
+reba:chandler:480,Genova,234710,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 6, 1901 totale",comparison
+reba:chandler:450,Firenze,158517,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 7, 1901 del centro principale",
+reba:chandler:450,Firenze,205589,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 7, 1901 totale",comparison
+reba:chandler:1501,Venezia,145471,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 8, 1901 del centro principale",
+reba:chandler:1501,Venezia,151840,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 8, 1901 totale",comparison
+reba:chandler:267,Catania,143184,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 9, 1901 del centro principale",
+reba:chandler:267,Catania,149295,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 9, 1901 totale",comparison
+reba:chandler:195,Bologna,124424,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 10, 1901 del centro principale",
+reba:chandler:195,Bologna,152009,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 10, 1901 totale",comparison
+reba:chandler:919,Messina,92410,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 11, 1901 del centro principale",
+reba:chandler:919,Messina,149778,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 11, 1901 totale",comparison
+reba:chandler:786,Livorno,85102,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 12, 1901 del centro principale",
+reba:chandler:786,Livorno,93321,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 12, 1901 totale",comparison
+reba:chandler:1362,Siracusa,23247,,,it_census_1901_centers,1901-02-10,Population present in the principal centre.,"Tavola XI, row 73, 1901 del centro principale",
+reba:chandler:1362,Siracusa,32030,,,it_census_1901_municipal,1901-02-10,Population present in the entire contemporary municipality.,"Tavola XI, row 73, 1901 totale",comparison
+reba:chandler:57,Amsterdam,510853,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Amsterdam, Gemeentecode 363, Totale bevolking",
+reba:chandler:1208,Rotterdam,318507,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Rotterdam, Gemeentecode 599, Totale bevolking",
+reba:chandler:1413,The Hague,206022,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Gravenhage ('s), Gemeentecode 518, Totale bevolking",
+reba:chandler:1483,Utrecht,102086,,,nl_cbs_census_1899,1899-12-31,Municipality as enumerated in the 1899 census.,"Utrecht (gem.), Gemeentecode 344, Totale bevolking",
+reba:chandler:162,Berlin,1888326,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:544,Hamburg,705738,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:960,München,499959,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:790,Leipzig,455089,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:1544,Breslau,422738,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:396,Dresden,395350,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:322,Köln,372230,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:458,Frankfurt am Main,288289,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:1026,Nürnberg,261022,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:549,Hannover,235666,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:845,Magdeburg,229663,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:408,Düsseldorf,213767,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:1365,Stettin,210680,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:288,Chemnitz,206584,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+landscape:charlottenburg,Charlottenburg,189290,13.296,52.519,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:734,Königsberg,187897,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:1344,Stuttgart,176318,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:214,Bremen,163418,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+landscape:altona,Altona,161507,9.935,53.545,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+landscape:elberfeld,Elberfeld,156937,7.145,51.257,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:541,Halle,156611,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:1343,Straßburg,150268,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:394,Dortmund,142418,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+landscape:barmen,Barmen,141947,7.201,51.272,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:476,Danzig,140540,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:874,Mannheim,140384,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:2,Aachen,135235,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:213,Braunschweig,128177,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+landscape:essen,Essen,118863,7.011,51.456,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:1138,Posen,117014,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:712,Kiel,107938,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:745,Krefeld,106928,,,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:266,Cassel,106001,9.493,51.312,de_census_1900_table3,1900-12-01,Municipality in the 1900 census,"Table 3, 1900 column",
+reba:chandler:1081,Paris,2714068,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:886,Marseille,491161,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:840,Lyon,459099,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:199,Bordeaux,256638,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:803,Lille,210696,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:1440,Toulouse,149841,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+landscape:saint_etienne,Saint-Étienne,146559,4.388,45.435,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:986,Nantes,132990,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:782,Le Havre,130196,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:1003,Nice,105109,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:1209,Roubaix,124365,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:1210,Rouen,116316,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+landscape:nancy,Nancy,102559,6.183,48.693,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:1187,Reims,108385,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+landscape:toulon,Toulon,101602,5.930,43.122,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:218,Brest,84284,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:52,Amiens,90758,,,fr_census_1901,1901-03-24,Commune in the 1901 census,"Comparative population table, 1901 column",
+reba:chandler:817,London,4536541,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:186,Birmingham,522204,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:206,Bradford,279767,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:222,Bristol,328945,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:599,Kingston upon Hull,240259,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:785,Leeds,428968,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:788,Leicester,211579,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:813,Liverpool,684958,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:866,Manchester,543872,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:999,Newcastle upon Tyne,215328,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:1021,Nottingham,239743,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+landscape:salford,Salford,220957,-2.275,53.486,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:1285,Sheffield,380793,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+landscape:west_ham,West Ham,267358,0.003,51.541,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:417,Edinburgh,316837,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:488,Glasgow,761709,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:261,Cardiff,164333,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:6,Aberdeen,153114,,,gb_empire_table3,1901-03-31,Named municipal/counting jurisdiction in the 1901 census,"Table 3, 1901 column",
+reba:chandler:1135,Portsmouth,188133,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:196,Bolton,168215,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:402,Dundee,161173,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:1349,Sunderland,146077,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+landscape:oldham,Oldham,137246,-2.111,53.541,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:189,Blackburn,127626,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:220,Brighton,123478,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:1142,Preston,112989,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:1020,Norwich,111733,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+landscape:birkenhead,Birkenhead,110915,-3.016,53.389,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+landscape:gateshead,Gateshead,109888,-1.604,54.961,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:1120,Plymouth,107636,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:372,Derby,105912,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:540,Halifax,104936,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:1322,Southampton,104824,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+landscape:south_shields,South Shields,100858,-1.434,54.995,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+landscape:croydon,Croydon,133895,-0.101,51.373,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:1191,Rhondda,113735,,,gb_census_1901,1901-03-31,Named urban district or county borough in the 1901 census,"Table 7, 1901 column",
+reba:chandler:1429,Tokyo,1440121,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+reba:chandler:1049,Osaka,821235,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+landscape:kyoto,Kyoto,353139,135.768,35.012,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+reba:chandler:975,Nagoya,244145,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+reba:chandler:725,Kobe,215780,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+reba:chandler:1572,Yokohama,193762,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+reba:chandler:575,Hiroshima,122306,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+reba:chandler:974,Nagasaki,107422,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+reba:chandler:1275,Sendai,83325,,,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+landscape:kanazawa,Kanazawa,83595,136.657,36.563,jp_registration_1898,1898,"Town register, published by the Cabinet Bureau of Statistics","Urban population table, 1898 column",
+reba:chandler:988,Napoli,564000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:928,Milano,491000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1202,Roma,465000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1463,Torino,336000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1074,Palermo,310000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:480,Genova,235000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:450,Firenze,206000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1451,Trieste,179000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:195,Bologna,152000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1501,Venezia,152000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:919,Messina,150000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:267,Catania,149000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",comparison
+reba:chandler:1139,Praha,202000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:226,Brünn,109000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:1508,Wien,1675000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:504,Graz,138000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:479,Genève,105000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:91,Athens,123000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:1415,Salonika,105000,,,de_yearbook_municipal,1900,"Published 1900 comparison, in thousands","International table 4, 1900 column",
+reba:chandler:947,Montreal,267730,,,ca_census_1901,1901-03-31,City municipality,"Table V, 1901 column",
+reba:chandler:1437,Toronto,208040,,,ca_census_1901,1901-03-31,City municipality,"Table V, 1901 column",
+reba:chandler:1162,Quebec,68840,,,ca_census_1901,1901-03-31,City municipality,"Table V, 1901 column",
+reba:chandler:1361,Sydney,487932,,,gb_empire_table3,1901,City including reported suburbs,"Table 3, Australasia, 1901 column",
+reba:chandler:15,Adelaide,162261,,,gb_empire_table3,1901,City including reported suburbs,"Table 3, Australasia, 1901 column",
+reba:chandler:910,Melbourne,494129,,,gb_empire_table3,1901,City including reported suburbs,"Table 3, Australasia, 1901 column",
+reba:chandler:221,Brisbane,119428,,,gb_empire_table3,1901,City including reported suburbs,"Table 3, Australasia, 1901 column",
+reba:chandler:94,Auckland,67226,,,gb_empire_table3,1901,City including reported suburbs,"Table 3, Australasia, 1901 column",
+reba:chandler:309,Christchurch,57041,,,gb_empire_table3,1901,City including reported suburbs,"Table 3, Australasia, 1901 column",
+reba:chandler:403,Dunedin,52390,,,gb_empire_table3,1901,City including reported suburbs,"Table 3, Australasia, 1901 column",
+landscape:wellington_nz,Wellington,49344,174.777,-41.288,gb_empire_table3,1901,City including reported suburbs,"Table 3, Australasia, 1901 column",
+reba:chandler:1302,Singapore,193089,,,gb_empire_table3,1901,Named town municipality,"Table 3, 1901 column",
+landscape:george_town_penang,George Town,94086,100.340,5.418,gb_empire_table3,1901,Named town municipality,"Table 3, 1901 column",
+reba:chandler:585,City of Victoria,181918,114.154,22.281,gb_empire_table3,1901,Named town municipality,"Table 3, 1901 column",
+reba:chandler:656,Johannesburg,102078,,,za_johannesburg_sanitary_board,1896-07,Sanitary Board count of town and outlying suburbs/mines,"Town and surroundings, 1896",
+reba:chandler:257,Cape Town,169641,,,gb_empire_table3,1904,City and suburbs,"Table 3, Cape Colony, 1904 column",
+reba:chandler:1257,São Paulo,239820,,,br_ibge_1900,1900,Municipal total including rural districts,"IBGE municipal comparisons, 1900 total",
+reba:chandler:146,Belém,96560,,,br_ibge_1900,1900,Municipal total including rural districts,"IBGE municipal comparisons, 1900 total",
+reba:chandler:847,Madrid,539835,,,es_census_1900,1900,Named municipality; population present,"1903 June vital statistics, 1900 population column",
+reba:chandler:128,Barcelona,533000,,,es_census_1900,1900,Named municipality; population present,"1903 June vital statistics, 1900 population column",
+reba:chandler:1488,Valencia,213550,,,es_census_1900,1900,Named municipality; population present,"1903 June vital statistics, 1900 population column",
+reba:chandler:859,Málaga,130109,,,es_census_1900,1900,Named municipality; population present,"1903 June vital statistics, 1900 population column",
+reba:chandler:962,Murcia,111539,,,es_census_1900,1900,Named municipality; population present,"1903 June vital statistics, 1900 population column",
+reba:chandler:1584,Zaragoza,99118,,,es_census_1900,1900,Named municipality; population present,"1903 June vital statistics, 1900 population column",
+reba:chandler:183,Bilbao,83306,,,es_census_1900,1900,Named municipality; population present,"1903 June vital statistics, 1900 population column",
+landscape:sevilla,Sevilla,148315,-5.993,37.386,es_census_1900,1900,Named municipality; population present,"1903 June vital statistics, 1900 population column",
+reba:chandler:921,Ciudad de México,344721,,,mx_census_1900,1900-10-28,Locality classified as Ciudad,"1930 summary, city comparison, 1900 row",
+reba:chandler:514,Guadalajara,101208,,,mx_census_1900,1900-10-28,Locality classified as Ciudad,"1930 summary, city comparison, 1900 row",
+reba:chandler:1150,Puebla,93521,,,mx_census_1900,1900-10-28,Locality classified as Ciudad,"1930 summary, city comparison, 1900 row",
+reba:chandler:561,La Habana,235981,,,cu_census_1899,1899-10-16,City as separately enumerated,"Table IV, Habana",
+reba:chandler:1250,Santiago,256403,,,cl_census_1895,1895-11-28,Named city,"Cuadro II, municipal urban comparison",
+reba:chandler:1250,Santiago,332724,,,cl_census_1895,1907-11-28,Named city,"Cuadro II, municipal urban comparison",comparison
+reba:chandler:1494,Valparaíso,122447,,,cl_census_1895,1895-11-28,Named city,"Cuadro II, municipal urban comparison",
+reba:chandler:1494,Valparaíso,162447,,,cl_census_1895,1907-11-28,Named city,"Cuadro II, municipal urban comparison",comparison
+landscape:hankou,Hankou,800000,114.286,30.564,zh_statesman_1899,1899,"Published port estimate, boundary unknown","Hankau row (800,000; footnote), p. 791",
+landscape:wuchang,Wuchang,250000,114.300,30.541,zh_wuchang_1903,1903,Period estimate named city,"1903 textbook, Wuchang",
+landscape:hankou,Hankou,350000,114.286,30.564,zh_1918_urban,1918,Historical city estimate for comparison only,"Appendix A1, Hubei rows",comparison
+landscape:wuchang,Wuchang,250000,114.300,30.541,zh_1918_urban,1918,Historical city estimate for comparison only,"Appendix A1, Hubei rows",comparison
+landscape:hanyang,Hanyang,150000,114.264,30.549,zh_1918_urban,1918,Historical city estimate for comparison only,"Appendix A1, Hubei rows",comparison
+reba:chandler:1038,Omdurman,46000,,,sd_gleichen_1905,1904,Town proper after the 1898 battle,Vol. 1 pp. 46–47,comparison
+landscape:kano,Kano,30000,8.518,11.992,ng_kano_growth,1903,"Market alone, not a municipal population","Table 1, Lugard",comparison
+landscape:kano,Kano,83000,8.518,11.992,ng_kano_growth,1932,"Ancient city, colonial government estimate","Table 1, colonial government",comparison
+landscape:st_johns_newfoundland,St. John's,29594,-52.704,47.565,british_empire_1901_principal_towns,1901,Reported town population.,"Table 3, Newfoundland",
+landscape:belize_town,Belize,9113,-88.187,17.496,british_empire_1901_principal_towns,1901,Named town in British Honduras.,"Table 3, British Honduras",
+landscape:bathurst_gambia,Bathurst,8807,-16.581,13.454,british_empire_1901_principal_towns,1901,Named town; present-day Banjul.,"Table 3, Gambia",
+landscape:freetown,Freetown,34463,-13.233,8.489,british_empire_1901_principal_towns,1901,"Named town, distinct from the colony and protectorate.","Table 3, Sierra Leone",
+landscape:kingston_jamaica,Kingston,57000,-76.795,17.974,british_empire_1901_principal_towns,1901,Combined estimated population of Kingston and Port Royal. The total is an upper bound for Kingston only.,"Table 3, Jamaica",comparison
+landscape:perth_western_australia,Perth,27553,115.86,-31.955,british_empire_1901_principal_towns,1901,Principal town count in Western Australia.,"Table 3, Western Australia",
+landscape:hobart,Hobart,24654,147.329,-42.881,british_empire_1901_principal_towns,1901,Principal town count in Tasmania.,"Table 3, Tasmania",
+landscape:bloemfontein,Bloemfontein,25873,26.217,-29.116,british_empire_1901_principal_towns,1904,Civil population in the named town; excludes military.,"Table 3, Orange River Colony; 1904 returns",
+landscape:kathmandu,Katmandu,50000,85.307,27.705,statesman_1899_nepal,1899,Approximate capital population; observation year unspecified.,"Nepal, p. 803",dated_publication
+landscape:monrovia,Monrovia,5000,-10.807,6.317,statesman_1899_liberia,1897,Monrovia together with Krootown.,"Liberia, p. 781",
+landscape:luxembourg_city,Luxembourg-ville,32761,6.132,49.61,statec_luxembourg_localities,1890,Retrospective locality series.,"Table 4, Luxembourg-ville, 1890",comparison
+landscape:luxembourg_city,Luxembourg-ville,45744,6.132,49.61,statec_luxembourg_localities,1910,Retrospective locality series.,"Table 4, Luxembourg-ville, 1910",comparison
+landscape:sarajevo,Sarajevo,38083,18.429,43.859,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:travnik,Travnik,6261,17.664,44.227,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:banja_luka,Banja Luka,13566,17.191,44.769,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:bihac,Bihac,3943,15.868,44.811,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:mostar,Mostar,14370,17.815,43.337,donia_bosnia_census_1895,1895-04-22,Town population in the published census tabulation.,"Table 1, 1895 column",
+landscape:bukhara,Bokhara,100000,64.417,39.775,hamilton_bukhara_1906,1906,Named town estimate; year of observation unspecified.,"Distribution of population, p. 29",dated_publication
+landscape:bukhara,Bukhara,78650,,,masalskii_protectorates_1909,1909,Retrospective series reports an estimate of the city.,"Table 1, protectorate estimates",comparison
+landscape:karshi,Karshi,60000,65.8,38.86,hamilton_bukhara_1906,1906,Named town estimate; year of observation unspecified.,"Distribution of population, p. 29",dated_publication
+landscape:khiva,Khiva,26070,60.361,41.378,masalskii_protectorates_1909,1909,Estimate for the named city in the protectorate.,"Table 1, protectorate estimates",comparison
+reba:chandler:5,Abbeokuta,150000,,,hammond_1909_cities,1909,Near-period published estimate; observation date and urban bounds unspecified.,"p. 75, Abbeokuta",dated_publication
+reba:chandler:5,Abeokuta,100000,,,large_cities_nyheritage,,Estimated city figure; date and bounds unspecified.,"Abeokuta, Yoruba, marked estimate",comparison
+reba:chandler:550,Hanoi,103000,,,hanoi_hitotsubashi_table6,1900,"Hanoi total, reconstructed series (a). Contemporary city perimeter unresolved.","Table 6, Hanoi total (a), 1900",
+reba:chandler:550,Hanoi,51000,,,hanoi_hitotsubashi_table6,1907,Hanoi total in a different series. Coverage not interchangeable.,"Table 6, Hanoi total (b), 1907",comparison
+reba:chandler:550,Hanoi,86000,,,hanoi_hitotsubashi_table6,1913,Hanoi total in a different series. Coverage not interchangeable.,"Table 6, Hanoi total (b), 1913",comparison
+reba:chandler:550,Hanoi,150000,,,large_cities_nyheritage,,Estimated city figure; date and bounds unspecified.,"Hanoi, Tongking, marked estimate",comparison
+reba:chandler:70,Tananarive,61068,,,gallieni_madagascar_1905,1905-01-01,"Named capital, excluding military per period summary.","p. 475, La capitale Tananarive",
+reba:chandler:70,Tananarive,260000,,,large_cities_nyheritage,,Secondary atlas estimate with unresolved perimeter and date.,"Tananarive, Madagascar, marked estimate",comparison
+landscape:pr_san_juan,San Juan,32048,-66.116,18.466,pr_census_1899,1899-11-10,Report treats whole municipality as the city.,"Population discussion, p. 43",
+landscape:pr_ponce,Ponce,27952,-66.614,18.011,pr_census_1899,1899-11-10,Ponce and its port form one city for this count.,"Population discussion, p. 43",
+landscape:pr_mayaguez,Mayagüez,15187,-67.14,18.201,pr_census_1899,1899-11-10,"Named urban locality, separate from district.","Population table, Mayaguez city",
+landscape:pr_arecibo,Arecibo,8008,-66.714,18.474,pr_census_1899,1899-11-10,"Named urban locality, separate from district.","Population table, Arecibo city",
+landscape:paramaribo,Paramaribo,31817,-55.15,5.823,suriname_report_1901,1900,Town and suburbs in the administrative series.,"Bijlage C(b), Paramaribo",
+landscape:nieuw_nickerie,Nieuw-Nickerie,1347,-56.99,5.936,suriname_report_1901,1900,"Named town, separate from the district.","Bijlage C(b), p. 2, footnote 3",
+landscape:totness,Totness,630,-56.327,5.877,suriname_report_1901,1900,"Named town, separate from the district.","Bijlage C(b), p. 2",
+landscape:albina,Albina,313,-54.055,5.502,suriname_report_1901,1900,"Named town, separate from the district.","Bijlage C(b), p. 2",
+landscape:ni_granada,Granada,25000,-85.956,11.93,hammond_1909_cities,1909,Named Nicaraguan city in period comparative index.,"Granada, Nicaragua, p. 77",dated_publication_comparison
+landscape:managua,Managua,30000,-86.273,12.156,hammond_1909_cities,1909,Named capital in period comparative index.,"Managua, Nicaragua, p. 78",dated_publication_comparison
+landscape:addis_ababa,Addis Ababa,35000,38.753,9.034,hammond_1909_cities,1909,Named capital in period comparative index.,"Adli Abeba, Abyssinia, p. 75",dated_publication_comparison
+landscape:muscat,Muscat,60000,58.59,23.613,hammond_1909_cities,1909,Named harbour town; whether Muttrah is included is unspecified.,"Maskat, Arabia, p. 78",dated_publication_comparison
+landscape:mombasa,Mombasa,27000,39.671,-4.06,hammond_1909_cities,1909,Named port in period comparative index.,"Mombasa, Br. E. Africa, p. 78",dated_publication_comparison
+landscape:porto_novo,Porto-Novo,50000,2.619,6.492,hammond_1909_cities,1909,Named town in period comparative index.,"Porto Novo, Dahomey, p. 79",dated_publication_comparison
+landscape:praia,Praia,20000,-23.509,14.915,hammond_1909_cities,1909,Named town in period comparative index.,"Praya, Cape Verde Islands, p. 79",dated_publication_comparison
+landscape:phnom_penh,Phnom Penh,50000,104.93,11.57,phnom_penh_1897,1897,Named city estimate quoted in the historical study.,"ASIEN 63, section on Phnom Penh",
+landscape:phnom_penh,Pnum Penh,60000,104.93,11.57,hammond_1909_cities,1909,Named city in period comparative index.,"Pnum Penh, Cambodia, p. 79",dated_publication_comparison
+landscape:rufisque,Rufisque,19200,-17.27,14.72,rufisque_returns,1904,"Reported local figure, separate from Dakar.","Perspectives historiques, Rufisque",
