@@ -63,6 +63,14 @@ struct CityBatch {
         let rank=(f32(bayer[p.y*4u+p.x])+.5)/16.;
         if rank<input.lod_range.x || rank>=input.lod_range.y {discard;}
     }
+    return shade_model(input, metre_dx, metre_dy);
+}
+
+@fragment fn opaque_city_fragment(input: Output) -> @location(0) vec4f {
+    return shade_model(input, dpdx(input.local_metres), dpdy(input.local_metres));
+}
+
+fn shade_model(input: Output, metre_dx: vec3f, metre_dy: vec3f) -> vec4f {
     let sun = normalize(vec3f(-0.38, 0.84, 0.39));
     let light = 0.46 + 0.54 * max(0., dot(normalize(input.normal), sun));
     var linear = clamp(input.color.rgb * light, vec3f(0.), vec3f(1.));

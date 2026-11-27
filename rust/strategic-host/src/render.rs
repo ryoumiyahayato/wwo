@@ -511,6 +511,7 @@ struct CityBatchDraw {
     page: ModelKey,
     kit: ModelKey,
     module: usize,
+    opaque: bool,
     instances: [std::ops::Range<u32>;city_models::MAX_INSTANCE_RUNS],
 }
 
@@ -576,6 +577,7 @@ impl CityUploads {
 struct ModelLayer {
     pipeline: wgpu::RenderPipeline,
     city_pipeline: wgpu::RenderPipeline,
+    opaque_city_pipeline: wgpu::RenderPipeline,
     city_uniforms: wgpu::Buffer,
     city_bindings: wgpu::BindGroup,
     city_batches: Vec<CityBatchDraw>,
@@ -630,7 +632,7 @@ impl ModelLayer {
             resource:wgpu::BindingResource::Buffer(wgpu::BufferBinding {
             buffer:&city_uniforms,offset:0,size:std::num::NonZeroU64::new(batch_bytes),
         })}]);
-        let pipeline=|vertex_entry,instance_bytes,attributes:&[wgpu::VertexAttribute],groups:&[&wgpu::BindGroupLayout]| {
+        let pipeline=|vertex_entry,fragment_entry,instance_bytes,attributes:&[wgpu::VertexAttribute],groups:&[&wgpu::BindGroupLayout]| {
             let stages=device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label:Some("WWO static model"),bind_group_layouts:groups,push_constant_ranges:&[],
             });
@@ -654,18 +656,20 @@ impl ModelLayer {
                     }],
                 },
                 fragment: Some(wgpu::FragmentState {
-                    module: &shader, entry_point: Some("model_fragment"), compilation_options: Default::default(),
+                    module: &shader, entry_point: Some(fragment_entry), compilation_options: Default::default(),
                     targets: &[Some(wgpu::ColorTargetState { format, blend: None, write_mask: wgpu::ColorWrites::ALL })],
                 }),
             })
         };
-        let city_pipeline=pipeline("city_vertex",std::mem::size_of::<landmarks::FootprintModel>() as u64,
-            &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x2,5=>Float32x3],
-            &[&material_layout,&city_layout]);
-        let pipeline=pipeline("model_vertex",std::mem::size_of::<ModelInstance>() as u64,
+        let city_attributes=wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x2,5=>Float32x3];
+        let city_groups=[&material_layout,&city_layout];
+        let city_stride=std::mem::size_of::<landmarks::FootprintModel>() as u64;
+        let city_pipeline=pipeline("city_vertex","model_fragment",city_stride,&city_attributes,&city_groups);
+        let opaque_city_pipeline=pipeline("city_vertex","opaque_city_fragment",city_stride,&city_attributes,&city_groups);
+        let pipeline=pipeline("model_vertex","model_fragment",std::mem::size_of::<ModelInstance>() as u64,
             &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x4,8=>Float32x4],
             &[&material_layout]);
-        Self { pipeline, city_pipeline, city_uniforms, city_bindings, city_batches:Vec::new(),city_batch_uniforms:Vec::new(),
+        Self { pipeline, city_pipeline, opaque_city_pipeline, city_uniforms, city_bindings, city_batches:Vec::new(),city_batch_uniforms:Vec::new(),
             materials, depth: None, residents: HashMap::new(), visible: HashSet::new(),
             pending: HashSet::new(), failed: HashSet::new(), events, city_override:None,city_revision:0,
             city_fixed_bytes:surface.city_water.size()+surface.material_bytes+batch_bytes*(city_models::MAX_RESIDENT*MODULES) as u64,
@@ -769,7 +773,7 @@ impl ModelLayer {
                                 material:[city_material,mpp,0.,0.],padding:[0;24],
                             });
                             self.city_batches.push(CityBatchDraw {page:key,kit:ModelKey::city_detail(city.kit,module),
-                                module,instances:batch.instances.clone()});
+                                module,opaque:lod_range[0] == 1.,instances:batch.instances.clone()});
                         }
                         resident.last_drawn=now;
                     }
@@ -931,7 +935,14 @@ impl ModelLayer {
         }
         if !self.city_batches.is_empty() {
             pass.set_pipeline(&self.city_pipeline);
+            let mut opaque=false;
             for (slot,batch) in self.city_batches.iter().enumerate() {
+                // Fully opaque instances can use early depth testing. Keep the
+                // draw order so an equal-depth overlap produces the same colour.
+                if opaque != batch.opaque {
+                    opaque=batch.opaque;
+                    pass.set_pipeline(if opaque {&self.opaque_city_pipeline} else {&self.city_pipeline});
+                }
                 let kit=&self.residents[&batch.kit];
                 let page=&self.residents[&batch.page];
                 let instances=page.city_instances.as_ref().unwrap()[batch.module].as_ref().unwrap();
