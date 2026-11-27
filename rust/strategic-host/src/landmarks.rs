@@ -185,7 +185,7 @@ impl FootprintModel {
 enum Lod { Single, Far, Near }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-enum ModelAsset { Landmark(usize), City(usize), CityPage(u64,usize), Park(usize), Transport(TransportModel, ModelLod) }
+enum ModelAsset { Landmark(usize), City(usize), CityKit(usize,usize), CityPage(u64,usize), Park(usize), Transport(TransportModel, ModelLod) }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ModelKey { asset: ModelAsset, lod: Lod }
@@ -202,13 +202,16 @@ impl ModelKey {
         match self.asset {
             ModelAsset::Landmark(asset) => ASSETS[asset].name,
             ModelAsset::City(module) => R40_MODULES[module],
+            ModelAsset::CityKit(_,role) => crate::city_kit::ROLES[role],
             ModelAsset::CityPage(..) => "City block page",
             ModelAsset::Park(_) => "Park trees",
             ModelAsset::Transport(model, _) => model.id(),
         }
     }
 
-    pub fn is_city(self) -> bool { matches!(self.asset, ModelAsset::City(_) | ModelAsset::CityPage(..)) }
+    pub fn is_city(self) -> bool {
+        matches!(self.asset, ModelAsset::City(_) | ModelAsset::CityKit(..) | ModelAsset::CityPage(..))
+    }
     pub(crate) fn city_page_id(self) -> Option<(u64, usize)> {
         match self.asset {
             ModelAsset::CityPage(revision, index) => Some((revision, index)),
@@ -218,8 +221,9 @@ impl ModelKey {
     pub fn city_page(revision:u64,index:usize)->Self {
         Self {asset:ModelAsset::CityPage(revision,index),lod:Lod::Far}
     }
-    pub(crate) fn city_detail(module:usize)->Self {
-        Self {asset:ModelAsset::City(module),lod:Lod::Near}
+    pub(crate) fn city_detail(kit: Option<usize>, role: usize) -> Self {
+        let asset = kit.map_or(ModelAsset::City(role+1), |kit| ModelAsset::CityKit(kit,role));
+        Self { asset, lod: Lod::Near }
     }
     pub(crate) fn park(site:usize)->Self {
         Self {asset:ModelAsset::Park(site),lod:Lod::Single}
@@ -556,6 +560,7 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
             LandmarkMesh::Original(build) => return Ok(build()),
         },
         ModelAsset::City(_) => city_override.unwrap_or(R40_MODELS),
+        ModelAsset::CityKit(kit,role) => return Ok(crate::city_kit::build(kit,role,true)),
         ModelAsset::CityPage(..) => return Err(io::Error::other("City page mesh was not loaded")),
         ModelAsset::Park(site) => return Ok(crate::city_parks::mesh(site)),
         ModelAsset::Transport(model, lod) => {
@@ -582,7 +587,7 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
         ModelAsset::City(module) => {
             append(city_node(&glb, module, key.lod)?, Mat4::IDENTITY, blob, key.lod, &mut model)?;
         }
-        ModelAsset::Transport(..) | ModelAsset::CityPage(..) | ModelAsset::Park(_) => unreachable!(),
+        ModelAsset::Transport(..) | ModelAsset::CityKit(..) | ModelAsset::CityPage(..) | ModelAsset::Park(_) => unreachable!(),
     }
     if model.indices.is_empty() {
         return Err(io::Error::other(format!("{} has no static triangles", key.model())));

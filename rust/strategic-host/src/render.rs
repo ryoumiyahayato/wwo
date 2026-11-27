@@ -409,6 +409,7 @@ struct CityBatchUniform {
 
 struct CityBatchDraw {
     page: ModelKey,
+    kit: ModelKey,
     module: usize,
     instances: std::ops::Range<u32>,
 }
@@ -603,7 +604,7 @@ impl ModelLayer {
             || model.city_page.is_some()).map(|model| model.key));
         for city in models.iter().filter_map(|model|model.city_page.as_ref()).filter(|city|city.preload) {
             self.visible.extend(city.geometry.instances.iter().enumerate().filter(|(_,rows)|!rows.is_empty())
-                .map(|(module,_)|ModelKey::city_detail(module+1)));
+                .map(|(module,_)|ModelKey::city_detail(city.kit,module)));
         }
         self.residents.retain(|key, _| self.visible.contains(key) || key.is_city());
         self.city_meshes.retain(|key, _| self.visible.contains(key));
@@ -650,7 +651,7 @@ impl ModelLayer {
             }
             let lod_range=self.lod_range(model);
             if let Some(resident) = self.residents.get_mut(&key).filter(|resident| resident.mesh_ready()) {
-                let city_material = model.city_page.as_ref().map_or(0., |city|
+                let city_material = model.city_page.as_ref().filter(|city|city.kit.is_none()).map_or(0., |city|
                     if city.paris {2.} else {1.});
                 if let Some(city)=model.city_page.as_ref().filter(|city|city.preload) {
                     if lod_range[0]>0. {
@@ -661,7 +662,8 @@ impl ModelLayer {
                                 inverse_size_and_opacity:[x,y,z,lod_range[0]],
                                 material:[city_material,mpp,0.,0.],padding:[0;24],
                             });
-                            self.city_batches.push(CityBatchDraw {page:key,module,instances:batch.instances.clone()});
+                            self.city_batches.push(CityBatchDraw {page:key,kit:ModelKey::city_detail(city.kit,module),
+                                module,instances:batch.instances.clone()});
                         }
                         resident.last_drawn=now;
                     }
@@ -682,9 +684,13 @@ impl ModelLayer {
             queue.write_buffer(&self.city_uniforms,0,uniforms);
             self.city_transfer_bytes+=uniforms.len() as u64;
         }
+        let mut city_jobs = self.pending.iter().filter(|key| key.is_city()).count()
+            + self.city_meshes.len();
         for &key in &self.visible {
             if key.city_page_id().is_some() || self.residents.contains_key(&key) || self.city_meshes.contains_key(&key)
+                || (key.is_city() && city_jobs >= 6)
                 || self.failed.contains(&key) || !self.pending.insert(key) {continue;}
+            city_jobs += usize::from(key.is_city());
             let events = self.events.clone();
             let revision=if key.is_city() {self.city_revision}else{0};
             let bytes=self.city_override.clone().filter(|_|key.is_city());
@@ -710,7 +716,7 @@ impl ModelLayer {
         if let Some(city)=&model.city_page {
             if !self.residents.get(&model.key).is_some_and(ResidentModel::detail_ready)
                 || city.batches.iter().enumerate().any(|(i,batch)|batch.is_some()
-                    && !self.residents.get(&ModelKey::city_detail(i+1)).is_some_and(ResidentModel::mesh_ready)) {
+                    && !self.residents.get(&ModelKey::city_detail(city.kit,i)).is_some_and(ResidentModel::mesh_ready)) {
                 return [0.,model.lod_range[1]];
             }
         }
@@ -820,7 +826,7 @@ impl ModelLayer {
         if !self.city_batches.is_empty() {
             pass.set_pipeline(&self.city_pipeline);
             for (slot,batch) in self.city_batches.iter().enumerate() {
-                let kit=&self.residents[&ModelKey::city_detail(batch.module+1)];
+                let kit=&self.residents[&batch.kit];
                 let page=&self.residents[&batch.page];
                 let instances=page.city_instances.as_ref().unwrap()[batch.module].as_ref().unwrap();
                 pass.set_bind_group(1,&self.city_bindings,&[(slot*std::mem::size_of::<CityBatchUniform>()) as u32]);
@@ -1429,14 +1435,10 @@ impl Renderer {
     }
 
     pub fn model_instances(&self) -> Vec<(&'static str, usize)> {
-        let mut batched=[0;MODULES];
-        for batch in &self.models.city_batches {
-            batched[batch.module]+=batch.instances.len();
-        }
         let mut counts:HashMap<_,_>=self.models.residents.iter()
             .map(|(key,model)|(*key,model.transforms.len())).collect();
-        for (i,count) in batched.into_iter().enumerate() {
-            *counts.entry(ModelKey::city_detail(i+1)).or_default()+=count;
+        for batch in &self.models.city_batches {
+            *counts.entry(batch.kit).or_default()+=batch.instances.len();
         }
         let mut models:Vec<_>=counts.into_iter().filter(|&(_,count)|count>0)
             .map(|(key,count)|(key.model(),count)).collect();

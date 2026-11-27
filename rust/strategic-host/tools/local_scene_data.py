@@ -9,7 +9,7 @@ from shapely import box, intersects_xy, prepare, segmentize, transform
 from shapely.geometry import MultiLineString, MultiPolygon, mapping
 from zstandard import ZstdDecompressor
 
-from build_city_models import RECORD, transforms
+from build_city_models import RECORD, ROLES, transforms
 from build_city_water import SITES, prepared_roads, sections
 
 
@@ -19,11 +19,14 @@ RIVER_IDS = ("seine", "thames")
 
 def _building_features(root, region):
     catalog = json.loads((root / "catalogue.json").read_text(encoding="utf-8-sig"))
-    if catalog["version"] != "wwo-city-models-v1":
+    if catalog["version"] not in ("wwo-city-models-v1", "wwo-city-models-v2"):
         raise ValueError("Unsupported city building catalogue")
     decoder = ZstdDecompressor()
     prepare(region)
     for city in catalog["cities"]:
+        profile = city.get("kit")
+        models = ROLES if profile else BUILDING_NODES
+        magic = b"WWOWCB02" if profile else b"WWOWCB01"
         for tile in city["tiles"]:
             if not region.intersects(box(*tile["bounds"])):
                 continue
@@ -31,7 +34,7 @@ def _building_features(root, region):
             with path.open("rb") as source:
                 header = source.read(12)
                 count = tile["buildings"]
-                if header != b"WWOWCB01" + struct.pack("<I", count) or not 1 <= count <= 12000:
+                if header != magic + struct.pack("<I", count) or not 1 <= count <= 12000:
                     raise ValueError(f"Invalid WCB page header in {path}")
                 size = count * RECORD.size
                 with decoder.stream_reader(source) as stream:
@@ -42,15 +45,17 @@ def _building_features(root, region):
                 xy = (lon / 1e6, lat / 1e6)
                 if not intersects_xy(region, *xy):
                     continue
-                if not 1 <= kit <= len(BUILDING_NODES) or flags != 0 or not all((width, depth, height)):
+                if not 1 <= kit <= len(models) or flags != 0 or not all((width, depth, height)):
                     raise ValueError(f"Invalid WCB placement in {path}")
+                asset = ({"profile": profile, "role": models[kit-1]} if profile else
+                         {"node": models[kit-1], "roof_layer": 10, "wall_layer": 11})
                 yield {
-                    "type": "Feature", "id": f"wcb:{city['name'].lower()}:{lon}:{lat}:{heading}",
+                    "type": "Feature", "id": f"wcb:{city.get('id', city['name'].lower())}:{lon}:{lat}:{heading}",
                     "geometry": {"type": "Point", "coordinates": xy},
-                    "properties": {"kind": "building", "node": BUILDING_NODES[kit-1],
+                    "properties": {"kind": "building", **asset,
                                    "heading_degrees": heading / 100, "width_m": width / 10,
                                    "depth_m": depth / 10, "height_m": height / 10,
-                                   "roof_layer": 10, "wall_layer": 11, "source": city["source"]},
+                                   "source": city["source"]},
                 }
 
 
@@ -102,4 +107,5 @@ def read_city_scene(sources: Path, buildings: Path, center: tuple[float, float],
 def _collection(center, size_km, features):
     return {"type": "FeatureCollection", "coordinate_system": "OGC:CRS84", "center": center,
             "size_m": size_km * 1000, "model_library": "assets/settlements/urban_landscape_r40.glb",
+            "model_profiles": "assets/settlements/city-kits-1900.json",
             "material_atlas": "rust/strategic-host/src/surface-materials.png", "features": features}
