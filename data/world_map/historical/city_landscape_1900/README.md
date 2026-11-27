@@ -56,6 +56,8 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 不列颠群岛及大洋洲预审城市均登记具名核心、普通街区和两个边缘样区。本次补 36 张不列颠群岛卡及 4 张澳大利亚卡。不列颠群岛按六英寸图定位路网和地物，用二十五英寸图核实小路、房屋及实际覆盖。每幅图单独核对测绘与修订时间。澳大利亚分别登记悉尼、阿德莱德、布里斯班、墨尔本的城市测绘档案，明确水岸、港口、开敞公园和独立近郊边界。图源已登记，未数字化其有效覆盖。
 
+南亚 28 城、东南亚 10 城和中亚 2 城均已有具名施工单元。本次补 28 张南亚卡及 7 张东南亚卡。印度图册按城图区分道路、街廓及外缘，省图只作主干和地形约束。南亚城镇与兵营各用独立建设范围，保留其间空地。曼谷、新加坡、巴达维亚、泗水、梭罗和仰光分别登记近年图源与水系约束。道路矢量及各图层边界待逐幅核实。
+
 ## B4 实测
 
 - 正式 EXE 为 Build 144，路径为 `D:/programs/WWO/wwo/local-artifacts/strategic-map-phase4/wwo-map-lab.exe`。实际启动的窗口标题和 GitHub Windows CI 一致。数据来自 `D:/programs/WWO/wwo-cold-restore/runtime-97ebaf1003/data`。

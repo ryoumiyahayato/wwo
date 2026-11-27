@@ -1,6 +1,90 @@
 {
   "version": 1,
   "sources": {
+    "india_constable_1893": {
+      "name": "Constable's Hand Atlas of India",
+      "version": "1893, town and provincial sheets",
+      "url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~312755~90082010",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Use only locality-specific symbols and surveyed alignments. Province map scale has no minor streets."
+    },
+    "india_gazetteer_atlas": {
+      "name": "Imperial Gazetteer of India atlas",
+      "version": "1909 publication; survey and compilation dates vary",
+      "url": "https://dsal.uchicago.edu/reference/gaz_atlas_1909/",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Use named Plans of Towns where available. Treat later editions as comparisons until a period source corroborates a feature."
+    },
+    "india_survey_catalogue": {
+      "name": "Secretary of State for India in Council, catalogue of maps and plans",
+      "version": "1891 catalogue, survey dates by entry",
+      "url": "https://pahar.in/pahar/Books%20and%20Articles/Indian%20Subcontinent/1891%20Catalogue%20of%20Maps%20Plans%20etc%20of%20India%20and%20Burma%20s.pdf",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Select the smallest dated town plan or survey sheet. The index does not establish any geometry."
+    },
+    "calcutta_1893": {
+      "name": "Constable, Plan of the City of Calcutta plate 38 and environs",
+      "version": "1893",
+      "url": "https://www.davidrumsey.com/luna/servlet/view/all/where/Calcutta%2B%28India%29/when/1893",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Check city roads from plate 38; use separate environs reference to locate industrial and river constraints."
+    },
+    "india_city_1890": {
+      "name": "Johnston atlas sheet, University of Minnesota Ames Library",
+      "version": "1890, Calcutta, Madras and Bombay insets",
+      "url": "https://geo.nyu.edu/catalog/p16022coll246%3A252",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Use city band, island or river edge and established thoroughfares. No lot-size or minor-street inference from small inset."
+    },
+    "colombo_survey_1901": {
+      "name": "Survey Department of Sri Lanka, Colombo in 1901",
+      "version": "1901 plan listed in map catalogue",
+      "url": "https://survey.gov.lk/sdweb/pdf/other_pdf/map_catelog.pdf",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Use historic series sheet or city map with permission. Compare port approaches separately to an Admiralty chart."
+    },
+    "bangkok_1896": {
+      "name": "Royal Thai Survey Department, Map of Bangkok",
+      "version": "1896-12-18",
+      "url": "https://artsandculture.google.com/asset/map-of-bangkok-royal-thai-survey-department/1QEEWHqTTg33cw",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Use the mapped canals and buildings at their respective scale. Treat opposite-bank Bangkok Noi as independently surveyed."
+    },
+    "singapore_1898": {
+      "name": "National Archives of Singapore, Map of the Island of Singapore and Its Dependencies TM000012",
+      "version": "1898",
+      "url": "https://corporate.nas.gov.sg/discover-archives/media/nasmapcollection/",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Major routes and named topography only. Consult the town series separately for residential and minor-road detail."
+    },
+    "batavia_1897": {
+      "name": "Topographisch Bureau, Kaart van Batavia en Omstreken, Leiden University",
+      "version": "1897",
+      "url": "https://www.oldmapsonline.org/en/webs/ac7e7df1-6aea-5748-a315-c09fafd3ac17",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Inspect separately the canal city, Weltevreden and surrounding areas at the edition scale."
+    },
+    "surabaya_1897": {
+      "name": "Soerabaja city plan, Guide to the Dutch East Indies",
+      "version": "1897",
+      "url": "https://www.lib.utexas.edu/maps/historical/soerabaja_1897.jpg",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Use marked and shaded blocks; later harbour works require separate chronologies."
+    },
+    "surakarta_1894": {
+      "name": "Netherlands National Archives, Topographische kaart van de residentie Soerakarta",
+      "version": "1894–1906, see sheet date",
+      "url": "https://www.nationaalarchief.nl/onderzoeken/archief/4.MIKO/invnr/%40B2.4.12/file/NL-HaNA_4.MIKO_B2.4.12?page=166&viewer=true",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Use period regional edges and compare the 1873 Utrecht plan and the 1899 Kraton plan before assuming changed streets."
+    },
+    "rangoon_1893": {
+      "name": "Constable, Rangoon and environs, plate 42",
+      "version": "1893",
+      "url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~312798~90081967",
+      "rights": "Citation only. Check archive and per-sheet rights before reuse in assets.",
+      "role": "Use dated river and occupied grid; verify local lane coverage against the Survey of India Rangoon sheet."
+    },
     "nls_os_gb_1888_1913": {
       "name": "Ordnance Survey, National Library of Scotland georeferenced collection",
       "version": "Six-inch county sheets 1888–1913",
@@ -962,6 +1046,1774 @@
     "Central Asia": "Confirm citadel, bazaars, irrigation and garden edges. Keep residential courtyard form apart from colonial wards."
   },
   "sites": {
+    "reba:chandler:1561": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Sule and Strand grid",
+          "point": [
+            96.16,
+            16.773
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Pazundaung ward",
+          "point": [
+            96.187,
+            16.788
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Rangoon River wharf edge",
+          "point": [
+            96.158,
+            16.765
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Shwedagon and Kandawgyi ridge",
+          "point": [
+            96.159,
+            16.802
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build lower commercial grid with dated wet fringes and extend separately toward pagoda ridge and old village routes.",
+      "morphology": "Brick commercial blocks and timber raised houses, detached pagoda compounds.",
+      "risks": "Exclude later reclamation and map docks, rail, sluices and cantonment separately.",
+      "source_preference": [
+        "rangoon_1893",
+        "india_constable_1893"
+      ]
+    },
+    "reba:chandler:636": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Stadhuis and Kali Besar canal",
+          "point": [
+            106.813,
+            -6.135
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Glodok kampung lanes",
+          "point": [
+            106.812,
+            -6.146
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Sunda Kelapa and old mouth",
+          "point": [
+            106.809,
+            -6.121
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Weltevreden upper town and fields",
+          "point": [
+            106.844,
+            -6.178
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep old lower canal city, market kampungs and upper administrative nuclei separate by documented roads, wet gaps and fields.",
+      "morphology": "Masonry canal warehouses and shops, timber or tile kampungs and open upper compounds.",
+      "risks": "1897 port and banks only; Tanjung Priok separate nucleus connected by period links.",
+      "source_preference": [
+        "batavia_1897"
+      ]
+    },
+    "reba:chandler:867": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Palace square and moat",
+          "point": [
+            96.096,
+            21.993
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Zegyo market streets",
+          "point": [
+            96.08,
+            21.976
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Irrawaddy landing and wet margin",
+          "point": [
+            96.047,
+            21.982
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mandalay Hill and northern open skirts",
+          "point": [
+            96.107,
+            22.01
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep axial market grid, palace precinct, shore landing, monasteries and hill break as distinct units.",
+      "morphology": "Low timber and masonry market plots, open monastic courts and royal compounds.",
+      "risks": "Do not borrow later reconstructed palace buildings or river work; trace dated rail and road.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:848": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Meenakshi temple and concentric streets",
+          "point": [
+            78.119,
+            9.919
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Chithirai and market blocks",
+          "point": [
+            78.123,
+            9.919
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Vaigai bank and steps",
+          "point": [
+            78.124,
+            9.934
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mariyamman tank and eastern fringe",
+          "point": [
+            78.154,
+            9.912
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Reconstruct concentric market wards. Extend on mapped occupied roads and leave river and tanks open.",
+      "morphology": "Dense masonry street houses and interior courts, open temple tanks.",
+      "risks": "Do not absorb distant villages or later bridges; retain dry-season riverbed.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:907": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Kotwali and old city bazaar",
+          "point": [
+            77.699,
+            28.977
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Lisari Gate lanes",
+          "point": [
+            77.698,
+            28.962
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Northern cantonment and parade grounds",
+          "point": [
+            77.704,
+            29.011
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Railway-west fringe",
+          "point": [
+            77.673,
+            28.975
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use civilian bazaar and dated cantonment grid as discontinuous patches. Preserve parade grounds.",
+      "morphology": "Narrow brick bazaar compounds and detached bungalows.",
+      "risks": "Avoid new street engineering and suburban joins.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:976": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Mahal and Bhonsle quarter",
+          "point": [
+            79.111,
+            21.146
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Itwari and market streets",
+          "point": [
+            79.123,
+            21.154
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Sitabuldi and rail divide",
+          "point": [
+            79.079,
+            21.148
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Ambazari and western lowlands",
+          "point": [
+            79.025,
+            21.124
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate older court and trading wards from station and cantonment approaches. Keep water bodies and still-open land.",
+      "morphology": "Low courtyard houses, timber and brick commercial courts, wider colonial lots.",
+      "risks": "Verify dated drains and railway approach; modern road through fort land excluded.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:124": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Grand Palace and Sanam Luang",
+          "point": [
+            100.492,
+            13.754
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Sampheng and Charoen Krung",
+          "point": [
+            100.506,
+            13.74
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Thonburi Bangkok Noi canals",
+          "point": [
+            100.484,
+            13.76
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Eastern klong and wet fields",
+          "point": [
+            100.529,
+            13.753
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build canal-bound palace, trading streets and villages across water as separate units. Preserve paddies and shore.",
+      "morphology": "Timber bank houses and brick shophouses, large court and wat compounds.",
+      "risks": "No modern crossings; use documented ferries and canal bridges only.",
+      "source_preference": [
+        "bangkok_1896"
+      ]
+    },
+    "reba:chandler:1302": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Singapore River mouth and civic frontage",
+          "point": [
+            103.852,
+            1.288
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "South Bank Telok Ayer blocks",
+          "point": [
+            103.847,
+            1.282
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Tanjong Pagar docks",
+          "point": [
+            103.846,
+            1.27
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Kallang wet fringe",
+          "point": [
+            103.866,
+            1.313
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate civic and trading cores, river warehouses and dock strips from wetland and park gaps.",
+      "morphology": "Shophouse rows, bulky godowns and dispersed timber settlements.",
+      "risks": "Use 1898 unfilled shoreline; date bridges and early rail independently.",
+      "source_preference": [
+        "singapore_1898"
+      ]
+    },
+    "reba:chandler:1350": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Jembatan Merah and port commerce",
+          "point": [
+            112.738,
+            -7.237
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Ampel kampung lanes",
+          "point": [
+            112.74,
+            -7.228
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Kalimas yards and tidal banks",
+          "point": [
+            112.738,
+            -7.21
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Southern Simpang fringe",
+          "point": [
+            112.737,
+            -7.264
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Trace Kalimas and discrete kampung blocks, warehouse strips and upper commercial routes separated by canals and open land.",
+      "morphology": "Low clay roof houses, courtyard kampungs and masonry warehouses.",
+      "risks": "Tanjung Perak modern harbour and later canal forms excluded.",
+      "source_preference": [
+        "surabaya_1897"
+      ]
+    },
+    "reba:chandler:1351": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Kraton and Alun-alun",
+          "point": [
+            110.828,
+            -7.575
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Kauman and Laweyan side streets",
+          "point": [
+            110.801,
+            -7.571
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Bengawan Solo flood edge",
+          "point": [
+            110.849,
+            -7.561
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mangkunegaran and northern rail approach",
+          "point": [
+            110.823,
+            -7.562
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep palace compounds, kampung clusters and market corridors separate from stream, field and transport gaps.",
+      "morphology": "Low clay roofs, interior garden courts and palace square voids.",
+      "risks": "Do not use the residency boundary as town; confirm old channel and rail dates.",
+      "source_preference": [
+        "surakarta_1894"
+      ]
+    },
+    "reba:chandler:600": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Charminar and Laad Bazaar",
+          "point": [
+            78.474,
+            17.361
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Pathergatti and old courtyard streets",
+          "point": [
+            78.477,
+            17.366
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Musi bank and Purana Pul",
+          "point": [
+            78.459,
+            17.368
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Hussain Sagar and cantonment approach",
+          "point": [
+            78.49,
+            17.435
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Split the old city, north of Musi expansion and distant Secunderabad cantonment. Retain reservoir and low banks.",
+      "morphology": "Courtyard masonry, bazaar rows and large spaced compounds.",
+      "risks": "Exclude post-1908 flood works and avoid continuous infill to cantonment.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:635": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "City Palace and Tripolia bazaar",
+          "point": [
+            75.824,
+            26.926
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Johari Bazaar grid cells",
+          "point": [
+            75.827,
+            26.92
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Gates and east hill foot",
+          "point": [
+            75.84,
+            26.922
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Southern gate and open plain",
+          "point": [
+            75.814,
+            26.908
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Follow planned chaukris, old wall and gates. Use occupancy evidence before adding outside roads.",
+      "morphology": "Pink-plastered street walls, inward courts and regular main bazaar widths.",
+      "risks": "Exclude modern development between Jaipur and Amber; keep hills open.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:680": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Generalganj and old market",
+          "point": [
+            80.351,
+            26.469
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Collectorganj working districts",
+          "point": [
+            80.347,
+            26.462
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Ganga landing and rail works",
+          "point": [
+            80.373,
+            26.471
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Cantonment and open bank",
+          "point": [
+            80.393,
+            26.452
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate industrial and military plots, older bazaar and flood banks with dated road links.",
+      "morphology": "Brick factory compounds and courtyard shops separate from parade ground.",
+      "risks": "Check dated Ganga shoreline and rail bridging before joining river sides.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:683": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Kharadar and old city market",
+          "point": [
+            67.001,
+            24.852
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Mithadar wards and Bunder Road",
+          "point": [
+            67.01,
+            24.859
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Keamari causeway and docks",
+          "point": [
+            66.973,
+            24.825
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Saddar cantonment approaches",
+          "point": [
+            67.031,
+            24.859
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build tidal shore, narrow old city and cantonment grids independently. Keep open salt margins.",
+      "morphology": "Courtyard masonry, port sheds and wider cantonment plots.",
+      "risks": "Use dated port and wetland limits; later land reclamation excluded.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:771": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Lahore Fort and Delhi Gate",
+          "point": [
+            74.318,
+            31.586
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Wazir Khan and Shahi Guzargah courts",
+          "point": [
+            74.326,
+            31.583
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Ravi channels and north flood margin",
+          "point": [
+            74.312,
+            31.607
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mian Mir cantonment and southeast approaches",
+          "point": [
+            74.389,
+            31.531
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep walled city, nascent civil and rail district and distant cantonment separate. Preserve Ravi changes, estates and dry gaps.",
+      "morphology": "Tall brick bazaar courts and spaced cantonment lots.",
+      "risks": "Verify dated Ravi position; no modern continuous frontage to Mian Mir.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:832": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Chowk and Asafi precinct",
+          "point": [
+            80.902,
+            26.87
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Aminabad and old market lanes",
+          "point": [
+            80.921,
+            26.851
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Gomti bank and crossings",
+          "point": [
+            80.921,
+            26.865
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Dilkusha and cantonment fringe",
+          "point": [
+            80.965,
+            26.831
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use separately mapped old wards, colonial centre, river and cantonment. Leave gardens and flood banks unbuilt.",
+      "morphology": "Plaster and brick courtyard houses, garden palaces and separated low compounds.",
+      "risks": "Bridge and rail link dates matter; exclude later riverfront engineering.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:846": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Fort St George and old harbour",
+          "point": [
+            80.287,
+            13.081
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "George Town bazaar grid",
+          "point": [
+            80.281,
+            13.097
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Cooum inlet and foreshore",
+          "point": [
+            80.29,
+            13.067
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mylapore tanks and garden fringe",
+          "point": [
+            80.268,
+            13.034
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate old northern town, fort, shore, and inland or southern settlements. Keep tanks and coastal sands.",
+      "morphology": "Masonry street shops and courts, garden bungalows and waterfront sheds.",
+      "risks": "Use period breakwaters and rail; no later Marina development or continuous infill to cantonment.",
+      "source_preference": [
+        "india_city_1890",
+        "india_gazetteer_atlas"
+      ]
+    },
+    "reba:chandler:1497": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Dashashwamedh ghat and old lanes",
+          "point": [
+            83.011,
+            25.307
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Chowk market courts",
+          "point": [
+            83.01,
+            25.314
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Ganga ghat steps and flood strand",
+          "point": [
+            83.018,
+            25.298
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Cantonment and Varuna edge",
+          "point": [
+            82.977,
+            25.337
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build sloping ghat fronts separately from interior lanes and cantonment. Keep river strand and uncrossed banks open.",
+      "morphology": "Narrow masonry lanes and shaded courts, high ghat terraces and distant compounds.",
+      "risks": "Use dated ghats and bridge evidence; opposite Ramnagar stays separate.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:18": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Agra Fort and Kinari lanes",
+          "point": [
+            78.022,
+            27.179
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Rawatpara bazaar",
+          "point": [
+            78.013,
+            27.184
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Yamuna and Taj river garden",
+          "point": [
+            78.043,
+            27.175
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Cantonment southwest",
+          "point": [
+            77.993,
+            27.151
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate old city and fort, riverside gardens and spaced cantonment. Maintain rail and agricultural gaps.",
+      "morphology": "Brick and stone bazaar courts, garden walls and bungalow plots.",
+      "risks": "No continuous settlement between monuments; independently date Yamuna crossings.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:21": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Bhadra and Teen Darwaza",
+          "point": [
+            72.584,
+            23.025
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Manek Chowk and pol houses",
+          "point": [
+            72.59,
+            23.023
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Sabarmati banks and bridge",
+          "point": [
+            72.576,
+            23.025
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Shahibaug and cantonment north",
+          "point": [
+            72.594,
+            23.067
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use walled pols with identified gates, industrial extensions and open ward margins or river edge.",
+      "morphology": "Linked courtyards and timber frontages, outside mill compounds.",
+      "risks": "No modern riverfront levees or infill; document dated Ellis Bridge.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:323": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Fort and old harbour customs",
+          "point": [
+            79.844,
+            6.935
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Pettah bazaar grid",
+          "point": [
+            79.858,
+            6.935
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Beira Lake and Slave Island",
+          "point": [
+            79.852,
+            6.921
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Northern Kotahena rise",
+          "point": [
+            79.871,
+            6.957
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep Fort and Pettah retail blocks, port works and lakeside compounds separate. Preserve marsh and open water.",
+      "morphology": "Brick and plaster street shops and warehouse bars, verandah houses elsewhere.",
+      "risks": "Check 1901 docks against date and no later reclamation.",
+      "source_preference": [
+        "colombo_survey_1901"
+      ]
+    },
+    "reba:chandler:368": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Shahjahanabad and Chandni Chowk",
+          "point": [
+            77.23,
+            28.656
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Ballimaran courtyard lanes",
+          "point": [
+            77.225,
+            28.651
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Red Fort and Yamuna flood strip",
+          "point": [
+            77.243,
+            28.656
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Kashmere Gate and Civil Lines",
+          "point": [
+            77.225,
+            28.681
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use gates, bazaar spines and fort open ground with separate ridge and Civil Lines compounds.",
+      "morphology": "Courtyard havelis, narrow bazaar frontage and spacious colonial blocks.",
+      "risks": "Exclude New Delhi and the modern cantonment. Trace original banks and dated railway bridge.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:40": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Chowk and old city courts",
+          "point": [
+            81.833,
+            25.433
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Daraganj river streets",
+          "point": [
+            81.885,
+            25.436
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Fort and Ganga–Yamuna confluence",
+          "point": [
+            81.881,
+            25.425
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Civil Lines and cantonment fringe",
+          "point": [
+            81.833,
+            25.461
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Treat narrow old streets, planned civil grid and fluvial edges as distinct zones. Only dated roads join them.",
+      "morphology": "Dense courtyard compounds and spaced colonial buildings.",
+      "risks": "Changing sandbars and fair ground are open; verify dated Yamuna road/rail crossing.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:55": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Harmandir Sahib and old city",
+          "point": [
+            74.877,
+            31.62
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Katra Ahluwalia market lanes",
+          "point": [
+            74.879,
+            31.627
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Ram Bagh and northern edge",
+          "point": [
+            74.879,
+            31.64
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Gobindgarh fort and west rail",
+          "point": [
+            74.858,
+            31.626
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep old katras, tanks, gardens and forts distinct. Add station or cantonment edges only where documented.",
+      "morphology": "Walled courts, tall narrow street frontage and separate grounds.",
+      "risks": "Date gaps and gateways, exclude widening after later events.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:1153": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Shaniwar Wada and old peth streets",
+          "point": [
+            73.855,
+            18.519
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Kasba and Tulshibaug lots",
+          "point": [
+            73.857,
+            18.512
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Mutha edge and bridge approaches",
+          "point": [
+            73.85,
+            18.525
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Cantonment east of old city",
+          "point": [
+            73.881,
+            18.513
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep civilian peth, river and cantonment distinct, with Parvati slope and gaps open.",
+      "morphology": "Timber wadas and compact markets, spaced military and civil compounds.",
+      "risks": "Avoid one density over cantonment and city; date crossings.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:123": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Bangalore pete and fort",
+          "point": [
+            77.575,
+            12.963
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Cottonpet bazaar",
+          "point": [
+            77.569,
+            12.969
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Cubbon Park and cantonment interval",
+          "point": [
+            77.592,
+            12.977
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Ulsoor tank and east cantonment",
+          "point": [
+            77.622,
+            12.986
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate pete from cantonment, retaining park, tanks and grounds.",
+      "morphology": "Courtyard shops and tiled houses; cantonment bungalows in compounds.",
+      "risks": "Check 1898 plague-era plots individually and date lake works.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:129": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Qila and old bazaar",
+          "point": [
+            79.401,
+            28.365
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Kutubkhana lanes",
+          "point": [
+            79.418,
+            28.363
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Railway settlement south of city",
+          "point": [
+            79.41,
+            28.337
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Cantonment parade ground",
+          "point": [
+            79.44,
+            28.335
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Group occupied market streets, station housing and cantonment separately. Keep intervening open parcels.",
+      "morphology": "Dense market compounds contrast with detached cantonment buildings.",
+      "risks": "Exclude unverified airfield, railway subdivisions and drainage changes.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:1331": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Jamia Masjid and old Jhelum wards",
+          "point": [
+            74.813,
+            34.098
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Zaina Kadal lanes",
+          "point": [
+            74.803,
+            34.092
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Dal Lake shallows and garden edge",
+          "point": [
+            74.846,
+            34.092
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Amira Kadal upstream approach",
+          "point": [
+            74.815,
+            34.075
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Follow bridgeheads and both banks. Keep waterways, gardens and houseboat uses distinct.",
+      "morphology": "Timber and masonry river houses, tight lanes and open gardens.",
+      "risks": "Trace historic ghats and ferries; preserve flood channels.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:1353": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Surat Castle and old port",
+          "point": [
+            72.814,
+            21.195
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Gopipura market courts",
+          "point": [
+            72.826,
+            21.189
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Tapi ghats and bank",
+          "point": [
+            72.811,
+            21.202
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Railway approaches outside old core",
+          "point": [
+            72.839,
+            21.205
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate waterfront and core courts. Use flood, fort and station edges to limit entanglement.",
+      "morphology": "Tight masonry courtyard and shop plots, loading and ghat aprons.",
+      "risks": "Exclude modern bridges, new embankments and broad road corridors.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:1424": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Rockfort and bazaar streets",
+          "point": [
+            78.697,
+            10.828
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Woraiyur older lanes",
+          "point": [
+            78.67,
+            10.829
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Cauvery floodplain and crossings",
+          "point": [
+            78.692,
+            10.847
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Cantonment and junction south",
+          "point": [
+            78.686,
+            10.798
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Retain rock slope and distinct cantonment; use flood reach and uninterrupted open plots to bound each unit.",
+      "morphology": "Tight masonry market courts, temple streets and widely spaced bungalows.",
+      "risks": "Srirangam requires independent settlement limits; check dated bridges across each channel.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "reba:chandler:1486": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Mandvi and old walled Baroda",
+          "point": [
+            73.207,
+            22.3
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Raopura lanes",
+          "point": [
+            73.196,
+            22.304
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Vishwamitri banks and park",
+          "point": [
+            73.188,
+            22.31
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Fatehgunj cantonment fringe",
+          "point": [
+            73.196,
+            22.329
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate old court, market, river, garden and station approaches. Leave wet banks clear.",
+      "morphology": "Brick houses with timber details, royal gardens and bungalow compounds.",
+      "risks": "Verify extensions by period map; no later station grids or canalization.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
+    "raj_bengal_calcutta": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Tank Square and Writers’ Buildings",
+          "point": [
+            88.348,
+            22.573
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Chitpur bazaar lanes",
+          "point": [
+            88.361,
+            22.59
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Fort William and Maidan",
+          "point": [
+            88.339,
+            22.555
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Kidderpore dock and rail",
+          "point": [
+            88.32,
+            22.535
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Divide European formal streets, northern bazaars, river ghats and dock strips. Keep Maidan open.",
+      "morphology": "Brick and stucco courtyard blocks, verandahs and warehouse bars.",
+      "risks": "Howrah independent; use the pontoon bridge, omit 1943 bridge and later harbour fill.",
+      "source_preference": [
+        "calcutta_1893",
+        "india_city_1890"
+      ]
+    },
+    "raj_bombay_bombay_city": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Fort at the old Town Hall",
+          "point": [
+            72.836,
+            18.932
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Bhuleshwar bazaars",
+          "point": [
+            72.829,
+            18.951
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Mazagon docks and rail",
+          "point": [
+            72.846,
+            18.963
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Parel and mill fringe",
+          "point": [
+            72.84,
+            19.002
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use 1890 island shape and separate Fort, bazaars, industrial ports and occupied northward corridors.",
+      "morphology": "Stone offices, compact chawls and mill compounds with open yards.",
+      "risks": "Verify reclamation and new street works; no modern peninsula outline.",
+      "source_preference": [
+        "india_city_1890",
+        "india_gazetteer_atlas"
+      ]
+    },
+    "raj_city_bengal_howrah": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Howrah station and old bridge landing",
+          "point": [
+            88.343,
+            22.581
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Kadamtala blocks",
+          "point": [
+            88.319,
+            22.582
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Shibpur ghats and lower bank",
+          "point": [
+            88.326,
+            22.555
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Salkia northern river lots",
+          "point": [
+            88.344,
+            22.595
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Follow individually dated riverside mills and dispersed wet inland housing. Preserve gardens and rail yards.",
+      "morphology": "Small brick court rows and large river works.",
+      "risks": "Separate Calcutta population and building footprints; check pre-1905 station and 1874 pontoon path.",
+      "source_preference": [
+        "calcutta_1893",
+        "india_city_1890"
+      ]
+    },
+    "raj_city_bengal_patna": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_series_located",
+      "anchors": [
+        {
+          "name": "Patna City market near Chowk",
+          "point": [
+            85.235,
+            25.601
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Gulzarbagh bazaar lanes",
+          "point": [
+            85.204,
+            25.607
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Ganga ghats and flood edge",
+          "point": [
+            85.222,
+            25.618
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Bankipore west civic district",
+          "point": [
+            85.14,
+            25.61
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Develop a narrow old river strip and separate Bankipore occupation; retain riverbank gaps and wet lowlands.",
+      "morphology": "Long market-front plots, courts and spaced civil buildings.",
+      "risks": "Do not fill the length of modern Patna uniformly; check old and current riverbank divergence.",
+      "source_preference": [
+        "india_constable_1893",
+        "india_gazetteer_atlas",
+        "india_survey_catalogue"
+      ]
+    },
     "reba:chandler:540": {
       "profile": "relief",
       "grade": "C",
