@@ -1,6 +1,118 @@
 {
   "version": 1,
   "sources": {
+    "omaha_1890": {
+      "name": "Sanborn, Omaha vol. 1",
+      "version": "1890",
+      "url": "https://www.loc.gov/item/sanborn05229_002/",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "philadelphia_hexamer": {
+      "name": "Hexamer & Son, Insurance Maps of Philadelphia",
+      "version": "1895–1901 volumes",
+      "url": "https://www.loc.gov/item/2005633562/",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "baltimore_1890": {
+      "name": "Sanborn, Baltimore vol. 3",
+      "version": "1890",
+      "url": "https://www.loc.gov/resource/g3844bm.g3844bm_g03573189003/?st=gallery",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "los_angeles_1894": {
+      "name": "Sanborn, Los Angeles vol. 2",
+      "version": "1894",
+      "url": "https://www.loc.gov/resource/g4364lm.g4364lm_g00656189402/?st=list",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "cleveland_1896": {
+      "name": "Sanborn, Cleveland",
+      "version": "1896",
+      "url": "https://www.loc.gov/item/sanborn06648_005/",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "cincinnati_1891": {
+      "name": "Sanborn, Cincinnati vol. 1",
+      "version": "1891",
+      "url": "https://www.loc.gov/item/sanborn06645_002/",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "boston_1897": {
+      "name": "Sanborn, Boston vol. 2",
+      "version": "1897",
+      "url": "https://www.loc.gov/item/sanborn03693_009/",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "buffalo_1895": {
+      "name": "Sanborn, Buffalo",
+      "version": "1895",
+      "url": "https://www.loc.gov/resource/g3804bm.g3804bm_g057931895/",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "saint_paul_1885_1903": {
+      "name": "Sanborn, Saint Paul",
+      "version": "1885 and 1903",
+      "url": "https://www.loc.gov/resource/g4144sm.g04379190302/?st=list",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "minneapolis_1885": {
+      "name": "Sanborn, Minneapolis vol. 2",
+      "version": "1885",
+      "url": "https://www.loc.gov/item/sanborn04339_002/",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "milwaukee_1894": {
+      "name": "UWM AGSL, georeferenced Milwaukee Sanborn",
+      "version": "1894 volumes 1–4",
+      "url": "https://webgis.uwm.edu/arcgisuwm/rest/services/AGSL/Sanborn1894/MapServer",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "washington_1900": {
+      "name": "Thorn and Baily, Topographical Map of Washington DC",
+      "version": "1899–1900",
+      "url": "https://www.loc.gov/resource/g3850.la002288/",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "new_orleans_1896": {
+      "name": "Sanborn, New Orleans vol. 3",
+      "version": "1896",
+      "url": "https://www.loc.gov/resource/g4014nm.g03376189603/?sp=104",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "toronto_1895": {
+      "name": "Toronto Archives, Alexander and Cable",
+      "version": "1895, series 726 item 90",
+      "url": "https://www.toronto.ca/city-government/accountability-operations-customer-service/access-city-information-or-records/city-of-toronto-archives/whats-online/maps/historical-maps-and-atlases/",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "montreal_goad": {
+      "name": "McGill Libraries, Goad Atlas of the City and Island of Montreal",
+      "version": "1890 and 1907 entries",
+      "url": "https://libraryguides.mcgill.ca/maps/hist",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Use the period plate index. Confirm visible street, building and bank dates before deriving valid layer footprints."
+    },
+    "usgs_historical_topo": {
+      "name": "USGS Historical Topographic Map Collection",
+      "version": "1884 onward; use sheet survey date",
+      "url": "https://www.usgs.gov/tools/topoview",
+      "rights": "Citations only. Check rights per plate before redistribution.",
+      "role": "Datum and period terrain reference. Effective map coverage must be checked against the locations to reconstruct."
+    },
     "hanoi_anom_1900": {
       "name": "Vietnam State Archives / ANOM, Plan de la ville de Hanoi, GGI7758-PL02001",
       "url": "https://luutruquocgia1.org.vn/wp-content/uploads/2016/11/Kien-truc-cac-cong-trinh-xay-dung-tai-Ha-Noi.pdf",
@@ -794,6 +906,1467 @@
     "Central Asia": "Confirm citadel, bazaars, irrigation and garden edges. Keep residential courtyard form apart from colonial wards."
   },
   "sites": {
+    "reba:chandler:1037": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Downtown rail commerce",
+          "point": [
+            -95.936,
+            41.257
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "North 24th Street grid",
+          "point": [
+            -95.948,
+            41.273
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Missouri railway bottomland",
+          "point": [
+            -95.922,
+            41.253
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Kountze Place and fairground edge",
+          "point": [
+            -95.946,
+            41.286
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep the road grids apart at the bluff; ease density at unoccupied bottomland or before the 1898 fairgrounds.",
+      "morphology": "Brick rail warehouses west of port bottomland; frame house lots uphill.",
+      "risks": "South Omaha and Council Bluffs are independent; require dated river crossings and 1890s streetcar extensions.",
+      "source_preference": [
+        "omaha_1890",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:1108": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Market and Independence Hall",
+          "point": [
+            -75.1518,
+            39.949
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Southwark rowhouses",
+          "point": [
+            -75.151,
+            39.931
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Delaware wharves",
+          "point": [
+            -75.135,
+            39.947
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Fairmount Schuylkill ravine",
+          "point": [
+            -75.205,
+            39.984
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep the Delaware grid and wharves distinct; identify separate built pockets toward and beyond the Schuylkill, stopping at park and unoccupied valley.",
+      "morphology": "Narrow attached brick rows, factory courts and wharf aprons.",
+      "risks": "Check Manayunk, Germantown and West Philadelphia individually; consolidated area includes large rural sections.",
+      "source_preference": [
+        "philadelphia_hexamer",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:1146": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Market Square and cove outlet",
+          "point": [
+            -71.409,
+            41.825
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Federal Hill",
+          "point": [
+            -71.43,
+            41.821
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Fox Point harbour",
+          "point": [
+            -71.398,
+            41.815
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Woonasquatucket industrial corridor",
+          "point": [
+            -71.45,
+            41.831
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Follow the market crossings, waterfront warehouses and verified upstream mills; separate College Hill and preserve river margins.",
+      "morphology": "Small timber and brick house lots above broader mill yards.",
+      "risks": "Great Salt Cove reclamation chronology needs a dated map. Modern Waterplace cannot fix its historic bank.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:118": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Baltimore Street docks",
+          "point": [
+            -76.61,
+            39.289
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Fells Point Broadway rows",
+          "point": [
+            -76.593,
+            39.283
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Canton rail and marsh shore",
+          "point": [
+            -76.57,
+            39.279
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Jones Falls mill slope",
+          "point": [
+            -76.626,
+            39.328
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Reconstruct the inner basin and dated Canton industry; end rows at water, yard and slope breaks.",
+      "morphology": "Brick rowhouse runs and separate industrial docks and mills.",
+      "risks": "Exclude post-1904 reconstruction and modern harbour fill.",
+      "source_preference": [
+        "baltimore_1890",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:1240": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Portsmouth Square and Market",
+          "point": [
+            -122.405,
+            37.794
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "16th Street Mission grid",
+          "point": [
+            -122.419,
+            37.763
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Period sea wall and piers",
+          "point": [
+            -122.392,
+            37.796
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Golden Gate Park dune fringe",
+          "point": [
+            -122.483,
+            37.769
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep Market and Mission grids distinct; register street slopes, only the established part of the sea wall, and the western park and dune edge.",
+      "morphology": "Sloping small lots, brick waterfront works, open park and dunes.",
+      "risks": "Exclude post-1906 rebuilding; verify each pier and ferry slip. No bridge to Oakland.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:1336": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Old courthouse and Washington Avenue",
+          "point": [
+            -90.191,
+            38.626
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Soulard market streets",
+          "point": [
+            -90.202,
+            38.611
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Mississippi levee and Eads Bridge",
+          "point": [
+            -90.182,
+            38.631
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Forest Park east edge",
+          "point": [
+            -90.279,
+            38.638
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Follow occupied streets west from the river landing; separate levee uses and stop rows at park and independently dated outer frontage.",
+      "morphology": "Brick rows, deep commercial buildings and levee grain and warehouse apron.",
+      "risks": "No World's Fair structures. East St Louis remains separate across dated Eads crossing.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:1431": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Summit and Madison docks",
+          "point": [
+            -83.537,
+            41.651
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Vistula blocks near Lagrange",
+          "point": [
+            -83.523,
+            41.661
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Maumee and Swan Creek mouth",
+          "point": [
+            -83.54,
+            41.644
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Upstream yards and crossing approaches",
+          "point": [
+            -83.553,
+            41.63
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use independently dated port blocks on both sides and retain the creek and yards as gaps in housing.",
+      "morphology": "Gridded wood and brick rows; wide grain and timber storage.",
+      "risks": "Later river engineering and modern bridges do not fix historical water or crossing geometry.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:1437": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "King and Yonge streets",
+          "point": [
+            -79.382,
+            43.65
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Cabbagetown at Parliament",
+          "point": [
+            -79.366,
+            43.664
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Don River and Ashbridge's Bay",
+          "point": [
+            -79.351,
+            43.649
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Bloor ravine and north fringe",
+          "point": [
+            -79.378,
+            43.675
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use 1895 occupied blocks and period lake shoreline; stop at Don floodplain and northern unoccupied frontage beyond the dated streetcar grid.",
+      "morphology": "Brick row and bay-and-gable lots, separate rail harbour and shore use.",
+      "risks": "Exclude later lake fill and do not use the 1904 fire perimeter as extent.",
+      "source_preference": [
+        "toronto_1895"
+      ]
+    },
+    "reba:chandler:1528": {
+      "profile": "anchored_evidence",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Pennsylvania Avenue and 7th",
+          "point": [
+            -77.022,
+            38.894
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Shaw rowhouses",
+          "point": [
+            -77.024,
+            38.912
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Rock Creek and Georgetown",
+          "point": [
+            -77.058,
+            38.904
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Boundary Street and northern hills",
+          "point": [
+            -77.025,
+            38.925
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate occupied L'Enfant grid, diagonal avenues and federal grounds from outer mapped rural parcels. Map dated creek crossings on separate layers.",
+      "morphology": "Rowhouses on regular blocks, ceremonial open spaces and limited industry along the river.",
+      "risks": "Exclude later McMillan Park and river fill; verify Anacostia crossings on date-appropriate sheets.",
+      "source_preference": [
+        "washington_1900",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:1542": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Worcester Common and Main",
+          "point": [
+            -71.802,
+            42.263
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Three-decker streets east of centre",
+          "point": [
+            -71.79,
+            42.263
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Blackstone rail and southern mill yards",
+          "point": [
+            -71.797,
+            42.242
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "West slope and park edge",
+          "point": [
+            -71.836,
+            42.273
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Follow mill and rail alignments along valley, separating residential hills and waterworks. End rail corridors at confirmed industry or sidings.",
+      "morphology": "Wood three-deckers and houses with large masonry industrial lots.",
+      "risks": "Do not assume modern enclosed streams represent missing historic routes.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:202": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Old State House and downtown",
+          "point": [
+            -71.057,
+            42.359
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "South End brick rows",
+          "point": [
+            -71.074,
+            42.341
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Fort Point Channel and South Boston shore",
+          "point": [
+            -71.049,
+            42.342
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Roxbury and Franklin Park transition",
+          "point": [
+            -71.095,
+            42.316
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use separate historic peninsula, Back Bay, South End and outer district plans; treat Charlestown, East and South Boston as districts with dated crossings.",
+      "morphology": "Brick rows on reclaimed grid and older irregular lanes, distinct dock and rail sheds.",
+      "risks": "Confirm each land-fill date. Cambridge, Brookline and Somerville stay separate. Preserve unbuilt marsh and park.",
+      "source_preference": [
+        "boston_1897",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:232": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Niagara Square radial grid",
+          "point": [
+            -78.879,
+            42.887
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Lower West Side blocks",
+          "point": [
+            -78.891,
+            42.898
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Buffalo River grain harbour",
+          "point": [
+            -78.873,
+            42.868
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Delaware Park north fringe",
+          "point": [
+            -78.866,
+            42.935
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep canal, grain complex and rail yards distinct from radial central streets. Use the park and last occupied frontage to resolve land edge.",
+      "morphology": "Brick and frame lots and grain elevator footprints separately modeled.",
+      "risks": "Exclude 1901 exposition buildings and modern breakwater; compare older and newer maps only by independently dated feature.",
+      "source_preference": [
+        "buffalo_1895",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:311": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Fountain Square terrace",
+          "point": [
+            -84.513,
+            39.101
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Over-the-Rhine at Findlay",
+          "point": [
+            -84.519,
+            39.115
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Ohio River landing",
+          "point": [
+            -84.509,
+            39.094
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mount Auburn ridge transition",
+          "point": [
+            -84.507,
+            39.128
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate downtown basin, Over-the-Rhine rows and slopes. End residential fabric at ridge breaks or last documented frontage.",
+      "morphology": "Brick rows, rear yards and hillside lots, with industry in basin strips.",
+      "risks": "Covington and Newport stay independent. Verify inclines and suspension-bridge approaches.",
+      "source_preference": [
+        "cincinnati_1891",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:313": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Public Square and Euclid",
+          "point": [
+            -81.693,
+            41.5
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Ohio City West 25th",
+          "point": [
+            -81.704,
+            41.483
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Cuyahoga Flats rail and plants",
+          "point": [
+            -81.709,
+            41.493
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Northeast Euclid edge",
+          "point": [
+            -81.619,
+            41.512
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use plateau grid, Ohio City's occupied blocks and the Flats industrial terraces. At slope or yard break, stop residential footprint.",
+      "morphology": "Plateau house lots, valley warehouses and port works distinct.",
+      "risks": "Date each bridge and shoreline; do not backdate the Group Plan mall.",
+      "source_preference": [
+        "cleveland_1896",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:324": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Ohio Statehouse and High Street",
+          "point": [
+            -83.001,
+            39.962
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "German Village blocks",
+          "point": [
+            -82.993,
+            39.946
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Scioto and Olentangy rail yards",
+          "point": [
+            -83.017,
+            39.972
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "North High and university lands",
+          "point": [
+            -83.007,
+            39.999
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Retain the central state grid and separately occupied Franklinton west bank. Stop rail or river corridors at yard and inundation breaks.",
+      "morphology": "Brick rows and cottages, rail bays and open college courts.",
+      "risks": "Exclude later annexation, flood control and bridges from post-1913 reconstruction.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:370": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Larimer and 16th Street",
+          "point": [
+            -104.999,
+            39.749
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Capitol Hill grid",
+          "point": [
+            -104.972,
+            39.731
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Platte and Cherry Creek confluence",
+          "point": [
+            -105.008,
+            39.755
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Globeville river fan",
+          "point": [
+            -104.978,
+            39.79
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use competing historic grids around Cherry Creek. Treat rail and open Platte reaches independently; map only evidenced outward extensions.",
+      "morphology": "Masonry commercial core, differentiated detached hill houses, rail sheds and open yards.",
+      "risks": "No modern basin works or later industrial parcels inferred from current channels.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:376": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Campus Martius and Woodward",
+          "point": [
+            -83.046,
+            42.332
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Corktown near Michigan Avenue",
+          "point": [
+            -83.069,
+            42.331
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Detroit River docks",
+          "point": [
+            -83.04,
+            42.324
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "East river and Grand Boulevard fringe",
+          "point": [
+            -83.009,
+            42.345
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Start at old radial plan, separate the intersecting grids and locate docks, yards and local wards. Stop at park, bank and last occupied frontage.",
+      "morphology": "Frame and brick house parcels; distinct port and rail works before automobile mass production.",
+      "risks": "Belle Isle remains park; Windsor is independent. Preserve documented ferry connections only.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:612": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Monument Circle and Washington Street",
+          "point": [
+            -86.158,
+            39.768
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Lockerbie and east blocks",
+          "point": [
+            -86.148,
+            39.772
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "White River and west rail approach",
+          "point": [
+            -86.18,
+            39.76
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Fall Creek northern transition",
+          "point": [
+            -86.148,
+            39.804
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Build the original mile-square and proved extension streets; keep canal, river floodplain and south-side yards open.",
+      "morphology": "Mile-square civic and commercial blocks, house lots and separated rail industry.",
+      "risks": "Later speedway and suburban plats cannot establish 1900 occupancy; date river crossings.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:681": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "River Market at Main Street",
+          "point": [
+            -94.585,
+            39.109
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "West Side bluff streets",
+          "point": [
+            -94.599,
+            39.092
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "West Bottoms stockyards",
+          "point": [
+            -94.613,
+            39.103
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "South streetcar fringe",
+          "point": [
+            -94.58,
+            39.074
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep stockyards, Kansas and Missouri banks and bluff streets discrete; use verified streetcar frontages toward south, stopping at low unbuilt land or hill breaks.",
+      "morphology": "Brick warehouse strips and small stepped uphill lots; avoid infill over rail yards.",
+      "risks": "Kansas City Kansas remains independent. Use surveyed shoreline and separately dated viaducts.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:822": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Plaza and Main Street",
+          "point": [
+            -118.239,
+            34.057
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Alameda and First Street lots",
+          "point": [
+            -118.237,
+            34.049
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Rail yard and former Los Angeles River bed",
+          "point": [
+            -118.227,
+            34.053
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Elysian Park and pueblo fringe",
+          "point": [
+            -118.239,
+            34.081
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Keep early Pueblo nucleus, downtown grid and rail parcels distinct. Extend only along documented occupied routes and stop against open hills and river bottom.",
+      "morphology": "Small frame lots and early masonry blocks, separate rail sheds; nearby undeveloped hills stay open.",
+      "risks": "No modern concrete river, highways or later annexations. Confirm line and crossing chronology before using.",
+      "source_preference": [
+        "los_angeles_1894",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:823": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Main Street warehouses",
+          "point": [
+            -85.757,
+            38.258
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Old Louisville blocks",
+          "point": [
+            -85.759,
+            38.229
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Portland Canal and Ohio shore",
+          "point": [
+            -85.805,
+            38.268
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Beargrass Creek east fringe",
+          "point": [
+            -85.708,
+            38.254
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate downtown quays, Portland neighbourhood and southern grid; leave canal and lower tributary breaks open.",
+      "morphology": "Brick riverfront warehouses, narrow masonry or timber residential lots.",
+      "risks": "Jeffersonville and New Albany independent. Use period bridge and canal conditions.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:912": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Court Square and Front Street",
+          "point": [
+            -90.052,
+            35.146
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Victorian Village blocks",
+          "point": [
+            -90.034,
+            35.143
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Wolf River and floodplain",
+          "point": [
+            -90.041,
+            35.174
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "South bluff and rail approach",
+          "point": [
+            -90.066,
+            35.121
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Reconstruct the bluff grid with independent warehouses, river landing and rail strips. End residential blocks at the last documented street or slope break.",
+      "morphology": "Narrow house plots and bulky cotton storage set apart from the street ridge.",
+      "risks": "No modern Mud Island or present flood-control shoreline as evidence of 1900 shape.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:930": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Third Ward Broadway and Buffalo",
+          "point": [
+            -87.907,
+            43.032
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Walker’s Point near South Second",
+          "point": [
+            -87.913,
+            43.022
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Menomonee Valley canals",
+          "point": [
+            -87.929,
+            43.029
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "North shore bluff edge",
+          "point": [
+            -87.888,
+            43.07
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use 1894 sheet polygons over dated period bank, then separate industrial canal strips, ordinary house fronts and bluff or park gaps.",
+      "morphology": "Frame and brick house lots, wide brewery or tannery volumes, canals and railway aprons.",
+      "risks": "Keep later port fill out; check correction slip dates. Vol. 1 sheet 005 covers the ordinary commercial reference around Broadway.",
+      "source_preference": [
+        "milwaukee_1894",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:931": {
+      "profile": "split_industrial",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "St Anthony Falls mills",
+          "point": [
+            -93.255,
+            44.981
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Cedar–Riverside lots",
+          "point": [
+            -93.246,
+            44.968
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Mississippi East Bank mill edge",
+          "point": [
+            -93.254,
+            44.985
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Minnehaha Creek southern transition",
+          "point": [
+            -93.247,
+            44.91
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Split opposite-bank mill districts; extend along occupied streets and break at documented park and creek areas.",
+      "morphology": "Historic masonry mill forms, rail yards and frame houses set apart.",
+      "risks": "Older volume does not demonstrate 1890s growth. Later locks are excluded. Saint Paul stays independent.",
+      "source_preference": [
+        "minneapolis_1885",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:947": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Place d’Armes old city",
+          "point": [
+            -73.556,
+            45.504
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Sainte-Marie ordinary blocks",
+          "point": [
+            -73.549,
+            45.534
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Old Port and Lachine Canal",
+          "point": [
+            -73.558,
+            45.492
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Mount Royal park and slope",
+          "point": [
+            -73.586,
+            45.503
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Separate older riverfront blocks, Lachine industry, terrace houses and documented outer nuclei. End at canal-water, hillside park, or unoccupied fringe.",
+      "morphology": "Narrow masonry lots, warehouse bars, sloped residential terraces.",
+      "risks": "Westmount and other municipalities use independent contemporary limits. Later docks and suburban maps are comparison only.",
+      "source_preference": [
+        "montreal_goad"
+      ]
+    },
+    "reba:chandler:994": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "New Haven Green and nine squares",
+          "point": [
+            -72.927,
+            41.308
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Wooster Square residences",
+          "point": [
+            -72.917,
+            41.304
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Long Wharf rail and harbour edge",
+          "point": [
+            -72.919,
+            41.292
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "West Rock outer slopes",
+          "point": [
+            -72.953,
+            41.332
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Preserve core Green; follow attested streets toward harbour and mill rivers, ending at rail marsh, rock grades and the last occupied street.",
+      "morphology": "Institutional courts and housing grid with separated waterfront yards.",
+      "risks": "Modern shore fill and road access do not fix original shore or housing.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "reba:chandler:995": {
+      "profile": "historic_port",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Jackson Square and Decatur grid",
+          "point": [
+            -90.063,
+            29.957
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Faubourg Marigny narrow lots",
+          "point": [
+            -90.052,
+            29.967
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Algiers Point and ferry",
+          "point": [
+            -90.055,
+            29.952
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Bayou St John and swamp edge",
+          "point": [
+            -90.094,
+            29.989
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Trace built levee ridges, bend by bend. Keep Algiers as an isolated ferry unit; use dated drainage and frontage to stop on swampward edges.",
+      "morphology": "Creole courtyard and narrow shotgun lots, embankments and drainage voids.",
+      "risks": "No permanent bridge across the lower Mississippi here in 1900. Later lakefront drainage and fill require exclusion.",
+      "source_preference": [
+        "new_orleans_1896",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "us_city_minnesota_st_paul": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "dated_source_located",
+      "anchors": [
+        {
+          "name": "Rice Park and downtown terrace",
+          "point": [
+            -93.097,
+            44.945
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Dayton’s Bluff streets",
+          "point": [
+            -93.058,
+            44.958
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Mississippi landing and low bank",
+          "point": [
+            -93.092,
+            44.936
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "Summit Hill and ravine",
+          "point": [
+            -93.137,
+            44.941
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use downtown terrace, rail landing and Summit and Dayton bluff ranges separately, stopping at ravines or low unbuilt river margin.",
+      "morphology": "Compact masonry core and separate hill house lots and industry.",
+      "risks": "Bracket 1900 with older and later editions; verify bridge changes and the gap to Minneapolis.",
+      "source_preference": [
+        "saint_paul_1885_1903",
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
+    "us_city_missouri_st_joseph": {
+      "profile": "relief",
+      "grade": "C",
+      "extent_state": "named_constraints_source_pending",
+      "anchors": [
+        {
+          "name": "Fifth and Francis commercial grid",
+          "point": [
+            -94.854,
+            39.767
+          ],
+          "precision": "approximate_locator",
+          "role": "core"
+        },
+        {
+          "name": "Museum Hill residences",
+          "point": [
+            -94.842,
+            39.764
+          ],
+          "precision": "approximate_locator",
+          "role": "ordinary_block"
+        },
+        {
+          "name": "Missouri River and north rail edge",
+          "point": [
+            -94.864,
+            39.778
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_a"
+        },
+        {
+          "name": "South stockyards and bluff",
+          "point": [
+            -94.863,
+            39.726
+          ],
+          "precision": "approximate_locator",
+          "role": "edge_b"
+        }
+      ],
+      "scope": "Use downtown warehouse grid, bluffs and separately confirmed stockyard or rail industry. Protect steep unbuilt drainage gullies and floodplain.",
+      "morphology": "Brick wholesale bars below ordinary small house lots on slopes.",
+      "risks": "Do not use the modern Missouri course to place past structures. Date rail and road crossings independently.",
+      "source_preference": [
+        "us_sanborn",
+        "usgs_historical_topo"
+      ]
+    },
     "reba:chandler:5": {
       "profile": "relief",
       "grade": "C",

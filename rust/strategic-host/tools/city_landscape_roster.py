@@ -467,7 +467,9 @@ def compile_roster():
                     "seed": point,
                     "seed_precision": "locator_only" if quality == "C" else "see_source_mask",
                     "site_plan": key if plan and plan.get("anchors") else None,
-                    "extent_state": "anchor_reviewed" if plan and plan.get("anchors") else "period_anchor_needed",
+                    "extent_state": (plan or {}).get("extent_state") or (
+                        "anchor_reviewed" if plan and plan.get("anchors") else "period_anchor_needed"
+                    ),
                     "source_lookup": {
                         "place": name,
                         "preference": list(preferred_sources),

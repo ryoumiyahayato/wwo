@@ -52,6 +52,8 @@ python rust/strategic-host/tools/city_landscape_roster.py --generate
 
 法国和西班牙本机参考瓦片有明确采集窗，属近现代参照。只用于定位经历史依据证实的地物，不用于确认其历史建成区或道路存在。英国道路与建筑资料的缺口分开记录。湖面、公园、海湾和有证据的空地可作为有效空白。资料裁边和历史郊缘分别标注。区域缺口保留在名录头；没有可比城市统计的地区继续补资料，不能推导为没有可施工城市。现有目录的行政几何只用于匹配政治和统计单位。
 
+北美预审 40 城均登记具名施工单元。本次补 29 城，15 城已登记有测绘年代的地方图源，14 城已有具名空间约束并保留图幅核对待办。具体将港岸、铁路堆场、台地住宅与空地分开。未量出的道路有效覆盖仍为未知，Sanborn 图幅拼接线不作历史郊缘。
+
 ## B4 实测
 
 - 正式 EXE 为 Build 144，路径为 `D:/programs/WWO/wwo/local-artifacts/strategic-map-phase4/wwo-map-lab.exe`。实际启动的窗口标题和 GitHub Windows CI 一致。数据来自 `D:/programs/WWO/wwo-cold-restore/runtime-97ebaf1003/data`。
