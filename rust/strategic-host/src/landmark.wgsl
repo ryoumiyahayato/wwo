@@ -40,14 +40,13 @@ struct CityBatch {
     @location(0) position: vec3f,
     @location(1) normal: vec3f,
     @location(2) color: vec4f,
-    @location(3) column_x: vec4f,
-    @location(4) column_y: vec4f,
-    @location(5) column_z: vec4f,
-    @location(6) origin: vec4f,
-    @location(7) dimensions: vec3f,
+    @location(3) horizontal_axes: vec4f,
+    @location(4) origin: vec2f,
+    @location(5) dimensions: vec3f,
 ) -> Output {
-    let placement=mat4x4f(column_x,column_y,column_z,origin);
-    let fitted=placement*(city_batch.fit*vec4f(position,1.));
+    let p=city_batch.fit*vec4f(position,1.);
+    let horizontal=horizontal_axes.xy*p.x+horizontal_axes.zw*p.z+origin*p.w;
+    let fitted=vec4f(horizontal.x,dimensions.y*p.y,horizontal.y,p.w);
     let inverse=city_batch.inverse_size_and_opacity;
     return Output(city_batch.clip_from_page*fitted,normal,color,vec2f(0.,inverse.w),position.y,0.,
                   position*dimensions*inverse.xyz,city_batch.material.xy);

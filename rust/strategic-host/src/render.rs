@@ -511,7 +511,7 @@ struct CityBatchDraw {
     page: ModelKey,
     kit: ModelKey,
     module: usize,
-    instances: std::ops::Range<u32>,
+    instances: [std::ops::Range<u32>;city_models::MAX_INSTANCE_RUNS],
 }
 
 struct ResidentModel {
@@ -600,6 +600,12 @@ impl ModelLayer {
     const DEPTH: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
     const CITY_LOD_CACHE_TIME: Duration = Duration::from_secs(2);
 
+    fn city_lod_boundary(opacity: f32) -> f32 {
+        // model_fragment uses the centres of the 16 Bayer ranks. Preserve that
+        // exact pixel set and skip the mesh when its interval covers no rank.
+        (opacity * 16. - 0.5).ceil().clamp(0., 16.) / 16.
+    }
+
     fn new(device: &wgpu::Device, format: wgpu::TextureFormat, surface: &GroundSurface,
            events: winit::event_loop::EventLoopProxy<crate::HostEvent>) -> Self {
         let material_layout=layout(device,&[
@@ -654,7 +660,7 @@ impl ModelLayer {
             })
         };
         let city_pipeline=pipeline("city_vertex",std::mem::size_of::<landmarks::FootprintModel>() as u64,
-            &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x3],
+            &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x2,5=>Float32x3],
             &[&material_layout,&city_layout]);
         let pipeline=pipeline("model_vertex",std::mem::size_of::<ModelInstance>() as u64,
             &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x4,8=>Float32x4],
@@ -746,7 +752,10 @@ impl ModelLayer {
                     self.city_upload_due = true;
                 }
             }
-            let lod_range=self.lod_range(model);
+            let mut lod_range=self.lod_range(model);
+            if model.city_page.is_some() {
+                lod_range=lod_range.map(Self::city_lod_boundary);
+            }
             if let Some(resident) = self.residents.get_mut(&key).filter(|resident| resident.mesh_ready()) {
                 let city_material = model.city_page.as_ref().filter(|city|city.kit.is_none()).map_or(0., |city|
                     if city.paris {2.} else {1.});
@@ -930,7 +939,9 @@ impl ModelLayer {
                 pass.set_vertex_buffer(0,kit.vertices.slice(..));
                 pass.set_vertex_buffer(1,instances.slice(..));
                 pass.set_index_buffer(kit.indices.slice(..),wgpu::IndexFormat::Uint32);
-                pass.draw_indexed(0..kit.count,0,batch.instances.clone());
+                for rows in batch.instances.iter().take_while(|rows|!rows.is_empty()) {
+                    pass.draw_indexed(0..kit.count,0,rows.clone());
+                }
             }
         }
     }
@@ -1111,24 +1122,35 @@ struct FrameTimer {
     queries: wgpu::QuerySet,
     resolved: wgpu::Buffer,
     slots: Vec<TimestampSlot>,
-    samples: Vec<(usize, f64)>,
+    query_count: u32,
+    samples: FrameGpuTiming,
+}
+
+#[derive(Default)]
+pub struct FrameGpuTiming {
+    pub frames: Vec<(usize, f64)>,
+    // Water projection, base scene, vegetation, overlays, models, HUD.
+    pub stages: Option<Vec<(usize, [f64; 6])>>,
 }
 
 impl FrameTimer {
-    fn new(device: &wgpu::Device) -> Self {
+    fn new(device: &wgpu::Device, stages: bool) -> Self {
+        let query_count = if stages { 7 } else { 2 };
         let buffer = |usage| device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("Game frame timestamps"), size: 16, usage, mapped_at_creation: false,
+            label: Some("Game frame timestamps"), size: u64::from(query_count) * 8,
+            usage, mapped_at_creation: false,
         });
         Self {
             queries: device.create_query_set(&wgpu::QuerySetDescriptor {
-                label: Some("Game frame timestamps"), ty: wgpu::QueryType::Timestamp, count: 2,
+                label: Some("Game frame timestamps"), ty: wgpu::QueryType::Timestamp, count: query_count,
             }),
             resolved: buffer(wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC),
             slots: (0..8).map(|_| TimestampSlot {
                 buffer: buffer(wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST),
                 pending: None,
             }).collect(),
-            samples: Vec::new(),
+            query_count,
+            samples: FrameGpuTiming { frames: Vec::new(), stages: stages.then(Vec::new) },
         }
     }
 
@@ -1139,11 +1161,15 @@ impl FrameTimer {
             match ready.try_recv() {
                 Ok(Ok(())) => {
                     let values = slot.buffer.slice(..).get_mapped_range();
-                    let begin = u64::from_le_bytes(values[..8].try_into().unwrap());
-                    let end = u64::from_le_bytes(values[8..].try_into().unwrap());
-                    let gpu_ms = end.saturating_sub(begin) as f64
-                        * f64::from(queue.get_timestamp_period()) / 1_000_000.;
-                    self.samples.push((*frame, gpu_ms));
+                    let timestamp = |index: usize| {
+                        u64::from_le_bytes(values[index * 8..(index + 1) * 8].try_into().unwrap())
+                    };
+                    let period_ms = f64::from(queue.get_timestamp_period()) / 1_000_000.;
+                    let elapsed = |first, last| timestamp(last).saturating_sub(timestamp(first)) as f64 * period_ms;
+                    self.samples.frames.push((*frame, elapsed(0, self.query_count as usize - 1)));
+                    if let Some(stages) = &mut self.samples.stages {
+                        stages.push((*frame, std::array::from_fn(|index| elapsed(index, index + 1))));
+                    }
                     drop(values);
                     slot.buffer.unmap();
                     slot.pending = None;
@@ -1156,12 +1182,12 @@ impl FrameTimer {
 }
 
 impl Renderer {
-    pub fn start_frame_timing(&mut self) {
+    pub fn start_frame_timing(&mut self, stages: bool) {
         self.frame_timer = self.device.features().contains(FRAME_TIMESTAMP_FEATURES)
-            .then(|| FrameTimer::new(&self.device));
+            .then(|| FrameTimer::new(&self.device, stages));
     }
 
-    pub fn finish_frame_timing(&mut self) -> Option<Vec<(usize, f64)>> {
+    pub fn finish_frame_timing(&mut self) -> Option<FrameGpuTiming> {
         let mut timer = self.frame_timer.take()?;
         timer.collect(&self.device, &self.queue, true);
         Some(timer.samples)
@@ -1535,7 +1561,7 @@ impl Renderer {
         let mut counts:HashMap<_,_>=self.models.residents.iter()
             .map(|(key,model)|(*key,model.transforms.len())).collect();
         for batch in &self.models.city_batches {
-            *counts.entry(batch.kit).or_default()+=batch.instances.len();
+            *counts.entry(batch.kit).or_default()+=batch.instances.iter().map(|rows|rows.len()).sum::<usize>();
         }
         let mut models:Vec<_>=counts.into_iter().filter(|&(_,count)|count>0)
             .map(|(key,count)|(key.model(),count)).collect();
@@ -1845,14 +1871,21 @@ impl Renderer {
             encoder.write_timestamp(&timer.queries, 0);
             Some((frame, slot))
         });
+        let stage_queries = gpu_slot.and(self.frame_timer.as_ref())
+            .filter(|timer| timer.query_count > 2).map(|timer| &timer.queries);
+        let mark_stage = |encoder: &mut wgpu::CommandEncoder, index| {
+            if let Some(queries) = stage_queries { encoder.write_timestamp(queries, index); }
+        };
         if show_map {
             if let Some(water)=&self.water_pages {
                 self.surface.project_water(&self.device,&mut encoder,[w,h],view,water.revision());
             }
         }
+        mark_stage(&mut encoder, 1);
         if let Some(battle) = battle {
             let scene = self.battle.as_mut().ok_or_else(|| io::Error::other("battle renderer not initialized"))?;
             scene.draw(&self.device, &self.queue, &mut encoder, &image, size, battle.view, battle.state, battle.terrain);
+            for stage in 2..=5 { mark_stage(&mut encoder, stage); }
         } else {
             let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label:Some("WWO map"),color_attachments:&[Some(wgpu::RenderPassColorAttachment{
@@ -1878,9 +1911,11 @@ impl Renderer {
                 }
             }
             drop(pass);
+            mark_stage(&mut encoder, 2);
             if let Some(layer)=&mut self.landscape {
                 layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group,&self.surface.group],[w,h]);
             }
+            mark_stage(&mut encoder, 3);
             let draw_city=show_map&&pages.iter().any(|(_,tile,_,_)|tile.city_ink_only);
             let road_area=if show_map && camera.mpp<300. && view.road_layer[0]<2 {
                 self.surface.city_roads.vector_bounds().chain(self.surface.road_store.active().map(|slot|slot.bounds))
@@ -1932,7 +1967,9 @@ impl Renderer {
                 if draw_economy {self.transport_economy.as_ref().unwrap().1.draw(&mut pass);}
                 if draw_vehicles {self.transport_vehicles.as_ref().unwrap().draw(&mut pass);}
             }
+            mark_stage(&mut encoder, 4);
             self.models.draw(&mut encoder, &image);
+            mark_stage(&mut encoder, 5);
         }
         {
             let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -1964,9 +2001,9 @@ impl Renderer {
         let padded=(w*4).div_ceil(256)*256;
         if let Some((_, slot)) = gpu_slot {
             let timer = self.frame_timer.as_ref().unwrap();
-            encoder.write_timestamp(&timer.queries, 1);
-            encoder.resolve_query_set(&timer.queries, 0..2, &timer.resolved, 0);
-            encoder.copy_buffer_to_buffer(&timer.resolved, 0, &timer.slots[slot].buffer, 0, 16);
+            encoder.write_timestamp(&timer.queries, timer.query_count - 1);
+            encoder.resolve_query_set(&timer.queries, 0..timer.query_count, &timer.resolved, 0);
+            encoder.copy_buffer_to_buffer(&timer.resolved, 0, &timer.slots[slot].buffer, 0, u64::from(timer.query_count) * 8);
         }
         let readback=capture.filter(|_|copy_src).map(|_|{
             let data=self.device.create_buffer(&wgpu::BufferDescriptor {label:Some("WWO capture"),size:u64::from(padded)*u64::from(h),

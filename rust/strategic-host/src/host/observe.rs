@@ -351,12 +351,12 @@ impl Host {
                 self.trial.timing=!self.trial.timing;self.trial.previous=None;
                 if self.trial.timing{
                     self.trial.passive_timing=input.value=="passive";
-                    self.trial.profile_frames=input.value=="profile";
+                    self.trial.profile_frames=matches!(input.value.as_str(),"profile"|"stages");
                     self.trial.frames.clear();
                     self.trial.load_frames.clear();
                     self.trial.battle_openings.clear();
                     if self.trial.profile_frames {
-                        if let Some(renderer)=&mut self.renderer {renderer.start_frame_timing();}
+                        if let Some(renderer)=&mut self.renderer {renderer.start_frame_timing(input.value=="stages");}
                     }
                     self.trial.times.clear();
                     self.trial.loads.clear();
@@ -365,7 +365,12 @@ impl Host {
                     let gpu=self.renderer.as_mut().and_then(Renderer::finish_frame_timing);
                     extra=serde_json::json!({"interval_ms":self.trial.times,"tile_load_ms":self.trial.loads,
                         "terrain_decode_ms":self.trial.terrain_decodes,"frames":self.trial.frames,
-                        "gpu_frame_ms":gpu,"load_frame_indices":self.trial.load_frames,
+                        "gpu_frame_ms":gpu.as_ref().map(|value| &value.frames),
+                        "gpu_stage_ms":gpu.as_ref().and_then(|value| value.stages.as_ref()).map(|samples| serde_json::json!({
+                            "names":["water_projection","base_scene","vegetation","overlays","models","hud"],
+                            "samples":samples,
+                        })),
+                        "load_frame_indices":self.trial.load_frames,
                         "battle_openings":self.trial.battle_openings});
                 }
             }

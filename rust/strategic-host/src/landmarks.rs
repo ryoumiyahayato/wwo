@@ -168,7 +168,8 @@ pub(crate) type ModelBounds = ([f64; 3], [f64; 3]);
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 pub(crate) struct FootprintModel {
-    local_transform: [[f32;4];4],
+    horizontal_axes: [f32;4],
+    origin: [f32;2],
     dimensions: [f32; 3],
 }
 
@@ -177,7 +178,12 @@ impl FootprintModel {
         let dimensions=dimensions.map(|value|value as f32);
         let local_transform=Mat4::from_scale_rotation_translation(Vec3::from_array(dimensions),
             Quat::from_rotation_y(heading.to_radians() as f32),Vec3::new(east as f32,0.,south as f32));
-        Self {local_transform:local_transform.to_cols_array_2d(),dimensions}
+        Self {
+            horizontal_axes: [local_transform.x_axis.x,local_transform.x_axis.z,
+                              local_transform.z_axis.x,local_transform.z_axis.z],
+            origin: [local_transform.w_axis.x,local_transform.w_axis.z],
+            dimensions,
+        }
     }
 }
 

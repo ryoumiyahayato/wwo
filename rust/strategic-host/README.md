@@ -288,6 +288,8 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 运行时按日期和视野调度道路显示页。道路和建筑共用六个页读取任务，每次最多两个道路任务。GPU 保留最多十六个道路页槽，分帧上传完成后才启用。离开视野后取消未开始任务并撤销绘制，CPU 页在宽限期后释放。`observe` 的 `city_models.roads` 记录所需页、CPU 状态和来源覆盖，`city_gpu` 记录槽位容量、预留量和已启用覆盖。
 
+建筑页按可见地块合并实例区间。每个建筑模块共用一组绑定，每页最多绘制六个区间。`timing` 的 `stages` 值采集水面投影、基础地景、植被、叠加层、模型及界面六段 GPU 时间。结果附在 `gpu_stage_ms`，与引擎帧间隔分开。
+
 在现有离线 Python 环境运行 `tools/build_city_models.py PLAN.geojson DATA/city-models --site FROZEN_CITY_ID` 可增量生成一城。输入为 CRS84 FeatureCollection，顶层 `wwo` 记录 `city_id`、`name`、`key`、固定 `origin`、单调递增的 `revision`、`method` 和 `sources`。每条来源含 `id`、`url`、`licence`、`date` 和 `precision`，每条要素含稳定 `id` 和 `properties.source`。覆盖面用 `kind=coverage`，路中心线用 `kind=road` 和 `width_m`，历史建筑面用 `kind=building` 与可选 `role`、`height_m`。推定只在有资料依据的 `kind=zone` 面内沿道路进行，区内指定 `role` 和 `gap_m`。水面、公园、场坪、铁路用地和不宜施工的坡地分别用 `water`、`park`、`yard`、`rail`、`steep` 排除。先写新增页，再原子更新目录，其他城市文件可复用。v2 建筑使用 `profile` 和 `role`，局部场景导出继续保留旧 GLB 节点标识。
 
 道路在四种地图模式中共用同一个基础渲染通道，专题交通线随后绘制。巴黎中心使用 PTM 街道。法兰西岛外围使用 IPR 约 1900 年的 1∶50,000 道路中心线，按交叉口的方向连续性推定道路等级。伦敦使用有年代记录的 OHM 道路，优先采用 1893–1896 年测绘和已整理的泰晤士河桥位。只有较晚底图线形的同期道路是位置参照。路面、部分路宽、人行道和 IPR 窄水道过河表现均为绘制推定。道路几何不提供给正式交通网络。

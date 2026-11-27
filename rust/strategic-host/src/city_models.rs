@@ -27,6 +27,7 @@ const LATITUDE_CELLS: i32 = 720;
 const PARIS_FRINGE: &[u8] = include_bytes!("paris-fringe.bin");
 const METRES_PER_DEGREE:f64=camera::EARTH*std::f64::consts::PI/180.;
 const BLOCK_METRES:f64=96.;
+pub(crate) const MAX_INSTANCE_RUNS:usize=6;
 
 #[derive(Deserialize)]
 struct Header {
@@ -243,7 +244,7 @@ pub(crate) struct CityGeometry {
 }
 
 pub(crate) struct CityBatch {
-    pub(crate) instances: Range<u32>,
+    pub(crate) instances: [Range<u32>;MAX_INSTANCE_RUNS],
     pub(crate) fit: [[f32;4];4],
     pub(crate) inverse_size: [f32;3],
 }
@@ -322,20 +323,28 @@ impl CityPage {
     }
 
     fn visible_batches(&self,camera:&Camera,size:[u32;2],landmarks:&Landmarks)->[Option<CityBatch>;MODULES] {
-        let mut visible:[Range<u32>;MODULES]=Default::default();
+        let mut visible:[[Range<u32>;MAX_INSTANCE_RUNS];MODULES]=Default::default();
+        let mut current=[0;MODULES];
         for block in self.blocks.iter().filter(|block|distance_to_view(block.bounds,camera,size,block.apron).is_some()) {
-            for (range,block_rows) in visible.iter_mut().zip(&block.instances) {
-                if !block_rows.is_empty() {
-                    range.start=if range.start==range.end {block_rows.start} else {range.start.min(block_rows.start)};
-                    range.end=range.end.max(block_rows.end);
+            for (module,block_rows) in block.instances.iter().enumerate().filter(|(_,rows)|!rows.is_empty()) {
+                let runs=&mut visible[module];
+                let slot=&mut current[module];
+                let last=&mut runs[*slot];
+                if last.start == last.end {
+                    *last=block_rows.clone();
+                } else if block_rows.start.saturating_sub(last.end)<=8 || *slot+1==MAX_INSTANCE_RUNS {
+                    last.end=block_rows.end;
+                } else {
+                    *slot+=1;
+                    runs[*slot]=block_rows.clone();
                 }
             }
         }
-        // Keep one draw per kit and page. Intermediate off-screen rows clip on the GPU.
+        // Keep one binding per kit and page, with a fixed limit on draw runs.
         let mut module=0;
         visible.map(|instances| {
             module+=1;
-            (!instances.is_empty()).then(|| {
+            (!instances[0].is_empty()).then(|| {
                 let (fit,inverse_size) = if self.kit.is_some() {
                     (glam::Mat4::IDENTITY.to_cols_array_2d(), [1.;3])
                 } else {
