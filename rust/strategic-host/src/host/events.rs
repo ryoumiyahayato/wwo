@@ -301,9 +301,8 @@ impl Host {
             });
         }
         let city_path=data.join("city-models");
-        if city_path.join("catalogue.json").is_file() || self.city_models.is_some() {
-            report("城市分片",crate::city_models::Catalogue::reload(city_path,self.city_models.as_ref(),&self.camera,self.size)
-                .map(|candidate|{self.city_models=Some(candidate);true}));
+        if !self.city_reload_inflight && (self.city_models.is_some() || city_path.join("catalogue.json").is_file()) {
+            self.city_reload_queued = true;
         }
         self.resource_warnings.retain(|warning|!warning.starts_with("Reload · "));
         if !failures.is_empty() {
@@ -311,10 +310,29 @@ impl Host {
             #[cfg(windows)] crate::desktop_start::write_runtime_log(&self.resource_warnings.join("\n"));
         }
         let status=if !failures.is_empty(){format!("热加载失败 · {} · F10",failures[0].lines().next().unwrap_or(""))}
+            else if self.city_reload_inflight || self.city_reload_queued {"正在重新加载城市分片".into()}
             else if messages.is_empty(){"没有可热加载的资源".into()}
             else {format!("已热加载 · {}",messages.join("、"))};
         self.screenshot_status=Some((Instant::now(),status));
         self.dirty=true;
+    }
+
+    fn start_city_reload(&mut self) {
+        if !self.city_reload_queued { return; }
+        let capacity = self.city_models.as_ref().and_then(crate::city_models::Catalogue::reload_capacity);
+        if self.city_models.is_some() && capacity.is_none() { return; }
+        self.city_reload_queued = false;
+        self.city_reload_inflight = true;
+        let city_path = self.config.root.join("city-models");
+        let camera = self.camera.clone();
+        let size = self.size;
+        let events = self.events.clone();
+        if let Err(error) = std::thread::Builder::new().name("WWO city catalogue".into()).spawn(move || {
+            let candidate = crate::city_models::Catalogue::reload(city_path,capacity,&camera,size);
+            let _ = events.send_event(HostEvent::CityCatalogue(candidate));
+        }) {
+            let _ = self.events.send_event(HostEvent::CityCatalogue(Err(error)));
+        }
     }
 
     pub(super) fn world_view_changed(&mut self, had_session:bool, loaded:bool, now:Instant) {
@@ -589,6 +607,24 @@ impl ApplicationHandler<HostEvent> for Host {
                 }
                 return;
             }
+            HostEvent::CityCatalogue(result)=>{
+                self.city_reload_inflight = false;
+                let status = match result {
+                    Ok(candidate) => {
+                        self.city_models = Some(candidate);
+                        "已热加载 · 城市分片".into()
+                    }
+                    Err(error) => {
+                        let warning = format!("Reload · 城市分片 · {error}");
+                        self.resource_warnings.push(warning.clone());
+                        #[cfg(windows)] crate::desktop_start::write_runtime_log(&warning);
+                        format!("热加载失败 · {error} · F10")
+                    }
+                };
+                self.screenshot_status = Some((Instant::now(), status));
+                self.dirty = true;
+                return;
+            }
             HostEvent::TerrainRegional(key,result)=>{
                 if let Some(renderer)=&mut self.renderer {
                     if let Err(error)=renderer.terrain_regional_ready(key,result) {
@@ -835,6 +871,7 @@ impl ApplicationHandler<HostEvent> for Host {
         let now=Instant::now();self.poll(event_loop,now);
         let city_expired = self.city_models.as_mut().is_some_and(|catalogue| catalogue.expire(now));
         self.dirty |= city_expired;
+        self.start_city_reload();
         self.animate_opening(now);
         if self.hud.menu!=HudMenu::None {self.hud.clock_drag=None;}
         if let Some(s)=self.state.session.as_ref(){self.hud.mechanical.update(now,formal_ui::clock_index(Some(s)),s.clock_ack,self.hud.clock_drag,if s.paused{0}else{s.speed});}

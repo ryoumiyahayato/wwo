@@ -32,6 +32,7 @@ pub(crate) enum HostEvent {
     Rivers(io::Result<hydrology::Rivers>),
     Model(u64,landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
     CityTile(u64,usize,io::Result<crate::city_models::CityPage>),
+    CityCatalogue(io::Result<crate::city_models::Catalogue>),
     BattleTerrain(MilitaryCell, io::Result<PreparedBattleTerrain>),
 }
 
@@ -66,6 +67,8 @@ struct Host {
     events:winit::event_loop::EventLoopProxy<HostEvent>,
     landmarks:Option<landmarks::Landmarks>,
     city_models:Option<crate::city_models::Catalogue>,
+    city_reload_inflight:bool,
+    city_reload_queued:bool,
     transport_scene:Option<transport_scene::TransportScene>,
     transport_selection:Option<transport_ui::ObjectId>,
     transport_detail:Option<(i64, transport_ui::Detail)>,
@@ -195,7 +198,7 @@ impl Host {
         let observation_id=config.observe.as_ref().filter(|_|!config.terrain_review).and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
         let resources=crate::resource_map::State::new(&config.root);
-        Ok(Self {natural,events:events.create_proxy(),landmarks,city_models,transport_scene:None,transport_selection:None,transport_detail:None,resources,config,map_root,map_signature,fatal_error:None,resource_warnings,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
+        Ok(Self {natural,events:events.create_proxy(),landmarks,city_models,city_reload_inflight:false,city_reload_queued:false,transport_scene:None,transport_selection:None,transport_detail:None,resources,config,map_root,map_signature,fatal_error:None,resource_warnings,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
@@ -955,7 +958,8 @@ impl Host {
             Vec::new()
         } else if let Some(landmarks)=&self.landmarks {
             let mut models=self.city_models.as_mut().map_or_else(Vec::new,|catalogue|
-                catalogue.visible(&date,&self.camera,self.size,landmarks,&self.events,|[lon,lat]| {
+                catalogue.visible(&date,&self.camera,self.size,landmarks,
+                    (!self.city_reload_inflight && !self.city_reload_queued).then_some(&self.events),|[lon,lat]| {
                     pages.iter().filter(|(_,tile,_,_)| {
                         let [west,south,east,north]=tile.core;
                         tile.city_ink_only && !tile.city_area && !tile.city_streets
