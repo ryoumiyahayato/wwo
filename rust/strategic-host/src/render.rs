@@ -259,6 +259,7 @@ struct GroundSurface {
 struct RoadSlot {
     key:(u64,usize),
     bounds:[f64;4],
+    offset:usize,
     bytes:usize,
     written:usize,
     active:bool,
@@ -272,27 +273,48 @@ struct RoadStore {
     capacity:usize,
     registry:[u32;crate::city_roads::PAGE_SLOTS+1],
     slots:[Option<RoadSlot>;crate::city_roads::PAGE_SLOTS],
+    fragmented:usize,
     uploading:bool,
     water_revision:u64,
 }
 
 impl RoadStore {
     fn allocate(storage:&mut Vec<u8>, limit:u64) -> Self {
-        use crate::city_roads::{PAGE_BYTES,PAGE_DESCRIPTOR_WORDS,PAGE_SLOTS};
+        use crate::city_roads::{PAGE_DESCRIPTOR_WORDS,PAGE_SLOTS,PAGE_STORAGE_BYTES};
         let base=(storage.len()/4) as u32;
-        let total=storage.len()+4*((PAGE_SLOTS+1)+PAGE_DESCRIPTOR_WORDS*PAGE_SLOTS+5)+PAGE_BYTES*PAGE_SLOTS;
+        let total=storage.len()+4*((PAGE_SLOTS+1)+PAGE_DESCRIPTOR_WORDS*PAGE_SLOTS+5)+PAGE_STORAGE_BYTES;
         let capacity=if total as u64<=limit {PAGE_SLOTS} else {0};
         let bytes=if capacity>0 {total-20} else {storage.len()+4};
         storage.resize(bytes,0);
-        Self{base,capacity,registry:[0;PAGE_SLOTS+1],slots:[None;PAGE_SLOTS],uploading:false,water_revision:0}
+        Self{base,capacity,registry:[0;PAGE_SLOTS+1],slots:[None;PAGE_SLOTS],fragmented:0,uploading:false,water_revision:0}
+    }
+
+    fn payload_offset(&self, bytes:usize) -> Option<usize> {
+        // Keep the addresses of ready pages stable while neighboring pages stream in.
+        let mut occupied = self.slots.iter().flatten()
+            .map(|slot| slot.offset..slot.offset + slot.bytes)
+            .collect::<Vec<_>>();
+        occupied.sort_unstable_by_key(|range| range.start);
+        let limit = crate::city_roads::PAGE_STORAGE_BYTES;
+        let mut end = 0;
+        let mut best = None;
+        for next in occupied.into_iter().chain(std::iter::once(limit..limit)) {
+            let space = next.start - end;
+            if space >= bytes && best.is_none_or(|(_, previous)| space < previous) {
+                best = Some((end, space));
+            }
+            end = next.end;
+        }
+        best.map(|(offset, _)| offset)
     }
 
     fn update(&mut self, queue:&wgpu::Queue, buffer:&wgpu::Buffer,
               wanted:&[crate::city_models::ReadyRoad<'_>], uploads:&mut CityUploads) {
-        use crate::city_roads::{PAGE_BYTES,PAGE_DESCRIPTOR_WORDS,PAGE_SLOTS};
+        use crate::city_roads::{PAGE_DESCRIPTOR_WORDS,PAGE_SLOTS};
         let stride=PAGE_DESCRIPTOR_WORDS as u32;
         let descriptors=self.base+1+PAGE_SLOTS as u32;
         let start=descriptors+stride*PAGE_SLOTS as u32;
+        self.fragmented=0;
         if self.capacity==0 || (wanted.is_empty() && self.registry[0]==0 && !self.uploading) {return;}
         // Reserve the registry transfer so a removed slot cannot remain visible after reuse.
         let registry_bytes=std::mem::size_of_val(&self.registry) as u64;
@@ -309,12 +331,20 @@ impl RoadStore {
         for road in wanted {
             let Some(index)=self.slots.iter().position(|slot|slot.is_some_and(|slot|slot.key==road.key))
                 .or_else(||self.slots.iter().position(Option::is_none)) else {break;};
-            let slot=self.slots[index].get_or_insert(RoadSlot{key:road.key,bounds:road.bounds,
-                bytes:road.page.data.len(),written:0,active:false,water:road.page.water_offset.is_some(),
-                ground:road.page.ground_material.is_some(),road_coverage:road.page.coverage_offset
-                    .map(|_|if road.page.has_vector {"mapped_or_empty"} else {"confirmed_empty"})});
+            if self.slots[index].is_none() {
+                let bytes=road.page.data.len();
+                let Some(offset)=self.payload_offset(bytes) else {
+                    self.fragmented+=1;
+                    continue;
+                };
+                self.slots[index]=Some(RoadSlot{key:road.key,bounds:road.bounds,offset,bytes,
+                    written:0,active:false,water:road.page.water_offset.is_some(),
+                    ground:road.page.ground_material.is_some(),road_coverage:road.page.coverage_offset
+                        .map(|_|if road.page.has_vector {"mapped_or_empty"} else {"confirmed_empty"})});
+            }
+            let slot=self.slots[index].as_mut().unwrap();
             if slot.active {continue;}
-            let contents=start+(PAGE_BYTES/4*index) as u32;
+            let contents=start+(slot.offset/4) as u32;
             uploads.write(queue,buffer,u64::from(contents)*4,&road.page.data,&mut slot.written);
             let descriptor=road.page.descriptor(contents,road.bounds);
             let data=bytemuck::cast_slice(&descriptor);
@@ -1602,7 +1632,8 @@ impl Renderer {
                 .filter(|(key,model)| key.city_page_id().is_some() && model.detail_ready()).count(),
             "upload_pending":self.models.city_upload_due || roads.uploading,
             "road_slot_capacity":roads.capacity,
-            "road_reserved_bytes":roads.capacity*crate::city_roads::PAGE_BYTES,
+            "road_reserved_bytes":if roads.capacity==0 {0} else {crate::city_roads::PAGE_STORAGE_BYTES},
+            "road_fragmented":roads.fragmented,
             "road_active":roads.active().map(|slot|serde_json::json!({"revision":slot.key.0,"index":slot.key.1,
                 "payload_bytes":slot.bytes,"water":slot.water,"ground":slot.ground,
                 "active_coverage":slot.road_coverage})).collect::<Vec<_>>(),

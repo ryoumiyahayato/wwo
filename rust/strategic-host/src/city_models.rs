@@ -1,5 +1,6 @@
 use crate::{camera::{self, Camera}, city_kit, landmarks::{FootprintModel, Landmarks, ModelBounds, ModelKey, ModelMesh, ModelPose, ModelVertex, VisibleModel}, HostEvent};
 use crate::city_roads::{self, RoadPage, RoadTile};
+use glam::{Vec3, Vec4};
 use serde::Deserialize;
 use std::{
     collections::{BTreeMap, HashMap, HashSet},
@@ -225,8 +226,8 @@ struct Building {
 }
 
 struct Block {
-    bounds: [f64;4],
-    apron: f64,
+    center: Vec3,
+    half_extent: Vec3,
     instances: [Range<u32>;MODULES],
 }
 
@@ -295,13 +296,16 @@ impl CityPage {
         let mut instances = counts.map(Vec::with_capacity);
         for buildings in grouped.into_values() {
             check()?;
-            let mut bounds=[180_f64,90.,-180.,-90.];
-            let mut apron=0_f64;
+            let mut min=Vec3::splat(f32::INFINITY);
+            let mut max=Vec3::splat(f32::NEG_INFINITY);
             let starts=instances.each_ref().map(|rows|rows.len() as u32);
             for row in buildings {
-                let [lon,lat]=row.anchor();
-                bounds=[bounds[0].min(lon),bounds[1].min(lat),bounds[2].max(lon),bounds[3].max(lat)];
-                apron=apron.max(row.dimensions[0].hypot(row.dimensions[2])*0.5+row.dimensions[1]);
+                let [east,south]=row.offset.map(|value|value as f32);
+                let [width,height,depth]=row.dimensions.map(|value|value as f32);
+                // The extra margin includes the kit window faces.
+                let radius=width.hypot(depth)*0.502;
+                min=min.min(Vec3::new(east-radius,0.,south-radius));
+                max=max.max(Vec3::new(east+radius,height,south+radius));
                 if let Some(module) = &modules[row.module-1] {
                     row.place(module, &mut mesh);
                 } else {
@@ -310,7 +314,7 @@ impl CityPage {
                 instances[row.module-1].push(FootprintModel::new(row.offset,row.heading,row.dimensions));
             }
             let ranges=std::array::from_fn(|module|starts[module]..instances[module].len() as u32);
-            blocks.push(Block {bounds,apron,instances:ranges});
+            blocks.push(Block {center:(min+max)*0.5,half_extent:(max-min)*0.5,instances:ranges});
         }
         let mut mesh_bounds=([f64::INFINITY;3],[f64::NEG_INFINITY;3]);
         for vertex in &mesh.vertices {
@@ -322,10 +326,22 @@ impl CityPage {
         Ok(Self{blocks,mesh:Arc::new(CityGeometry{mesh,instances}),mesh_bounds,paris,kit})
     }
 
-    fn visible_batches(&self,camera:&Camera,size:[u32;2],landmarks:&Landmarks)->[Option<CityBatch>;MODULES] {
+    fn visible_batches(&self,clip_from_page:[[f32;4];4],landmarks:&Landmarks)->[Option<CityBatch>;MODULES] {
+        // The kit volumes and fitted legacy models lie within the footprint
+        // dimensions. Project their block bounds with the same affine map as the shader.
+        let planes:[Vec4;2]=std::array::from_fn(|axis|
+            Vec4::from_array(clip_from_page.map(|column|column[axis])));
+        let absolute=planes.map(|plane|plane.truncate().abs());
+        let intersects_screen=|block:&Block| {
+            (0..2).all(|axis| {
+                let center=planes[axis].dot(block.center.extend(1.));
+                let radius=absolute[axis].dot(block.half_extent);
+                center.abs()<=1.001+radius
+            })
+        };
         let mut visible:[[Range<u32>;MAX_INSTANCE_RUNS];MODULES]=Default::default();
         let mut current=[0;MODULES];
-        for block in self.blocks.iter().filter(|block|distance_to_view(block.bounds,camera,size,block.apron).is_some()) {
+        for block in self.blocks.iter().filter(|block|intersects_screen(block)) {
             for (module,block_rows) in block.instances.iter().enumerate().filter(|(_,rows)|!rows.is_empty()) {
                 let runs=&mut visible[module];
                 let slot=&mut current[module];
@@ -362,7 +378,7 @@ impl Building {
     }
 
     fn place(&self, module: &ModelMesh, page: &mut ModelMesh) {
-        use glam::{Quat, Vec3};
+        use glam::Quat;
         let [east, south] = self.offset.map(|value| value as f32);
         let shift = Vec3::new(east, 0., south);
         let rotation = Quat::from_rotation_y(self.heading.to_radians() as f32);
@@ -643,8 +659,16 @@ impl Catalogue {
                 && (tile.water_features == 0 || camera.mpp < 21.)
                 && (tile.ground_features == 0 || camera.mpp < 115.)
         }).collect::<Vec<_>>();
-        self.roads.overflow = wanted.len().saturating_sub(city_roads::PAGE_SLOTS);
+        let available = wanted.len();
+        let mut remaining = city_roads::PAGE_STORAGE_BYTES;
+        wanted.retain(|&index| {
+            let bytes = self.roads.tiles[index].1.bytes;
+            if bytes > remaining { return false; }
+            remaining -= bytes;
+            true
+        });
         wanted.truncate(city_roads::PAGE_SLOTS);
+        self.roads.overflow = available - wanted.len();
         self.lookup += started.elapsed();
         self.set_road_wanted(wanted, now);
         let Some(events) = events else { return; };
@@ -774,7 +798,7 @@ impl Catalogue {
                 let key=ModelKey::city_page(self.revision,index);
                 let pose=ModelPose{key,anchor,heading:0.,datum:0.,dimensions:[1.;3],bounds:page.mesh_bounds};
                 let Some(mut block_model)=pose.project(None,camera,camera.pitch(),size) else {continue;};
-                let batches=if detail>0. {page.visible_batches(camera,size,landmarks)} else {Default::default()};
+                let batches=if detail>0. {page.visible_batches(block_model.clip_from_model,landmarks)} else {Default::default()};
                 let has_details=batches.iter().any(Option::is_some);
                 self.draw_wanted.insert(index, if has_details { "detail" } else { "overview" });
                 block_model.lod_range=[if has_details {detail} else {0.},opacity];
