@@ -142,5 +142,45 @@
       2
     ],
     "basis": "Rio 1900 plan sets roads, openings, shore and slopes; low block perimeter and courtyard massing are inferred."
+  },
+  {
+    "id": "singapore_early_shophouse",
+    "roof": "gable",
+    "work_roof": "gable",
+    "court": "rear",
+    "parapet": false,
+    "arcade": true,
+    "shop_airwell": [
+      0.04,
+      0.22
+    ],
+    "eave": 0.82,
+    "wall": [
+      0.63,
+      0.53,
+      0.38
+    ],
+    "tile": [
+      0.39,
+      0.20,
+      0.14
+    ],
+    "frontage_m": [
+      4,
+      6
+    ],
+    "depth_m": [
+      12,
+      18
+    ],
+    "storeys": [
+      2,
+      3
+    ],
+    "setback_m": [
+      0,
+      0
+    ],
+    "basis": "The URA Kampong Glam trail dates the early style to 1840–1900 and records typical frontages of 4–6 m and depths of at least two to three times the width (https://www.roots.gov.sg/-/media/Roots/Files/ura-kampong-glam-trail/urakampongglamtrail19_brochure.pdf). URA documents two- to three-storey party-wall rows, pitched clay tile roofs, rear courts and covered street arcades (https://www.ura.gov.sg/conservation/conservation-resources/understanding-the-shophouse/). NLB documents timber spans and open airwells in the historic rows (https://biblioasia.nlb.gov.sg/all-sections/vol-2-issue2-jul-2006-ethnic-enclave-urban-settlement/). Model depths are a representative 12–18 m band. Roof geometry, eave height, exact street setback, wall and tile colours, and relative airwell dimensions are inferred for the Kit."
   }
 ]

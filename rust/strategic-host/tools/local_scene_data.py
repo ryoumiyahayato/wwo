@@ -6,15 +6,14 @@ import struct
 from pathlib import Path
 
 from shapely import box, intersects_xy, prepare, segmentize, transform
-from shapely.geometry import MultiLineString, MultiPolygon, mapping
+from shapely.geometry import MultiLineString, mapping
 from zstandard import ZstdDecompressor
 
 from build_city_models import RECORD, transforms
-from build_city_water import SITES, prepared_roads, sections
+from build_city_water import SITES, prepared_roads, projected_bounds
 
 
 BUILDING_NODES = ("london_gabled", "london_terrace", "paris_corner", "paris_mansard")
-RIVER_IDS = ("seine", "thames")
 
 
 def _building_features(root, region):
@@ -54,20 +53,16 @@ def _building_features(root, region):
                 }
 
 
-def _water_and_road_features(sources, region):
-    for index, (origin, extent, water_source) in enumerate(SITES):
+def _road_features(sources, region):
+    for index, (origin, extent) in enumerate(SITES):
         if not region.intersects(box(*extent)):
             continue
-        values, banks, limits = sections(sources, origin, extent, water_source)
+        values = projected_bounds(origin, extent)
+        limits = box(*values[4:])
         lon, lat, east, north = values[:4]
 
         def to_geographic(x, y):
             return x / east + lon, y / north + lat
-
-        water = transform(MultiPolygon(banks), to_geographic, interleaved=False)
-        if region.intersects(water):
-            yield {"type": "Feature", "id": f"river:{RIVER_IDS[index]}", "geometry": mapping(water),
-                   "properties": {"kind": "water", "source": water_source, "artist_smoothed": True}}
 
         for feature_id, lines, radius, material, bridge in prepared_roads(sources, limits, values, index == 1):
             road = transform(MultiLineString(lines), to_geographic, interleaved=False)
@@ -81,7 +76,7 @@ def read_city_scene(sources: Path, buildings: Path, center: tuple[float, float],
     """Return a CRS84 FeatureCollection for a square centred at (longitude, latitude).
 
     Features retain their identity and geometry across window sizes. Placements
-    are selected by their centre, lines and polygons by intersection.
+    are selected by their centre and roads by intersection. Water comes from QWG.
     """
     if size_km not in (5, 25, 50):
         raise ValueError("Local scenes support 5, 25 or 50 km on each side")
@@ -95,7 +90,7 @@ def read_city_scene(sources: Path, buildings: Path, center: tuple[float, float],
         # The current historical sources have no antimeridian or polar coverage.
         return _collection(center, size_km, [])
     features = list(_building_features(buildings, region))
-    features.extend(_water_and_road_features(sources, region))
+    features.extend(_road_features(sources, region))
     return _collection(center, size_km, features)
 
 

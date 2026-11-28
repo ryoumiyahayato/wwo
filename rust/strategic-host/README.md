@@ -276,7 +276,7 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 `tools/build_city_water.py <已有地图资料目录> <输出文件>` 用巴黎 PTM 1900 和 OpenHistoricalMap 的伦敦道路重建现有道路索引。城市水陆使用 QWG。[OpenHistoricalMap 版权](https://www.openhistoricalmap.org/copyright)
 
-局部场景的资源制作可调用 `tools/local_scene_data.py` 的 `read_city_scene(sources, buildings, (lon, lat), size_km)`。输入沿用河岸原始资料目录和游戏 `data/city-models`。`size_km` 支持 5、25、50，输出 CRS84 的 GeoJSON FeatureCollection。建筑按中心选取，道路和水域按几何交集选取。同一地物在各范围内保持原坐标和 ID。道路沿用 PTM 与 OHM 源记录 ID，建筑 ID 由城市、记录坐标及朝向确定。建筑记录指向现有 GLB 节点，路面、屋顶和墙面指向现有材质图集层。接口提供现有近景资料，全球高程及水域仍由 QPK 和 QWG 提供。
+局部场景的资源制作可调用 `tools/local_scene_data.py` 的 `read_city_scene(sources, buildings, (lon, lat), size_km)`。输入沿用道路原始资料目录和游戏 `data/city-models`。`size_km` 支持 5、25、50，输出 CRS84 的 GeoJSON FeatureCollection。建筑按中心选取，道路按几何交集选取。同一地物在各范围内保持原坐标和 ID。道路沿用 PTM 与 OHM 源记录 ID，建筑 ID 由城市、记录坐标及朝向确定。建筑记录指向现有 GLB 节点，路面、屋顶和墙面指向现有材质图集层。接口提供现有近景资料，全球高程及水域仍由 QPK 和 QWG 提供。
 
 道路在四种地图模式中共用同一个基础渲染通道，专题交通线随后绘制。巴黎中心使用 PTM 街道。法兰西岛外围使用 IPR 约 1900 年的 1∶50,000 道路中心线，按交叉口的方向连续性推定道路等级。伦敦使用有年代记录的 OHM 道路，优先采用 1893–1896 年测绘和已整理的泰晤士河桥位。只有较晚底图线形的同期道路是位置参照。路面、部分路宽、人行道和 IPR 窄水道过河表现均为绘制推定。道路几何不提供给正式交通网络。
 
