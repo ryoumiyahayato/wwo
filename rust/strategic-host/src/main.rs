@@ -6,6 +6,7 @@ mod capital_landmarks;
 mod city_kit;
 mod city_models;
 mod city_parks;
+mod city_plan;
 #[cfg(windows)]
 mod desktop_start;
 #[cfg(windows)]

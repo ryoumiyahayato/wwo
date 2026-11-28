@@ -1,4 +1,5 @@
 use crate::{camera::{self, Camera}, city_kit, landmarks::{FootprintModel, Landmarks, ModelBounds, ModelKey, ModelMesh, ModelPose, ModelVertex, VisibleModel}, HostEvent};
+use crate::{city_plan::{Plan, PlanSource, Plans}, overlay::Mesh};
 use serde::Deserialize;
 use std::{
     collections::{BTreeMap, HashMap, HashSet},
@@ -29,6 +30,9 @@ struct Header {
 
 #[derive(Deserialize)]
 struct City {
+    id: Option<String>,
+    plan: Option<String>,
+    plan_bounds: Option<[f64; 4]>,
     name: String,
     source: String,
     attribution: String,
@@ -97,7 +101,7 @@ fn paris_fringe() -> io::Result<Vec<Tile>> {
     Ok(tiles)
 }
 
-fn distance_to_view(bounds:[f64;4],camera:&Camera,[width,height]:[u32;2],apron:f64)->Option<f64> {
+pub(crate) fn distance_to_view(bounds:[f64;4],camera:&Camera,[width,height]:[u32;2],apron:f64)->Option<f64> {
     let [west, south, east, north] = bounds;
     let center = [(west + east) * 0.5, (south + north) * 0.5];
     let [x, y] = camera.project(center, [width,height])?;
@@ -297,6 +301,7 @@ pub(crate) struct Catalogue {
     cache: HashMap<usize, CityPage>,
     pending: HashSet<usize>,
     failed: HashSet<usize>,
+    plans: Plans,
     revision: u64,
 }
 
@@ -311,10 +316,12 @@ impl Catalogue {
         let mut tiles = Vec::new();
         let mut sources = Vec::new();
         let mut files = HashSet::new();
+        let mut plans = Vec::new();
         for city in catalog.cities {
             let kit = city.kit.as_deref().map(|kit| city_kit::index(kit)
                 .ok_or_else(|| io::Error::other(format!("Unknown city kit {kit} for {}", city.name)))).transpose()?;
             sources.push(format!("{} · {} {}", city.name, city.source, city.attribution));
+            let first = tiles.len();
             for mut tile in city.tiles {
                 let [w,s,e,n] = tile.bounds;
                 if !tile.file.ends_with(".wcb") || !tile.file.bytes().all(|c|c.is_ascii_alphanumeric()||b"-_.".contains(&c))
@@ -325,11 +332,16 @@ impl Catalogue {
                 tile.kit = kit;
                 tiles.push(tile);
             }
+            if let Some(file) = city.plan {
+                plans.push(PlanSource::new(city.id, file, city.plan_bounds,
+                    tiles[first..].iter().map(|tile| tile.bounds))?);
+            }
         }
         if tiles.is_empty() {return Err(io::Error::other("City model catalogue has no tiles"));}
         tiles.extend(paris_fringe()?);
         sources.push("Paris fringe · Institut Paris Region, c. 1900 land use and roads. Reconstructed building placements.".into());
-        Ok(Self { root, tiles, sources, cache:HashMap::new(),pending:HashSet::new(),failed:HashSet::new(),revision:0 })
+        Ok(Self { root, tiles, sources, cache:HashMap::new(),pending:HashSet::new(),failed:HashSet::new(),
+            plans:Plans::new(plans)?,revision:0 })
     }
 
     pub(crate) fn reload(root: PathBuf, previous: Option<&Self>, camera:&Camera, size:[u32;2]) -> io::Result<Self> {
@@ -358,6 +370,21 @@ impl Catalogue {
                 Err(io::Error::other(format!("City tile {} · {error}",self.tiles[index].file)))
             }
         }
+    }
+
+    pub(crate) fn plan_ready(&mut self, revision: u64, index: usize, result: io::Result<Plan>) -> io::Result<()> {
+        if revision != self.revision { return Ok(()); }
+        self.plans.ready(index, result)
+    }
+
+    pub(crate) fn plan_mesh(&mut self, date:&str, camera:&Camera, size:[u32;2], geographic:bool, roads:bool,
+        events:&EventLoopProxy<HostEvent>) -> Option<(u64,&Mesh)>
+    {
+        if camera.mpp >= MAX_MPP || !("1891-01-01".."1915-01-01").contains(&date) {
+            return None;
+        }
+        let opacity = (1. - camera::smooth(115., MAX_MPP, camera.mpp)) as f32;
+        self.plans.mesh(&self.root, self.revision, camera, size, geographic, roads, opacity, events)
     }
 
     pub(crate) fn covers(&self, [lon,lat]: [f64;2]) -> bool {

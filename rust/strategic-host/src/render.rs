@@ -182,6 +182,7 @@ pub struct Renderer {
     frame_timer:Option<FrameTimer>,
     pub frame_acquire_ms:f64,
     models: ModelLayer,
+    city_plan: Option<(u64, MeshBuffers)>,
     transport_network: Option<(u64, MeshBuffers)>,
     transport_economy: Option<(u64, MeshBuffers)>,
     transport_vehicles: Option<MeshBuffers>,
@@ -1109,7 +1110,7 @@ impl Renderer {
                 solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,
                 prologue_art,prologue_texture,prologue_scene:None,prologue_paper,opening_cloud,
                 menu_layout:font_layout,menu_sampler:linear,instrument,instrument_view,screen,screen_size,meshes,models,
-                battle:None,landscape:None,map_layout:glob,landscape_shader:globe_shader,surface,transport_network:None,
+                battle:None,landscape:None,map_layout:glob,landscape_shader:globe_shader,surface,city_plan:None,transport_network:None,
                 transport_economy:None,transport_vehicles:None})
     }
 
@@ -1440,18 +1441,24 @@ impl Renderer {
         let water=pixels.terrain.chunks_exact(4).map(|p|p[2]).collect();
         Page {group,uniform,ids:pixels.ids,water,bytes}
     }
+    fn prepare_static_overlay(device:&wgpu::Device,queue:&wgpu::Queue,
+        draw:Option<(u64,&Mesh)>,cache:&mut Option<(u64,MeshBuffers)>)
+    {
+        if let Some((revision,mesh))=draw {
+            if cache.as_ref().is_none_or(|(previous,_)|*previous!=revision) {
+                let (previous,buffers)=cache.get_or_insert_with(|| {
+                    (revision,MeshBuffers::new(device,4096,2048))
+                });
+                buffers.upload(device,queue,mesh);
+                *previous=revision;
+            }
+        }
+    }
+
     fn prepare_transport(&mut self, overlay: Option<TransportOverlay<'_>>) -> [bool;3] {
         let Some(overlay)=overlay else {return [false;3];};
         for (draw,cache) in [(overlay.network,&mut self.transport_network),(overlay.economy,&mut self.transport_economy)] {
-            if let Some((revision,mesh))=draw {
-                if cache.as_ref().is_none_or(|(previous,_)|*previous!=revision) {
-                    let (previous,buffers)=cache.get_or_insert_with(|| {
-                        (revision,MeshBuffers::new(&self.device,4096,2048))
-                    });
-                    buffers.upload(&self.device,&self.queue,mesh);
-                    *previous=revision;
-                }
-            }
+            Self::prepare_static_overlay(&self.device,&self.queue,draw,cache);
         }
         let vehicles=!overlay.vehicles.indices.is_empty();
         if vehicles {
@@ -1463,7 +1470,7 @@ impl Renderer {
 
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
                   meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel],
-                  transport:Option<TransportOverlay<'_>>,
+                  city_plan:Option<(u64,&Mesh)>,transport:Option<TransportOverlay<'_>>,
                   (camera,landscape_enabled,now):(&Camera,bool,Instant),
                   battle:Option<BattleFrame<'_>>,timing_frame:Option<usize>)->io::Result<Option<io::Result<()>>> {
         let acquire_start = timing_frame.map(|_| Instant::now());
@@ -1485,6 +1492,9 @@ impl Renderer {
             RenderTarget::Offscreen(texture)=>[texture.width(),texture.height()],
         };
         if battle.is_none() {self.prepare_landscape(camera,size,landscape_enabled,now,seconds);}
+        let city_plan=city_plan.filter(|_|show_map && battle.is_none());
+        let draw_city_plan=city_plan.is_some();
+        Self::prepare_static_overlay(&self.device,&self.queue,city_plan,&mut self.city_plan);
         let [draw_network,draw_economy,draw_vehicles]=self.prepare_transport(transport.filter(|_|show_map && battle.is_none() && view.road_layer[0]==0));
         let (texture,copy_src)=match &self.target {
             RenderTarget::Window(_,config)=>(&frame.as_ref().unwrap().texture,config.usage.contains(wgpu::TextureUsages::COPY_SRC)),
@@ -1582,7 +1592,7 @@ impl Renderer {
                 [[1.78,48.59,2.89,49.15],[-0.371,51.371,0.104,51.638]].map(|bounds| road_scissor(camera,size,bounds))
             } else {[None;2]};
             let draw_roads=road_scissors.iter().any(Option::is_some);
-            if draw_city||draw_roads||draw_network||draw_economy||draw_vehicles {
+            if draw_city||draw_roads||draw_city_plan||draw_network||draw_economy||draw_vehicles {
                 let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label:Some("WWO map overlays"),
                     color_attachments:&[Some(wgpu::RenderPassColorAttachment {
@@ -1620,6 +1630,7 @@ impl Renderer {
                 }
                 pass.set_pipeline(&self.solid);
                 pass.set_bind_group(0,&self.screen,&[]);
+                if draw_city_plan {self.city_plan.as_ref().unwrap().1.draw(&mut pass);}
                 if draw_network {self.transport_network.as_ref().unwrap().1.draw(&mut pass);}
                 if draw_economy {self.transport_economy.as_ref().unwrap().1.draw(&mut pass);}
                 if draw_vehicles {self.transport_vehicles.as_ref().unwrap().draw(&mut pass);}

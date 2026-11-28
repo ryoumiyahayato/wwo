@@ -283,6 +283,32 @@ def pack(output, key, source, attribution, rows, modern_format=False):
     return dict(name=key.title(), source=source, attribution=attribution, tiles=entries)
 
 
+def plan_bounds(layout):
+    # Unwrap about the city center. A wrapped result has west greater than east.
+    origin = layout["wwo"]["origin"][0]
+    west = south = math.inf
+    east = north = -math.inf
+    metres_per_degree = math.radians(1) * 6_371_008.8
+    for feature in layout["features"]:
+        properties = feature["properties"]
+        if properties["kind"] not in {"road", "block"}:
+            continue
+        x, y = shapely.get_coordinates(shape(feature["geometry"])).T
+        lon = (x - origin + 180) % 360 - 180
+        low, high = float(y.min()), float(y.max())
+        half_width = properties.get("width_m", 0) / 2
+        lat_pad = half_width / metres_per_degree
+        lon_pad = lat_pad / math.cos(math.radians(max(abs(low), abs(high))))
+        west, east = min(west, float(lon.min()) - lon_pad), max(east, float(lon.max()) + lon_pad)
+        south, north = min(south, low - lat_pad), max(north, high + lat_pad)
+    if west == math.inf:
+        return None
+    south, north = max(-90., south), min(90., north)
+    if east - west >= 360:
+        return [-180., south, 180., north]
+    return [(origin + west + 180) % 360 - 180, south, (origin + east + 180) % 360 - 180, north]
+
+
 def generate_roster_city(output, city_id, terrain, transport_data, revision):
     from build_procedural_city import build_city
 
@@ -299,7 +325,8 @@ def generate_roster_city(output, city_id, terrain, transport_data, revision):
     layout_file = f"{key}.geojson"
     (output/layout_file).write_text(json.dumps(layout, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     entry.update(id=city_id, name=city["name"], kit=layout["wwo"]["kit"], plan=layout_file, revision=revision,
-                 transport=layout["wwo"]["transport"], reserves=layout["wwo"]["reserves"])
+                 plan_bounds=plan_bounds(layout), transport=layout["wwo"]["transport"],
+                 reserves=layout["wwo"]["reserves"])
     return entry
 
 
