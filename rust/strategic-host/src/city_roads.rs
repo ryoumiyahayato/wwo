@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use std::{fs::File, io::{self, Read}, path::Path};
+use crate::city_models::{read_city_page_payload, CityLoadMemory};
 
 const ROWS: usize = 180;
 const COLUMNS: usize = 360;
@@ -39,7 +40,7 @@ impl RoadTile {
             && (1..self.years[1]).contains(&self.years[0]) && self.years[1] <= 9999
     }
 
-    pub(crate) fn read(&self, root: &Path) -> io::Result<RoadPage> {
+    pub(crate) fn read(&self, root: &Path, memory: Option<&CityLoadMemory>) -> io::Result<RoadPage> {
         let invalid = || io::Error::other("Invalid city road page");
         let mut file = File::open(root.join(&self.file))?;
         let mut header = [0; 12];
@@ -52,10 +53,7 @@ impl RoadTile {
         if &header[..8] != expected || u32::from_le_bytes(header[8..].try_into().unwrap()) as usize != self.bytes {
             return Err(invalid());
         }
-        let mut decoder = zstd::stream::read::Decoder::new(file)?;
-        decoder.window_log_max(20)?;
-        let mut data = Vec::with_capacity(self.bytes);
-        decoder.take((self.bytes + 1) as u64).read_to_end(&mut data)?;
+        let data = read_city_page_payload(file, self.bytes, 20, memory)?;
         if data.len() != self.bytes { return Err(invalid()); }
         let len = data.len() / 4;
         let word = |offset: usize| u32::from_le_bytes(data[offset * 4..offset * 4 + 4].try_into().unwrap());

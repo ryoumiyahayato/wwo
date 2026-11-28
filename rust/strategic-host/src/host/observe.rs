@@ -379,6 +379,9 @@ impl Host {
                     self.trial.passive_timing=input.value=="passive";
                     self.trial.profile_frames=matches!(input.value.as_str(),"profile"|"stages");
                     self.trial.city_memory_started=(input.value=="city-memory").then(Instant::now);
+                    if self.trial.city_memory_started.is_some() {
+                        if let Some(catalogue) = &mut self.city_models { catalogue.measure_loads(true); }
+                    }
                     self.trial.city_memory_samples.clear();
                     self.trial.frames.clear();
                     self.trial.load_frames.clear();
@@ -402,6 +405,7 @@ impl Host {
                         "battle_openings":self.trial.battle_openings});
                     if self.trial.city_memory_started.take().is_some() {
                         extra["city_memory_samples"]=serde_json::json!(self.trial.city_memory_samples);
+                        if let Some(catalogue) = &mut self.city_models { catalogue.measure_loads(false); }
                     }
                 }
             }

@@ -5,10 +5,10 @@ use serde::Deserialize;
 use std::{
     collections::{BTreeMap, HashMap, HashSet},
     fs::File,
-    io::{self, Read},
+    io::{self, BufReader, Read},
     ops::Range,
     path::{Path, PathBuf},
-    sync::{atomic::{AtomicBool, Ordering}, Arc},
+    sync::{atomic::{AtomicBool, AtomicUsize, Ordering}, Arc},
     time::{Duration, Instant},
 };
 use winit::event_loop::EventLoopProxy;
@@ -87,20 +87,20 @@ impl Tile {
     }
 
     fn load(&self, root: &Path) -> io::Result<CityPage> {
-        self.load_for_view(root, &AtomicBool::new(false))
+        self.load_for_view(root, &AtomicBool::new(false), None)
     }
 
-    fn load_for_view(&self, root: &Path, cancelled: &AtomicBool) -> io::Result<CityPage> {
+    fn load_for_view(&self, root: &Path, cancelled: &AtomicBool, memory: Option<&CityLoadMemory>) -> io::Result<CityPage> {
         let check = || if cancelled.load(Ordering::Relaxed) {
             Err(io::Error::new(io::ErrorKind::Interrupted, "City page no longer requested"))
         } else { Ok(()) };
         check()?;
         let rows = match self.embedded {
-            Some(bytes) => read_tile(bytes, self.buildings, self.kit),
-            None => read_tile(File::open(root.join(&self.file))?, self.buildings, self.kit),
+            Some(bytes) => read_tile(bytes, self.buildings, self.kit, memory),
+            None => read_tile(File::open(root.join(&self.file))?, self.buildings, self.kit, memory),
         }?;
         check()?;
-        CityPage::pack(rows, self.anchor(), self.kit, check)
+        CityPage::pack(rows, self.anchor(), self.kit, check, memory)
     }
 
     fn cpu_reservation(&self) -> usize {
@@ -291,7 +291,8 @@ impl CityPage {
             + self.mesh.instances.iter().map(|rows| rows.capacity() * size_of::<FootprintModel>()).sum::<usize>()
     }
 
-    fn pack(rows:Vec<Building>,anchor:[f64;2],kit:Option<usize>,check:impl Fn()->io::Result<()>)->io::Result<Self> {
+    fn pack(rows:Vec<Building>,anchor:[f64;2],kit:Option<usize>,check:impl Fn()->io::Result<()>,
+            memory:Option<&CityLoadMemory>)->io::Result<Self> {
         let paris=kit.is_none() && rows.first().is_some_and(|row|row.module>2);
         let mut modules: [Option<ModelMesh>; MODULES] = Default::default();
         let mut counts = [0; MODULES];
@@ -311,16 +312,27 @@ impl CityPage {
         }
         let longitude_metres=METRES_PER_DEGREE*anchor[1].to_radians().cos().max(0.01);
         let offset=|point:[f64;2]| [(point[0]-anchor[0])*longitude_metres,(anchor[1]-point[1])*METRES_PER_DEGREE];
+        let module_bytes = memory.map_or(0, |_| modules.iter().flatten().map(mesh_capacity).sum());
+        let input_bytes = rows.capacity() * size_of::<Building>();
+        let mut grouped_bytes = 0;
         let mut grouped=BTreeMap::<[i32;2],Vec<_>>::new();
         for mut row in rows {
             row.offset=offset(row.anchor());
             let cell=row.offset.map(|metres|(metres/BLOCK_METRES).floor() as i32);
-            grouped.entry(cell).or_default().push(row);
+            let block = grouped.entry(cell).or_default();
+            let before = block.capacity();
+            block.push(row);
+            if let Some(memory) = memory.filter(|_| block.capacity() != before) {
+                grouped_bytes += (block.capacity() - before) * size_of::<Building>();
+                memory.packing(module_bytes + input_bytes + grouped_bytes + mesh_capacity(&mesh));
+            }
         }
         let mut blocks=Vec::with_capacity(grouped.len());
         let mut instances = counts.map(Vec::with_capacity);
+        let mut packed_capacity = 0;
         for buildings in grouped.into_values() {
             check()?;
+            let block_bytes = buildings.capacity() * size_of::<Building>();
             let mut min=Vec3::splat(f32::INFINITY);
             let mut max=Vec3::splat(f32::NEG_INFINITY);
             let mut max_depth=[0.0_f32;MODULES];
@@ -339,9 +351,21 @@ impl CityPage {
                     row.extrude(row.offset,&mut mesh);
                 }
                 instances[row.module-1].push(FootprintModel::new(row.offset,row.heading,row.dimensions));
+                if let Some(memory) = memory {
+                    let capacity = mesh_capacity(&mesh) + blocks.capacity() * size_of::<Block>()
+                        + instances.iter().map(|rows| rows.capacity() * size_of::<FootprintModel>()).sum::<usize>();
+                    if capacity != packed_capacity {
+                        packed_capacity = capacity;
+                        memory.packing(module_bytes + grouped_bytes + packed_capacity);
+                    }
+                }
             }
             let ranges=std::array::from_fn(|module|starts[module]..instances[module].len() as u32);
             blocks.push(Block {center:(min+max)*0.5,half_extent:(max-min)*0.5,instances:ranges,max_depth});
+            if let Some(memory) = memory {
+                grouped_bytes -= block_bytes;
+                memory.packing(module_bytes + grouped_bytes + packed_capacity);
+            }
         }
         let mut mesh_bounds=([f64::INFINITY;3],[f64::NEG_INFINITY;3]);
         for vertex in &mesh.vertices {
@@ -399,6 +423,10 @@ impl CityPage {
             })
         })
     }
+}
+
+fn mesh_capacity(mesh: &ModelMesh) -> usize {
+    mesh.vertices.capacity() * size_of::<ModelVertex>() + mesh.indices.capacity() * size_of::<u32>()
 }
 
 impl Building {
@@ -465,6 +493,42 @@ struct ResidentPage {
 struct PageRequest {
     reservation: usize,
     cancelled: Arc<AtomicBool>,
+    _memory: Option<Arc<CityLoadMemory>>,
+}
+
+#[derive(Default)]
+struct ActiveCityLoads {
+    bytes: AtomicUsize,
+    peak_bytes: AtomicUsize,
+    largest_decode_bytes: AtomicUsize,
+    largest_pack_bytes: AtomicUsize,
+}
+
+pub(crate) struct CityLoadMemory {
+    loads: Arc<ActiveCityLoads>,
+    bytes: AtomicUsize,
+}
+
+impl CityLoadMemory {
+    fn update(&self, bytes: usize) {
+        let previous = self.bytes.swap(bytes, Ordering::Relaxed);
+        if bytes >= previous {
+            let increase = bytes - previous;
+            let total = self.loads.bytes.fetch_add(increase, Ordering::Relaxed) + increase;
+            self.loads.peak_bytes.fetch_max(total, Ordering::Relaxed);
+        } else {
+            self.loads.bytes.fetch_sub(previous - bytes, Ordering::Relaxed);
+        }
+    }
+
+    fn packing(&self, bytes: usize) {
+        self.loads.largest_pack_bytes.fetch_max(bytes, Ordering::Relaxed);
+        self.update(bytes);
+    }
+}
+
+impl Drop for CityLoadMemory {
+    fn drop(&mut self) { self.update(0); }
 }
 
 #[derive(serde::Serialize)]
@@ -473,6 +537,10 @@ pub(crate) struct CityPageMemory {
     resident_page_bytes: usize,
     reserved_load_bytes: usize,
     cancelled_load_reservation_bytes: usize,
+    worker_buffer_bytes: usize,
+    worker_buffer_peak_bytes: usize,
+    largest_worker_decode_bytes: usize,
+    largest_worker_pack_bytes: usize,
 }
 
 pub(crate) struct Catalogue {
@@ -493,6 +561,7 @@ pub(crate) struct Catalogue {
     discarded: u64,
     lookup: Duration,
     roads: Roads,
+    measured_loads: Option<Arc<ActiveCityLoads>>,
 }
 
 impl Catalogue {
@@ -558,7 +627,7 @@ impl Catalogue {
         Ok(Self { root, tiles, index, sites: catalog.sites, site_index, sites_in_view: Vec::new(),
             sources, city_ids, cache: HashMap::new(), pending: HashMap::new(),
             wanted: HashSet::new(), draw_wanted: HashMap::new(), failed: HashSet::new(), revision: 0,
-            discarded: 0, lookup: Duration::ZERO, roads })
+            discarded: 0, lookup: Duration::ZERO, roads, measured_loads: None })
     }
 
     pub(crate) fn reload_capacity(&self) -> Option<(u64, usize, usize)> {
@@ -622,6 +691,8 @@ impl Catalogue {
     }
 
     pub(crate) fn memory(&self) -> CityPageMemory {
+        let tracked = |value: fn(&ActiveCityLoads) -> &AtomicUsize| self.measured_loads.as_deref()
+            .map_or(0, |loads| value(loads).load(Ordering::Relaxed));
         CityPageMemory {
             catalogue_bytes: self.metadata_bytes(),
             resident_page_bytes: self.cpu_page_bytes(),
@@ -629,7 +700,21 @@ impl Catalogue {
             cancelled_load_reservation_bytes: self.pending.values().chain(self.roads.pending.values())
                 .filter(|request| request.cancelled.load(Ordering::Relaxed))
                 .map(|request| request.reservation).sum(),
+            worker_buffer_bytes: tracked(|loads| &loads.bytes),
+            worker_buffer_peak_bytes: tracked(|loads| &loads.peak_bytes),
+            largest_worker_decode_bytes: tracked(|loads| &loads.largest_decode_bytes),
+            largest_worker_pack_bytes: tracked(|loads| &loads.largest_pack_bytes),
         }
+    }
+
+    pub(crate) fn measure_loads(&mut self, enabled: bool) {
+        self.measured_loads = enabled.then(|| Arc::new(ActiveCityLoads::default()));
+    }
+
+    fn load_memory(&self) -> Option<Arc<CityLoadMemory>> {
+        self.measured_loads.as_ref().map(|loads| Arc::new(CityLoadMemory {
+            loads: Arc::clone(loads), bytes: AtomicUsize::new(0),
+        }))
     }
 
     fn reserve(&mut self, bytes: usize) -> bool {
@@ -752,11 +837,17 @@ impl Catalogue {
             let proxy = events.clone();
             let revision = self.revision;
             let cancelled = Arc::new(AtomicBool::new(false));
-            self.roads.pending.insert(index, PageRequest { reservation, cancelled: Arc::clone(&cancelled) });
+            let memory = self.load_memory();
+            self.roads.pending.insert(index, PageRequest {
+                reservation, cancelled: Arc::clone(&cancelled), _memory: memory.clone(),
+            });
             if let Err(error) = std::thread::Builder::new().name("WWO city road tile".into()).spawn(move || {
                 let result = if cancelled.load(Ordering::Relaxed) {
                     Err(io::Error::new(io::ErrorKind::Interrupted, "Road page no longer requested"))
-                } else { tile.read(&root) };
+                } else { tile.read(&root, memory.as_deref()) };
+                if let Some(memory) = memory {
+                    memory.update(result.as_ref().map_or(0, |page| page.data.capacity()));
+                }
                 let _ = proxy.send_event(HostEvent::CityRoad(revision,index,result));
             }) {
                 let _ = events.send_event(HostEvent::CityRoad(revision,index,Err(error)));
@@ -886,9 +977,15 @@ impl Catalogue {
                 let proxy=events.clone();
                 let revision=self.revision;
                 let cancelled = Arc::new(AtomicBool::new(false));
-                self.pending.insert(index, PageRequest { reservation, cancelled: Arc::clone(&cancelled) });
+                let memory = self.load_memory();
+                self.pending.insert(index, PageRequest {
+                    reservation, cancelled: Arc::clone(&cancelled), _memory: memory.clone(),
+                });
                 if let Err(error)=std::thread::Builder::new().name("WWO city tile".into()).spawn(move || {
-                    let result = tile.load_for_view(&root, &cancelled);
+                    let result = tile.load_for_view(&root, &cancelled, memory.as_deref());
+                    if let Some(memory) = memory {
+                        memory.update(result.as_ref().map_or(0, CityPage::bytes));
+                    }
                     let _=proxy.send_event(HostEvent::CityTile(revision,index,result));
                 }) {
                     let _=events.send_event(HostEvent::CityTile(revision,index,Err(error)));
@@ -899,7 +996,33 @@ impl Catalogue {
     }
 }
 
-fn read_tile(mut file: impl Read, count: usize, kit: Option<usize>) -> io::Result<Vec<Building>> {
+pub(crate) fn read_city_page_payload(file: impl Read, wanted: usize, window_log: u32,
+                                    memory: Option<&CityLoadMemory>) -> io::Result<Vec<u8>> {
+    let mut bytes = Vec::with_capacity(wanted);
+    if let Some(memory) = memory {
+        use zstd::zstd_safe::DCtx;
+        let mut context = DCtx::try_create().ok_or_else(|| io::Error::other("Cannot allocate city page decoder"))?;
+        let buffer = BufReader::with_capacity(DCtx::in_size(), file);
+        let buffer_bytes = buffer.capacity();
+        memory.update(context.sizeof() + buffer_bytes + bytes.capacity());
+        let mut decoder = zstd::stream::read::Decoder::with_context(buffer, &mut context);
+        decoder.window_log_max(window_log)?;
+        let result = decoder.take((wanted + 1) as u64).read_to_end(&mut bytes);
+        let used = context.sizeof() + buffer_bytes + bytes.capacity();
+        memory.loads.largest_decode_bytes.fetch_max(used, Ordering::Relaxed);
+        memory.update(used);
+        drop(context);
+        result?;
+        memory.update(bytes.capacity());
+    } else {
+        let mut decoder = zstd::stream::read::Decoder::new(file)?;
+        decoder.window_log_max(window_log)?;
+        decoder.take((wanted + 1) as u64).read_to_end(&mut bytes)?;
+    }
+    Ok(bytes)
+}
+
+fn read_tile(mut file: impl Read, count: usize, kit: Option<usize>, memory: Option<&CityLoadMemory>) -> io::Result<Vec<Building>> {
     let mut header = [0;12];
     file.read_exact(&mut header)?;
     let (magic, module_count) = if kit.is_some() { (b"WWOWCB02", MODULES) } else { (b"WWOWCB01", 4) };
@@ -907,12 +1030,9 @@ fn read_tile(mut file: impl Read, count: usize, kit: Option<usize>) -> io::Resul
         return Err(io::Error::other("Invalid building page header"));
     }
     let wanted=count*RECORD;
-    let mut bytes=Vec::with_capacity(wanted);
-    let mut decoder = zstd::stream::read::Decoder::new(file)?;
-    decoder.window_log_max(23)?;
-    decoder.take((wanted+1) as u64).read_to_end(&mut bytes)?;
+    let bytes = read_city_page_payload(file, wanted, 23, memory)?;
     if bytes.len()!=wanted {return Err(io::Error::other("Invalid building page length"));}
-    bytes.chunks_exact(RECORD).map(|part| {
+    let rows = bytes.chunks_exact(RECORD).map(|part| {
         let signed=|at| i32::from_le_bytes(part[at..at+4].try_into().unwrap());
         let decimetres=|at| f64::from(u16::from_le_bytes(part[at..at+2].try_into().unwrap()))/10.;
         let coordinates=[signed(0),signed(4)];
@@ -925,5 +1045,9 @@ fn read_tile(mut file: impl Read, count: usize, kit: Option<usize>) -> io::Resul
         }
         let heading=f64::from(i16::from_le_bytes(part[8..10].try_into().unwrap()))/100.;
         Ok(Building{coordinates,offset:[0.;2],heading,dimensions,module})
-    }).collect()
+    }).collect::<io::Result<Vec<_>>>()?;
+    if let Some(memory) = memory {
+        memory.update(bytes.capacity() + rows.capacity() * size_of::<Building>());
+    }
+    Ok(rows)
 }
