@@ -198,7 +198,7 @@ impl Host {
             self.dirty=true;return;
         }
         if self.hud.menu.modal() && !matches!(&key,Key::Named(NamedKey::Escape)){return;}
-        if key==Key::Named(NamedKey::Enter) && self.military_grid_active() && self.military_cell.is_some(){
+        if key==Key::Named(NamedKey::Enter) && self.military_grid_active() && self.visible_military_selection().is_some(){
             self.enter_selected_battle();return;
         }
         if key==Key::Named(NamedKey::Escape) && self.battle_enter_requested.take().is_some(){
@@ -682,6 +682,9 @@ impl ApplicationHandler<HostEvent> for Host {
             }
             WindowEvent::RedrawRequested if self.renderer.is_some()=>{
                 if let Err(e)=self.draw(){self.fatal_error=Some(e.to_string());event_loop.exit();}
+            }
+            WindowEvent::CursorLeft{..} if self.military_grid_active() && self.drag.is_none()=>{
+                self.cursor=[-1.;2];self.dirty=true;
             }
             WindowEvent::CursorMoved{position,..}=>{
                 let next:[f64;2]=position.into();self.cursor=next;

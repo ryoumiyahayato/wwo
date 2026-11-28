@@ -9,10 +9,20 @@ use std::collections::{HashMap, HashSet};
 use std::{fs::File,io,path::{Path,PathBuf},sync::Arc,time::{Duration,Instant}};
 use wgpu::util::DeviceExt;
 use winit::window::Window;
+use wwo_map_lab::military_grid::{MilitaryCell, BAND_COUNT, BAND_LONGITUDE_DEGREES, GRID_EARTH_RADIUS_M, MAX_GRID_LATITUDE_DEGREES};
 
 #[repr(C)]
 #[derive(Clone,Copy,Pod,Zeroable)]
 pub struct Edit {pub area:[f32;4],pub state:[f32;4]}
+#[repr(C)]
+#[derive(Clone,Copy,Pod,Zeroable)]
+struct MilitaryMark {cell:[f32;4],band:[u32;4]}
+impl MilitaryMark {
+    fn new(cell:MilitaryCell)->Self {
+        let band=cell.band.map_or([0,1,0,0],|band|[u32::from(band.index()),0,0,0]);
+        Self {cell:cell.highlight(),band}
+    }
+}
 #[repr(C)]
 #[derive(Clone,Copy,Pod,Zeroable)]
 pub struct View {
@@ -28,8 +38,11 @@ pub struct View {
     pub natural_lod:[[f32;4];2],
     pub close_sample:[f32;3],
     water_clock:u32,
-    pub military_cell:[f32;4],
     pub road_layer:[u32;4],
+    military_selected:MilitaryMark,
+    military_hover:MilitaryMark,
+    military_legacy:[f32;4],
+    military_chart:[f32;4],
 }
 impl View {
     pub fn new(camera:&Camera,size:[u32;2])->Self {
@@ -46,6 +59,16 @@ impl View {
         self.projection_origin[3]=if exact {1.} else {0.};
     }
 
+    pub fn set_military_grid(&mut self, size_km:u8, selected:Option<MilitaryCell>,
+        hover:Option<MilitaryCell>, legacy:Option<MilitaryCell>) {
+        self.map_style[3]=f32::from(size_km)*1000.;
+        self.military_chart=[BAND_LONGITUDE_DEGREES as f32,GRID_EARTH_RADIUS_M as f32,
+            MAX_GRID_LATITUDE_DEGREES as f32,f32::from(BAND_COUNT-1)];
+        self.military_selected=selected.map(MilitaryMark::new).unwrap_or_else(MilitaryMark::zeroed);
+        self.military_hover=hover.filter(|cell|Some(*cell)!=selected).map(MilitaryMark::new)
+            .unwrap_or_else(MilitaryMark::zeroed);
+        self.military_legacy=legacy.map_or([0.;4],MilitaryCell::highlight);
+    }
 }
 #[repr(C)]
 #[derive(Clone,Copy,Pod,Zeroable)]

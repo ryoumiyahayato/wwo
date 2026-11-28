@@ -166,10 +166,10 @@ pub fn battlefield(root: &Path, cell: MilitaryCell) -> io::Result<(BattlefieldTe
     for row in 0..rows {
         for col in 0..columns {
             let [lon, lat] = region.local_to_lon_lat([min_x + col as f64 * spacing, min_z + row as f64 * spacing]);
-            let u = (lon + 180.) * texels_per_degree;
+            let u = ((lon + 180.) * texels_per_degree).rem_euclid(f64::from(width * TILE_SIZE));
             let v = (90. - lat) * texels_per_degree;
             let x = (u / tile_size).floor() as u32;
-            let y = (v / tile_size).floor() as u32;
+            let y = ((v / tile_size).floor() as u32).min(height - 1);
             let key = Key(MAX_LEVEL, x, y);
             let page = match pages.entry(key) {
                 std::collections::hash_map::Entry::Occupied(entry) => entry.into_mut(),

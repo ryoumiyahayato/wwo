@@ -14,8 +14,15 @@ struct View {
     natural_lod: array<vec4f, 2>, // opacity indexed by Z, or -1 for per-page blending
     close_sample: vec3f, // detail weight, streamed, historical survey
     water_clock: u32,
-    military_cell: vec4f, // easting index, northing index, step metres, active
     road_layer: vec4u, // observer road-layer isolation
+    military_selected: MilitaryMark,
+    military_hover: MilitaryMark,
+    military_legacy: vec4f, // stored Lambert-93 parent, in grid indices
+    military_chart: vec4f, // longitude width, Earth radius, latitude limit, last band
+};
+struct MilitaryMark {
+    cell: vec4f, // easting index, northing index, step metres, active
+    band: vec4u, // longitude band, legacy flag
 };
 struct LandEdit { area: vec4f, state: vec4f };
 struct Tile {
@@ -647,6 +654,48 @@ fn natural_water_color(color:vec3f, world:vec3f, depth:f32, coverage:f32, mpp:f3
     return clamp(color+pigment*surface,vec3f(0.),vec3f(1.));
 }
 
+fn military_band_edge(band:u32,width:f32)->f32 {
+    return f32(band)*width-180.;
+}
+
+fn military_point(ll:vec2f)->vec4f {
+    let width=view.military_chart.x;
+    let earth=view.military_chart.y;
+    let lon=select(ll.x,-180.,ll.x>=180.);
+    var band=min(u32(floor((lon+180.)/width)),u32(view.military_chart.w));
+    if band>0u && lon<military_band_edge(band,width) {
+        band-=1u;
+    }
+    let west=military_band_edge(band,width);
+    let east=west+width;
+    let delta=radians(lon-(west+east)*.5);
+    let lat=radians(ll.y);
+    let cos_lat=cos(lat);
+    let point=earth*vec2f(asin(cos_lat*sin(delta)),atan2(sin(lat),cos_lat*cos(delta)));
+    let band_edge=asin(cos_lat*sin(radians(min(lon-west,east-lon))));
+    let polar_edge=radians(view.military_chart.z-abs(ll.y));
+    return vec4f(point,f32(band),earth*min(band_edge,polar_edge));
+}
+
+fn legacy_military_point(ll:vec2f)->vec2f {
+    let phi=radians(clamp(ll.y,-85.,85.));
+    let e=.08181919*sin(phi);
+    let ts=tan(PI*.25-phi*.5)/pow((1.-e)/(1.+e),.040909595);
+    let rho=11754255.426*pow(ts,.725607765);
+    let theta=.725607765*radians(ll.x-3.);
+    return vec2f(52000.,-262000.)+vec2f(rho*sin(theta),6055612.05-rho*cos(theta));
+}
+
+fn military_mark(mark:MilitaryMark,point:vec2f,band:u32,legacy:bool,pixel_m:vec2f,clip_px:f32)->vec2f {
+    let same_chart=select(!legacy && mark.band.x==band,legacy,mark.band.y!=0u);
+    if mark.cell.w==0. || !same_chart {return vec2f(0.);}
+    let edge=min(point-mark.cell.xy*mark.cell.z,(mark.cell.xy+vec2f(1.))*mark.cell.z-point);
+    let pixels=edge/pixel_m;
+    let distance=min(min(pixels.x,pixels.y),clip_px);
+    let inside=smoothstep(-.7,.1,distance);
+    return vec2f(inside,inside*(1.-smoothstep(.95,2.4,distance)));
+}
+
 fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32) -> vec3f {
     let dims=vec2f(textureDimensions(terrain_data));
     let du=1./dims;
@@ -882,30 +931,29 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
         }
     }
     if view.settings.y>2.5 && view.map_style.w>0. {
-        // R68's Lambert-93 origin and 50/25 km spacing. This is a display grid;
-        // its France mask does not claim the original topology's cell membership.
-        let phi=radians(clamp(ll.y,-85.,85.));
-        let e=.08181919*sin(phi);
-        let ts=tan(PI*.25-phi*.5)/pow((1.-e)/(1.+e),.040909595);
-        let rho=11754255.426*pow(ts,.725607765);
-        let theta=.725607765*radians(ll.x-3.);
-        let shifted=vec2f(52000.,-262000.)+vec2f(rho*sin(theta),6055612.05-rho*cos(theta));
-        let cell=shifted/view.map_style.w;
-        let pixel_span=max(fwidth(cell),vec2f(.00001));
-        let gap=abs(fract(cell+vec2f(.5))-.5)/pixel_span;
-        let stroke=(1.-smoothstep(.22,.95,min(gap.x,gap.y)))*(1.-smoothstep(2200.,5000.,base_mpp));
-        let selected=shifted/max(1.,view.military_cell.z)-view.military_cell.xy;
-        let selected_span=max(fwidth(selected),vec2f(.00001));
-        let edge=min(selected,vec2f(1.)-selected)/selected_span;
-        let distance=min(edge.x,edge.y);
-        let inside=smoothstep(-1.,0.,distance)*view.military_cell.w;
-        let rim=inside*(1.-smoothstep(1.,2.4,distance));
-        let grid_dims=vec2i(textureDimensions(owners));
-        let grid_id=ids(vec2i(floor(uv*vec2f(grid_dims))),grid_dims);
-        if view.settings.z>.5 && grid_id.x!=0u && grid_id.x==u32(view.selection.w) && ll.y>41. && ll.y<52. {
-            color=mix(color,vec3f(.72,.81,.63),stroke*(1.-data.b)*.65);
-            color=mix(color,vec3f(.93,.72,.38),(.12*inside+.73*rim)*(1.-data.b));
+        let chart=military_point(ll);
+        var point=chart.xy;
+        var step=view.map_style.w;
+        var legacy=false;
+        if view.military_legacy.w>0. {
+            let old_point=legacy_military_point(ll);
+            let offset=old_point/view.military_legacy.z-view.military_legacy.xy;
+            legacy=all(offset>=vec2f(0.)) && all(offset<vec2f(1.));
+            point=select(point,old_point,legacy);
+            step=select(step,max(step,25000.),legacy);
         }
+        // A projection seam may jump in metres, but may not widen a stroke.
+        let world_pixel=max(.01,view.military_chart.y*max(length(dpdx(normal_world)),length(dpdy(normal_world))));
+        let pixel_m=clamp(fwidth(point),vec2f(world_pixel*.2),vec2f(world_pixel*1.5));
+        let gap=abs(fract(point/step+vec2f(.5))-.5)*step/pixel_m;
+        let clip_px=select(chart.w/world_pixel,1.e6,legacy);
+        let fade=(1.-smoothstep(3200.,5100.,base_mpp))*select(0.,1.,clip_px>=0.);
+        let stroke=(1.-smoothstep(.22,.95,min(min(gap.x,gap.y),clip_px)))*fade;
+        let selected=military_mark(view.military_selected,point,u32(chart.z),legacy,pixel_m,clip_px);
+        let hover=military_mark(view.military_hover,point,u32(chart.z),legacy,pixel_m,clip_px);
+        color=mix(color,vec3f(.72,.81,.63),stroke*mix(.66,.50,data.b));
+        color=mix(color,vec3f(.72,.81,.63),(.055*hover.x+.52*hover.y)*fade);
+        color=mix(color,vec3f(.93,.72,.38),(.12*selected.x+.73*selected.y)*fade);
     }
     return color;
 }

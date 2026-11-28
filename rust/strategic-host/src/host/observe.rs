@@ -241,8 +241,8 @@ impl Host {
             "terrain_detail":self.renderer.as_ref().and_then(Renderer::close_terrain_status),
             "workspace":format!("{:?}",self.hud.page),"menu":format!("{:?}",self.hud.menu),"messages":self.hud.messages,
             "session":session,"lobby":lobby,
-            "military_grid":{"active":self.military_grid_active(),"step_m":self.grid_step,"selected":self.military_cell.map(|selection|selection.cell),
-                "terrain_ready":self.military_cell.zip(self.battle_terrain.as_ref()).is_some_and(|(selected,(loaded,_))|selected.cell.region()==*loaded),
+            "military_grid":{"active":self.military_grid_active(),"step_m":u32::from(self.military_grid_size())*1000,"selected":self.visible_military_selection().map(|selection|selection.cell),
+                "terrain_ready":self.visible_military_selection().zip(self.battle_terrain.as_ref()).is_some_and(|(selected,(loaded,_))|selected.cell.size_km>=25&&selected.cell.region()==*loaded),
                 "enter_pending":self.battle_enter_requested.is_some()},
             "land_battle":land_battle,
             "window":{"background":self.config.background,"offscreen":self.config.terrain_review,"focused":self.window.as_ref().is_some_and(|w|w.has_focus()),"visible":self.window.as_ref().and_then(|w|w.is_visible())}
