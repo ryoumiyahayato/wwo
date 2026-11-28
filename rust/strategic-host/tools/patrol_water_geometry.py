@@ -1,7 +1,6 @@
 """Index the whole shoreline and capture its regions in the normal game."""
 import argparse
 from collections import Counter, defaultdict
-from functools import lru_cache
 import json
 import math
 from pathlib import Path
@@ -14,8 +13,8 @@ from shapely.geometry import LineString, box
 from shapely.strtree import STRtree
 
 from build_natural_terrain import (WATER_COLUMNS, WATER_GRID, WATER_ROWS,
-                                   WATER_STEP, WATER_QUANTIZATION, polygon_parts, shoreline_sources,
-                                   water_class, water_pack_index, water_payload_cells)
+                                   WATER_STEP, WaterGeometry, polygon_parts, shoreline_sources,
+                                   water_pack_index, water_payload_cells)
 from capture_z7_pages import (EARTH, WIDTH, HEIGHT, Observer, at_camera, bounds, dot, geographic,
                               png_size, read, vector, write)
 
@@ -240,38 +239,7 @@ def clear_color_class(colors):
     return np.select((blue, ground), (2, 1))
 
 
-class WaterProbes:
-    def __init__(self, source):
-        self.source = source
-        self.offsets, self.classes = water_pack_index(source)
-
-    @lru_cache(maxsize=32)
-    def page(self, number):
-        start, end = map(int, self.offsets[number:number+2])
-        self.source.seek(start)
-        return water_payload_cells(self.classes[number],self.source.read(end-start))
-
-    def area(self, lon, lat):
-        x = ((lon+180) % 360)/WATER_STEP
-        y = min(np.nextafter(float(WATER_ROWS),0), (90-lat)/WATER_STEP)
-        page_x, page_y = int(x), int(y)
-        local_x = x-page_x
-        local_y = min(np.nextafter(1.,0.), 1-(y-page_y))
-        cx, cy = int(local_x*WATER_GRID), int(local_y*WATER_GRID)
-        cell = self.page(page_y*WATER_COLUMNS+page_x)[cy*WATER_GRID+cx]
-        if isinstance(cell,int):
-            return cell
-        bits,bands = cell
-        edges = bands[int(local_y*64) % 8]
-        px,py = local_x*WATER_QUANTIZATION, local_y*WATER_QUANTIZATION
-        for a,b,flag in edges.tolist():
-            ay,by = a >> 16,b >> 16
-            if ay <= py < by:
-                ax,bx = a & 65535,b & 65535
-                if px < ax+(bx-ax)*(py-ay)/(by-ay):
-                    bits ^= flag
-        return water_class(bits)
-
+class WaterProbes(WaterGeometry):
     def review(self, image, state, admitted, wide):
         # At wider scales the game mixes or replaces QWG with the base map.
         mpp = state['mpp']

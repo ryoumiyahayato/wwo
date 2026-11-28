@@ -182,6 +182,7 @@ pub struct Renderer {
     frame_timer:Option<FrameTimer>,
     pub frame_acquire_ms:f64,
     models: ModelLayer,
+    city_plan: Option<(u64, MeshBuffers)>,
     transport_network: Option<(u64, MeshBuffers)>,
     transport_economy: Option<(u64, MeshBuffers)>,
     transport_vehicles: Option<MeshBuffers>,
@@ -404,6 +405,7 @@ struct CityBatchUniform {
 
 struct CityBatchDraw {
     page: ModelKey,
+    kit: ModelKey,
     module: usize,
     instances: std::ops::Range<u32>,
 }
@@ -513,7 +515,7 @@ impl ModelLayer {
             || model.city_page.is_some()).map(|model| model.key));
         for city in models.iter().filter_map(|model|model.city_page.as_ref()).filter(|city|city.preload) {
             self.visible.extend(city.geometry.instances.iter().enumerate().filter(|(_,rows)|!rows.is_empty())
-                .map(|(module,_)|ModelKey::city_detail(module+1)));
+                .map(|(module,_)|ModelKey::city_detail(city.kit,module)));
         }
         self.residents.retain(|key, model| {
             self.visible.contains(key) || (key.is_city() && now.duration_since(model.last_drawn) < Self::CITY_LOD_CACHE_TIME)
@@ -539,7 +541,7 @@ impl ModelLayer {
             }
             let lod_range=self.lod_range(model);
             if let Some(resident) = self.residents.get_mut(&key) {
-                let city_material = model.city_page.as_ref().map_or(0., |city|
+                let city_material = model.city_page.as_ref().filter(|city|city.kit.is_none()).map_or(0., |city|
                     if city.paris {2.} else {1.});
                 if let Some(city)=model.city_page.as_ref().filter(|city|city.preload) {
                     resident.city_instances.get_or_insert_with(||city.geometry.instances.each_ref().map(|rows| {
@@ -555,7 +557,8 @@ impl ModelLayer {
                                 inverse_size_and_opacity:[x,y,z,lod_range[0]],
                                 material:[city_material,mpp,0.,0.],padding:[0;24],
                             });
-                            self.city_batches.push(CityBatchDraw {page:key,module,instances:batch.instances.clone()});
+                            self.city_batches.push(CityBatchDraw {page:key,kit:ModelKey::city_detail(city.kit,module),
+                                module,instances:batch.instances.clone()});
                         }
                         resident.last_drawn=now;
                     }
@@ -573,8 +576,10 @@ impl ModelLayer {
         if !self.city_batch_uniforms.is_empty() {
             queue.write_buffer(&self.city_uniforms,0,bytemuck::cast_slice(&self.city_batch_uniforms));
         }
+        let mut city_jobs = self.pending.iter().filter(|key| key.is_city()).count();
         for &key in &self.visible {
-            if self.residents.contains_key(&key) || self.failed.contains(&key) || !self.pending.insert(key) {continue;}
+            if self.residents.contains_key(&key) || (key.is_city() && city_jobs >= 6)
+                || self.failed.contains(&key) || !self.pending.insert(key) {continue;}
             let events = self.events.clone();
             let revision=if key.is_city() {self.city_revision}else{0};
             let bytes=self.city_override.clone().filter(|_|key.is_city());
@@ -585,6 +590,8 @@ impl ModelLayer {
                 self.pending.remove(&key);
                 self.failed.insert(key);
                 let _ = self.events.send_event(crate::HostEvent::Model(revision,key,Err(error)));
+            } else {
+                city_jobs += usize::from(key.is_city());
             }
         }
         for resident in self.residents.values_mut().filter(|model|!model.transforms.is_empty()) {
@@ -599,7 +606,7 @@ impl ModelLayer {
     fn lod_range(&self,model:&VisibleModel)->[f32;2] {
         if let Some(city)=&model.city_page {
             if city.batches.iter().enumerate().any(|(i,batch)|batch.is_some()
-                && !self.residents.contains_key(&ModelKey::city_detail(i+1))) {
+                && !self.residents.contains_key(&ModelKey::city_detail(city.kit,i))) {
                 return [0.,model.lod_range[1]];
             }
         }
@@ -660,7 +667,7 @@ impl ModelLayer {
         if !self.city_batches.is_empty() {
             pass.set_pipeline(&self.city_pipeline);
             for (slot,batch) in self.city_batches.iter().enumerate() {
-                let kit=&self.residents[&ModelKey::city_detail(batch.module+1)];
+                let kit=&self.residents[&batch.kit];
                 let page=&self.residents[&batch.page];
                 let instances=page.city_instances.as_ref().unwrap()[batch.module].as_ref().unwrap();
                 pass.set_bind_group(1,&self.city_bindings,&[(slot*std::mem::size_of::<CityBatchUniform>()) as u32]);
@@ -1103,7 +1110,7 @@ impl Renderer {
                 solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,
                 prologue_art,prologue_texture,prologue_scene:None,prologue_paper,opening_cloud,
                 menu_layout:font_layout,menu_sampler:linear,instrument,instrument_view,screen,screen_size,meshes,models,
-                battle:None,landscape:None,map_layout:glob,landscape_shader:globe_shader,surface,transport_network:None,
+                battle:None,landscape:None,map_layout:glob,landscape_shader:globe_shader,surface,city_plan:None,transport_network:None,
                 transport_economy:None,transport_vehicles:None})
     }
 
@@ -1263,14 +1270,10 @@ impl Renderer {
     }
 
     pub fn model_instances(&self) -> Vec<(&'static str, usize)> {
-        let mut batched=[0;MODULES];
-        for batch in &self.models.city_batches {
-            batched[batch.module]+=batch.instances.len();
-        }
         let mut counts:HashMap<_,_>=self.models.residents.iter()
             .map(|(key,model)|(*key,model.transforms.len())).collect();
-        for (i,count) in batched.into_iter().enumerate() {
-            *counts.entry(ModelKey::city_detail(i+1)).or_default()+=count;
+        for batch in &self.models.city_batches {
+            *counts.entry(batch.kit).or_default()+=batch.instances.len();
         }
         let mut models:Vec<_>=counts.into_iter().filter(|&(_,count)|count>0)
             .map(|(key,count)|(key.model(),count)).collect();
@@ -1438,18 +1441,24 @@ impl Renderer {
         let water=pixels.terrain.chunks_exact(4).map(|p|p[2]).collect();
         Page {group,uniform,ids:pixels.ids,water,bytes}
     }
+    fn prepare_static_overlay(device:&wgpu::Device,queue:&wgpu::Queue,
+        draw:Option<(u64,&Mesh)>,cache:&mut Option<(u64,MeshBuffers)>)
+    {
+        if let Some((revision,mesh))=draw {
+            if cache.as_ref().is_none_or(|(previous,_)|*previous!=revision) {
+                let (previous,buffers)=cache.get_or_insert_with(|| {
+                    (revision,MeshBuffers::new(device,4096,2048))
+                });
+                buffers.upload(device,queue,mesh);
+                *previous=revision;
+            }
+        }
+    }
+
     fn prepare_transport(&mut self, overlay: Option<TransportOverlay<'_>>) -> [bool;3] {
         let Some(overlay)=overlay else {return [false;3];};
         for (draw,cache) in [(overlay.network,&mut self.transport_network),(overlay.economy,&mut self.transport_economy)] {
-            if let Some((revision,mesh))=draw {
-                if cache.as_ref().is_none_or(|(previous,_)|*previous!=revision) {
-                    let (previous,buffers)=cache.get_or_insert_with(|| {
-                        (revision,MeshBuffers::new(&self.device,4096,2048))
-                    });
-                    buffers.upload(&self.device,&self.queue,mesh);
-                    *previous=revision;
-                }
-            }
+            Self::prepare_static_overlay(&self.device,&self.queue,draw,cache);
         }
         let vehicles=!overlay.vehicles.indices.is_empty();
         if vehicles {
@@ -1461,7 +1470,7 @@ impl Renderer {
 
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
                   meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel],
-                  transport:Option<TransportOverlay<'_>>,
+                  city_plan:Option<(u64,&Mesh)>,transport:Option<TransportOverlay<'_>>,
                   (camera,landscape_enabled,now):(&Camera,bool,Instant),
                   battle:Option<BattleFrame<'_>>,timing_frame:Option<usize>)->io::Result<Option<io::Result<()>>> {
         let acquire_start = timing_frame.map(|_| Instant::now());
@@ -1483,6 +1492,9 @@ impl Renderer {
             RenderTarget::Offscreen(texture)=>[texture.width(),texture.height()],
         };
         if battle.is_none() {self.prepare_landscape(camera,size,landscape_enabled,now,seconds);}
+        let city_plan=city_plan.filter(|_|show_map && battle.is_none());
+        let draw_city_plan=city_plan.is_some();
+        Self::prepare_static_overlay(&self.device,&self.queue,city_plan,&mut self.city_plan);
         let [draw_network,draw_economy,draw_vehicles]=self.prepare_transport(transport.filter(|_|show_map && battle.is_none() && view.road_layer[0]==0));
         let (texture,copy_src)=match &self.target {
             RenderTarget::Window(_,config)=>(&frame.as_ref().unwrap().texture,config.usage.contains(wgpu::TextureUsages::COPY_SRC)),
@@ -1580,7 +1592,7 @@ impl Renderer {
                 [[1.78,48.59,2.89,49.15],[-0.371,51.371,0.104,51.638]].map(|bounds| road_scissor(camera,size,bounds))
             } else {[None;2]};
             let draw_roads=road_scissors.iter().any(Option::is_some);
-            if draw_city||draw_roads||draw_network||draw_economy||draw_vehicles {
+            if draw_city||draw_roads||draw_city_plan||draw_network||draw_economy||draw_vehicles {
                 let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label:Some("WWO map overlays"),
                     color_attachments:&[Some(wgpu::RenderPassColorAttachment {
@@ -1618,6 +1630,7 @@ impl Renderer {
                 }
                 pass.set_pipeline(&self.solid);
                 pass.set_bind_group(0,&self.screen,&[]);
+                if draw_city_plan {self.city_plan.as_ref().unwrap().1.draw(&mut pass);}
                 if draw_network {self.transport_network.as_ref().unwrap().1.draw(&mut pass);}
                 if draw_economy {self.transport_economy.as_ref().unwrap().1.draw(&mut pass);}
                 if draw_vehicles {self.transport_vehicles.as_ref().unwrap().draw(&mut pass);}

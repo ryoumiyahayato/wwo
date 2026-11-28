@@ -763,18 +763,56 @@ class LevelPack:
         color_size, height_size = self.frame_sizes(x, y)
         color_frame, height_frame = self.file.read(color_size), self.file.read(height_size)
         dim = TILE+2*GUTTER
+        pixels = self.decode_frame(color_frame, dim**2)
+        return (np.frombuffer(pixels, dtype="V16").reshape(dim//4,dim//4),
+                self.decode_height(height_frame, dim))
+
+    def heights_at(self, x, y):
+        color_size, height_size = self.frame_sizes(x, y)
+        self.file.seek(color_size, os.SEEK_CUR)
+        return self.decode_height(self.file.read(height_size), TILE+2*GUTTER)
+
+    def decode_frame(self, frame, size):
         if self.version == COMPACT_VERSION:
             if self.decoder is None:
                 import zstandard
                 self.decoder = zstandard.ZstdDecompressor()
-            pixels = self.decoder.decompress(color_frame, max_output_size=dim**2)
-            residual = self.decoder.decompress(height_frame, max_output_size=2*dim**2)
-            height = restore_heights(residual, dim)
-        else:
-            pixels = zlib.decompress(color_frame)
-            height = zlib.decompress(height_frame)
-        return (np.frombuffer(pixels, dtype="V16").reshape(dim//4,dim//4),
-                np.frombuffer(height, dtype="<i2").reshape(dim,dim))
+            return self.decoder.decompress(frame, max_output_size=size)
+        return zlib.decompress(frame)
+
+    def decode_height(self, frame, dim):
+        height = self.decode_frame(frame, 2*dim**2)
+        if self.version == COMPACT_VERSION:
+            height = restore_heights(height, dim)
+        return np.frombuffer(height, dtype="<i2").reshape(dim,dim)
+
+
+class PackedElevation:
+    """Sample installed compact Z7 elevations at WGS84 coordinates."""
+
+    def __init__(self, source):
+        self.pack = LevelPack(source, PACK_MAX_LEVEL, COMPACT_VERSION)
+        self.page = lru_cache(maxsize=32)(self.pack.heights_at)
+        self.texels_per_degree = self.pack.nx*TILE/360
+
+    def elevation(self, lon, lat):
+        if not np.isfinite(lon) or not -90 <= lat <= 90:
+            raise ValueError("Expected a finite WGS84 coordinate")
+        u = min(((lon+180) % 360)*self.texels_per_degree,
+                np.nextafter(float(self.pack.nx*TILE), 0))
+        v = min((90-lat)*self.texels_per_degree,
+                np.nextafter(float(self.pack.ny*TILE), 0))
+        x, y = int(u//TILE), int(v//TILE)
+        page = self.page(x, y)
+        # Match terrain.rs: stored values are at pixel centers; gutters carry
+        # the adjoining samples and keep interpolation continuous at page edges.
+        local_u, local_v = u-x*TILE+GUTTER-.5, v-y*TILE+GUTTER-.5
+        col, row = int(local_u), int(local_v)
+        a, b = page[row, col:col+2].astype(float)
+        c, d = page[row+1, col:col+2].astype(float)
+        above = a + (b-a)*(local_u-col)
+        below = c + (d-c)*(local_u-col)
+        return float(above + (below-above)*(local_v-row))
 
 
 def predict_heights(height):
@@ -1709,6 +1747,78 @@ def water_payload_cells(kind, payload):
     return cells
 
 
+class WaterGeometry:
+    """Read the formal QWG classes and shoreline geometry on demand."""
+
+    def __init__(self, source):
+        self.source = source
+        self.offsets, self.classes = water_pack_index(source)
+        self.page = lru_cache(maxsize=32)(self._page)
+
+    def _page(self, number):
+        start, end = map(int, self.offsets[number:number+2])
+        self.source.seek(start)
+        try:
+            return water_payload_cells(self.classes[number], self.source.read(end-start))
+        except ValueError as error:
+            y, x = divmod(number, WATER_COLUMNS)
+            raise ValueError(f"Invalid QWG page {x}/{y}: {error}") from error
+
+    def area(self, lon, lat):
+        if not np.isfinite(lon) or not -90 <= lat <= 90:
+            raise ValueError("Expected a finite WGS84 coordinate")
+        x = ((lon+180) % 360)/WATER_STEP
+        y = min(np.nextafter(float(WATER_ROWS), 0), (90-lat)/WATER_STEP)
+        page_x, page_y = int(x), int(y)
+        local_x = x-page_x
+        local_y = min(np.nextafter(1., 0.), 1-(y-page_y))
+        cx, cy = int(local_x*WATER_GRID), int(local_y*WATER_GRID)
+        cell = self.page(page_y*WATER_COLUMNS+page_x)[cy*WATER_GRID+cx]
+        if isinstance(cell, int):
+            return cell
+        bits, bands = cell
+        px, py = local_x*WATER_QUANTIZATION, local_y*WATER_QUANTIZATION
+        return water_class(water_cell_bits(bits, bands, px, py))
+
+    def land_geometry(self, bounds):
+        """Return the QWG dry area in a WGS84 rectangle, with unwrapped longitude."""
+        west, south, east, north = bounds
+        if (not np.isfinite(bounds).all() or not 0 < east-west <= 360
+                or not -90 <= south < north <= 90):
+            raise ValueError("Expected ordered WGS84 bounds for QWG land geometry")
+        first_x, last_x = (west+180)/WATER_STEP, (east+180)/WATER_STEP
+        first_y, last_y = (90-north)/WATER_STEP, (90-south)/WATER_STEP
+        window = box(*bounds)
+        units = WATER_STEP/WATER_QUANTIZATION
+        step = WATER_QUANTIZATION//WATER_GRID
+        land = []
+        for y in range(int(np.floor(first_y)), int(np.ceil(last_y))):
+            for x in range(int(np.floor(first_x)), int(np.ceil(last_x))):
+                page = y*WATER_COLUMNS+x%WATER_COLUMNS
+                page_west, page_south, _, _ = water_page_bounds(x, y)
+                origin = np.array([page_west, page_south])
+                for index, cell in enumerate(self.page(page)):
+                    row, col = divmod(index, WATER_GRID)
+                    w, s, e, n = col*step, row*step, (col+1)*step, (row+1)*step
+                    if (page_west+e*units <= west or page_west+w*units >= east
+                            or page_south+n*units <= south or page_south+s*units >= north):
+                        continue
+                    cell_land = water_cell_land_area(cell, box(w, s, e, n))
+                    if not cell_land.is_empty:
+                        land.append(transform(cell_land, lambda xy: xy*units+origin))
+        return union_all(land).intersection(window)
+
+
+def water_cell_bits(bits, bands, px, py):
+    band = int(py*WATER_GRID*WATER_BANDS/WATER_QUANTIZATION) % WATER_BANDS
+    for a, b, flag in bands[band].tolist():
+        ay, by = a >> 16, b >> 16
+        ax, bx = a & 65535, b & 65535
+        if ay <= py < by and px < ax+(bx-ax)*(py-ay)/(by-ay):
+            bits ^= flag
+    return bits
+
+
 def water_cell_signature(cell):
     """Compare the shader's parity inputs independent of record and mask order."""
     if isinstance(cell, int):
@@ -1803,7 +1913,7 @@ def water_cell_flag_area(bits, bands, flag, bounds):
         lines.extend(LineString(((a,y),(b,y))) for a,b in zip(xs[::2],xs[1::2]))
     linework = union_all([bounds.boundary,*lines])
     land = []
-    for face in polygonize(linework.geoms):
+    for face in polygonize(getattr(linework, "geoms", (linework,))):
         p = face.representative_point()
         band = int(p.y*64/WATER_QUANTIZATION)%WATER_BANDS
         state = bool(bits & flag)
@@ -1817,6 +1927,22 @@ def water_cell_flag_area(bits, bands, flag, bounds):
         if state:
             land.append(face)
     return union_all(land)
+
+
+def water_cell_land_area(cell, bounds):
+    if isinstance(cell, int):
+        return bounds if cell == 1 else Polygon()
+    bits, bands = cell
+    flags = bits
+    for band in bands:
+        flags |= int(np.bitwise_or.reduce(band[:,2], initial=0))
+    layers = {flag: water_cell_flag_area(bits, bands, flag, bounds)
+              for i in range(flags.bit_length()) if flags & (flag := 1 << i)}
+    # Match water_class precedence: islands can interrupt lake water. Amended
+    # and measured water take precedence over both.
+    land = layers.get(1, Polygon()).difference(layers.get(2, Polygon())).union(layers.get(4, Polygon()))
+    water = union_all([layer for flag, layer in layers.items() if flag >= 8])
+    return land.difference(water)
 
 
 def correct_shoreline_page(x, y, existing, coverage, land):

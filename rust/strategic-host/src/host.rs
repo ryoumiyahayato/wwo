@@ -32,6 +32,7 @@ pub(crate) enum HostEvent {
     Rivers(io::Result<hydrology::Rivers>),
     Model(u64,landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
     CityTile(u64,usize,io::Result<crate::city_models::CityPage>),
+    CityPlan(u64,usize,io::Result<crate::city_plan::Plan>),
     BattleTerrain(MilitaryCell, io::Result<PreparedBattleTerrain>),
 }
 
@@ -951,6 +952,7 @@ impl Host {
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
         let geographic_detail=self.mode==Mode::Geographic;
+        let show_city_plan=!loading&&!self.in_lobby();
         let mut models=if loading||self.in_lobby() {Vec::new()} else if let Some(landmarks)=&self.landmarks {
             let mut models=Vec::new();
             if let Some(catalogue)=self.city_models.as_mut().filter(|_|geographic_detail) {
@@ -1003,7 +1005,9 @@ impl Host {
             .or_else(||self.trial.terrain_capture.as_ref().map(|(_,path)|path)).map(PathBuf::as_path);
         let mut redraw=false;
         let timing_frame=self.trial.timing_frame(capture.is_some());
-        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,transport,
+        let city_plan=self.city_models.as_mut().filter(|_|show_city_plan).and_then(|catalogue|
+            catalogue.plan_mesh(&date,&self.camera,self.size,geographic_detail,view.road_layer[0]<2,&self.events));
+        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,city_plan,transport,
             (&self.camera,landscape_enabled&&geographic_detail&&!self.trial.hide_landscape_models,now),None,timing_frame)? {
             #[cfg(windows)]
             if !loading && self.config.native.is_some() {
@@ -1063,7 +1067,7 @@ impl Host {
         let has_capture=capture.is_some();
         let timing_frame=self.trial.timing_frame(has_capture);
         if let Some(result) = renderer.render(&map_view, self.base.as_ref().unwrap(), &[], &meshes, None,
-            self.started.elapsed().as_secs_f32(), false, capture, &[], None,
+            self.started.elapsed().as_secs_f32(), false, capture, &[], None, None,
             (&self.camera, false, now), Some(battle_frame),timing_frame)?
         {
             let presented = Instant::now();
