@@ -4,13 +4,13 @@
     "city_id": "us_city_new_jersey_jersey_city",
     "name": "Jersey City",
     "key": "jersey-city-harrison-hudson",
-    "revision": 6,
+    "revision": 7,
     "status": "candidate_sample",
     "origin": [
       -74.048,
       40.722
     ],
-    "method": "Harrison street and land traces connect Paulus Hook and Hamilton Park through Van Vorst to Bergen. The 1895 Erie plan corroborates the Pavonia passenger house and ferry approach. Dated inventory entries and surviving parcel frontages anchor three Belmont and Bentley rows. A locally registered 1900 USGS quadrangle supplies the West Bergen street extent, tidal meadow, Hackensack river banks, Communipaw Avenue and Newark & New York Railroad formation to the port. Hudson County records identify the Newark Plank Road bridge and distinguish it from the adjacent canal and southern railway bridge. NJ Transit records identify the 1869 cut through Bergen Hill. Roofs, widths, paving and ground finishes are interpreted. The plan represents the cut as a placement exclusion and the railway as land formations. Track structure, the railway bridge and historical height profiles require separate geometry.",
+    "method": "Harrison street and land traces connect Paulus Hook and Hamilton Park through Van Vorst to Bergen. The 1895 Erie plan corroborates the Pavonia passenger house and ferry approach. Dated inventory entries and surviving parcel frontages anchor three Belmont and Bentley rows. A locally registered 1900 USGS quadrangle supplies the West Bergen street extent, tidal meadow, Hackensack river banks, Communipaw Avenue and Newark & New York Railroad formation to the port. Hudson County records identify the Newark Plank Road bridge and distinguish it from the adjacent canal and southern railway bridge. NJ Transit records identify the 1869 cut through Bergen Hill. Roofs, widths, paving and ground finishes are interpreted. The plan represents the cut as a placement exclusion and the railway as land formations. Track structure, the railway bridge and historical height profiles require separate geometry. The USGS trace follows both Hackensack banks north and the east bank into Newark Bay. The lower Hudson water mask overlaps the Manhattan mask offshore. The two land plans are separate.",
     "registration": {
       "model": "Affine pixel to WGS84 fitted in the east crop",
       "matrix": [
@@ -473,6 +473,13 @@
         "licence": "Cited for historical facts. Report images and text are excluded from the plan.",
         "date": "1869 railroad cut. Later NJ TRANSIT historic-resources inventory.",
         "precision": "Inventory for Bergen Avenue and other overbridges identifies the Newark & New York Railroad cut through Bergen Hill and its Communipaw connection."
+      },
+      {
+        "id": "cram-new-york-1899",
+        "url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~353194~90120495:Map-of-New-York-and-vicinity-",
+        "licence": "Public-domain historical map. Scan omitted.",
+        "date": "1899",
+        "precision": "Regional atlas confirms the open Hudson reach; Bromley details the Manhattan waterfront."
       }
     ]
   },
@@ -19839,12 +19846,80 @@
         "kind": "water_surface",
         "source": "usgs-staten-island-1900",
         "basin": "river",
-        "use_basis": "The charted east river bank defines the open channel beside the marsh. The trace follows the west bank where visible and closes within continuing water toward Newark Bay."
+        "use_basis": "The 1900 USGS banks carry the Hackensack north through the documented railway crossings. The dated east shore continues south into Newark Bay. The offshore limit lies in continuing bay water."
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
+            [
+              -74.07442127,
+              40.74649705
+            ],
+            [
+              -74.07412658,
+              40.74585647
+            ],
+            [
+              -74.07407138,
+              40.74535418
+            ],
+            [
+              -74.0744404,
+              40.7445805
+            ],
+            [
+              -74.07444632,
+              40.74398729
+            ],
+            [
+              -74.07457358,
+              40.7433035
+            ],
+            [
+              -74.0750612,
+              40.74271304
+            ],
+            [
+              -74.07566971,
+              40.74207764
+            ],
+            [
+              -74.07633888,
+              40.74139696
+            ],
+            [
+              -74.07718732,
+              40.74085421
+            ],
+            [
+              -74.07845725,
+              40.74031387
+            ],
+            [
+              -74.07978739,
+              40.73977388
+            ],
+            [
+              -74.08051496,
+              40.73927607
+            ],
+            [
+              -74.08058063,
+              40.73872883
+            ],
+            [
+              -74.08082786,
+              40.73809136
+            ],
+            [
+              -74.081435,
+              40.73759286
+            ],
+            [
+              -74.08239977,
+              40.73746149
+            ],
             [
               -74.08408663,
               40.73737989
@@ -20006,20 +20081,104 @@
               40.70456995
             ],
             [
-              -74.10777754,
-              40.7046131
+              -74.10025961,
+              40.70370294
             ],
             [
-              -74.11022439,
-              40.70681759
+              -74.10020714,
+              40.70292685
             ],
             [
-              -74.11291301,
-              40.7089322
+              -74.10033577,
+              40.70210617
             ],
             [
-              -74.11451597,
-              40.71122313
+              -74.10058573,
+              40.70119491
+            ],
+            [
+              -74.10095429,
+              40.70046686
+            ],
+            [
+              -74.10120334,
+              40.69964687
+            ],
+            [
+              -74.10169324,
+              40.69882825
+            ],
+            [
+              -74.10224426,
+              40.69791872
+            ],
+            [
+              -74.10285459,
+              40.69710079
+            ],
+            [
+              -74.10328382,
+              40.69632746
+            ],
+            [
+              -74.1037126,
+              40.69559977
+            ],
+            [
+              -74.10432383,
+              40.69469058
+            ],
+            [
+              -74.10582505,
+              40.6951099
+            ],
+            [
+              -74.10768526,
+              40.69575945
+            ],
+            [
+              -74.10972384,
+              40.69663819
+            ],
+            [
+              -74.11164062,
+              40.69765314
+            ],
+            [
+              -74.11301139,
+              40.69907568
+            ],
+            [
+              -74.11420107,
+              40.70054281
+            ],
+            [
+              -74.11514853,
+              40.70214545
+            ],
+            [
+              -74.1156745,
+              40.70374568
+            ],
+            [
+              -74.11571832,
+              40.70538878
+            ],
+            [
+              -74.11564216,
+              40.70698556
+            ],
+            [
+              -74.11568598,
+              40.70862866
+            ],
+            [
+              -74.11543101,
+              40.71004187
+            ],
+            [
+              -74.11529555,
+              40.71154704
             ],
             [
               -74.11491651,
@@ -20118,8 +20277,76 @@
               40.73742476
             ],
             [
-              -74.08408663,
-              40.73737989
+              -74.0897407,
+              40.73800555
+            ],
+            [
+              -74.0875694,
+              40.73835818
+            ],
+            [
+              -74.08569871,
+              40.73875817
+            ],
+            [
+              -74.08466917,
+              40.73934552
+            ],
+            [
+              -74.08412088,
+              40.73998126
+            ],
+            [
+              -74.08363417,
+              40.74048045
+            ],
+            [
+              -74.08272643,
+              40.7409316
+            ],
+            [
+              -74.0812161,
+              40.74142492
+            ],
+            [
+              -74.08006887,
+              40.74173779
+            ],
+            [
+              -74.07934085,
+              40.74228123
+            ],
+            [
+              -74.0781918,
+              40.74277662
+            ],
+            [
+              -74.07734427,
+              40.74322811
+            ],
+            [
+              -74.07685665,
+              40.74381857
+            ],
+            [
+              -74.07667009,
+              40.74441075
+            ],
+            [
+              -74.07654147,
+              40.74523143
+            ],
+            [
+              -74.0765953,
+              40.74587063
+            ],
+            [
+              -74.07695157,
+              40.74637465
+            ],
+            [
+              -74.07442127,
+              40.74649705
             ]
           ]
         ]
@@ -20131,12 +20358,36 @@
       "properties": {
         "kind": "open_ground",
         "source": "usgs-staten-island-1900",
-        "use_basis": "Dated salt-meadow hatching east of the Hackensack. The vegetated open-ground display represents the marsh and excludes inferred building lots. Fine channels and flood level are unresolved."
+        "use_basis": "Dated salt-meadow hatching east of the Hackensack. The river bank and landward margin follow the charted floodplain. The open-ground display excludes inferred building lots. Fine channels and flood level remain unresolved."
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
+            [
+              -74.07646112,
+              40.74121512
+            ],
+            [
+              -74.07652726,
+              40.74062225
+            ],
+            [
+              -74.07641139,
+              40.74016524
+            ],
+            [
+              -74.0760574,
+              40.73943305
+            ],
+            [
+              -74.07642596,
+              40.73870501
+            ],
+            [
+              -74.07769772,
+              40.73798215
+            ],
             [
               -74.07662027,
               40.73733709
@@ -20286,6 +20537,34 @@
               40.70456581
             ],
             [
+              -74.09832051,
+              40.70492396
+            ],
+            [
+              -74.09778133,
+              40.70464706
+            ],
+            [
+              -74.09772704,
+              40.7040535
+            ],
+            [
+              -74.09851527,
+              40.7035104
+            ],
+            [
+              -74.09924101,
+              40.70319512
+            ],
+            [
+              -74.10020396,
+              40.70324628
+            ],
+            [
+              -74.10025961,
+              40.70370294
+            ],
+            [
               -74.10025096,
               40.70456995
             ],
@@ -20446,8 +20725,44 @@
               40.73737989
             ],
             [
-              -74.07662027,
-              40.73733709
+              -74.08239977,
+              40.73746149
+            ],
+            [
+              -74.081435,
+              40.73759286
+            ],
+            [
+              -74.08082786,
+              40.73809136
+            ],
+            [
+              -74.08058063,
+              40.73872883
+            ],
+            [
+              -74.08051496,
+              40.73927607
+            ],
+            [
+              -74.07978739,
+              40.73977388
+            ],
+            [
+              -74.07845725,
+              40.74031387
+            ],
+            [
+              -74.07718732,
+              40.74085421
+            ],
+            [
+              -74.07633888,
+              40.74139696
+            ],
+            [
+              -74.07646112,
+              40.74121512
             ]
           ]
         ]
@@ -20766,59 +21081,95 @@
         "kind": "rail",
         "source": "usgs-staten-island-1900",
         "use_reference": "njtransit-bergen-hill-cut",
-        "use_basis": "The USGS chart shows the through railway. The formation width is interpreted. The documented Hackensack railway bridge lies between the land formations."
+        "use_basis": "The 1900 USGS line is traced on the solid formation between the Passaic and Hackensack. Its width is interpreted. The mapped water crossings remain open."
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
-              -74.11064289,
-              40.71928151
-            ],
-            [
-              -74.11064256,
-              40.71928142
-            ],
-            [
-              -74.1091749,
-              40.71888845
-            ],
-            [
-              -74.10914028,
-              40.71890457
-            ],
-            [
-              -74.10861705,
-              40.71903914
+              -74.11346054,
+              40.72034076
             ],
             [
               -74.11051803,
               40.71954815
             ],
             [
-              -74.11346054,
-              40.72034076
+              -74.10861705194193,
+              40.719039140519975
             ],
             [
-              -74.11346496,
-              40.7203419
+              -74.10914028,
+              40.71890457
             ],
             [
-              -74.11628812,
-              40.72104261
+              -74.1091749,
+              40.71888845
             ],
             [
-              -74.11640431,
-              40.72077373
+              -74.11064256,
+              40.71928142
+            ],
+            [
+              -74.11064289,
+              40.71928151
             ],
             [
               -74.11358337,
               40.72007358
             ],
             [
-              -74.11064289,
-              40.71928151
+              -74.11640431,
+              40.72077373
+            ],
+            [
+              -74.11640170184423,
+              40.72077976563924
+            ],
+            [
+              -74.117294610916,
+              40.72096571365379
+            ],
+            [
+              -74.11720054908399,
+              40.72122604634621
+            ],
+            [
+              -74.116299179084,
+              40.72103833634621
+            ],
+            [
+              -74.11629219933093,
+              40.72103676547859
+            ],
+            [
+              -74.116290792712,
+              40.72103642496856
+            ],
+            [
+              -74.11628812,
+              40.72104261
+            ],
+            [
+              -74.11517243904514,
+              40.720765697319926
+            ],
+            [
+              -74.11358900933092,
+              40.72038238547859
+            ],
+            [
+              -74.1135926973829,
+              40.72037360449481
+            ],
+            [
+              -74.11346496,
+              40.7203419
+            ],
+            [
+              -74.11346054,
+              40.72034076
             ]
           ]
         ]
@@ -21557,6 +21908,88 @@
                 -74.09782517,
                 40.71354163
               ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hudson-open-channel-handoff",
+      "properties": {
+        "kind": "water_surface",
+        "source": "usgs-staten-island-1900",
+        "use_reference": "cram-new-york-1899",
+        "basin": "coast",
+        "use_basis": "The 1900 USGS quadrangle and 1899 Cram atlas show uninterrupted navigable water between Jersey City and the lower Manhattan shoreline traced from Bromley. The polygon overlaps the two offshore water masks. It excludes known land and piers."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.03095,
+              40.7033
+            ],
+            [
+              -74.03084,
+              40.705
+            ],
+            [
+              -74.0305,
+              40.707
+            ],
+            [
+              -74.03,
+              40.71
+            ],
+            [
+              -74.0293,
+              40.713
+            ],
+            [
+              -74.0282,
+              40.717
+            ],
+            [
+              -74.0276,
+              40.7192
+            ],
+            [
+              -74.0158,
+              40.71927
+            ],
+            [
+              -74.016,
+              40.717
+            ],
+            [
+              -74.0176,
+              40.715
+            ],
+            [
+              -74.0182,
+              40.713
+            ],
+            [
+              -74.0189,
+              40.709
+            ],
+            [
+              -74.0209,
+              40.707
+            ],
+            [
+              -74.0198,
+              40.705
+            ],
+            [
+              -74.02015,
+              40.7033
+            ],
+            [
+              -74.03095,
+              40.7033
             ]
           ]
         ]
