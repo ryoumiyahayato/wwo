@@ -4,13 +4,13 @@
     "city_id": "us_city_new_jersey_jersey_city",
     "name": "Jersey City",
     "key": "jersey-city-harrison-hudson",
-    "revision": 4,
+    "revision": 5,
     "status": "candidate_sample",
     "origin": [
       -74.048,
       40.722
     ],
-    "method": "Harrison street and land traces connect Paulus Hook and Hamilton Park through Van Vorst to Bergen. Historic wet margins, the Morris Canal basin and named railroad facilities are managed separately. Six surviving junctions check the east transform locally. The 1894 Belmont and Bentley axes and two adjoining sections of the Bergen ridge are traced from Harrison. Three residential rows use dated inventory entries and surviving parcel frontages as references. Roofs, parcel depths, heights and paving are interpreted. The wider West Bergen fringe remains provisional.",
+    "method": "Harrison street and land traces connect Paulus Hook and Hamilton Park through Van Vorst to Bergen. The 1894 mapped Pavonia approach reaches the Erie passenger house and ferry landing, confirmed as existing by the 1895 railroad plan. The adjacent mapped track arms and Hudson water edge constrain the transition from the terminal to the surrounding street grid. The National Register describes the red-brick Eighth Street rows between Erie and Grove; individual lot shapes are interpreted. Six surviving junctions check the east transform locally near Bergen. Three Belmont and Bentley rows use dated inventory entries and surviving parcel frontages. Roofs, heights and paving are interpreted. The wider West Bergen fringe remains provisional.",
     "registration": {
       "model": "Affine pixel to WGS84 fitted in the east crop",
       "matrix": [
@@ -223,7 +223,7 @@
       ],
       "leave_one_out_rms_m": 20.4,
       "leave_one_out_max_m": 44.7,
-      "limits": "Residuals apply around Paulus Hook and Hamilton Park only. The central and Bergen crops share the same 1894 sheet with an exact image-space offset. Geodetic registration westward and small port features lack independent control.",
+      "limits": "Residuals apply around Paulus Hook and Hamilton Park only. The central and Bergen crops share the same 1894 sheet with an exact image-space offset. The 1895 terminal plan corroborates facility use and existing construction. Its image is not a second geodetic fit.",
       "bergen_independent_controls": {
         "reference": "NJ Office of GIS surviving street intersections matched to the Harrison Bergen crop. Modern streets were not copied into the historic plan.",
         "crop_origin_in_sheet": [
@@ -361,6 +361,13 @@
         "date": "Jersey City public parcels, blocks 17801 and 17803, retrieved 2026-11-28",
         "licence": "Parcel control reference only; raw polygons and tax data omitted.",
         "precision": "Surviving frontage spans and spacing only. Present parcel boundaries are not historic building outlines."
+      },
+      {
+        "id": "hamilton-park-national-register",
+        "url": "https://npgallery.nps.gov/GetAsset/3865ae52-8dc8-4cef-b204-25b49865a304",
+        "date": "Hamilton Park Historic District National Register nomination, 1977; listed 1979",
+        "licence": "Documentation reference; no pages or photographs copied.",
+        "precision": "Section 7 records both sides of Eighth Street between Grove and Erie as continuous red-brick rows from the decades after the Civil War. Individual lot limits and heights are interpreted."
       }
     ]
   },
@@ -926,10 +933,6 @@
         "coordinates": [
           [
             [
-              -74.0318165,
-              40.7270215
-            ],
-            [
               -74.0302352,
               40.7268162
             ],
@@ -960,6 +963,32 @@
             [
               -74.0318165,
               40.7270215
+            ],
+            [
+              -74.0302352,
+              40.7268162
+            ]
+          ],
+          [
+            [
+              -74.03174655,
+              40.726588161
+            ],
+            [
+              -74.030329109,
+              40.726474595
+            ],
+            [
+              -74.03030411,
+              40.726780637
+            ],
+            [
+              -74.031643386,
+              40.726919322
+            ],
+            [
+              -74.03174655,
+              40.726588161
             ]
           ]
         ]
@@ -3615,10 +3644,6 @@
         "coordinates": [
           [
             [
-              -74.0390035,
-              40.7289432
-            ],
-            [
               -74.0359897,
               40.7291593
             ],
@@ -3633,6 +3658,18 @@
             [
               -74.0314097,
               40.7270901
+            ],
+            [
+              -74.031544929,
+              40.726909127
+            ],
+            [
+              -74.031643386,
+              40.726919322
+            ],
+            [
+              -74.031719227,
+              40.726675869
             ],
             [
               -74.0318824,
@@ -3653,6 +3690,10 @@
             [
               -74.0390035,
               40.7289432
+            ],
+            [
+              -74.0359897,
+              40.7291593
             ]
           ]
         ]
@@ -4600,20 +4641,40 @@
         "type": "LineString",
         "coordinates": [
           [
-            -74.0436122,
-            40.7274533
+            -74.04357414,
+            40.72759336
           ],
           [
-            -74.0419298,
-            40.7272869
+            -74.04188772,
+            40.72744386
           ],
           [
-            -74.0403147,
-            40.7271273
+            -74.04026811,
+            40.72730304
           ],
           [
-            -74.0386996,
-            40.7269676
+            -74.03865252,
+            40.72714539
+          ],
+          [
+            -74.03714829,
+            40.72700219
+          ],
+          [
+            -74.0356886,
+            40.72686477
+          ],
+          [
+            -74.03355676,
+            40.72665746
+          ],
+          [
+            -74.03189663,
+            40.72649402
+          ],
+          [
+            -74.03025877,
+            40.72633348
           ]
         ]
       },
@@ -4626,7 +4687,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Pavonia Avenue alignment traced through Provost Street to the passenger house entrance. The 1895 terminal plan confirms the public approach and ferry connection.",
+        "use_reference": "jersey-railroad-1895"
       }
     },
     {
@@ -5256,8 +5318,8 @@
             40.7281304
           ],
           [
-            -74.0436122,
-            40.7274533
+            -74.04357414,
+            40.72759336
           ],
           [
             -74.0437379,
@@ -5316,8 +5378,8 @@
             40.7279641
           ],
           [
-            -74.0419298,
-            40.7272869
+            -74.04188772,
+            40.72744386
           ],
           [
             -74.0420555,
@@ -5358,7 +5420,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport.",
+        "street_name": "Grove Street"
       }
     },
     {
@@ -5376,8 +5439,8 @@
             40.7278044
           ],
           [
-            -74.0403147,
-            40.7271273
+            -74.04026811,
+            40.72730304
           ],
           [
             -74.0404404,
@@ -5418,7 +5481,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport.",
+        "street_name": "Henderson Street"
       }
     },
     {
@@ -5436,8 +5500,8 @@
             40.7276447
           ],
           [
-            -74.0386996,
-            40.7269676
+            -74.03865252,
+            40.72714539
           ],
           [
             -74.0388253,
@@ -5462,7 +5526,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport.",
+        "street_name": "Provost Street"
       }
     },
     {
@@ -6086,12 +6151,12 @@
               40.7279641
             ],
             [
-              -74.0419298,
-              40.7272869
+              -74.04188772,
+              40.72744386
             ],
             [
-              -74.0436122,
-              40.7274533
+              -74.04357414,
+              40.72759336
             ],
             [
               -74.0434825,
@@ -6141,12 +6206,12 @@
               40.7278044
             ],
             [
-              -74.0403147,
-              40.7271273
+              -74.04026811,
+              40.72730304
             ],
             [
-              -74.0419298,
-              40.7272869
+              -74.04188772,
+              40.72744386
             ],
             [
               -74.0418001,
@@ -6196,12 +6261,12 @@
               40.7276447
             ],
             [
-              -74.0386996,
-              40.7269676
+              -74.03865252,
+              40.72714539
             ],
             [
-              -74.0403147,
-              40.7271273
+              -74.04026811,
+              40.72730304
             ],
             [
               -74.040185,
@@ -6408,24 +6473,40 @@
         "coordinates": [
           [
             [
-              -74.0436122,
-              40.7274533
-            ],
-            [
-              -74.0419298,
-              40.7272869
+              -74.04188772,
+              40.72744386
             ],
             [
               -74.0420555,
               40.7266266
             ],
             [
+              -74.0421938,
+              40.726640271
+            ],
+            [
+              -74.042157647,
+              40.726865192
+            ],
+            [
+              -74.043572802,
+              40.726996833
+            ],
+            [
+              -74.043607646,
+              40.726780025
+            ],
+            [
               -74.0437379,
               40.7267929
             ],
             [
-              -74.0436122,
-              40.7274533
+              -74.04357414,
+              40.72759336
+            ],
+            [
+              -74.04188772,
+              40.72744386
             ]
           ]
         ]
@@ -6463,12 +6544,12 @@
         "coordinates": [
           [
             [
-              -74.0419298,
-              40.7272869
+              -74.04188772,
+              40.72744386
             ],
             [
-              -74.0403147,
-              40.7271273
+              -74.04026811,
+              40.72730304
             ],
             [
               -74.0404404,
@@ -6479,8 +6560,8 @@
               40.7266266
             ],
             [
-              -74.0419298,
-              40.7272869
+              -74.04188772,
+              40.72744386
             ]
           ]
         ]
@@ -6518,12 +6599,12 @@
         "coordinates": [
           [
             [
-              -74.0403147,
-              40.7271273
+              -74.04026811,
+              40.72730304
             ],
             [
-              -74.0386996,
-              40.7269676
+              -74.03865252,
+              40.72714539
             ],
             [
               -74.0388253,
@@ -6534,8 +6615,8 @@
               40.7264669
             ],
             [
-              -74.0403147,
-              40.7271273
+              -74.04026811,
+              40.72730304
             ]
           ]
         ]
@@ -6848,8 +6929,20 @@
         "coordinates": [
           [
             [
-              -74.0437379,
-              40.7267929
+              -74.043607646,
+              40.726780025
+            ],
+            [
+              -74.043641778,
+              40.726567647
+            ],
+            [
+              -74.042226633,
+              40.726436008
+            ],
+            [
+              -74.0421938,
+              40.726640271
             ],
             [
               -74.0420555,
@@ -6866,6 +6959,10 @@
             [
               -74.0437379,
               40.7267929
+            ],
+            [
+              -74.043607646,
+              40.726780025
             ]
           ]
         ]
@@ -19172,6 +19269,468 @@
             ]
           ]
         ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "erie-pavonia-passenger-house",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.03163615,
+              40.7269113
+            ],
+            [
+              -74.03031411,
+              40.7267744
+            ],
+            [
+              -74.03033795,
+              40.72648255
+            ],
+            [
+              -74.03173485,
+              40.72659447
+            ],
+            [
+              -74.03163615,
+              40.7269113
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "building",
+        "source": "harrison-1894",
+        "role": "transport_auxiliary",
+        "height_m": 12,
+        "use_reference": "jersey-railroad-1895",
+        "use_basis": "Dark passenger-house envelope north of Pavonia traced from Harrison and confirmed by the existing station hatch on the 1895 terminal plan. Roof and height are interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "erie-pavonia-station-coverage",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0318165,
+              40.7270215
+            ],
+            [
+              -74.0302352,
+              40.7268162
+            ],
+            [
+              -74.0302674,
+              40.7266816
+            ],
+            [
+              -74.0285364,
+              40.7265263
+            ],
+            [
+              -74.0287035,
+              40.7259234
+            ],
+            [
+              -74.0295579,
+              40.7259996
+            ],
+            [
+              -74.0294793,
+              40.7262323
+            ],
+            [
+              -74.0319229,
+              40.7264801
+            ],
+            [
+              -74.0318165,
+              40.7270215
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "coverage",
+        "source": "harrison-1894",
+        "use_reference": "jersey-railroad-1895",
+        "use_basis": "Mapped Erie passenger and ferry landing area."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "pavonia-ferry-approach-dry",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.03484044,
+              40.72685878
+            ],
+            [
+              -74.03335446,
+              40.7267353
+            ],
+            [
+              -74.03193931,
+              40.72660366
+            ],
+            [
+              -74.0317531,
+              40.72661419
+            ],
+            [
+              -74.03018205,
+              40.72646232
+            ],
+            [
+              -74.02993893,
+              40.72632667
+            ],
+            [
+              -74.0302727,
+              40.72617914
+            ],
+            [
+              -74.03176889,
+              40.726356
+            ],
+            [
+              -74.03313949,
+              40.72648185
+            ],
+            [
+              -74.03483798,
+              40.72658087
+            ],
+            [
+              -74.03484044,
+              40.72685878
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "known_dry",
+        "source": "harrison-1894",
+        "use_reference": "jersey-railroad-1895",
+        "use_basis": "Mapped entrance strip connecting the inland bank to the passenger house and existing ferry landing."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "pavonia-ferry-mapped-road",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.040250034,
+              40.727410257
+            ],
+            [
+              -74.035670586,
+              40.726971993
+            ],
+            [
+              -74.030240612,
+              40.726440689
+            ],
+            [
+              -74.030276928,
+              40.726226271
+            ],
+            [
+              -74.040286186,
+              40.727195823
+            ],
+            [
+              -74.040250034,
+              40.727410257
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road_coverage",
+        "source": "harrison-1894",
+        "categories": 2,
+        "coverage_state": "mapped_network",
+        "source_year": 1894,
+        "priority": 31,
+        "use_reference": "jersey-railroad-1895",
+        "coverage_basis": "Mapped Pavonia Avenue entrance strip leading to the ferry. Coverage follows the mapped avenue."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "erie-pavonia-south-shore-track",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.037978237,
+              40.727753921
+            ],
+            [
+              -74.037797002,
+              40.726504608
+            ],
+            [
+              -74.037583727,
+              40.72590398
+            ],
+            [
+              -74.03731135,
+              40.725609662
+            ],
+            [
+              -74.036891737,
+              40.725393325
+            ],
+            [
+              -74.036161231,
+              40.725281683
+            ],
+            [
+              -74.034341965,
+              40.725132082
+            ],
+            [
+              -74.034361675,
+              40.724988738
+            ],
+            [
+              -74.036186497,
+              40.72513881
+            ],
+            [
+              -74.036947745,
+              40.725254878
+            ],
+            [
+              -74.037451041,
+              40.725510762
+            ],
+            [
+              -74.037756566,
+              40.725842294
+            ],
+            [
+              -74.037983491,
+              40.726477993
+            ],
+            [
+              -74.038166614,
+              40.727738545
+            ],
+            [
+              -74.038240767,
+              40.728392055
+            ],
+            [
+              -74.038052013,
+              40.728404444
+            ],
+            [
+              -74.037978237,
+              40.727753921
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "rail",
+        "source": "harrison-1894",
+        "use_reference": "jersey-railroad-1895",
+        "use_basis": "Mapped New York, Lake Erie and Western track arm. Working width is interpreted within the mapped inland bank."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "erie-pavonia-south-diagonal-track",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.036211595,
+              40.727406051
+            ],
+            [
+              -74.035809547,
+              40.726991733
+            ],
+            [
+              -74.035411807,
+              40.726350222
+            ],
+            [
+              -74.035059064,
+              40.725715485
+            ],
+            [
+              -74.034680269,
+              40.725201028
+            ],
+            [
+              -74.034845551,
+              40.725130592
+            ],
+            [
+              -74.03523152,
+              40.725655693
+            ],
+            [
+              -74.035583978,
+              40.726290068
+            ],
+            [
+              -74.035976892,
+              40.726923794
+            ],
+            [
+              -74.036353616,
+              40.727310246
+            ],
+            [
+              -74.036935284,
+              40.727729178
+            ],
+            [
+              -74.036805036,
+              40.727833842
+            ],
+            [
+              -74.036211595,
+              40.727406051
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "rail",
+        "source": "harrison-1894",
+        "use_reference": "jersey-railroad-1895",
+        "use_basis": "Mapped New York, Lake Erie and Western track arm. Working width is interpreted within the mapped inland bank."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hamilton-eighth-erie-grove-north",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.043607646,
+              40.726780025
+            ],
+            [
+              -74.043572802,
+              40.726996833
+            ],
+            [
+              -74.042157647,
+              40.726865192
+            ],
+            [
+              -74.0421938,
+              40.726640271
+            ],
+            [
+              -74.043607646,
+              40.726780025
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          4.8,
+          6.3
+        ],
+        "depth_m": [
+          10,
+          14
+        ],
+        "setback_m": [
+          0.8,
+          1.6
+        ],
+        "storeys": [
+          3,
+          3
+        ],
+        "gap_m": 0.18,
+        "form_reference": "hamilton-park-national-register",
+        "use_basis": "Continuous documented red-brick rows facing Eighth Street between Erie and Grove. Individual lot divisions, heights and roof forms are interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hamilton-eighth-erie-grove-south",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.0421938,
+              40.726640271
+            ],
+            [
+              -74.042226633,
+              40.726436008
+            ],
+            [
+              -74.043641778,
+              40.726567647
+            ],
+            [
+              -74.043607646,
+              40.726780025
+            ],
+            [
+              -74.0421938,
+              40.726640271
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "harrison-1894",
+        "role": "street_row",
+        "frontage_m": [
+          4.8,
+          6.3
+        ],
+        "depth_m": [
+          10,
+          14
+        ],
+        "setback_m": [
+          0.8,
+          1.6
+        ],
+        "storeys": [
+          3,
+          3
+        ],
+        "gap_m": 0.18,
+        "form_reference": "hamilton-park-national-register",
+        "use_basis": "Continuous documented red-brick rows facing Eighth Street between Erie and Grove. Individual lot divisions, heights and roof forms are interpreted."
       }
     }
   ]

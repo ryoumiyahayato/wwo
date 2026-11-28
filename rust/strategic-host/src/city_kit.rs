@@ -42,6 +42,8 @@ struct Kit {
     court: Court,
     parapet: bool,
     arcade: bool,
+    #[serde(default)]
+    shop_airwell: Option<[f32; 2]>,
     eave: f32,
     wall: [f32; 3],
     tile: [f32; 3],
@@ -93,6 +95,16 @@ pub(crate) fn build(index: usize, role: usize, detail: bool) -> ModelMesh {
                 wing([-0.31, 0.28, 0.31, 0.5], 0.65, kit.roof, false);
             }
         }
+        3 => {
+            if let Some([front_end, rear_start]) = kit.shop_airwell {
+                wing([-0.5, -0.5, 0.5, front_end], 1., kit.roof, true);
+                wing([-0.5, rear_start, 0.5, 0.5], 0.62, kit.roof, false);
+                wing([-0.5, front_end, -0.46, rear_start], 0.42, Roof::Flat, false);
+                wing([0.46, front_end, 0.5, rear_start], 0.42, Roof::Flat, false);
+            } else {
+                wing([-0.5, -0.5, 0.5, 0.5], 1., kit.roof, true);
+            }
+        }
         4 => {
             wing([-0.5, -0.38, 0.5, 0.5], 0.75, kit.roof, false);
             wing([-0.26, -0.5, 0.26, -0.38], 1., kit.roof, true);
@@ -108,7 +120,7 @@ pub(crate) fn build(index: usize, role: usize, detail: bool) -> ModelMesh {
             wing([-0.5, -0.5, 0.5, 0.23], 1., kit.work_roof, true);
             wing([-0.5, 0.23, 0.5, 0.5], 0.55, Roof::Flat, true);
         }
-        _ => wing([-0.5, -0.5, 0.5, 0.5], 1., kit.roof, role == 3),
+        _ => wing([-0.5, -0.5, 0.5, 0.5], 1., kit.roof, false),
     }
     debug_assert!(mesh.indices.len() / 3 <= if detail { 2_000 } else { 128 });
     mesh

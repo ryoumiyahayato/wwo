@@ -299,7 +299,7 @@ def planned_site(path, city_id):
         left, bottom, right, top = (math.floor(value / 48) for value in geom.bounds)
         return [(x, y) for x in range(left, right + 1) for y in range(bottom, top + 1)]
 
-    def placement(x, y, angle, width, depth, height, role, limit, inferred):
+    def placement(x, y, angle, width, depth, height, role, limit, inferred, *, facing=None):
         lot = rectangle(x, y, angle, width, depth)
         if not coverage.covers(lot) or not limit.covers(lot) or not clear_of(obstacles, lot):
             return None
@@ -314,7 +314,9 @@ def planned_site(path, city_id):
             raise ValueError("Building anchor or height outside supported range")
         for cell in bins:
             occupied[cell].append(lot)
-        return x, y, lon, lat, angle, width, depth, height, ROLES.index(role) + 1
+        if facing is None:
+            facing = angle
+        return x, y, lon, lat, facing, width, depth, height, ROLES.index(role) + 1
 
     rows = []
     provenance = []
@@ -382,8 +384,10 @@ def planned_site(path, city_id):
                     heading = math.atan2(after.y-before.y, after.x-before.x)
                     offset = road["width_m"]*0.5 + setback + depth*0.5 + 0.4
                     x, y = at.x-side*math.sin(heading)*offset, at.y+side*math.cos(heading)*offset
-                    facing = heading if side > 0 else heading+math.pi
-                    row = placement(x, y, facing, width, depth, round(storeys)*3.2, role, zone, True)
+                    lot_heading = heading if side > 0 else heading + math.pi
+                    # Preserve the checked footprint and turn the model's -Z front toward the road.
+                    row = placement(x, y, lot_heading, width, depth, round(storeys)*3.2,
+                                    role, zone, True, facing=lot_heading + math.pi)
                     if row:
                         record(row, key, props, "inferred_parcel")
     if not rows:
