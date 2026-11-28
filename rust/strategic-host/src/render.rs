@@ -310,7 +310,7 @@ impl GroundSurface {
         city_geometry.extend_from_slice(&fringe_offset.to_le_bytes());
         city_geometry.extend_from_slice(&park_offset.to_le_bytes());
         let city_water=device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label:Some("Near-map city banks, streets, parks, and ground coverage"),
+            label:Some("Near-map city streets, parks, and ground coverage"),
             contents:&city_geometry,
             usage:wgpu::BufferUsages::STORAGE,
         });
@@ -362,7 +362,7 @@ impl GroundSurface {
             let fits=bytes<=u64::from(device.limits().max_storage_buffer_binding_size);
             self.water_pixels=water_pixels(device,if fits {bytes} else {4});
             raster.buffers=fits.then(||bind(device,&raster.pipeline.get_bind_group_layout(3),
-                &[buf_resource(3,&self.water),buf_resource(5,&self.water_pixels),buf_resource(7,&self.city_water)]));
+                &[buf_resource(3,&self.water),buf_resource(5,&self.water_pixels)]));
             self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,&self.landscape,
                 &self.materials,&self.water,&self.water_pixels,&self.city_water);
             raster.previous=None;
