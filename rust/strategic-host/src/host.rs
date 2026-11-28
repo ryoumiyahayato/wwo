@@ -200,7 +200,7 @@ impl Host {
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
             animate:false,next_date:Instant::now(),feedback:String::new(),dirty:true,last_input_check:Instant::now(),
-            version:None,last_palette:None,trial:Trial{last:observation_id,..Trial::default()},hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,..Hud::default()},skin,exit_requested:false,
+            version:None,last_palette:None,trial:Trial{last:observation_id,..Trial::default()},hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,reduce_opening_motion:preferences.reduce_opening_motion,..Hud::default()},skin,exit_requested:false,
             prologue: None,menu_themes,
             opening_nav: lobby::Selection::default(),
             lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,country_directory:lobby::Directory::default(),
@@ -935,7 +935,7 @@ impl Host {
             else { self.opening_nav.arrival_cloud = None; None }
         } else { None };
         if let Some((opacity, travel)) = cloud {
-            fade = Some(lobby::cloud_cover(self.size, opacity, travel));
+            fade = Some(lobby::cloud_cover(self.size, opacity, travel, &self.skin));
         }
         let needs_overlay=matches!(self.mode,Mode::Political|Mode::Economic)
             ||self.mode==Mode::Military&&view.map_style[3]>0.;

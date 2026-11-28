@@ -369,6 +369,7 @@ pub struct Hud {
     pub lot_offset: usize,
     pub transport_lots_open: bool,
     pub volume:u8,pub english:bool,pub volume_drag:bool,
+    pub reduce_opening_motion:bool,
 }
 impl Hud {
     pub fn place_filter(&self,mode:Mode)->PlaceFilter {
@@ -915,7 +916,17 @@ impl Display<'_> {
         self.skin.text(t,"语言",7,[x+16.,y+185.],width-32.,IVORY);
         row(m,t,hits,[x+16.,y+207.,half,29.],"简体中文",Command::Language(false),!self.hud.english);
         row(m,t,hits,[x+24.+half,y+207.,half,29.],"English",Command::Language(true),self.hud.english);
-        row(m,t,hits,[x+16.,y+248.,width-32.,29.],"返回",back,false);
+        let back_y = if slider {
+            let label = if self.hud.reduce_opening_motion {
+                self.skin.choose("减少开局动效 · 开启", "Reduce opening motion: On")
+            } else {
+                self.skin.choose("减少开局动效 · 关闭", "Reduce opening motion: Off")
+            };
+            row(m,t,hits,[x+16.,y+248.,width-32.,29.],label,
+                Command::Lobby(crate::lobby::Command::ToggleOpeningMotion),self.hud.reduce_opening_motion);
+            289.
+        } else { 248. };
+        row(m,t,hits,[x+16.,y+back_y,width-32.,29.],"返回",back,false);
     }
     pub(crate) fn folio(&self,m:&mut Mesh,art:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,a:[f32;4],title:&str){
         self.decorated_folio(m,art,t,hits,a,title,"crest");

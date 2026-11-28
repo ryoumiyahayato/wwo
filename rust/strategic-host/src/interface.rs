@@ -4,12 +4,13 @@ pub struct Preferences {
     pub fullscreen:bool,
     pub volume:u8,
     pub english:bool,
+    pub reduce_opening_motion:bool,
     pub fixed_painting:Option<String>,
     pub last_painting:Option<String>,
 }
 
 impl Default for Preferences {
-    fn default()->Self {Self{fullscreen:false,volume:80,english:false,fixed_painting:None,last_painting:None}}
+    fn default()->Self {Self{fullscreen:false,volume:80,english:false,reduce_opening_motion:false,fixed_painting:None,last_painting:None}}
 }
 
 impl Preferences {
@@ -24,6 +25,7 @@ impl Preferences {
             match (section,key.trim()) {
                 ("[display]","fullscreen")=>value.fullscreen=raw=="true",
                 ("[display]","locale")=>value.english=raw.trim_matches('"').starts_with("en"),
+                ("[display]","reduce_opening_motion")=>value.reduce_opening_motion=raw=="true",
                 ("[menu]","fixed")=>value.fixed_painting=painting_id(raw),
                 ("[menu]","last")=>value.last_painting=painting_id(raw),
                 ("[audio]","volume")=>{
@@ -48,6 +50,7 @@ impl Preferences {
             Err(error)=>return Err(error),
         };
         set(&mut text,"[display]","fullscreen",&self.fullscreen.to_string());
+        set(&mut text,"[display]","reduce_opening_motion",&self.reduce_opening_motion.to_string());
         set(&mut text,"[display]","locale",&format!("\"{}\"",self.locale()));
         set(&mut text,"[audio]","volume",&format!("{:.2}",f64::from(self.volume)/100.));
         set(&mut text,"[menu]","fixed",&format!("\"{}\"",self.fixed_painting.as_deref().unwrap_or("")));

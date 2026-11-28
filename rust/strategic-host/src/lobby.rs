@@ -56,7 +56,7 @@ pub enum Page {#[default] Home,Selection,Cloud,Prologue,Load,Settings,Themes}
 pub enum Command {
     Page(Page), Country(usize), Back, Drawer, Area(usize, usize), MapArea(usize), Site(usize),
     Up, Search, ClearSearch, ChangePainting, FixPainting(bool), Enter, PrologueChoice(usize),
-    PrologueNext, PrologueBack, Load(u8), Exit,
+    PrologueNext, PrologueBack, ToggleOpeningMotion, Load(u8), Exit,
 }
 
 struct BirthplaceRow<'a> {
@@ -66,6 +66,7 @@ struct BirthplaceRow<'a> {
 }
 
 pub type Rect = [f32;4];
+pub const SETTINGS_HEIGHT: f32 = 332.;
 
 pub fn contains([x,y,w,h]: Rect, [px,py]: [f64;2]) -> bool {
     (f64::from(x)..=f64::from(x+w)).contains(&px)
@@ -533,6 +534,14 @@ impl Display<'_> {
                     world.polities.get(draft.country).and_then(|polity| state?.opening(polity)).map(|opening| (draft, opening))
                 }) {
                     self.draw_prologue(&mut scenes, &mut paper, &mut panels, &mut text, &mut hits, draft, opening, world);
+                    if !self.hud.reduce_opening_motion {
+                        let opacity = 0.65 + 0.35 * ease_cloud(draft.changed.elapsed().as_secs_f32() / 0.34);
+                        for mesh in [&mut paper, &mut panels, &mut text] {
+                            for vertex in &mut mesh.vertices {
+                                vertex.color[3] = (f32::from(vertex.color[3]) * opacity).round() as u8;
+                            }
+                        }
+                    }
                 }
             }
             Page::Load=>{
@@ -551,7 +560,7 @@ impl Display<'_> {
                     (!busy).then_some(action(Command::Page(Page::Home))),false);
             }
             Page::Settings|Page::Themes=>{
-                let height=if page==Page::Settings{290.}else{228.};
+                let height=if page==Page::Settings{SETTINGS_HEIGHT}else{228.};
                 let width=365.;let x=(w-width)*0.5;let y=(h-height)*0.5;
                 formal_ui::panel(&mut panels,[x,y,width,height],[6,14,23,247]);
                 self.skin.text(&mut text,if page==Page::Settings{"设置"}else{"主题管理"},1,[x+22.,y+15.],width-44.,IVORY);
@@ -630,13 +639,17 @@ impl Display<'_> {
         }
         formal_ui::panel(panels, layout.card, [9, 19, 30, 251]);
         if let Some(slot) = self.flags {
-            let elapsed = nav.last_animation.saturating_duration_since(nav.last_input).as_secs_f32();
             let flag_area = [x + 16., y + 13., 60., 33.];
-            let fade = nav.previous_country.map_or(1., |(_, at)| (at.elapsed().as_secs_f32() / 0.3).clamp(0., 1.));
-            if let Some((index, _)) = nav.previous_country.filter(|_| fade < 1.) {
-                flags.flag_wave(flag_area, view.visuals.record(index).flag, elapsed, (1. - fade) * 255.);
+            if self.hud.reduce_opening_motion {
+                flags.flag(flag_area, slot);
+            } else {
+                let elapsed = nav.last_animation.saturating_duration_since(nav.last_input).as_secs_f32();
+                let fade = nav.previous_country.map_or(1., |(_, at)| (at.elapsed().as_secs_f32() / 0.3).clamp(0., 1.));
+                if let Some((index, _)) = nav.previous_country.filter(|_| fade < 1.) {
+                    flags.flag_wave(flag_area, view.visuals.record(index).flag, elapsed, (1. - fade) * 255.);
+                }
+                flags.flag_wave(flag_area, slot, elapsed, fade * 255.);
             }
-            flags.flag_wave(flag_area, slot, elapsed, fade * 255.);
         }
         let say = |zh, en| self.skin.choose(zh, en);
         let title = polity_label(polity, opening, self.skin.english());
@@ -785,7 +798,11 @@ pub fn ease_cloud(t: f32) -> f32 {
     t * t * (3. - 2. * t)
 }
 
-pub fn cloud_cover(size: [u32; 2], coverage: f32, travel: f32) -> crate::ui::Layers {
+pub fn cloud_skip_rect(size: [u32; 2]) -> Rect {
+    [size[0] as f32 - 191., size[1] as f32 - 58., 172., 35.]
+}
+
+pub fn cloud_cover(size: [u32; 2], coverage: f32, travel: f32, skin: &crate::formal_ui::Skin) -> crate::ui::Layers {
     use crate::ui::Ink;
     let mut layers = std::array::from_fn(|_| (Mesh::default(), Ink::Solid));
     let [w, h] = size.map(|value| value as f32);
@@ -803,6 +820,12 @@ pub fn cloud_cover(size: [u32; 2], coverage: f32, travel: f32) -> crate::ui::Lay
         let alpha = (coverage.powf(1. + index as f32 * 0.35) * 255. * strength) as u8;
         layers[1].0.image([x, y, span.0, span.1], uv, [tint[0], tint[1], tint[2], alpha]);
     }
+    let rect = cloud_skip_rect(size);
+    let [x, y, width, _] = rect;
+    formal_ui::panel(&mut layers[2].0, rect, [6, 14, 23, 247]);
+    layers[3].1 = Ink::Text;
+    skin.text(&mut layers[3].0, skin.choose("跳过过场 · Esc", "Skip transition · Esc"), 0,
+        [x + 11., y + 8.], width - 22., IVORY);
     layers
 }
 
