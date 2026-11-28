@@ -101,26 +101,6 @@ fn chart_ocean(ll:vec2f,earth:vec3f,normal:vec3f)->vec3f {
     return solar_ground(base,normal)*mix(.94,1.06,grazing)+vec3f(.15,.19,.18)*glint
         +vec3f(.035,.080,.110)*rim*(1.-ice*.6);
 }
-fn moon_noise(p:vec2f)->f32 {
-    var q=fract(p*vec2f(123.34,456.21));
-    q+=dot(q,q+45.32);
-    return fract(q.x*q.y);
-}
-fn moon_fbm(uv:vec2f)->f32 {
-    var p=uv;
-    var value=0.;
-    var amplitude=.58;
-    for (var i=0;i<4;i++) {
-        let cell=floor(p);
-        let f=fract(p);
-        let u=f*f*(3.-2.*f);
-        value+=mix(mix(moon_noise(cell),moon_noise(cell+vec2f(1.,0.)),u.x),
-            mix(moon_noise(cell+vec2f(0.,1.)),moon_noise(cell+1.),u.x),u.y)*amplitude;
-        p=p*2.07+vec2f(5.1,8.7);
-        amplitude*=.46;
-    }
-    return value;
-}
 fn sky(p: vec2f) -> vec3f {
     let size=vec2f(textureDimensions(galactic_chart));
     let fit=max(view.viewport.x/size.x,view.viewport.y/size.y);
@@ -132,15 +112,10 @@ fn sky(p: vec2f) -> vec3f {
     let r=dot(q,q);
     if r>=1. { return base; }
     let n=vec3f(q.x,-q.y,sqrt(1.-r));
-    let tilted=vec3f(n.x,.996802*n.y-.079915*n.z,.079915*n.y+.996802*n.z);
-    let local=vec3f(.971338*tilted.x-.237703*tilted.z,tilted.y,.237703*tilted.x+.971338*tilted.z);
-    let uv=vec2f(fract(atan2(local.x,local.z)/(2.*PI)+.5),acos(clamp(local.y,-1.,1.))/PI);
     let lit=smoothstep(-.18,.82,dot(n,CHART_SUN_VIEW));
     let limb=pow(1.-n.z,2.4);
-    let broad=moon_fbm(uv*vec2f(8.,4.));
-    let crater=smoothstep(.62,.84,moon_fbm(uv*vec2f(23.,11.)+vec2f(4.7,1.9)));
     let surface=mix(vec3f(.10,.13,.15),mix(vec3f(.54,.56,.54),vec3f(.78,.78,.70),lit),lit)
-        *mix(.78,1.08,broad)*mix(1.,.64,crater*.42)+vec3f(.78,.78,.70)*limb*.045;
+        +vec3f(.78,.78,.70)*limb*.045;
     return mix(surface*1.14,base,smoothstep(.97,1.,r));
 }
 fn raw(uv: vec2f) -> vec4f {

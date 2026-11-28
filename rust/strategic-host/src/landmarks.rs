@@ -329,11 +329,12 @@ impl Landmarks {
     }
 
     pub fn visible(&self, date: &str, camera: &Camera, size: [u32; 2],
-        covered: impl Fn([f64;2])->bool) -> Vec<VisibleModel> {
+        geographic_detail: bool, covered: impl Fn([f64;2])->bool) -> Vec<VisibleModel> {
         let pitch = camera.pitch();
         let mut visible: Vec<_> = self.landmarks.iter().filter_map(|(place, asset, row)| {
             row.project(*place, *asset, date, camera, pitch, size)
         }).collect();
+        if !geographic_detail { return visible; }
         for (&place, city) in &self.cities {
             let opacity=city.opacity(date,camera.mpp);
             if opacity <= 0. { continue; }

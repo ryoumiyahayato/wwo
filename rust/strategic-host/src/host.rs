@@ -950,16 +950,19 @@ impl Host {
             let scissor=self.index.scissor(id,&self.camera,self.size)?;
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
+        let geographic_detail=self.mode==Mode::Geographic;
         let mut models=if loading||self.in_lobby() {Vec::new()} else if let Some(landmarks)=&self.landmarks {
-            let mut models=self.city_models.as_mut().map_or_else(Vec::new,|catalogue|
-                catalogue.visible(&date,&self.camera,self.size,landmarks,&self.events,|[lon,lat]| {
+            let mut models=Vec::new();
+            if let Some(catalogue)=self.city_models.as_mut().filter(|_|geographic_detail) {
+                models=catalogue.visible(&date,&self.camera,self.size,landmarks,&self.events,|[lon,lat]| {
                     pages.iter().filter(|(_,tile,_,_)| {
                         let [west,south,east,north]=tile.core;
                         tile.city_ink_only && !tile.city_area && !tile.city_streets
                             && lon>=west && lon<east && lat>=south && lat<north
                     }).map(|(_,_,_,alpha)|*alpha).next().unwrap_or(0.)
-                }));
-            models.extend(landmarks.visible(&date,&self.camera,self.size,|point|
+                });
+            }
+            models.extend(landmarks.visible(&date,&self.camera,self.size,geographic_detail,|point|
                 self.city_models.as_ref().is_some_and(|catalogue|catalogue.covers(point))));
             models
         } else {
@@ -1001,7 +1004,7 @@ impl Host {
         let mut redraw=false;
         let timing_frame=self.trial.timing_frame(capture.is_some());
         if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,transport,
-            (&self.camera,landscape_enabled&&!self.trial.hide_landscape_models,now),None,timing_frame)? {
+            (&self.camera,landscape_enabled&&geographic_detail&&!self.trial.hide_landscape_models,now),None,timing_frame)? {
             #[cfg(windows)]
             if !loading && self.config.native.is_some() {
                 crate::desktop_start::notify_program_update("ready");
