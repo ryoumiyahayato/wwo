@@ -8,16 +8,16 @@
       18.419,
       -33.926
     ],
-    "revision": 3,
+    "revision": 4,
     "status": "candidate_sample",
-    "method": "Selected surveyed street and land-use relationships along Bo-Kaap, central gardens, the former shore and the Woodstock railway edge. Parcel positions and building volumes are inferred along traced streets. Surveyed road alignments and mapped open ground are approximate. No inferred street coverage in unreadable gaps. Shoreline, docks and selected additional street corridors follow the separate circa 1900 municipal plan.",
+    "method": "Selected street and land-use relationships along Bo-Kaap, the central gardens, Woodstock and the former shore. Thom's sheets supply the Table Valley garden approach, the street along the Woodstock railway district, its yard accesses and the landward constraint along the railway embankment. Brink's 1901 compilation supplies the two basin outlines and adjoining old shore and is used for supplementary streets and dock ground. Centre lines are approximate. Building dimensions and locations along streets are inferred within mapped frontage groups. Survey blanks and areas without readable access remain outside the traced network.",
     "sources": [
       {
         "id": "thom-1892-1900",
         "url": "https://cityimg.capetown.gov.za/erdas-iws/esri/GeoSpatial%20Datasets/rest/services/Heritage%20Datasets_Historical%20Maps%201892-1900_Thom_updates/MapServer",
         "licence": "Historical geographic observations only. Municipality scan and service imagery excluded.",
         "date": "Walter Thom municipal sheets, 1892–1900",
-        "precision": "Municipal CRS84 rendering at 0.00002 degrees per pixel. Selected local centre lines and use boundaries read manually. Exact sheet dates, registration error, parcels and paving are unresolved."
+        "precision": "Municipal CRS84 rendering at 0.00002 degrees per pixel. Centre lines and boundaries read manually across the core, Table Valley and Woodstock windows. Registration between editions, individual sheet dates, paving and parcel detail are unresolved."
       },
       {
         "id": "bo-kaap-hap13",
@@ -34,11 +34,18 @@
         "precision": "Context for archive provenance and later harbour reclamation."
       },
       {
-        "id": "municipal-shore-1900",
+        "id": "brink-cape-division-1901",
         "url": "https://cityimg.capetown.gov.za/erdas-iws/esri/GeoSpatial%20Datasets/rest/services/Heritage%20Datasets_Historical%20Maps%201900_Cape%20Town/MapServer",
         "licence": "Geographic observations only. Municipal raster omitted.",
-        "date": "Municipal historical map labelled 1900",
-        "precision": "CRS84 export 0.00004 degrees per pixel. Historical harbour, street and shoreline positions are approximate. Survey date of each addition and tides are unresolved."
+        "date": "M. J. Brink, Map of the Cape Division, compiled 1901",
+        "precision": "CRS84 export at 0.00004 degrees per pixel. The municipal service title says 1900; its catalogue identifies the 1901 compilation. Individual survey dates and tide stage are unresolved. Thom constrains the local railway embankment."
+      },
+      {
+        "id": "woodstock-municipal-heritage",
+        "url": "https://resource.capetown.gov.za/documentcentre/Documents/City%20strategies%2C%20plans%20and%20frameworks/Heritage%20Cultural%20Tourism%20Framework%20Final.pdf#page=49",
+        "licence": "Historical use and form observations only.",
+        "date": "Municipal heritage strategy, 2013–2018",
+        "precision": "Page 49 documents mixed late nineteenth- and early twentieth-century residential, commercial and industrial stock in the Albert Road and Victoria Road area. Individual occupiers and footprints are unresolved."
       }
     ],
     "road_validity": {
@@ -459,7 +466,7 @@
         "coverage_state": "mapped_network",
         "source_year": 1898,
         "priority": 25,
-        "coverage_basis": "Small plotted windows along the readable local streets; missing small passages are possible."
+        "coverage_basis": "Thom depicts a continuous main street, local yard accesses and compact streets south of the railway. Smaller passages remain unresolved."
       },
       "geometry": {
         "type": "Polygon",
@@ -1082,26 +1089,27 @@
         "source_year": 1898,
         "display_surface": "gravel",
         "width_basis": "Estimated from the visible street corridor.",
-        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan."
+        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan.",
+        "alignment_basis": "Readable cross street along the developed northern edge of the slope district on Thom."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
           [
-            18.41754,
-            -33.93256
+            18.4141,
+            -33.93378
           ],
           [
-            18.41612,
-            -33.93384
+            18.41494,
+            -33.93374
           ],
           [
-            18.41488,
-            -33.93488
+            18.41576,
+            -33.93374
           ],
           [
-            18.41406,
-            -33.93574
+            18.41646,
+            -33.93374
           ]
         ]
       }
@@ -1117,42 +1125,71 @@
         "source_year": 1898,
         "display_surface": "gravel",
         "width_basis": "Estimated from the visible street corridor.",
-        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan."
+        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan.",
+        "alignment_basis": "Thom street corridor at the end of the diagonal blocks and around the south side of the railway district. The surveyed Woodstock street resumes at the same junction."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
           [
-            18.4235,
-            -33.92694
+            18.42268,
+            -33.92406
           ],
           [
-            18.42562,
-            -33.92678
+            18.42372,
+            -33.92474
           ],
           [
-            18.4274,
-            -33.92698
+            18.42392,
+            -33.9248676
           ],
           [
-            18.42942,
-            -33.92724
+            18.42488,
+            -33.92548
           ],
           [
-            18.43142,
-            -33.92732
+            18.4258,
+            -33.92616
           ],
           [
-            18.4345,
-            -33.92742
+            18.427,
+            -33.9269
           ],
           [
-            18.4372,
-            -33.92744
+            18.42766,
+            -33.92722
           ],
           [
-            18.438,
-            -33.9275
+            18.42846,
+            -33.92706
+          ],
+          [
+            18.4293,
+            -33.92704
+          ],
+          [
+            18.4302,
+            -33.92706
+          ],
+          [
+            18.431,
+            -33.92706
+          ],
+          [
+            18.4322,
+            -33.92718
+          ],
+          [
+            18.4341,
+            -33.9273
+          ],
+          [
+            18.435,
+            -33.92736
+          ],
+          [
+            18.43698,
+            -33.92736
           ]
         ]
       }
@@ -1168,26 +1205,47 @@
         "source_year": 1898,
         "display_surface": "gravel",
         "width_basis": "Estimated from the visible street corridor.",
-        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan."
+        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan.",
+        "alignment_basis": "Thom continuous street south of the rail-side building groups. The adjoining west–east trace ends at the same node."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
           [
-            18.4371,
-            -33.9275
+            18.43698,
+            -33.92736
           ],
           [
-            18.43896,
+            18.43724,
+            -33.9273758
+          ],
+          [
+            18.4383,
+            -33.92744
+          ],
+          [
+            18.43948,
+            -33.9274711
+          ],
+          [
+            18.43982,
+            -33.92748
+          ],
+          [
+            18.44088,
             -33.92754
           ],
           [
-            18.44116,
-            -33.9277
+            18.44176,
+            -33.92756
           ],
           [
-            18.44294,
-            -33.9278
+            18.44234,
+            -33.92758
+          ],
+          [
+            18.44304,
+            -33.92752
           ]
         ]
       }
@@ -1373,49 +1431,6 @@
     },
     {
       "type": "Feature",
-      "id": "cape-town-thom:woodstock-factory-frontage",
-      "properties": {
-        "kind": "road",
-        "source": "thom-1892-1900",
-        "width_m": 8,
-        "display_rank": 1,
-        "source_year": 1898,
-        "display_surface": "gravel",
-        "width_basis": "Estimated from the visible street corridor.",
-        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan."
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            18.4306,
-            -33.92654
-          ],
-          [
-            18.43288,
-            -33.92648
-          ],
-          [
-            18.4353,
-            -33.92658
-          ],
-          [
-            18.4378,
-            -33.92654
-          ],
-          [
-            18.44036,
-            -33.92638
-          ],
-          [
-            18.44276,
-            -33.92656
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
       "id": "cape-town-thom:slope-gardens-approach",
       "properties": {
         "kind": "road",
@@ -1425,34 +1440,59 @@
         "source_year": 1898,
         "display_surface": "gravel",
         "width_basis": "Estimated from the visible street corridor.",
-        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan."
+        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan.",
+        "alignment_basis": "Thom road between the Table Valley gardens and the rising east-side parcels. Ends before the surveyed road fades into hillside strips."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
           [
             18.41412,
-            -33.92974
+            -33.93202
           ],
           [
-            18.41414,
-            -33.93192
+            18.41408,
+            -33.93306
           ],
           [
             18.4141,
-            -33.93422
+            -33.93378
           ],
           [
-            18.414,
-            -33.93678
+            18.4141,
+            -33.9349
           ],
           [
-            18.41394,
-            -33.93922
+            18.4141,
+            -33.93602
           ],
           [
-            18.414,
-            -33.94066
+            18.41412,
+            -33.937
+          ],
+          [
+            18.4141,
+            -33.9377
+          ],
+          [
+            18.41416,
+            -33.93832
+          ],
+          [
+            18.41426,
+            -33.9389
+          ],
+          [
+            18.4143,
+            -33.93934
+          ],
+          [
+            18.41432,
+            -33.94004
+          ],
+          [
+            18.4143,
+            -33.94076
           ]
         ]
       }
@@ -1468,69 +1508,35 @@
         "source_year": 1898,
         "display_surface": "gravel",
         "width_basis": "Estimated from the visible street corridor.",
-        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan."
+        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan.",
+        "alignment_basis": "Western approach provided by the path along the north edge of the mapped garden grounds. Stops at the garden-edge road."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
           [
-            18.41024,
-            -33.93294
+            18.41082,
+            -33.9341
           ],
           [
-            18.41102,
-            -33.93366
+            18.41136,
+            -33.93462
           ],
           [
-            18.41258,
-            -33.9343
-          ],
-          [
-            18.41406,
+            18.41192,
             -33.93512
           ],
           [
-            18.41604,
-            -33.93594
+            18.41284,
+            -33.9356
           ],
           [
-            18.41796,
-            -33.93684
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "cape-town-thom:slope-high-lane",
-      "properties": {
-        "kind": "road",
-        "source": "thom-1892-1900",
-        "width_m": 7,
-        "display_rank": 1,
-        "source_year": 1898,
-        "display_surface": "gravel",
-        "width_basis": "Estimated from the visible street corridor.",
-        "surface_basis": "Compacted surface reconstructed. Paving is not legible in the plan."
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
+            18.4135,
+            -33.93584
+          ],
           [
             18.4141,
-            -33.9377
-          ],
-          [
-            18.41594,
-            -33.93812
-          ],
-          [
-            18.41814,
-            -33.93882
-          ],
-          [
-            18.41896,
-            -33.93936
+            -33.93602
           ]
         ]
       }
@@ -3022,59 +3028,70 @@
         ],
         "gap_m": 4,
         "form_reference": "thom-1892-1900",
-        "use_basis": "Street-side building use and density interpreted from the surveyed blocks."
+        "use_basis": "Two developed pockets on Thom south of the railway, near the local access gaps. The municipal heritage record supports district-level work uses. Principal occupiers and individual workshop footprints are unresolved.",
+        "use_reference": "woodstock-municipal-heritage"
       },
       "geometry": {
-        "type": "Polygon",
+        "type": "MultiPolygon",
         "coordinates": [
           [
             [
-              18.4305,
-              -33.9261
-            ],
+              [
+                18.4365,
+                -33.92632
+              ],
+              [
+                18.43864,
+                -33.92632
+              ],
+              [
+                18.43888,
+                -33.92718
+              ],
+              [
+                18.43806,
+                -33.92736
+              ],
+              [
+                18.43662,
+                -33.92726
+              ],
+              [
+                18.4365,
+                -33.92632
+              ]
+            ]
+          ],
+          [
             [
-              18.43518,
-              -33.92608
-            ],
-            [
-              18.43826,
-              -33.9261
-            ],
-            [
-              18.44068,
-              -33.92592
-            ],
-            [
-              18.44264,
-              -33.92624
-            ],
-            [
-              18.44284,
-              -33.927
-            ],
-            [
-              18.43998,
-              -33.92714
-            ],
-            [
-              18.43768,
-              -33.92702
-            ],
-            [
-              18.43512,
-              -33.92708
-            ],
-            [
-              18.43288,
-              -33.927
-            ],
-            [
-              18.4305,
-              -33.92692
-            ],
-            [
-              18.4305,
-              -33.9261
+              [
+                18.43892,
+                -33.9264
+              ],
+              [
+                18.43974,
+                -33.92632
+              ],
+              [
+                18.44064,
+                -33.92642
+              ],
+              [
+                18.44052,
+                -33.92732
+              ],
+              [
+                18.43958,
+                -33.92744
+              ],
+              [
+                18.439,
+                -33.92728
+              ],
+              [
+                18.43892,
+                -33.9264
+              ]
             ]
           ]
         ]
@@ -3086,67 +3103,69 @@
       "properties": {
         "kind": "block_ground",
         "source": "thom-1892-1900",
-        "use_basis": "Street-side inferred frontage ground only; the undetermined interior is left to the base."
+        "use_basis": "Ground in the two modelled pockets next to the rail-side accesses. Unresolved yard interiors and the railway remain separate."
       },
       "geometry": {
-        "type": "Polygon",
+        "type": "MultiPolygon",
         "coordinates": [
           [
             [
-              18.4427391,
-              -33.9268392
-            ],
+              [
+                18.4365,
+                -33.92632
+              ],
+              [
+                18.43864,
+                -33.92632
+              ],
+              [
+                18.43888,
+                -33.92718
+              ],
+              [
+                18.43806,
+                -33.92736
+              ],
+              [
+                18.43662,
+                -33.92726
+              ],
+              [
+                18.4365,
+                -33.92632
+              ]
+            ]
+          ],
+          [
             [
-              18.4403583,
-              -33.9266607
-            ],
-            [
-              18.437811,
-              -33.9268199
-            ],
-            [
-              18.4352965,
-              -33.9268601
-            ],
-            [
-              18.4328779,
-              -33.9267602
-            ],
-            [
-              18.4306074,
-              -33.9268199
-            ],
-            [
-              18.4305926,
-              -33.9262601
-            ],
-            [
-              18.4328821,
-              -33.9261998
-            ],
-            [
-              18.4353035,
-              -33.9262999
-            ],
-            [
-              18.437789,
-              -33.9262601
-            ],
-            [
-              18.4403617,
-              -33.9260993
-            ],
-            [
-              18.4426481,
-              -33.9262708
-            ],
-            [
-              18.4427521,
-              -33.9266658
-            ],
-            [
-              18.4427391,
-              -33.9268392
+              [
+                18.43892,
+                -33.9264
+              ],
+              [
+                18.43974,
+                -33.92632
+              ],
+              [
+                18.44064,
+                -33.92642
+              ],
+              [
+                18.44052,
+                -33.92732
+              ],
+              [
+                18.43958,
+                -33.92744
+              ],
+              [
+                18.439,
+                -33.92728
+              ],
+              [
+                18.43892,
+                -33.9264
+              ]
             ]
           ]
         ]
@@ -3745,9 +3764,10 @@
       "id": "cape-town-1900:table-bay-and-basins",
       "properties": {
         "kind": "water_surface",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "basin": "coast",
-        "use_basis": "Circa 1900 earlier shoreline and both harbour basins. Water extends offshore to intercept the modern marine baseline. The plotted Salt River marsh and tidal edge are approximate."
+        "use_basis": "Brink depicts both harbour basins and the earlier coastal edge. Along Woodstock the water edge stays seaward of the mapped Thom railway embankment. The plotted Salt River marsh and the exact tidal contact remain approximate.",
+        "use_reference": "thom-1892-1900"
       },
       "geometry": {
         "type": "Polygon",
@@ -3835,39 +3855,39 @@
             ],
             [
               18.44296,
-              -33.92532
+              -33.92496
             ],
             [
               18.44084,
-              -33.92552
+              -33.92476
             ],
             [
               18.439,
-              -33.92576
+              -33.92452
             ],
             [
               18.43724,
-              -33.92604
+              -33.92458
             ],
             [
               18.43544,
-              -33.92624
+              -33.92472
             ],
             [
               18.43352,
-              -33.92628
+              -33.92502
             ],
             [
               18.4318,
-              -33.9262
+              -33.92506
             ],
             [
               18.43016,
-              -33.92596
+              -33.92498
             ],
             [
               18.42888,
-              -33.92548
+              -33.92482
             ],
             [
               18.42804,
@@ -4314,8 +4334,9 @@
       "id": "cape-town-1900:narrow-shore-correction",
       "properties": {
         "kind": "known_dry",
-        "source": "municipal-shore-1900",
-        "use_basis": "Limited mapped landward strip protects the 1900 dock works and shore edge."
+        "source": "brink-cape-division-1901",
+        "use_basis": "Mapped landward coast and dock works with a dry strip at the surveyed Thom railway embankment. Limits of tidal conditions remain unresolved.",
+        "use_reference": "thom-1892-1900"
       },
       "geometry": {
         "type": "Polygon",
@@ -4751,39 +4772,39 @@
             ],
             [
               18.42888,
-              -33.92548
+              -33.92482
             ],
             [
               18.43016,
-              -33.92596
+              -33.92498
             ],
             [
               18.4318,
-              -33.9262
+              -33.92506
             ],
             [
               18.43352,
-              -33.92628
+              -33.92502
             ],
             [
               18.43544,
-              -33.92624
+              -33.92472
             ],
             [
               18.43724,
-              -33.92604
+              -33.92458
             ],
             [
               18.439,
-              -33.92576
+              -33.92452
             ],
             [
               18.44084,
-              -33.92552
+              -33.92476
             ],
             [
               18.44296,
-              -33.92532
+              -33.92496
             ],
             [
               18.4446,
@@ -4970,7 +4991,7 @@
       "id": "cape-town-1900:dockyard-footprint",
       "properties": {
         "kind": "coverage",
-        "source": "municipal-shore-1900"
+        "source": "brink-cape-division-1901"
       },
       "geometry": {
         "type": "Polygon",
@@ -5025,7 +5046,7 @@
       "id": "cape-town-1900:outer-dock-support",
       "properties": {
         "kind": "zone",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "role": "warehouse",
         "frontage_m": [
           12,
@@ -5044,7 +5065,7 @@
           2
         ],
         "gap_m": 6,
-        "use_basis": "The 1900 plan labels the dock area. Storage footprints and uses are inferred from the working harbour strip."
+        "use_basis": "Brink labels the dock area. Storage forms are inferred on the working harbour strip. Individual firms and cargoes are unresolved."
       },
       "geometry": {
         "type": "Polygon",
@@ -5099,24 +5120,28 @@
       "id": "cape-town-1900:dock-yard-open",
       "properties": {
         "kind": "work_ground",
-        "source": "municipal-shore-1900",
-        "use_basis": "Unbuilt service apron around the inner basin as depicted."
+        "source": "brink-cape-division-1901",
+        "use_basis": "Mapped dry portion of the service apron along the inner basin."
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
-              18.41948,
-              -33.9068
+              18.42024756363636,
+              -33.908220072727275
             ],
             [
-              18.42072,
-              -33.9076
+              18.42,
+              -33.90836
             ],
             [
               18.42008,
-              -33.90844
+              -33.90892
+            ],
+            [
+              18.42024730769231,
+              -33.909075769230775
             ],
             [
               18.42028,
@@ -5147,8 +5172,24 @@
               -33.90744
             ],
             [
-              18.41948,
-              -33.9068
+              18.419243428571427,
+              -33.90711542857143
+            ],
+            [
+              18.41924,
+              -33.90716
+            ],
+            [
+              18.42008,
+              -33.90736
+            ],
+            [
+              18.420653270142182,
+              -33.90768758293839
+            ],
+            [
+              18.42024756363636,
+              -33.908220072727275
             ]
           ]
         ]
@@ -5159,9 +5200,9 @@
       "id": "cape-town-1900:core-lateral-street",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 9,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
@@ -5202,9 +5243,9 @@
       "id": "cape-town-1900:core-upper-lateral-street",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 9,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
@@ -5241,9 +5282,9 @@
       "id": "cape-town-1900:core-street-south",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 9,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
@@ -5276,9 +5317,9 @@
       "id": "cape-town-1900:district-six-approach",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 11,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 2,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
@@ -5315,32 +5356,41 @@
       "id": "cape-town-1900:district-six-cross-1",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "thom-1892-1900",
         "width_m": 8,
-        "source_year": 1900,
+        "source_year": 1898,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
-        "surface_basis": "Paving inferred."
+        "surface_basis": "Paving inferred.",
+        "alignment_basis": "Thom cross street on the northeast edge of the built blocks. Joins the district approach and the continuous road toward Woodstock through the visible street clearance."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
           [
-            18.42372,
-            -33.92524
+            18.42392,
+            -33.9248676
           ],
           [
-            18.4228,
-            -33.9264
+            18.42336,
+            -33.92554
           ],
           [
-            18.42184,
-            -33.92756
+            18.42276,
+            -33.92628
           ],
           [
-            18.42104,
-            -33.92868
+            18.42218,
+            -33.92694
+          ],
+          [
+            18.42152,
+            -33.92768
+          ],
+          [
+            18.421,
+            -33.9283
           ]
         ]
       }
@@ -5350,9 +5400,9 @@
       "id": "cape-town-1900:district-six-cross-2",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 8,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
@@ -5385,9 +5435,9 @@
       "id": "cape-town-1900:district-six-cross-3",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 8,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
@@ -5420,9 +5470,9 @@
       "id": "cape-town-1900:district-six-low-street",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 9,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
@@ -5459,9 +5509,9 @@
       "id": "cape-town-1900:district-six-high-street",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 8,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
@@ -5494,36 +5544,33 @@
       "id": "cape-town-1900:dock-road",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 9,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
-        "surface_basis": "Paving inferred."
+        "surface_basis": "Paving inferred.",
+        "alignment_basis": "Short double-line access alongside the dock land shown by Brink. Ends before the shore-side trunk alignment and rail reservation."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
           [
-            18.41604,
-            -33.9096
+            18.4168,
+            -33.91336
           ],
           [
-            18.4174,
-            -33.91032
+            18.41856,
+            -33.91284
           ],
           [
-            18.419,
-            -33.91128
+            18.42024,
+            -33.91228
           ],
           [
-            18.42048,
-            -33.91128
-          ],
-          [
-            18.42196,
-            -33.91176
+            18.42144,
+            -33.91184
           ]
         ]
       }
@@ -5533,36 +5580,33 @@
       "id": "cape-town-1900:dock-link",
       "properties": {
         "kind": "road",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "width_m": 8,
-        "source_year": 1900,
+        "source_year": 1901,
         "display_rank": 1,
         "display_surface": "gravel",
         "width_basis": "Estimate from the historical street corridor.",
-        "surface_basis": "Paving inferred."
+        "surface_basis": "Paving inferred.",
+        "alignment_basis": "Turns south from the dock access on the landward side of Amsterdam Battery. Continues as far as the first readable paved-block margin."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
           [
-            18.42104,
-            -33.9142
+            18.42024,
+            -33.91228
           ],
           [
-            18.42088,
-            -33.91336
+            18.42072,
+            -33.9132
           ],
           [
-            18.42028,
-            -33.9126
+            18.42112,
+            -33.914
           ],
           [
-            18.41932,
-            -33.912
-          ],
-          [
-            18.41856,
-            -33.91152
+            18.42136,
+            -33.9146
           ]
         ]
       }
@@ -5572,7 +5616,7 @@
       "id": "cape-town-1900:district-six-area",
       "properties": {
         "kind": "coverage",
-        "source": "municipal-shore-1900"
+        "source": "brink-cape-division-1901"
       },
       "geometry": {
         "type": "Polygon",
@@ -5643,7 +5687,7 @@
       "id": "cape-town-1900:district-six-frontages",
       "properties": {
         "kind": "zone",
-        "source": "municipal-shore-1900",
+        "source": "brink-cape-division-1901",
         "role": "street_row",
         "frontage_m": [
           6,
@@ -5724,6 +5768,114 @@
               18.42292,
               -33.92644
             ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cape-town-thom:woodstock-west-yard-access",
+      "properties": {
+        "kind": "road",
+        "source": "thom-1892-1900",
+        "width_m": 7,
+        "display_rank": 1,
+        "source_year": 1898,
+        "display_surface": "gravel",
+        "width_basis": "Estimated from the visible street corridor.",
+        "surface_basis": "Compacted surface reconstructed. Paving is unresolved.",
+        "alignment_basis": "Short clearance from the main street to the rail-side building plots visible on Thom. Ends before the railway land."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            18.43724,
+            -33.9273758
+          ],
+          [
+            18.43724,
+            -33.92706
+          ],
+          [
+            18.4372,
+            -33.92662
+          ],
+          [
+            18.43716,
+            -33.92628
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cape-town-thom:woodstock-east-yard-access",
+      "properties": {
+        "kind": "road",
+        "source": "thom-1892-1900",
+        "width_m": 7,
+        "display_rank": 1,
+        "source_year": 1898,
+        "display_surface": "gravel",
+        "width_basis": "Estimated from the visible street corridor.",
+        "surface_basis": "Compacted surface reconstructed. Paving is unresolved.",
+        "alignment_basis": "Short opening to the rail-side building plots on Thom. Ends at the yards."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            18.43948,
+            -33.9274711
+          ],
+          [
+            18.43946,
+            -33.9271
+          ],
+          [
+            18.43942,
+            -33.92674
+          ],
+          [
+            18.43942,
+            -33.9263
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cape-town-thom:slope-gardens-junction",
+      "properties": {
+        "kind": "road",
+        "source": "thom-1892-1900",
+        "width_m": 8,
+        "display_rank": 1,
+        "source_year": 1898,
+        "display_surface": "gravel",
+        "width_basis": "Estimated from the visible street corridor.",
+        "surface_basis": "Compacted surface reconstructed. Paving is unresolved.",
+        "alignment_basis": "Diagonal street approach from the city blocks to the surveyed garden-edge road."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            18.41548,
+            -33.93072
+          ],
+          [
+            18.41502,
+            -33.93102
+          ],
+          [
+            18.41454,
+            -33.93148
+          ],
+          [
+            18.41412,
+            -33.93202
           ]
         ]
       }

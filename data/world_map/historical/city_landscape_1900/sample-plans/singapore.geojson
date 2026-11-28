@@ -8,14 +8,14 @@
       1.29
     ],
     "key": "singapore-corridor",
-    "revision": 11,
+    "revision": 13,
     "status": "candidate_buildings",
     "road_validity": {
       "start": 1890,
       "end": 1901,
       "basis": "Guide map 1890 and Constable atlas 1893 reconstructed at opening date. Detailed core roads, partial mapped coverage, and an independently sourced open field."
     },
-    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence. Revised lower river and Tanjong Pagar harbour layout from the 1893 city atlas, with mapped work sheds and separate wet/dry coverage. Sourced open grounds and yard aprons precede placement; roof cover comes from the accepted footprints. Selected river approaches, crossings, mapped Chinatown street blocks and local coverage use the same 1893 reference frame as the mapped riverbanks. Keppel Harbour shoreline, wharf sheds and Keppel frontage trace Admiralty chart 2023.",
+    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence. Revised lower river and Tanjong Pagar harbour layout from the 1893 city atlas, with mapped work sheds and separate wet/dry coverage. Sourced open grounds and yard aprons precede placement; roof cover comes from the accepted footprints. Selected river approaches, crossings, mapped Chinatown street blocks and local coverage use the same 1893 reference frame as the mapped riverbanks. Keppel Harbour shoreline, wharf sheds and Keppel frontage trace Admiralty chart 2023. Kallang and Rochore rivers, crossing and basin are traced in the 1890 plan frame and corroborated by the 1891 census. The Kallang and lower town coastline traces terminate at separately mapped limits. The Keppel turn reaches only the segment readable in the 1890 source. The west-bank street ends follow the same guide-map shoreline, and ground approaches stop landward of the drawn coast.",
     "registration": {
       "method": "local affine to stable landmarks; modern map used solely for locating controls",
       "working_scan_px": [
@@ -181,10 +181,26 @@
         "licence": "CC BY-SA 4.0 for chart facsimile and derived tracings; credit UK Hydrographic Office, via Barry Lawrence Ruderman Antique Maps and Wikimedia Commons. Traced vector features adapted from chart.",
         "date": "1891 survey, 1893 publication",
         "precision": "Manually traced from 3840×2607 facsimile. Scale from the printed 10-cable (one sea mile) bar; anchored at Albert Dock observation stone. Approximate north-up with original survey reference at Singapore meridian; datum shift and orientation have no independent registration for this candidate."
+      },
+      {
+        "id": "singapore-census1891",
+        "url": "https://sabrizain.org/malaya/library/straitscensus.pdf",
+        "record": "Straits Settlements Government Printing Office, Report on the Census of the Straits Settlements taken on 5th April 1891, Map No. I, Singapore Town, PDF page 211.",
+        "licence": "Public-domain historical map, no reproduction bundled",
+        "date": "1891",
+        "precision": "Original photo-zincographic map corroborates the shore form, road crossing and Tanjong Rhu; guide map supplies candidate coordinates."
+      },
+      {
+        "id": "ura-kallang-history",
+        "url": "https://www.ura.gov.sg/-/media/Corporate/Resources/Publications/Books/kallangriverguide.pdf",
+        "record": "Urban Redevelopment Authority, Kallang River Guide, Kampong Bugis",
+        "licence": "Narrative reference, no source assets copied",
+        "date": "Gasworks existed by 1862",
+        "precision": "Qualitative industrial use and historic waterfront settlement. No individual structure boundary inferred from this source."
       }
     ],
     "water_validity": {
-      "start": 1893,
+      "start": 1890,
       "end": 1901
     },
     "shore_registration": {
@@ -256,7 +272,7 @@
     },
     "ground_material": 2,
     "ground_validity": {
-      "start": 1893,
+      "start": 1890,
       "end": 1901
     },
     "dock_registration": {
@@ -276,6 +292,11 @@
         }
       ],
       "limits": "Separate registration from the town atlas. The charted north harbour extends from Pasir Panjang to the eastern works. The link to the town atlas beyond the north sheet edge is an inferred shoreline around separately registered traces. The Borneo Wharf stone label lies near the position predicted by the printed coordinates; its exact marker centre could not be isolated. Modern datum and tie to the town atlas are approximate. Structure heights and road widths inferred. Tidal mud flats depict high-water coverage. The printed under-construction seawall is excluded."
+    },
+    "kallang_registration": {
+      "source": "aranjo1890",
+      "check_reference": "singapore-census1891",
+      "limits": "Reuses the published 1890 registration (118 m leave-one-out RMS, 174 m maximum). 1891 map cross-checks topology, not coordinate residuals. No measurement of tidal level, bridge deck construction, or individual building outline. 1890 guide map and 1891 Admiralty chart remain independently registered at Keppel."
     }
   },
   "features": [
@@ -816,8 +837,12 @@
             1.303781
           ],
           [
-            103.862682,
-            1.302692
+            103.8613088,
+            1.3034998
+          ],
+          [
+            103.8618238,
+            1.30315
           ]
         ]
       }
@@ -7776,6 +7801,1376 @@
               103.8455799,
               1.264275
             ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:kallang-road-west-approach",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 2,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "source_basis": "Mapped junction, approach and span were traced in a single reference frame."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.868195,
+            1.310915
+          ],
+          [
+            103.8684276,
+            1.310763
+          ],
+          [
+            103.8687616,
+            1.3109217
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:old-kallang-river-crossing",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 2,
+        "width_m": 9,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "bridge": true,
+        "bridge_reference": "singapore-census1891",
+        "source_basis": "The road crossing is marked across the Kallang River in the 1890 guide map and 1891 Census map No. I."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8687616,
+            1.3109217
+          ],
+          [
+            103.8694568,
+            1.3112432
+          ],
+          [
+            103.870152,
+            1.3115647
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:gaylang-road-east-approach",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 2,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "source_basis": "Road marked Gaylang in the 1890 guide map."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.870152,
+            1.3115647
+          ],
+          [
+            103.8718493,
+            1.3123623
+          ],
+          [
+            103.8739876,
+            1.3133082
+          ],
+          [
+            103.877872,
+            1.3149787
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:gasworks-approach",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 1,
+        "width_m": 5,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "source_basis": "Mapped gasworks approach from the Lavender and Kallang junction. Gasworks began operating in 1862."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.863968,
+            1.309353
+          ],
+          [
+            103.8638513,
+            1.3084229
+          ],
+          [
+            103.8639264,
+            1.3071473
+          ],
+          [
+            103.8638044,
+            1.3065386
+          ],
+          [
+            103.8630581,
+            1.3058606
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:rochore-west-bank-track",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "source_basis": "West bank branch and the mapped join below the Kallang Road junction."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8600692,
+            1.305481
+          ],
+          [
+            103.8619316,
+            1.3063308
+          ],
+          [
+            103.8630024,
+            1.3066297
+          ],
+          [
+            103.8639264,
+            1.3071473
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:sultan-west-of-rochore",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "source_basis": "Branch at the mapped bend in Jalan Sultan and the Rochore branch."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.86157,
+            1.303781
+          ],
+          [
+            103.8602047,
+            1.3046974
+          ],
+          [
+            103.8600692,
+            1.305481
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:sultan-towards-waterfront",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "source_basis": "Guide map trace only within the depicted street junctions."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8618238,
+            1.30315
+          ],
+          [
+            103.8614607,
+            1.3029601
+          ],
+          [
+            103.8607508,
+            1.3024218
+          ],
+          [
+            103.8603024,
+            1.302165
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:rochore-inner-waterfront-approach",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 1,
+        "width_m": 5,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "source_basis": "Short approach in the mapped triangular riverside street blocks."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.8613088,
+            1.3034998
+          ],
+          [
+            103.8624001,
+            1.304499
+          ],
+          [
+            103.8635753,
+            1.3059402
+          ],
+          [
+            103.8638044,
+            1.3065386
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:rochore-road-coastal-approach",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "source_basis": "Guide map approach turns before the historic waterfront line."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.856234,
+            1.299367
+          ],
+          [
+            103.8562852,
+            1.3001255
+          ],
+          [
+            103.8573615,
+            1.3005057
+          ],
+          [
+            103.8591334,
+            1.3016097
+          ],
+          [
+            103.8603024,
+            1.302165
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:rivers-and-kallang-basin",
+      "properties": {
+        "kind": "water_surface",
+        "source": "aranjo1890",
+        "basin": "coast",
+        "source_basis": "Traced Kallang and Rochore estuary shoreline from the 1890 map, cross-checked against 1891 Census map No. I. Cartographic cutoffs stop within the illustrated source window. The 1893 atlas remains authoritative at the lower town boundary."
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                103.87871275204907,
+                1.2999576947244518
+              ],
+              [
+                103.88135139296264,
+                1.3003370423627183
+              ],
+              [
+                103.8813121861122,
+                1.2997585
+              ],
+              [
+                103.87687143941888,
+                1.2997585
+              ],
+              [
+                103.87871275204907,
+                1.2999576947244518
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                103.85757715901053,
+                1.3001098196946572
+              ],
+              [
+                103.85894255050522,
+                1.301178071067676
+              ],
+              [
+                103.86057831979059,
+                1.302261125923658
+              ],
+              [
+                103.8622067436304,
+                1.303235789945581
+              ],
+              [
+                103.86359384745612,
+                1.3042269373992876
+              ],
+              [
+                103.86469437024442,
+                1.3053616758201005
+              ],
+              [
+                103.86561136456606,
+                1.3061731996934545
+              ],
+              [
+                103.8654050974215,
+                1.30690567367834
+              ],
+              [
+                103.8657731807017,
+                1.3065735162536636
+              ],
+              [
+                103.86610318640112,
+                1.3062757199045418
+              ],
+              [
+                103.86591533720008,
+                1.3050937639581577
+              ],
+              [
+                103.86640931940235,
+                1.305625655173763
+              ],
+              [
+                103.86677670034146,
+                1.3066743565648846
+              ],
+              [
+                103.86750163240112,
+                1.3078317244863649
+              ],
+              [
+                103.86856607597298,
+                1.3092290562891786
+              ],
+              [
+                103.86937969371797,
+                1.3101051109057742
+              ],
+              [
+                103.86952530660682,
+                1.3106638217793065
+              ],
+              [
+                103.86922619504537,
+                1.3110200027648231
+              ],
+              [
+                103.86913048792019,
+                1.3115951971947684
+              ],
+              [
+                103.86903294443357,
+                1.3121432939960804
+              ],
+              [
+                103.86957402402072,
+                1.3125751740241305
+              ],
+              [
+                103.86993643621378,
+                1.3119605887007637
+              ],
+              [
+                103.86969997727226,
+                1.3112538201734225
+              ],
+              [
+                103.86989171552852,
+                1.3105057036312961
+              ],
+              [
+                103.87012169336833,
+                1.3099243621358656
+              ],
+              [
+                103.86969284815899,
+                1.3091611645092265
+              ],
+              [
+                103.86876116294616,
+                1.3081328612913627
+              ],
+              [
+                103.86795305428535,
+                1.3073380986327912
+              ],
+              [
+                103.86733182280818,
+                1.3065184716353393
+              ],
+              [
+                103.86689930487609,
+                1.305701077841144
+              ],
+              [
+                103.86694791461645,
+                1.3052258920491735
+              ],
+              [
+                103.86800587708672,
+                1.30533511271194
+              ],
+              [
+                103.86945476918845,
+                1.306443029867765
+              ],
+              [
+                103.87089415547734,
+                1.3070131856977123
+              ],
+              [
+                103.87228277165866,
+                1.3076291561996174
+              ],
+              [
+                103.87315202058386,
+                1.3077361432890267
+              ],
+              [
+                103.8742332077407,
+                1.3073930858590372
+              ],
+              [
+                103.87565725512673,
+                1.3069419149663606
+              ],
+              [
+                103.87702534732682,
+                1.3068575393328865
+              ],
+              [
+                103.8778251385246,
+                1.306337092521794
+              ],
+              [
+                103.87869103873277,
+                1.306792157751591
+              ],
+              [
+                103.87949698702636,
+                1.3071575499577015
+              ],
+              [
+                103.88063142866378,
+                1.3076003213970224
+              ],
+              [
+                103.88186557415509,
+                1.307924365627691
+              ],
+              [
+                103.88183986509546,
+                1.3075450000081672
+              ],
+              [
+                103.88078006626381,
+                1.3074086818938262
+              ],
+              [
+                103.87941316241353,
+                1.3067156088197154
+              ],
+              [
+                103.87905831199839,
+                1.3054543170525221
+              ],
+              [
+                103.87933506321718,
+                1.3043706908583088
+              ],
+              [
+                103.87951913202198,
+                1.30311190818179
+              ],
+              [
+                103.87904686215069,
+                1.302502913787704
+              ],
+              [
+                103.87765090052375,
+                1.3017785515992806
+              ],
+              [
+                103.87627881159506,
+                1.301406458188669
+              ],
+              [
+                103.87457088387686,
+                1.3008485947636206
+              ],
+              [
+                103.87277643084047,
+                1.3010014161881178
+              ],
+              [
+                103.87155114315044,
+                1.3004105850059622
+              ],
+              [
+                103.87025553338896,
+                1.3003720432118366
+              ],
+              [
+                103.8682010727187,
+                1.2998680980226651
+              ],
+              [
+                103.8679661712517,
+                1.2997585
+              ],
+              [
+                103.8573403301319,
+                1.2997585
+              ],
+              [
+                103.85757715901053,
+                1.3001098196946572
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                103.86531307660147,
+                1.3069887130276554
+              ],
+              [
+                103.8647449240197,
+                1.3073001296555997
+              ],
+              [
+                103.86440422415762,
+                1.3078376136384062
+              ],
+              [
+                103.86399989965815,
+                1.308231229527954
+              ],
+              [
+                103.86448804877051,
+                1.3082795545788635
+              ],
+              [
+                103.86502297126174,
+                1.3078255967907113
+              ],
+              [
+                103.865087784249,
+                1.3071920162505588
+              ],
+              [
+                103.86531307660147,
+                1.3069887130276554
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:kallang-estuary-landsides",
+      "properties": {
+        "kind": "known_dry",
+        "source": "aranjo1890",
+        "source_basis": "Mapped land edge at ordinary high water. Nearby dry bands close the historic water mask locally. Inland land use and tidal marsh are unknown where the guide map has no detail."
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                103.87331229103046,
+                1.3131505977350013
+              ],
+              [
+                103.87333934340893,
+                1.3129312180176762
+              ],
+              [
+                103.87334471852324,
+                1.3125925497072206
+              ],
+              [
+                103.87331488738153,
+                1.3122473534346881
+              ],
+              [
+                103.87325866608506,
+                1.3119449565970087
+              ],
+              [
+                103.8733337121202,
+                1.3117552542072892
+              ],
+              [
+                103.8734324674665,
+                1.3114554590404277
+              ],
+              [
+                103.8734978431317,
+                1.3111402271103136
+              ],
+              [
+                103.87349798079919,
+                1.311138788396171
+              ],
+              [
+                103.87382714561869,
+                1.3111627983479164
+              ],
+              [
+                103.87415971832695,
+                1.3111528519173348
+              ],
+              [
+                103.8744820854975,
+                1.3111083025263692
+              ],
+              [
+                103.87479098233183,
+                1.3110296013506342
+              ],
+              [
+                103.87587161337677,
+                1.3106867208237116
+              ],
+              [
+                103.87696297885617,
+                1.3103409516552538
+              ],
+              [
+                103.87796714572386,
+                1.310279020814363
+              ],
+              [
+                103.87825563079389,
+                1.3102473719908245
+              ],
+              [
+                103.87853431702712,
+                1.310188724189608
+              ],
+              [
+                103.87857316912886,
+                1.310176313955624
+              ],
+              [
+                103.87870766662911,
+                1.3102372909133513
+              ],
+              [
+                103.87891370951195,
+                1.3103241655226154
+              ],
+              [
+                103.88004815114937,
+                1.3107669364027814
+              ],
+              [
+                103.88048380707693,
+                1.3109089549423243
+              ],
+              [
+                103.88171795256818,
+                1.3112329987452715
+              ],
+              [
+                103.88205512911799,
+                1.3113051691921027
+              ],
+              [
+                103.88209500175952,
+                1.3113098212311114
+              ],
+              [
+                103.88186557415509,
+                1.307924365627691
+              ],
+              [
+                103.88063142866378,
+                1.3076003213970224
+              ],
+              [
+                103.87949698702636,
+                1.3071575499577015
+              ],
+              [
+                103.87869103873277,
+                1.306792157751591
+              ],
+              [
+                103.8778251385246,
+                1.306337092521794
+              ],
+              [
+                103.87702534732682,
+                1.3068575393328865
+              ],
+              [
+                103.87565725512673,
+                1.3069419149663606
+              ],
+              [
+                103.8742332077407,
+                1.3073930858590372
+              ],
+              [
+                103.87315202058386,
+                1.3077361432890267
+              ],
+              [
+                103.87228277165866,
+                1.3076291561996174
+              ],
+              [
+                103.87089415547734,
+                1.3070131856977123
+              ],
+              [
+                103.86945476918845,
+                1.306443029867765
+              ],
+              [
+                103.86800587708672,
+                1.30533511271194
+              ],
+              [
+                103.86694791461645,
+                1.3052258920491735
+              ],
+              [
+                103.86689930487609,
+                1.305701077841144
+              ],
+              [
+                103.86733182280818,
+                1.3065184716353393
+              ],
+              [
+                103.86795305428535,
+                1.3073380986327912
+              ],
+              [
+                103.86876116294616,
+                1.3081328612913627
+              ],
+              [
+                103.86969284815899,
+                1.3091611645092265
+              ],
+              [
+                103.87012169336833,
+                1.3099243621358656
+              ],
+              [
+                103.86989171552852,
+                1.3105057036312961
+              ],
+              [
+                103.86969997727226,
+                1.3112538201734225
+              ],
+              [
+                103.86993643621378,
+                1.3119605887007637
+              ],
+              [
+                103.86957402402072,
+                1.3125751740241305
+              ],
+              [
+                103.87331229103046,
+                1.3131505977350013
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                103.8682010727187,
+                1.2998680980226651
+              ],
+              [
+                103.87025553338896,
+                1.3003720432118366
+              ],
+              [
+                103.87155114315044,
+                1.3004105850059622
+              ],
+              [
+                103.87277643084047,
+                1.3010014161881178
+              ],
+              [
+                103.87457088387686,
+                1.3008485947636206
+              ],
+              [
+                103.87627881159506,
+                1.301406458188669
+              ],
+              [
+                103.87765090052375,
+                1.3017785515992806
+              ],
+              [
+                103.87904686215069,
+                1.302502913787704
+              ],
+              [
+                103.87951913202198,
+                1.30311190818179
+              ],
+              [
+                103.87933506321718,
+                1.3043706908583088
+              ],
+              [
+                103.87905831199839,
+                1.3054543170525221
+              ],
+              [
+                103.87941316241353,
+                1.3067156088197154
+              ],
+              [
+                103.88078006626381,
+                1.3074086818938262
+              ],
+              [
+                103.88183986509546,
+                1.3075450000081672
+              ],
+              [
+                103.88135139296264,
+                1.3003370423627183
+              ],
+              [
+                103.87871275204907,
+                1.2999576947244518
+              ],
+              [
+                103.87687143941888,
+                1.2997585
+              ],
+              [
+                103.8679661712517,
+                1.2997585
+              ],
+              [
+                103.8682010727187,
+                1.2998680980226651
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                103.86903294443357,
+                1.3121432939960804
+              ],
+              [
+                103.86913048792019,
+                1.3115951971947684
+              ],
+              [
+                103.86922619504537,
+                1.3110200027648231
+              ],
+              [
+                103.86952530660682,
+                1.3106638217793065
+              ],
+              [
+                103.86937969371797,
+                1.3101051109057742
+              ],
+              [
+                103.86856607597298,
+                1.3092290562891786
+              ],
+              [
+                103.86750163240112,
+                1.3078317244863649
+              ],
+              [
+                103.86677670034146,
+                1.3066743565648846
+              ],
+              [
+                103.86640931940235,
+                1.305625655173763
+              ],
+              [
+                103.86591533720008,
+                1.3050937639581577
+              ],
+              [
+                103.86610318640112,
+                1.3062757199045418
+              ],
+              [
+                103.8657731807017,
+                1.3065735162536636
+              ],
+              [
+                103.8654050974215,
+                1.30690567367834
+              ],
+              [
+                103.86561136456606,
+                1.3061731996934545
+              ],
+              [
+                103.86469437024442,
+                1.3053616758201005
+              ],
+              [
+                103.86359384745612,
+                1.3042269373992876
+              ],
+              [
+                103.8622067436304,
+                1.303235789945581
+              ],
+              [
+                103.86057831979059,
+                1.302261125923658
+              ],
+              [
+                103.85894255050522,
+                1.301178071067676
+              ],
+              [
+                103.85757715901053,
+                1.3001098196946572
+              ],
+              [
+                103.8573403301319,
+                1.2997585
+              ],
+              [
+                103.8558562910869,
+                1.2997585
+              ],
+              [
+                103.85606096164008,
+                1.3027786497754743
+              ],
+              [
+                103.8572460780913,
+                1.3037058570829132
+              ],
+              [
+                103.8575410491124,
+                1.303918457147647
+              ],
+              [
+                103.85917681839777,
+                1.3050015108253017
+              ],
+              [
+                103.8593503910248,
+                1.3051108533252036
+              ],
+              [
+                103.86082165123202,
+                1.3059914488795876
+              ],
+              [
+                103.86094522830098,
+                1.3060797501175967
+              ],
+              [
+                103.86084567247315,
+                1.3062653780434823
+              ],
+              [
+                103.86073272110559,
+                1.3065531787567133
+              ],
+              [
+                103.86065191066899,
+                1.3068574872968608
+              ],
+              [
+                103.86060403613766,
+                1.3071753100174133
+              ],
+              [
+                103.86058956847813,
+                1.3075035203268162
+              ],
+              [
+                103.86060865001627,
+                1.30783888944646
+              ],
+              [
+                103.86066109303721,
+                1.3081781181740844
+              ],
+              [
+                103.8607463816316,
+                1.308517869339725
+              ],
+              [
+                103.86086367677132,
+                1.308854800635312
+              ],
+              [
+                103.86101182456315,
+                1.3091855974945874
+              ],
+              [
+                103.8611893676005,
+                1.3095070057002594
+              ],
+              [
+                103.86139455930027,
+                1.3098158633971626
+              ],
+              [
+                103.86162538108528,
+                1.310109132197059
+              ],
+              [
+                103.86187956224182,
+                1.3103839270684796
+              ],
+              [
+                103.86215460225787,
+                1.310637544718183
+              ],
+              [
+                103.86244779542216,
+                1.3108674901845025
+              ],
+              [
+                103.86275625744133,
+                1.3110715013813534
+              ],
+              [
+                103.86307695381436,
+                1.3112475713512877
+              ],
+              [
+                103.8634067296847,
+                1.3113939680086837
+              ],
+              [
+                103.86374234087589,
+                1.311509251178975
+              ],
+              [
+                103.86408048580648,
+                1.311592286766118
+              ],
+              [
+                103.86441783796931,
+                1.3116422579092097
+              ],
+              [
+                103.86490598708161,
+                1.3116905828943315
+              ],
+              [
+                103.86524442568401,
+                1.3117069868186764
+              ],
+              [
+                103.86557518738266,
+                1.3116886037881887
+              ],
+              [
+                103.86563896263357,
+                1.3116780353265198
+              ],
+              [
+                103.86565344345752,
+                1.311848768408417
+              ],
+              [
+                103.86567659945456,
+                1.3119752513786902
+              ],
+              [
+                103.86957402402072,
+                1.3125751740241305
+              ],
+              [
+                103.86903294443357,
+                1.3121432939960804
+              ]
+            ],
+            [
+              [
+                103.86531307660147,
+                1.3069887130276554
+              ],
+              [
+                103.865087784249,
+                1.3071920162505588
+              ],
+              [
+                103.86502297126174,
+                1.3078255967907113
+              ],
+              [
+                103.86448804877051,
+                1.3082795545788635
+              ],
+              [
+                103.86399989965815,
+                1.308231229527954
+              ],
+              [
+                103.86440422415762,
+                1.3078376136384062
+              ],
+              [
+                103.8647449240197,
+                1.3073001296555997
+              ],
+              [
+                103.86531307660147,
+                1.3069887130276554
+              ]
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:gasworks-approach-yard",
+      "properties": {
+        "kind": "work_ground",
+        "source": "aranjo1890",
+        "use_basis": "Map labels Gas Works at the junction. Yard outline and finish are inferred near the street access. No building footprint or fence is claimed.",
+        "use_reference": "ura-kallang-history"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.86485175698681,
+              1.3092740598066475
+            ],
+            [
+              103.86538883984531,
+              1.3092494725392627
+            ],
+            [
+              103.8655570294091,
+              1.3085513603267023
+            ],
+            [
+              103.86486731222197,
+              1.308311119053816
+            ],
+            [
+              103.86430117158687,
+              1.3083044186487123
+            ],
+            [
+              103.86421280990726,
+              1.3089880038272592
+            ],
+            [
+              103.86485175698681,
+              1.3092740598066475
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:mapped-estuary-road-window",
+      "properties": {
+        "kind": "coverage",
+        "source": "aranjo1890",
+        "purpose": "Source coverage for the shown traces only; the visible guide-map street skeleton is selective."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8581276357516,
+              1.3054502799017782
+            ],
+            [
+              103.86123217310836,
+              1.3075370495087575
+            ],
+            [
+              103.8642223157201,
+              1.3095257642412423
+            ],
+            [
+              103.86622568227688,
+              1.3096732495762906
+            ],
+            [
+              103.86749428695549,
+              1.3077233343111996
+            ],
+            [
+              103.86624717926088,
+              1.3048230650095531
+            ],
+            [
+              103.86393789603517,
+              1.3033413741296866
+            ],
+            [
+              103.86094073198365,
+              1.3016465380759108
+            ],
+            [
+              103.85887492913918,
+              1.3005777333136255
+            ],
+            [
+              103.85773076535662,
+              1.3015814714024527
+            ],
+            [
+              103.8581276357516,
+              1.3054502799017782
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1890:upper-keppel-turn",
+      "properties": {
+        "kind": "road",
+        "source": "aranjo1890",
+        "source_year": 1890,
+        "display_rank": 2,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
+        "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
+        "source_basis": "Mapped Keppel Road turn at the south end of Tanjong Pagar Road. The parallel Admiralty survey trace is independently registered. The overlapping southwest continuation is intentionally omitted."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.842726,
+            1.271759
+          ],
+          [
+            103.8427146,
+            1.2711946
+          ],
+          [
+            103.8416695,
+            1.2712751
+          ],
+          [
+            103.8403176,
+            1.2712011
+          ],
+          [
+            103.8385828,
+            1.2710413
+          ],
+          [
+            103.8369112,
+            1.2706231
           ]
         ]
       }
