@@ -3,6 +3,7 @@ use crate::{city_plan::{Plan, PlanSource, Plans}, overlay::Mesh};
 use serde::Deserialize;
 use std::{
     collections::{BTreeMap, HashMap, HashSet},
+    f64::consts::FRAC_PI_2,
     fs::File,
     io::{self, Read},
     ops::Range,
@@ -18,6 +19,7 @@ pub(crate) const MODULES: usize = city_kit::ROLES.len();
 const MAX_PENDING: usize = 6;
 const RECORD: usize = 18;
 const MAX_BUILDINGS: usize = 12000;
+const TILE_APRON_METRES: f64 = 250.;
 const PARIS_FRINGE: &[u8] = include_bytes!("paris-fringe.bin");
 const METRES_PER_DEGREE:f64=camera::EARTH*std::f64::consts::PI/180.;
 const BLOCK_METRES:f64=96.;
@@ -52,8 +54,8 @@ struct Tile {
 }
 
 impl Tile {
-    fn distance_to_view(&self, camera: &Camera, [width, height]: [u32; 2]) -> Option<f64> {
-        distance_to_view(self.bounds,camera,[width,height],250.)
+    fn distance_to_view(&self, camera: &Camera, size: [u32; 2]) -> Option<f64> {
+        distance_to_view(self.bounds, camera, size, TILE_APRON_METRES)
     }
 
     fn anchor(&self)->[f64;2] {
@@ -101,16 +103,112 @@ fn paris_fringe() -> io::Result<Vec<Tile>> {
     Ok(tiles)
 }
 
+fn view_margin_metres(bounds: [f64; 4], apron: f64) -> f64 {
+    let [west, south, east, north] = bounds;
+    let longitude = (east - west) * ((south + north) * 0.5).to_radians().cos();
+    let latitude = north - south;
+    longitude.hypot(latitude) * 56_000. + apron
+}
+
 pub(crate) fn distance_to_view(bounds:[f64;4],camera:&Camera,[width,height]:[u32;2],apron:f64)->Option<f64> {
     let [west, south, east, north] = bounds;
     let center = [(west + east) * 0.5, (south + north) * 0.5];
     let [x, y] = camera.project(center, [width,height])?;
-    let longitude = (east-west)*center[1].to_radians().cos();
-    let latitude = north-south;
-    let margin = (longitude.hypot(latitude)*56_000. + apron)/camera.mpp;
+    let margin = view_margin_metres(bounds, apron) / camera.mpp;
     let [w,h] = [f64::from(width),f64::from(height)];
     (x >= -margin && x <= w+margin && y >= -margin && y <= h+margin)
         .then_some((x-w*0.5).hypot(y-h*0.5))
+}
+
+type TileCells = HashMap<(i32, i32), Vec<usize>>;
+
+struct TileIndex {
+    cells_by_margin: BTreeMap<u32, TileCells>,
+}
+
+fn wrap_longitude_cell(cell: i32) -> i32 {
+    (cell + 180).rem_euclid(360) - 180
+}
+
+impl TileIndex {
+    fn new(tiles: &[Tile]) -> Self {
+        let mut cells_by_margin = BTreeMap::<u32, TileCells>::new();
+        for (index, tile) in tiles.iter().enumerate() {
+            let [longitude, latitude] = tile.anchor().map(|degrees| degrees.floor() as i32);
+            let cell = (wrap_longitude_cell(longitude), latitude);
+            // Keep wide pages from inflating the search for ordinary one-kilometre pages.
+            let margin = (view_margin_metres(tile.bounds, TILE_APRON_METRES).ceil() as u32)
+                .next_power_of_two();
+            cells_by_margin
+                .entry(margin)
+                .or_default()
+                .entry(cell)
+                .or_default()
+                .push(index);
+        }
+        Self { cells_by_margin }
+    }
+
+    fn visible(&self, tiles: &[Tile], camera: &Camera, size: [u32; 2]) -> Vec<usize> {
+        let (axes, center) = camera.projection(size);
+        let [x, y, z] = axes[2];
+        let lon = x.atan2(z).to_degrees();
+        let lat = y.atan2(x.hypot(z)).to_degrees();
+        let [width, height] = size.map(f64::from);
+        let horizontal = center[0].abs().max((width - center[0]).abs());
+        let vertical = center[1].abs().max((height - center[1]).abs());
+        let pitch_scale = 1. / camera.pitch().cos();
+        let local = camera.blend() == 1.;
+        let mut visible = Vec::new();
+
+        for (&margin, cells) in &self.cells_by_margin {
+            // The farthest corner of the padded viewport bounds the projected anchor radius.
+            let pad = f64::from(margin) / camera.mpp;
+            let radius = (horizontal + pad).hypot((vertical + pad) * pitch_scale)
+                * camera.mpp / camera::EARTH;
+            let angle = if local { radius.min(FRAC_PI_2) } else { radius.min(1.).asin() };
+            let angle = angle + 1e-10;
+            let degrees = angle.to_degrees();
+            let half_longitude = if lat.abs() + degrees >= 90. {
+                180.
+            } else {
+                (angle.sin() / lat.to_radians().cos()).clamp(0., 1.).asin().to_degrees()
+            };
+            let west = (lon - half_longitude).floor() as i32;
+            let east = (lon + half_longitude).floor() as i32;
+            let south = (lat - degrees).max(-90.).floor() as i32;
+            let north = (lat + degrees).min(90.).floor() as i32;
+            let longitude_count = (east - west + 1).min(360);
+            let mut include = |indices: &[usize]| {
+                visible.extend(indices.iter().filter_map(|&index| {
+                    tiles[index].distance_to_view(camera, size).map(|distance| (index, distance))
+                }));
+            };
+            if ((north - south + 1) * longitude_count) as usize <= cells.len() {
+                for x in west..west + longitude_count {
+                    let longitude = wrap_longitude_cell(x);
+                    for latitude in south..=north {
+                        if let Some(indices) = cells.get(&(longitude, latitude)) {
+                            include(indices);
+                        }
+                    }
+                }
+            } else {
+                // A sparse band with a wide apron can span many empty cells.
+                for (&(longitude, latitude), indices) in cells {
+                    if (south..=north).contains(&latitude)
+                        && (longitude - west).rem_euclid(360) < longitude_count
+                    {
+                        include(indices);
+                    }
+                }
+            }
+        }
+
+        visible.sort_unstable_by(|a, b| a.1.total_cmp(&b.1).then_with(|| a.0.cmp(&b.0)));
+        visible.truncate(MAX_RESIDENT);
+        visible.into_iter().map(|(index, _)| index).collect()
+    }
 }
 
 struct Building {
@@ -297,6 +395,7 @@ impl Building {
 pub(crate) struct Catalogue {
     root: PathBuf,
     tiles: Vec<Tile>,
+    index: TileIndex,
     pub(crate) sources: Vec<String>,
     cache: HashMap<usize, CityPage>,
     pending: HashSet<usize>,
@@ -309,7 +408,7 @@ impl Catalogue {
     pub(crate) fn open(root: PathBuf) -> io::Result<Self> {
         let path = root.join("catalogue.json");
         let file = File::open(&path).map_err(|e| io::Error::other(format!("{} · {e}",path.display())))?;
-        let catalog: Header = serde_json::from_reader(file.take(4*1024*1024))?;
+        let catalog: Header = serde_json::from_reader(io::BufReader::new(file))?;
         if !matches!(catalog.version.as_str(), "wwo-city-models-v1" | "wwo-city-models-v2") || catalog.cities.is_empty() {
             return Err(io::Error::other("Unsupported city model catalogue"));
         }
@@ -340,7 +439,8 @@ impl Catalogue {
         if tiles.is_empty() {return Err(io::Error::other("City model catalogue has no tiles"));}
         tiles.extend(paris_fringe()?);
         sources.push("Paris fringe · Institut Paris Region, c. 1900 land use and roads. Reconstructed building placements.".into());
-        Ok(Self { root, tiles, sources, cache:HashMap::new(),pending:HashSet::new(),failed:HashSet::new(),
+        let index = TileIndex::new(&tiles);
+        Ok(Self { root, tiles, index, sources, cache:HashMap::new(),pending:HashSet::new(),failed:HashSet::new(),
             plans:Plans::new(plans)?,revision:0 })
     }
 
@@ -348,10 +448,7 @@ impl Catalogue {
         let mut candidate=Self::open(root)?;
         candidate.revision=previous.map_or(1,|current|current.revision+1);
         if camera.mpp<=MAX_MPP {
-            let mut visible:Vec<_>=candidate.tiles.iter().enumerate().filter_map(|(index,tile)|
-                tile.distance_to_view(camera,size).map(|distance|(index,distance))).collect();
-            visible.sort_by(|a,b|a.1.total_cmp(&b.1));
-            for (index,_) in visible.into_iter().take(MAX_RESIDENT) {
+            for index in candidate.index.visible(&candidate.tiles, camera, size) {
                 let tile=&candidate.tiles[index];
                 let buildings=tile.load(&candidate.root).map_err(|error|io::Error::other(format!("{} · {error}",tile.file)))?;
                 candidate.cache.insert(index,buildings);
@@ -401,19 +498,16 @@ impl Catalogue {
         if camera.mpp > MAX_MPP || !("1891-01-01".."1915-01-01").contains(&date) {
             return Vec::new();
         }
-        let mut visible: Vec<_> = self.tiles.iter().enumerate()
-            .filter_map(|(index,tile)|tile.distance_to_view(camera,size).map(|distance|(index,distance))).collect();
-        visible.sort_by(|a,b|a.1.total_cmp(&b.1));
-        visible.truncate(MAX_RESIDENT);
-        let wanted: HashSet<_> = visible.iter().map(|&(index,_)|index).collect();
+        let visible = self.index.visible(&self.tiles, camera, size);
         if self.cache.len() > MAX_RESIDENT {
+            let wanted: HashSet<_> = visible.iter().copied().collect();
             self.cache.retain(|index,_|wanted.contains(index));
         }
         let mut models = Vec::new();
         let middle=camera::smooth(8.,COVERAGE_MPP,camera.mpp) as f32;
         let fallback=(1.-camera::smooth(115.,MAX_MPP,camera.mpp)) as f32;
         let details=(1.-camera::smooth(1.7,3.1,camera.mpp)) as f32;
-        for (index,_) in visible {
+        for index in visible {
             let tile=&self.tiles[index];
             let anchor=tile.anchor();
             // Keep the mesh while the matching footprint or block page streams in.
