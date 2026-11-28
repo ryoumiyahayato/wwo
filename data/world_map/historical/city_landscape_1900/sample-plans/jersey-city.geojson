@@ -4,13 +4,13 @@
     "city_id": "us_city_new_jersey_jersey_city",
     "name": "Jersey City",
     "key": "jersey-city-harrison-hudson",
-    "revision": 5,
+    "revision": 6,
     "status": "candidate_sample",
     "origin": [
       -74.048,
       40.722
     ],
-    "method": "Harrison street and land traces connect Paulus Hook and Hamilton Park through Van Vorst to Bergen. The 1894 mapped Pavonia approach reaches the Erie passenger house and ferry landing, confirmed as existing by the 1895 railroad plan. The adjacent mapped track arms and Hudson water edge constrain the transition from the terminal to the surrounding street grid. The National Register describes the red-brick Eighth Street rows between Erie and Grove; individual lot shapes are interpreted. Six surviving junctions check the east transform locally near Bergen. Three Belmont and Bentley rows use dated inventory entries and surviving parcel frontages. Roofs, heights and paving are interpreted. The wider West Bergen fringe remains provisional.",
+    "method": "Harrison street and land traces connect Paulus Hook and Hamilton Park through Van Vorst to Bergen. The 1895 Erie plan corroborates the Pavonia passenger house and ferry approach. Dated inventory entries and surviving parcel frontages anchor three Belmont and Bentley rows. A locally registered 1900 USGS quadrangle supplies the West Bergen street extent, tidal meadow, Hackensack river banks, Communipaw Avenue and Newark & New York Railroad formation to the port. Hudson County records identify the Newark Plank Road bridge and distinguish it from the adjacent canal and southern railway bridge. NJ Transit records identify the 1869 cut through Bergen Hill. Roofs, widths, paving and ground finishes are interpreted. The plan represents the cut as a placement exclusion and the railway as land formations. Track structure, the railway bridge and historical height profiles require separate geometry.",
     "registration": {
       "model": "Affine pixel to WGS84 fitted in the east crop",
       "matrix": [
@@ -304,6 +304,90 @@
         "alternative_local_affine_leave_one_out_rms_m": 18.3,
         "alternative_local_affine_leave_one_out_max_m": 30.0,
         "limits": "Selected named junctions only. No independent parcel, shoreline, track or West Bergen occupation check."
+      },
+      "west_bergen_usgs_controls": {
+        "reference": "Five NJ Office of GIS junctions already used in the Bergen controls, with street centers independently read from the USGS map.",
+        "image": "Princeton scan, IIIF region 2900,320,2660,1810 rendered 2000 pixels wide.",
+        "model": "Local metric similarity with scan y down. The matrix maps derivative crop pixels to CRS84 degrees.",
+        "matrix": [
+          [
+            6.0212626479810024e-05,
+            -3.451913236149611e-07
+          ],
+          [
+            -4.554883623071533e-07,
+            -4.5632068682542624e-05
+          ],
+          [
+            -74.13364817572203,
+            40.749072689202926
+          ]
+        ],
+        "controls": [
+          {
+            "name": "West Side Avenue and Montgomery Street",
+            "crop_pixel": [
+              969,
+              444
+            ],
+            "wgs84_approx": [
+              -74.07545633030936,
+              40.728364249777414
+            ],
+            "leave_one_out_m": 19.1
+          },
+          {
+            "name": "West Side Avenue and Duncan Avenue",
+            "crop_pixel": [
+              950,
+              482
+            ],
+            "wgs84_approx": [
+              -74.07660868951089,
+              40.726678213781035
+            ],
+            "leave_one_out_m": 12.8
+          },
+          {
+            "name": "West Side Avenue and Communipaw Avenue",
+            "crop_pixel": [
+              876,
+              612
+            ],
+            "wgs84_approx": [
+              -74.08133718589518,
+              40.72090035085041
+            ],
+            "leave_one_out_m": 37.2
+          },
+          {
+            "name": "Bergen Avenue and Montgomery Street",
+            "crop_pixel": [
+              1093,
+              514
+            ],
+            "wgs84_approx": [
+              -74.06807670017946,
+              40.725316398201194
+            ],
+            "leave_one_out_m": 12.5
+          },
+          {
+            "name": "Summit Avenue and Montgomery Street",
+            "crop_pixel": [
+              1140,
+              539
+            ],
+            "wgs84_approx": [
+              -74.06519305712148,
+              40.72413592147299
+            ],
+            "leave_one_out_m": 15.0
+          }
+        ],
+        "leave_one_out_rms_m": 21.4,
+        "leave_one_out_max_m": 37.2,
+        "limits": "Residuals describe the street-junction cluster. River and terminal traces extend outside that cluster. The sheet supports district-scale land boundaries and alignments. Widths and fine geometry are approximate."
       }
     },
     "road_validity": {
@@ -368,6 +452,27 @@
         "date": "Hamilton Park Historic District National Register nomination, 1977; listed 1979",
         "licence": "Documentation reference; no pages or photographs copied.",
         "precision": "Section 7 records both sides of Eighth Street between Grove and Erie as continuous red-brick rows from the decades after the Civil War. Individual lot limits and heights are interpreted."
+      },
+      {
+        "id": "usgs-staten-island-1900",
+        "url": "https://catalog.princeton.edu/catalog/6865938",
+        "licence": "Public domain, U.S. Geological Survey map. Princeton University Library scan.",
+        "date": "1900",
+        "precision": "Staten Island quadrangle, 1:62,500, 20-foot contours. Local trace of Hackensack, West Bergen and Communipaw."
+      },
+      {
+        "id": "hudson-county-hackensack-crossings",
+        "url": "https://www.hcnj.us/wp-content/uploads/2022/11/wittpenn.pdf",
+        "licence": "Cited for historical facts. Report images and text are excluded from the plan.",
+        "date": "1852 bridge described in 1865. Contextual report prepared for the Wittpenn Bridge project.",
+        "precision": "Chapter 2 documents the timber pivot drawbridge and distinguishes the Plank Road, Morris Canal and southern railway crossings."
+      },
+      {
+        "id": "njtransit-bergen-hill-cut",
+        "url": "https://njtransitresilienceprogram.com/wp-content/uploads/2019/05/15-AppendixCHistoricResources-Part8of13.pdf",
+        "licence": "Cited for historical facts. Report images and text are excluded from the plan.",
+        "date": "1869 railroad cut. Later NJ TRANSIT historic-resources inventory.",
+        "precision": "Inventory for Bergen Avenue and other overbridges identifies the Newark & New York Railroad cut through Bergen Hill and its Communipaw connection."
       }
     ]
   },
@@ -11366,6 +11471,10 @@
           [
             -74.0696447,
             40.714877
+          ],
+          [
+            -74.06949615,
+            40.71507215
           ]
         ]
       },
@@ -11378,7 +11487,8 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport."
+        "use_basis": "Axis traced from Harrison. Road width, hierarchy and setts are interpreted displays. No change to transport. The short tie at the west end reaches the mapped Communipaw junction.",
+        "use_reference": "usgs-staten-island-1900"
       }
     },
     {
@@ -12436,20 +12546,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            -74.0904617,
-            40.7328812
-          ],
-          [
-            -74.0876522,
-            40.7316664
-          ],
-          [
-            -74.0845955,
-            40.7303328
-          ],
-          [
-            -74.0823774,
-            40.7293336
+            -74.08146654,
+            40.72890223
           ],
           [
             -74.0800053,
@@ -12474,8 +12572,9 @@
         "source_year": 1894,
         "width_basis": "Interpreted width from the mapped street hierarchy.",
         "surface_basis": "Setts are inferred. A street-level pavement inventory is unavailable.",
-        "use_basis": "Harrison axis west of West Side Avenue. The previous gap at the West Side Avenue junction was joined.",
-        "name": "Duncan Avenue"
+        "use_basis": "The Harrison axis joins West Side Avenue. Its continuation across the USGS salt meadow has been removed. The retained end follows mapped dry ground.",
+        "name": "Duncan Avenue",
+        "use_reference": "usgs-staten-island-1900"
       }
     },
     {
@@ -19731,6 +19830,1736 @@
         "gap_m": 0.18,
         "form_reference": "hamilton-park-national-register",
         "use_basis": "Continuous documented red-brick rows facing Eighth Street between Erie and Grove. Individual lot divisions, heights and roof forms are interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-bergen-hackensack-open-channel",
+      "properties": {
+        "kind": "water_surface",
+        "source": "usgs-staten-island-1900",
+        "basin": "river",
+        "use_basis": "The charted east river bank defines the open channel beside the marsh. The trace follows the west bank where visible and closes within continuing water toward Newark Bay."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.08408663,
+              40.73737989
+            ],
+            [
+              -74.08577623,
+              40.7370245
+            ],
+            [
+              -74.0874681,
+              40.73644095
+            ],
+            [
+              -74.08910068,
+              40.73576579
+            ],
+            [
+              -74.09061419,
+              40.73495304
+            ],
+            [
+              -74.09200819,
+              40.73404834
+            ],
+            [
+              -74.0931618,
+              40.73309662
+            ],
+            [
+              -74.09395367,
+              40.73218847
+            ],
+            [
+              -74.09486642,
+              40.73123537
+            ],
+            [
+              -74.09541699,
+              40.73037147
+            ],
+            [
+              -74.09590963,
+              40.72927906
+            ],
+            [
+              -74.09634159,
+              40.72823194
+            ],
+            [
+              -74.09653362,
+              40.72709217
+            ],
+            [
+              -74.09672518,
+              40.72599804
+            ],
+            [
+              -74.09673384,
+              40.72513103
+            ],
+            [
+              -74.09644325,
+              40.72407977
+            ],
+            [
+              -74.09681592,
+              40.72294104
+            ],
+            [
+              -74.09664393,
+              40.72207299
+            ],
+            [
+              -74.09586937,
+              40.72124713
+            ],
+            [
+              -74.09605911,
+              40.72033552
+            ],
+            [
+              -74.09570831,
+              40.71928391
+            ],
+            [
+              -74.09596055,
+              40.71814449
+            ],
+            [
+              -74.09614848,
+              40.71741541
+            ],
+            [
+              -74.0971178,
+              40.71682772
+            ],
+            [
+              -74.09694308,
+              40.71623347
+            ],
+            [
+              -74.09743253,
+              40.71546048
+            ],
+            [
+              -74.09731939,
+              40.71472968
+            ],
+            [
+              -74.09811172,
+              40.71377589
+            ],
+            [
+              -74.09914262,
+              40.71305165
+            ],
+            [
+              -74.10041255,
+              40.71251131
+            ],
+            [
+              -74.10138051,
+              40.71206052
+            ],
+            [
+              -74.10204877,
+              40.7114711
+            ],
+            [
+              -74.10169706,
+              40.71051075
+            ],
+            [
+              -74.1021231,
+              40.71005685
+            ],
+            [
+              -74.10393495,
+              40.70951962
+            ],
+            [
+              -74.10364482,
+              40.70842272
+            ],
+            [
+              -74.10293183,
+              40.70746031
+            ],
+            [
+              -74.10185985,
+              40.70626766
+            ],
+            [
+              -74.10078376,
+              40.7054857
+            ],
+            [
+              -74.10025096,
+              40.70456995
+            ],
+            [
+              -74.10777754,
+              40.7046131
+            ],
+            [
+              -74.11022439,
+              40.70681759
+            ],
+            [
+              -74.11291301,
+              40.7089322
+            ],
+            [
+              -74.11451597,
+              40.71122313
+            ],
+            [
+              -74.11491651,
+              40.71332462
+            ],
+            [
+              -74.11531522,
+              40.71560864
+            ],
+            [
+              -74.11482305,
+              40.71665541
+            ],
+            [
+              -74.11361515,
+              40.71701357
+            ],
+            [
+              -74.11216413,
+              40.7175985
+            ],
+            [
+              -74.11059222,
+              40.71822837
+            ],
+            [
+              -74.10914028,
+              40.71890457
+            ],
+            [
+              -74.10775175,
+              40.71926169
+            ],
+            [
+              -74.10606306,
+              40.71952581
+            ],
+            [
+              -74.10461295,
+              40.72001948
+            ],
+            [
+              -74.10298083,
+              40.72064901
+            ],
+            [
+              -74.10176656,
+              40.72164601
+            ],
+            [
+              -74.10127393,
+              40.72273842
+            ],
+            [
+              -74.1008999,
+              40.72401405
+            ],
+            [
+              -74.10106642,
+              40.72542968
+            ],
+            [
+              -74.10099208,
+              40.72684393
+            ],
+            [
+              -74.10091957,
+              40.72807565
+            ],
+            [
+              -74.10054372,
+              40.7295338
+            ],
+            [
+              -74.09986999,
+              40.73067081
+            ],
+            [
+              -74.09889338,
+              40.73198861
+            ],
+            [
+              -74.09791586,
+              40.73339768
+            ],
+            [
+              -74.09633803,
+              40.73462077
+            ],
+            [
+              -74.09463659,
+              40.7361626
+            ],
+            [
+              -74.09191427,
+              40.73742476
+            ],
+            [
+              -74.08408663,
+              40.73737989
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-bergen-hackensack-tidal-meadow",
+      "properties": {
+        "kind": "open_ground",
+        "source": "usgs-staten-island-1900",
+        "use_basis": "Dated salt-meadow hatching east of the Hackensack. The vegetated open-ground display represents the marsh and excludes inferred building lots. Fine channels and flood level are unresolved."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.07662027,
+              40.73733709
+            ],
+            [
+              -74.07657326,
+              40.73601341
+            ],
+            [
+              -74.07640447,
+              40.73482594
+            ],
+            [
+              -74.077434,
+              40.73423859
+            ],
+            [
+              -74.078105,
+              40.73337538
+            ],
+            [
+              -74.07901456,
+              40.73274171
+            ],
+            [
+              -74.07986209,
+              40.73229022
+            ],
+            [
+              -74.07926953,
+              40.7313285
+            ],
+            [
+              -74.07951813,
+              40.73055413
+            ],
+            [
+              -74.08036839,
+              40.72982885
+            ],
+            [
+              -74.08139702,
+              40.72933277
+            ],
+            [
+              -74.08272898,
+              40.72861025
+            ],
+            [
+              -74.08297666,
+              40.72792715
+            ],
+            [
+              -74.08358745,
+              40.72706359
+            ],
+            [
+              -74.08408053,
+              40.72592555
+            ],
+            [
+              -74.08403216,
+              40.72473877
+            ],
+            [
+              -74.08559997,
+              40.72451959
+            ],
+            [
+              -74.08687081,
+              40.72388799
+            ],
+            [
+              -74.08784423,
+              40.7228896
+            ],
+            [
+              -74.0887579,
+              40.72184524
+            ],
+            [
+              -74.08912737,
+              40.72102594
+            ],
+            [
+              -74.08853162,
+              40.72038364
+            ],
+            [
+              -74.08938052,
+              40.71979525
+            ],
+            [
+              -74.09184787,
+              40.7199463
+            ],
+            [
+              -74.09239981,
+              40.7189455
+            ],
+            [
+              -74.09295311,
+              40.71780781
+            ],
+            [
+              -74.09362775,
+              40.71657954
+            ],
+            [
+              -74.09442235,
+              40.71539759
+            ],
+            [
+              -74.09497474,
+              40.71435116
+            ],
+            [
+              -74.09564892,
+              40.71316852
+            ],
+            [
+              -74.09632493,
+              40.71180336
+            ],
+            [
+              -74.09693844,
+              40.71066601
+            ],
+            [
+              -74.09755196,
+              40.70952866
+            ],
+            [
+              -74.09876668,
+              40.70848603
+            ],
+            [
+              -74.09938247,
+              40.70712052
+            ],
+            [
+              -74.0994559,
+              40.70579753
+            ],
+            [
+              -74.09952841,
+              40.70456581
+            ],
+            [
+              -74.10025096,
+              40.70456995
+            ],
+            [
+              -74.10078376,
+              40.7054857
+            ],
+            [
+              -74.10185985,
+              40.70626766
+            ],
+            [
+              -74.10293183,
+              40.70746031
+            ],
+            [
+              -74.10364482,
+              40.70842272
+            ],
+            [
+              -74.10393495,
+              40.70951962
+            ],
+            [
+              -74.1021231,
+              40.71005685
+            ],
+            [
+              -74.10169706,
+              40.71051075
+            ],
+            [
+              -74.10204877,
+              40.7114711
+            ],
+            [
+              -74.10138051,
+              40.71206052
+            ],
+            [
+              -74.10041255,
+              40.71251131
+            ],
+            [
+              -74.09914262,
+              40.71305165
+            ],
+            [
+              -74.09811172,
+              40.71377589
+            ],
+            [
+              -74.09731939,
+              40.71472968
+            ],
+            [
+              -74.09743253,
+              40.71546048
+            ],
+            [
+              -74.09694308,
+              40.71623347
+            ],
+            [
+              -74.0971178,
+              40.71682772
+            ],
+            [
+              -74.09614848,
+              40.71741541
+            ],
+            [
+              -74.09596055,
+              40.71814449
+            ],
+            [
+              -74.09570831,
+              40.71928391
+            ],
+            [
+              -74.09605911,
+              40.72033552
+            ],
+            [
+              -74.09586937,
+              40.72124713
+            ],
+            [
+              -74.09664393,
+              40.72207299
+            ],
+            [
+              -74.09681592,
+              40.72294104
+            ],
+            [
+              -74.09644325,
+              40.72407977
+            ],
+            [
+              -74.09673384,
+              40.72513103
+            ],
+            [
+              -74.09672518,
+              40.72599804
+            ],
+            [
+              -74.09653362,
+              40.72709217
+            ],
+            [
+              -74.09634159,
+              40.72823194
+            ],
+            [
+              -74.09590963,
+              40.72927906
+            ],
+            [
+              -74.09541699,
+              40.73037147
+            ],
+            [
+              -74.09486642,
+              40.73123537
+            ],
+            [
+              -74.09395367,
+              40.73218847
+            ],
+            [
+              -74.0931618,
+              40.73309662
+            ],
+            [
+              -74.09200819,
+              40.73404834
+            ],
+            [
+              -74.09061419,
+              40.73495304
+            ],
+            [
+              -74.08910068,
+              40.73576579
+            ],
+            [
+              -74.0874681,
+              40.73644095
+            ],
+            [
+              -74.08577623,
+              40.7370245
+            ],
+            [
+              -74.08408663,
+              40.73737989
+            ],
+            [
+              -74.07662027,
+              40.73733709
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "newark-plank-road-west-approach",
+      "properties": {
+        "kind": "road",
+        "source": "usgs-staten-island-1900",
+        "width_m": 13,
+        "display_surface": "setts",
+        "display_rank": 2,
+        "source_year": 1900,
+        "width_basis": "Interpreted from the mapped street hierarchy and sheet scale.",
+        "surface_basis": "The county history records replacement of plank paving. The setts display is inferred.",
+        "name": "Newark Plank Road / Communipaw Avenue",
+        "use_reference": "hudson-county-hackensack-crossings",
+        "use_basis": "The road follows the 1900 corridor immediately north of the Morris Canal. The county history identifies the Hackensack bridge in service from 1852."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.10375913,
+            40.7271336
+          ],
+          [
+            -74.10113543,
+            40.72640963
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "newark-plank-road-bridge",
+      "properties": {
+        "kind": "road",
+        "source": "usgs-staten-island-1900",
+        "width_m": 13,
+        "display_surface": "setts",
+        "display_rank": 2,
+        "source_year": 1900,
+        "width_basis": "Interpreted from the mapped street hierarchy and sheet scale.",
+        "surface_basis": "The county history records replacement of plank paving. The setts display is inferred.",
+        "name": "Newark Plank Road / Communipaw Avenue",
+        "bridge_reference": "hudson-county-hackensack-crossings",
+        "use_basis": "The road follows the 1900 corridor immediately north of the Morris Canal. The county history identifies the Hackensack bridge in service from 1852."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.10113543,
+            40.72640963
+          ],
+          [
+            -74.10105685,
+            40.72638795
+          ],
+          [
+            -74.09925503,
+            40.72592127
+          ],
+          [
+            -74.09667089,
+            40.72540448
+          ],
+          [
+            -74.09661084,
+            40.72538791
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "newark-plank-road-east-approach",
+      "properties": {
+        "kind": "road",
+        "source": "usgs-staten-island-1900",
+        "width_m": 13,
+        "display_surface": "setts",
+        "display_rank": 2,
+        "source_year": 1900,
+        "width_basis": "Interpreted from the mapped street hierarchy and sheet scale.",
+        "surface_basis": "The county history records replacement of plank paving. The setts display is inferred.",
+        "name": "Newark Plank Road / Communipaw Avenue",
+        "use_reference": "hudson-county-hackensack-crossings",
+        "use_basis": "The road follows the 1900 corridor immediately north of the Morris Canal. The county history identifies the Hackensack bridge in service from 1852."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.09661084,
+            40.72538791
+          ],
+          [
+            -74.09396861,
+            40.72465883
+          ],
+          [
+            -74.09132746,
+            40.72382227
+          ],
+          [
+            -74.088986,
+            40.72312432
+          ],
+          [
+            -74.08634575,
+            40.72219649
+          ],
+          [
+            -74.08370368,
+            40.72145119
+          ],
+          [
+            -74.0814716,
+            40.7209229
+          ],
+          [
+            -74.07872471,
+            40.71955162
+          ],
+          [
+            -74.07602607,
+            40.71844092
+          ],
+          [
+            -74.07386844,
+            40.71742459
+          ],
+          [
+            -74.07123047,
+            40.7162686
+          ],
+          [
+            -74.06949615,
+            40.71507215
+          ],
+          [
+            -74.06865681,
+            40.71470227
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-bergen-residential-parallel-1",
+      "properties": {
+        "kind": "road",
+        "source": "usgs-staten-island-1900",
+        "width_m": 10,
+        "display_surface": "gravel",
+        "display_rank": 1,
+        "source_year": 1900,
+        "width_basis": "Interpreted from the mapped street hierarchy and sheet scale.",
+        "surface_basis": "The gravel display is inferred.",
+        "use_basis": "Selected survey-marked street on the occupied dry side of West Bergen. The trace is limited to confident linework."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.08816989,
+            40.7204272
+          ],
+          [
+            -74.08565235,
+            40.7192719
+          ],
+          [
+            -74.08301484,
+            40.71807028
+          ],
+          [
+            -74.08067748,
+            40.71696164
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-bergen-residential-parallel-2",
+      "properties": {
+        "kind": "road",
+        "source": "usgs-staten-island-1900",
+        "width_m": 10,
+        "display_surface": "gravel",
+        "display_rank": 1,
+        "source_year": 1900,
+        "width_basis": "Interpreted from the mapped street hierarchy and sheet scale.",
+        "surface_basis": "The gravel display is inferred.",
+        "use_basis": "Selected survey-marked street on the occupied dry side of West Bergen. The trace is limited to confident linework."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.08993291,
+            40.71874882
+          ],
+          [
+            -74.08711522,
+            40.71750053
+          ],
+          [
+            -74.08459813,
+            40.7162996
+          ],
+          [
+            -74.08214034,
+            40.71519028
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-bergen-residential-cross-axis",
+      "properties": {
+        "kind": "road",
+        "source": "usgs-staten-island-1900",
+        "width_m": 10,
+        "display_surface": "gravel",
+        "display_rank": 1,
+        "source_year": 1900,
+        "width_basis": "Interpreted from the mapped street hierarchy and sheet scale.",
+        "surface_basis": "The gravel display is inferred.",
+        "use_basis": "Selected survey-marked street on the occupied dry side of West Bergen. The trace is limited to confident linework."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.08627343,
+            40.72217609
+          ],
+          [
+            -74.08714537,
+            40.72051259
+          ],
+          [
+            -74.08818629,
+            40.71878444
+          ],
+          [
+            -74.08928788,
+            40.71701101
+          ],
+          [
+            -74.09020474,
+            40.71564722
+          ],
+          [
+            -74.09142448,
+            40.71410263
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-bergen-west-side-south-connection",
+      "properties": {
+        "kind": "road",
+        "source": "usgs-staten-island-1900",
+        "width_m": 10,
+        "display_surface": "gravel",
+        "display_rank": 1,
+        "source_year": 1900,
+        "width_basis": "Interpreted from the mapped street hierarchy and sheet scale.",
+        "surface_basis": "The gravel display is inferred.",
+        "use_basis": "Selected survey-marked street on the occupied dry side of West Bergen. The trace is limited to confident linework."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -74.0814716,
+            40.7209229
+          ],
+          [
+            -74.08203823,
+            40.71938808
+          ],
+          [
+            -74.083138,
+            40.71779717
+          ],
+          [
+            -74.08435819,
+            40.71620695
+          ],
+          [
+            -74.08588127,
+            40.71443593
+          ],
+          [
+            -74.08661293,
+            40.71352743
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "newark-new-york-railway-west-formation",
+      "properties": {
+        "kind": "rail",
+        "source": "usgs-staten-island-1900",
+        "use_reference": "njtransit-bergen-hill-cut",
+        "use_basis": "The USGS chart shows the through railway. The formation width is interpreted. The documented Hackensack railway bridge lies between the land formations."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.11064289,
+              40.71928151
+            ],
+            [
+              -74.11064256,
+              40.71928142
+            ],
+            [
+              -74.1091749,
+              40.71888845
+            ],
+            [
+              -74.10914028,
+              40.71890457
+            ],
+            [
+              -74.10861705,
+              40.71903914
+            ],
+            [
+              -74.11051803,
+              40.71954815
+            ],
+            [
+              -74.11346054,
+              40.72034076
+            ],
+            [
+              -74.11346496,
+              40.7203419
+            ],
+            [
+              -74.11628812,
+              40.72104261
+            ],
+            [
+              -74.11640431,
+              40.72077373
+            ],
+            [
+              -74.11358337,
+              40.72007358
+            ],
+            [
+              -74.11064289,
+              40.71928151
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "newark-new-york-railway-east-formation",
+      "properties": {
+        "kind": "rail",
+        "source": "usgs-staten-island-1900",
+        "use_reference": "njtransit-bergen-hill-cut",
+        "use_basis": "The USGS chart shows the through railway. The formation width is interpreted. The documented Hackensack railway bridge lies between the land formations."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.09484351,
+              40.71508269
+            ],
+            [
+              -74.09166028,
+              40.71428872
+            ],
+            [
+              -74.09165617,
+              40.71428774
+            ],
+            [
+              -74.08901526,
+              40.71367991
+            ],
+            [
+              -74.08607464,
+              40.71293352
+            ],
+            [
+              -74.08607035,
+              40.71293248
+            ],
+            [
+              -74.08366731,
+              40.71237108
+            ],
+            [
+              -74.08366178,
+              40.71236986
+            ],
+            [
+              -74.08096464,
+              40.71180819
+            ],
+            [
+              -74.07874948,
+              40.71120406
+            ],
+            [
+              -74.07874091,
+              40.71120189
+            ],
+            [
+              -74.07591945,
+              40.71054732
+            ],
+            [
+              -74.07369918,
+              40.7099875
+            ],
+            [
+              -74.07369157,
+              40.70998572
+            ],
+            [
+              -74.07153546,
+              40.70951849
+            ],
+            [
+              -74.06956072,
+              40.70896143
+            ],
+            [
+              -74.0695515,
+              40.70895904
+            ],
+            [
+              -74.06738942,
+              40.70844479
+            ],
+            [
+              -74.06547112,
+              40.70797838
+            ],
+            [
+              -74.06361288,
+              40.70746665
+            ],
+            [
+              -74.06356911,
+              40.70745896
+            ],
+            [
+              -74.0617641,
+              40.70731171
+            ],
+            [
+              -74.0616942,
+              40.70731605
+            ],
+            [
+              -74.0600046,
+              40.70767144
+            ],
+            [
+              -74.05999683,
+              40.70767321
+            ],
+            [
+              -74.05836699,
+              40.70807458
+            ],
+            [
+              -74.05835899,
+              40.7080767
+            ],
+            [
+              -74.0568095,
+              40.70851818
+            ],
+            [
+              -74.05504191,
+              40.70868649
+            ],
+            [
+              -74.05247479,
+              40.70853596
+            ],
+            [
+              -74.04977085,
+              40.70833817
+            ],
+            [
+              -74.04707562,
+              40.70809556
+            ],
+            [
+              -74.04546244,
+              40.70781417
+            ],
+            [
+              -74.0453787,
+              40.70808989
+            ],
+            [
+              -74.04700171,
+              40.708373
+            ],
+            [
+              -74.04702157,
+              40.70837562
+            ],
+            [
+              -74.04972886,
+              40.70861931
+            ],
+            [
+              -74.04973294,
+              40.70861964
+            ],
+            [
+              -74.05244069,
+              40.7088177
+            ],
+            [
+              -74.05244422,
+              40.70881794
+            ],
+            [
+              -74.055032,
+              40.70896968
+            ],
+            [
+              -74.05506967,
+              40.70896899
+            ],
+            [
+              -74.05687787,
+              40.70879682
+            ],
+            [
+              -74.05692029,
+              40.70878888
+            ],
+            [
+              -74.0584864,
+              40.70834266
+            ],
+            [
+              -74.06010835,
+              40.70794324
+            ],
+            [
+              -74.06175964,
+              40.7075959
+            ],
+            [
+              -74.06350665,
+              40.70773842
+            ],
+            [
+              -74.06534696,
+              40.70824522
+            ],
+            [
+              -74.06535369,
+              40.70824696
+            ],
+            [
+              -74.06727594,
+              40.70871433
+            ],
+            [
+              -74.06727706,
+              40.7087146
+            ],
+            [
+              -74.06943506,
+              40.70922787
+            ],
+            [
+              -74.07141204,
+              40.70978556
+            ],
+            [
+              -74.07142584,
+              40.709789
+            ],
+            [
+              -74.07358511,
+              40.71025691
+            ],
+            [
+              -74.07580373,
+              40.71081632
+            ],
+            [
+              -74.07580802,
+              40.71081736
+            ],
+            [
+              -74.07862731,
+              40.71147143
+            ],
+            [
+              -74.08084501,
+              40.71207626
+            ],
+            [
+              -74.08085876,
+              40.71207956
+            ],
+            [
+              -74.08356008,
+              40.7126421
+            ],
+            [
+              -74.08595822,
+              40.71320234
+            ],
+            [
+              -74.08889921,
+              40.71394883
+            ],
+            [
+              -74.08890425,
+              40.71395005
+            ],
+            [
+              -74.09154562,
+              40.71455798
+            ],
+            [
+              -74.0947271,
+              40.71535151
+            ],
+            [
+              -74.09472769,
+              40.71535166
+            ],
+            [
+              -74.0971268,
+              40.71594332
+            ],
+            [
+              -74.09728975,
+              40.71568597
+            ],
+            [
+              -74.09484351,
+              40.71508269
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bergen-hill-newark-new-york-cut",
+      "properties": {
+        "kind": "steep",
+        "source": "usgs-staten-island-1900",
+        "use_reference": "njtransit-bergen-hill-cut",
+        "use_basis": "The 1869 railroad cut through Bergen Hill is documented by NJ Transit. This polygon excludes placements around the district-scale formation. Excavation profile and elevation are unresolved."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -74.07159565,
+              40.70937965
+            ],
+            [
+              -74.06962794,
+              40.70882458
+            ],
+            [
+              -74.0696092,
+              40.70881971
+            ],
+            [
+              -74.0674477,
+              40.7083056
+            ],
+            [
+              -74.06553348,
+              40.70784019
+            ],
+            [
+              -74.06367869,
+              40.7073294
+            ],
+            [
+              -74.06341957,
+              40.70786981
+            ],
+            [
+              -74.06528115,
+              40.70838247
+            ],
+            [
+              -74.06529482,
+              40.70838601
+            ],
+            [
+              -74.06721707,
+              40.70885338
+            ],
+            [
+              -74.06721937,
+              40.70885393
+            ],
+            [
+              -74.06937256,
+              40.70936606
+            ],
+            [
+              -74.07134482,
+              40.70992242
+            ],
+            [
+              -74.07137286,
+              40.7099294
+            ],
+            [
+              -74.07353596,
+              40.71039814
+            ],
+            [
+              -74.07374455,
+              40.70984532
+            ],
+            [
+              -74.07159565,
+              40.70937965
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-bergen-meadow-confirmed-road-absence",
+      "properties": {
+        "kind": "road_coverage",
+        "source": "usgs-staten-island-1900",
+        "categories": 3,
+        "coverage_state": "confirmed_empty",
+        "coverage_basis": "The charted salt meadow interior has a buffer along the surveyed edge and gaps for road crossings and railroad formation. No separate roads are charted inside it."
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                -74.08563168,
+                40.73672339
+              ],
+              [
+                -74.0872796,
+                40.736155
+              ],
+              [
+                -74.08887712,
+                40.73549434
+              ],
+              [
+                -74.09035472,
+                40.73470088
+              ],
+              [
+                -74.09171486,
+                40.73381815
+              ],
+              [
+                -74.09282866,
+                40.73289927
+              ],
+              [
+                -74.09450322,
+                40.7310708
+              ],
+              [
+                -74.09502637,
+                40.73024991
+              ],
+              [
+                -74.09592819,
+                40.72816353
+              ],
+              [
+                -74.09630624,
+                40.72574094
+              ],
+              [
+                -74.09375963,
+                40.72503777
+              ],
+              [
+                -74.08802675,
+                40.72323993
+              ],
+              [
+                -74.08710196,
+                40.7241551
+              ],
+              [
+                -74.08583112,
+                40.7247867
+              ],
+              [
+                -74.08446464,
+                40.72500313
+              ],
+              [
+                -74.084481,
+                40.7260252
+              ],
+              [
+                -74.08398791,
+                40.72716324
+              ],
+              [
+                -74.08337055,
+                40.72804641
+              ],
+              [
+                -74.08313542,
+                40.72869489
+              ],
+              [
+                -74.08297431,
+                40.72887
+              ],
+              [
+                -74.08064438,
+                40.73007438
+              ],
+              [
+                -74.07990289,
+                40.73070687
+              ],
+              [
+                -74.07971408,
+                40.731295
+              ],
+              [
+                -74.08024401,
+                40.73215507
+              ],
+              [
+                -74.08026936,
+                40.73237254
+              ],
+              [
+                -74.08010448,
+                40.73255155
+              ],
+              [
+                -74.07927952,
+                40.73299102
+              ],
+              [
+                -74.07843637,
+                40.73357842
+              ],
+              [
+                -74.07779717,
+                40.73440073
+              ],
+              [
+                -74.07684918,
+                40.73497206
+              ],
+              [
+                -74.07703066,
+                40.73702
+              ],
+              [
+                -74.08403079,
+                40.73706013
+              ],
+              [
+                -74.08563168,
+                40.73672339
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                -74.09624205,
+                40.72219587
+              ],
+              [
+                -74.09552581,
+                40.72143219
+              ],
+              [
+                -74.09545301,
+                40.72119735
+              ],
+              [
+                -74.09562931,
+                40.72035038
+              ],
+              [
+                -74.09529262,
+                40.71923106
+              ],
+              [
+                -74.0957348,
+                40.71735417
+              ],
+              [
+                -74.09588516,
+                40.71716598
+              ],
+              [
+                -74.09664922,
+                40.71670274
+              ],
+              [
+                -74.09653167,
+                40.71630294
+              ],
+              [
+                -74.09656737,
+                40.71608849
+              ],
+              [
+                -74.09473477,
+                40.71563654
+              ],
+              [
+                -74.09401066,
+                40.71671362
+              ],
+              [
+                -74.09223677,
+                40.72006948
+              ],
+              [
+                -74.09206716,
+                40.7202191
+              ],
+              [
+                -74.09181394,
+                40.7202647
+              ],
+              [
+                -74.08952954,
+                40.72012485
+              ],
+              [
+                -74.08908962,
+                40.72042976
+              ],
+              [
+                -74.08947221,
+                40.72084224
+              ],
+              [
+                -74.08952622,
+                40.72112924
+              ],
+              [
+                -74.08915675,
+                40.72194855
+              ],
+              [
+                -74.08864539,
+                40.72255192
+              ],
+              [
+                -74.09416591,
+                40.7242762
+              ],
+              [
+                -74.09622386,
+                40.72484405
+              ],
+              [
+                -74.09603071,
+                40.72414526
+              ],
+              [
+                -74.09638666,
+                40.72292572
+              ],
+              [
+                -74.09624205,
+                40.72219587
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                -74.09782517,
+                40.71354163
+              ],
+              [
+                -74.09893627,
+                40.71277311
+              ],
+              [
+                -74.10110373,
+                40.71181449
+              ],
+              [
+                -74.10158246,
+                40.71139224
+              ],
+              [
+                -74.10129091,
+                40.71059618
+              ],
+              [
+                -74.10135359,
+                40.71032559
+              ],
+              [
+                -74.10177964,
+                40.70987169
+              ],
+              [
+                -74.10196953,
+                40.70975937
+              ],
+              [
+                -74.1034522,
+                40.70931975
+              ],
+              [
+                -74.10324464,
+                40.70853505
+              ],
+              [
+                -74.10257321,
+                40.70762873
+              ],
+              [
+                -74.10153631,
+                40.7064751
+              ],
+              [
+                -74.10049204,
+                40.70571627
+              ],
+              [
+                -74.09997524,
+                40.70488782
+              ],
+              [
+                -74.0998036,
+                40.70713394
+              ],
+              [
+                -74.09916553,
+                40.70858933
+              ],
+              [
+                -74.09791513,
+                40.70969957
+              ],
+              [
+                -74.09515188,
+                40.7148756
+              ],
+              [
+                -74.09698768,
+                40.71532835
+              ],
+              [
+                -74.09690076,
+                40.7147669
+              ],
+              [
+                -74.09696269,
+                40.7145595
+              ],
+              [
+                -74.09782517,
+                40.71354163
+              ]
+            ]
+          ]
+        ]
       }
     }
   ]
