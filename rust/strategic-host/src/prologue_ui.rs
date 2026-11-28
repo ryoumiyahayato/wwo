@@ -11,6 +11,8 @@ use wwo_character_core::{
     Education, Family, Language, OpeningHealth, Prologue, Temperament, Youth,
 };
 
+pub const CHAPTER_FADE: std::time::Duration = std::time::Duration::from_millis(340);
+
 const STAGES: [(&str, &str); 5] = [
     ("家庭", "Family"),
     ("教育", "Schooling"),
@@ -59,9 +61,11 @@ const EXPERIENCES: [Experience; 4] = [
     },
 ];
 
+#[derive(Clone)]
 pub struct Draft {
     pub country: usize,
     pub stage: usize,
+    pub previous_stage: Option<usize>,
     pub place: String,
     pub changed: Instant,
     pub opening: Prologue,
@@ -74,6 +78,7 @@ impl Draft {
         Self {
             country,
             stage: 0,
+            previous_stage: None,
             place,
             changed: Instant::now(),
             health: None,
@@ -92,8 +97,9 @@ impl Draft {
         self.stage == STAGES.len() - 1
     }
 
-    pub fn advance(&mut self) {
-        self.stage = (self.stage + 1).min(STAGES.len() - 1);
+    pub fn change_stage(&mut self, stage: usize) {
+        self.previous_stage = Some(self.stage);
+        self.stage = stage;
         self.changed = Instant::now();
     }
 
@@ -316,6 +322,22 @@ fn paper_choice(
 }
 
 impl Display<'_> {
+    pub(crate) fn draw_prologue_reference(&self, surface: &mut Mesh, text: &mut Mesh, draft: &Draft, country: &Opening) {
+        let image = &ART[scene_index(country, &draft.place)];
+        if image.places.contains(&draft.place.as_str()) {
+            return;
+        }
+        let label = if image.places.is_empty() {
+            self.skin.choose("时代场景示意", "Illustrative period scene")
+        } else {
+            self.skin.choose("区域时代场景示意", "Illustrative regional scene")
+        };
+        let width = self.skin.width(label, 0) + 20.;
+        let y = self.size[1] as f32 - 27.;
+        surface.rect(14., y, width, 21., [52, 36, 25, 209]);
+        self.skin.text(text, label, 0, [23., y + 2.], width - 16., formal_ui::IVORY);
+    }
+
     pub(crate) fn draw_prologue(
         &self,
         art: &mut Mesh,

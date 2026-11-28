@@ -40,6 +40,10 @@ impl Host {
             if key==Key::Named(NamedKey::Space){let speed=self.state.session.as_ref().map_or(0,|s|if s.paused{s.speed}else{0});self.hud_action(HudCommand::Clock(speed));}
             self.dirty=true;return;
         }
+        if self.opening_transition_active() {
+            if key == Key::Named(NamedKey::Escape) { self.skip_opening_transition(); }
+            return;
+        }
         if self.loading(){return;}
         if key==Key::Named(NamedKey::F7) && !self.in_lobby() && self.written_world().is_some() && !self.hud.menu.modal() {
             if self.population_debug.take().is_none() {
@@ -89,7 +93,6 @@ impl Host {
             self.dirty=true;
             return;
         }
-        if self.opening_transition_active() {return;}
         if self.in_lobby(){
             if self.country_directory.search_active {
                 match key {
@@ -336,14 +339,13 @@ impl Host {
                 if let Some(renderer) = &mut self.renderer { renderer.clear_battle(); }
             }
             if connected && self.lobby_page == lobby::Page::Prologue {
-                self.opening_nav.departure_cloud = None;
-                self.opening_nav.arrival_cloud = Some(now);
+                self.opening_nav.arrival_cloud = self.opening_nav.departure_cloud.take().map(|_| now);
             } else if connected {
                 self.loading_fade = Some(now);
                 self.loading_status = "正在安装地图".into();
             }
             self.prologue = None;
-            self.hud=Hud{fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,..Hud::default()};
+            self.hud=Hud{fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,reduce_opening_motion:self.hud.reduce_opening_motion,..Hud::default()};
             self.selected=None;self.details=false;self.country=None;self.country_click=None;
             self.search=None;self.history.clear();self.focus=None;self.velocity=[0.;2];self.hits.clear();
             self.mode=Mode::Political;
@@ -713,7 +715,12 @@ impl ApplicationHandler<HostEvent> for Host {
                 self.dirty=true;
             }
             WindowEvent::MouseInput{state,button,..} if matches!(button,MouseButton::Left|MouseButton::Right)=>{
-                if self.opening_transition_active() {return;}
+                if self.opening_transition_active() {
+                    if button == MouseButton::Left && state == ElementState::Released {
+                        self.click(self.cursor);
+                    }
+                    return;
+                }
                 if let (Some(view), Some((_,terrain))) = (&mut self.battle_view, &self.battle_terrain) {
                     let down = state == ElementState::Pressed;
                     if button == MouseButton::Left {
@@ -865,9 +872,9 @@ impl ApplicationHandler<HostEvent> for Host {
                 if let Err(error)=self.draw(){self.fatal_error=Some(error.to_string());event_loop.exit();}
             }
         }
-        let opening_animation = self.in_lobby()
+        let opening_animation = self.in_lobby() && !self.hud.reduce_opening_motion
             && (self.opening_nav.shift.is_some() || self.lobby_page == lobby::Page::Cloud
-                || self.lobby_page == lobby::Page::Prologue && self.prologue.as_ref().is_some_and(|draft| draft.changed.elapsed().as_millis() < 340));
+                || self.lobby_page == lobby::Page::Prologue && self.prologue.as_ref().is_some_and(|draft| draft.previous_stage.is_some() && draft.changed.elapsed() < crate::prologue_ui::CHAPTER_FADE));
         let fast=opening_animation||self.focus.is_some()||self.animate||(self.trial.timing&&!self.trial.passive_timing)||self.trial.movement.is_some()||self.velocity[0].hypot(self.velocity[1])>9.||fading;
         let frame=now+Duration::from_millis(if fast||transitioning{16}else if animated{50}else if self.state.session.as_ref().is_some_and(|s|!s.paused){50}else{120});
         let frame=if self.config.terrain_review && self.dirty {frame.min(self.last_present+Duration::from_millis(33))} else {frame};

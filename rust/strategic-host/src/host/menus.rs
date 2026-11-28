@@ -14,6 +14,7 @@ impl Host {
         let (fixed,last)=self.menu_themes.preference();
         let preferences=interface::Preferences{
             fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,
+            reduce_opening_motion:self.hud.reduce_opening_motion,
             fixed_painting:fixed.map(str::to_owned),last_painting:last.map(str::to_owned),
         };
         if let Some(path)=&self.config.preferences {
@@ -24,7 +25,7 @@ impl Host {
     }
     pub(super) fn volume_slider(&self)->Option<[f64;4]> {
         (self.in_lobby()&&self.lobby_page==lobby::Page::Settings).then(||{
-            [(f64::from(self.size[0])-365.)*0.5+16.,(f64::from(self.size[1])-290.)*0.5+73.,333.,28.]
+            [(f64::from(self.size[0])-365.)*0.5+16.,(f64::from(self.size[1])-f64::from(lobby::SETTINGS_HEIGHT))*0.5+73.,333.,28.]
         })
     }
     pub(super) fn slide_volume(&mut self) {
@@ -296,6 +297,20 @@ impl Host {
         self.opening_nav.cloud.is_some() || self.opening_nav.departure_cloud.is_some()
             || self.opening_nav.arrival_cloud.is_some()
     }
+    pub(super) fn skip_opening_transition(&mut self) {
+        if self.opening_nav.cloud.take().is_some() {
+            self.lobby_page = lobby::Page::Prologue;
+            self.opening_nav.shift = None;
+            self.camera.screen_offset_x = 0.;
+            self.focus = None;
+        } else if self.opening_nav.departure_cloud.take().is_some() {
+            self.enter_prologue_world();
+        } else {
+            self.opening_nav.arrival_cloud = None;
+        }
+        self.dirty = true;
+    }
+
     pub(super) fn loading(&self)->bool {
         self.config.managed && (self.lobby_request||self.state.lobby.as_ref().is_some_and(|s|s.loading||s.busy||
                 self.lobby_page==lobby::Page::Selection&&!s.selection_ready&&self.feedback.is_empty()&&s.status.is_empty())
@@ -303,7 +318,7 @@ impl Host {
     }
     pub(super) fn animate_opening(&mut self, now: Instant) {
         use lobby::{Page, SelectionStage};
-        if !self.in_lobby()
+        if !self.in_lobby() || self.hud.reduce_opening_motion
             || self.window.as_ref().is_some_and(|window| window.is_minimized() == Some(true)) { return; }
         let elapsed = now.saturating_duration_since(self.opening_nav.last_animation);
         if let Some((start, from, to)) = self.opening_nav.shift {
@@ -341,7 +356,7 @@ impl Host {
                     self.dirty = true;
                 }
             }
-            Page::Prologue if self.prologue.as_ref().is_some_and(|draft| now.saturating_duration_since(draft.changed) < Duration::from_millis(340)) => {
+            Page::Prologue if self.prologue.as_ref().is_some_and(|draft| draft.previous_stage.is_some() && now.saturating_duration_since(draft.changed) < prologue_ui::CHAPTER_FADE) => {
                 self.dirty = true;
             }
             _ => (),
@@ -353,12 +368,21 @@ impl Host {
     }
 
     pub(super) fn opening_shift(&mut self, target: f64) {
-        self.opening_nav.shift = Some((Instant::now(), self.camera.screen_offset_x, target));
+        if self.hud.reduce_opening_motion {
+            self.camera.screen_offset_x = target;
+        } else {
+            self.opening_nav.shift = Some((Instant::now(), self.camera.screen_offset_x, target));
+        }
     }
 
     fn opening_focus(&mut self, target: [f64; 2], mpp: f64) {
         self.velocity = [0.; 2];
-        self.focus = Some(Focus { start: Instant::now(), camera: self.camera.clone(), target, mpp });
+        if self.hud.reduce_opening_motion {
+            self.focus = None;
+            self.camera.focus(target, mpp, self.size);
+        } else {
+            self.focus = Some(Focus { start: Instant::now(), camera: self.camera.clone(), target, mpp });
+        }
         self.dirty = true;
     }
 
@@ -411,7 +435,7 @@ impl Host {
         if self.state.session.is_none() {
             self.lobby_request = false;
             self.opening_nav.departure_cloud = None;
-            self.opening_nav.arrival_cloud = Some(Instant::now());
+            self.opening_nav.arrival_cloud = None;
         }
     }
 
@@ -550,6 +574,10 @@ impl Host {
                 self.menu_themes.set_fixed(fixed);
                 self.save_preferences();
             }
+            Command::ToggleOpeningMotion => {
+                self.hud.reduce_opening_motion = !self.hud.reduce_opening_motion;
+                self.save_preferences();
+            }
             Command::Enter => {
                 if self.lobby_page != Page::Selection || self.lobby_request || self.opening_nav.stage != SelectionStage::Profile
                     || self.state.lobby.as_ref().is_none_or(|state| !state.selection_ready || state.busy) { return; }
@@ -560,8 +588,12 @@ impl Host {
                         {
                             let point = site.coordinates;
                             self.prologue = Some(prologue_ui::Draft::new(self.lobby_country, site.id.clone(), opening.language));
-                            self.opening_nav.cloud = Some(Instant::now());
-                            self.lobby_page = Page::Cloud;
+                            self.lobby_page = if self.hud.reduce_opening_motion {
+                                Page::Prologue
+                            } else {
+                                self.opening_nav.cloud = Some(Instant::now());
+                                Page::Cloud
+                            };
                             self.opening_shift(0.);
                             self.opening_focus(point, self.camera.mpp.min(125.));
                         }
@@ -586,14 +618,14 @@ impl Host {
                             self.opening_focus(point, 800.);
                         }
                     } else {
-                        draft.stage -= 1;
-                        draft.changed = Instant::now();
+                        draft.change_stage(draft.stage - 1);
                     }
                 }
             }
             Command::PrologueNext if self.lobby_page == Page::Prologue && !self.lobby_request => {
                 if let Some(draft) = &mut self.prologue {
-                    if !draft.confirm() { draft.advance(); }
+                    if !draft.confirm() { draft.change_stage(draft.stage + 1); }
+                    else if self.hud.reduce_opening_motion { self.enter_prologue_world(); }
                     else { self.opening_nav.departure_cloud = Some(Instant::now()); }
                 }
             }
