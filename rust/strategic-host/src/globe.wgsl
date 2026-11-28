@@ -283,7 +283,7 @@ fn water_page_area(page:u32, q:vec2f) -> u32 {
 
 // The raster carries the area and its age origin. A parked camera can reuse it
 // through the handoff without rerunning the polygon tests each frame.
-fn global_water_area(ll:vec2f) -> u32 {
+fn water_area(ll:vec2f) -> u32 {
     let tile_uv=min(vec2f(fract(ll.x/360.+.5),clamp(.5-ll.y/180.,0.,1.)),vec2f(.99999994));
     let grid=tile_uv*vec2f(256.,128.);
     let tile_cell=vec2u(grid);
@@ -291,37 +291,6 @@ fn global_water_area(ll:vec2f) -> u32 {
     if page<=3u {return page;}
     let q=vec2f(fract(grid.x),min(1.-fract(grid.y),.99999994));
     return (water_geometry[page]<<2u)|water_page_area(page+1u,q);
-}
-
-fn water_area(ll:vec2f) -> u32 {
-    let mpp=view.viewport.z*EARTH;
-    if mpp<21. {
-        for (var site=0u;site<20u;site+=10u) {
-            let origin=vec2f(bitcast<f32>(city_water[site]),bitcast<f32>(city_water[site+1u]));
-            let scale=vec2f(bitcast<f32>(city_water[site+2u]),bitcast<f32>(city_water[site+3u]));
-            let p=(ll-origin)*scale;
-            let low=vec2f(bitcast<f32>(city_water[site+4u]),bitcast<f32>(city_water[site+5u]));
-            let high=vec2f(bitcast<f32>(city_water[site+6u]),bitcast<f32>(city_water[site+7u]));
-            if any(p<low) || any(p>=high) {continue;}
-            let border=min(p-low,high-p);
-            let handoff=(1.-smoothstep(7.,21.,mpp))*smoothstep(0.,150.,min(border.x,border.y));
-            if handoff<1. && handoff<hash(floor(p*.34)) {continue;}
-            let band=min(u32((p.y-low.y)/32.),city_water[site+9u]-1u);
-            let offset=city_water[site+8u]+band*2u;
-            var bits=0u;
-            for (var i=city_water[offset];i<city_water[offset+1u];i+=5u) {
-                let ay=bitcast<f32>(city_water[i+1u]);
-                let by=bitcast<f32>(city_water[i+3u]);
-                if p.y<ay || p.y>=by {continue;}
-                let ax=bitcast<f32>(city_water[i]);
-                let bx=bitcast<f32>(city_water[i+2u]);
-                if p.x<mix(ax,bx,(p.y-ay)/(by-ay)) {bits^=city_water[i+4u];}
-            }
-            if (bits&1u)!=0u {return 3u;}
-            if (bits&2u)!=0u {return 1u;}
-        }
-    }
-    return global_water_area(ll);
 }
 
 fn geographic_water_weight() -> f32 {
