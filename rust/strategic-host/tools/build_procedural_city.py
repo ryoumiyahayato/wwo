@@ -16,6 +16,8 @@ KIT_FILE = ROOT / "assets/settlements/city-kits-1900.json"
 DATE = "1900-01-01"
 RELIEF_SPACING = 610.0
 MAX_STREET_GRADE = 0.12
+ROAD_CLIP_MARGIN = 0.05
+GEOMETRY_TOLERANCE = 1e-6
 ROLES = ("low_home", "street_row", "courtyard_home", "shop", "civic", "warehouse", "workshop",
          "transport_auxiliary")
 
@@ -81,6 +83,13 @@ def street_width(index):
     return 15.0 if index % 5 == 0 else 7.0
 
 
+def polygonal(geometry):
+    if geometry.geom_type in {"Polygon", "MultiPolygon"}:
+        return geometry
+    return shapely.union_all([part for part in shapely.get_parts(geometry)
+                              if part.geom_type in {"Polygon", "MultiPolygon"}])
+
+
 def maximum_covered_grade(footprint, cell_grade):
     """Include every relief cell that touches the footprint."""
     left, bottom, right, top = footprint.bounds
@@ -118,10 +127,11 @@ def waterfront_blocks(candidates, wet, block_size, reference, count):
         cell = min(bordering, key=priority)
         bordering.remove(cell)
         block = shore.pop(cell)
-        coast = Point(shapely.shortest_line(block.centroid, shore_water).coords[-1])
+        coast = Point(shapely.shortest_line(block.representative_point(), shore_water).coords[-1])
         connected.append((cell, coast))
         i, j = cell
-        bordering.update(near for near in ((i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)) if near in shore)
+        bordering.update(near for near in ((i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1))
+                         if near in shore and block.intersection(shore[near]).length > GEOMETRY_TOLERANCE)
     return connected
 
 
@@ -149,7 +159,8 @@ def service_buildings(parcel, towards, role, obstacles, backward):
         along = start + 4.0 + (lot + 0.5) * plot_width
         x, y = (along, across) if horizontal else (across, along)
         half_x, half_y = (width / 2, depth / 2) if horizontal else (depth / 2, width / 2)
-        if obstacles.intersects(box(x - half_x, y - half_y, x + half_x, y + half_y)):
+        footprint = box(x - half_x, y - half_y, x + half_x, y + half_y)
+        if not parcel.covers(footprint) or obstacles.intersects(footprint):
             continue
         lon, lat = backward.transform(x, y)
         yield x, y, lon, lat, angle, width, depth, 6.4 if count == 1 else 8.0, ROLES.index(role) + 1
@@ -177,6 +188,9 @@ def build_city(city, terrain, transport_data):
     city_extent = backward.transform_bounds(-radius, -radius, radius, radius)
     land = transform(shoreline_land.intersection(box(*city_extent)), forward)
     shapely.prepare(land)
+    dry_blocks = land.buffer(-7.5)
+    # Leave a margin when clipping centerlines, then check the actual full-width strip.
+    dry_streets = {width: land.buffer(-width / 2 - ROAD_CLIP_MARGIN) for width in (7.0, 15.0)}
     # The search window is inside the QWG query. Its artificial edge cannot be a shore.
     water_window = radius + block_size
     wet = box(-water_window, -water_window, water_window, water_window).difference(
@@ -210,6 +224,15 @@ def build_city(city, terrain, transport_data):
         features.append({"type": "Feature", "geometry": mapping(transform(geometry, backward)),
                          "properties": {"kind": kind, **properties}})
 
+    def street_point(node):
+        return offset_x + node[0] * spacing_x, offset_y + node[1] * spacing_y
+
+    def parcel_bounds(i, j):
+        x, y = street_point((i, j))
+        right, top = street_point((i + 1, j + 1))
+        return (x + street_width(i) / 2, y + street_width(j) / 2,
+                right - street_width(i + 1) / 2, top - street_width(j + 1) / 2)
+
     cells, roads = {}, {}
     for i in range(-math.ceil(radius / spacing_x), math.ceil(radius / spacing_x)):
         for j in range(-math.ceil(radius / spacing_y), math.ceil(radius / spacing_y)):
@@ -219,14 +242,22 @@ def build_city(city, terrain, transport_data):
             half_diagonal = math.hypot(spacing_x, spacing_y) / 2
             if distance > radius or (peer and math.hypot(cx - peer[0], cy - peer[1]) < distance + half_diagonal):
                 continue
-            block = box(x, y, x + spacing_x, y + spacing_y)
+            block = box(x, y, *street_point((i + 1, j + 1)))
             footprint = block.buffer(7.5)
-            if not land.covers(footprint) or guarded.intersects(block):
+            if not land.covers(footprint):
+                block = polygonal(block.intersection(dry_blocks))
+                if block.is_empty:
+                    continue
+                footprint = block.buffer(7.5)
+            if guarded.intersects(block):
                 continue
             slope = maximum_covered_grade(footprint, cell_grade)
             if slope > MAX_STREET_GRADE:
                 continue
-            cells[i, j] = (block, distance, slope)
+            parcel = polygonal(block.intersection(box(*parcel_bounds(i, j))))
+            if parcel.is_empty:
+                continue
+            cells[i, j] = (block, parcel, distance, slope)
             corners = ((i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1))
             for first, second in zip(corners, corners[1:] + corners[:1]):
                 edge = tuple(sorted((first, second)))
@@ -234,38 +265,53 @@ def build_city(city, terrain, transport_data):
 
     if not cells:
         raise ValueError(f"No buildable QWG land and QPK relief for {city['city_id']}")
-    def street_point(node):
-        return offset_x + node[0] * spacing_x, offset_y + node[1] * spacing_y
 
+    street_segments = {}
     for (first, second), width in roads.items():
         line = LineString([street_point(first), street_point(second)])
         main_axis = first[1] == second[1] == 0
-        feature(line, "road", width_m=width,
-                role="layout_axis" if main_axis else "district" if width > 7 else "local")
+        full_width = line.buffer(width / 2, cap_style="flat")
+        pieces = [line] if land.covers(full_width) else shapely.get_parts(line.intersection(dry_streets[width]))
+        segments = []
+        for piece in pieces:
+            if piece.geom_type != "LineString" or piece.length <= ROAD_CLIP_MARGIN:
+                continue
+            full_width = piece.buffer(width / 2, cap_style="flat")
+            if (not land.covers(full_width) or guarded.intersects(full_width)
+                    or maximum_covered_grade(full_width, cell_grade) > MAX_STREET_GRADE):
+                continue
+            feature(piece, "road", width_m=width,
+                    role="layout_axis" if main_axis else "district" if width > 7 else "local")
+            segments.append(piece)
+        street_segments[first, second] = segments
 
-    vertices = {vertex for pair in roads for vertex in pair}
     access_clearance = []
     connected_rail = {}
     for anchor in anchors:
         target = Point(*forward.transform(*anchor["point"]))
-        usable_nodes = sorted(vertices, key=lambda node: (
-            Point(street_point(node)).distance(target), node,
-        ))
+        candidates = set()
+        for segments in street_segments.values():
+            for segment in segments:
+                if segment.distance(target) <= 3 * block_size:
+                    candidates.update((segment.coords[0], segment.coords[-1],
+                                       segment.interpolate(segment.project(target)).coords[0]))
+        usable_nodes = sorted(candidates, key=lambda point: (Point(point).distance(target), point))
         anchor_id = anchor.get("station_id", anchor.get("node_id"))
         own_guard = guards.get(anchor_id)
         other_guards = shapely.union_all([guard for key, guard in guards.items() if key != anchor_id])
         anchor["access_status"] = "no_buildable_approach"
-        for vertex in usable_nodes:
-            node = Point(street_point(vertex))
-            if node.distance(target) < 0.1:
+        for point in usable_nodes:
+            node = Point(point)
+            if node.distance(target) <= GEOMETRY_TOLERANCE:
                 anchor["access_status"] = "at_generated_junction"
                 break
             approach = LineString([node, target])
-            if approach.length > 3 * max(spacing_x, spacing_y):
+            if approach.length > 3 * block_size:
                 break
             if own_guard is not None:
                 approach = approach.difference(own_guard)
-            if approach.is_empty or approach.geom_type != "LineString":
+            if (approach.is_empty or approach.geom_type != "LineString"
+                    or approach.distance(node) > GEOMETRY_TOLERANCE):
                 continue
             clearance = approach.buffer(3.5, cap_style="flat")
             if (not land.covers(clearance) or other_guards.intersects(clearance)
@@ -284,7 +330,7 @@ def build_city(city, terrain, transport_data):
     rail_clearance = [line.buffer(12.0) for line in local_corridors.values()]
     clearance = shapely.union_all([*access_clearance, *rail_clearance])
     shapely.prepare(clearance)
-    edge = [cell for cell, (block, distance, slope) in cells.items()
+    edge = [cell for cell, (block, _, distance, _) in cells.items()
             if distance >= radius * 0.83 and not clearance.intersects(block)]
     if len(edge) < 2:
         raise ValueError(f"No separate buildable industrial and military reserves for {city['city_id']}")
@@ -296,12 +342,12 @@ def build_city(city, terrain, transport_data):
         cells[cell][0].distance(point) for point in industry_points
     ))
     military = min((cell for cell in edge if cell != industry), key=lambda cell: (
-        cells[cell][2], -cells[cell][0].distance(cells[industry][0]), cell,
+        cells[cell][3], -cells[cell][0].distance(cells[industry][0]), cell,
     ))
     reserves = {industry: "reserved_industrial", military: "reserved_military"}
 
     service = {}
-    available = {cell: block for cell, (block, _, _) in cells.items()
+    available = {cell: block for cell, (block, _, _, _) in cells.items()
                  if cell not in reserves and not clearance.intersects(block)}
     formal_port = min((anchor for anchor in anchors if anchor["mode"] == "port"),
                       key=lambda anchor: math.hypot(*forward.transform(*anchor["point"])), default=None)
@@ -340,16 +386,12 @@ def build_city(city, terrain, transport_data):
             service[cell] = ("rail_industry", "workshop", toward, source)
 
     def placements():
-        for (i, j), (block, distance, slope) in cells.items():
-            minx, miny, maxx, maxy = block.bounds
-            left = minx + street_width(i) / 2
-            right = maxx - street_width(i + 1) / 2
-            bottom = miny + street_width(j) / 2
-            top = maxy - street_width(j + 1) / 2
-            parcel = box(left, bottom, right, top)
+        for (i, j), (block, parcel, distance, slope) in cells.items():
+            left, bottom, right, top = parcel_bounds(i, j)
             if (i, j) in reserves:
+                point = parcel.representative_point()
                 reserve = {"type": reserves[i, j], "availability": "unallocated",
-                           "point": list(backward.transform(parcel.centroid.x, parcel.centroid.y)),
+                           "point": list(backward.transform(point.x, point.y)),
                            "heading_degrees": 90.0, "capacity_m2": round(parcel.area)}
                 reserve_metadata.append(reserve)
                 feature(parcel, "landuse", use=reserve["type"], coarse_grade=round(slope, 4),
@@ -363,19 +405,28 @@ def build_city(city, terrain, transport_data):
                             coarse_grade=round(slope, 4))
                     yield from rows
                     continue
-            feature(parcel.difference(clearance) if clearance.intersects(parcel) else parcel,
-                    "block", role="street_frontage", coarse_grade=round(slope, 4))
+            if clearance.intersects(parcel):
+                parcel = polygonal(parcel.difference(clearance))
+                if parcel.is_empty:
+                    continue
+            shapely.prepare(parcel)
+            feature(parcel, "block", role="street_frontage", coarse_grade=round(slope, 4))
             maximum_depth = kit["depth_m"][1] + kit["setback_m"][1]
             court = box(left + maximum_depth, bottom + maximum_depth,
                         right - maximum_depth, top - maximum_depth)
-            if not clearance.intersects(court):
+            court = polygonal(parcel.intersection(court))
+            if not court.is_empty:
                 feature(court, "landuse", use="courtyard" if kit["court"] == "enclosed" else "rear_open_space")
-            for side, (start, end, front, direction, horizontal, district) in enumerate((
-                (left, right, bottom, 1, True, j % 5 == 0),
-                (left, right, top, -1, True, (j + 1) % 5 == 0),
-                (bottom + maximum_depth, top - maximum_depth, left, 1, False, i % 5 == 0),
-                (bottom + maximum_depth, top - maximum_depth, right, -1, False, (i + 1) % 5 == 0),
+            for side, (edge, start, end, front, direction, horizontal, district) in enumerate((
+                (((i, j), (i + 1, j)), left, right, bottom, 1, True, j % 5 == 0),
+                (((i, j + 1), (i + 1, j + 1)), left, right, top, -1, True, (j + 1) % 5 == 0),
+                (((i, j), (i, j + 1)), bottom + maximum_depth, top - maximum_depth, left, 1, False, i % 5 == 0),
+                (((i + 1, j), (i + 1, j + 1)), bottom + maximum_depth, top - maximum_depth, right, -1, False, (i + 1) % 5 == 0),
             )):
+                segments = street_segments.get(edge, [])
+                if not segments:
+                    continue
+                street_x, street_y = street_point(edge[0])
                 frontage_min, frontage_max = kit["frontage_m"]
                 target = (frontage_min + frontage_max) / 2
                 count = max(1, round((end - start) / target))
@@ -389,7 +440,12 @@ def build_city(city, terrain, transport_data):
                     x, y = (along, inward) if horizontal else (inward, along)
                     width = min(frontage_max, frontage - 0.2)
                     half_x, half_y = (width / 2, depth / 2) if horizontal else (depth / 2, width / 2)
-                    if clearance.intersects(box(x - half_x, y - half_y, x + half_x, y + half_y)):
+                    footprint = box(x - half_x, y - half_y, x + half_x, y + half_y)
+                    if not parcel.covers(footprint) or clearance.intersects(footprint):
+                        continue
+                    access = Point(along, street_y) if horizontal else Point(street_x, along)
+                    if (not any(segment.distance(access) <= GEOMETRY_TOLERANCE for segment in segments)
+                            or not block.covers(LineString([access.coords[0], (x, y)]))):
                         continue
                     floor_count = kit["storeys"][0] + (i + j + side + lot) % (
                         kit["storeys"][1] - kit["storeys"][0] + 1)

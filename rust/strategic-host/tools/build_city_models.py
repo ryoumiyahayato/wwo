@@ -1,4 +1,4 @@
-"""Pack established city models or generate a city from formal roster inputs."""
+"""Pack established city models or generate cities from formal roster inputs."""
 
 import argparse
 import json
@@ -50,6 +50,32 @@ def roster_city(city_id, roster=None):
     if type(population) is not int or population <= 0:
         raise ValueError(f"Missing roster population for {city_id}")
     return city
+
+
+def roster_batch(batch, roster):
+    if roster.get("status") != "frozen":
+        raise ValueError("Batch generation requires the frozen construction roster")
+    city_ids = [row["city_id"] for row in roster["candidates"] if row.get("batch") == batch]
+    if not city_ids or len(city_ids) != len(set(city_ids)):
+        raise ValueError(f"Frozen batch {batch} has missing or duplicate city IDs")
+    return city_ids
+
+
+def validate_batch_inputs(batch, city_ids, roster, transport_data):
+    from build_procedural_city import official_inputs
+
+    failures = []
+    for city_id in city_ids:
+        try:
+            official_inputs(roster_city(city_id, roster), transport_data)
+        except StopIteration:
+            failures.append(f"{city_id}: Configured regional Kit was not found")
+        except (ValueError, OSError, KeyError) as error:
+            failures.append(f"{city_id}: {error}")
+    if failures:
+        details = "\n".join(failures)
+        raise ValueError(f"Frozen batch {batch} has invalid or unbound procedural inputs for "
+                         f"{len(failures)} of {len(city_ids)} cities. No output written.\n{details}")
 
 
 class CityTerrain:
@@ -309,10 +335,10 @@ def plan_bounds(layout):
     return [(origin + west + 180) % 360 - 180, south, (origin + east + 180) % 360 - 180, north]
 
 
-def generate_roster_city(output, city_id, terrain, transport_data, revision):
+def generate_roster_city(output, city_id, terrain, transport_data, revision, roster=None):
     from build_procedural_city import build_city
 
-    city = roster_city(city_id)
+    city = roster_city(city_id, roster)
     prefix = city_id.replace(":", "-")
     if not re.fullmatch(r"[A-Za-z0-9_-]+", prefix):
         raise ValueError(f"Roster identifier cannot be used as a page name: {city_id}")
@@ -348,13 +374,13 @@ def write_catalogue(pending, catalog, data):
     pending.replace(catalog)
 
 
-def publish_roster_cities(output, selected, terrain_root, transport_data, revision):
+def publish_roster_cities(output, selected, terrain_root, transport_data, revision, roster=None):
     output.mkdir(parents=True, exist_ok=True)
     catalog = output / "catalogue.json"
     with TemporaryDirectory(prefix=".wwo-city-", dir=output) as folder:
         stage = Path(folder)
         with open_city_terrain(terrain_root) as terrain:
-            entries = [generate_roster_city(stage, city_id, terrain, transport_data, revision)
+            entries = [generate_roster_city(stage, city_id, terrain, transport_data, revision, roster)
                        for city_id in dict.fromkeys(selected)]
         with lock_catalogue(output):
             previous = read(catalog) if catalog.is_file() else {"version": "wwo-city-models-v2", "cities": []}
@@ -368,7 +394,7 @@ def publish_roster_cities(output, selected, terrain_root, transport_data, revisi
             sites = {site["id"]: site for site in previous.get("sites", [])}
             for entry in entries:
                 city_id = entry["id"]
-                sites[city_id] = {"id": city_id, "name": entry["name"], "point": roster_city(city_id)["point"],
+                sites[city_id] = {"id": city_id, "name": entry["name"], "point": roster_city(city_id, roster)["point"],
                                   "source": entry["source"]}
             assets = sorted(stage.iterdir())
             for asset in assets:
@@ -386,21 +412,30 @@ def publish_roster_cities(output, selected, terrain_root, transport_data, revisi
 
 if __name__ == "__main__":
     cli = argparse.ArgumentParser(description=__doc__)
-    cli.add_argument("sources", type=Path, help="Original survey sources, or the formal data directory with --city-id")
+    cli.add_argument("sources", type=Path, help="Original survey sources, or formal data for --city-id or --batch")
     cli.add_argument("output", type=Path)
     selection = cli.add_mutually_exclusive_group()
     selection.add_argument("--city", choices=("london", "paris"), help="Update one legacy city in the output catalogue")
     selection.add_argument("--city-id", action="append", help="Generate a frozen roster city. Repeat within the current batch.")
+    selection.add_argument("--batch", type=int, choices=(7, 8, 9), help="Generate every city in the frozen construction batch")
     cli.add_argument("--terrain", type=Path, help="Directory holding formal QWG and QPK assets")
     cli.add_argument("--revision", type=int, default=1, help="Positive procedural page revision")
     args = cli.parse_args()
-    if args.city_id and not args.terrain:
-        cli.error("--city-id requires --terrain")
-    if args.city_id:
+    if args.city_id or args.batch is not None:
+        if not args.terrain:
+            cli.error(f"{'--batch' if args.batch is not None else '--city-id'} requires --terrain")
         if args.revision < 1:
             cli.error("--revision must be positive")
         try:
-            publish_roster_cities(args.output, args.city_id, args.terrain, args.sources, args.revision)
+            selected = args.city_id
+            roster = None
+            if args.batch is not None:
+                from city_landscape_roster import read_roster
+
+                roster = read_roster()
+                selected = roster_batch(args.batch, roster)
+                validate_batch_inputs(args.batch, selected, roster, args.sources)
+            publish_roster_cities(args.output, selected, args.terrain, args.sources, args.revision, roster)
         except (ValueError, OSError, KeyError) as error:
             cli.exit(1, f"{error}\n")
         cli.exit()
