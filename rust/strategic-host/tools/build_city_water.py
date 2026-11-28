@@ -1,11 +1,11 @@
-"""Build the local Seine and Thames banks and streets from retained vector sources."""
+"""Build the existing Paris and London street index from retained road sources."""
 from argparse import ArgumentParser
 import json
 import math
 from pathlib import Path
 import struct
 
-from shapely import box, transform, union_all
+from shapely import box, transform
 from shapely.geometry import LinearRing, Polygon, shape
 import zstandard
 
@@ -18,7 +18,6 @@ SITES = (
 )
 LONDON_ROAD_EXTENT = (-.371, 51.371, .104, 51.638)
 METRES = 6371008.8 * math.pi / 180
-BAND_HEIGHT = 32
 ROAD_CELL = 64
 # Pixel footprints at the end of each blend band, in metres.
 ROAD_LEVELS = ((1, 128, 42.), (2, 256, 86.), (3, 384, 175.))
@@ -63,13 +62,19 @@ def encode(word, fmt):
     return struct.unpack("<I", struct.pack("<" + fmt, word))[0]
 
 
-def sections(root, origin, extent, source):
+def projected_bounds(origin, extent):
     lon, lat = origin
-    east = METRES*math.cos(math.radians(lat))
-    project = lambda x, y: ((x-lon)*east, (y-lat)*METRES)
-    sw = project(*extent[:2])
-    ne = project(*extent[2:])
-    limits = box(*sw, *ne)
+    x_scale = METRES * math.cos(math.radians(lat))
+    west, south, east, north = extent
+    return [lon, lat, x_scale, METRES, (west-lon)*x_scale, (south-lat)*METRES,
+            (east-lon)*x_scale, (north-lat)*METRES]
+
+
+def sections(root, origin, extent, source):
+    values = projected_bounds(origin, extent)
+    lon, lat, x_scale, y_scale = values[:4]
+    project = lambda x, y: ((x-lon)*x_scale, (y-lat)*y_scale)
+    limits = box(*values[4:])
     base = json.loads((root / source).read_text(encoding="utf-8-sig"))
     # The continuous main stem is the largest polygon in both retained unions.
     # Other hydrological records are still rendered by the QWG underlay.
@@ -95,7 +100,7 @@ def sections(root, origin, extent, source):
     clipped = transform(original, project, interleaved=False).intersection(limits)
     drawn = [redraw(part, anchors) for part in getattr(clipped, "geoms", [clipped])
              if part.geom_type == "Polygon" and part.area > 0]
-    return [lon, lat, east, METRES, *sw, *ne], drawn, limits
+    return values, drawn, limits
 
 
 def road_lines(root, london):
@@ -201,46 +206,17 @@ def pack_road_levels(words, values, roads, fine_cell, offsets):
 
 def write(root, output):
     words = [0] * 29
-    for index, (origin, extent, source) in enumerate(SITES):
-        values, shapes, valid = sections(root, origin, extent, source)
-        west, south, east, north = values[4:]
-        rows = [[] for _ in range(math.ceil((north-south)/BAND_HEIGHT))]
-
-        def add_rings(parts, flag):
-            for part in parts:
-                for ring in [part.exterior, *part.interiors]:
-                    points = list(ring.coords)
-                    for a, b in zip(points, points[1:]):
-                        if a[1] == b[1]:
-                            continue
-                        a, b = sorted((a, b), key=lambda p:p[1])
-                        lo = max(0, math.floor((a[1]-south)/BAND_HEIGHT))
-                        hi = min(len(rows)-1, math.floor((b[1]-south)/BAND_HEIGHT))
-                        edge = [*(encode(v, "f") for v in (*a, *b)), flag]
-                        for row in rows[lo:hi+1]:
-                            row.extend(edge)
-
-        add_rings(shapes, 1)
-        # Limit dry overrides to the near-bank corridor. Other lakes, canals
-        # and the riparian land use continue to come from the global layers.
-        corridor = union_all(shapes).buffer(45, quad_segs=2).intersection(valid).simplify(1.0, preserve_topology=True)
-        add_rings([p for p in getattr(corridor, "geoms", [corridor]) if p.geom_type == "Polygon"], 2)
+    for index, (origin, extent, _) in enumerate(SITES):
+        values = projected_bounds(origin, extent)
+        # Older readers clamp to the last band. One empty band lets them fall back to QWG.
         start = len(words)
-        words[index*10:(index+1)*10] = [*(encode(v, "f") for v in values), start, len(rows)]
-        words.extend([0] * (2*len(rows)))
-        for i, row in enumerate(rows):
-            words[start+2*i:start+2*i+2] = [len(words), len(words)+len(row)]
-            words.extend(row)
-        print(f"{source}: {len(shapes)} water polygons, {sum(len(p.interiors) for p in shapes)} interior rings")
+        words[index*10:(index+1)*10] = [*(encode(v, "f") for v in values), start, 1]
+        words.extend((start+2, start+2))
         if index == 1:
-            # The dated street survey extends beyond the Thames bank redraw.
-            lon, lat, x_scale, y_scale = values[:4]
-            left, bottom, right, top = LONDON_ROAD_EXTENT
-            valid = box((left-lon)*x_scale, (bottom-lat)*y_scale,
-                        (right-lon)*x_scale, (top-lat)*y_scale)
-            values = [*values[:4], *valid.bounds]
+            values = projected_bounds(origin, LONDON_ROAD_EXTENT)
             words[28] = len(words)
             words.extend(encode(v, "f") for v in values)
+        valid = box(*values[4:])
         roads = list(prepared_roads(root, valid, values, index == 1, classified=True))
         words[20+index] = pack_road_levels(words, values, roads, ROAD_CELL, range(22+index*3, 25+index*3))
     payload = struct.pack(f"<{len(words)}I", *words)

@@ -1,10 +1,13 @@
 {
   "reba:chandler:996": {"kit": "north_american_masonry_timber", "peer": "us_city_new_jersey_jersey_city", "pilot": true},
+  "us_city_new_jersey_jersey_city": {"kit": "north_american_masonry_timber", "pilot": true},
   "reba:chandler:1282": {"kit": "south_chinese_lane", "pilot": true},
   "landscape:hankou": {"kit": "south_chinese_lane", "peer": "landscape:wuchang", "pilot": true},
   "landscape:wuchang": {"kit": "south_chinese_lane", "peer": "landscape:hankou", "pilot": true},
   "reba:chandler:585": {"kit": "south_chinese_lane", "pilot": true},
+  "reba:chandler:516": {"kit": "south_chinese_lane", "pilot": true},
   "reba:chandler:1494": {"kit": "latin_american_court", "pilot": true},
+  "reba:chandler:1194": {"kit": "latin_american_court", "pilot": true},
   "reba:chandler:307": {"kit": "south_chinese_lane", "pilot": true},
   "reba:chandler:1081": {
     "place": "place:paris",

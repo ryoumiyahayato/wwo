@@ -274,7 +274,7 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 `tools/build_surface_textures.py` 生成原创材质图集。地类和地物位置沿用现有数据。渲染按米制比例混合材质，并为每层生成 Mipmap。城市建筑的墙面和屋顶共享材质图集。建筑近景实例和合并网格从同一批 WGS84 放置记录生成。
 
-`tools/build_city_water.py` 将已有河岸和街道整理成塞纳河和泰晤士河的近景层。河岸使用 IGN BD TOPO 水域（Etalab Open Licence 2.0）和 OpenStreetMap 贡献者的泰晤士河资料（ODbL 1.0）。街道使用巴黎 PTM 1900 街道和 OpenHistoricalMap 贡献者记录。曲线受原始河岸、岛屿和桥梁位置约束。近景河岸经过美术平滑，道路缺失宽度按类别估算。全球 QWG 继续提供背景水域。[IGN BD TOPO](https://geoservices.ign.fr/bdtopo) [OpenStreetMap 版权](https://www.openstreetmap.org/copyright) [OpenHistoricalMap 版权](https://www.openhistoricalmap.org/copyright)
+`tools/build_city_water.py <已有地图资料目录> <输出文件>` 用巴黎 PTM 1900 和 OpenHistoricalMap 的伦敦道路重建现有道路索引。城市水陆使用 QWG。[OpenHistoricalMap 版权](https://www.openhistoricalmap.org/copyright)
 
 局部场景的资源制作可调用 `tools/local_scene_data.py` 的 `read_city_scene(sources, buildings, (lon, lat), size_km)`。输入沿用河岸原始资料目录和游戏 `data/city-models`。`size_km` 支持 5、25、50，输出 CRS84 的 GeoJSON FeatureCollection。建筑按中心选取，道路和水域按几何交集选取。同一地物在各范围内保持原坐标和 ID。道路沿用 PTM 与 OHM 源记录 ID，建筑 ID 由城市、记录坐标及朝向确定。建筑记录指向现有 GLB 节点，路面、屋顶和墙面指向现有材质图集层。接口提供现有近景资料，全球高程及水域仍由 QPK 和 QWG 提供。
 
