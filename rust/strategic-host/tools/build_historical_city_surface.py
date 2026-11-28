@@ -240,6 +240,8 @@ def planned_surface_pages(plan, rows):
             kind, parent, geom = masks[i]
             by_use.setdefault(kind, []).append(geom)
             used.add(parent)
+        if not used:
+            continue  # The bounding box can nominate a page without any source geometry.
         classes = np.zeros((grid.side, grid.side), dtype=np.uint8)
         # The same protected areas already constrain placements. Leave all
         # gaps between sourced features to the world surface.
