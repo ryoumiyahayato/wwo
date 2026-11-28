@@ -8,14 +8,14 @@
       1.29
     ],
     "key": "singapore-corridor",
-    "revision": 13,
+    "revision": 14,
     "status": "candidate_buildings",
     "road_validity": {
       "start": 1890,
       "end": 1901,
-      "basis": "Guide map 1890 and Constable atlas 1893 reconstructed at opening date. Detailed core roads, partial mapped coverage, and an independently sourced open field."
+      "basis": "Guide map 1890 and Constable atlas 1893 reconstructed at opening date. Detailed core roads, partial mapped coverage, and an independently sourced open field. Anson Road and its Tanjong Pagar junction follow the 1893 atlas at the harbour approach."
     },
-    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels and all buildings reconstructed in sourced use polygons. Outside the polygons and in source gaps, no inference of absence. Revised lower river and Tanjong Pagar harbour layout from the 1893 city atlas, with mapped work sheds and separate wet/dry coverage. Sourced open grounds and yard aprons precede placement; roof cover comes from the accepted footprints. Selected river approaches, crossings, mapped Chinatown street blocks and local coverage use the same 1893 reference frame as the mapped riverbanks. Keppel Harbour shoreline, wharf sheds and Keppel frontage trace Admiralty chart 2023. Kallang and Rochore rivers, crossing and basin are traced in the 1890 plan frame and corroborated by the 1891 census. The Kallang and lower town coastline traces terminate at separately mapped limits. The Keppel turn reaches only the segment readable in the 1890 source. The west-bank street ends follow the same guide-map shoreline, and ground approaches stop landward of the drawn coast.",
+    "method": "1890 guide-map alignment; selected street skeleton and water/open-ground exclusions. Parcels inferred inside sourced use polygons, with separate traces of mapped building outlines. Outside the polygons and in source gaps, no inference of absence. Revised lower river and Tanjong Pagar harbour layout from the 1893 city atlas, with mapped work sheds and separate wet/dry coverage. Sourced open grounds and yard aprons precede placement; roof cover comes from the accepted footprints. Selected river approaches, crossings, mapped Chinatown street blocks and local coverage use the same 1893 reference frame as the mapped riverbanks. Keppel Harbour shoreline, wharf sheds and Keppel frontage trace Admiralty chart 2023. Kallang and Rochore rivers, crossing and basin are traced in the 1890 plan frame and corroborated by the 1891 census. The paired banks north of the Kallang Road crossing continue on 1891 Census Map No. I. The 1893 atlas extends Anson Road to the Tanjong Pagar junction and maps discrete village homes and Tramway Depot footprints at the harbour approach. The Keppel turn reaches only the segment readable in the guide map. The west-bank street ends follow the same guide-map shoreline, and ground approaches stop landward of the drawn coast.",
     "registration": {
       "method": "local affine to stable landmarks; modern map used solely for locating controls",
       "working_scan_px": [
@@ -188,7 +188,7 @@
         "record": "Straits Settlements Government Printing Office, Report on the Census of the Straits Settlements taken on 5th April 1891, Map No. I, Singapore Town, PDF page 211.",
         "licence": "Public-domain historical map, no reproduction bundled",
         "date": "1891",
-        "precision": "Original photo-zincographic map corroborates the shore form, road crossing and Tanjong Rhu; guide map supplies candidate coordinates."
+        "precision": "Original photo-zincographic map corroborates the lower shore, road crossing and Tanjong Rhu. Its paired upstream banks provide a locally registered continuation with limits in kallang_registration."
       },
       {
         "id": "ura-kallang-history",
@@ -296,7 +296,51 @@
     "kallang_registration": {
       "source": "aranjo1890",
       "check_reference": "singapore-census1891",
-      "limits": "Reuses the published 1890 registration (118 m leave-one-out RMS, 174 m maximum). 1891 map cross-checks topology, not coordinate residuals. No measurement of tidal level, bridge deck construction, or individual building outline. 1890 guide map and 1891 Admiralty chart remain independently registered at Keppel."
+      "limits": "The lower estuary and crossing reuse the 1890 registration (118 m leave-one-out RMS, 174 m maximum). The upstream reach uses a local registration of Census Map No. I. Neither source measures tidal level or bridge deck construction.",
+      "census_upstream": {
+        "method": "Local similarity from the 1918×1684 Census Map No. I scan into the 3385×3008 D’Aranjo working scan. The common Kallang Road bridge centre is fixed. Two named road junctions set rotation and scale. The existing guide-map fit then provides world coordinates. Both banks share the previous endpoints at the transition.",
+        "controls": [
+          {
+            "feature": "Kallang Road bridge",
+            "census_scan_xy": [
+              1215,
+              840
+            ],
+            "guide_scan_xy": [
+              2446,
+              1309
+            ]
+          },
+          {
+            "feature": "Kallang Road / Lavender Street",
+            "census_scan_xy": [
+              1136,
+              855
+            ],
+            "guide_scan_xy": [
+              2246,
+              1348
+            ]
+          },
+          {
+            "feature": "Lavender Street / Serangoon Road",
+            "census_scan_xy": [
+              1052,
+              746
+            ],
+            "guide_scan_xy": [
+              2074,
+              1094
+            ]
+          }
+        ],
+        "control_residual_m": [
+          0.0,
+          54.8,
+          20.2
+        ],
+        "limits": "Residuals are agreements in the existing guide-map frame. These are schematic images and give no independent survey precision or upstream width where the banks become single strokes."
+      }
     }
   },
   "features": [
@@ -469,7 +513,8 @@
         "display_rank": 2,
         "source_year": 1890,
         "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
+        "surface_basis": "Unresolved; generic surface for review only",
+        "source_basis": "The approach centre line follows the 1890 guide map. Terminal junction aligned to the shared Anson Road intersection drawn in the 1893 city atlas."
       },
       "geometry": {
         "type": "LineString",
@@ -487,8 +532,8 @@
             1.274478
           ],
           [
-            103.842726,
-            1.271759
+            103.84248586820662,
+            1.2719273414413883
           ]
         ]
       }
@@ -503,11 +548,28 @@
         "display_rank": 2,
         "source_year": 1893,
         "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
+        "surface_basis": "Unresolved; generic surface for review only",
+        "source_basis": "Atlas centre line eastward from the Tanjong Pagar junction, past the market and Guthrie Village, to the existing eastern trace. Joins the same-source South Bridge Road approach."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
+          [
+            103.84248586820662,
+            1.2719273414413883
+          ],
+          [
+            103.84291184284014,
+            1.2725608375248
+          ],
+          [
+            103.84343462314776,
+            1.2732856158068315
+          ],
+          [
+            103.8440461,
+            1.2741424
+          ],
           [
             103.8441962,
             1.2743128
@@ -541,7 +603,8 @@
         "display_rank": 2,
         "source_year": 1890,
         "width_basis": "Estimated by visual function; map scale cannot support measurements",
-        "surface_basis": "Unresolved; generic surface for review only"
+        "surface_basis": "Unresolved; generic surface for review only",
+        "source_basis": "The approach centre line follows the 1890 guide map. Terminal junction aligned to the shared Anson Road intersection drawn in the 1893 city atlas."
       },
       "geometry": {
         "type": "LineString",
@@ -563,8 +626,8 @@
             1.271212
           ],
           [
-            103.842726,
-            1.271759
+            103.84248586820662,
+            1.2719273414413883
           ]
         ]
       }
@@ -1729,157 +1792,128 @@
       "properties": {
         "kind": "water_surface",
         "source": "bartholomew1893",
-        "basin": "coast"
+        "basin": "coast",
+        "source_basis": "The isolated wet fragment over Guthrie Village is omitted. The 1893 atlas shows building footprints and unbroken land at that registration seam."
       },
       "geometry": {
-        "type": "MultiPolygon",
+        "type": "Polygon",
         "coordinates": [
           [
             [
-              [
-                103.8450995,
-                1.2738123
-              ],
-              [
-                103.8454055,
-                1.2738676
-              ],
-              [
-                103.8454055,
-                1.2736636
-              ],
-              [
-                103.8443725,
-                1.2736636
-              ],
-              [
-                103.844493,
-                1.2738586
-              ],
-              [
-                103.8450995,
-                1.2738123
-              ]
-            ]
-          ],
-          [
+              103.8496738,
+              1.2797194
+            ],
             [
-              [
-                103.8496738,
-                1.2797194
-              ],
-              [
-                103.8504709,
-                1.2807994
-              ],
-              [
-                103.8512067,
-                1.281841
-              ],
-              [
-                103.8519682,
-                1.2828682
-              ],
-              [
-                103.8526831,
-                1.2842474
-              ],
-              [
-                103.8530526,
-                1.2851657
-              ],
-              [
-                103.8530091,
-                1.2857333
-              ],
-              [
-                103.8529785,
-                1.2860039
-              ],
-              [
-                103.8524963,
-                1.2868145
-              ],
-              [
-                103.8528513,
-                1.2873424
-              ],
-              [
-                103.8531498,
-                1.2881552
-              ],
-              [
-                103.8532789,
-                1.2886633
-              ],
-              [
-                103.853692,
-                1.2895938
-              ],
-              [
-                103.8541826,
-                1.2904814
-              ],
-              [
-                103.8546151,
-                1.291546
-              ],
-              [
-                103.8548781,
-                1.292306
-              ],
-              [
-                103.8551476,
-                1.2929175
-              ],
-              [
-                103.8557381,
-                1.2935323
-              ],
-              [
-                103.8550074,
-                1.2939734
-              ],
-              [
-                103.8556818,
-                1.2949764
-              ],
-              [
-                103.8567838,
-                1.2961411
-              ],
-              [
-                103.8573905,
-                1.2972542
-              ],
-              [
-                103.858065,
-                1.2982572
-              ],
-              [
-                103.8590073,
-                1.2991843
-              ],
-              [
-                103.8655372,
-                1.2955663
-              ],
-              [
-                103.8529335,
-                1.2768225
-              ],
-              [
-                103.8475133,
-                1.2768225
-              ],
-              [
-                103.8486896,
-                1.2783083
-              ],
-              [
-                103.8496738,
-                1.2797194
-              ]
+              103.8504709,
+              1.2807994
+            ],
+            [
+              103.8512067,
+              1.281841
+            ],
+            [
+              103.8519682,
+              1.2828682
+            ],
+            [
+              103.8526831,
+              1.2842474
+            ],
+            [
+              103.8530526,
+              1.2851657
+            ],
+            [
+              103.8530091,
+              1.2857333
+            ],
+            [
+              103.8529785,
+              1.2860039
+            ],
+            [
+              103.8524963,
+              1.2868145
+            ],
+            [
+              103.8528513,
+              1.2873424
+            ],
+            [
+              103.8531498,
+              1.2881552
+            ],
+            [
+              103.8532789,
+              1.2886633
+            ],
+            [
+              103.853692,
+              1.2895938
+            ],
+            [
+              103.8541826,
+              1.2904814
+            ],
+            [
+              103.8546151,
+              1.291546
+            ],
+            [
+              103.8548781,
+              1.292306
+            ],
+            [
+              103.8551476,
+              1.2929175
+            ],
+            [
+              103.8557381,
+              1.2935323
+            ],
+            [
+              103.8550074,
+              1.2939734
+            ],
+            [
+              103.8556818,
+              1.2949764
+            ],
+            [
+              103.8567838,
+              1.2961411
+            ],
+            [
+              103.8573905,
+              1.2972542
+            ],
+            [
+              103.858065,
+              1.2982572
+            ],
+            [
+              103.8590073,
+              1.2991843
+            ],
+            [
+              103.8655372,
+              1.2955663
+            ],
+            [
+              103.8529335,
+              1.2768225
+            ],
+            [
+              103.8475133,
+              1.2768225
+            ],
+            [
+              103.8486896,
+              1.2783083
+            ],
+            [
+              103.8496738,
+              1.2797194
             ]
           ]
         ]
@@ -3732,7 +3766,8 @@
       "id": "singapore-1893:mapped-harbour-landward",
       "properties": {
         "kind": "known_dry",
-        "source": "bartholomew1893"
+        "source": "bartholomew1893",
+        "source_basis": "The 1893 atlas shows continuous land at Guthrie Village north of the mapped foreshore. Includes the small fragment between the town and Admiralty coverage windows."
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -3740,13 +3775,117 @@
           [
             [
               [
-                103.8584749,
-                1.2986605
+                103.8454055,
+                1.2736636
               ],
               [
-                103.858065,
-                1.2982572
+                103.8443725,
+                1.2736636
               ],
+              [
+                103.8396804,
+                1.2736636
+              ],
+              [
+                103.8419298,
+                1.2758946
+              ],
+              [
+                103.8457875,
+                1.2797351
+              ],
+              [
+                103.8481804,
+                1.283083
+              ],
+              [
+                103.8490843,
+                1.2872195
+              ],
+              [
+                103.849251,
+                1.2875304
+              ],
+              [
+                103.8495473,
+                1.2868543
+              ],
+              [
+                103.8498505,
+                1.2862516
+              ],
+              [
+                103.8504151,
+                1.2857214
+              ],
+              [
+                103.8511926,
+                1.2855079
+              ],
+              [
+                103.8518686,
+                1.2854595
+              ],
+              [
+                103.8525139,
+                1.2856816
+              ],
+              [
+                103.8529785,
+                1.2860039
+              ],
+              [
+                103.8530091,
+                1.2857333
+              ],
+              [
+                103.8530526,
+                1.2851657
+              ],
+              [
+                103.8526831,
+                1.2842474
+              ],
+              [
+                103.8519682,
+                1.2828682
+              ],
+              [
+                103.8512067,
+                1.281841
+              ],
+              [
+                103.8504709,
+                1.2807994
+              ],
+              [
+                103.8496738,
+                1.2797194
+              ],
+              [
+                103.8486896,
+                1.2783083
+              ],
+              [
+                103.8475133,
+                1.2768225
+              ],
+              [
+                103.8454055,
+                1.2768225
+              ],
+              [
+                103.8454055,
+                1.2738676
+              ],
+              [
+                103.8454055,
+                1.2736636
+              ]
+            ]
+          ],
+          [
+            [
               [
                 103.8573905,
                 1.2972542
@@ -3850,122 +3989,14 @@
               [
                 103.8584749,
                 1.2986605
-              ]
-            ]
-          ],
-          [
-            [
-              [
-                103.8457875,
-                1.2797351
               ],
               [
-                103.8481804,
-                1.283083
+                103.858065,
+                1.2982572
               ],
               [
-                103.8490843,
-                1.2872195
-              ],
-              [
-                103.849251,
-                1.2875304
-              ],
-              [
-                103.8495473,
-                1.2868543
-              ],
-              [
-                103.8498505,
-                1.2862516
-              ],
-              [
-                103.8504151,
-                1.2857214
-              ],
-              [
-                103.8511926,
-                1.2855079
-              ],
-              [
-                103.8518686,
-                1.2854595
-              ],
-              [
-                103.8525139,
-                1.2856816
-              ],
-              [
-                103.8529785,
-                1.2860039
-              ],
-              [
-                103.8530091,
-                1.2857333
-              ],
-              [
-                103.8530526,
-                1.2851657
-              ],
-              [
-                103.8526831,
-                1.2842474
-              ],
-              [
-                103.8519682,
-                1.2828682
-              ],
-              [
-                103.8512067,
-                1.281841
-              ],
-              [
-                103.8504709,
-                1.2807994
-              ],
-              [
-                103.8496738,
-                1.2797194
-              ],
-              [
-                103.8486896,
-                1.2783083
-              ],
-              [
-                103.8475133,
-                1.2768225
-              ],
-              [
-                103.8454055,
-                1.2768225
-              ],
-              [
-                103.8454055,
-                1.2738676
-              ],
-              [
-                103.8450995,
-                1.2738123
-              ],
-              [
-                103.844493,
-                1.2738586
-              ],
-              [
-                103.8443725,
-                1.2736636
-              ],
-              [
-                103.8396804,
-                1.2736636
-              ],
-              [
-                103.8419298,
-                1.2758946
-              ],
-              [
-                103.8457875,
-                1.2797351
+                103.8573905,
+                1.2972542
               ]
             ]
           ]
@@ -8134,7 +8165,7 @@
         "kind": "water_surface",
         "source": "aranjo1890",
         "basin": "coast",
-        "source_basis": "Traced Kallang and Rochore estuary shoreline from the 1890 map, cross-checked against 1891 Census map No. I. Cartographic cutoffs stop within the illustrated source window. The 1893 atlas remains authoritative at the lower town boundary."
+        "source_basis": "Traced Kallang and Rochore estuary shoreline from the 1890 map, cross-checked against 1891 Census map No. I. Both upstream bank endpoints join the census reach. The 1893 atlas supplies the lower town shoreline."
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -8456,17 +8487,14 @@
       "properties": {
         "kind": "known_dry",
         "source": "aranjo1890",
-        "source_basis": "Mapped land edge at ordinary high water. Nearby dry bands close the historic water mask locally. Inland land use and tidal marsh are unknown where the guide map has no detail."
+        "source_basis": "Mapped land edge at ordinary high water. Nearby dry bands close the historic water mask locally. Inland land use and tidal marsh are unknown where the guide map has no detail.",
+        "upstream_reference": "singapore-census1891"
       },
       "geometry": {
         "type": "MultiPolygon",
         "coordinates": [
           [
             [
-              [
-                103.87331229103046,
-                1.3131505977350013
-              ],
               [
                 103.87333934340893,
                 1.3129312180176762
@@ -8664,17 +8692,25 @@
                 1.3125751740241305
               ],
               [
+                103.8696727420666,
+                1.3125840806133409
+              ],
+              [
+                103.86966785210842,
+                1.3125896167876532
+              ],
+              [
                 103.87331229103046,
                 1.3131505977350013
+              ],
+              [
+                103.87333934340893,
+                1.3129312180176762
               ]
             ]
           ],
           [
             [
-              [
-                103.8682010727187,
-                1.2998680980226651
-              ],
               [
                 103.87025553338896,
                 1.3003720432118366
@@ -8746,15 +8782,15 @@
               [
                 103.8682010727187,
                 1.2998680980226651
+              ],
+              [
+                103.87025553338896,
+                1.3003720432118366
               ]
             ]
           ],
           [
             [
-              [
-                103.86903294443357,
-                1.3121432939960804
-              ],
               [
                 103.86913048792019,
                 1.3115951971947684
@@ -8980,19 +9016,19 @@
                 1.3119752513786902
               ],
               [
-                103.86957402402072,
-                1.3125751740241305
+                103.8689034248225,
+                1.3124719500519415
               ],
               [
                 103.86903294443357,
                 1.3121432939960804
+              ],
+              [
+                103.86913048792019,
+                1.3115951971947684
               ]
             ],
             [
-              [
-                103.86531307660147,
-                1.3069887130276554
-              ],
               [
                 103.865087784249,
                 1.3071920162505588
@@ -9020,6 +9056,10 @@
               [
                 103.86531307660147,
                 1.3069887130276554
+              ],
+              [
+                103.865087784249,
+                1.3071920162505588
               ]
             ]
           ]
@@ -9143,14 +9183,14 @@
         "display_surface": "gravel",
         "width_basis": "Estimated by function; 1890 guide-map strokes do not measure the carriageway.",
         "surface_basis": "Unbound road surface is a display estimate; the map does not describe paving.",
-        "source_basis": "Mapped Keppel Road turn at the south end of Tanjong Pagar Road. The parallel Admiralty survey trace is independently registered. The overlapping southwest continuation is intentionally omitted."
+        "source_basis": "Mapped Keppel Road turn at the south end of Tanjong Pagar Road. The parallel Admiralty survey trace is independently registered. The overlapping southwest continuation is intentionally omitted. Terminal junction aligned to the shared Anson Road intersection drawn in the 1893 city atlas."
       },
       "geometry": {
         "type": "LineString",
         "coordinates": [
           [
-            103.842726,
-            1.271759
+            103.84248586820662,
+            1.2719273414413883
           ],
           [
             103.8427146,
@@ -9171,6 +9211,764 @@
           [
             103.8369112,
             1.2706231
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-kallang-1891:upper-kallang-tidal-reach",
+      "properties": {
+        "kind": "water_surface",
+        "source": "singapore-census1891",
+        "basin": "coast",
+        "source_basis": "Paired banks north of Kallang Road and the upstream junction in Map No. I. Continued from both guide-map bank endpoints. The narrow northern and eastern continuations have single strokes without separable banks. No water extent or upland use is assigned beyond the map’s readable paired banks."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.86903294443357,
+              1.3121432939960804
+            ],
+            [
+              103.86885950232465,
+              1.3125834034047386
+            ],
+            [
+              103.86890638121622,
+              1.3132755695843636
+            ],
+            [
+              103.86895326010773,
+              1.313967735572276
+            ],
+            [
+              103.86880623962566,
+              1.31456777901588
+            ],
+            [
+              103.86906761326873,
+              1.3147325582539993
+            ],
+            [
+              103.86927429779456,
+              1.3150134530445456
+            ],
+            [
+              103.86943055492054,
+              1.315473387483154
+            ],
+            [
+              103.86970045199848,
+              1.3157640149180923
+            ],
+            [
+              103.87009677418047,
+              1.3160741077724258
+            ],
+            [
+              103.87024024615425,
+              1.3163452696864217
+            ],
+            [
+              103.87000870453306,
+              1.3166209593294171
+            ],
+            [
+              103.86996253885064,
+              1.3168629230136368
+            ],
+            [
+              103.87023243592859,
+              1.317153550286639
+            ],
+            [
+              103.87031269535026,
+              1.3174149793618943
+            ],
+            [
+              103.87019905539836,
+              1.3175842861686324
+            ],
+            [
+              103.8699462051901,
+              1.3175453552856171
+            ],
+            [
+              103.86968056982965,
+              1.3173176521466314
+            ],
+            [
+              103.86941067275177,
+              1.317027024892767
+            ],
+            [
+              103.86909887170884,
+              1.317041285373322
+            ],
+            [
+              103.86866490727925,
+              1.3170990045020434
+            ],
+            [
+              103.8681592068628,
+              1.3170211427202598
+            ],
+            [
+              103.86777140811557,
+              1.3168368981862109
+            ],
+            [
+              103.86725292254687,
+              1.3165702640842236
+            ],
+            [
+              103.86693685978656,
+              1.3165216004605835
+            ],
+            [
+              103.86676000728261,
+              1.3166811746038145
+            ],
+            [
+              103.86691200269127,
+              1.3170781846420843
+            ],
+            [
+              103.8672578974734,
+              1.3175673168622455
+            ],
+            [
+              103.86749831913397,
+              1.3178845397300776
+            ],
+            [
+              103.86734028775379,
+              1.3178602079311899
+            ],
+            [
+              103.86700504726514,
+              1.3175283859789853
+            ],
+            [
+              103.86667619935264,
+              1.3172909501166288
+            ],
+            [
+              103.86642334914438,
+              1.3172520192290296
+            ],
+            [
+              103.86636439830977,
+              1.317305210595673
+            ],
+            [
+              103.86656682111817,
+              1.3175231810149035
+            ],
+            [
+              103.86682819476124,
+              1.3176879600577471
+            ],
+            [
+              103.86709809183913,
+              1.3179785872345071
+            ],
+            [
+              103.86742267803425,
+              1.3181530989656898
+            ],
+            [
+              103.86767126652506,
+              1.3181291057729951
+            ],
+            [
+              103.86778916819435,
+              1.3180227230737793
+            ],
+            [
+              103.86777212132472,
+              1.3177710267822662
+            ],
+            [
+              103.86750222424683,
+              1.317480399581288
+            ],
+            [
+              103.86716485289946,
+              1.3171171155323993
+            ],
+            [
+              103.86708459347773,
+              1.316855686425875
+            ],
+            [
+              103.86733744368598,
+              1.3168946173196654
+            ],
+            [
+              103.8677927167027,
+              1.3171515186645897
+            ],
+            [
+              103.86811730289782,
+              1.3173260304537153
+            ],
+            [
+              103.86855979076222,
+              1.3173941595045955
+            ],
+            [
+              103.86905696774386,
+              1.317346173104313
+            ],
+            [
+              103.86936876878679,
+              1.3173319126255232
+            ],
+            [
+              103.86957119159518,
+              1.3175498830424173
+            ],
+            [
+              103.86977361440358,
+              1.3177678534402397
+            ],
+            [
+              103.87003498804665,
+              1.3179326324669172
+            ],
+            [
+              103.87041000164163,
+              1.3179281047108127
+            ],
+            [
+              103.87070901753225,
+              1.3177250720108462
+            ],
+            [
+              103.87075092149729,
+              1.317420184326202
+            ],
+            [
+              103.87113019680964,
+              1.3174785806534206
+            ],
+            [
+              103.87139157045272,
+              1.3176433596992145
+            ],
+            [
+              103.87171189493046,
+              1.3177549473782224
+            ],
+            [
+              103.87189300915179,
+              1.3176582973834474
+            ],
+            [
+              103.87150521040456,
+              1.3174740528965108
+            ],
+            [
+              103.87104993738791,
+              1.3172171515848385
+            ],
+            [
+              103.87072961291017,
+              1.3171055638817426
+            ],
+            [
+              103.87052719010177,
+              1.3168875934259614
+            ],
+            [
+              103.87045119239752,
+              1.316689088399552
+            ],
+            [
+              103.8706869957361,
+              1.3164763228736296
+            ],
+            [
+              103.87066568714903,
+              1.3161617023100345
+            ],
+            [
+              103.87033257751904,
+              1.3158613421940302
+            ],
+            [
+              103.86993625533705,
+              1.3155512493132668
+            ],
+            [
+              103.86959888398968,
+              1.315187964983291
+            ],
+            [
+              103.8694426268637,
+              1.314728030492104
+            ],
+            [
+              103.86940853312439,
+              1.3142246372185797
+            ],
+            [
+              103.86942486678493,
+              1.3135422040383016
+            ],
+            [
+              103.8693822496108,
+              1.3129129621318762
+            ],
+            [
+              103.8696727420666,
+              1.3125840806133409
+            ],
+            [
+              103.86957402402072,
+              1.3125751740241305
+            ],
+            [
+              103.86903294443357,
+              1.3121432939960804
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:guthrie-village-home-a",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "low_home",
+        "height_m": 4.5,
+        "source_basis": "Discrete outline within the labelled Guthrie Village group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84407994486288,
+              1.2735077397818249
+            ],
+            [
+              103.84410738179021,
+              1.2736012272742
+            ],
+            [
+              103.844176750537,
+              1.273599021980445
+            ],
+            [
+              103.8441928724546,
+              1.2735176296762634
+            ],
+            [
+              103.84407994486288,
+              1.2735077397818249
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:guthrie-village-home-b",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "low_home",
+        "height_m": 4.5,
+        "source_basis": "Discrete outline within the labelled Guthrie Village group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8442413123759,
+              1.273853088787428
+            ],
+            [
+              103.84424293940135,
+              1.2739608767617518
+            ],
+            [
+              103.84432199613241,
+              1.2740257632902297
+            ],
+            [
+              103.84435586699308,
+              1.2739707666561901
+            ],
+            [
+              103.84432843006576,
+              1.273877279163815
+            ],
+            [
+              103.8442413123759,
+              1.273853088787428
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:guthrie-village-home-c",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "low_home",
+        "height_m": 4.5,
+        "source_basis": "Discrete outline within the labelled Guthrie Village group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84433641685608,
+              1.2732569469880146
+            ],
+            [
+              103.84432029493848,
+              1.2733383392921962
+            ],
+            [
+              103.84440741262834,
+              1.2733625296685833
+            ],
+            [
+              103.84442353454594,
+              1.2732811373644017
+            ],
+            [
+              103.84433641685608,
+              1.2732569469880146
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:guthrie-village-home-d",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "low_home",
+        "height_m": 4.5,
+        "source_basis": "Discrete outline within the labelled Guthrie Village group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84433316280517,
+              1.273041371039367
+            ],
+            [
+              103.84430897992877,
+              1.2731634594956396
+            ],
+            [
+              103.84443965646355,
+              1.27319974506022
+            ],
+            [
+              103.8444380294381,
+              1.2730919570858963
+            ],
+            [
+              103.84433316280517,
+              1.273041371039367
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:guthrie-village-home-e",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "low_home",
+        "height_m": 4.5,
+        "source_basis": "Discrete outline within the labelled Guthrie Village group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84458482789049,
+              1.273046850346295
+            ],
+            [
+              103.84456064501407,
+              1.2731689388025675
+            ],
+            [
+              103.844665511647,
+              1.2732195248490967
+            ],
+            [
+              103.84468969452341,
+              1.2730974363928242
+            ],
+            [
+              103.84458482789049,
+              1.273046850346295
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:guthrie-village-home-f",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "low_home",
+        "height_m": 4.5,
+        "source_basis": "Discrete outline within the labelled Guthrie Village group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84462195280207,
+              1.2732074296609033
+            ],
+            [
+              103.84459776992566,
+              1.2733295181171755
+            ],
+            [
+              103.84470263655858,
+              1.2733801041637047
+            ],
+            [
+              103.84472681943498,
+              1.2732580157074325
+            ],
+            [
+              103.84462195280207,
+              1.2732074296609033
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:guthrie-village-home-g",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "low_home",
+        "height_m": 4.5,
+        "source_basis": "Discrete outline within the labelled Guthrie Village group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84528827751117,
+              1.2736715252546862
+            ],
+            [
+              103.84526409463476,
+              1.2737936137109587
+            ],
+            [
+              103.84536896126768,
+              1.2738441997574876
+            ],
+            [
+              103.84541089308715,
+              1.2737485069713574
+            ],
+            [
+              103.84528827751117,
+              1.2736715252546862
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:guthrie-village-home-h",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "low_home",
+        "height_m": 4.5,
+        "source_basis": "Discrete outline within the labelled Guthrie Village group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84527378261902,
+              1.2738607055331916
+            ],
+            [
+              103.84527540964447,
+              1.2739684935075153
+            ],
+            [
+              103.84536252733433,
+              1.2739926838839022
+            ],
+            [
+              103.84538671021075,
+              1.27387059542763
+            ],
+            [
+              103.84527378261902,
+              1.2738607055331916
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tramway-depot-long-shed",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "transport_auxiliary",
+        "height_m": 6,
+        "source_basis": "Discrete outline within the labelled Tramway Depot group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84041301509855,
+              1.2731120761493713
+            ],
+            [
+              103.84044045202587,
+              1.2732055636417465
+            ],
+            [
+              103.8412567550698,
+              1.2732604924208661
+            ],
+            [
+              103.84125512804434,
+              1.2731527044465425
+            ],
+            [
+              103.84041301509855,
+              1.2731120761493713
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tramway-depot-west-shed",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "transport_auxiliary",
+        "height_m": 6,
+        "source_basis": "Discrete outline within the labelled Tramway Depot group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84120668812305,
+              1.2728172453353777
+            ],
+            [
+              103.84136968266152,
+              1.2732703823153046
+            ],
+            [
+              103.84146486131019,
+              1.2732538765396009
+            ],
+            [
+              103.84128411782865,
+              1.2727743438895318
+            ],
+            [
+              103.84120668812305,
+              1.2728172453353777
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "singapore-1893:tramway-depot-east-shed",
+      "properties": {
+        "kind": "building",
+        "source": "bartholomew1893",
+        "role": "transport_auxiliary",
+        "height_m": 6,
+        "source_basis": "Discrete outline within the labelled Tramway Depot group.",
+        "dimension_basis": "Atlas footprint is schematic. Height is inferred for the display model."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.84140680757311,
+              1.2734309616299126
+            ],
+            [
+              103.8415326772,
+              1.2737235192952314
+            ],
+            [
+              103.8416020459468,
+              1.2737213140014763
+            ],
+            [
+              103.84150198622177,
+              1.2734144558542089
+            ],
+            [
+              103.84140680757311,
+              1.2734309616299126
+            ]
           ]
         ]
       }
