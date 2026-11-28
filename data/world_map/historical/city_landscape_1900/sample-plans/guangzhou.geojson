@@ -1,0 +1,6407 @@
+{
+  "type": "FeatureCollection",
+  "wwo": {
+    "city_id": "reba:chandler:516",
+    "name": "Guangzhou",
+    "key": "guangzhou-yuedong-1900",
+    "revision": 1,
+    "status": "candidate_sample",
+    "origin": [
+      113.267,
+      23.129
+    ],
+    "ground_material": 0,
+    "road_validity": {
+      "start": 1900,
+      "end": 1901
+    },
+    "ground_validity": {
+      "start": 1900,
+      "end": 1901
+    },
+    "water_validity": {
+      "start": 1900,
+      "end": 1901
+    },
+    "method": "The 1900 Yuedong map records the street and water relationships. The pre-1900 Kerr plate corroborates stable features. Schnock's 1907 survey supplies readable reference positions for alignments already shown in 1900. Ordinary Xiguan housing and courts are inferred inside the mapped blocks. The old West Gate connects toward the north side of the Xiguan creek, and the southern gates connect through the former New City and Lower Xiguan toward Shamian's West Bridge. The widening and arcades of Enning Road are excluded.",
+    "registration": {
+      "model": "Five approximate landmark correspondences place the 2000 by 1600 Schnock consultation copy in WGS84/UTM 49N with a least-squares affine. Lines shared with the 1900 map are traced in that registration. Printed landmarks can occupy more than one control point's residual.",
+      "metric_origin": [
+        730416.9293335538,
+        2558802.4745200407
+      ],
+      "affine": [
+        [
+          3.611504403013936,
+          -0.07324109605562844
+        ],
+        [
+          -0.04069632621050223,
+          -3.701291646693485
+        ],
+        [
+          -3637.625621120571,
+          3251.741498264411
+        ]
+      ],
+      "controls": [
+        {
+          "name": "Shamian Christ Church, at the west end of the historic concession",
+          "pixel": [
+            628,
+            1249
+          ],
+          "wgs84": [
+            113.23628,
+            23.10961
+          ],
+          "url": "https://www.openstreetmap.org/way/509641361",
+          "residual_m": 42.8,
+          "leave_one_out_m": 111.9
+        },
+        {
+          "name": "Shamian North Street at the nineteenth-century West Bridge",
+          "pixel": [
+            741,
+            1191
+          ],
+          "wgs84": [
+            113.239527,
+            23.110971
+          ],
+          "url": "https://commons.wikimedia.org/wiki/Category:West_Bridge_(Shamian)",
+          "residual_m": 51.9,
+          "leave_one_out_m": 85.4
+        },
+        {
+          "name": "Sacred Heart Cathedral, printed church symbol",
+          "pixel": [
+            1163,
+            977
+          ],
+          "wgs84": [
+            113.25474,
+            23.11739
+          ],
+          "url": "https://www.openstreetmap.org/way/542890833",
+          "residual_m": 61.0,
+          "leave_one_out_m": 92.9
+        },
+        {
+          "name": "Haichuang Temple, centre of the named site on Honam",
+          "pixel": [
+            1126,
+            1286
+          ],
+          "wgs84": [
+            113.25369,
+            23.10794
+          ],
+          "url": "https://www.openstreetmap.org/way/363853167",
+          "residual_m": 46.7,
+          "leave_one_out_m": 162.0
+        },
+        {
+          "name": "Five-Story Pavilion, the east summit of the paired hills in the north wall",
+          "pixel": [
+            1290,
+            297
+          ],
+          "wgs84": [
+            113.26028,
+            23.1406
+          ],
+          "url": "https://www.openstreetmap.org/way/146688561",
+          "residual_m": 22.1,
+          "leave_one_out_m": 344.0
+        }
+      ],
+      "limitation": "The leave-one-out residual ranges from about 85 m to 344 m. No surveyed position or individual building footprint is implied."
+    },
+    "anchors_wgs84": {
+      "core": [
+        113.267,
+        23.129
+      ],
+      "ordinary_block": [
+        113.231,
+        23.119
+      ],
+      "edge_a": [
+        113.241,
+        23.11
+      ],
+      "edge_b": [
+        113.251,
+        23.119
+      ]
+    },
+    "limitations": [
+      "The West Bridge is the confirmed Shamian crossing in this revision. The two editions differ in the east crossing. That geometry remains unresolved.",
+      "The plan classifies only mapped blocks, court parcels and water. The bounds of the historic Pearl River demonstration reach delimit source support. Small lanes outside the registered portions remain unclassified.",
+      "All generated forms and heights are inferred. No business, dock operation or traffic is assigned. Shamian's garden lots are separated from the dense Xiguan frontage. Colonial facades are not independently reconstructed by the existing profile.",
+      "The approximate 1900 relation at the ordinary anchor is the Xiguan creek and housing seam. Today's Enning roadway alignment cannot be used as a Qing survey."
+    ],
+    "sources": [
+      {
+        "id": "yuedong-1900",
+        "date": "1900 edition",
+        "url": "https://commons.wikimedia.org/wiki/File:Map_of_Guangzhou_1900.jpg",
+        "licence": "Public domain in China and the United States. Wikimedia Commons source record.",
+        "precision": "Period topology, settlement extent, named districts and shared alignments. This edition is not metrically rectified. The atlas owner is Guangdong Provincial Archives.",
+        "local_reference": "offline-map-sources/guangzhou-canton-1900/yuedong-1900.jpg"
+      },
+      {
+        "id": "schnock-1907",
+        "date": "1907",
+        "url": "https://www.gzdaj.gov.cn/gzjs/zdjm/content/post_138362.html",
+        "consultation_url": "https://beichao.halu.lu/beichao/671019/",
+        "licence": "Public access for consultation. American public domain by period publication. No scan redistributed.",
+        "precision": "F. Schnock, Canton with Suburbs and Honam, printed 1:5,000. The detailed copy is 2000 by 1600 pixels. Coordinate control only for common pre-1901 features. See residuals.",
+        "local_reference": "offline-map-sources/guangzhou-canton-1900/schnock-1907-detailed-consultation.jpg"
+      },
+      {
+        "id": "kerr-vrooman-late-qing",
+        "date": "Kerr guide plate attributed to 1880. Commons scan labelled 1890.",
+        "url": "https://commons.wikimedia.org/wiki/File:Canton1890.jpg",
+        "licence": "Public Domain Mark on the Commons record.",
+        "precision": "Pre-1900 corroboration for the walled city, Shamian street grid, the Pearl River and Honam temple site. Approximate historical plate date. Not used to date individual features.",
+        "local_reference": "offline-map-sources/guangzhou-canton-1900/kerr-vrooman-late-qing.jpg"
+      },
+      {
+        "id": "xiguan-heritage-forms",
+        "date": "Qing building forms in municipal conservation record",
+        "url": "https://ghzyj.gz.gov.cn/sjb/zw/zcfg/content/post_10604962.html",
+        "licence": "Public municipal record consulted for historical facts. No map or text reproduced.",
+        "precision": "Xiguan narrow deep zhutongwu and courtyard houses. Modern protected footprints and later arcades are outside this source's use."
+      },
+      {
+        "id": "historical-enning-name",
+        "date": "Qing Enning market and 1931 road construction in municipal name record",
+        "url": "https://www.gz.gov.cn/hdjlpt/yjzj/api/attachments/view/c97c61e9b198202a0cd0bb40d5c9f21e",
+        "licence": "Public municipal record consulted for historical facts. No map or text reproduced.",
+        "precision": "Eleventh Pu was already occupied. The present widened Enning Road alignment and arcade are excluded."
+      },
+      {
+        "id": "shamian-west-bridge",
+        "date": "1861 historic Shamian West Bridge",
+        "url": "https://ysln.ycwb.com/content/2021-12/23/content_40469952.html",
+        "licence": "Public page consulted for historical facts. No image or text reproduced.",
+        "precision": "Existence and west crossing. Geometry is approximated from the period maps."
+      },
+      {
+        "id": "historic-shi-ba-pu",
+        "date": "Qing waterways described by municipal water authority",
+        "url": "https://swj.gz.gov.cn/swyw/rdxw/content/post_10352555.html",
+        "licence": "Public municipal record consulted for historical facts. No modern map or text reproduced.",
+        "precision": "Historic western canals and Xihao context. Common map alignments only. No modern width or river engineering used."
+      }
+    ],
+    "candidate_routes": [
+      {
+        "id": "west-gate-to-xiguan",
+        "from_anchor": "core",
+        "to_anchor": "ordinary_block",
+        "junction_wgs84": [
+          [
+            113.267064,
+            23.12907246
+          ],
+          [
+            113.24957757,
+            23.12931679
+          ],
+          [
+            113.24799959,
+            23.1296364
+          ],
+          [
+            113.2417066,
+            23.12910855
+          ],
+          [
+            113.24022575,
+            23.12417558
+          ],
+          [
+            113.24553761,
+            23.12369941
+          ],
+          [
+            113.23965156,
+            23.12011544
+          ],
+          [
+            113.23092874,
+            23.12093777
+          ],
+          [
+            113.23082029,
+            23.11960394
+          ]
+        ],
+        "scope": "Common mapped road and urban blocks to the north bank of the creek. The ordinary anchor also reads the opposite inner bend as housing."
+      },
+      {
+        "id": "south-gate-to-shamian",
+        "from_anchor": "core",
+        "passes_anchor": "edge_b",
+        "to_anchor": "edge_a",
+        "junction_wgs84": [
+          [
+            113.267064,
+            23.12907246
+          ],
+          [
+            113.25849413,
+            23.12908883
+          ],
+          [
+            113.25803033,
+            23.12151448
+          ],
+          [
+            113.25800929,
+            23.12077961
+          ],
+          [
+            113.25809969,
+            23.12024167
+          ],
+          [
+            113.2513005,
+            23.11926284
+          ],
+          [
+            113.25250768,
+            23.11584603
+          ],
+          [
+            113.24839783,
+            23.11517937
+          ],
+          [
+            113.24772651,
+            23.11513467
+          ],
+          [
+            113.24113235,
+            23.11515167
+          ],
+          [
+            113.23989736,
+            23.11141424
+          ],
+          [
+            113.23988404,
+            23.11094659
+          ],
+          [
+            113.23985454,
+            23.10991107
+          ]
+        ],
+        "scope": "Mapped gate links, lower street bands and Shamian West Bridge. The Pearl channel continues between the sourced banks beyond the bridge."
+      }
+    ]
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "old-city-west-gate-east-spine",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 7,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Old City east–west road at West Gate"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24957757,
+            23.12931679
+          ],
+          [
+            113.250748,
+            23.1295456
+          ],
+          [
+            113.25198221,
+            23.12953824
+          ],
+          [
+            113.25332308,
+            23.12956079
+          ],
+          [
+            113.25458584,
+            23.12931843
+          ],
+          [
+            113.25609906,
+            23.12920151
+          ],
+          [
+            113.2572266,
+            23.12916421
+          ],
+          [
+            113.25849413,
+            23.12908883
+          ],
+          [
+            113.25941121,
+            23.12909191
+          ],
+          [
+            113.26033116,
+            23.1291952
+          ],
+          [
+            113.26184629,
+            23.12914503
+          ],
+          [
+            113.26319194,
+            23.1293345
+          ],
+          [
+            113.26470706,
+            23.12928431
+          ],
+          [
+            113.26590411,
+            23.12921121
+          ],
+          [
+            113.267064,
+            23.12907246
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-west-wall-gateway",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5,
+        "display_rank": 2,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Historic West Gate passage",
+        "bridge_reference": "yuedong-1900"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24957757,
+            23.12931679
+          ],
+          [
+            113.24901953,
+            23.12953584
+          ],
+          [
+            113.24852909,
+            23.12965234
+          ],
+          [
+            113.24799959,
+            23.1296364
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-gate-suburb",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 6,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Upper western suburb spine"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24799959,
+            23.1296364
+          ],
+          [
+            113.24718058,
+            23.12936253
+          ],
+          [
+            113.24657203,
+            23.12904828
+          ],
+          [
+            113.24572637,
+            23.1290762
+          ],
+          [
+            113.24502069,
+            23.12906606
+          ],
+          [
+            113.24406646,
+            23.12899725
+          ],
+          [
+            113.24293605,
+            23.12893425
+          ],
+          [
+            113.2417066,
+            23.12910855
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "western-suburb-cross-lanes",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Western suburb connector"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.2417066,
+            23.12910855
+          ],
+          [
+            113.24114473,
+            23.12919395
+          ],
+          [
+            113.2404781,
+            23.12931624
+          ],
+          [
+            113.24029049,
+            23.12892121
+          ],
+          [
+            113.24012955,
+            23.12822438
+          ],
+          [
+            113.2401086,
+            23.1274895
+          ],
+          [
+            113.24001623,
+            23.12672355
+          ],
+          [
+            113.23999719,
+            23.12605548
+          ],
+          [
+            113.23997624,
+            23.1253206
+          ],
+          [
+            113.24006481,
+            23.12471585
+          ],
+          [
+            113.24022575,
+            23.12417558
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "western-suburb-inner-lane",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Western suburb interior lane"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24022575,
+            23.12417558
+          ],
+          [
+            113.24092664,
+            23.12401873
+          ],
+          [
+            113.24186655,
+            23.1235865
+          ],
+          [
+            113.24278169,
+            23.12352288
+          ],
+          [
+            113.24373493,
+            23.1235583
+          ],
+          [
+            113.244552,
+            23.12376538
+          ],
+          [
+            113.24553761,
+            23.12369941
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "western-suburb-inner-lane-south",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Western suburb lane toward Xiguan"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24553761,
+            23.12369941
+          ],
+          [
+            113.24537665,
+            23.12300259
+          ],
+          [
+            113.24524426,
+            23.12207078
+          ],
+          [
+            113.24518996,
+            23.12140387
+          ],
+          [
+            113.24499472,
+            23.12074162
+          ],
+          [
+            113.24473474,
+            23.12028211
+          ],
+          [
+            113.2437082,
+            23.12014881
+          ],
+          [
+            113.24268262,
+            23.12004891
+          ],
+          [
+            113.24158751,
+            23.11998473
+          ],
+          [
+            113.24049622,
+            23.12005416
+          ],
+          [
+            113.23965156,
+            23.12011544
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-xiguan-long-lane",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Northern road above the Xiguan creek bend"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23965156,
+            23.12011544
+          ],
+          [
+            113.2389126,
+            23.12017324
+          ],
+          [
+            113.23813936,
+            23.1202656
+          ],
+          [
+            113.23712043,
+            23.12039949
+          ],
+          [
+            113.23635099,
+            23.12062546
+          ],
+          [
+            113.23546824,
+            23.12058767
+          ],
+          [
+            113.23472548,
+            23.12051183
+          ],
+          [
+            113.23370749,
+            23.1206791
+          ],
+          [
+            113.23276092,
+            23.12087745
+          ],
+          [
+            113.23177626,
+            23.12097674
+          ],
+          [
+            113.23092874,
+            23.12093777
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ordinary-west-bank-approach",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 3.4,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "West lane at the north bank residential seam"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23092874,
+            23.12093777
+          ],
+          [
+            113.23091355,
+            23.12040331
+          ],
+          [
+            113.23087071,
+            23.12013724
+          ],
+          [
+            113.23082029,
+            23.11960394
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ordinary-xiguan-north-cross",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 3.6,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Narrow street north of the Xiguan creek"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23087071,
+            23.12013724
+          ],
+          [
+            113.23171538,
+            23.120076
+          ],
+          [
+            113.23245624,
+            23.12008504
+          ],
+          [
+            113.23312474,
+            23.12002959
+          ],
+          [
+            113.2337561,
+            23.1199085
+          ],
+          [
+            113.23445412,
+            23.11965146
+          ],
+          [
+            113.23519118,
+            23.11952688
+          ],
+          [
+            113.23585301,
+            23.11923759
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ordinary-xiguan-fold-lane",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 3.6,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Street within the Xiguan creek-bend housing"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23135743,
+            23.11865007
+          ],
+          [
+            113.23194786,
+            23.11832972
+          ],
+          [
+            113.23249734,
+            23.1178101
+          ],
+          [
+            113.23318776,
+            23.11728584
+          ],
+          [
+            113.23370675,
+            23.1169344
+          ],
+          [
+            113.23387817,
+            23.11676158
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ordinary-xiguan-inner-cross",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 2.8,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Creek-bend housing alley"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23249734,
+            23.1178101
+          ],
+          [
+            113.23216979,
+            23.1174531
+          ],
+          [
+            113.23166608,
+            23.1171019
+          ],
+          [
+            113.23112808,
+            23.11678526
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ordinary-xiguan-inner-lower",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 3.2,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Creek-bend housing alley toward the lower market"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23387817,
+            23.11676158
+          ],
+          [
+            113.23330398,
+            23.1164127
+          ],
+          [
+            113.23286884,
+            23.11599238
+          ],
+          [
+            113.23250131,
+            23.11546952
+          ],
+          [
+            113.23220805,
+            23.11507795
+          ],
+          [
+            113.23257756,
+            23.11443052
+          ],
+          [
+            113.23295087,
+            23.1139167
+          ],
+          [
+            113.2333575,
+            23.11333491
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-suburb-south-link",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4.1,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Narrow western blocks above the Shamian bank"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23965156,
+            23.12011544
+          ],
+          [
+            113.23952873,
+            23.11951766
+          ],
+          [
+            113.23944018,
+            23.11888532
+          ],
+          [
+            113.2392764,
+            23.11808828
+          ],
+          [
+            113.23928404,
+            23.11711841
+          ],
+          [
+            113.23926215,
+            23.11635013
+          ],
+          [
+            113.23941738,
+            23.11560944
+          ],
+          [
+            113.23976018,
+            23.11526379
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-lower-western-spine",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.5,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Lower Xiguan cross street toward the waterfront"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24113235,
+            23.11515167
+          ],
+          [
+            113.24190651,
+            23.1150927
+          ],
+          [
+            113.2430349,
+            23.11508891
+          ],
+          [
+            113.24426993,
+            23.11511503
+          ],
+          [
+            113.24539832,
+            23.11511123
+          ],
+          [
+            113.24659622,
+            23.11507169
+          ],
+          [
+            113.24772651,
+            23.11513467
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-mainland-approach",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4.1,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Shamian West Bridge mainland approach"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24113235,
+            23.11515167
+          ],
+          [
+            113.24107712,
+            23.11445136
+          ],
+          [
+            113.24074004,
+            23.11376034
+          ],
+          [
+            113.24023442,
+            23.11334236
+          ],
+          [
+            113.24022204,
+            23.11290811
+          ],
+          [
+            113.24027633,
+            23.11233792
+          ],
+          [
+            113.24012493,
+            23.11197513
+          ],
+          [
+            113.23993926,
+            23.1116469
+          ],
+          [
+            113.23989736,
+            23.11141424
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-west-bridge",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4,
+        "display_rank": 1,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Shamian West Bridge",
+        "bridge_reference": "shamian-west-bridge"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23989736,
+            23.11141424
+          ],
+          [
+            113.2398926,
+            23.11124722
+          ],
+          [
+            113.23988785,
+            23.1110802
+          ],
+          [
+            113.23988404,
+            23.11094659
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-north-central-lane",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Shamian western cross lane"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23988404,
+            23.11094659
+          ],
+          [
+            113.23987072,
+            23.11047894
+          ],
+          [
+            113.23985454,
+            23.10991107
+          ],
+          [
+            113.23983551,
+            23.109243
+          ],
+          [
+            113.23986313,
+            23.10897461
+          ],
+          [
+            113.23988408,
+            23.10847239
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-central-street",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 7.5,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Shamian Central Street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.2349517,
+            23.10987203
+          ],
+          [
+            113.23579915,
+            23.10991099
+          ],
+          [
+            113.23657519,
+            23.10991885
+          ],
+          [
+            113.23766831,
+            23.10991627
+          ],
+          [
+            113.23872714,
+            23.10994824
+          ],
+          [
+            113.23985454,
+            23.10991107
+          ],
+          [
+            113.2409467,
+            23.10987506
+          ],
+          [
+            113.24189794,
+            23.10984369
+          ],
+          [
+            113.24270921,
+            23.10985037
+          ],
+          [
+            113.24362521,
+            23.10982015
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-north-street",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.2,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Shamian North Street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23532777,
+            23.11069552
+          ],
+          [
+            113.2358629,
+            23.11091194
+          ],
+          [
+            113.23713409,
+            23.11097036
+          ],
+          [
+            113.23868522,
+            23.11095267
+          ],
+          [
+            113.23988404,
+            23.11094659
+          ],
+          [
+            113.24125806,
+            23.11090128
+          ],
+          [
+            113.24256257,
+            23.11089169
+          ],
+          [
+            113.24368902,
+            23.11082109
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-south-street",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.2,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Shamian South Street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23577443,
+            23.10904249
+          ],
+          [
+            113.23651048,
+            23.1088845
+          ],
+          [
+            113.23774737,
+            23.10897748
+          ],
+          [
+            113.23884048,
+            23.10897489
+          ],
+          [
+            113.23986313,
+            23.10897461
+          ],
+          [
+            113.2410943,
+            23.10886715
+          ],
+          [
+            113.24243402,
+            23.10885639
+          ],
+          [
+            113.24349285,
+            23.10888833
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-west-cross-street",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.0,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Shamian west cross street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23621712,
+            23.11096714
+          ],
+          [
+            113.23618669,
+            23.10989822
+          ],
+          [
+            113.23620291,
+            23.10922898
+          ],
+          [
+            113.23616007,
+            23.10896291
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-middle-west-cross-street",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.0,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Shamian middle-west cross street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.23780348,
+            23.1109483
+          ],
+          [
+            113.237774,
+            23.10991279
+          ],
+          [
+            113.23774737,
+            23.10897748
+          ],
+          [
+            113.23773215,
+            23.10844302
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-east-cross-street",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.0,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Shamian east cross street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24196269,
+            23.11087804
+          ],
+          [
+            113.24189794,
+            23.10984369
+          ],
+          [
+            113.24190556,
+            23.10887383
+          ],
+          [
+            113.24189128,
+            23.10837277
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-south-gate-approach",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.2,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Old City lane to the southern gate in its cross wall"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.25849413,
+            23.12908883
+          ],
+          [
+            113.25853781,
+            23.12815121
+          ],
+          [
+            113.25847387,
+            23.12715028
+          ],
+          [
+            113.2584423,
+            23.12604798
+          ],
+          [
+            113.25844309,
+            23.1248443
+          ],
+          [
+            113.25827537,
+            23.12391368
+          ],
+          [
+            113.25814288,
+            23.12298189
+          ],
+          [
+            113.2580485,
+            23.12214914
+          ],
+          [
+            113.25803033,
+            23.12151448
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-south-gate-passage",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.2,
+        "display_rank": 1,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Old City gate passage over the Yudai channel",
+        "bridge_reference": "yuedong-1900"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.25803033,
+            23.12151448
+          ],
+          [
+            113.25802077,
+            23.12118045
+          ],
+          [
+            113.25800929,
+            23.12077961
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "new-city-south-block-approach",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 6,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "New City lane toward the lower wall and merchant streets"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.25800929,
+            23.12077961
+          ],
+          [
+            113.25809969,
+            23.12024167
+          ],
+          [
+            113.25814911,
+            23.11950447
+          ],
+          [
+            113.25823186,
+            23.11869929
+          ],
+          [
+            113.25834983,
+            23.11789295
+          ],
+          [
+            113.25787842,
+            23.11744047
+          ],
+          [
+            113.25702232,
+            23.11710101
+          ],
+          [
+            113.25630907,
+            23.11682369
+          ],
+          [
+            113.25549203,
+            23.11661666
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "new-city-south-wall-spine",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 6,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "New City lower-wall road"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.25549203,
+            23.11661666
+          ],
+          [
+            113.25453216,
+            23.11634749
+          ],
+          [
+            113.25360752,
+            23.11607715
+          ],
+          [
+            113.25250768,
+            23.11584603
+          ],
+          [
+            113.25144403,
+            23.11564713
+          ],
+          [
+            113.25034324,
+            23.11538259
+          ],
+          [
+            113.24942243,
+            23.11524584
+          ],
+          [
+            113.24839783,
+            23.11517937
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-west-canal-crossing",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4.5,
+        "display_rank": 1,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Lower Xihao mapped crossing",
+        "bridge_reference": "yuedong-1900"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24839783,
+            23.11517937
+          ],
+          [
+            113.24807979,
+            23.11515644
+          ],
+          [
+            113.24772651,
+            23.11513467
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-new-city-western-road",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 5.4,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "New City cross street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.25809969,
+            23.12024167
+          ],
+          [
+            113.25675987,
+            23.12025256
+          ],
+          [
+            113.25559239,
+            23.120124
+          ],
+          [
+            113.25449824,
+            23.12009331
+          ],
+          [
+            113.25354025,
+            23.11989094
+          ],
+          [
+            113.25233277,
+            23.11959651
+          ],
+          [
+            113.2513005,
+            23.11926284
+          ],
+          [
+            113.25034253,
+            23.11906045
+          ],
+          [
+            113.24931504,
+            23.11889379
+          ],
+          [
+            113.24825518,
+            23.11882849
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-eastern-lane",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Old City east interior lane"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.26319194,
+            23.1293345
+          ],
+          [
+            113.26302801,
+            23.1285375
+          ],
+          [
+            113.26303451,
+            23.12753424
+          ],
+          [
+            113.26329148,
+            23.12665643
+          ],
+          [
+            113.26340943,
+            23.12585009
+          ],
+          [
+            113.26367023,
+            23.12510589
+          ],
+          [
+            113.26392528,
+            23.12416127
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-core-cross-lane",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Old City ordinary cross street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.25847387,
+            23.12715028
+          ],
+          [
+            113.25956903,
+            23.12721434
+          ],
+          [
+            113.26062895,
+            23.12727956
+          ],
+          [
+            113.26197171,
+            23.12736883
+          ],
+          [
+            113.26303451,
+            23.12753424
+          ],
+          [
+            113.26426965,
+            23.1275602
+          ],
+          [
+            113.26543432,
+            23.12758848
+          ],
+          [
+            113.26632478,
+            23.12789331
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "new-city-parish-approach",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4.1,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "Mapped New City parish street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.25559239,
+            23.120124
+          ],
+          [
+            113.25567324,
+            23.11925202
+          ],
+          [
+            113.25568649,
+            23.11848258
+          ],
+          [
+            113.25569687,
+            23.11761293
+          ],
+          [
+            113.25549203,
+            23.11661666
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "southwest-new-city-lane",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4.0,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "New City side street"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.2513005,
+            23.11926284
+          ],
+          [
+            113.25152327,
+            23.11841961
+          ],
+          [
+            113.25181554,
+            23.11754064
+          ],
+          [
+            113.2521735,
+            23.11649233
+          ],
+          [
+            113.25250768,
+            23.11584603
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "new-city-riverside-frontage",
+      "properties": {
+        "kind": "road",
+        "source": "yuedong-1900",
+        "width_m": 4.0,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "alignment_reference": "schnock-1907",
+        "width_basis": "Inferred from the period mapped hierarchy. No street width measurement is reported.",
+        "surface_basis": "Display interpretation for the lane hierarchy. The period map does not identify paving.",
+        "name": "New City mainland frontage lane upstream of the port"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            113.24942243,
+            23.11524584
+          ],
+          [
+            113.24947286,
+            23.11454204
+          ],
+          [
+            113.24959566,
+            23.11390272
+          ],
+          [
+            113.2498232,
+            23.1132265
+          ],
+          [
+            113.24984125,
+            23.11262408
+          ],
+          [
+            113.25051065,
+            23.11260196
+          ],
+          [
+            113.25108295,
+            23.11288397
+          ],
+          [
+            113.25172761,
+            23.11323045
+          ],
+          [
+            113.25226659,
+            23.11358042
+          ],
+          [
+            113.25287221,
+            23.11379445
+          ],
+          [
+            113.25354926,
+            23.11403955
+          ],
+          [
+            113.25443961,
+            23.11434446
+          ],
+          [
+            113.25522331,
+            23.11461946
+          ],
+          [
+            113.25597178,
+            23.11489562
+          ],
+          [
+            113.25658028,
+            23.11520984
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "pearl-river-shamian-and-honam",
+      "properties": {
+        "kind": "water_surface",
+        "source": "yuedong-1900",
+        "name": "Historic Pearl River channel through Shamian and the north Honam reach",
+        "basin": "river",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.2167697,
+              23.12407802
+            ],
+            [
+              113.21750156,
+              23.12127887
+            ],
+            [
+              113.21809224,
+              23.11972145
+            ],
+            [
+              113.21928568,
+              23.11827798
+            ],
+            [
+              113.22097311,
+              23.11808881
+            ],
+            [
+              113.22121104,
+              23.11901718
+            ],
+            [
+              113.22200608,
+              23.1196932
+            ],
+            [
+              113.2218841,
+              23.12036591
+            ],
+            [
+              113.22186307,
+              23.12086813
+            ],
+            [
+              113.22214969,
+              23.12102589
+            ],
+            [
+              113.22261075,
+              23.11987394
+            ],
+            [
+              113.22310988,
+              23.11882105
+            ],
+            [
+              113.22364803,
+              23.11790061
+            ],
+            [
+              113.22436803,
+              23.1171748
+            ],
+            [
+              113.22487568,
+              23.11642254
+            ],
+            [
+              113.22531474,
+              23.1157394
+            ],
+            [
+              113.2260499,
+              23.11554805
+            ],
+            [
+              113.22655373,
+              23.11466217
+            ],
+            [
+              113.22719944,
+              23.11380506
+            ],
+            [
+              113.2270291,
+              23.11277417
+            ],
+            [
+              113.22745677,
+              23.11169018
+            ],
+            [
+              113.22826425,
+              23.11156331
+            ],
+            [
+              113.22887268,
+              23.11187764
+            ],
+            [
+              113.22971445,
+              23.11171621
+            ],
+            [
+              113.23051814,
+              23.11145571
+            ],
+            [
+              113.23121233,
+              23.11106508
+            ],
+            [
+              113.23201886,
+              23.11090479
+            ],
+            [
+              113.23257402,
+              23.1105856
+            ],
+            [
+              113.23351102,
+              23.11005322
+            ],
+            [
+              113.23412135,
+              23.11043434
+            ],
+            [
+              113.23420797,
+              23.11099989
+            ],
+            [
+              113.23478403,
+              23.11141557
+            ],
+            [
+              113.23616187,
+              23.11150392
+            ],
+            [
+              113.23827671,
+              23.11146766
+            ],
+            [
+              113.23989736,
+              23.11141424
+            ],
+            [
+              113.24106,
+              23.1113759
+            ],
+            [
+              113.24246926,
+              23.11132942
+            ],
+            [
+              113.2437014,
+              23.11125534
+            ],
+            [
+              113.24446982,
+              23.11099594
+            ],
+            [
+              113.24449362,
+              23.11059393
+            ],
+            [
+              113.24522681,
+              23.11033569
+            ],
+            [
+              113.24619234,
+              23.11080535
+            ],
+            [
+              113.24733023,
+              23.11113557
+            ],
+            [
+              113.2487852,
+              23.1114553
+            ],
+            [
+              113.25013925,
+              23.11194554
+            ],
+            [
+              113.25117337,
+              23.11234602
+            ],
+            [
+              113.25231891,
+              23.11294343
+            ],
+            [
+              113.25357016,
+              23.11353733
+            ],
+            [
+              113.25499567,
+              23.1140586
+            ],
+            [
+              113.25631263,
+              23.11448313
+            ],
+            [
+              113.2578067,
+              23.11493523
+            ],
+            [
+              113.25915986,
+              23.11539197
+            ],
+            [
+              113.260653,
+              23.11581064
+            ],
+            [
+              113.26211187,
+              23.11626386
+            ],
+            [
+              113.26367358,
+              23.11661336
+            ],
+            [
+              113.26538101,
+              23.11712518
+            ],
+            [
+              113.26694848,
+              23.11767506
+            ],
+            [
+              113.26685359,
+              23.11436817
+            ],
+            [
+              113.26534247,
+              23.11455199
+            ],
+            [
+              113.26378462,
+              23.11433612
+            ],
+            [
+              113.26229436,
+              23.11401769
+            ],
+            [
+              113.26105073,
+              23.11369108
+            ],
+            [
+              113.25973281,
+              23.11323319
+            ],
+            [
+              113.25830539,
+              23.11264516
+            ],
+            [
+              113.25687128,
+              23.1118233
+            ],
+            [
+              113.25558003,
+              23.11106357
+            ],
+            [
+              113.25446972,
+              23.11046502
+            ],
+            [
+              113.25357367,
+              23.10995969
+            ],
+            [
+              113.25271763,
+              23.1096202
+            ],
+            [
+              113.25161307,
+              23.10922205
+            ],
+            [
+              113.25047901,
+              23.10902548
+            ],
+            [
+              113.24926972,
+              23.1086642
+            ],
+            [
+              113.24816613,
+              23.10829943
+            ],
+            [
+              113.24716347,
+              23.10776414
+            ],
+            [
+              113.24594944,
+              23.10723582
+            ],
+            [
+              113.24469637,
+              23.10657505
+            ],
+            [
+              113.24366041,
+              23.1061077
+            ],
+            [
+              113.24262541,
+              23.10567376
+            ],
+            [
+              113.24165707,
+              23.10510386
+            ],
+            [
+              113.24103532,
+              23.10432193
+            ],
+            [
+              113.24164089,
+              23.10329891
+            ],
+            [
+              113.2425759,
+              23.10146258
+            ],
+            [
+              113.24358801,
+              23.09985775
+            ],
+            [
+              113.24434399,
+              23.0991641
+            ],
+            [
+              113.24395076,
+              23.09773937
+            ],
+            [
+              113.2393359,
+              23.09789156
+            ],
+            [
+              113.23899595,
+              23.09957451
+            ],
+            [
+              113.23828182,
+              23.1005008
+            ],
+            [
+              113.23684594,
+              23.10208613
+            ],
+            [
+              113.23547479,
+              23.1034687
+            ],
+            [
+              113.23402745,
+              23.10465316
+            ],
+            [
+              113.23246584,
+              23.10554046
+            ],
+            [
+              113.23090991,
+              23.10662816
+            ],
+            [
+              113.22938159,
+              23.10744746
+            ],
+            [
+              113.22808848,
+              23.10785779
+            ],
+            [
+              113.22710107,
+              23.10785683
+            ],
+            [
+              113.22602897,
+              23.10735712
+            ],
+            [
+              113.22569562,
+              23.10803679
+            ],
+            [
+              113.22501375,
+              23.10886165
+            ],
+            [
+              113.22384147,
+              23.10980293
+            ],
+            [
+              113.22260345,
+              23.11091355
+            ],
+            [
+              113.22108829,
+              23.11220043
+            ],
+            [
+              113.21955984,
+              23.11301965
+            ],
+            [
+              113.21796091,
+              23.11384116
+            ],
+            [
+              113.21616002,
+              23.11500364
+            ],
+            [
+              113.2167697,
+              23.12407802
+            ]
+          ],
+          [
+            [
+              113.23482788,
+              23.11047794
+            ],
+            [
+              113.23497736,
+              23.11077393
+            ],
+            [
+              113.23530205,
+              23.11103072
+            ],
+            [
+              113.23586955,
+              23.11114576
+            ],
+            [
+              113.23756352,
+              23.11119025
+            ],
+            [
+              113.23985452,
+              23.11114817
+            ],
+            [
+              113.24218074,
+              23.11110489
+            ],
+            [
+              113.24369474,
+              23.11102151
+            ],
+            [
+              113.24393659,
+              23.11084636
+            ],
+            [
+              113.24399277,
+              23.11034298
+            ],
+            [
+              113.243928,
+              23.10930863
+            ],
+            [
+              113.24377184,
+              23.10877883
+            ],
+            [
+              113.24330432,
+              23.1084599
+            ],
+            [
+              113.24262922,
+              23.10828156
+            ],
+            [
+              113.24156849,
+              23.10818281
+            ],
+            [
+              113.23755124,
+              23.10828181
+            ],
+            [
+              113.23642956,
+              23.10851938
+            ],
+            [
+              113.23562876,
+              23.10888011
+            ],
+            [
+              113.2351136,
+              23.10936517
+            ],
+            [
+              113.23491457,
+              23.10980638
+            ],
+            [
+              113.23482788,
+              23.11047794
+            ]
+          ],
+          [
+            [
+              113.25436998,
+              23.11314311
+            ],
+            [
+              113.2546252,
+              23.11343558
+            ],
+            [
+              113.25501657,
+              23.11355638
+            ],
+            [
+              113.25558123,
+              23.11357114
+            ],
+            [
+              113.25571738,
+              23.11339947
+            ],
+            [
+              113.25535838,
+              23.1131773
+            ],
+            [
+              113.25482608,
+              23.11306116
+            ],
+            [
+              113.25436998,
+              23.11314311
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-surveyed-land",
+      "properties": {
+        "kind": "known_dry",
+        "source": "yuedong-1900",
+        "name": "The historic Shamian concession dry island",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23482788,
+              23.11047794
+            ],
+            [
+              113.23497736,
+              23.11077393
+            ],
+            [
+              113.23530205,
+              23.11103072
+            ],
+            [
+              113.23586955,
+              23.11114576
+            ],
+            [
+              113.23756352,
+              23.11119025
+            ],
+            [
+              113.23985452,
+              23.11114817
+            ],
+            [
+              113.24218074,
+              23.11110489
+            ],
+            [
+              113.24369474,
+              23.11102151
+            ],
+            [
+              113.24393659,
+              23.11084636
+            ],
+            [
+              113.24399277,
+              23.11034298
+            ],
+            [
+              113.243928,
+              23.10930863
+            ],
+            [
+              113.24377184,
+              23.10877883
+            ],
+            [
+              113.24330432,
+              23.1084599
+            ],
+            [
+              113.24262922,
+              23.10828156
+            ],
+            [
+              113.24156849,
+              23.10818281
+            ],
+            [
+              113.23755124,
+              23.10828181
+            ],
+            [
+              113.23642956,
+              23.10851938
+            ],
+            [
+              113.23562876,
+              23.10888011
+            ],
+            [
+              113.2351136,
+              23.10936517
+            ],
+            [
+              113.23491457,
+              23.10980638
+            ],
+            [
+              113.23482788,
+              23.11047794
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sea-pearl-islet",
+      "properties": {
+        "kind": "known_dry",
+        "source": "yuedong-1900",
+        "name": "The period Sea Pearl islet",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.25436998,
+              23.11314311
+            ],
+            [
+              113.2546252,
+              23.11343558
+            ],
+            [
+              113.25501657,
+              23.11355638
+            ],
+            [
+              113.25558123,
+              23.11357114
+            ],
+            [
+              113.25571738,
+              23.11339947
+            ],
+            [
+              113.25535838,
+              23.1131773
+            ],
+            [
+              113.25482608,
+              23.11306116
+            ],
+            [
+              113.25436998,
+              23.11314311
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "xiguan-western-creek",
+      "properties": {
+        "kind": "water_surface",
+        "source": "yuedong-1900",
+        "name": "Western creek outlet through the historic Xiguan housing",
+        "basin": "river",
+        "alignment_reference": "schnock-1907",
+        "use_reference": "historic-shi-ba-pu"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.22697189,
+              23.12164963
+            ],
+            [
+              113.22771099,
+              23.12035478
+            ],
+            [
+              113.2277255,
+              23.120335
+            ],
+            [
+              113.2286493,
+              23.11933499
+            ],
+            [
+              113.22866443,
+              23.11932136
+            ],
+            [
+              113.22945867,
+              23.11872683
+            ],
+            [
+              113.2294916,
+              23.11870966
+            ],
+            [
+              113.22999141,
+              23.11854374
+            ],
+            [
+              113.2301659,
+              23.11783014
+            ],
+            [
+              113.2303158,
+              23.11692625
+            ],
+            [
+              113.23033432,
+              23.11688209
+            ],
+            [
+              113.23037109,
+              23.11684971
+            ],
+            [
+              113.23078967,
+              23.1166189
+            ],
+            [
+              113.23113853,
+              23.11583998
+            ],
+            [
+              113.23159758,
+              23.11465709
+            ],
+            [
+              113.23160248,
+              23.11464631
+            ],
+            [
+              113.23213771,
+              23.11362564
+            ],
+            [
+              113.23214552,
+              23.11361298
+            ],
+            [
+              113.23285785,
+              23.11261991
+            ],
+            [
+              113.23286177,
+              23.11261478
+            ],
+            [
+              113.23316234,
+              23.11224437
+            ],
+            [
+              113.233626,
+              23.11140362
+            ],
+            [
+              113.23409152,
+              23.11045435
+            ],
+            [
+              113.23412677,
+              23.11046969
+            ],
+            [
+              113.23417561,
+              23.11078863
+            ],
+            [
+              113.23382928,
+              23.11149486
+            ],
+            [
+              113.23382693,
+              23.11149937
+            ],
+            [
+              113.23335744,
+              23.1123507
+            ],
+            [
+              113.23334677,
+              23.11236653
+            ],
+            [
+              113.23304217,
+              23.1127419
+            ],
+            [
+              113.23233608,
+              23.11372628
+            ],
+            [
+              113.23180706,
+              23.11473511
+            ],
+            [
+              113.23134918,
+              23.11591497
+            ],
+            [
+              113.23134713,
+              23.11591988
+            ],
+            [
+              113.23098236,
+              23.11673433
+            ],
+            [
+              113.23093473,
+              23.11678552
+            ],
+            [
+              113.23053023,
+              23.11700857
+            ],
+            [
+              113.2303881,
+              23.11786558
+            ],
+            [
+              113.23038655,
+              23.11787316
+            ],
+            [
+              113.23019699,
+              23.11864841
+            ],
+            [
+              113.23017082,
+              23.11869609
+            ],
+            [
+              113.23012365,
+              23.11872593
+            ],
+            [
+              113.22958263,
+              23.11890554
+            ],
+            [
+              113.22881157,
+              23.11948271
+            ],
+            [
+              113.22790311,
+              23.12046613
+            ],
+            [
+              113.22717174,
+              23.12174743
+            ],
+            [
+              113.22657313,
+              23.12296786
+            ],
+            [
+              113.22636872,
+              23.12287889
+            ],
+            [
+              113.22696879,
+              23.12165549
+            ],
+            [
+              113.22697189,
+              23.12164963
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "xiguan-housing-creek-bend",
+      "properties": {
+        "kind": "water_surface",
+        "source": "yuedong-1900",
+        "name": "Inner mapped curve of the Xiguan creek",
+        "basin": "river",
+        "alignment_reference": "schnock-1907",
+        "use_reference": "historic-shi-ba-pu"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23158176,
+              23.11943553
+            ],
+            [
+              113.23158951,
+              23.11943799
+            ],
+            [
+              113.23232632,
+              23.11970996
+            ],
+            [
+              113.23291708,
+              23.11975261
+            ],
+            [
+              113.23338592,
+              23.11940433
+            ],
+            [
+              113.23353166,
+              23.1188481
+            ],
+            [
+              113.23338815,
+              23.11847485
+            ],
+            [
+              113.23338692,
+              23.11842347
+            ],
+            [
+              113.23341884,
+              23.11838169
+            ],
+            [
+              113.23373024,
+              23.11817083
+            ],
+            [
+              113.23375124,
+              23.11816044
+            ],
+            [
+              113.23448954,
+              23.11791126
+            ],
+            [
+              113.23465853,
+              23.11762584
+            ],
+            [
+              113.23451574,
+              23.11714131
+            ],
+            [
+              113.23410003,
+              23.11658627
+            ],
+            [
+              113.23355639,
+              23.11641266
+            ],
+            [
+              113.23352262,
+              23.11639231
+            ],
+            [
+              113.23319602,
+              23.11606872
+            ],
+            [
+              113.23317825,
+              23.11604202
+            ],
+            [
+              113.23317281,
+              23.1160108
+            ],
+            [
+              113.23319284,
+              23.11547518
+            ],
+            [
+              113.23321401,
+              23.11542473
+            ],
+            [
+              113.23369301,
+              23.11490743
+            ],
+            [
+              113.23372176,
+              23.11488717
+            ],
+            [
+              113.23455783,
+              23.11452528
+            ],
+            [
+              113.23457161,
+              23.11452062
+            ],
+            [
+              113.23565716,
+              23.11425082
+            ],
+            [
+              113.23568018,
+              23.1142482
+            ],
+            [
+              113.23701751,
+              23.11427084
+            ],
+            [
+              113.23828153,
+              23.11419583
+            ],
+            [
+              113.23828669,
+              23.11419568
+            ],
+            [
+              113.23934461,
+              23.11419424
+            ],
+            [
+              113.23935501,
+              23.11419483
+            ],
+            [
+              113.24002728,
+              23.11427297
+            ],
+            [
+              113.24007452,
+              23.11429394
+            ],
+            [
+              113.24043636,
+              23.11461636
+            ],
+            [
+              113.24046232,
+              23.11466609
+            ],
+            [
+              113.24055525,
+              23.11551142
+            ],
+            [
+              113.24096641,
+              23.11606034
+            ],
+            [
+              113.24172282,
+              23.11629388
+            ],
+            [
+              113.24166932,
+              23.11644647
+            ],
+            [
+              113.24088658,
+              23.1162048
+            ],
+            [
+              113.24084424,
+              23.1161753
+            ],
+            [
+              113.24040431,
+              23.11558798
+            ],
+            [
+              113.24038927,
+              23.11555012
+            ],
+            [
+              113.2402973,
+              23.11471343
+            ],
+            [
+              113.23997814,
+              23.11442905
+            ],
+            [
+              113.23933832,
+              23.11435468
+            ],
+            [
+              113.23828821,
+              23.11435611
+            ],
+            [
+              113.23702337,
+              23.11443116
+            ],
+            [
+              113.23701658,
+              23.1144313
+            ],
+            [
+              113.23568753,
+              23.11440881
+            ],
+            [
+              113.23462041,
+              23.11467403
+            ],
+            [
+              113.23380767,
+              23.11502582
+            ],
+            [
+              113.23336084,
+              23.11550837
+            ],
+            [
+              113.23334315,
+              23.11598156
+            ],
+            [
+              113.23363104,
+              23.11626681
+            ],
+            [
+              113.23418093,
+              23.11644243
+            ],
+            [
+              113.23422247,
+              23.11647168
+            ],
+            [
+              113.23466237,
+              23.11705903
+            ],
+            [
+              113.23467476,
+              23.11708367
+            ],
+            [
+              113.23483091,
+              23.11761348
+            ],
+            [
+              113.23482311,
+              23.11767449
+            ],
+            [
+              113.23462121,
+              23.11801549
+            ],
+            [
+              113.23457534,
+              23.11805218
+            ],
+            [
+              113.23381812,
+              23.11830774
+            ],
+            [
+              113.23356922,
+              23.11847628
+            ],
+            [
+              113.23369949,
+              23.11881506
+            ],
+            [
+              113.23370207,
+              23.11886183
+            ],
+            [
+              113.23354301,
+              23.1194689
+            ],
+            [
+              113.23351277,
+              23.11951313
+            ],
+            [
+              113.23299471,
+              23.11989797
+            ],
+            [
+              113.2329358,
+              23.11991496
+            ],
+            [
+              113.23229969,
+              23.11986903
+            ],
+            [
+              113.23227554,
+              23.11986383
+            ],
+            [
+              113.23153089,
+              23.11958896
+            ],
+            [
+              113.23075304,
+              23.1193817
+            ],
+            [
+              113.23071533,
+              23.11936031
+            ],
+            [
+              113.23002595,
+              23.11868086
+            ],
+            [
+              113.2301483,
+              23.11856916
+            ],
+            [
+              113.23082191,
+              23.11923307
+            ],
+            [
+              113.23158176,
+              23.11943553
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-xihao",
+      "properties": {
+        "kind": "water_surface",
+        "source": "yuedong-1900",
+        "name": "Historic Xihao outlet",
+        "basin": "river",
+        "alignment_reference": "schnock-1907",
+        "use_reference": "historic-shi-ba-pu"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24754372,
+              23.1178334
+            ],
+            [
+              113.247657,
+              23.11686005
+            ],
+            [
+              113.24765846,
+              23.11685087
+            ],
+            [
+              113.2478435,
+              23.11594499
+            ],
+            [
+              113.2479611,
+              23.11514167
+            ],
+            [
+              113.24796279,
+              23.11513273
+            ],
+            [
+              113.24821412,
+              23.11405452
+            ],
+            [
+              113.24821646,
+              23.11404606
+            ],
+            [
+              113.24860231,
+              23.11283768
+            ],
+            [
+              113.24880948,
+              23.11150178
+            ],
+            [
+              113.24897346,
+              23.11152346
+            ],
+            [
+              113.24904412,
+              23.11154905
+            ],
+            [
+              113.24883812,
+              23.11287742
+            ],
+            [
+              113.24883423,
+              23.1128939
+            ],
+            [
+              113.24844713,
+              23.1141062
+            ],
+            [
+              113.24819782,
+              23.11517571
+            ],
+            [
+              113.24808044,
+              23.11597755
+            ],
+            [
+              113.24807939,
+              23.11598355
+            ],
+            [
+              113.24789468,
+              23.11688786
+            ],
+            [
+              113.24778321,
+              23.11784577
+            ],
+            [
+              113.24788803,
+              23.11906852
+            ],
+            [
+              113.24764915,
+              23.11908868
+            ],
+            [
+              113.24754339,
+              23.11785508
+            ],
+            [
+              113.24754372,
+              23.1178334
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-yudai-channel",
+      "properties": {
+        "kind": "water_surface",
+        "source": "yuedong-1900",
+        "name": "Yudai channel along the South Gate wall",
+        "basin": "river",
+        "alignment_reference": "schnock-1907",
+        "use_reference": "historic-shi-ba-pu"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24916576,
+              23.11922487
+            ],
+            [
+              113.24918941,
+              23.11923281
+            ],
+            [
+              113.25022066,
+              23.11976345
+            ],
+            [
+              113.25130928,
+              23.12009055
+            ],
+            [
+              113.25236398,
+              23.12022176
+            ],
+            [
+              113.25237144,
+              23.12022302
+            ],
+            [
+              113.25357428,
+              23.12048326
+            ],
+            [
+              113.25484465,
+              23.12064127
+            ],
+            [
+              113.25484674,
+              23.12064155
+            ],
+            [
+              113.25594471,
+              23.12080585
+            ],
+            [
+              113.25595265,
+              23.12080743
+            ],
+            [
+              113.25700678,
+              23.12107023
+            ],
+            [
+              113.25801665,
+              23.12103682
+            ],
+            [
+              113.25801927,
+              23.12103677
+            ],
+            [
+              113.25911246,
+              23.12103403
+            ],
+            [
+              113.25914513,
+              23.12104048
+            ],
+            [
+              113.26003745,
+              23.12141217
+            ],
+            [
+              113.26006842,
+              23.121435
+            ],
+            [
+              113.26008428,
+              23.12146907
+            ],
+            [
+              113.26024122,
+              23.12233984
+            ],
+            [
+              113.2609543,
+              23.1223776
+            ],
+            [
+              113.26097972,
+              23.12238293
+            ],
+            [
+              113.26243419,
+              23.12293357
+            ],
+            [
+              113.2636993,
+              23.12315684
+            ],
+            [
+              113.26521688,
+              23.12330675
+            ],
+            [
+              113.26519885,
+              23.12345967
+            ],
+            [
+              113.26367804,
+              23.12330945
+            ],
+            [
+              113.26367163,
+              23.12330857
+            ],
+            [
+              113.26239554,
+              23.12308335
+            ],
+            [
+              113.26238041,
+              23.1230792
+            ],
+            [
+              113.26093083,
+              23.12253041
+            ],
+            [
+              113.26016695,
+              23.12248996
+            ],
+            [
+              113.26013255,
+              23.1224806
+            ],
+            [
+              113.26010589,
+              23.12245805
+            ],
+            [
+              113.26009219,
+              23.12242673
+            ],
+            [
+              113.25993174,
+              23.12153654
+            ],
+            [
+              113.25909456,
+              23.12118782
+            ],
+            [
+              113.25801975,
+              23.12119052
+            ],
+            [
+              113.25699928,
+              23.12122428
+            ],
+            [
+              113.2569759,
+              23.12122181
+            ],
+            [
+              113.25591422,
+              23.12095712
+            ],
+            [
+              113.2548213,
+              23.12079358
+            ],
+            [
+              113.25354821,
+              23.12063523
+            ],
+            [
+              113.25354075,
+              23.12063396
+            ],
+            [
+              113.25233791,
+              23.12037373
+            ],
+            [
+              113.25127989,
+              23.12024212
+            ],
+            [
+              113.25126602,
+              23.1202392
+            ],
+            [
+              113.25016328,
+              23.11990785
+            ],
+            [
+              113.25014922,
+              23.11990218
+            ],
+            [
+              113.24912239,
+              23.11937382
+            ],
+            [
+              113.24817786,
+              23.11920702
+            ],
+            [
+              113.24820874,
+              23.11905587
+            ],
+            [
+              113.24916576,
+              23.11922487
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-core-street-parcels-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Old City ordinary street fronts",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.2587961,
+              23.12978096
+            ],
+            [
+              113.2609179,
+              23.1299782
+            ],
+            [
+              113.26405963,
+              23.13007476
+            ],
+            [
+              113.26652133,
+              23.12982601
+            ],
+            [
+              113.26724977,
+              23.12940065
+            ],
+            [
+              113.26725048,
+              23.12819698
+            ],
+            [
+              113.26683605,
+              23.12727454
+            ],
+            [
+              113.26435427,
+              23.12682183
+            ],
+            [
+              113.26328861,
+              23.12655622
+            ],
+            [
+              113.26216014,
+              23.12656016
+            ],
+            [
+              113.26061076,
+              23.1266449
+            ],
+            [
+              113.25920041,
+              23.12665815
+            ],
+            [
+              113.25872625,
+              23.12734254
+            ],
+            [
+              113.2587961,
+              23.12978096
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-core-street-parcels",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Old City ordinary street fronts",
+        "role": "street_row",
+        "frontage_m": [
+          4.3,
+          8.6
+        ],
+        "depth_m": [
+          11,
+          21
+        ],
+        "setback_m": [
+          0.2,
+          1.2
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 1.25,
+        "use_reference": "yuedong-1900",
+        "form_reference": "yuedong-1900",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.2587961,
+              23.12978096
+            ],
+            [
+              113.2609179,
+              23.1299782
+            ],
+            [
+              113.26405963,
+              23.13007476
+            ],
+            [
+              113.26652133,
+              23.12982601
+            ],
+            [
+              113.26724977,
+              23.12940065
+            ],
+            [
+              113.26725048,
+              23.12819698
+            ],
+            [
+              113.26683605,
+              23.12727454
+            ],
+            [
+              113.26435427,
+              23.12682183
+            ],
+            [
+              113.26328861,
+              23.12655622
+            ],
+            [
+              113.26216014,
+              23.12656016
+            ],
+            [
+              113.26061076,
+              23.1266449
+            ],
+            [
+              113.25920041,
+              23.12665815
+            ],
+            [
+              113.25872625,
+              23.12734254
+            ],
+            [
+              113.2587961,
+              23.12978096
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-west-gate-parcels-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Old City West Gate interior housing",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.2501062,
+              23.13053642
+            ],
+            [
+              113.25275369,
+              23.13061609
+            ],
+            [
+              113.25538779,
+              23.13022808
+            ],
+            [
+              113.25728288,
+              23.12989791
+            ],
+            [
+              113.25826757,
+              23.12979846
+            ],
+            [
+              113.25829403,
+              23.12825958
+            ],
+            [
+              113.25627892,
+              23.12809221
+            ],
+            [
+              113.25374675,
+              23.12834313
+            ],
+            [
+              113.25132122,
+              23.12862392
+            ],
+            [
+              113.25001464,
+              23.12856679
+            ],
+            [
+              113.24988992,
+              23.1291393
+            ],
+            [
+              113.2501062,
+              23.13053642
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-west-gate-parcels",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Old City West Gate interior housing",
+        "role": "street_row",
+        "frontage_m": [
+          4.0,
+          7.5
+        ],
+        "depth_m": [
+          10,
+          19
+        ],
+        "setback_m": [
+          0.3,
+          1.5
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 1.3,
+        "use_reference": "yuedong-1900",
+        "form_reference": "yuedong-1900",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.2501062,
+              23.13053642
+            ],
+            [
+              113.25275369,
+              23.13061609
+            ],
+            [
+              113.25538779,
+              23.13022808
+            ],
+            [
+              113.25728288,
+              23.12989791
+            ],
+            [
+              113.25826757,
+              23.12979846
+            ],
+            [
+              113.25829403,
+              23.12825958
+            ],
+            [
+              113.25627892,
+              23.12809221
+            ],
+            [
+              113.25374675,
+              23.12834313
+            ],
+            [
+              113.25132122,
+              23.12862392
+            ],
+            [
+              113.25001464,
+              23.12856679
+            ],
+            [
+              113.24988992,
+              23.1291393
+            ],
+            [
+              113.2501062,
+              23.13053642
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-southern-parcels-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Old City ordinary southern courtyard lots",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.25712155,
+              23.12672694
+            ],
+            [
+              113.25913377,
+              23.1267941
+            ],
+            [
+              113.25950969,
+              23.12514335
+            ],
+            [
+              113.25911238,
+              23.12358507
+            ],
+            [
+              113.25889698,
+              23.12222137
+            ],
+            [
+              113.25835413,
+              23.12173781
+            ],
+            [
+              113.25695339,
+              23.12208507
+            ],
+            [
+              113.25703261,
+              23.12362045
+            ],
+            [
+              113.25712155,
+              23.12672694
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-city-southern-parcels",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Old City ordinary southern courtyard lots",
+        "role": "courtyard_home",
+        "frontage_m": [
+          6.7,
+          12.5
+        ],
+        "depth_m": [
+          14,
+          23
+        ],
+        "setback_m": [
+          2,
+          6
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 3.0,
+        "use_reference": "yuedong-1900",
+        "form_reference": "yuedong-1900",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.25712155,
+              23.12672694
+            ],
+            [
+              113.25913377,
+              23.1267941
+            ],
+            [
+              113.25950969,
+              23.12514335
+            ],
+            [
+              113.25911238,
+              23.12358507
+            ],
+            [
+              113.25889698,
+              23.12222137
+            ],
+            [
+              113.25835413,
+              23.12173781
+            ],
+            [
+              113.25695339,
+              23.12208507
+            ],
+            [
+              113.25703261,
+              23.12362045
+            ],
+            [
+              113.25712155,
+              23.12672694
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-gate-outer-parcels-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Urban blocks west of the Old City wall",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24060286,
+              23.12998083
+            ],
+            [
+              113.24207802,
+              23.12976499
+            ],
+            [
+              113.24349032,
+              23.1298187
+            ],
+            [
+              113.24511309,
+              23.12983201
+            ],
+            [
+              113.24653399,
+              23.13018632
+            ],
+            [
+              113.24777107,
+              23.13027921
+            ],
+            [
+              113.24794527,
+              23.12896949
+            ],
+            [
+              113.24700243,
+              23.12806445
+            ],
+            [
+              113.24502542,
+              23.12799598
+            ],
+            [
+              113.24316174,
+              23.12819123
+            ],
+            [
+              113.24169041,
+              23.12854069
+            ],
+            [
+              113.24059428,
+              23.1284431
+            ],
+            [
+              113.24060286,
+              23.12998083
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-gate-outer-parcels",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Urban blocks west of the Old City wall",
+        "role": "street_row",
+        "frontage_m": [
+          4.1,
+          8.6
+        ],
+        "depth_m": [
+          11,
+          21
+        ],
+        "setback_m": [
+          0.5,
+          2
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 1.4,
+        "use_reference": "yuedong-1900",
+        "form_reference": "xiguan-heritage-forms",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24060286,
+              23.12998083
+            ],
+            [
+              113.24207802,
+              23.12976499
+            ],
+            [
+              113.24349032,
+              23.1298187
+            ],
+            [
+              113.24511309,
+              23.12983201
+            ],
+            [
+              113.24653399,
+              23.13018632
+            ],
+            [
+              113.24777107,
+              23.13027921
+            ],
+            [
+              113.24794527,
+              23.12896949
+            ],
+            [
+              113.24700243,
+              23.12806445
+            ],
+            [
+              113.24502542,
+              23.12799598
+            ],
+            [
+              113.24316174,
+              23.12819123
+            ],
+            [
+              113.24169041,
+              23.12854069
+            ],
+            [
+              113.24059428,
+              23.1284431
+            ],
+            [
+              113.24060286,
+              23.12998083
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-suburb-ordinary-blocks-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Ordinary lanes through western residential blocks",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24029526,
+              23.12661404
+            ],
+            [
+              113.24169801,
+              23.12633373
+            ],
+            [
+              113.24316455,
+              23.12581726
+            ],
+            [
+              113.24495773,
+              23.12562434
+            ],
+            [
+              113.2462538,
+              23.12531408
+            ],
+            [
+              113.24599089,
+              23.12351727
+            ],
+            [
+              113.24563469,
+              23.1221582
+            ],
+            [
+              113.24534039,
+              23.12049617
+            ],
+            [
+              113.24488518,
+              23.1193744
+            ],
+            [
+              113.24322635,
+              23.11932884
+            ],
+            [
+              113.24173892,
+              23.11911043
+            ],
+            [
+              113.24038386,
+              23.11982382
+            ],
+            [
+              113.23996009,
+              23.12104145
+            ],
+            [
+              113.24065715,
+              23.12198808
+            ],
+            [
+              113.24026861,
+              23.12320455
+            ],
+            [
+              113.24029526,
+              23.12661404
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-suburb-ordinary-blocks",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Ordinary lanes through western residential blocks",
+        "role": "street_row",
+        "frontage_m": [
+          4.0,
+          7.3
+        ],
+        "depth_m": [
+          11,
+          22
+        ],
+        "setback_m": [
+          0.5,
+          2.2
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 1.1,
+        "use_reference": "yuedong-1900",
+        "form_reference": "xiguan-heritage-forms",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24029526,
+              23.12661404
+            ],
+            [
+              113.24169801,
+              23.12633373
+            ],
+            [
+              113.24316455,
+              23.12581726
+            ],
+            [
+              113.24495773,
+              23.12562434
+            ],
+            [
+              113.2462538,
+              23.12531408
+            ],
+            [
+              113.24599089,
+              23.12351727
+            ],
+            [
+              113.24563469,
+              23.1221582
+            ],
+            [
+              113.24534039,
+              23.12049617
+            ],
+            [
+              113.24488518,
+              23.1193744
+            ],
+            [
+              113.24322635,
+              23.11932884
+            ],
+            [
+              113.24173892,
+              23.11911043
+            ],
+            [
+              113.24038386,
+              23.11982382
+            ],
+            [
+              113.23996009,
+              23.12104145
+            ],
+            [
+              113.24065715,
+              23.12198808
+            ],
+            [
+              113.24026861,
+              23.12320455
+            ],
+            [
+              113.24029526,
+              23.12661404
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "xiguan-north-creek-rows-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Narrow deep housing just north of the Xiguan creek",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23046015,
+              23.12182251
+            ],
+            [
+              113.23197143,
+              23.12163902
+            ],
+            [
+              113.23394266,
+              23.12150723
+            ],
+            [
+              113.23633478,
+              23.12129469
+            ],
+            [
+              113.23808888,
+              23.1209694
+            ],
+            [
+              113.23966965,
+              23.12075011
+            ],
+            [
+              113.24007913,
+              23.12026852
+            ],
+            [
+              113.2394497,
+              23.11921936
+            ],
+            [
+              113.23828984,
+              23.1193579
+            ],
+            [
+              113.23716046,
+              23.11932825
+            ],
+            [
+              113.23595301,
+              23.11903369
+            ],
+            [
+              113.23507882,
+              23.11929653
+            ],
+            [
+              113.23409133,
+              23.11929562
+            ],
+            [
+              113.23336663,
+              23.11985445
+            ],
+            [
+              113.23214104,
+              23.12016229
+            ],
+            [
+              113.23131926,
+              23.11978812
+            ],
+            [
+              113.23064032,
+              23.11947612
+            ],
+            [
+              113.2301213,
+              23.11982755
+            ],
+            [
+              113.23046015,
+              23.12182251
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "xiguan-north-creek-rows",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Narrow deep housing just north of the Xiguan creek",
+        "role": "street_row",
+        "frontage_m": [
+          3.6,
+          6.3
+        ],
+        "depth_m": [
+          13,
+          24
+        ],
+        "setback_m": [
+          0.45,
+          1.3
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 0.9,
+        "use_reference": "yuedong-1900",
+        "form_reference": "xiguan-heritage-forms",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23046015,
+              23.12182251
+            ],
+            [
+              113.23197143,
+              23.12163902
+            ],
+            [
+              113.23394266,
+              23.12150723
+            ],
+            [
+              113.23633478,
+              23.12129469
+            ],
+            [
+              113.23808888,
+              23.1209694
+            ],
+            [
+              113.23966965,
+              23.12075011
+            ],
+            [
+              113.24007913,
+              23.12026852
+            ],
+            [
+              113.2394497,
+              23.11921936
+            ],
+            [
+              113.23828984,
+              23.1193579
+            ],
+            [
+              113.23716046,
+              23.11932825
+            ],
+            [
+              113.23595301,
+              23.11903369
+            ],
+            [
+              113.23507882,
+              23.11929653
+            ],
+            [
+              113.23409133,
+              23.11929562
+            ],
+            [
+              113.23336663,
+              23.11985445
+            ],
+            [
+              113.23214104,
+              23.12016229
+            ],
+            [
+              113.23131926,
+              23.11978812
+            ],
+            [
+              113.23064032,
+              23.11947612
+            ],
+            [
+              113.2301213,
+              23.11982755
+            ],
+            [
+              113.23046015,
+              23.12182251
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "xiguan-creek-bend-houses-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Creek bend deep housing and linked alleys around the Eleventh Pu",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23105078,
+              23.11902795
+            ],
+            [
+              113.23212014,
+              23.11942741
+            ],
+            [
+              113.2329686,
+              23.11949977
+            ],
+            [
+              113.23330288,
+              23.1188535
+            ],
+            [
+              113.23328673,
+              23.11828564
+            ],
+            [
+              113.23391333,
+              23.11799752
+            ],
+            [
+              113.23436186,
+              23.1176484
+            ],
+            [
+              113.23395243,
+              23.11689287
+            ],
+            [
+              113.23312877,
+              23.11645191
+            ],
+            [
+              113.23286124,
+              23.11572515
+            ],
+            [
+              113.2331203,
+              23.11491417
+            ],
+            [
+              113.23363643,
+              23.11446252
+            ],
+            [
+              113.23422493,
+              23.11407535
+            ],
+            [
+              113.23392027,
+              23.11328295
+            ],
+            [
+              113.23334895,
+              23.11303428
+            ],
+            [
+              113.23238905,
+              23.11400207
+            ],
+            [
+              113.2317957,
+              23.11545931
+            ],
+            [
+              113.2313995,
+              23.11640854
+            ],
+            [
+              113.23096046,
+              23.11709169
+            ],
+            [
+              113.23041952,
+              23.11791194
+            ],
+            [
+              113.23105078,
+              23.11902795
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "xiguan-creek-bend-houses",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Creek bend deep housing and linked alleys around the Eleventh Pu",
+        "role": "street_row",
+        "frontage_m": [
+          3.4,
+          6.4
+        ],
+        "depth_m": [
+          14,
+          24
+        ],
+        "setback_m": [
+          0.35,
+          1.3
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 0.8,
+        "use_reference": "yuedong-1900",
+        "form_reference": "xiguan-heritage-forms",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23105078,
+              23.11902795
+            ],
+            [
+              113.23212014,
+              23.11942741
+            ],
+            [
+              113.2329686,
+              23.11949977
+            ],
+            [
+              113.23330288,
+              23.1188535
+            ],
+            [
+              113.23328673,
+              23.11828564
+            ],
+            [
+              113.23391333,
+              23.11799752
+            ],
+            [
+              113.23436186,
+              23.1176484
+            ],
+            [
+              113.23395243,
+              23.11689287
+            ],
+            [
+              113.23312877,
+              23.11645191
+            ],
+            [
+              113.23286124,
+              23.11572515
+            ],
+            [
+              113.2331203,
+              23.11491417
+            ],
+            [
+              113.23363643,
+              23.11446252
+            ],
+            [
+              113.23422493,
+              23.11407535
+            ],
+            [
+              113.23392027,
+              23.11328295
+            ],
+            [
+              113.23334895,
+              23.11303428
+            ],
+            [
+              113.23238905,
+              23.11400207
+            ],
+            [
+              113.2317957,
+              23.11545931
+            ],
+            [
+              113.2313995,
+              23.11640854
+            ],
+            [
+              113.23096046,
+              23.11709169
+            ],
+            [
+              113.23041952,
+              23.11791194
+            ],
+            [
+              113.23105078,
+              23.11902795
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "xiguan-lower-court-parcels-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Ordinary courts set behind the Xiguan waterfront lanes",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23378482,
+              23.11719931
+            ],
+            [
+              113.23512653,
+              23.11725542
+            ],
+            [
+              113.23611591,
+              23.11732313
+            ],
+            [
+              113.23724528,
+              23.11735279
+            ],
+            [
+              113.23883647,
+              23.11750095
+            ],
+            [
+              113.23974778,
+              23.11730373
+            ],
+            [
+              113.240242,
+              23.11608378
+            ],
+            [
+              113.23964116,
+              23.11479962
+            ],
+            [
+              113.23843565,
+              23.11457188
+            ],
+            [
+              113.23681306,
+              23.11455849
+            ],
+            [
+              113.23515523,
+              23.11454624
+            ],
+            [
+              113.23414394,
+              23.11494733
+            ],
+            [
+              113.23362401,
+              23.11526537
+            ],
+            [
+              113.2333621,
+              23.11597613
+            ],
+            [
+              113.23378482,
+              23.11719931
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "xiguan-lower-court-parcels",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Ordinary courts set behind the Xiguan waterfront lanes",
+        "role": "courtyard_home",
+        "frontage_m": [
+          6.6,
+          11.4
+        ],
+        "depth_m": [
+          13,
+          22
+        ],
+        "setback_m": [
+          2,
+          5
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 3.3,
+        "use_reference": "yuedong-1900",
+        "form_reference": "xiguan-heritage-forms",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23378482,
+              23.11719931
+            ],
+            [
+              113.23512653,
+              23.11725542
+            ],
+            [
+              113.23611591,
+              23.11732313
+            ],
+            [
+              113.23724528,
+              23.11735279
+            ],
+            [
+              113.23883647,
+              23.11750095
+            ],
+            [
+              113.23974778,
+              23.11730373
+            ],
+            [
+              113.240242,
+              23.11608378
+            ],
+            [
+              113.23964116,
+              23.11479962
+            ],
+            [
+              113.23843565,
+              23.11457188
+            ],
+            [
+              113.23681306,
+              23.11455849
+            ],
+            [
+              113.23515523,
+              23.11454624
+            ],
+            [
+              113.23414394,
+              23.11494733
+            ],
+            [
+              113.23362401,
+              23.11526537
+            ],
+            [
+              113.2333621,
+              23.11597613
+            ],
+            [
+              113.23378482,
+              23.11719931
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-mainland-houses-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Mainland Lower Xiguan housing behind the Shamian channel",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.2394945,
+              23.11584094
+            ],
+            [
+              113.2410495,
+              23.11595684
+            ],
+            [
+              113.24242357,
+              23.11591152
+            ],
+            [
+              113.24383383,
+              23.11589843
+            ],
+            [
+              113.24563164,
+              23.11587253
+            ],
+            [
+              113.24742945,
+              23.11584661
+            ],
+            [
+              113.24769319,
+              23.11520264
+            ],
+            [
+              113.24776741,
+              23.11409684
+            ],
+            [
+              113.24793875,
+              23.11268691
+            ],
+            [
+              113.24783205,
+              23.11141991
+            ],
+            [
+              113.24659132,
+              23.1111934
+            ],
+            [
+              113.24506399,
+              23.11080915
+            ],
+            [
+              113.24430224,
+              23.11130238
+            ],
+            [
+              113.24324911,
+              23.11147087
+            ],
+            [
+              113.24138184,
+              23.11153246
+            ],
+            [
+              113.23997163,
+              23.11154553
+            ],
+            [
+              113.23927937,
+              23.11200301
+            ],
+            [
+              113.23913081,
+              23.11297752
+            ],
+            [
+              113.23923267,
+              23.11407752
+            ],
+            [
+              113.2394945,
+              23.11584094
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-mainland-houses",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Mainland Lower Xiguan housing behind the Shamian channel",
+        "role": "street_row",
+        "frontage_m": [
+          4.4,
+          8.4
+        ],
+        "depth_m": [
+          12,
+          22
+        ],
+        "setback_m": [
+          0.35,
+          1.55
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 1.2,
+        "use_reference": "yuedong-1900",
+        "form_reference": "xiguan-heritage-forms",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.2394945,
+              23.11584094
+            ],
+            [
+              113.2410495,
+              23.11595684
+            ],
+            [
+              113.24242357,
+              23.11591152
+            ],
+            [
+              113.24383383,
+              23.11589843
+            ],
+            [
+              113.24563164,
+              23.11587253
+            ],
+            [
+              113.24742945,
+              23.11584661
+            ],
+            [
+              113.24769319,
+              23.11520264
+            ],
+            [
+              113.24776741,
+              23.11409684
+            ],
+            [
+              113.24793875,
+              23.11268691
+            ],
+            [
+              113.24783205,
+              23.11141991
+            ],
+            [
+              113.24659132,
+              23.1111934
+            ],
+            [
+              113.24506399,
+              23.11080915
+            ],
+            [
+              113.24430224,
+              23.11130238
+            ],
+            [
+              113.24324911,
+              23.11147087
+            ],
+            [
+              113.24138184,
+              23.11153246
+            ],
+            [
+              113.23997163,
+              23.11154553
+            ],
+            [
+              113.23927937,
+              23.11200301
+            ],
+            [
+              113.23913081,
+              23.11297752
+            ],
+            [
+              113.23923267,
+              23.11407752
+            ],
+            [
+              113.2394945,
+              23.11584094
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "new-city-south-gate-rows-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "New City traditional blocks south of its gate",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24836565,
+              23.11899201
+            ],
+            [
+              113.24967787,
+              23.11924958
+            ],
+            [
+              113.2515605,
+              23.11972234
+            ],
+            [
+              113.25389736,
+              23.12004631
+            ],
+            [
+              113.25549816,
+              23.12052834
+            ],
+            [
+              113.25691323,
+              23.12068214
+            ],
+            [
+              113.25789976,
+              23.1206495
+            ],
+            [
+              113.25809012,
+              23.11990764
+            ],
+            [
+              113.2582309,
+              23.11866589
+            ],
+            [
+              113.25848503,
+              23.11768787
+            ],
+            [
+              113.25751271,
+              23.11698448
+            ],
+            [
+              113.25622809,
+              23.11645858
+            ],
+            [
+              113.25519966,
+              23.11625855
+            ],
+            [
+              113.25405981,
+              23.11586159
+            ],
+            [
+              113.25285427,
+              23.11563396
+            ],
+            [
+              113.25143162,
+              23.11521289
+            ],
+            [
+              113.25008707,
+              23.11505671
+            ],
+            [
+              113.24888441,
+              23.11492926
+            ],
+            [
+              113.24851402,
+              23.11554332
+            ],
+            [
+              113.24836565,
+              23.11899201
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "new-city-south-gate-rows",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "New City traditional blocks south of its gate",
+        "role": "street_row",
+        "frontage_m": [
+          4.2,
+          8.5
+        ],
+        "depth_m": [
+          11,
+          19
+        ],
+        "setback_m": [
+          0.4,
+          1.7
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 1.3,
+        "use_reference": "yuedong-1900",
+        "form_reference": "yuedong-1900",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24836565,
+              23.11899201
+            ],
+            [
+              113.24967787,
+              23.11924958
+            ],
+            [
+              113.2515605,
+              23.11972234
+            ],
+            [
+              113.25389736,
+              23.12004631
+            ],
+            [
+              113.25549816,
+              23.12052834
+            ],
+            [
+              113.25691323,
+              23.12068214
+            ],
+            [
+              113.25789976,
+              23.1206495
+            ],
+            [
+              113.25809012,
+              23.11990764
+            ],
+            [
+              113.2582309,
+              23.11866589
+            ],
+            [
+              113.25848503,
+              23.11768787
+            ],
+            [
+              113.25751271,
+              23.11698448
+            ],
+            [
+              113.25622809,
+              23.11645858
+            ],
+            [
+              113.25519966,
+              23.11625855
+            ],
+            [
+              113.25405981,
+              23.11586159
+            ],
+            [
+              113.25285427,
+              23.11563396
+            ],
+            [
+              113.25143162,
+              23.11521289
+            ],
+            [
+              113.25008707,
+              23.11505671
+            ],
+            [
+              113.24888441,
+              23.11492926
+            ],
+            [
+              113.24851402,
+              23.11554332
+            ],
+            [
+              113.24836565,
+              23.11899201
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "new-city-frontage-quay-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Inferred commercial street fronts inside the mapped south suburb by the river",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24856922,
+              23.11500654
+            ],
+            [
+              113.25023372,
+              23.11525247
+            ],
+            [
+              113.25186395,
+              23.11553295
+            ],
+            [
+              113.25335708,
+              23.11595169
+            ],
+            [
+              113.25473878,
+              23.11617349
+            ],
+            [
+              113.2560929,
+              23.11666366
+            ],
+            [
+              113.25718701,
+              23.11669434
+            ],
+            [
+              113.25712214,
+              23.11566001
+            ],
+            [
+              113.25594228,
+              23.11509721
+            ],
+            [
+              113.25447866,
+              23.11447691
+            ],
+            [
+              113.25383398,
+              23.11413044
+            ],
+            [
+              113.25247798,
+              23.11357344
+            ],
+            [
+              113.25139621,
+              23.11273988
+            ],
+            [
+              113.24982599,
+              23.11208962
+            ],
+            [
+              113.24904994,
+              23.11208182
+            ],
+            [
+              113.24871957,
+              23.11286174
+            ],
+            [
+              113.24856922,
+              23.11500654
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "new-city-frontage-quay",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Inferred commercial street fronts inside the mapped south suburb by the river",
+        "role": "shop",
+        "frontage_m": [
+          4.4,
+          8.1
+        ],
+        "depth_m": [
+          12,
+          19
+        ],
+        "setback_m": [
+          0.5,
+          1.8
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 1.6,
+        "use_reference": "yuedong-1900",
+        "form_reference": "yuedong-1900",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.24856922,
+              23.11500654
+            ],
+            [
+              113.25023372,
+              23.11525247
+            ],
+            [
+              113.25186395,
+              23.11553295
+            ],
+            [
+              113.25335708,
+              23.11595169
+            ],
+            [
+              113.25473878,
+              23.11617349
+            ],
+            [
+              113.2560929,
+              23.11666366
+            ],
+            [
+              113.25718701,
+              23.11669434
+            ],
+            [
+              113.25712214,
+              23.11566001
+            ],
+            [
+              113.25594228,
+              23.11509721
+            ],
+            [
+              113.25447866,
+              23.11447691
+            ],
+            [
+              113.25383398,
+              23.11413044
+            ],
+            [
+              113.25247798,
+              23.11357344
+            ],
+            [
+              113.25139621,
+              23.11273988
+            ],
+            [
+              113.24982599,
+              23.11208962
+            ],
+            [
+              113.24904994,
+              23.11208182
+            ],
+            [
+              113.24871957,
+              23.11286174
+            ],
+            [
+              113.24856922,
+              23.11500654
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-interior-low-lots-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "yuedong-1900",
+        "name": "Detached low masses in the mapped concession blocks. Facades are not reconstructed.",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23554011,
+              23.11072196
+            ],
+            [
+              113.23642755,
+              23.11092677
+            ],
+            [
+              113.23751878,
+              23.11085738
+            ],
+            [
+              113.23878901,
+              23.11088238
+            ],
+            [
+              113.23974121,
+              23.11088443
+            ],
+            [
+              113.2409724,
+              23.11077696
+            ],
+            [
+              113.24256067,
+              23.11082488
+            ],
+            [
+              113.24361665,
+              23.11075661
+            ],
+            [
+              113.24377852,
+              23.11024974
+            ],
+            [
+              113.24371852,
+              23.10938241
+            ],
+            [
+              113.24331574,
+              23.10886074
+            ],
+            [
+              113.24225025,
+              23.10859498
+            ],
+            [
+              113.24090768,
+              23.10850551
+            ],
+            [
+              113.23938895,
+              23.10842185
+            ],
+            [
+              113.23776738,
+              23.10844186
+            ],
+            [
+              113.23668283,
+              23.10874508
+            ],
+            [
+              113.23588203,
+              23.10910581
+            ],
+            [
+              113.23519452,
+              23.10973029
+            ],
+            [
+              113.23554011,
+              23.11072196
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-interior-low-lots",
+      "properties": {
+        "kind": "zone",
+        "source": "yuedong-1900",
+        "name": "Detached low masses in the mapped concession blocks. Facades are not reconstructed.",
+        "role": "low_home",
+        "frontage_m": [
+          10,
+          16
+        ],
+        "depth_m": [
+          12,
+          20
+        ],
+        "setback_m": [
+          4.5,
+          8.0
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "gap_m": 9.5,
+        "use_reference": "yuedong-1900",
+        "form_reference": "kerr-vrooman-late-qing",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23554011,
+              23.11072196
+            ],
+            [
+              113.23642755,
+              23.11092677
+            ],
+            [
+              113.23751878,
+              23.11085738
+            ],
+            [
+              113.23878901,
+              23.11088238
+            ],
+            [
+              113.23974121,
+              23.11088443
+            ],
+            [
+              113.2409724,
+              23.11077696
+            ],
+            [
+              113.24256067,
+              23.11082488
+            ],
+            [
+              113.24361665,
+              23.11075661
+            ],
+            [
+              113.24377852,
+              23.11024974
+            ],
+            [
+              113.24371852,
+              23.10938241
+            ],
+            [
+              113.24331574,
+              23.10886074
+            ],
+            [
+              113.24225025,
+              23.10859498
+            ],
+            [
+              113.24090768,
+              23.10850551
+            ],
+            [
+              113.23938895,
+              23.10842185
+            ],
+            [
+              113.23776738,
+              23.10844186
+            ],
+            [
+              113.23668283,
+              23.10874508
+            ],
+            [
+              113.23588203,
+              23.10910581
+            ],
+            [
+              113.23519452,
+              23.10973029
+            ],
+            [
+              113.23554011,
+              23.11072196
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-xiguan-vegetable-edge",
+      "properties": {
+        "kind": "open_ground",
+        "source": "yuedong-1900",
+        "name": "Mapped vegetable ground at the west edge of Xiguan",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.22726519,
+              23.12232885
+            ],
+            [
+              113.2285251,
+              23.12198649
+            ],
+            [
+              113.22992309,
+              23.12153927
+            ],
+            [
+              113.2301365,
+              23.12036201
+            ],
+            [
+              113.22982804,
+              23.11943598
+            ],
+            [
+              113.22950334,
+              23.11917919
+            ],
+            [
+              113.22884908,
+              23.11973568
+            ],
+            [
+              113.22802624,
+              23.12056519
+            ],
+            [
+              113.22754909,
+              23.12114928
+            ],
+            [
+              113.22726519,
+              23.12232885
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-xiguan-west-vegetable-edge",
+      "properties": {
+        "kind": "open_ground",
+        "source": "yuedong-1900",
+        "name": "Vegetable land on the outer bank above the Pearl River",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.22678193,
+              23.1177307
+            ],
+            [
+              113.22778175,
+              23.11816591
+            ],
+            [
+              113.22897495,
+              23.11795947
+            ],
+            [
+              113.22978342,
+              23.117866
+            ],
+            [
+              113.23021012,
+              23.1167486
+            ],
+            [
+              113.23064347,
+              23.11586502
+            ],
+            [
+              113.23094062,
+              23.11515311
+            ],
+            [
+              113.23044261,
+              23.11500232
+            ],
+            [
+              113.22955705,
+              23.11486429
+            ],
+            [
+              113.22872962,
+              23.11428968
+            ],
+            [
+              113.22810871,
+              23.1147782
+            ],
+            [
+              113.2275973,
+              23.11539686
+            ],
+            [
+              113.22698967,
+              23.11635303
+            ],
+            [
+              113.22678193,
+              23.1177307
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sacred-heart-precinct",
+      "properties": {
+        "kind": "courtyard",
+        "source": "yuedong-1900",
+        "name": "Sourced Sacred Heart Cathedral precinct. No standalone landmark mesh in this plan.",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.25473998,
+              23.11868106
+            ],
+            [
+              113.25533894,
+              23.11866125
+            ],
+            [
+              113.25560646,
+              23.11815088
+            ],
+            [
+              113.25555594,
+              23.1176176
+            ],
+            [
+              113.2551255,
+              23.11736435
+            ],
+            [
+              113.25463798,
+              23.11758108
+            ],
+            [
+              113.25451138,
+              23.11808679
+            ],
+            [
+              113.25473998,
+              23.11868106
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shamian-west-garden-edge",
+      "properties": {
+        "kind": "open_ground",
+        "source": "yuedong-1900",
+        "name": "Open concession ground by the Shamian west end",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              113.23507545,
+              23.11050322
+            ],
+            [
+              113.23536586,
+              23.11079457
+            ],
+            [
+              113.23596764,
+              23.11087505
+            ],
+            [
+              113.23587912,
+              23.1102427
+            ],
+            [
+              113.23530971,
+              23.11006085
+            ],
+            [
+              113.23510023,
+              23.11013462
+            ],
+            [
+              113.23507545,
+              23.11050322
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shared-period-settlement-evidence",
+      "properties": {
+        "kind": "coverage",
+        "source": "yuedong-1900",
+        "name": "The traced settlement fragments above the historic Pearl and on Shamian",
+        "alignment_reference": "schnock-1907"
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                113.22972508,
+                23.12077677
+              ],
+              [
+                113.2294757,
+                23.11944758
+              ],
+              [
+                113.22965862,
+                23.1184385
+              ],
+              [
+                113.22958162,
+                23.11696989
+              ],
+              [
+                113.22954175,
+                23.11556693
+              ],
+              [
+                113.22915241,
+                23.11427577
+              ],
+              [
+                113.23024662,
+                23.11306954
+              ],
+              [
+                113.230779,
+                23.11194866
+              ],
+              [
+                113.23172172,
+                23.11161671
+              ],
+              [
+                113.23304058,
+                23.11087115
+              ],
+              [
+                113.23405469,
+                23.11057028
+              ],
+              [
+                113.23453741,
+                23.11142369
+              ],
+              [
+                113.23591524,
+                23.11151204
+              ],
+              [
+                113.23841954,
+                23.11152983
+              ],
+              [
+                113.24028586,
+                23.11143486
+              ],
+              [
+                113.24271874,
+                23.1114215
+              ],
+              [
+                113.24429653,
+                23.11110196
+              ],
+              [
+                113.24458598,
+                23.1101228
+              ],
+              [
+                113.24558007,
+                23.11035747
+              ],
+              [
+                113.24700457,
+                23.1108454
+              ],
+              [
+                113.24849762,
+                23.11126419
+              ],
+              [
+                113.25013734,
+                23.11187873
+              ],
+              [
+                113.25149904,
+                23.11263618
+              ],
+              [
+                113.25293599,
+                23.1135583
+              ],
+              [
+                113.25468909,
+                23.11443652
+              ],
+              [
+                113.25678689,
+                23.11503584
+              ],
+              [
+                113.25946755,
+                23.11628453
+              ],
+              [
+                113.25976775,
+                23.11814694
+              ],
+              [
+                113.26004421,
+                23.12041136
+              ],
+              [
+                113.26322231,
+                23.12301434
+              ],
+              [
+                113.26570711,
+                23.12480436
+              ],
+              [
+                113.26767785,
+                23.1271129
+              ],
+              [
+                113.26778213,
+                23.12951674
+              ],
+              [
+                113.2660786,
+                23.13037564
+              ],
+              [
+                113.26248935,
+                23.13066173
+              ],
+              [
+                113.25796767,
+                23.13041021
+              ],
+              [
+                113.25343082,
+                23.13086118
+              ],
+              [
+                113.24848915,
+                23.13072358
+              ],
+              [
+                113.2474949,
+                23.13048894
+              ],
+              [
+                113.2450893,
+                23.13023401
+              ],
+              [
+                113.24293417,
+                23.13010453
+              ],
+              [
+                113.24060476,
+                23.13004763
+              ],
+              [
+                113.23970291,
+                23.12810471
+              ],
+              [
+                113.2397134,
+                23.12599796
+              ],
+              [
+                113.23942487,
+                23.12453634
+              ],
+              [
+                113.24005911,
+                23.12327833
+              ],
+              [
+                113.23985439,
+                23.12104494
+              ],
+              [
+                113.23891544,
+                23.12151055
+              ],
+              [
+                113.23649569,
+                23.12199152
+              ],
+              [
+                113.23445495,
+                23.12215906
+              ],
+              [
+                113.23235133,
+                23.12259613
+              ],
+              [
+                113.22993248,
+                23.12311041
+              ],
+              [
+                113.22972508,
+                23.12077677
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                113.23491457,
+                23.10980638
+              ],
+              [
+                113.2351136,
+                23.10936517
+              ],
+              [
+                113.23562876,
+                23.10888011
+              ],
+              [
+                113.23642956,
+                23.10851938
+              ],
+              [
+                113.23755124,
+                23.10828181
+              ],
+              [
+                113.24156849,
+                23.10818281
+              ],
+              [
+                113.24262922,
+                23.10828156
+              ],
+              [
+                113.24330432,
+                23.1084599
+              ],
+              [
+                113.24377184,
+                23.10877883
+              ],
+              [
+                113.243928,
+                23.10930863
+              ],
+              [
+                113.24399277,
+                23.11034298
+              ],
+              [
+                113.24393659,
+                23.11084636
+              ],
+              [
+                113.24369474,
+                23.11102151
+              ],
+              [
+                113.24218074,
+                23.11110489
+              ],
+              [
+                113.23985452,
+                23.11114817
+              ],
+              [
+                113.23756352,
+                23.11119025
+              ],
+              [
+                113.23586955,
+                23.11114576
+              ],
+              [
+                113.23530205,
+                23.11103072
+              ],
+              [
+                113.23497736,
+                23.11077393
+              ],
+              [
+                113.23482788,
+                23.11047794
+              ],
+              [
+                113.23491457,
+                23.10980638
+              ]
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
