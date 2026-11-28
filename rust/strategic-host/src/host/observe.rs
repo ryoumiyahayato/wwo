@@ -1,6 +1,7 @@
 use super::Host;
 use crate::{
-    camera::{self, Camera, Level}, hydrology, market_ui, pop_debug_ui, render::Renderer,
+    camera::{self, Camera, Level}, city_models::{Catalogue, CityPageMemory}, hydrology, market_ui,
+    pop_debug_ui, render::{CityRenderMemory, Renderer},
     timeline, ui::{self, Action, Object},
 };
 #[cfg(windows)]
@@ -15,6 +16,8 @@ pub(super) struct Trial {
     pub(super) terrain_decodes:Vec<f64>,
     pub(super) profile_frames:bool,
     pub(super) frames:Vec<FrameTiming>,
+    city_memory_started:Option<Instant>,
+    city_memory_samples:Vec<CityMemorySample>,
     pub(super) load_frames:Vec<usize>,
     pub(super) battle_openings:Vec<BattleOpeningTiming>,
     pub(super) movement:Option<([f64;2],[f64;2],u32,u32)>,
@@ -49,7 +52,20 @@ pub(super) struct FrameTiming {
     battle:bool,
 }
 
+#[derive(serde::Serialize)]
+struct CityMemorySample {
+    elapsed_ms: f64,
+    center:[f64;2],
+    mpp:f64,
+    pages:Option<CityPageMemory>,
+    renderer:CityRenderMemory,
+}
+
 impl Trial {
+    pub(super) fn new(last: String) -> Self {
+        Self { last, ..Self::default() }
+    }
+
     pub(super) fn timing_frame(&self, capture:bool)->Option<usize> {
         (self.timing && self.profile_frames && !capture).then_some(self.frames.len())
     }
@@ -68,6 +84,16 @@ impl Trial {
                 terrain_view_level:renderer.terrain_view_level(),
                 qwg_upload:if battle {None} else {renderer.water_upload()},
                 battle,
+            });
+        }
+    }
+
+    pub(super) fn record_city_memory(&mut self, presented:Instant, camera:&Camera, catalogue:Option<&Catalogue>, renderer:&Renderer) {
+        if let Some(started) = self.city_memory_started {
+            self.city_memory_samples.push(CityMemorySample {
+                elapsed_ms:presented.duration_since(started).as_secs_f64()*1000.,
+                center:camera.coordinates(), mpp:camera.mpp,
+                pages:catalogue.map(Catalogue::memory), renderer:renderer.city_render_memory(),
             });
         }
     }
@@ -229,6 +255,11 @@ impl Host {
             "pitch_degrees":self.camera.pitch().to_degrees(),
             "landmarks":self.renderer.as_ref().map(Renderer::resident_models),
             "model_instances":self.renderer.as_ref().map(Renderer::model_instances),
+            "city_models":self.city_models.as_ref().map(|catalogue| catalogue.status(|revision,index|
+                self.renderer.as_ref().map_or("absent",|renderer|renderer.city_page_gpu(revision,index)))),
+            "city_gpu":self.renderer.as_ref().map(Renderer::city_gpu_status),
+            "city_reload_inflight":self.city_reload_inflight,
+            "city_reload_queued":self.city_reload_queued,
             "selection":self.selected.map_or(String::new(),|o|self.id(o)),"date":self.state.date.to_string(),
             "transport_selection":self.transport_selection,
             "population_debug":self.population_debug.as_ref().map(pop_debug_ui::Panel::status),
@@ -346,12 +377,17 @@ impl Host {
                 self.trial.timing=!self.trial.timing;self.trial.previous=None;
                 if self.trial.timing{
                     self.trial.passive_timing=input.value=="passive";
-                    self.trial.profile_frames=input.value=="profile";
+                    self.trial.profile_frames=matches!(input.value.as_str(),"profile"|"stages");
+                    self.trial.city_memory_started=(input.value=="city-memory").then(Instant::now);
+                    if self.trial.city_memory_started.is_some() {
+                        if let Some(catalogue) = &mut self.city_models { catalogue.measure_loads(true); }
+                    }
+                    self.trial.city_memory_samples.clear();
                     self.trial.frames.clear();
                     self.trial.load_frames.clear();
                     self.trial.battle_openings.clear();
                     if self.trial.profile_frames {
-                        if let Some(renderer)=&mut self.renderer {renderer.start_frame_timing();}
+                        if let Some(renderer)=&mut self.renderer {renderer.start_frame_timing(input.value=="stages");}
                     }
                     self.trial.times.clear();
                     self.trial.loads.clear();
@@ -360,8 +396,17 @@ impl Host {
                     let gpu=self.renderer.as_mut().and_then(Renderer::finish_frame_timing);
                     extra=serde_json::json!({"interval_ms":self.trial.times,"tile_load_ms":self.trial.loads,
                         "terrain_decode_ms":self.trial.terrain_decodes,"frames":self.trial.frames,
-                        "gpu_frame_ms":gpu,"load_frame_indices":self.trial.load_frames,
+                        "gpu_frame_ms":gpu.as_ref().map(|value| &value.frames),
+                        "gpu_stage_ms":gpu.as_ref().and_then(|value| value.stages.as_ref()).map(|samples| serde_json::json!({
+                            "names":["water_projection","base_scene","vegetation","overlays","models","hud"],
+                            "samples":samples,
+                        })),
+                        "load_frame_indices":self.trial.load_frames,
                         "battle_openings":self.trial.battle_openings});
+                    if self.trial.city_memory_started.take().is_some() {
+                        extra["city_memory_samples"]=serde_json::json!(self.trial.city_memory_samples);
+                        if let Some(catalogue) = &mut self.city_models { catalogue.measure_loads(false); }
+                    }
                 }
             }
             "quit"=>event_loop.exit(),

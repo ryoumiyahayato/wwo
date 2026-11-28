@@ -32,6 +32,8 @@ pub(crate) enum HostEvent {
     Rivers(io::Result<hydrology::Rivers>),
     Model(u64,landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
     CityTile(u64,usize,io::Result<crate::city_models::CityPage>),
+    CityRoad(u64,usize,io::Result<crate::city_roads::RoadPage>),
+    CityCatalogue(io::Result<crate::city_models::Catalogue>),
     BattleTerrain(MilitaryCell, io::Result<PreparedBattleTerrain>),
 }
 
@@ -66,6 +68,8 @@ struct Host {
     events:winit::event_loop::EventLoopProxy<HostEvent>,
     landmarks:Option<landmarks::Landmarks>,
     city_models:Option<crate::city_models::Catalogue>,
+    city_reload_inflight:bool,
+    city_reload_queued:bool,
     transport_scene:Option<transport_scene::TransportScene>,
     transport_selection:Option<transport_ui::ObjectId>,
     transport_detail:Option<(i64, transport_ui::Detail)>,
@@ -195,12 +199,12 @@ impl Host {
         let observation_id=config.observe.as_ref().filter(|_|!config.terrain_review).and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
         let resources=crate::resource_map::State::new(&config.root);
-        Ok(Self {natural,events:events.create_proxy(),landmarks,city_models,transport_scene:None,transport_selection:None,transport_detail:None,resources,config,map_root,map_signature,fatal_error:None,resource_warnings,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
+        Ok(Self {natural,events:events.create_proxy(),landmarks,city_models,city_reload_inflight:false,city_reload_queued:false,transport_scene:None,transport_selection:None,transport_detail:None,resources,config,map_root,map_signature,fatal_error:None,resource_warnings,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
             animate:false,next_date:Instant::now(),feedback:String::new(),dirty:true,last_input_check:Instant::now(),
-            version:None,last_palette:None,trial:Trial{last:observation_id,..Trial::default()},hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,..Hud::default()},skin,exit_requested:false,
+            version:None,last_palette:None,trial:Trial::new(observation_id),hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,..Hud::default()},skin,exit_requested:false,
             prologue: None,menu_themes,
             opening_nav: lobby::Selection::default(),
             lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,country_directory:lobby::Directory::default(),
@@ -950,9 +954,13 @@ impl Host {
             let scissor=self.index.scissor(id,&self.camera,self.size)?;
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
-        let mut models=if loading||self.in_lobby() {Vec::new()} else if let Some(landmarks)=&self.landmarks {
+        let mut models=if loading||self.in_lobby() {
+            if let Some(catalogue) = &mut self.city_models { catalogue.idle(now); }
+            Vec::new()
+        } else if let Some(landmarks)=&self.landmarks {
             let mut models=self.city_models.as_mut().map_or_else(Vec::new,|catalogue|
-                catalogue.visible(&date,&self.camera,self.size,landmarks,&self.events,|[lon,lat]| {
+                catalogue.visible(&date,&self.camera,self.size,landmarks,
+                    (!self.city_reload_inflight && !self.city_reload_queued).then_some(&self.events),|[lon,lat]| {
                     pages.iter().filter(|(_,tile,_,_)| {
                         let [west,south,east,north]=tile.core;
                         tile.city_ink_only && !tile.city_area && !tile.city_streets
@@ -992,6 +1000,7 @@ impl Host {
         view.set_terrain_exact(renderer.terrain_exact());
         let landscape_enabled=!loading&&(!self.config.managed||self.state.session.is_some());
         renderer.prepare_rivers(&self.camera,self.size,landscape_enabled&&!renderer.terrain_exact());
+        let city_roads=self.city_models.as_ref().map_or_else(Vec::new,crate::city_models::Catalogue::ready_roads);
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
         }
@@ -1000,7 +1009,7 @@ impl Host {
             .or_else(||self.trial.terrain_capture.as_ref().map(|(_,path)|path)).map(PathBuf::as_path);
         let mut redraw=false;
         let timing_frame=self.trial.timing_frame(capture.is_some());
-        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,transport,
+        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,(&models,&city_roads),transport,
             (&self.camera,landscape_enabled&&!self.trial.hide_landscape_models,now),None,timing_frame)? {
             #[cfg(windows)]
             if !loading && self.config.native.is_some() {
@@ -1027,6 +1036,7 @@ impl Host {
             }
             else if self.trial.timing {
                 self.trial.record_frame(now,presented,&self.camera,renderer,false);
+                self.trial.record_city_memory(presented,&self.camera,self.city_models.as_ref(),renderer);
             }
             if self.debug {
                 self.perf.cpu_ms=ms(now);
@@ -1060,7 +1070,7 @@ impl Host {
         let has_capture=capture.is_some();
         let timing_frame=self.trial.timing_frame(has_capture);
         if let Some(result) = renderer.render(&map_view, self.base.as_ref().unwrap(), &[], &meshes, None,
-            self.started.elapsed().as_secs_f32(), false, capture, &[], None,
+            self.started.elapsed().as_secs_f32(), false, capture, (&[],&[]), None,
             (&self.camera, false, now), Some(battle_frame),timing_frame)?
         {
             let presented = Instant::now();

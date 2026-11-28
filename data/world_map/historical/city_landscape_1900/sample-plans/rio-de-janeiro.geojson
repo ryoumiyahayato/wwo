@@ -1,0 +1,5580 @@
+{
+  "type": "FeatureCollection",
+  "wwo": {
+    "city_id": "reba:chandler:1194",
+    "name": "Rio de Janeiro",
+    "key": "rio-reis-1900",
+    "revision": 2,
+    "status": "candidate_sample",
+    "origin": [
+      -43.1738,
+      -22.903
+    ],
+    "method": "The Reis cadastral plan supplies drawn streets, working shores, pre-fill beaches, contours and bounded street blocks. Revision 2 retraces the Gamboa to Saúde approach and ordinary blocks, the Glória to Flamengo shore and the Catete connections. Registration is locally adjusted around Saúde. Inferred building massing uses only drawn ordinary-block perimeters. West-sheet alignment and individual buildings remain provisional.",
+    "registration": {
+      "model": "Single affine from hand-read source pixels to WGS84. Near-north raster is the 3840 px public-domain derivative cropped to x=590..2280/y=820..1940 and rotated 138 degrees counterclockwise with expansion to 2006 by 1964. Revision 2 adds a bounded smooth shift around the Saúde church mark; all other controls and the base matrix are unchanged.",
+      "matrix": [
+        [
+          4.675630741921863e-05,
+          1.397339010444725e-06
+        ],
+        [
+          4.075001242831444e-07,
+          -4.7070385634513656e-05
+        ],
+        [
+          -43.24504739064319,
+          -22.865953734788587
+        ]
+      ],
+      "seam": "The joined original sheets have a dark, visually continuous diagonal paper seam in the working rotation. West sheet has one matched palace block center. Rail and street segments crossing the seam follow the visible same alignments on each side. Their near-view absolute accuracy is unverified.",
+      "controls": [
+        {
+          "name": "Paco Imperial courtyard block center",
+          "pixel": [
+            1515,
+            841
+          ],
+          "wgs84": [
+            -43.17423333,
+            -22.90350833
+          ],
+          "url": "https://pt.wikipedia.org/wiki/Pa%C3%A7o_Imperial",
+          "residual_m": 38.6,
+          "leave_one_out_m": 68.2
+        },
+        {
+          "name": "Campo de Santana garden center",
+          "pixel": [
+            1208,
+            895
+          ],
+          "wgs84": [
+            -43.18861,
+            -22.90667
+          ],
+          "url": "https://pt.wikipedia.org/wiki/Campo_de_Santana_(Rio_de_Janeiro)",
+          "residual_m": 51.9,
+          "leave_one_out_m": 64.0
+        },
+        {
+          "name": "Saude summit symbol, approximate historical church match",
+          "pixel": [
+            1128,
+            629
+          ],
+          "wgs84": [
+            -43.191477,
+            -22.893746
+          ],
+          "url": "https://pt.wikipedia.org/wiki/Igreja_de_Nossa_Senhora_da_Sa%C3%BAde_(Rio_de_Janeiro)",
+          "residual_m": 64.5,
+          "leave_one_out_m": 124.7
+        },
+        {
+          "name": "Quinta da Boa Vista palace courtyard block center",
+          "pixel": [
+            391,
+            855
+          ],
+          "wgs84": [
+            -43.226522768,
+            -22.905668369
+          ],
+          "url": "https://acasasenhorial.org/acs/index.php/pt/casas-senhoriais/pesquisa-avancada-2/174-quinta-da-boa-vista",
+          "residual_m": 11.0,
+          "leave_one_out_m": 131.1
+        },
+        {
+          "name": "Outeiro da Gloria summit symbol, approximate historical church match",
+          "pixel": [
+            1472,
+            1223
+          ],
+          "wgs84": [
+            -43.17556,
+            -22.92139
+          ],
+          "url": "https://pt.wikipedia.org/wiki/Igreja_de_Nossa_Senhora_da_Gl%C3%B3ria_do_Outeiro",
+          "residual_m": 18.7,
+          "leave_one_out_m": 28.3
+        },
+        {
+          "name": "Largo do Machado historical square center",
+          "pixel": [
+            1407,
+            1421
+          ],
+          "wgs84": [
+            -43.17854,
+            -22.93081
+          ],
+          "url": "https://www.openstreetmap.org/way/558145074",
+          "residual_m": 16.3,
+          "leave_one_out_m": 44.9
+        }
+      ],
+      "limitations": "Controls are plot markers or area centers, with image-center interpretation noted. Church marks are point candidates only. Sao Cristovao parish church, moved entrance gates and ambiguously placed names were excluded. The cross-sheet track and port slopes cannot yet be used for meter-scale alignment. The 124.7 m Saúde leave-one-out value describes the original affine. Local residual at the one translation anchor cannot measure block- or street-level accuracy. The original west-sheet rail position has no independent local residual.",
+      "local_adjustments": [
+        {
+          "area": "Saúde and nearby Gamboa and Valongo transition",
+          "note": "Local one-point translation. Weight is full through 0.33 of the elliptical source-pixel radius, then smoothly fades to zero at a radius of 1.0. No citywide accuracy claim follows from this correction.",
+          "center_pixel": [
+            1128.0,
+            629.0
+          ],
+          "radius_xy_pixels": [
+            169,
+            198
+          ],
+          "wgs84": [
+            -43.19142836,
+            -22.89374046
+          ],
+          "delta_lon_lat": [
+            0.0006215982961279565,
+            0.0002443489489145634
+          ],
+          "control_url": "https://pgeo3.rio.rj.gov.br/arcgis/rest/services/Hosted/CAMADA/FeatureServer/1",
+          "basis": "Centroid of the small church mark read at this scan resolution and location in the municipal protected-property catalogue. Nearby municipal monument markers have not been established as independent source-image centers."
+        }
+      ]
+    },
+    "road_validity": {
+      "start": 1900,
+      "end": 1901
+    },
+    "water_validity": {
+      "start": 1900,
+      "end": 1901
+    },
+    "ground_validity": {
+      "start": 1900,
+      "end": 1901
+    },
+    "ground_material": 0,
+    "sources": [
+      {
+        "id": "reis-rio-1900",
+        "url": "https://www.loc.gov/item/2012593122/",
+        "date": "Manoel Pereira Reis; Rio de Janeiro: Lith. do Archivo Militar, 1900",
+        "licence": "Historic public-domain map. Credit Library of Congress Geography and Map Division.",
+        "precision": "Printed on two sheets, viewed in the joined 3840 by 2165 public-domain copy. Solid street traces and mapped physical edges only. Consult control residuals for the limits of hand registration.",
+        "digital_copy": "https://commons.wikimedia.org/wiki/File:Planta_da_cidade_do_Rio_de_Janeiro_LOC_2012593122.jpg"
+      },
+      {
+        "id": "bn-gutierrez-gloria-1890s",
+        "url": "https://brasilianafotografica.bn.gov.br/brasiliana/handle/20.500.12156.1/6372",
+        "date": "Juan Gutierrez, 1890s. Biblioteca Nacional, Brasiliana Fotográfica.",
+        "licence": "Archive link and dated visual reference. No historic photograph is redistributed.",
+        "precision": "Corroborates the unfilled Glória bay and headland. All mapped coordinates are traced from Reis."
+      },
+      {
+        "id": "museu-republica-catete-gardens",
+        "url": "https://museudarepublica.museus.gov.br/o-museu/",
+        "date": "Museu da República institutional history; presidential garden redesigned for the 1897 relocation.",
+        "licence": "Institutional history cited for factual context. No page assets are redistributed.",
+        "precision": "Corroborates estate use near the shore. Parcel edges are taken from the 1900 plan."
+      }
+    ]
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "reis-mapped-work-area",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.2308121,
+              -22.9004165
+            ],
+            [
+              -43.230376,
+              -22.9129745
+            ],
+            [
+              -43.2114652,
+              -22.9148576
+            ],
+            [
+              -43.1914656,
+              -22.9182619
+            ],
+            [
+              -43.1790005,
+              -22.93192
+            ],
+            [
+              -43.1724583,
+              -22.9313008
+            ],
+            [
+              -43.1718942,
+              -22.9208316
+            ],
+            [
+              -43.1679129,
+              -22.9053166
+            ],
+            [
+              -43.1726329,
+              -22.9003257
+            ],
+            [
+              -43.1771245,
+              -22.8947158
+            ],
+            [
+              -43.185564917,
+              -22.894973165
+            ],
+            [
+              -43.191161701,
+              -22.892131651
+            ],
+            [
+              -43.199319723,
+              -22.894382224
+            ],
+            [
+              -43.2087789,
+              -22.8956147
+            ],
+            [
+              -43.2163088,
+              -22.8901899
+            ],
+            [
+              -43.2227461,
+              -22.8921243
+            ],
+            [
+              -43.2308121,
+              -22.9004165
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "coverage",
+        "source": "reis-rio-1900",
+        "use_basis": "Working extent of the source-derived geometry. Its closure is a processing boundary."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "praca-xv-mercantile-approach",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1726577,
+            -22.9028689
+          ],
+          [
+            -43.1733094,
+            -22.9032179
+          ],
+          [
+            -43.174051,
+            -22.9039934
+          ],
+          [
+            -43.1749821,
+            -22.904492
+          ],
+          [
+            -43.1761445,
+            -22.9052801
+          ],
+          [
+            -43.1776341,
+            -22.9060779
+          ],
+          [
+            -43.1792165,
+            -22.9069727
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 12,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "primeiro-de-marco-alignment",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1743767,
+            -22.9041915
+          ],
+          [
+            -43.1746654,
+            -22.9032584
+          ],
+          [
+            -43.1752813,
+            -22.9023352
+          ],
+          [
+            -43.1759925,
+            -22.9012265
+          ],
+          [
+            -43.176469,
+            -22.9002049
+          ],
+          [
+            -43.1769476,
+            -22.898948
+          ],
+          [
+            -43.1773281,
+            -22.898206
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 11,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "cathedral-quarter-cross-street",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1740051,
+            -22.9038979
+          ],
+          [
+            -43.1745747,
+            -22.9029261
+          ],
+          [
+            -43.175237,
+            -22.9020514
+          ],
+          [
+            -43.1760892,
+            -22.9008527
+          ],
+          [
+            -43.1763743,
+            -22.9003433
+          ],
+          [
+            -43.1772598,
+            -22.9006993
+          ],
+          [
+            -43.1787052,
+            -22.9012134
+          ],
+          [
+            -43.1800562,
+            -22.9018187
+          ],
+          [
+            -43.1813145,
+            -22.9023272
+          ],
+          [
+            -43.182853,
+            -22.9028911
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "central-north-grid-corridor",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1760892,
+            -22.9008527
+          ],
+          [
+            -43.1781872,
+            -22.9016216
+          ],
+          [
+            -43.1798208,
+            -22.902
+          ],
+          [
+            -43.1816841,
+            -22.9028561
+          ],
+          [
+            -43.1832689,
+            -22.9034685
+          ],
+          [
+            -43.1847611,
+            -22.9039839
+          ],
+          [
+            -43.186626,
+            -22.9046517
+          ],
+          [
+            -43.1876998,
+            -22.9048721
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 11,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "central-south-grid-corridor",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1749821,
+            -22.904492
+          ],
+          [
+            -43.1763803,
+            -22.9050517
+          ],
+          [
+            -43.1778716,
+            -22.9056613
+          ],
+          [
+            -43.1792682,
+            -22.9064093
+          ],
+          [
+            -43.1808985,
+            -22.9071642
+          ],
+          [
+            -43.1826224,
+            -22.907922
+          ],
+          [
+            -43.1845788,
+            -22.908828
+          ],
+          [
+            -43.1860234,
+            -22.9094361
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 12,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "central-diagonal-to-prainha",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1792165,
+            -22.9069727
+          ],
+          [
+            -43.1800216,
+            -22.9058197
+          ],
+          [
+            -43.1809201,
+            -22.9046695
+          ],
+          [
+            -43.181913,
+            -22.903428
+          ],
+          [
+            -43.1828107,
+            -22.9023719
+          ],
+          [
+            -43.1836125,
+            -22.9015954
+          ],
+          [
+            -43.1841822,
+            -22.9006237
+          ],
+          [
+            -43.184614,
+            -22.8993654
+          ],
+          [
+            -43.185367409,
+            -22.898209077
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 9,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "central-west-cross-street",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1808985,
+            -22.9071642
+          ],
+          [
+            -43.1818475,
+            -22.9055918
+          ],
+          [
+            -43.182888,
+            -22.9042575
+          ],
+          [
+            -43.1832689,
+            -22.9034685
+          ],
+          [
+            -43.1841655,
+            -22.9025536
+          ],
+          [
+            -43.1846883,
+            -22.9015805
+          ],
+          [
+            -43.1853503,
+            -22.9007528
+          ],
+          [
+            -43.186152058,
+            -22.899881868
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "central-valley-cross-street",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1845788,
+            -22.908828
+          ],
+          [
+            -43.1853387,
+            -22.9074853
+          ],
+          [
+            -43.1859096,
+            -22.9063723
+          ],
+          [
+            -43.186626,
+            -22.9046517
+          ],
+          [
+            -43.1871017,
+            -22.9037243
+          ],
+          [
+            -43.1877202,
+            -22.9025186
+          ],
+          [
+            -43.188275584,
+            -22.901446895
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "campo-santana-north-front",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.186626,
+            -22.9046517
+          ],
+          [
+            -43.1876998,
+            -22.9048721
+          ],
+          [
+            -43.1888207,
+            -22.9050469
+          ],
+          [
+            -43.1898928,
+            -22.9054556
+          ],
+          [
+            -43.1919444,
+            -22.906176
+          ],
+          [
+            -43.1941834,
+            -22.906855
+          ],
+          [
+            -43.1963749,
+            -22.9076268
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 13,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "campo-santana-south-front",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1860234,
+            -22.9094361
+          ],
+          [
+            -43.1873765,
+            -22.9098061
+          ],
+          [
+            -43.1886828,
+            -22.9101747
+          ],
+          [
+            -43.1903156,
+            -22.9106473
+          ],
+          [
+            -43.1922749,
+            -22.9112237
+          ],
+          [
+            -43.1938146,
+            -22.9116464
+          ],
+          [
+            -43.1952628,
+            -22.911831
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 13,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "prainha-to-valongo",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1773281,
+            -22.898206
+          ],
+          [
+            -43.1779897,
+            -22.8974254
+          ],
+          [
+            -43.179209,
+            -22.8970381
+          ],
+          [
+            -43.1800921,
+            -22.8976765
+          ],
+          [
+            -43.1809743,
+            -22.8984091
+          ],
+          [
+            -43.1820932,
+            -22.8988192
+          ],
+          [
+            -43.1833064,
+            -22.899138
+          ],
+          [
+            -43.1843826,
+            -22.899076
+          ],
+          [
+            -43.185367409,
+            -22.898209077
+          ],
+          [
+            -43.186357965,
+            -22.898018995
+          ],
+          [
+            -43.187222365,
+            -22.897512836
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 9,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "valongo-saude-waterfront",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.187222365,
+            -22.897512836
+          ],
+          [
+            -43.187927753,
+            -22.897248286
+          ],
+          [
+            -43.188826052,
+            -22.89703887
+          ],
+          [
+            -43.189470105,
+            -22.896895617
+          ],
+          [
+            -43.190473271,
+            -22.897058037
+          ],
+          [
+            -43.191590794,
+            -22.897136984
+          ],
+          [
+            -43.192733493,
+            -22.897320289
+          ],
+          [
+            -43.193519142,
+            -22.897404637
+          ],
+          [
+            -43.194284089,
+            -22.89754506
+          ],
+          [
+            -43.195388043,
+            -22.897716852
+          ],
+          [
+            -43.196289508,
+            -22.897735283
+          ],
+          [
+            -43.197027746,
+            -22.897646037
+          ],
+          [
+            -43.197767247,
+            -22.897698978
+          ],
+          [
+            -43.198237871,
+            -22.897920059
+          ],
+          [
+            -43.198694038,
+            -22.898560533
+          ],
+          [
+            -43.19920642,
+            -22.899283601
+          ],
+          [
+            -43.199716664,
+            -22.899769675
+          ],
+          [
+            -43.200273257,
+            -22.900304218
+          ],
+          [
+            -43.20092377,
+            -22.900794484
+          ],
+          [
+            -43.2018991,
+            -22.901577
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 11,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline follows the unbroken paired street edges drawn between the Gamboa working shore and the Saúde hill-foot blocks."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-foot-slope-street",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.192719311,
+            -22.897851233
+          ],
+          [
+            -43.192285344,
+            -22.897833484
+          ],
+          [
+            -43.191571159,
+            -22.897760245
+          ],
+          [
+            -43.191012169,
+            -22.897744297
+          ],
+          [
+            -43.19051466,
+            -22.897829996
+          ],
+          [
+            -43.190473271,
+            -22.897058037
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "The terrace street follows the two small closed blocks and turns back to the waterfront street. The nearby rising curves are contours."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gamboa-stepped-crossing",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.195388043,
+            -22.897716852
+          ],
+          [
+            -43.196134776,
+            -22.899081827
+          ],
+          [
+            -43.196630503,
+            -22.900368831
+          ],
+          [
+            -43.196331342,
+            -22.901692565
+          ],
+          [
+            -43.195574806,
+            -22.902800425
+          ],
+          [
+            -43.19425422,
+            -22.904079271
+          ],
+          [
+            -43.193405679,
+            -22.904854315
+          ],
+          [
+            -43.192982835,
+            -22.905077091
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Mapped inland crossing at the Gamboa shore and the lower hill streets."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gamboa-santo-cristo-coast",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.2018991,
+            -22.901577
+          ],
+          [
+            -43.2027314,
+            -22.9026847
+          ],
+          [
+            -43.2036555,
+            -22.9039836
+          ],
+          [
+            -43.2045817,
+            -22.9050471
+          ],
+          [
+            -43.2055074,
+            -22.9061576
+          ],
+          [
+            -43.2065263,
+            -22.9073181
+          ],
+          [
+            -43.2072666,
+            -22.9082348
+          ],
+          [
+            -43.2077252,
+            -22.9092843
+          ],
+          [
+            -43.2079537,
+            -22.9099032
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 10,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "paulo-dom-pedro-rail-frontage",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1929828,
+            -22.9050771
+          ],
+          [
+            -43.1943819,
+            -22.9055426
+          ],
+          [
+            -43.1958293,
+            -22.9058213
+          ],
+          [
+            -43.1971819,
+            -22.9062384
+          ],
+          [
+            -43.1984883,
+            -22.906607
+          ],
+          [
+            -43.2000743,
+            -22.9070782
+          ],
+          [
+            -43.2016124,
+            -22.9076891
+          ],
+          [
+            -43.2033842,
+            -22.9083071
+          ],
+          [
+            -43.2052943,
+            -22.9091645
+          ],
+          [
+            -43.2070678,
+            -22.9095942
+          ],
+          [
+            -43.2079537,
+            -22.9099032
+          ],
+          [
+            -43.2095886,
+            -22.9101404
+          ],
+          [
+            -43.2109888,
+            -22.9104647
+          ],
+          [
+            -43.2129021,
+            -22.9109456
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 11,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "santo-cristo-low-blocks",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.2079537,
+            -22.9099032
+          ],
+          [
+            -43.2089031,
+            -22.9082837
+          ],
+          [
+            -43.2096634,
+            -22.9068939
+          ],
+          [
+            -43.2104213,
+            -22.9057866
+          ],
+          [
+            -43.2112747,
+            -22.9044467
+          ],
+          [
+            -43.2123168,
+            -22.9029241
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 9,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "santo-cristo-inland-link",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.2104213,
+            -22.9057866
+          ],
+          [
+            -43.212009,
+            -22.9060694
+          ],
+          [
+            -43.2134105,
+            -22.9062526
+          ],
+          [
+            -43.2148599,
+            -22.9062959
+          ],
+          [
+            -43.2164016,
+            -22.9064832
+          ],
+          [
+            -43.217943,
+            -22.9067176
+          ],
+          [
+            -43.2191098,
+            -22.9069879
+          ],
+          [
+            -43.2204092,
+            -22.9081567
+          ],
+          [
+            -43.221237,
+            -22.9097823
+          ],
+          [
+            -43.2216993,
+            -22.9104081
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 10,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sao-cristovao-rail-approach",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.2129021,
+            -22.9109456
+          ],
+          [
+            -43.2142581,
+            -22.9109862
+          ],
+          [
+            -43.2159437,
+            -22.910754
+          ],
+          [
+            -43.217209,
+            -22.9104623
+          ],
+          [
+            -43.2185215,
+            -22.9101248
+          ],
+          [
+            -43.219831,
+            -22.9101169
+          ],
+          [
+            -43.220906,
+            -22.9101961
+          ],
+          [
+            -43.2216993,
+            -22.9104081
+          ],
+          [
+            -43.222638,
+            -22.9100125
+          ],
+          [
+            -43.2235321,
+            -22.90938
+          ],
+          [
+            -43.2240534,
+            -22.9085952
+          ],
+          [
+            -43.2242965,
+            -22.9075196
+          ],
+          [
+            -43.2243514,
+            -22.9065796
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 10,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sao-cristovao-ordinary-streets",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.2243514,
+            -22.9065796
+          ],
+          [
+            -43.2248288,
+            -22.9054638
+          ],
+          [
+            -43.2253069,
+            -22.904254
+          ],
+          [
+            -43.2254562,
+            -22.9032226
+          ],
+          [
+            -43.2258859,
+            -22.9021996
+          ],
+          [
+            -43.2268719,
+            -22.9017583
+          ],
+          [
+            -43.2281368,
+            -22.9015136
+          ],
+          [
+            -43.2292109,
+            -22.9016869
+          ],
+          [
+            -43.2301452,
+            -22.901809
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Solid street trace at the Quinta and the adjacent blocks. West sheet location has no independent local residual."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "calabouco-and-santa-luzia",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1726577,
+            -22.9028689
+          ],
+          [
+            -43.1723698,
+            -22.9037077
+          ],
+          [
+            -43.171801,
+            -22.9045853
+          ],
+          [
+            -43.1708606,
+            -22.9051693
+          ],
+          [
+            -43.1700625,
+            -22.9055221
+          ],
+          [
+            -43.1703369,
+            -22.9062365
+          ],
+          [
+            -43.1713594,
+            -22.9069733
+          ],
+          [
+            -43.1721929,
+            -22.9079399
+          ],
+          [
+            -43.1734931,
+            -22.9090146
+          ],
+          [
+            -43.1745603,
+            -22.9099881
+          ],
+          [
+            -43.1754401,
+            -22.9110031
+          ],
+          [
+            -43.1763212,
+            -22.9118769
+          ],
+          [
+            -43.1768741,
+            -22.9128351
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 10,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lapa-gloria-waterfront",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1768741,
+            -22.9128351
+          ],
+          [
+            -43.1770054,
+            -22.9138749
+          ],
+          [
+            -43.1770436,
+            -22.9148647
+          ],
+          [
+            -43.1771749,
+            -22.9159045
+          ],
+          [
+            -43.1772131,
+            -22.9168944
+          ],
+          [
+            -43.1772025,
+            -22.9181182
+          ],
+          [
+            -43.1771464,
+            -22.9191994
+          ],
+          [
+            -43.1769049,
+            -22.9200868
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 10,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gloria-catete-foot-slope",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1769049,
+            -22.9200868
+          ],
+          [
+            -43.1770345,
+            -22.9213148
+          ],
+          [
+            -43.1772118,
+            -22.9224501
+          ],
+          [
+            -43.1774842,
+            -22.9233998
+          ],
+          [
+            -43.1773349,
+            -22.9244312
+          ],
+          [
+            -43.1771389,
+            -22.9254612
+          ],
+          [
+            -43.177178,
+            -22.9263569
+          ],
+          [
+            -43.1774007,
+            -22.9276348
+          ],
+          [
+            -43.1776719,
+            -22.9287258
+          ],
+          [
+            -43.1780833,
+            -22.929821
+          ],
+          [
+            -43.1784009,
+            -22.9309605
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 10,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gloria-upland-fronts",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1772118,
+            -22.9224501
+          ],
+          [
+            -43.1786141,
+            -22.922539
+          ],
+          [
+            -43.1796878,
+            -22.9227595
+          ],
+          [
+            -43.1812271,
+            -22.9232292
+          ],
+          [
+            -43.1824871,
+            -22.9235494
+          ],
+          [
+            -43.1833755,
+            -22.9235759
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gloria-upper-curve",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1771464,
+            -22.9191994
+          ],
+          [
+            -43.1782197,
+            -22.9194669
+          ],
+          [
+            -43.1793858,
+            -22.9198313
+          ],
+          [
+            -43.1802258,
+            -22.9200448
+          ],
+          [
+            -43.1811097,
+            -22.9205891
+          ],
+          [
+            -43.1823229,
+            -22.9209078
+          ],
+          [
+            -43.1834024,
+            -22.9204693
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "catete-slope-side-blocks",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.1771389,
+            -22.9254612
+          ],
+          [
+            -43.1779781,
+            -22.9257687
+          ],
+          [
+            -43.1788636,
+            -22.9261248
+          ],
+          [
+            -43.1796105,
+            -22.9262883
+          ],
+          [
+            -43.1800789,
+            -22.9262082
+          ],
+          [
+            -43.1805058,
+            -22.9255147
+          ],
+          [
+            -43.1811218,
+            -22.9245915
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "catete-shore-cross-street",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.177138949,
+            -22.925461163
+          ],
+          [
+            -43.176901907,
+            -22.92583074
+          ],
+          [
+            -43.176200563,
+            -22.92580978
+          ],
+          [
+            -43.175172332,
+            -22.925731968
+          ],
+          [
+            -43.174097344,
+            -22.925652759
+          ],
+          [
+            -43.173816806,
+            -22.925644375
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Reis shows a continuous connecting street on the north side of the presidential garden from Catete to the old shore."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "catete-middle-block-cross-street",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.177177963,
+            -22.926356898
+          ],
+          [
+            -43.177127131,
+            -22.926826204
+          ],
+          [
+            -43.176142804,
+            -22.927079283
+          ],
+          [
+            -43.175298745,
+            -22.927336553
+          ],
+          [
+            -43.174361582,
+            -22.927543958
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Reis shows a continuous connecting street on the south side of the presidential garden from Catete to the old shore."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "catete-lower-block-cross-street",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.177400742,
+            -22.927634785
+          ],
+          [
+            -43.17660344,
+            -22.927893453
+          ],
+          [
+            -43.175572356,
+            -22.928145133
+          ],
+          [
+            -43.174540865,
+            -22.928443885
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "The next drawn transverse street connects Catete to the old shore."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "campo-de-santana",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.189479,
+              -22.9046428
+            ],
+            [
+              -43.1899745,
+              -22.9068234
+            ],
+            [
+              -43.1892597,
+              -22.9083558
+            ],
+            [
+              -43.1885019,
+              -22.9094631
+            ],
+            [
+              -43.1868678,
+              -22.9091318
+            ],
+            [
+              -43.1859343,
+              -22.9089155
+            ],
+            [
+              -43.1861328,
+              -22.9076032
+            ],
+            [
+              -43.1870907,
+              -22.9049952
+            ],
+            [
+              -43.187799,
+              -22.9042159
+            ],
+            [
+              -43.1887333,
+              -22.904338
+            ],
+            [
+              -43.189479,
+              -22.9046428
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "park",
+        "source": "reis-rio-1900",
+        "use_basis": "The drives and planted grounds printed at Campo de Santana."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "passeio-publico",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1784622,
+              -22.9130709
+            ],
+            [
+              -43.1778487,
+              -22.9137117
+            ],
+            [
+              -43.1773795,
+              -22.913886
+            ],
+            [
+              -43.1767342,
+              -22.9127839
+            ],
+            [
+              -43.1772986,
+              -22.9124241
+            ],
+            [
+              -43.1780926,
+              -22.912542
+            ],
+            [
+              -43.1784622,
+              -22.9130709
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "park",
+        "source": "reis-rio-1900",
+        "use_basis": "The small landscaped grounds shown at the end of the Lapa approach."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "quinta-park-rail-margin",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.2245409,
+              -22.9063027
+            ],
+            [
+              -43.2237838,
+              -22.9073159
+            ],
+            [
+              -43.2235403,
+              -22.9084386
+            ],
+            [
+              -43.2230186,
+              -22.9092705
+            ],
+            [
+              -43.2217041,
+              -22.9098433
+            ],
+            [
+              -43.2213817,
+              -22.9092687
+            ],
+            [
+              -43.2205511,
+              -22.9079726
+            ],
+            [
+              -43.2192046,
+              -22.9068495
+            ],
+            [
+              -43.2186508,
+              -22.9059854
+            ],
+            [
+              -43.2182382,
+              -22.9050315
+            ],
+            [
+              -43.2199242,
+              -22.9047523
+            ],
+            [
+              -43.2216526,
+              -22.9049923
+            ],
+            [
+              -43.2230028,
+              -22.9056918
+            ],
+            [
+              -43.2245409,
+              -22.9063027
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "park",
+        "source": "reis-rio-1900",
+        "use_basis": "Drawn park and paths between the palace sector and the railway. West sheet registration remains provisional."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "morro-de-santo-antonio-grade",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1821556,
+              -22.9078139
+            ],
+            [
+              -43.1817637,
+              -22.9098738
+            ],
+            [
+              -43.1809172,
+              -22.9104135
+            ],
+            [
+              -43.180115,
+              -22.911237
+            ],
+            [
+              -43.1789989,
+              -22.9104974
+            ],
+            [
+              -43.1782626,
+              -22.90911
+            ],
+            [
+              -43.17921,
+              -22.9077258
+            ],
+            [
+              -43.1802923,
+              -22.9069578
+            ],
+            [
+              -43.1815063,
+              -22.9071824
+            ],
+            [
+              -43.1821556,
+              -22.9078139
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "steep",
+        "source": "reis-rio-1900",
+        "use_basis": "Dense 1900 contours constrain the undeveloped hill face."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "morro-do-castelo-grade",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1765494,
+              -22.9071284
+            ],
+            [
+              -43.1766709,
+              -22.9092979
+            ],
+            [
+              -43.1757764,
+              -22.9099774
+            ],
+            [
+              -43.1743351,
+              -22.9089926
+            ],
+            [
+              -43.1728027,
+              -22.9077227
+            ],
+            [
+              -43.1728597,
+              -22.9065473
+            ],
+            [
+              -43.1739867,
+              -22.906016
+            ],
+            [
+              -43.1754842,
+              -22.9059195
+            ],
+            [
+              -43.1765494,
+              -22.9071284
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "steep",
+        "source": "reis-rio-1900",
+        "use_basis": "Dense 1900 contours constrain the hill that was removed later."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "providencia-slope",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.198577,
+              -22.9017602
+            ],
+            [
+              -43.1975821,
+              -22.9032371
+            ],
+            [
+              -43.1964558,
+              -22.9036742
+            ],
+            [
+              -43.194584,
+              -22.9038066
+            ],
+            [
+              -43.192905162,
+              -22.903238583
+            ],
+            [
+              -43.191447362,
+              -22.901504947
+            ],
+            [
+              -43.189695275,
+              -22.900783283
+            ],
+            [
+              -43.188339096,
+              -22.899845248
+            ],
+            [
+              -43.188028805,
+              -22.898816399
+            ],
+            [
+              -43.189075841,
+              -22.898408538
+            ],
+            [
+              -43.190610608,
+              -22.898812344
+            ],
+            [
+              -43.191913044,
+              -22.899290893
+            ],
+            [
+              -43.193108168,
+              -22.899636445
+            ],
+            [
+              -43.194508638,
+              -22.90113211
+            ],
+            [
+              -43.195940552,
+              -22.901344165
+            ],
+            [
+              -43.196887466,
+              -22.90066831
+            ],
+            [
+              -43.1979769,
+              -22.9008477
+            ],
+            [
+              -43.198577,
+              -22.9017602
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "steep",
+        "source": "reis-rio-1900",
+        "use_basis": "Closely spaced contours south of the historic port road. The surface uses the underlying terrain."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "outeiro-da-gloria-grade",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1768073,
+              -22.9205547
+            ],
+            [
+              -43.1769284,
+              -22.9227712
+            ],
+            [
+              -43.1766401,
+              -22.9236571
+            ],
+            [
+              -43.1762583,
+              -22.9245403
+            ],
+            [
+              -43.1753655,
+              -22.9250315
+            ],
+            [
+              -43.1741543,
+              -22.9244774
+            ],
+            [
+              -43.1738843,
+              -22.9232452
+            ],
+            [
+              -43.1736591,
+              -22.9222497
+            ],
+            [
+              -43.1745068,
+              -22.9215688
+            ],
+            [
+              -43.1750293,
+              -22.9206428
+            ],
+            [
+              -43.176247,
+              -22.9204438
+            ],
+            [
+              -43.1768073,
+              -22.9205547
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "steep",
+        "source": "reis-rio-1900",
+        "use_basis": "Closely spaced contours on Outeiro da Gloria. No church outline is inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gloria-inner-hillside-grade",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1838138,
+              -22.9215645
+            ],
+            [
+              -43.1832893,
+              -22.9227259
+            ],
+            [
+              -43.1823513,
+              -22.9230274
+            ],
+            [
+              -43.1800639,
+              -22.9225353
+            ],
+            [
+              -43.1791329,
+              -22.9220366
+            ],
+            [
+              -43.1788121,
+              -22.9212737
+            ],
+            [
+              -43.1796566,
+              -22.9209694
+            ],
+            [
+              -43.1809625,
+              -22.9213851
+            ],
+            [
+              -43.1818992,
+              -22.9212247
+            ],
+            [
+              -43.1838138,
+              -22.9215645
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "steep",
+        "source": "reis-rio-1900",
+        "use_basis": "Short contoured hillside directly behind the plotted street fronts."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "morro-do-pinto-grade",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.2061591,
+              -22.9065067
+            ],
+            [
+              -43.2035408,
+              -22.9064284
+            ],
+            [
+              -43.2020052,
+              -22.9055351
+            ],
+            [
+              -43.2007948,
+              -22.9048868
+            ],
+            [
+              -43.199399,
+              -22.9040447
+            ],
+            [
+              -43.1984273,
+              -22.9028386
+            ],
+            [
+              -43.1990454,
+              -22.90168
+            ],
+            [
+              -43.2004517,
+              -22.9012983
+            ],
+            [
+              -43.2018048,
+              -22.9016683
+            ],
+            [
+              -43.2028729,
+              -22.9025477
+            ],
+            [
+              -43.2040283,
+              -22.904136
+            ],
+            [
+              -43.2052322,
+              -22.9055373
+            ],
+            [
+              -43.2061591,
+              -22.9065067
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "steep",
+        "source": "reis-rio-1900",
+        "use_basis": "Contours define the ordinary-to-slope transition near the landward approach to Saco do Alferes."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gamboa-terminal-apron",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.197603557,
+              -22.897543857
+            ],
+            [
+              -43.197907379,
+              -22.898664679
+            ],
+            [
+              -43.197676111,
+              -22.8992255
+            ],
+            [
+              -43.197135339,
+              -22.899483038
+            ],
+            [
+              -43.19638342,
+              -22.898953008
+            ],
+            [
+              -43.196132936,
+              -22.897771905
+            ],
+            [
+              -43.196974462,
+              -22.897642099
+            ],
+            [
+              -43.197603557,
+              -22.897543857
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "work_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Apron and freight premises shown at the 1900 Gamboa terminal. Separate layout from the later filled port."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-shore-berth",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.189724801,
+              -22.896043653
+            ],
+            [
+              -43.189623162,
+              -22.895845566
+            ],
+            [
+              -43.190011802,
+              -22.895298951
+            ],
+            [
+              -43.189531966,
+              -22.895041915
+            ],
+            [
+              -43.1896414,
+              -22.894864153
+            ],
+            [
+              -43.190346403,
+              -22.894461451
+            ],
+            [
+              -43.190579004,
+              -22.89460965
+            ],
+            [
+              -43.190432603,
+              -22.895311551
+            ],
+            [
+              -43.190241503,
+              -22.895776651
+            ],
+            [
+              -43.189724801,
+              -22.896043653
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "work_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Small shoreline work area directly within the old surveyed headland."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "prainha-quay",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1844473,
+              -22.8970063
+            ],
+            [
+              -43.184613951,
+              -22.896614753
+            ],
+            [
+              -43.184832003,
+              -22.896459174
+            ],
+            [
+              -43.186085491,
+              -22.89653264
+            ],
+            [
+              -43.186483878,
+              -22.897292083
+            ],
+            [
+              -43.186175585,
+              -22.897684613
+            ],
+            [
+              -43.18449,
+              -22.8974784
+            ],
+            [
+              -43.1844473,
+              -22.8970063
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "work_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped shore apron. It excludes the outer pier projections and post-1900 fill."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "praca-xv-landward-ferry-apron",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1727028,
+              -22.9030585
+            ],
+            [
+              -43.172526520094465,
+              -22.902783405918203
+            ],
+            [
+              -43.1726622,
+              -22.9023511
+            ],
+            [
+              -43.17296878909987,
+              -22.90199360198938
+            ],
+            [
+              -43.173553,
+              -22.9020952
+            ],
+            [
+              -43.1735949,
+              -22.9026615
+            ],
+            [
+              -43.1732643,
+              -22.9030282
+            ],
+            [
+              -43.1727028,
+              -22.9030585
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "work_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Landward landing area bordering the former ferry steps."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sao-cristovao-drawn-coast-works",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.2132093,
+              -22.90248
+            ],
+            [
+              -43.212216,
+              -22.9037686
+            ],
+            [
+              -43.2117045,
+              -22.9034237
+            ],
+            [
+              -43.2109117,
+              -22.9031646
+            ],
+            [
+              -43.2116704,
+              -22.9019631
+            ],
+            [
+              -43.2124209,
+              -22.9017031
+            ],
+            [
+              -43.2132093,
+              -22.90248
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "work_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Industrial site footprints and yard bounds shown on the two-sheet plan. Modern fills are outside this mask."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "central-do-brasil-rail-alignment",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1899575,
+              -22.9033859
+            ],
+            [
+              -43.191221597,
+              -22.903235299
+            ],
+            [
+              -43.1929418,
+              -22.9044167
+            ],
+            [
+              -43.1945258,
+              -22.9051232
+            ],
+            [
+              -43.1965326,
+              -22.9056069
+            ],
+            [
+              -43.1980723,
+              -22.9060296
+            ],
+            [
+              -43.200452,
+              -22.9066657
+            ],
+            [
+              -43.2023625,
+              -22.9074761
+            ],
+            [
+              -43.20446,
+              -22.9082921
+            ],
+            [
+              -43.2060924,
+              -22.9088117
+            ],
+            [
+              -43.2083306,
+              -22.9095849
+            ],
+            [
+              -43.210479,
+              -22.9099316
+            ],
+            [
+              -43.212859,
+              -22.9105206
+            ],
+            [
+              -43.2149139,
+              -22.9108645
+            ],
+            [
+              -43.2167898,
+              -22.9102614
+            ],
+            [
+              -43.2184316,
+              -22.9096984
+            ],
+            [
+              -43.2195529,
+              -22.9098261
+            ],
+            [
+              -43.2213752,
+              -22.9100218
+            ],
+            [
+              -43.2234276,
+              -22.9106481
+            ],
+            [
+              -43.2254332,
+              -22.9112731
+            ],
+            [
+              -43.2270242,
+              -22.9111794
+            ],
+            [
+              -43.228709,
+              -22.9110414
+            ],
+            [
+              -43.2301613,
+              -22.9107552
+            ],
+            [
+              -43.2301593,
+              -22.9109906
+            ],
+            [
+              -43.2287529,
+              -22.9113723
+            ],
+            [
+              -43.2271148,
+              -22.9115116
+            ],
+            [
+              -43.2253836,
+              -22.9116011
+            ],
+            [
+              -43.2233776,
+              -22.9110233
+            ],
+            [
+              -43.2213248,
+              -22.910444
+            ],
+            [
+              -43.2195497,
+              -22.9102027
+            ],
+            [
+              -43.2184283,
+              -22.910075
+            ],
+            [
+              -43.2167866,
+              -22.910638
+            ],
+            [
+              -43.2149582,
+              -22.9111483
+            ],
+            [
+              -43.2128566,
+              -22.910803
+            ],
+            [
+              -43.2104765,
+              -22.910214
+            ],
+            [
+              -43.2082347,
+              -22.9098645
+            ],
+            [
+              -43.2059493,
+              -22.909137
+            ],
+            [
+              -43.2043169,
+              -22.9086174
+            ],
+            [
+              -43.2023133,
+              -22.9077571
+            ],
+            [
+              -43.2003561,
+              -22.9069453
+            ],
+            [
+              -43.1980231,
+              -22.9063106
+            ],
+            [
+              -43.1964363,
+              -22.9059336
+            ],
+            [
+              -43.194429,
+              -22.905497
+            ],
+            [
+              -43.1927978,
+              -22.9048361
+            ],
+            [
+              -43.1910776,
+              -22.9036548
+            ],
+            [
+              -43.1899543,
+              -22.9037624
+            ],
+            [
+              -43.1899575,
+              -22.9033859
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "rail",
+        "source": "reis-rio-1900",
+        "use_basis": "Track corridor interpreted from consistently drawn track edges. Plot position across the paper seam requires independent control."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-gamboa-old-bays",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.2075876,
+              -22.8981687
+            ],
+            [
+              -43.2066895,
+              -22.8992718
+            ],
+            [
+              -43.2055157,
+              -22.8998017
+            ],
+            [
+              -43.204829,
+              -22.8980862
+            ],
+            [
+              -43.2032429,
+              -22.8976151
+            ],
+            [
+              -43.2023672,
+              -22.8961294
+            ],
+            [
+              -43.2019964,
+              -22.8957416
+            ],
+            [
+              -43.2009714,
+              -22.8952872
+            ],
+            [
+              -43.2004579,
+              -22.8951777
+            ],
+            [
+              -43.2002197,
+              -22.8956885
+            ],
+            [
+              -43.198911068,
+              -22.895396438
+            ],
+            [
+              -43.197747014,
+              -22.895454205
+            ],
+            [
+              -43.196952463,
+              -22.896152304
+            ],
+            [
+              -43.196633852,
+              -22.896317892
+            ],
+            [
+              -43.194860779,
+              -22.896039636
+            ],
+            [
+              -43.193943281,
+              -22.895181692
+            ],
+            [
+              -43.193203502,
+              -22.893981851
+            ],
+            [
+              -43.1925558,
+              -22.893162053
+            ],
+            [
+              -43.191766703,
+              -22.892479352
+            ],
+            [
+              -43.190786404,
+              -22.892261753
+            ],
+            [
+              -43.189989102,
+              -22.89252035
+            ],
+            [
+              -43.1893752,
+              -22.893208251
+            ],
+            [
+              -43.188807244,
+              -22.893991767
+            ],
+            [
+              -43.189360104,
+              -22.89494985
+            ],
+            [
+              -43.190011802,
+              -22.895298951
+            ],
+            [
+              -43.189585707,
+              -22.895898255
+            ],
+            [
+              -43.188907415,
+              -22.896075266
+            ],
+            [
+              -43.188217353,
+              -22.895981267
+            ],
+            [
+              -43.187737517,
+              -22.896232596
+            ],
+            [
+              -43.187437461,
+              -22.896581103
+            ],
+            [
+              -43.186781895,
+              -22.896895519
+            ],
+            [
+              -43.186363004,
+              -22.896475615
+            ],
+            [
+              -43.184907392,
+              -22.896403364
+            ],
+            [
+              -43.1841204,
+              -22.8969494
+            ],
+            [
+              -43.1830934,
+              -22.8967304
+            ],
+            [
+              -43.1818306,
+              -22.8967398
+            ],
+            [
+              -43.1802938,
+              -22.8959876
+            ],
+            [
+              -43.1788459,
+              -22.895756
+            ],
+            [
+              -43.1773034,
+              -22.8956628
+            ],
+            [
+              -43.176874,
+              -22.8966387
+            ],
+            [
+              -43.1747883,
+              -22.8944577
+            ],
+            [
+              -43.177486,
+              -22.8907717
+            ],
+            [
+              -43.194604516,
+              -22.889354694
+            ],
+            [
+              -43.2032829,
+              -22.8930022
+            ],
+            [
+              -43.2086858,
+              -22.8955649
+            ],
+            [
+              -43.2085797,
+              -22.8970213
+            ],
+            [
+              -43.2075876,
+              -22.8981687
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "water_surface",
+        "source": "reis-rio-1900",
+        "use_basis": "Pre-fill shore and bays traced from the Reis shoreline. Offshore closure is a mask boundary. Projected piers and later landfills are excluded.",
+        "basin": "coast"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "praca-xv-and-gloria-old-water",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.177205,
+              -22.896224898
+            ],
+            [
+              -43.1766288,
+              -22.8979497
+            ],
+            [
+              -43.175736402,
+              -22.898393898
+            ],
+            [
+              -43.174600002,
+              -22.900007802
+            ],
+            [
+              -43.173607099,
+              -22.901249301
+            ],
+            [
+              -43.172662202,
+              -22.902351101
+            ],
+            [
+              -43.172325498,
+              -22.903423899
+            ],
+            [
+              -43.171614799,
+              -22.904485601
+            ],
+            [
+              -43.170205599,
+              -22.905196798
+            ],
+            [
+              -43.168518302,
+              -22.905617198
+            ],
+            [
+              -43.169215099,
+              -22.906155902
+            ],
+            [
+              -43.170471898,
+              -22.906852599
+            ],
+            [
+              -43.171632599,
+              -22.907829
+            ],
+            [
+              -43.172744999,
+              -22.908992198
+            ],
+            [
+              -43.174322901,
+              -22.910404702
+            ],
+            [
+              -43.175016499,
+              -22.911319999
+            ],
+            [
+              -43.1760362,
+              -22.912386299
+            ],
+            [
+              -43.176588699,
+              -22.913391601
+            ],
+            [
+              -43.176810598,
+              -22.914763599
+            ],
+            [
+              -43.176941101,
+              -22.915897499
+            ],
+            [
+              -43.176928899,
+              -22.917309602
+            ],
+            [
+              -43.176912599,
+              -22.919192399
+            ],
+            [
+              -43.176863,
+              -22.919520513
+            ],
+            [
+              -43.176532446,
+              -22.919887295
+            ],
+            [
+              -43.176108786,
+              -22.920204212
+            ],
+            [
+              -43.175731883,
+              -22.920522526
+            ],
+            [
+              -43.175169585,
+              -22.920646969
+            ],
+            [
+              -43.174514997,
+              -22.920627406
+            ],
+            [
+              -43.174464981,
+              -22.921002572
+            ],
+            [
+              -43.174321859,
+              -22.921327872
+            ],
+            [
+              -43.174038876,
+              -22.921601911
+            ],
+            [
+              -43.173616847,
+              -22.921730546
+            ],
+            [
+              -43.173055364,
+              -22.921760848
+            ],
+            [
+              -43.172539415,
+              -22.921933759
+            ],
+            [
+              -43.172770344,
+              -22.922270238
+            ],
+            [
+              -43.173095193,
+              -22.922562442
+            ],
+            [
+              -43.173326122,
+              -22.922898921
+            ],
+            [
+              -43.173415152,
+              -22.92341949
+            ],
+            [
+              -43.173409039,
+              -22.924125546
+            ],
+            [
+              -43.173358616,
+              -22.924547782
+            ],
+            [
+              -43.173585877,
+              -22.925307895
+            ],
+            [
+              -43.17385908,
+              -22.926163546
+            ],
+            [
+              -43.1740404,
+              -22.926828121
+            ],
+            [
+              -43.174221313,
+              -22.927539766
+            ],
+            [
+              -43.174400596,
+              -22.928439693
+            ],
+            [
+              -43.17453516,
+              -22.92910287
+            ],
+            [
+              -43.174763236,
+              -22.929768842
+            ],
+            [
+              -43.17480714,
+              -22.930099732
+            ],
+            [
+              -43.174846969,
+              -22.930901326
+            ],
+            [
+              -43.174934369,
+              -22.931610177
+            ],
+            [
+              -43.175066895,
+              -22.932508706
+            ],
+            [
+              -43.17506119,
+              -22.933167691
+            ],
+            [
+              -43.175007914,
+              -22.93391942
+            ],
+            [
+              -43.171267409,
+              -22.933807633
+            ],
+            [
+              -43.169057035,
+              -22.924419227
+            ],
+            [
+              -43.167741037,
+              -22.919765806
+            ],
+            [
+              -43.165996083,
+              -22.916041218
+            ],
+            [
+              -43.166546776,
+              -22.906452832
+            ],
+            [
+              -43.16918235,
+              -22.899139635
+            ],
+            [
+              -43.172812333,
+              -22.895811092
+            ],
+            [
+              -43.177205,
+              -22.896224898
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "water_surface",
+        "source": "reis-rio-1900",
+        "use_basis": "Reis shows the outer beach of the pre-fill Praia do Russel and the shore of Praia do Flamengo. The Glória headland and beach meet this shoreline. The mask closes through offshore water.",
+        "basin": "coast",
+        "use_reference": "bn-gutierrez-gloria-1890s"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saco-do-alferes-water-margin",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.2159002,
+              -22.8941797
+            ],
+            [
+              -43.2147662,
+              -22.8955112
+            ],
+            [
+              -43.2140099,
+              -22.8964302
+            ],
+            [
+              -43.2130158,
+              -22.897813
+            ],
+            [
+              -43.2120677,
+              -22.8992913
+            ],
+            [
+              -43.2112622,
+              -22.9004914
+            ],
+            [
+              -43.2105478,
+              -22.9019767
+            ],
+            [
+              -43.2099278,
+              -22.9033706
+            ],
+            [
+              -43.2092593,
+              -22.9049514
+            ],
+            [
+              -43.2083608,
+              -22.9061017
+            ],
+            [
+              -43.2076135,
+              -22.9059852
+            ],
+            [
+              -43.2069687,
+              -22.9048359
+            ],
+            [
+              -43.206182,
+              -22.9038707
+            ],
+            [
+              -43.2053075,
+              -22.9022438
+            ],
+            [
+              -43.2043337,
+              -22.9012731
+            ],
+            [
+              -43.2030302,
+              -22.9005749
+            ],
+            [
+              -43.2017223,
+              -22.9003946
+            ],
+            [
+              -43.2014971,
+              -22.8993991
+            ],
+            [
+              -43.2018776,
+              -22.8986572
+            ],
+            [
+              -43.2029616,
+              -22.8977009
+            ],
+            [
+              -43.20484,
+              -22.8968153
+            ],
+            [
+              -43.2065781,
+              -22.8959256
+            ],
+            [
+              -43.2091136,
+              -22.8947773
+            ],
+            [
+              -43.2116014,
+              -22.8937216
+            ],
+            [
+              -43.2143698,
+              -22.8926744
+            ],
+            [
+              -43.2159002,
+              -22.8941797
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "water_surface",
+        "source": "reis-rio-1900",
+        "use_basis": "Approximate historical embayment between the two shoreline reaches. Hand trace carries west sheet uncertainty.",
+        "basin": "coast"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-mercantile-inner",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1790153,
+              -22.9032001
+            ],
+            [
+              -43.180268,
+              -22.9043675
+            ],
+            [
+              -43.1796536,
+              -22.9051025
+            ],
+            [
+              -43.1782554,
+              -22.9045428
+            ],
+            [
+              -43.1770918,
+              -22.9038959
+            ],
+            [
+              -43.1778033,
+              -22.9027401
+            ],
+            [
+              -43.1790153,
+              -22.9032001
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "role": "shop",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-mercantile-inner-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1790153,
+              -22.9032001
+            ],
+            [
+              -43.180268,
+              -22.9043675
+            ],
+            [
+              -43.1796536,
+              -22.9051025
+            ],
+            [
+              -43.1782554,
+              -22.9045428
+            ],
+            [
+              -43.1770918,
+              -22.9038959
+            ],
+            [
+              -43.1778033,
+              -22.9027401
+            ],
+            [
+              -43.1790153,
+              -22.9032001
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-mercantile-west",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1815824,
+              -22.9037947
+            ],
+            [
+              -43.1826985,
+              -22.9045343
+            ],
+            [
+              -43.1820345,
+              -22.9055974
+            ],
+            [
+              -43.1808233,
+              -22.9050433
+            ],
+            [
+              -43.1796118,
+              -22.9045362
+            ],
+            [
+              -43.1804168,
+              -22.9033832
+            ],
+            [
+              -43.1815824,
+              -22.9037947
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "role": "street_row",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-mercantile-west-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1815824,
+              -22.9037947
+            ],
+            [
+              -43.1826985,
+              -22.9045343
+            ],
+            [
+              -43.1820345,
+              -22.9055974
+            ],
+            [
+              -43.1808233,
+              -22.9050433
+            ],
+            [
+              -43.1796118,
+              -22.9045362
+            ],
+            [
+              -43.1804168,
+              -22.9033832
+            ],
+            [
+              -43.1815824,
+              -22.9037947
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-largo-streets",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1844297,
+              -22.9044448
+            ],
+            [
+              -43.1847476,
+              -22.9055372
+            ],
+            [
+              -43.1841768,
+              -22.9066501
+            ],
+            [
+              -43.1836075,
+              -22.9075748
+            ],
+            [
+              -43.1826757,
+              -22.9071703
+            ],
+            [
+              -43.1810921,
+              -22.9064167
+            ],
+            [
+              -43.1820837,
+              -22.9053164
+            ],
+            [
+              -43.1830778,
+              -22.9039336
+            ],
+            [
+              -43.1844297,
+              -22.9044448
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "role": "street_row",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-largo-streets-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1844297,
+              -22.9044448
+            ],
+            [
+              -43.1847476,
+              -22.9055372
+            ],
+            [
+              -43.1841768,
+              -22.9066501
+            ],
+            [
+              -43.1836075,
+              -22.9075748
+            ],
+            [
+              -43.1826757,
+              -22.9071703
+            ],
+            [
+              -43.1810921,
+              -22.9064167
+            ],
+            [
+              -43.1820837,
+              -22.9053164
+            ],
+            [
+              -43.1830778,
+              -22.9039336
+            ],
+            [
+              -43.1844297,
+              -22.9044448
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-campo-east",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1864809,
+              -22.9052124
+            ],
+            [
+              -43.1857144,
+              -22.9073082
+            ],
+            [
+              -43.1852838,
+              -22.9084253
+            ],
+            [
+              -43.1837462,
+              -22.9077672
+            ],
+            [
+              -43.1840336,
+              -22.9069754
+            ],
+            [
+              -43.1844187,
+              -22.9057157
+            ],
+            [
+              -43.1849891,
+              -22.9046499
+            ],
+            [
+              -43.1864809,
+              -22.9052124
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "role": "courtyard_home",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-campo-east-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1864809,
+              -22.9052124
+            ],
+            [
+              -43.1857144,
+              -22.9073082
+            ],
+            [
+              -43.1852838,
+              -22.9084253
+            ],
+            [
+              -43.1837462,
+              -22.9077672
+            ],
+            [
+              -43.1840336,
+              -22.9069754
+            ],
+            [
+              -43.1844187,
+              -22.9057157
+            ],
+            [
+              -43.1849891,
+              -22.9046499
+            ],
+            [
+              -43.1864809,
+              -22.9052124
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-campo-west",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1917566,
+              -22.9062646
+            ],
+            [
+              -43.1914171,
+              -22.9076669
+            ],
+            [
+              -43.1909848,
+              -22.9089723
+            ],
+            [
+              -43.1903668,
+              -22.9101309
+            ],
+            [
+              -43.1887824,
+              -22.9094715
+            ],
+            [
+              -43.1889755,
+              -22.908771
+            ],
+            [
+              -43.1894561,
+              -22.9072787
+            ],
+            [
+              -43.1901722,
+              -22.9056052
+            ],
+            [
+              -43.1917566,
+              -22.9062646
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "role": "street_row",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "centro-campo-west-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1917566,
+              -22.9062646
+            ],
+            [
+              -43.1914171,
+              -22.9076669
+            ],
+            [
+              -43.1909848,
+              -22.9089723
+            ],
+            [
+              -43.1903668,
+              -22.9101309
+            ],
+            [
+              -43.1887824,
+              -22.9094715
+            ],
+            [
+              -43.1889755,
+              -22.908771
+            ],
+            [
+              -43.1894561,
+              -22.9072787
+            ],
+            [
+              -43.1901722,
+              -22.9056052
+            ],
+            [
+              -43.1917566,
+              -22.9062646
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gamboa-shore-inland-one",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.193858511,
+              -22.896221418
+            ],
+            [
+              -43.192997292,
+              -22.896188559
+            ],
+            [
+              -43.192950614,
+              -22.896612268
+            ],
+            [
+              -43.19286553,
+              -22.897037862
+            ],
+            [
+              -43.192733493,
+              -22.897320289
+            ],
+            [
+              -43.193519142,
+              -22.897404637
+            ],
+            [
+              -43.194284089,
+              -22.89754506
+            ],
+            [
+              -43.19448923,
+              -22.89683233
+            ],
+            [
+              -43.193858511,
+              -22.896221418
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred.",
+        "role": "low_home",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gamboa-shore-inland-one-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.193858511,
+              -22.896221418
+            ],
+            [
+              -43.192997292,
+              -22.896188559
+            ],
+            [
+              -43.192950614,
+              -22.896612268
+            ],
+            [
+              -43.19286553,
+              -22.897037862
+            ],
+            [
+              -43.192733493,
+              -22.897320289
+            ],
+            [
+              -43.193519142,
+              -22.897404637
+            ],
+            [
+              -43.194284089,
+              -22.89754506
+            ],
+            [
+              -43.19448923,
+              -22.89683233
+            ],
+            [
+              -43.193858511,
+              -22.896221418
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-shore-inland-two",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.192997292,
+              -22.896188559
+            ],
+            [
+              -43.192484195,
+              -22.896031977
+            ],
+            [
+              -43.191736502,
+              -22.895962549
+            ],
+            [
+              -43.191686078,
+              -22.896384786
+            ],
+            [
+              -43.191635654,
+              -22.896807022
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.192733493,
+              -22.897320289
+            ],
+            [
+              -43.19286553,
+              -22.897037862
+            ],
+            [
+              -43.192950614,
+              -22.896612268
+            ],
+            [
+              -43.192997292,
+              -22.896188559
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred.",
+        "role": "street_row",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-shore-inland-two-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.192997292,
+              -22.896188559
+            ],
+            [
+              -43.192484195,
+              -22.896031977
+            ],
+            [
+              -43.191736502,
+              -22.895962549
+            ],
+            [
+              -43.191686078,
+              -22.896384786
+            ],
+            [
+              -43.191635654,
+              -22.896807022
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.192733493,
+              -22.897320289
+            ],
+            [
+              -43.19286553,
+              -22.897037862
+            ],
+            [
+              -43.192950614,
+              -22.896612268
+            ],
+            [
+              -43.192997292,
+              -22.896188559
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-ordinary-terrain",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.192733493,
+              -22.897320289
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.191571159,
+              -22.897760245
+            ],
+            [
+              -43.192285344,
+              -22.897833484
+            ],
+            [
+              -43.192719311,
+              -22.897851233
+            ],
+            [
+              -43.192733493,
+              -22.897320289
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred.",
+        "role": "low_home",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-ordinary-terrain-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.192733493,
+              -22.897320289
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.191571159,
+              -22.897760245
+            ],
+            [
+              -43.192285344,
+              -22.897833484
+            ],
+            [
+              -43.192719311,
+              -22.897851233
+            ],
+            [
+              -43.192733493,
+              -22.897320289
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gloria-low-slope-north",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1787776,
+              -22.9198602
+            ],
+            [
+              -43.1798859,
+              -22.9214942
+            ],
+            [
+              -43.1797374,
+              -22.9224314
+            ],
+            [
+              -43.1788491,
+              -22.9224048
+            ],
+            [
+              -43.1773549,
+              -22.9221248
+            ],
+            [
+              -43.1771366,
+              -22.9203291
+            ],
+            [
+              -43.1773314,
+              -22.9194403
+            ],
+            [
+              -43.1787776,
+              -22.9198602
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "role": "low_home",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gloria-low-slope-north-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1787776,
+              -22.9198602
+            ],
+            [
+              -43.1798859,
+              -22.9214942
+            ],
+            [
+              -43.1797374,
+              -22.9224314
+            ],
+            [
+              -43.1788491,
+              -22.9224048
+            ],
+            [
+              -43.1773549,
+              -22.9221248
+            ],
+            [
+              -43.1771366,
+              -22.9203291
+            ],
+            [
+              -43.1773314,
+              -22.9194403
+            ],
+            [
+              -43.1787776,
+              -22.9198602
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "santo-cristo-developed-corner",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.2111788,
+              -22.9047263
+            ],
+            [
+              -43.2118207,
+              -22.9062051
+            ],
+            [
+              -43.2143435,
+              -22.9065159
+            ],
+            [
+              -43.214385,
+              -22.9071292
+            ],
+            [
+              -43.2132624,
+              -22.9071427
+            ],
+            [
+              -43.2113467,
+              -22.9069442
+            ],
+            [
+              -43.2099464,
+              -22.9066199
+            ],
+            [
+              -43.2106579,
+              -22.9054641
+            ],
+            [
+              -43.2111788,
+              -22.9047263
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "role": "low_home",
+        "gap_m": 1.5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "santo-cristo-developed-corner-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.2111788,
+              -22.9047263
+            ],
+            [
+              -43.2118207,
+              -22.9062051
+            ],
+            [
+              -43.2143435,
+              -22.9065159
+            ],
+            [
+              -43.214385,
+              -22.9071292
+            ],
+            [
+              -43.2132624,
+              -22.9071427
+            ],
+            [
+              -43.2113467,
+              -22.9069442
+            ],
+            [
+              -43.2099464,
+              -22.9066199
+            ],
+            [
+              -43.2106579,
+              -22.9054641
+            ],
+            [
+              -43.2111788,
+              -22.9047263
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sao-cristovao-hillside-front",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.2254562,
+            -22.9032226
+          ],
+          [
+            -43.2246145,
+            -22.9031975
+          ],
+          [
+            -43.2237786,
+            -22.9025133
+          ],
+          [
+            -43.2231761,
+            -22.9018833
+          ],
+          [
+            -43.222763,
+            -22.9009763
+          ],
+          [
+            -43.2219678,
+            -22.9009997
+          ],
+          [
+            -43.2207098,
+            -22.9004442
+          ],
+          [
+            -43.2197804,
+            -22.8997572
+          ],
+          [
+            -43.2189457,
+            -22.8989319
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "gravel",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Solid street edge under the hill between northern streets and the Quinta road. West sheet accuracy remains provisional."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sao-cristovao-contour-edge",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.229561,
+              -22.8990608
+            ],
+            [
+              -43.2298318,
+              -22.9001989
+            ],
+            [
+              -43.2294028,
+              -22.9011277
+            ],
+            [
+              -43.228512,
+              -22.9013836
+            ],
+            [
+              -43.2274801,
+              -22.9017294
+            ],
+            [
+              -43.2263559,
+              -22.9019312
+            ],
+            [
+              -43.2253289,
+              -22.9017122
+            ],
+            [
+              -43.2251004,
+              -22.9010933
+            ],
+            [
+              -43.2257168,
+              -22.900123
+            ],
+            [
+              -43.226987,
+              -22.8992664
+            ],
+            [
+              -43.2283007,
+              -22.8987877
+            ],
+            [
+              -43.229561,
+              -22.8990608
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "steep",
+        "source": "reis-rio-1900",
+        "use_basis": "Contoured hillside below the northern developed blocks. The park and northwest streets are interpreted at mapped-block scale."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "praca-xv-inland-commercial-front",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1769686,
+              -22.9019148
+            ],
+            [
+              -43.1765832,
+              -22.9032216
+            ],
+            [
+              -43.1760603,
+              -22.9041947
+            ],
+            [
+              -43.1748032,
+              -22.903545
+            ],
+            [
+              -43.175559,
+              -22.9026731
+            ],
+            [
+              -43.1762702,
+              -22.9015643
+            ],
+            [
+              -43.1769686,
+              -22.9019148
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "role": "shop",
+        "gap_m": 1.5,
+        "use_basis": "Drawn enclosed block west of the ferry approach. Building parcels and massing are inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "praca-xv-inland-commercial-front-ground",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1769686,
+              -22.9019148
+            ],
+            [
+              -43.1765832,
+              -22.9032216
+            ],
+            [
+              -43.1760603,
+              -22.9041947
+            ],
+            [
+              -43.1748032,
+              -22.903545
+            ],
+            [
+              -43.175559,
+              -22.9026731
+            ],
+            [
+              -43.1762702,
+              -22.9015643
+            ],
+            [
+              -43.1769686,
+              -22.9019148
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Drawn enclosed block west of the ferry approach. Ground material is inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-upper-block-street",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "The upper street spans the drawn rows below the Saúde contour and stops before the harbour parcel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.194608723,
+            -22.896167127
+          ],
+          [
+            -43.193858511,
+            -22.896221418
+          ],
+          [
+            -43.192997292,
+            -22.896188559
+          ],
+          [
+            -43.192484195,
+            -22.896031977
+          ],
+          [
+            -43.191736502,
+            -22.895962549
+          ],
+          [
+            -43.190988808,
+            -22.895893122
+          ],
+          [
+            -43.190006926,
+            -22.895863778
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-west-block-lane",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Paired street edges link the upper ordinary block, waterfront corridor and lower terrace."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.192997292,
+            -22.896188559
+          ],
+          [
+            -43.192950614,
+            -22.896612268
+          ],
+          [
+            -43.19286553,
+            -22.897037862
+          ],
+          [
+            -43.192733493,
+            -22.897320289
+          ],
+          [
+            -43.192719311,
+            -22.897851233
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-east-block-lane",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Paired street edges link the upper ordinary block, waterfront corridor and lower terrace."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.191736502,
+            -22.895962549
+          ],
+          [
+            -43.191686078,
+            -22.896384786
+          ],
+          [
+            -43.191635654,
+            -22.896807022
+          ],
+          [
+            -43.191590794,
+            -22.897136984
+          ],
+          [
+            -43.191571159,
+            -22.897760245
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-upper-east-row",
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "role": "street_row",
+        "gap_m": 1.5,
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.191736502,
+              -22.895962549
+            ],
+            [
+              -43.190988808,
+              -22.895893122
+            ],
+            [
+              -43.190053275,
+              -22.895912245
+            ],
+            [
+              -43.189470105,
+              -22.896895617
+            ],
+            [
+              -43.190473271,
+              -22.897058037
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.191635654,
+              -22.896807022
+            ],
+            [
+              -43.191686078,
+              -22.896384786
+            ],
+            [
+              -43.191736502,
+              -22.895962549
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-upper-east-row-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.191736502,
+              -22.895962549
+            ],
+            [
+              -43.190988808,
+              -22.895893122
+            ],
+            [
+              -43.190053275,
+              -22.895912245
+            ],
+            [
+              -43.189470105,
+              -22.896895617
+            ],
+            [
+              -43.190473271,
+              -22.897058037
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.191635654,
+              -22.896807022
+            ],
+            [
+              -43.191686078,
+              -22.896384786
+            ],
+            [
+              -43.191736502,
+              -22.895962549
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-lower-east-row",
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "role": "street_row",
+        "gap_m": 1.5,
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.190473271,
+              -22.897058037
+            ],
+            [
+              -43.19051466,
+              -22.897829996
+            ],
+            [
+              -43.191012169,
+              -22.897744297
+            ],
+            [
+              -43.191571159,
+              -22.897760245
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-lower-east-row-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.190473271,
+              -22.897058037
+            ],
+            [
+              -43.19051466,
+              -22.897829996
+            ],
+            [
+              -43.191012169,
+              -22.897744297
+            ],
+            [
+              -43.191571159,
+              -22.897760245
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-cape-contour-margin",
+      "properties": {
+        "kind": "steep",
+        "source": "reis-rio-1900",
+        "use_basis": "Contoured area above the drawn ordinary blocks and below the summit. No individual contour elevation is assigned."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.194443974,
+              -22.895822698
+            ],
+            [
+              -43.193709639,
+              -22.894938619
+            ],
+            [
+              -43.192822084,
+              -22.894817929
+            ],
+            [
+              -43.192078873,
+              -22.894230727
+            ],
+            [
+              -43.191610088,
+              -22.894357964
+            ],
+            [
+              -43.191558034,
+              -22.894968482
+            ],
+            [
+              -43.190997366,
+              -22.894904644
+            ],
+            [
+              -43.190478564,
+              -22.895407047
+            ],
+            [
+              -43.190662737,
+              -22.895742129
+            ],
+            [
+              -43.191784888,
+              -22.895775665
+            ],
+            [
+              -43.192532581,
+              -22.895845093
+            ],
+            [
+              -43.193139191,
+              -22.89600447
+            ],
+            [
+              -43.19404942,
+              -22.895992382
+            ],
+            [
+              -43.194443974,
+              -22.895822698
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "praia-do-flamengo-old-front",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Solid road along the landward edge of the old beach shown by Reis. The last mapped segment in this extraction ends on the same shore road."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.173546048,
+            -22.924506301
+          ],
+          [
+            -43.173726146,
+            -22.925312087
+          ],
+          [
+            -43.173816806,
+            -22.925644375
+          ],
+          [
+            -43.173999349,
+            -22.926167738
+          ],
+          [
+            -43.174180669,
+            -22.926832313
+          ],
+          [
+            -43.174361582,
+            -22.927543958
+          ],
+          [
+            -43.174540865,
+            -22.928443885
+          ],
+          [
+            -43.174675428,
+            -22.929107062
+          ],
+          [
+            -43.174903505,
+            -22.929773034
+          ],
+          [
+            -43.174947409,
+            -22.930103924
+          ],
+          [
+            -43.174987238,
+            -22.930905518
+          ],
+          [
+            -43.175074638,
+            -22.931614369
+          ],
+          [
+            -43.175207164,
+            -22.932512898
+          ],
+          [
+            -43.175201459,
+            -22.933171883
+          ],
+          [
+            -43.175148183,
+            -22.933923612
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "catete-shore-to-machado",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Mapped lower cross street links Rua do Catete to the pre-fill Praia do Flamengo-front street."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.178083341,
+            -22.929820983
+          ],
+          [
+            -43.176959968,
+            -22.929928658
+          ],
+          [
+            -43.175930514,
+            -22.929992057
+          ],
+          [
+            -43.174947409,
+            -22.930103924
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "catete-presidential-garden",
+      "properties": {
+        "kind": "park",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped parcel east of the presidential palace. The museum documents the garden renovation for the presidential seat in 1897.",
+        "use_reference": "museu-republica-catete-gardens"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.176012315,
+              -22.925945401
+            ],
+            [
+              -43.174984084,
+              -22.92586759
+            ],
+            [
+              -43.174003016,
+              -22.925744105
+            ],
+            [
+              -43.174184744,
+              -22.926361609
+            ],
+            [
+              -43.174364434,
+              -22.927214465
+            ],
+            [
+              -43.175066186,
+              -22.927188355
+            ],
+            [
+              -43.176144842,
+              -22.926843931
+            ],
+            [
+              -43.176379846,
+              -22.926709706
+            ],
+            [
+              -43.17628837,
+              -22.92647156
+            ],
+            [
+              -43.176054996,
+              -22.926417503
+            ],
+            [
+              -43.176012315,
+              -22.925945401
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gloria-flamengo-offshore-no-roads",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17668789778433,
+              -22.919580371
+            ],
+            [
+              -43.168067264,
+              -22.919580371
+            ],
+            [
+              -43.168067264,
+              -22.920588632673137
+            ],
+            [
+              -43.16914363845769,
+              -22.924394735345988
+            ],
+            [
+              -43.16914463976226,
+              -22.924398601636252
+            ],
+            [
+              -43.17131363987514,
+              -22.933611275
+            ],
+            [
+              -43.17493952689188,
+              -22.933611275
+            ],
+            [
+              -43.17497121757046,
+              -22.9331641167653
+            ],
+            [
+              -43.17497683783259,
+              -22.932514919843133
+            ],
+            [
+              -43.17484533223991,
+              -22.931623309225746
+            ],
+            [
+              -43.174845045406684,
+              -22.931621190431674
+            ],
+            [
+              -43.174757645406686,
+              -22.930912339431675
+            ],
+            [
+              -43.174757079891734,
+              -22.93090579234243
+            ],
+            [
+              -43.17471743471314,
+              -22.93010789791142
+            ],
+            [
+              -43.17467519394144,
+              -22.929789543115813
+            ],
+            [
+              -43.17445001477934,
+              -22.929132029756488
+            ],
+            [
+              -43.174446957411504,
+              -22.929120767021637
+            ],
+            [
+              -43.174312393411505,
+              -22.928457590021637
+            ],
+            [
+              -43.174312330515605,
+              -22.928457277204984
+            ],
+            [
+              -43.1741335074445,
+              -22.927559658859074
+            ],
+            [
+              -43.1739533674486,
+              -22.92685105457199
+            ],
+            [
+              -43.17377275959069,
+              -22.926189089718893
+            ],
+            [
+              -43.17350014123839,
+              -22.92533526979098
+            ],
+            [
+              -43.173499648540016,
+              -22.92533367585896
+            ],
+            [
+              -43.17327238754002,
+              -22.92457356285896
+            ],
+            [
+              -43.173270204808574,
+              -22.924564618306906
+            ],
+            [
+              -43.17326894733112,
+              -22.924555497557023
+            ],
+            [
+              -43.173268628267586,
+              -22.92454629606114
+            ],
+            [
+              -43.17326925095709,
+              -22.92453711011613
+            ],
+            [
+              -43.17331908534907,
+              -22.924119803047255
+            ],
+            [
+              -43.1733250858247,
+              -22.92342674369491
+            ],
+            [
+              -43.173240739843756,
+              -22.922933562711485
+            ],
+            [
+              -43.17302704554656,
+              -22.92262219582631
+            ],
+            [
+              -43.172710155396075,
+              -22.922337150868398
+            ],
+            [
+              -43.172702673550965,
+              -22.922329573573872
+            ],
+            [
+              -43.17269613903699,
+              -22.922321165629672
+            ],
+            [
+              -43.17246521003699,
+              -22.921984686629674
+            ],
+            [
+              -43.17246061310317,
+              -22.921977236132566
+            ],
+            [
+              -43.17245676178811,
+              -22.92196937425747
+            ],
+            [
+              -43.17245369253272,
+              -22.921961175392973
+            ],
+            [
+              -43.17245143437811,
+              -22.92195271711623
+            ],
+            [
+              -43.17245000869079,
+              -22.921944079458946
+            ],
+            [
+              -43.17244942896053,
+              -22.921935344150103
+            ],
+            [
+              -43.172449700672715,
+              -22.92192659384267
+            ],
+            [
+              -43.17245082125641,
+              -22.92191791133152
+            ],
+            [
+              -43.17245278010872,
+              -22.921909378770046
+            ],
+            [
+              -43.17245555869511,
+              -22.921901076892823
+            ],
+            [
+              -43.172459130724754,
+              -22.921893084251714
+            ],
+            [
+              -43.172463462399335,
+              -22.921885476472603
+            ],
+            [
+              -43.172468512732806,
+              -22.92187832553983
+            ],
+            [
+              -43.17247423393923,
+              -22.921871699115087
+            ],
+            [
+              -43.172480571884876,
+              -22.921865659897204
+            ],
+            [
+              -43.1724874666005,
+              -22.921860265028894
+            ],
+            [
+              -43.17249485284873,
+              -22.92185556555607
+            ],
+            [
+              -43.17250266074132,
+              -22.92185160594486
+            ],
+            [
+              -43.17251081640048,
+              -22.921848423660865
+            ],
+            [
+              -43.17302676540048,
+              -22.921675512660865
+            ],
+            [
+              -43.17303453499688,
+              -22.921673291431837
+            ],
+            [
+              -43.17304247251229,
+              -22.921671776065338
+            ],
+            [
+              -43.173050513956156,
+              -22.921670978777936
+            ],
+            [
+              -43.173601072118075,
+              -22.921641266367367
+            ],
+            [
+              -43.173991865031,
+              -22.921522152168215
+            ],
+            [
+              -43.17424658134029,
+              -22.921275486457976
+            ],
+            [
+              -43.17437745812601,
+              -22.92097801843492
+            ],
+            [
+              -43.17442578629789,
+              -22.920615512698163
+            ],
+            [
+              -43.174427375471566,
+              -22.9206068519796
+            ],
+            [
+              -43.17442980336197,
+              -22.92059838800493
+            ],
+            [
+              -43.17443304672922,
+              -22.92059020179165
+            ],
+            [
+              -43.174437074527695,
+              -22.92058237169852
+            ],
+            [
+              -43.174441848203145,
+              -22.920574972675496
+            ],
+            [
+              -43.17444732206176,
+              -22.92056807554632
+            ],
+            [
+              -43.17445344370755,
+              -22.920561746330584
+            ],
+            [
+              -43.17446015454388,
+              -22.920556045611786
+            ],
+            [
+              -43.17446739033436,
+              -22.920551027957437
+            ],
+            [
+              -43.17447508181771,
+              -22.92054674139672
+            ],
+            [
+              -43.174483155370766,
+              -22.92054322696076
+            ],
+            [
+              -43.174491533713145,
+              -22.920540518289883
+            ],
+            [
+              -43.17450013664703,
+              -22.920538641311584
+            ],
+            [
+              -43.174508881824806,
+              -22.920537613992384
+            ],
+            [
+              -43.174517685537275,
+              -22.920537446165813
+            ],
+            [
+              -43.17516107570033,
+              -22.920556674507548
+            ],
+            [
+              -43.17569076729454,
+              -22.92043944767932
+            ],
+            [
+              -43.17605071542893,
+              -22.92013545293678
+            ],
+            [
+              -43.17605487618545,
+              -22.920132144449088
+            ],
+            [
+              -43.176471485270525,
+              -22.919820501854986
+            ],
+            [
+              -43.17668789778433,
+              -22.919580371
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road_coverage",
+        "source": "reis-rio-1900",
+        "categories": 3,
+        "coverage_state": "confirmed_empty",
+        "coverage_basis": "Open water on the 1900 sheet east of the Glória and Flamengo shore, with a coastal setback. No modern reclamation roads are present."
+      }
+    }
+  ]
+}

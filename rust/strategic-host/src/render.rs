@@ -244,12 +244,142 @@ struct GroundSurface {
     landscape:[wgpu::TextureView;2],
     art:wgpu::TextureView,
     materials:wgpu::TextureView,
+    material_bytes:u64,
     water:wgpu::Buffer,
     city_water:wgpu::Buffer,
+    city_roads:crate::city_roads::RoadSources,
+    road_store:RoadStore,
     water_pixels:wgpu::Buffer,
     water_raster:Option<WaterRaster>,
     loaded:bool,
     custom_art:bool,
+}
+
+#[derive(Clone, Copy)]
+struct RoadSlot {
+    key:(u64,usize),
+    bounds:[f64;4],
+    offset:usize,
+    bytes:usize,
+    written:usize,
+    active:bool,
+    water:bool,
+    ground:bool,
+    road_coverage:Option<&'static str>,
+}
+
+struct RoadStore {
+    base:u32,
+    capacity:usize,
+    registry:[u32;crate::city_roads::PAGE_SLOTS+1],
+    slots:[Option<RoadSlot>;crate::city_roads::PAGE_SLOTS],
+    fragmented:usize,
+    uploading:bool,
+    water_revision:u64,
+}
+
+impl RoadStore {
+    fn allocate(storage:&mut Vec<u8>, limit:u64) -> Self {
+        use crate::city_roads::{PAGE_DESCRIPTOR_WORDS,PAGE_SLOTS,PAGE_STORAGE_BYTES};
+        let base=(storage.len()/4) as u32;
+        let total=storage.len()+4*((PAGE_SLOTS+1)+PAGE_DESCRIPTOR_WORDS*PAGE_SLOTS+5)+PAGE_STORAGE_BYTES;
+        let capacity=if total as u64<=limit {PAGE_SLOTS} else {0};
+        let bytes=if capacity>0 {total-20} else {storage.len()+4};
+        storage.resize(bytes,0);
+        Self{base,capacity,registry:[0;PAGE_SLOTS+1],slots:[None;PAGE_SLOTS],fragmented:0,uploading:false,water_revision:0}
+    }
+
+    fn payload_offset(&self, bytes:usize) -> Option<usize> {
+        // Keep the addresses of ready pages stable while neighboring pages stream in.
+        let mut occupied = self.slots.iter().flatten()
+            .map(|slot| slot.offset..slot.offset + slot.bytes)
+            .collect::<Vec<_>>();
+        occupied.sort_unstable_by_key(|range| range.start);
+        let limit = crate::city_roads::PAGE_STORAGE_BYTES;
+        let mut end = 0;
+        let mut best = None;
+        for next in occupied.into_iter().chain(std::iter::once(limit..limit)) {
+            let space = next.start - end;
+            if space >= bytes && best.is_none_or(|(_, previous)| space < previous) {
+                best = Some((end, space));
+            }
+            end = next.end;
+        }
+        best.map(|(offset, _)| offset)
+    }
+
+    fn update(&mut self, queue:&wgpu::Queue, buffer:&wgpu::Buffer,
+              wanted:&[crate::city_models::ReadyRoad<'_>], uploads:&mut CityUploads) {
+        use crate::city_roads::{PAGE_DESCRIPTOR_WORDS,PAGE_SLOTS};
+        let stride=PAGE_DESCRIPTOR_WORDS as u32;
+        let descriptors=self.base+1+PAGE_SLOTS as u32;
+        let start=descriptors+stride*PAGE_SLOTS as u32;
+        self.fragmented=0;
+        if self.capacity==0 || (wanted.is_empty() && self.registry[0]==0 && !self.uploading) {return;}
+        // Reserve the registry transfer so a removed slot cannot remain visible after reuse.
+        let registry_bytes=std::mem::size_of_val(&self.registry) as u64;
+        uploads.remaining-=registry_bytes;
+        uploads.used+=registry_bytes;
+        let mut water_changed=false;
+        for entry in &mut self.slots {
+            if let Some(slot)=entry.filter(|slot| !wanted.iter().any(|road|road.key==slot.key)) {
+                water_changed|=slot.active && slot.water;
+                *entry=None;
+            }
+        }
+        self.uploading=false;
+        for road in wanted {
+            let Some(index)=self.slots.iter().position(|slot|slot.is_some_and(|slot|slot.key==road.key))
+                .or_else(||self.slots.iter().position(Option::is_none)) else {break;};
+            if self.slots[index].is_none() {
+                let bytes=road.page.data.len();
+                let Some(offset)=self.payload_offset(bytes) else {
+                    self.fragmented+=1;
+                    continue;
+                };
+                self.slots[index]=Some(RoadSlot{key:road.key,bounds:road.bounds,offset,bytes,
+                    written:0,active:false,water:road.page.water_offset.is_some(),
+                    ground:road.page.ground_material.is_some(),road_coverage:road.page.coverage_offset
+                        .map(|_|if road.page.has_vector {"mapped_or_empty"} else {"confirmed_empty"})});
+            }
+            let slot=self.slots[index].as_mut().unwrap();
+            if slot.active {continue;}
+            let contents=start+(slot.offset/4) as u32;
+            uploads.write(queue,buffer,u64::from(contents)*4,&road.page.data,&mut slot.written);
+            let descriptor=road.page.descriptor(contents,road.bounds);
+            let data=bytemuck::cast_slice(&descriptor);
+            let mut written=0;
+            if slot.written==slot.bytes && uploads.remaining>=data.len() as u64 && uploads.can_allocate(data.len() as u64) {
+                uploads.write(queue,buffer,u64::from(descriptors+stride*index as u32)*4,data,&mut written);
+            }
+            slot.active=written==data.len();
+            water_changed|=slot.active && slot.water;
+            self.uploading|=!slot.active;
+        }
+        let mut registry=[0;PAGE_SLOTS+1];
+        let mut count=0;
+        for (index,slot) in self.slots.iter().enumerate() {
+            if slot.is_some_and(|slot|slot.active) {
+                count+=1;
+                registry[count]=descriptors+stride*index as u32;
+            }
+        }
+        registry[0]=count as u32;
+        if registry!=self.registry {
+            let data=bytemuck::cast_slice(&registry);
+            queue.write_buffer(buffer,u64::from(self.base)*4,data);
+            uploads.written+=registry_bytes;
+            self.registry=registry;
+        } else {
+            uploads.remaining+=registry_bytes;
+            uploads.used-=registry_bytes;
+        }
+        if water_changed {self.water_revision+=1;}
+    }
+
+    fn active(&self) -> impl Iterator<Item=RoadSlot> + '_ {
+        self.slots.iter().filter_map(|&slot|slot.filter(|slot|slot.active))
+    }
 }
 
 struct WaterRaster {
@@ -258,7 +388,7 @@ struct WaterRaster {
     gaps:[wgpu::BindGroup;2],
     buffers:Option<wgpu::BindGroup>,
     size:[u32;2],
-    previous:Option<([[f32;4];3],[f32;4],[f32;4],u64)>,
+    previous:Option<([[f32;4];3],[f32;4],[f32;4],u64,u64)>,
 }
 
 fn water_storage(binding:u32, visibility:wgpu::ShaderStages, read_only:bool)->wgpu::BindGroupLayoutEntry {
@@ -275,7 +405,7 @@ fn water_pixels(device:&wgpu::Device, bytes:u64)->wgpu::Buffer {
 }
 
 impl GroundSurface {
-    fn new(device:&wgpu::Device, materials:wgpu::TextureView, water_available:bool)->Self {
+    fn new(device:&wgpu::Device, (materials,material_bytes):(wgpu::TextureView,u64), water_available:bool)->Self {
         let entries=[sampled(0),sampler_entry(1),wgpu::BindGroupLayoutEntry{
                 visibility:wgpu::ShaderStages::FRAGMENT|wgpu::ShaderStages::COMPUTE,
                 ..texture_entry(2,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)
@@ -306,17 +436,22 @@ impl GroundSurface {
         let historic_surface_offset=(city_geometry.len()/4) as u32;
         city_geometry.extend_from_slice(&zstd::stream::decode_all(&include_bytes!("historical-city-surface.bin.zst")[..])
             .expect("embedded historical city surface"));
+        let (city_roads, road_sources_offset)=crate::city_roads::RoadSources::append(&mut city_geometry,fringe_offset);
+        let road_store=RoadStore::allocate(&mut city_geometry,u64::from(device.limits().max_storage_buffer_binding_size));
+        city_geometry.extend_from_slice(&road_store.base.to_le_bytes());
+        city_geometry.extend_from_slice(&road_sources_offset.to_le_bytes());
         city_geometry.extend_from_slice(&historic_surface_offset.to_le_bytes());
         city_geometry.extend_from_slice(&fringe_offset.to_le_bytes());
         city_geometry.extend_from_slice(&park_offset.to_le_bytes());
         let city_water=device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label:Some("Near-map city banks, streets, parks, and ground coverage"),
             contents:&city_geometry,
-            usage:wgpu::BufferUsages::STORAGE,
+            usage:wgpu::BufferUsages::STORAGE|wgpu::BufferUsages::COPY_DST,
         });
         let water_pixels=water_pixels(device,4);
         let group=Self::bind(device,&layout,&repeat,&art,&landscape,&materials,&water,&water_pixels,&city_water);
-        Self{layout,group,repeat,landscape,art,materials,water,city_water,water_pixels,water_raster:None,loaded:false,custom_art:false}
+        Self{layout,group,repeat,landscape,art,materials,material_bytes,water,city_water,city_roads,road_store,water_pixels,
+            water_raster:None,loaded:false,custom_art:false}
     }
 
     fn bind(device:&wgpu::Device, layout:&wgpu::BindGroupLayout, repeat:&wgpu::Sampler,
@@ -368,7 +503,7 @@ impl GroundSurface {
             raster.previous=None;
         }
         let Some(buffers)=&raster.buffers else {return;};
-        let key=(view.projection_axes,view.projection_origin,view.viewport,revision);
+        let key=(view.projection_axes,view.projection_origin,view.viewport,revision,self.road_store.water_revision);
         if raster.previous==Some(key) {return;}
         raster.previous=Some(key);
         let mut pass=encoder.begin_compute_pass(&wgpu::ComputePassDescriptor{
@@ -404,23 +539,108 @@ struct CityBatchUniform {
 
 struct CityBatchDraw {
     page: ModelKey,
+    kit: ModelKey,
     module: usize,
-    instances: std::ops::Range<u32>,
+    opaque: bool,
+    instances: [std::ops::Range<u32>;city_models::MAX_INSTANCE_RUNS],
+    depth_pixels: [f32;city_models::MAX_INSTANCE_RUNS],
+}
+
+impl CityBatchDraw {
+    fn indices(&self, kit: &ResidentModel, run: usize) -> std::ops::Range<u32> {
+        let Some(lod) = kit.facade_lod else { return 0..kit.count; };
+        if self.depth_pixels[run] * lod.relief_metres <= 0.25 {
+            lod.start..kit.count
+        } else {
+            0..lod.start
+        }
+    }
 }
 
 struct ResidentModel {
     vertices: wgpu::Buffer,
     indices: wgpu::Buffer,
     count: u32,
+    facade_lod: Option<landmarks::FacadeLod>,
     instance_buffer: wgpu::Buffer,
     transforms: Vec<ModelInstance>,
     city_instances: Option<[Option<wgpu::Buffer>;MODULES]>,
     last_drawn: Instant,
+    mesh_uploaded: [usize; 2],
+    instances_uploaded: [usize; MODULES],
+}
+
+impl ResidentModel {
+    fn gpu_bytes(&self) -> u64 {
+        self.vertices.size() + self.indices.size() + self.instance_buffer.size()
+            + self.city_instances.iter().flatten().flatten().map(wgpu::Buffer::size).sum::<u64>()
+    }
+
+    fn mesh_ready(&self) -> bool {
+        self.mesh_uploaded == [self.vertices.size() as usize, self.indices.size() as usize]
+    }
+
+    fn detail_ready(&self) -> bool {
+        self.city_instances.as_ref().is_some_and(|buffers| buffers.iter().zip(self.instances_uploaded)
+            .all(|(buffer, uploaded)| buffer.as_ref().is_none_or(|buffer| buffer.size() == uploaded as u64)))
+    }
+}
+
+struct CityUploads {
+    started: Instant,
+    used: u64,
+    remaining: u64,
+    written: u64,
+}
+
+impl CityUploads {
+    const GPU_LIMIT: u64 = 512 * 1024 * 1024;
+    const FRAME_LIMIT: u64 = 4 * 1024 * 1024;
+    const CHUNK: usize = 256 * 1024;
+    const TIME: Duration = Duration::from_millis(2);
+
+    fn can_allocate(&self, bytes: u64) -> bool {
+        self.started.elapsed() < Self::TIME && bytes <= Self::GPU_LIMIT.saturating_sub(self.used)
+    }
+
+    fn write(&mut self, queue: &wgpu::Queue, buffer: &wgpu::Buffer, offset:u64, bytes: &[u8], uploaded: &mut usize) {
+        while *uploaded < bytes.len() && self.remaining > 0 && self.started.elapsed() < Self::TIME {
+            let count = (bytes.len() - *uploaded).min(Self::CHUNK).min(self.remaining as usize)
+                .min(Self::GPU_LIMIT.saturating_sub(self.used) as usize);
+            if count == 0 { break; }
+            queue.write_buffer(buffer, offset+*uploaded as u64, &bytes[*uploaded..*uploaded + count]);
+            *uploaded += count;
+            self.remaining -= count as u64;
+            self.written += count as u64;
+            self.used += count as u64;
+        }
+    }
+}
+
+#[derive(serde::Serialize)]
+pub(crate) struct CityRenderMemory {
+    fixed_gpu_bytes: u64,
+    resident_page_gpu_bytes: u64,
+    resident_kit_gpu_bytes: u64,
+    submitted_upload_payload_bytes: u64,
+    retiring_buffer_gpu_bytes: u64,
+    shared_model_depth_gpu_bytes: u64,
+    road_active_payload_bytes: usize,
+    renderer_cpu_bytes: usize,
+    decoded_kit_cpu_bytes: usize,
+}
+
+struct SubmittedCityGpu {
+    upload_payload_bytes: u64,
+    retiring_bytes: u64,
+    _retiring_buffers: Vec<ResidentModel>,
+    done: std::sync::Arc<std::sync::atomic::AtomicBool>,
 }
 
 struct ModelLayer {
     pipeline: wgpu::RenderPipeline,
     city_pipeline: wgpu::RenderPipeline,
+    opaque_city_pipeline: wgpu::RenderPipeline,
     city_uniforms: wgpu::Buffer,
     city_bindings: wgpu::BindGroup,
     city_batches: Vec<CityBatchDraw>,
@@ -434,11 +654,22 @@ struct ModelLayer {
     events: winit::event_loop::EventLoopProxy<crate::HostEvent>,
     city_override: Option<std::sync::Arc<[u8]>>,
     city_revision: u64,
+    city_fixed_bytes: u64,
+    city_meshes: HashMap<ModelKey, ModelMesh>,
+    city_upload_due: bool,
+    city_transfer_bytes: u64,
+    city_gpu_batches: Vec<SubmittedCityGpu>,
 }
 
 impl ModelLayer {
     const DEPTH: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
     const CITY_LOD_CACHE_TIME: Duration = Duration::from_secs(2);
+
+    fn city_lod_boundary(opacity: f32) -> f32 {
+        // model_fragment uses the centres of the 16 Bayer ranks. Preserve that
+        // exact pixel set and skip the mesh when its interval covers no rank.
+        (opacity * 16. - 0.5).ceil().clamp(0., 16.) / 16.
+    }
 
     fn new(device: &wgpu::Device, format: wgpu::TextureFormat, surface: &GroundSurface,
            events: winit::event_loop::EventLoopProxy<crate::HostEvent>) -> Self {
@@ -464,7 +695,7 @@ impl ModelLayer {
             resource:wgpu::BindingResource::Buffer(wgpu::BufferBinding {
             buffer:&city_uniforms,offset:0,size:std::num::NonZeroU64::new(batch_bytes),
         })}]);
-        let pipeline=|vertex_entry,instance_bytes,attributes:&[wgpu::VertexAttribute],groups:&[&wgpu::BindGroupLayout]| {
+        let pipeline=|vertex_entry,fragment_entry,instance_bytes,attributes:&[wgpu::VertexAttribute],groups:&[&wgpu::BindGroupLayout]| {
             let stages=device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label:Some("WWO static model"),bind_group_layouts:groups,push_constant_ranges:&[],
             });
@@ -488,23 +719,67 @@ impl ModelLayer {
                     }],
                 },
                 fragment: Some(wgpu::FragmentState {
-                    module: &shader, entry_point: Some("model_fragment"), compilation_options: Default::default(),
+                    module: &shader, entry_point: Some(fragment_entry), compilation_options: Default::default(),
                     targets: &[Some(wgpu::ColorTargetState { format, blend: None, write_mask: wgpu::ColorWrites::ALL })],
                 }),
             })
         };
-        let city_pipeline=pipeline("city_vertex",std::mem::size_of::<landmarks::FootprintModel>() as u64,
-            &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x3],
-            &[&material_layout,&city_layout]);
-        let pipeline=pipeline("model_vertex",std::mem::size_of::<ModelInstance>() as u64,
+        let city_attributes=wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x2,5=>Float32x3];
+        let city_groups=[&material_layout,&city_layout];
+        let city_stride=std::mem::size_of::<landmarks::FootprintModel>() as u64;
+        let city_pipeline=pipeline("city_vertex","model_fragment",city_stride,&city_attributes,&city_groups);
+        let opaque_city_pipeline=pipeline("city_vertex","opaque_city_fragment",city_stride,&city_attributes,&city_groups);
+        let pipeline=pipeline("model_vertex","model_fragment",std::mem::size_of::<ModelInstance>() as u64,
             &wgpu::vertex_attr_array![3=>Float32x4,4=>Float32x4,5=>Float32x4,6=>Float32x4,7=>Float32x4,8=>Float32x4],
             &[&material_layout]);
-        Self { pipeline, city_pipeline, city_uniforms, city_bindings, city_batches:Vec::new(),city_batch_uniforms:Vec::new(),
+        Self { pipeline, city_pipeline, opaque_city_pipeline, city_uniforms, city_bindings, city_batches:Vec::new(),city_batch_uniforms:Vec::new(),
             materials, depth: None, residents: HashMap::new(), visible: HashSet::new(),
-            pending: HashSet::new(), failed: HashSet::new(), events, city_override:None,city_revision:0 }
+            pending: HashSet::new(), failed: HashSet::new(), events, city_override:None,city_revision:0,
+            city_fixed_bytes:surface.city_water.size()+surface.material_bytes+batch_bytes*(city_models::MAX_RESIDENT*MODULES) as u64,
+            city_meshes:HashMap::new(),city_upload_due:false,city_transfer_bytes:0,city_gpu_batches:Vec::new() }
     }
 
-    fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel], mpp:f32) {
+    fn city_usage(&self) -> (u64,u64) {
+        let resident = self.residents.iter().filter(|(key, _)| key.is_city())
+            .map(|(_, model)| model.gpu_bytes()).sum::<u64>();
+        let submitted = self.city_gpu_batches.iter()
+            .map(|batch| batch.upload_payload_bytes + batch.retiring_bytes).sum::<u64>();
+        (resident, submitted)
+    }
+
+    fn decoded_kit_cpu_bytes(&self) -> usize {
+        self.city_meshes.values().map(|mesh| {
+            mesh.vertices.capacity() * std::mem::size_of::<ModelVertex>()
+                + mesh.indices.capacity() * std::mem::size_of::<u32>()
+        }).sum::<usize>() + self.city_override.as_ref().map_or(0, |bytes| bytes.len())
+    }
+
+    fn retire_city_gpu(&mut self, queue: &wgpu::Queue, evicted: Vec<ResidentModel>, staging: u64) {
+        if evicted.is_empty() && staging == 0 { return; }
+        let retiring_bytes = evicted.iter().map(ResidentModel::gpu_bytes).sum::<u64>();
+        let done = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let complete = done.clone();
+        queue.on_submitted_work_done(move || complete.store(true, std::sync::atomic::Ordering::Release));
+        self.city_gpu_batches.push(SubmittedCityGpu {
+            upload_payload_bytes: staging, retiring_bytes, _retiring_buffers: evicted, done,
+        });
+    }
+
+    fn maintain_city_gpu(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, now: Instant) {
+        if !self.city_gpu_batches.is_empty() {
+            let _ = device.poll(wgpu::Maintain::Poll);
+            self.city_gpu_batches.retain(|batch| !batch.done.load(std::sync::atomic::Ordering::Acquire));
+        }
+        let expired = self.residents.iter().filter(|(key, model)|
+            key.is_city() && !self.visible.contains(key)
+                && now.saturating_duration_since(model.last_drawn) >= Self::CITY_LOD_CACHE_TIME)
+            .map(|(&key, _)| key).collect::<Vec<_>>();
+        let evicted = expired.into_iter().filter_map(|key| self.residents.remove(&key)).collect();
+        self.retire_city_gpu(queue, evicted, 0);
+    }
+
+    fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel], mpp:f32,
+               uploads:&mut CityUploads) {
         let now = Instant::now();
         self.city_batches.clear();
         self.city_batch_uniforms.clear();
@@ -513,14 +788,16 @@ impl ModelLayer {
             || model.city_page.is_some()).map(|model| model.key));
         for city in models.iter().filter_map(|model|model.city_page.as_ref()).filter(|city|city.preload) {
             self.visible.extend(city.geometry.instances.iter().enumerate().filter(|(_,rows)|!rows.is_empty())
-                .map(|(module,_)|ModelKey::city_detail(module+1)));
+                .map(|(module,_)|ModelKey::city_detail(city.kit,module)));
         }
-        self.residents.retain(|key, model| {
-            self.visible.contains(key) || (key.is_city() && now.duration_since(model.last_drawn) < Self::CITY_LOD_CACHE_TIME)
-        });
+        self.residents.retain(|key, _| self.visible.contains(key) || key.is_city());
+        self.city_meshes.retain(|key, _| self.visible.contains(key));
+        self.maintain_city_gpu(device, queue, now);
+        self.city_upload_due = false;
         for resident in self.residents.values_mut() { resident.transforms.clear(); }
         if models.is_empty() {
             self.depth = None;
+            self.city_transfer_bytes=uploads.written;
             return;
         }
         if self.depth.as_ref().is_none_or(|(previous, _)| *previous != size) {
@@ -532,22 +809,41 @@ impl ModelLayer {
             });
             self.depth = Some((size, texture.create_view(&Default::default())));
         }
+        let mut kits = self.city_meshes.keys().copied().collect::<Vec<_>>();
+        kits.sort_unstable_by_key(|key| key.model());
+        for key in kits {
+            let mesh = self.city_meshes.remove(&key).unwrap();
+            if !self.stage_city_mesh(device, queue, key, &mesh, uploads, now) {
+                self.city_meshes.insert(key, mesh);
+                self.city_upload_due = true;
+            }
+        }
         for model in models {
             let key = model.key;
             if let Some(city)=&model.city_page {
-                if !self.residents.contains_key(&key) {self.upload(device,key,&city.geometry.mesh);}
+                if !self.stage_city_mesh(device, queue, key, &city.geometry.mesh, uploads, now) {
+                    self.city_upload_due = true;
+                    continue;
+                }
+                if city.preload && !self.stage_city_instances(device, queue, key, &city.geometry.instances, uploads) {
+                    self.city_upload_due = true;
+                }
             }
-            let lod_range=self.lod_range(model);
-            if let Some(resident) = self.residents.get_mut(&key) {
-                let city_material = model.city_page.as_ref().map_or(0., |city|
+            let mut lod_range=self.lod_range(model);
+            if model.city_page.is_some() {
+                lod_range=lod_range.map(Self::city_lod_boundary);
+            }
+            if let Some(resident) = self.residents.get_mut(&key).filter(|resident| resident.mesh_ready()) {
+                let city_material = model.city_page.as_ref().filter(|city|city.kit.is_none()).map_or(0., |city|
                     if city.paris {2.} else {1.});
                 if let Some(city)=model.city_page.as_ref().filter(|city|city.preload) {
-                    resident.city_instances.get_or_insert_with(||city.geometry.instances.each_ref().map(|rows| {
-                        (!rows.is_empty()).then(||device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                            label:Some("WWO city footprints"), contents:bytemuck::cast_slice(rows), usage:wgpu::BufferUsages::VERTEX,
-                        }))
-                    }));
                     if lod_range[0]>0. {
+                        // Bound screen displacement for any rotation of a
+                        // horizontal metre by the norm of the affine projection.
+                        let [east, _, south, _] = model.clip_from_model;
+                        let [half_width, half_height] = size.map(|v| v as f32 * 0.5);
+                        let pixels_per_metre = (east[0].hypot(south[0]) * half_width)
+                            .hypot(east[1].hypot(south[1]) * half_height);
                         for (module,batch) in city.batches.iter().enumerate().filter_map(|(i,b)|b.as_ref().map(|b|(i,b))) {
                             let [x,y,z]=batch.inverse_size;
                             self.city_batch_uniforms.push(CityBatchUniform {
@@ -555,7 +851,9 @@ impl ModelLayer {
                                 inverse_size_and_opacity:[x,y,z,lod_range[0]],
                                 material:[city_material,mpp,0.,0.],padding:[0;24],
                             });
-                            self.city_batches.push(CityBatchDraw {page:key,module,instances:batch.instances.clone()});
+                            self.city_batches.push(CityBatchDraw {page:key,kit:ModelKey::city_detail(city.kit,module),
+                                module,opaque:lod_range[0] == 1.,instances:batch.instances.clone(),
+                                depth_pixels:batch.max_depth.map(|depth| depth * z * pixels_per_metre)});
                         }
                         resident.last_drawn=now;
                     }
@@ -570,11 +868,19 @@ impl ModelLayer {
                 }
             }
         }
+        self.city_transfer_bytes = uploads.written;
         if !self.city_batch_uniforms.is_empty() {
-            queue.write_buffer(&self.city_uniforms,0,bytemuck::cast_slice(&self.city_batch_uniforms));
+            let uniforms=bytemuck::cast_slice::<_,u8>(&self.city_batch_uniforms);
+            queue.write_buffer(&self.city_uniforms,0,uniforms);
+            self.city_transfer_bytes+=uniforms.len() as u64;
         }
+        let mut city_jobs = self.pending.iter().filter(|key| key.is_city()).count()
+            + self.city_meshes.len();
         for &key in &self.visible {
-            if self.residents.contains_key(&key) || self.failed.contains(&key) || !self.pending.insert(key) {continue;}
+            if key.city_page_id().is_some() || self.residents.contains_key(&key) || self.city_meshes.contains_key(&key)
+                || (key.is_city() && city_jobs >= 6)
+                || self.failed.contains(&key) || !self.pending.insert(key) {continue;}
+            city_jobs += usize::from(key.is_city());
             let events = self.events.clone();
             let revision=if key.is_city() {self.city_revision}else{0};
             let bytes=self.city_override.clone().filter(|_|key.is_city());
@@ -598,13 +904,14 @@ impl ModelLayer {
 
     fn lod_range(&self,model:&VisibleModel)->[f32;2] {
         if let Some(city)=&model.city_page {
-            if city.batches.iter().enumerate().any(|(i,batch)|batch.is_some()
-                && !self.residents.contains_key(&ModelKey::city_detail(i+1))) {
+            if !self.residents.get(&model.key).is_some_and(ResidentModel::detail_ready)
+                || city.batches.iter().enumerate().any(|(i,batch)|batch.is_some()
+                    && !self.residents.get(&ModelKey::city_detail(city.kit,i)).is_some_and(ResidentModel::mesh_ready)) {
                 return [0.,model.lod_range[1]];
             }
         }
         if let Some((key,opacity))=model.alternate {
-            if !self.residents.contains_key(&key) {return [0.,opacity];}
+            if !self.residents.get(&key).is_some_and(ResidentModel::mesh_ready) {return [0.,opacity];}
         }
         model.lod_range
     }
@@ -620,7 +927,8 @@ impl ModelLayer {
         self.pending.remove(&key);
         let model = model.inspect_err(|_| { self.failed.insert(key); })?;
         if !self.visible.contains(&key) { return Ok(()); }
-        self.upload(device,key,&model);
+        if key.is_city() { self.city_meshes.insert(key, model); }
+        else { self.upload(device,key,&model); }
         Ok(())
     }
 
@@ -632,8 +940,58 @@ impl ModelLayer {
             vertices: upload(bytemuck::cast_slice(&model.vertices), wgpu::BufferUsages::VERTEX),
             indices: upload(bytemuck::cast_slice(&model.indices), wgpu::BufferUsages::INDEX),
             count: model.indices.len() as u32, instance_buffer: Self::instance_buffer(device, std::mem::size_of::<ModelInstance>() as u64),
+            facade_lod: None,
             transforms: Vec::new(), city_instances:None,last_drawn: Instant::now(),
+            mesh_uploaded:[bytemuck::cast_slice::<_, u8>(&model.vertices).len(), bytemuck::cast_slice::<_, u8>(&model.indices).len()],
+            instances_uploaded:[0;MODULES],
         });
+    }
+
+    fn stage_city_mesh(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, key: ModelKey,
+        mesh: &ModelMesh, uploads: &mut CityUploads, now: Instant) -> bool
+    {
+        let vertices = bytemuck::cast_slice::<_, u8>(&mesh.vertices);
+        let indices = bytemuck::cast_slice::<_, u8>(&mesh.indices);
+        let instance_bytes = std::mem::size_of::<ModelInstance>() as u64;
+        if !self.residents.contains_key(&key) {
+            let bytes = (vertices.len()+indices.len()) as u64 + instance_bytes;
+            if !uploads.can_allocate(bytes) { return false; }
+            uploads.used += bytes;
+            let buffer = |size, usage| device.create_buffer(&wgpu::BufferDescriptor {
+                label:Some("WWO streamed city mesh"),size,usage:usage|wgpu::BufferUsages::COPY_DST,mapped_at_creation:false,
+            });
+            self.residents.insert(key,ResidentModel {
+                vertices:buffer(vertices.len() as u64,wgpu::BufferUsages::VERTEX),
+                indices:buffer(indices.len() as u64,wgpu::BufferUsages::INDEX),
+                count:mesh.indices.len() as u32,instance_buffer:Self::instance_buffer(device,instance_bytes),
+                facade_lod:mesh.facade_lod,
+                transforms:Vec::new(),city_instances:None,last_drawn:now,mesh_uploaded:[0;2],instances_uploaded:[0;MODULES],
+            });
+        }
+        let resident = self.residents.get_mut(&key).unwrap();
+        resident.last_drawn = now;
+        uploads.write(queue, &resident.vertices, 0, vertices, &mut resident.mesh_uploaded[0]);
+        uploads.write(queue, &resident.indices, 0, indices, &mut resident.mesh_uploaded[1]);
+        resident.mesh_ready()
+    }
+
+    fn stage_city_instances(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, key: ModelKey,
+        instances: &[Vec<landmarks::FootprintModel>;MODULES], uploads: &mut CityUploads) -> bool
+    {
+        let resident = self.residents.get_mut(&key).unwrap();
+        if resident.city_instances.is_none() {
+            let bytes = instances.each_ref().map(|rows| std::mem::size_of_val(rows.as_slice()) as u64);
+            let total = bytes.iter().sum();
+            if !uploads.can_allocate(total) { return false; }
+            uploads.used += total;
+            resident.city_instances = Some(bytes.map(|size| (size>0).then(|| Self::instance_buffer(device,size))));
+        }
+        for (module, buffer) in resident.city_instances.iter().flatten().enumerate() {
+            if let Some(buffer) = buffer {
+                uploads.write(queue, buffer, 0, bytemuck::cast_slice(&instances[module]), &mut resident.instances_uploaded[module]);
+            }
+        }
+        resident.detail_ready()
     }
 
     fn draw(&self, encoder: &mut wgpu::CommandEncoder, image: &wgpu::TextureView) {
@@ -655,19 +1013,29 @@ impl ModelLayer {
             pass.set_vertex_buffer(0, model.vertices.slice(..));
             pass.set_vertex_buffer(1, model.instance_buffer.slice(..));
             pass.set_index_buffer(model.indices.slice(..), wgpu::IndexFormat::Uint32);
-            pass.draw_indexed(0..model.count, 0, 0..model.transforms.len() as u32);
+            let count = model.facade_lod.map_or(model.count, |lod| lod.start);
+            pass.draw_indexed(0..count, 0, 0..model.transforms.len() as u32);
         }
         if !self.city_batches.is_empty() {
             pass.set_pipeline(&self.city_pipeline);
+            let mut opaque=false;
             for (slot,batch) in self.city_batches.iter().enumerate() {
-                let kit=&self.residents[&ModelKey::city_detail(batch.module+1)];
+                // Fully opaque instances can use early depth testing. Keep the
+                // draw order so an equal-depth overlap produces the same colour.
+                if opaque != batch.opaque {
+                    opaque=batch.opaque;
+                    pass.set_pipeline(if opaque {&self.opaque_city_pipeline} else {&self.city_pipeline});
+                }
+                let kit=&self.residents[&batch.kit];
                 let page=&self.residents[&batch.page];
                 let instances=page.city_instances.as_ref().unwrap()[batch.module].as_ref().unwrap();
                 pass.set_bind_group(1,&self.city_bindings,&[(slot*std::mem::size_of::<CityBatchUniform>()) as u32]);
                 pass.set_vertex_buffer(0,kit.vertices.slice(..));
                 pass.set_vertex_buffer(1,instances.slice(..));
                 pass.set_index_buffer(kit.indices.slice(..),wgpu::IndexFormat::Uint32);
-                pass.draw_indexed(0..kit.count,0,batch.instances.clone());
+                for (run,rows) in batch.instances.iter().take_while(|rows|!rows.is_empty()).enumerate() {
+                    pass.draw_indexed(batch.indices(kit,run),0,rows.clone());
+                }
             }
         }
     }
@@ -723,7 +1091,7 @@ fn material_texture(device:&wgpu::Device,queue:&wgpu::Queue,art:Raster)->wgpu::T
     texture.create_view(&Default::default())
 }
 
-fn surface_materials(device:&wgpu::Device,queue:&wgpu::Queue)->io::Result<wgpu::TextureView> {
+fn surface_materials(device:&wgpu::Device,queue:&wgpu::Queue)->io::Result<(wgpu::TextureView,u64)> {
     const LAYERS:u32=12;
     let art=crate::decode_rgba(&include_bytes!("surface-materials.png")[..])?;
     let [side,height]=art.size;
@@ -733,8 +1101,10 @@ fn surface_materials(device:&wgpu::Device,queue:&wgpu::Queue)->io::Result<wgpu::
     let levels=side.ilog2()+1;
     let texture=create_texture_mips(device,[side,side,LAYERS],wgpu::TextureFormat::Rgba8Unorm,levels);
     let mut pixels=art.pixels;
+    let mut bytes=0;
     for level in 0..levels {
         let width=side>>level;
+        bytes+=u64::from(width).pow(2)*u64::from(LAYERS)*4;
         write_texture_mip(queue,&texture,[width,width,LAYERS],4,&pixels,level);
         if level+1<levels {
             // Filter each material independently so the smallest mip cannot mix layers.
@@ -742,7 +1112,7 @@ fn surface_materials(device:&wgpu::Device,queue:&wgpu::Queue)->io::Result<wgpu::
                 .flat_map(|layer|downsample_rgba(layer,width,width)).collect();
         }
     }
-    Ok(texture.create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()}))
+    Ok((texture.create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()}),bytes))
 }
 fn create_texture_mips(device:&wgpu::Device,size:[u32;3],format:wgpu::TextureFormat,levels:u32)->wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
@@ -846,24 +1216,35 @@ struct FrameTimer {
     queries: wgpu::QuerySet,
     resolved: wgpu::Buffer,
     slots: Vec<TimestampSlot>,
-    samples: Vec<(usize, f64)>,
+    query_count: u32,
+    samples: FrameGpuTiming,
+}
+
+#[derive(Default)]
+pub struct FrameGpuTiming {
+    pub frames: Vec<(usize, f64)>,
+    // Water projection, base scene, vegetation, overlays, models, HUD.
+    pub stages: Option<Vec<(usize, [f64; 6])>>,
 }
 
 impl FrameTimer {
-    fn new(device: &wgpu::Device) -> Self {
+    fn new(device: &wgpu::Device, stages: bool) -> Self {
+        let query_count = if stages { 7 } else { 2 };
         let buffer = |usage| device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("Game frame timestamps"), size: 16, usage, mapped_at_creation: false,
+            label: Some("Game frame timestamps"), size: u64::from(query_count) * 8,
+            usage, mapped_at_creation: false,
         });
         Self {
             queries: device.create_query_set(&wgpu::QuerySetDescriptor {
-                label: Some("Game frame timestamps"), ty: wgpu::QueryType::Timestamp, count: 2,
+                label: Some("Game frame timestamps"), ty: wgpu::QueryType::Timestamp, count: query_count,
             }),
             resolved: buffer(wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC),
             slots: (0..8).map(|_| TimestampSlot {
                 buffer: buffer(wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST),
                 pending: None,
             }).collect(),
-            samples: Vec::new(),
+            query_count,
+            samples: FrameGpuTiming { frames: Vec::new(), stages: stages.then(Vec::new) },
         }
     }
 
@@ -874,11 +1255,15 @@ impl FrameTimer {
             match ready.try_recv() {
                 Ok(Ok(())) => {
                     let values = slot.buffer.slice(..).get_mapped_range();
-                    let begin = u64::from_le_bytes(values[..8].try_into().unwrap());
-                    let end = u64::from_le_bytes(values[8..].try_into().unwrap());
-                    let gpu_ms = end.saturating_sub(begin) as f64
-                        * f64::from(queue.get_timestamp_period()) / 1_000_000.;
-                    self.samples.push((*frame, gpu_ms));
+                    let timestamp = |index: usize| {
+                        u64::from_le_bytes(values[index * 8..(index + 1) * 8].try_into().unwrap())
+                    };
+                    let period_ms = f64::from(queue.get_timestamp_period()) / 1_000_000.;
+                    let elapsed = |first, last| timestamp(last).saturating_sub(timestamp(first)) as f64 * period_ms;
+                    self.samples.frames.push((*frame, elapsed(0, self.query_count as usize - 1)));
+                    if let Some(stages) = &mut self.samples.stages {
+                        stages.push((*frame, std::array::from_fn(|index| elapsed(index, index + 1))));
+                    }
                     drop(values);
                     slot.buffer.unmap();
                     slot.pending = None;
@@ -891,12 +1276,12 @@ impl FrameTimer {
 }
 
 impl Renderer {
-    pub fn start_frame_timing(&mut self) {
+    pub fn start_frame_timing(&mut self, stages: bool) {
         self.frame_timer = self.device.features().contains(FRAME_TIMESTAMP_FEATURES)
-            .then(|| FrameTimer::new(&self.device));
+            .then(|| FrameTimer::new(&self.device, stages));
     }
 
-    pub fn finish_frame_timing(&mut self) -> Option<Vec<(usize, f64)>> {
+    pub fn finish_frame_timing(&mut self) -> Option<FrameGpuTiming> {
         let mut timer = self.frame_timer.take()?;
         timer.collect(&self.device, &self.queue, true);
         Some(timer.samples)
@@ -1246,7 +1631,10 @@ impl Renderer {
         let layer=&mut self.models;
         layer.city_revision+=1;
         layer.city_override=Some(bytes.into());
-        layer.residents.retain(|key,_|!key.is_city());
+        let keys = layer.residents.keys().filter(|key| key.is_city()).copied().collect::<Vec<_>>();
+        let evicted = keys.into_iter().filter_map(|key| layer.residents.remove(&key)).collect();
+        layer.retire_city_gpu(&self.queue, evicted, 0);
+        layer.city_meshes.clear();
         layer.pending.retain(|key|!key.is_city());
         layer.failed.retain(|key|!key.is_city());
     }
@@ -1257,20 +1645,17 @@ impl Renderer {
     }
 
     pub fn resident_models(&self) -> Vec<(&'static str, &'static str)> {
-        let mut models:Vec<_>=self.models.residents.keys().map(|key|(key.model(),key.lod())).collect();
+        let mut models:Vec<_>=self.models.residents.iter().filter(|(_,model)| model.mesh_ready())
+            .map(|(key,_)|(key.model(),key.lod())).collect();
         models.sort_unstable();
         models
     }
 
     pub fn model_instances(&self) -> Vec<(&'static str, usize)> {
-        let mut batched=[0;MODULES];
-        for batch in &self.models.city_batches {
-            batched[batch.module]+=batch.instances.len();
-        }
         let mut counts:HashMap<_,_>=self.models.residents.iter()
             .map(|(key,model)|(*key,model.transforms.len())).collect();
-        for (i,count) in batched.into_iter().enumerate() {
-            *counts.entry(ModelKey::city_detail(i+1)).or_default()+=count;
+        for batch in &self.models.city_batches {
+            *counts.entry(batch.kit).or_default()+=batch.instances.iter().map(|rows|rows.len()).sum::<usize>();
         }
         let mut models:Vec<_>=counts.into_iter().filter(|&(_,count)|count>0)
             .map(|(key,count)|(key.model(),count)).collect();
@@ -1280,7 +1665,76 @@ impl Renderer {
 
     pub fn has_model(&self, model:&VisibleModel) -> bool {
         let [low,high]=self.models.lod_range(model);
-        low<high && self.models.residents.contains_key(&model.key)
+        low<high && self.models.residents.get(&model.key).is_some_and(ResidentModel::mesh_ready)
+    }
+
+    pub(crate) fn maintain_city_gpu(&mut self, now: Instant) -> bool {
+        self.models.maintain_city_gpu(&self.device, &self.queue, now);
+        self.models.city_upload_due || self.surface.road_store.uploading
+    }
+
+    pub(crate) fn city_render_memory(&self) -> CityRenderMemory {
+        let layer = &self.models;
+        let (mut resident_page_gpu_bytes, mut resident_kit_gpu_bytes, mut transform_bytes) = (0, 0, 0);
+        for (key, model) in layer.residents.iter().filter(|(key, _)| key.is_city()) {
+            if key.city_page_id().is_some() {
+                resident_page_gpu_bytes += model.gpu_bytes();
+            } else {
+                resident_kit_gpu_bytes += model.gpu_bytes();
+            }
+            transform_bytes += model.transforms.capacity() * std::mem::size_of::<ModelInstance>();
+        }
+        CityRenderMemory {
+            fixed_gpu_bytes: layer.city_fixed_bytes,
+            resident_page_gpu_bytes,
+            resident_kit_gpu_bytes,
+            submitted_upload_payload_bytes: layer.city_gpu_batches.iter().map(|batch| batch.upload_payload_bytes).sum(),
+            retiring_buffer_gpu_bytes: layer.city_gpu_batches.iter().map(|batch| batch.retiring_bytes).sum(),
+            shared_model_depth_gpu_bytes: layer.depth.as_ref().map_or(0, |([w,h],_)| u64::from(*w) * u64::from(*h) * 4),
+            road_active_payload_bytes: self.surface.road_store.active().map(|slot| slot.bytes).sum(),
+            renderer_cpu_bytes: transform_bytes
+                + layer.city_batches.capacity() * std::mem::size_of::<CityBatchDraw>()
+                + layer.city_batch_uniforms.capacity() * std::mem::size_of::<CityBatchUniform>(),
+            decoded_kit_cpu_bytes: layer.decoded_kit_cpu_bytes(),
+        }
+    }
+
+    pub(crate) fn city_gpu_status(&self) -> serde_json::Value {
+        let (resident, submitted) = self.models.city_usage();
+        let roads=&self.surface.road_store;
+        let facade_lod_instances=self.models.city_batches.iter().filter_map(|batch| {
+            let kit=self.models.residents.get(&batch.kit)?;
+            kit.facade_lod?;
+            Some(batch.instances.iter().enumerate()
+                .filter(|(run,_)| batch.indices(kit,*run).start != 0)
+                .map(|(_,rows)| rows.len()).sum::<usize>())
+        }).sum::<usize>();
+        serde_json::json!({
+            "fixed_bytes": self.models.city_fixed_bytes, "resident_bytes":resident,
+            "submitted_and_retiring_bytes":submitted,
+            "page_mesh_ready":self.models.residents.iter()
+                .filter(|(key,model)| key.city_page_id().is_some() && model.mesh_ready()).count(),
+            "detail_buffers_ready":self.models.residents.iter()
+                .filter(|(key,model)| key.city_page_id().is_some() && model.detail_ready()).count(),
+            "facade_lod_instances":facade_lod_instances,
+            "upload_pending":self.models.city_upload_due || roads.uploading,
+            "road_slot_capacity":roads.capacity,
+            "road_reserved_bytes":if roads.capacity==0 {0} else {crate::city_roads::PAGE_STORAGE_BYTES},
+            "road_fragmented":roads.fragmented,
+            "road_active":roads.active().map(|slot|serde_json::json!({"revision":slot.key.0,"index":slot.key.1,
+                "payload_bytes":slot.bytes,"water":slot.water,"ground":slot.ground,
+                "active_coverage":slot.road_coverage})).collect::<Vec<_>>(),
+            "decoded_kit_cpu_bytes":self.models.decoded_kit_cpu_bytes(),
+        })
+    }
+
+    pub(crate) fn city_page_gpu(&self, revision:u64, index:usize) -> &'static str {
+        match self.models.residents.get(&ModelKey::city_page(revision,index)) {
+            Some(page) if page.detail_ready() => "detail_buffers",
+            Some(page) if page.mesh_ready() => "overview",
+            Some(_) => "uploading",
+            None => "absent",
+        }
     }
     pub fn update_terrain(&mut self,camera:&Camera,size:[u32;2],now:Instant)->io::Result<()> {
         if let Some(terrain)=&mut self.terrain {
@@ -1460,7 +1914,8 @@ impl Renderer {
     }
 
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
-                  meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel],
+                  meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,
+                  (models,roads):(&[VisibleModel],&[crate::city_models::ReadyRoad<'_>]),
                   transport:Option<TransportOverlay<'_>>,
                   (camera,landscape_enabled,now):(&Camera,bool,Instant),
                   battle:Option<BattleFrame<'_>>,timing_frame:Option<usize>)->io::Result<Option<io::Result<()>>> {
@@ -1491,7 +1946,11 @@ impl Renderer {
         let [w,h]=[texture.width(),texture.height()];
         let format=texture.format();
         if battle.is_none() {
-            self.models.prepare(&self.device,&self.queue,[w,h],models,camera.mpp as f32);
+            let (resident_bytes, submitted_bytes)=self.models.city_usage();
+            let mut uploads=CityUploads { started:Instant::now(),written:0,remaining:CityUploads::FRAME_LIMIT,
+                used:self.models.city_fixed_bytes+resident_bytes+submitted_bytes+self.models.city_uniforms.size() };
+            self.surface.road_store.update(&self.queue,&self.surface.city_water,roads,&mut uploads);
+            self.models.prepare(&self.device,&self.queue,[w,h],models,camera.mpp as f32,&mut uploads);
             let mut frame_view=*view;
             frame_view.projection_axes[0][3]=seconds;
             if let Some(water)=&self.water_pages {
@@ -1538,14 +1997,21 @@ impl Renderer {
             encoder.write_timestamp(&timer.queries, 0);
             Some((frame, slot))
         });
+        let stage_queries = gpu_slot.and(self.frame_timer.as_ref())
+            .filter(|timer| timer.query_count > 2).map(|timer| &timer.queries);
+        let mark_stage = |encoder: &mut wgpu::CommandEncoder, index| {
+            if let Some(queries) = stage_queries { encoder.write_timestamp(queries, index); }
+        };
         if show_map {
             if let Some(water)=&self.water_pages {
                 self.surface.project_water(&self.device,&mut encoder,[w,h],view,water.revision());
             }
         }
+        mark_stage(&mut encoder, 1);
         if let Some(battle) = battle {
             let scene = self.battle.as_mut().ok_or_else(|| io::Error::other("battle renderer not initialized"))?;
             scene.draw(&self.device, &self.queue, &mut encoder, &image, size, battle.view, battle.state, battle.terrain);
+            for stage in 2..=5 { mark_stage(&mut encoder, stage); }
         } else {
             let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label:Some("WWO map"),color_attachments:&[Some(wgpu::RenderPassColorAttachment{
@@ -1571,15 +2037,22 @@ impl Renderer {
                 }
             }
             drop(pass);
+            mark_stage(&mut encoder, 2);
             if let Some(layer)=&mut self.landscape {
                 layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group,&self.surface.group],[w,h]);
             }
+            mark_stage(&mut encoder, 3);
             let draw_city=show_map&&pages.iter().any(|(_,tile,_,_)|tile.city_ink_only);
-            let road_scissors=if show_map && camera.mpp<300. && view.road_layer[0]<2 {
-                // Extents of the compact road indices, in WGS84.
-                [[1.78,48.59,2.89,49.15],[-0.371,51.371,0.104,51.638]].map(|bounds| road_scissor(camera,size,bounds))
-            } else {[None;2]};
-            let draw_roads=road_scissors.iter().any(Option::is_some);
+            let road_area=if show_map && camera.mpp<300. && view.road_layer[0]<2 {
+                self.surface.city_roads.vector_bounds().chain(self.surface.road_store.active().map(|slot|slot.bounds))
+                    .filter_map(|bounds| road_scissor(camera,size,bounds))
+                    .reduce(|[ax,ay,aw,ah],[bx,by,bw,bh]| {
+                        let x=ax.min(bx);
+                        let y=ay.min(by);
+                        [x,y,(ax+aw).max(bx+bw)-x,(ay+ah).max(by+bh)-y]
+                    })
+            } else {None};
+            let draw_roads=road_area.is_some();
             if draw_city||draw_roads||draw_network||draw_economy||draw_vehicles {
                 let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label:Some("WWO map overlays"),
@@ -1604,16 +2077,14 @@ impl Renderer {
                     }
                     pass.set_scissor_rect(0,0,w,h);
                 }
-                if draw_roads {
+                if let Some([x,y,width,height])=road_area {
                     pass.set_pipeline(&self.roads);
                     pass.set_bind_group(0,&self.globals,&[]);
                     pass.set_bind_group(1,&base.group,&[]);
                     pass.set_bind_group(2,&self.close_group,&[]);
                     pass.set_bind_group(3,&self.surface.group,&[]);
-                    for [x,y,width,height] in road_scissors.into_iter().flatten() {
-                        pass.set_scissor_rect(x,y,width,height);
-                        pass.draw(0..3,0..1);
-                    }
+                    pass.set_scissor_rect(x,y,width,height);
+                    pass.draw(0..3,0..1);
                     pass.set_scissor_rect(0,0,w,h);
                 }
                 pass.set_pipeline(&self.solid);
@@ -1622,7 +2093,9 @@ impl Renderer {
                 if draw_economy {self.transport_economy.as_ref().unwrap().1.draw(&mut pass);}
                 if draw_vehicles {self.transport_vehicles.as_ref().unwrap().draw(&mut pass);}
             }
+            mark_stage(&mut encoder, 4);
             self.models.draw(&mut encoder, &image);
+            mark_stage(&mut encoder, 5);
         }
         {
             let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -1654,9 +2127,9 @@ impl Renderer {
         let padded=(w*4).div_ceil(256)*256;
         if let Some((_, slot)) = gpu_slot {
             let timer = self.frame_timer.as_ref().unwrap();
-            encoder.write_timestamp(&timer.queries, 1);
-            encoder.resolve_query_set(&timer.queries, 0..2, &timer.resolved, 0);
-            encoder.copy_buffer_to_buffer(&timer.resolved, 0, &timer.slots[slot].buffer, 0, 16);
+            encoder.write_timestamp(&timer.queries, timer.query_count - 1);
+            encoder.resolve_query_set(&timer.queries, 0..timer.query_count, &timer.resolved, 0);
+            encoder.copy_buffer_to_buffer(&timer.resolved, 0, &timer.slots[slot].buffer, 0, u64::from(timer.query_count) * 8);
         }
         let readback=capture.filter(|_|copy_src).map(|_|{
             let data=self.device.create_buffer(&wgpu::BufferDescriptor {label:Some("WWO capture"),size:u64::from(padded)*u64::from(h),
@@ -1667,6 +2140,8 @@ impl Renderer {
             data
         });
         self.queue.submit([encoder.finish()]);
+        let city_staging = std::mem::take(&mut self.models.city_transfer_bytes);
+        self.models.retire_city_gpu(&self.queue, Vec::new(), city_staging);
         if let Some((frame, slot)) = gpu_slot {
             let slot = &mut self.frame_timer.as_mut().unwrap().slots[slot];
             let (send, ready) = std::sync::mpsc::channel();

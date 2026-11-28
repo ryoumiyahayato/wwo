@@ -38,6 +38,33 @@
           "https://gygl.beijing.gov.cn/mlgy/mlgy_lsmy/201911/t20191129_732675.html",
           "https://whc.unesco.org/en/list/439/"
         ]
+      },
+      {
+        "id": "landmark:hall_of_prayer_1900",
+        "display_name": "祈年殿",
+        "parent_country_id": "qing_empire",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [116.406583, 39.882250]
+        },
+        "valid_from": "1900-01-01",
+        "valid_to": "1912-02-13",
+        "model_path": "procedural:hall_of_prayer_1900",
+        "model_height_m": 38.0,
+        "model_base_width_m": 94.0,
+        "model_footprint_m": [94.0, 94.0],
+        "model_heading_degrees": 2.2,
+        "model_max_mpp": 8.0,
+        "symbol_max_mpp": 36.0,
+        "rank": 2,
+        "reference_year": 1900,
+        "coordinate_role": "MODERN_LOCATOR_OF_FIXED_HISTORICAL_MONUMENT",
+        "historical_reference_zh": "光绪年间重建。以三层石台、三重蓝瓦檐和鎏金宝顶还原形制。栏板、檐曲和柱脚比例为美术重建。",
+        "source_references": [
+          "https://whc.unesco.org/en/list/881/",
+          "https://japan.visitbeijing.com.cn/article/47Jv3rPapVL",
+          "https://www.visitbeijing.com.cn/article/4EFqwW1Mie4"
+        ]
       }
     ],
     "license_notice": "Original WWO game geometry based on historical dimensions and placement references. Source images are absent from runtime assets."

@@ -1,0 +1,27 @@
+{
+  "version": "1900-opening-batch6-sites-v1",
+  "roster": "1900-opening-v1",
+  "camera_anchors": "Use the frozen site-plans.json by city_id. Select the core, ordinary block and both edges from the named anchors before capture.",
+  "sites": [
+    {"city_id": "reba:chandler:817", "profile": "british_brick", "reason": "London dated footprints, A/B, established Thames crossing"},
+    {"city_id": "reba:chandler:866", "profile": "british_brick", "reason": "Manchester industrial corridors and distinct layout with the same asset family"},
+    {"city_id": "reba:chandler:1081", "profile": "francophone_stone", "reason": "Paris existing blocks, B, centre to north fringe"},
+    {"city_id": "reba:chandler:803", "profile": "francophone_stone", "reason": "Lille industrial and railway edge"},
+    {"city_id": "reba:chandler:228", "profile": "central_european_court", "reason": "Bucharest mahalale, Dâmbovița and rail transition"},
+    {"city_id": "reba:chandler:952", "profile": "russian_masonry_timber", "reason": "Moscow core compounds and transition to ordinary streets"},
+    {"city_id": "reba:chandler:480", "profile": "mediterranean_court", "reason": "Genoa narrow port streets and hills"},
+    {"city_id": "reba:chandler:623", "profile": "ottoman_timber", "reason": "Istanbul steep harbour fabric, historic source boundaries"},
+    {"city_id": "reba:chandler:246", "profile": "north_african_court", "reason": "Cairo eastern street fabric, courts and distinct later expansion"},
+    {"city_id": "reba:chandler:143", "profile": "north_chinese_court", "reason": "Beijing walled precinct and narrow residential lanes"},
+    {"city_id": "reba:chandler:516", "profile": "south_chinese_lane", "reason": "Guangzhou waterfront and deep lanes"},
+    {"city_id": "landscape:kyoto", "profile": "japanese_machiya", "reason": "Kyoto street-front timber houses with deep plots and gardens"},
+    {"city_id": "raj_bengal_calcutta", "profile": "south_asian_bazaar", "reason": "Calcutta Hooghly port, bazaar and drainage"},
+    {"city_id": "reba:chandler:1302", "profile": "southeast_asian_shophouse", "reason": "Singapore arcaded frontage, quay, hill and water"},
+    {"city_id": "reba:chandler:996", "profile": "north_american_masonry_timber", "reason": "New York surveyed blocks, dock and East River crossings"},
+    {"city_id": "us_city_new_jersey_jersey_city", "profile": "north_american_masonry_timber", "reason": "Jersey City separate rail and dock footprints across overlapping New York source extents"},
+    {"city_id": "reba:chandler:1194", "profile": "latin_american_court", "reason": "Rio de Janeiro mapped hills, streets and pre-reform shoreline"},
+    {"city_id": "reba:chandler:1361", "profile": "oceanian_veranda", "reason": "Sydney harbour, grid and rail-controlled edges"},
+    {"city_id": "reba:chandler:257", "profile": "cape_cottage", "reason": "Cape Town port and locally distinct cottage and terrace fabric"},
+    {"city_id": "landscape:bukhara", "profile": "central_asian_court", "reason": "Bukhara low courtyards, markets and irrigated edge"}
+  ]
+}

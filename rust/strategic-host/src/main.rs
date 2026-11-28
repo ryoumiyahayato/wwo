@@ -4,6 +4,8 @@ mod build_identity;
 mod camera;
 mod capital_landmarks;
 mod city_models;
+mod city_roads;
+mod city_kit;
 mod city_parks;
 #[cfg(windows)]
 mod desktop_start;

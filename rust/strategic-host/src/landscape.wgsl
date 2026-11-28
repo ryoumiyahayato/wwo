@@ -1033,10 +1033,12 @@ struct HistoricSurfacePage {
     first: u32,
     weight: f32,
     paris: bool,
+    collar: u32,
+    material: u32,
 }
 
 fn historic_surface_page(ll:vec2f,mpp:f32) -> HistoricSurfacePage {
-    let empty=HistoricSurfacePage(vec2f(0.),vec2f(0.),0u,0u,0.,false);
+    let empty=HistoricSurfacePage(vec2f(0.),vec2f(0.),0u,0u,0.,false,0u,0u);
     if mpp>=115. || view.map_style.y<=.5 || view.selection.y>.5 {return empty;}
     let base=city_water[arrayLength(&city_water)-3u];
     for (var site=0u;site<city_water[base];site+=1u) {
@@ -1051,7 +1053,24 @@ fn historic_surface_page(ll:vec2f,mpp:f32) -> HistoricSurfacePage {
         // LOD handoff to the existing overview. The short margin only
         // handles the rectangular limit of this source, not settlement edges.
         let weight=(1.-smoothstep(77.,115.,mpp))*smoothstep(0.,680.,min(border.x,border.y));
-        return HistoricSurfacePage(uv,metres,city_water[header+4u],base+city_water[header+5u],weight,site==1u);
+        return HistoricSurfacePage(uv,metres,city_water[header+4u],base+city_water[header+5u],weight,site==1u,0u,0u);
+    }
+    let registry=loaded_road_registry();
+    for (var i=0u;i<city_water[registry];i++) {
+        let page=city_water[registry+1u+i];
+        let first=city_water[page+23u];
+        if first==0u {continue;}
+        let header=city_water[page];
+        let origin=vec2f(bitcast<f32>(city_water[header]),bitcast<f32>(city_water[header+1u]));
+        let scale=vec2f(bitcast<f32>(city_water[header+2u]),bitcast<f32>(city_water[header+3u]));
+        let point=(ll-origin)*scale;
+        let low=vec2f(bitcast<f32>(city_water[header+4u]),bitcast<f32>(city_water[header+5u]));
+        let high=vec2f(bitcast<f32>(city_water[header+6u]),bitcast<f32>(city_water[header+7u]));
+        if any(point<low) || any(point>=high) {continue;}
+        let metres=high-low;
+        let uv=vec2f(point.x-low.x,high.y-point.y)/metres;
+        let weight=1.-smoothstep(77.,115.,mpp);
+        return HistoricSurfacePage(uv,metres,256u,first,weight,false,1u,city_water[page+18u]);
     }
     return empty;
 }
@@ -1075,24 +1094,38 @@ fn interpolate_use(a:HistoricUse,b:HistoricUse,t:f32) -> HistoricUse {
 
 fn historic_surface_level(page:HistoricSurfacePage,level:u32) -> HistoricUse {
     let width=page.side>>level;
-    let first=page.first+4u*(page.side*page.side-width*width)/3u;
-    let point=clamp(page.uv*f32(width)-.5,vec2f(0.),vec2f(f32(width-1u)));
+    var first=page.first+4u*(page.side*page.side-width*width)/3u;
+    if page.collar!=0u {
+        first=page.first;
+        for (var i=0u;i<level;i++) {
+            let span=(page.side>>i)+2u;
+            first+=span*span;
+        }
+    }
+    let span=width+2u*page.collar;
+    let point=clamp(page.uv*f32(width)-.5+f32(page.collar),vec2f(0.),vec2f(f32(span-1u)));
     let low=vec2u(point);
-    let high=min(low+1u,vec2u(width-1u));
-    let a=interpolate_use(historic_surface_texel(first+low.y*width+low.x),
-        historic_surface_texel(first+low.y*width+high.x),fract(point.x));
-    let b=interpolate_use(historic_surface_texel(first+high.y*width+low.x),
-        historic_surface_texel(first+high.y*width+high.x),fract(point.x));
+    let high=min(low+1u,vec2u(span-1u));
+    let a=interpolate_use(historic_surface_texel(first+low.y*span+low.x),
+        historic_surface_texel(first+low.y*span+high.x),fract(point.x));
+    let b=interpolate_use(historic_surface_texel(first+high.y*span+low.x),
+        historic_surface_texel(first+high.y*span+high.x),fract(point.x));
     return interpolate_use(a,b,fract(point.y));
 }
 
 fn historic_surface_use(page:HistoricSurfacePage,mpp:f32) -> HistoricUse {
     let spacing=min(page.metres.x,page.metres.y)/f32(page.side);
-    let mip=clamp(log2(mpp/spacing),0.,log2(f32(page.side)));
+    let mip=clamp(log2(mpp/spacing),0.,select(log2(f32(page.side)),3.,page.collar!=0u));
     let level=u32(mip);
     let land=historic_surface_level(page,level);
     if fract(mip)<=.001 {return land;}
     return interpolate_use(land,historic_surface_level(page,level+1u),fract(mip));
+}
+
+fn historic_ground_weight(page:HistoricSurfacePage,mpp:f32) -> f32 {
+    if page.collar==0u {return page.weight;}
+    let land=historic_surface_use(page,mpp);
+    return page.weight*clamp(dot(land.built,vec3f(1.))+land.open.x+land.open.y+land.garden,0.,1.);
 }
 
 fn historic_street_weight(mpp:f32,paris:bool) -> f32 {
@@ -1154,7 +1187,7 @@ fn landscape_relief(base:vec3f,ll:vec2f,world:vec3f,water:f32,mpp:f32) -> vec3f 
     var legacy_street=0.;
     var street_ground=0.;
     if surveyed_street>.001 {
-        let fallback=road_raster_fraction(ll);
+        let fallback=road_raster_fraction(ll,mpp).x;
         legacy_street=surveyed_street*fallback;
         // A mineral bed belongs only to streets inside the adjoining
         // built fabric. Rural centrelines must leave no painted footprint.
@@ -1167,11 +1200,13 @@ fn landscape_relief(base:vec3f,ll:vec2f,world:vec3f,water:f32,mpp:f32) -> vec3f 
     let natural=unassigned-garden;
     var color=vec3f(0.);
     let fringe=select(0.,1.-paris_core_weight(ll),page.paris);
+    let materials=array<vec3f,3>(vec3f(0.),vec3f(.055,.014,-.021),vec3f(.040,.028,.018));
+    let tint=materials[page.material];
     if natural>.001 {color=natural_relief(base,ll,world,water,mpp,fringe)*natural;}
     if park.a>.001 {color+=park_pigment(park,world,mpp)*support;}
     if garden>.001 {color+=market_garden(ll,world,mpp)*garden;}
     if built.x+built.y>.001 {
-        let court=select(vec3f(.554,.523,.468),vec3f(.625,.610,.568),page.paris)
+        let court=(select(vec3f(.554,.523,.468),vec3f(.625,.610,.568),page.paris)+tint)
             *(1.+material_grain(world,mpp,SETTS,21.,10.)*.36);
         // Mesh roofs take over at street scale. Their footprint remains
         // urban ground even when the detailed roof is drawn in the model pass.
@@ -1186,7 +1221,7 @@ fn landscape_relief(base:vec3f,ll:vec2f,world:vec3f,water:f32,mpp:f32) -> vec3f 
         color+=mix(lot,roof,near_roof)*built.x+court*built.y;
     }
     if built.z>.001 {
-        let ballast=select(vec3f(.507,.475,.423),vec3f(.533,.521,.481),page.paris);
+        let ballast=select(vec3f(.507,.475,.423),vec3f(.533,.521,.481),page.paris)+tint*.6;
         let yard=ballast*(1.+material_grain(world,mpp,GRAVEL,34.,12.)*.5);
         color+=yard*built.z;
     }
@@ -1199,7 +1234,7 @@ fn landscape_relief(base:vec3f,ll:vec2f,world:vec3f,water:f32,mpp:f32) -> vec3f 
         color+=woodland_ground(world,ll.y,0.,mpp,FOREST_GROUND*(1.+crown*.64))*open.y;
     }
     if street>.001 {
-        let mineral=select(vec3f(.554,.523,.468),vec3f(.625,.610,.568),page.paris);
+        let mineral=select(vec3f(.554,.523,.468),vec3f(.625,.610,.568),page.paris)+tint;
         let legacy=mix(city_road(page.paris,.2),vec3f(.682,.661,.615),smoothstep(6.,18.,mpp));
         color+=(mineral*street_ground+legacy*legacy_street)*(1.+material_grain(world,mpp,SETTS,9.,7.)*.39);
     }
@@ -1565,9 +1600,10 @@ fn landscape_fragment(input: LandscapeVertex) -> @location(0) vec4f {
     if strength <= .001 { discard; }
     let modern = 1.-landscape_survey_mask(input.site.xy,mpp);
     var occupancy=park_coverage(input.site.xy,mpp).a;
-    if historic.weight>.001 {
+    let ground_weight=historic_ground_weight(historic,0.);
+    if ground_weight>.001 {
         let planned=park_layout(input.site.xy,mpp).a;
-        occupancy=mix(occupancy,planned,historic.weight);
+        occupancy=mix(occupancy,planned,ground_weight);
     }
     let opacity = input.color.a*edge*modern*strength*(1.-occupancy);
     if opacity <= .012 { discard; }

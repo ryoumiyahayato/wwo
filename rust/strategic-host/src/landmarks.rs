@@ -52,6 +52,12 @@ static ASSETS: &[Asset] = &[
         path: "procedural:forbidden_city_1900",
         mesh: LandmarkMesh::Original(crate::capital_landmarks::forbidden_city),
     },
+    Asset {
+        name: "Hall of Prayer for Good Harvests",
+        symbol: "government",
+        path: "procedural:hall_of_prayer_1900",
+        mesh: LandmarkMesh::Original(crate::capital_landmarks::hall_of_prayer),
+    },
 ];
 
 enum LandmarkMesh {
@@ -168,7 +174,8 @@ pub(crate) type ModelBounds = ([f64; 3], [f64; 3]);
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 pub(crate) struct FootprintModel {
-    local_transform: [[f32;4];4],
+    horizontal_axes: [f32;4],
+    origin: [f32;2],
     dimensions: [f32; 3],
 }
 
@@ -177,7 +184,12 @@ impl FootprintModel {
         let dimensions=dimensions.map(|value|value as f32);
         let local_transform=Mat4::from_scale_rotation_translation(Vec3::from_array(dimensions),
             Quat::from_rotation_y(heading.to_radians() as f32),Vec3::new(east as f32,0.,south as f32));
-        Self {local_transform:local_transform.to_cols_array_2d(),dimensions}
+        Self {
+            horizontal_axes: [local_transform.x_axis.x,local_transform.x_axis.z,
+                              local_transform.z_axis.x,local_transform.z_axis.z],
+            origin: [local_transform.w_axis.x,local_transform.w_axis.z],
+            dimensions,
+        }
     }
 }
 
@@ -185,7 +197,7 @@ impl FootprintModel {
 enum Lod { Single, Far, Near }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-enum ModelAsset { Landmark(usize), City(usize), CityPage(u64,usize), Park(usize), Transport(TransportModel, ModelLod) }
+enum ModelAsset { Landmark(usize), City(usize), CityKit(usize,usize), CityPage(u64,usize), Park(usize), Transport(TransportModel, ModelLod) }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ModelKey { asset: ModelAsset, lod: Lod }
@@ -202,18 +214,28 @@ impl ModelKey {
         match self.asset {
             ModelAsset::Landmark(asset) => ASSETS[asset].name,
             ModelAsset::City(module) => R40_MODULES[module],
+            ModelAsset::CityKit(_,role) => crate::city_kit::ROLES[role],
             ModelAsset::CityPage(..) => "City block page",
             ModelAsset::Park(_) => "Park trees",
             ModelAsset::Transport(model, _) => model.id(),
         }
     }
 
-    pub fn is_city(self) -> bool { matches!(self.asset, ModelAsset::City(_) | ModelAsset::CityPage(..)) }
+    pub fn is_city(self) -> bool {
+        matches!(self.asset, ModelAsset::City(_) | ModelAsset::CityKit(..) | ModelAsset::CityPage(..))
+    }
+    pub(crate) fn city_page_id(self) -> Option<(u64, usize)> {
+        match self.asset {
+            ModelAsset::CityPage(revision, index) => Some((revision, index)),
+            _ => None,
+        }
+    }
     pub fn city_page(revision:u64,index:usize)->Self {
         Self {asset:ModelAsset::CityPage(revision,index),lod:Lod::Far}
     }
-    pub(crate) fn city_detail(module:usize)->Self {
-        Self {asset:ModelAsset::City(module),lod:Lod::Near}
+    pub(crate) fn city_detail(kit: Option<usize>, role: usize) -> Self {
+        let asset = kit.map_or(ModelAsset::City(role+1), |kit| ModelAsset::CityKit(kit,role));
+        Self { asset, lod: Lod::Near }
     }
     pub(crate) fn park(site:usize)->Self {
         Self {asset:ModelAsset::Park(site),lod:Lod::Single}
@@ -518,9 +540,57 @@ pub struct ModelVertex {
     pub(crate) color: [f32; 4],
 }
 
+#[derive(Default)]
 pub struct ModelMesh {
     pub vertices: Vec<ModelVertex>,
     pub indices: Vec<u32>,
+    pub(crate) facade_lod: Option<FacadeLod>,
+}
+
+#[derive(Clone, Copy)]
+pub(crate) struct FacadeLod {
+    pub(crate) start: u32,
+    pub(crate) relief_metres: f32,
+}
+
+impl ModelMesh {
+    fn add_r40_facade_lod(&mut self) -> Option<FacadeLod> {
+        // The bundled R40 mansard meshes start with a base, three bands and a
+        // loft, followed by the 204 closed boxes from the authored facade.
+        const START: usize = (4 * 12 + 20) * 3;
+        const END: usize = START + 204 * 36;
+        let facade = self.indices.get(START..END)?;
+        let mut reduced = self.indices[..START].to_vec();
+        let mut relief_metres = 0.0_f32;
+        for solid in facade.chunks_exact(36) {
+            let z = |index: u32| self.vertices[index as usize].position[2];
+            let near = solid.iter().copied().map(z).reduce(f32::min)?;
+            let far = solid.iter().copied().map(z).reduce(f32::max)?;
+            let thickness = far - near;
+            if near * far <= 0.0 || thickness > 0.251 {
+                reduced.extend_from_slice(solid);
+                continue;
+            }
+            let outer = if near < 0.0 { near } else { far };
+            let before = reduced.len();
+            for face in solid.chunks_exact(3) {
+                if face.iter().all(|&index| z(index) == outer) {
+                    reduced.extend_from_slice(face);
+                }
+            }
+            if reduced.len() - before != 6 {
+                return None;
+            }
+            relief_metres = relief_metres.max(thickness);
+        }
+        if relief_metres == 0.0 {
+            return None;
+        }
+        reduced.extend_from_slice(&self.indices[END..]);
+        let start = self.indices.len() as u32;
+        self.indices.extend(reduced);
+        Some(FacadeLod { start, relief_metres })
+    }
 }
 
 impl Landmarks {
@@ -550,6 +620,7 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
             LandmarkMesh::Original(build) => return Ok(build()),
         },
         ModelAsset::City(_) => city_override.unwrap_or(R40_MODELS),
+        ModelAsset::CityKit(kit,role) => return Ok(crate::city_kit::build(kit,role,true)),
         ModelAsset::CityPage(..) => return Err(io::Error::other("City page mesh was not loaded")),
         ModelAsset::Park(site) => return Ok(crate::city_parks::mesh(site)),
         ModelAsset::Transport(model, lod) => {
@@ -559,12 +630,13 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
                     position: vertex.position, normal: vertex.normal, color: vertex.color,
                 }).collect(),
                 indices: mesh.indices,
+                facade_lod: None,
             });
         }
     };
     let glb = gltf::Gltf::from_slice(bytes).map_err(io::Error::other)?;
     let blob = glb.blob.as_deref().ok_or_else(|| io::Error::other("GLB has no mesh buffer"))?;
-    let mut model = ModelMesh { vertices: Vec::new(), indices: Vec::new() };
+    let mut model = ModelMesh::default();
     match key.asset {
         ModelAsset::Landmark(_) => {
             let scene = glb.default_scene().or_else(|| glb.scenes().next())
@@ -575,8 +647,13 @@ pub fn decode(key: ModelKey, city_override:Option<&[u8]>) -> io::Result<ModelMes
         }
         ModelAsset::City(module) => {
             append(city_node(&glb, module, key.lod)?, Mat4::IDENTITY, blob, key.lod, &mut model)?;
+            if city_override.is_none() && key.lod == Lod::Near
+                && matches!(R40_MODULES[module], "paris_mansard" | "paris_corner")
+            {
+                model.facade_lod = model.add_r40_facade_lod();
+            }
         }
-        ModelAsset::Transport(..) | ModelAsset::CityPage(..) | ModelAsset::Park(_) => unreachable!(),
+        ModelAsset::Transport(..) | ModelAsset::CityKit(..) | ModelAsset::CityPage(..) | ModelAsset::Park(_) => unreachable!(),
     }
     if model.indices.is_empty() {
         return Err(io::Error::other(format!("{} has no static triangles", key.model())));

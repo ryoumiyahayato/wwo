@@ -278,6 +278,24 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 局部场景的资源制作可调用 `tools/local_scene_data.py` 的 `read_city_scene(sources, buildings, (lon, lat), size_km)`。输入沿用河岸原始资料目录和游戏 `data/city-models`。`size_km` 支持 5、25、50，输出 CRS84 的 GeoJSON FeatureCollection。建筑按中心选取，道路和水域按几何交集选取。同一地物在各范围内保持原坐标和 ID。道路沿用 PTM 与 OHM 源记录 ID，建筑 ID 由城市、记录坐标及朝向确定。建筑记录指向现有 GLB 节点，路面、屋顶和墙面指向现有材质图集层。接口提供现有近景资料，全球高程及水域仍由 QPK 和 QWG 提供。
 
+第六批候选城市使用同一个 `city-models/catalogue.json`。目录 v2 可同时引用旧 `WWOWCB01` 页和带 `kit` 的 `WWOWCB02` 页。v2 页的 1–8 号槽对应功能角色。模型原点在占地中心地面，本地 X 为临街宽度，+Y 向上，正面朝 −Z。实例使用米制宽、深和高。模型 ID 为风貌配置与角色，版本为该页的来源修订和候选构建提交。中景与近景来自同一结构和同一放置记录。新模块用 WWO 原创程序化几何、一个共享顶点色材质、零贴图，源文件为 `src/city_kit.rs` 和 [风貌参数](../../assets/settlements/city-kits-1900.json)。历史外形和分发依据随城市输入登记。原有 R40 几何与来源记录继续保留。
+
+推定区可指定 `frontage_m`、`depth_m`、`setback_m` 和 `storeys` 的取值范围。要素可通过 `use_reference` 和 `form_reference` 附加已登记的用途与形态来源。目录的 `placement_origins` 指向该修订的压缩记录，含每栋建筑的稳定 ID、坐标、角色、定位方法和来源。相同输入和修订可重复生成。`observe` 的 `draw_target` 区分已投影页面的中近景需求和视野周边的 CPU 预取。
+
+为同一输入加 `--with-roads` 可生成限于 1 MiB 解压量的 4096 米道路显示页及 `road_origins`。四档共用规划中心线和源 ID，跨页保留边缘余量。输入须登记中心线年代、宽度和铺装依据。经来源确认的桥面路段可指定 `bridge_reference`。`road_validity` 的结束年不含。
+
+`road_coverage` 可声明有效道路测绘范围，含面内空洞。`categories` 位 1 代表地方道路，位 2 代表干道。`coverage_state` 用 `mapped_network` 或 `confirmed_empty`，`coverage_basis` 登记证据。每类已测道路须有同源中心线。已证实无路面不得穿过同类中心线。16 米覆盖网格与本页道路一起启用，邻页保留一单元取样，覆盖内缘渐变。缺失、加载和测绘范围外保留旧道路。概览中的细类道路按矢量可读级别退回已有资料。只有明确无路的面可以单独成页。
+
+运行时按日期和视野调度道路显示页。道路和建筑共用六个页读取任务，每次最多两个道路任务。道路、水岸和地表页最多共用 32 个 GPU 页槽，按实际尺寸分配 16 MiB 内容区。分帧上传完成后才启用。离开视野后取消未开始任务并撤销绘制，CPU 页在宽限期后释放。`observe` 的 `city_models.roads` 记录所需页、CPU 状态和来源覆盖，`city_gpu` 记录槽位容量、预留量和已启用覆盖。
+
+建筑页按可见地块合并实例区间。每页每种建筑模块共用一组绑定，最多保留 12 个实例区间。`timing` 的 `stages` 值采集水面投影、基础地景、植被、叠加层、模型及界面六段 GPU 时间。结果附在 `gpu_stage_ms`，与引擎帧间隔分开。
+
+内置 R40 的两种孟莎屋顶模块共用原顶点和材质。运行时仅在立面凸饰厚度的投影上界不超过四分之一像素时使用外侧面索引。更近视角使用完整立面。通过调试热加载的模型使用完整索引。`city_gpu.facade_lod_instances` 记录应用此层级的建筑实例数。
+
+在现有离线 Python 环境运行 `tools/build_city_models.py PLAN.geojson DATA/city-models --site FROZEN_CITY_ID` 可增量生成一城。输入为 CRS84 FeatureCollection，顶层 `wwo` 记录 `city_id`、`name`、`key`、固定 `origin`、单调递增的 `revision`、`method` 和 `sources`。每条来源含 `id`、`url`、`licence`、`date` 和 `precision`，每条要素含稳定 `id` 和 `properties.source`。覆盖面用 `kind=coverage`，路中心线用 `kind=road` 和 `width_m`，历史建筑面用 `kind=building` 与可选 `role`、`height_m`。推定只在有资料依据的 `kind=zone` 面内沿道路进行，区内指定 `role` 和 `gap_m`。水面、公园、场坪、铁路用地和不宜施工的坡地分别用 `water`、`park`、`yard`、`rail`、`steep` 排除。先写新增页，再原子更新目录，其他城市文件可复用。v2 建筑使用 `profile` 和 `role`，局部场景导出继续保留旧 GLB 节点标识。
+
+[里尔 r6 候选](../../data/world_map/historical/city_landscape_1900/sample-plans/lille.geojson)保留 r5 的东侧五段沟渠。依 1898 年 Tallandier 图重描 Béthune 城门西沟、沿岸道路及 Cormontaigne 至 Porte des Postes 街段。Montebello 与沿城墙的 Metz 大道分别入图。水面采用地图蓝色填绘，旁侧园圃沟网未转录。原配准的南端控制点更正为 Porte d’Arras，保留其坐标。七点留一误差 RMS 为 85.4 米，最大 138.7 米。外围与配准精度仍待核对。[里尔 1892 年市议会记录](https://archives.lille.fr/media/187a90bc-669f-4304-b6cf-04a8c166626c.pdf)
+
 道路在四种地图模式中共用同一个基础渲染通道，专题交通线随后绘制。巴黎中心使用 PTM 街道。法兰西岛外围使用 IPR 约 1900 年的 1∶50,000 道路中心线，按交叉口的方向连续性推定道路等级。伦敦使用有年代记录的 OHM 道路，优先采用 1893–1896 年测绘和已整理的泰晤士河桥位。只有较晚底图线形的同期道路是位置参照。路面、部分路宽、人行道和 IPR 窄水道过河表现均为绘制推定。道路几何不提供给正式交通网络。
 
 `build_city_water.py` 和 `build_paris_fringe.py` 离线为道路制作四级空间索引。各级沿用同一批中心线，按投影米数逐级接入干道、连接道路、街道和小径。矢量资料接替范围内退出旧道路着色，范围外保留已有栅格回退。`build_paris_city_ground.py --detailed-streets` 的分片用于旧版兼容和分层调试。`--blocks` 仍提供中景街区。原生观察接口可用 `road-layer` 选择 `composite`、`vector`、`fallback`、`ground` 和 `cover`。
@@ -346,6 +364,8 @@ Z7 水文按复杂度加密。QWG 含边界的单元、Natural Earth 的岸线�
 | 单次临时观察输出 | `%TEMP%` 下的本次会话目录 |
 
 `wwo-cargo.ps1 build` 分配共享 Build 编号。Cargo 复用现有产物时保留原编号，编号在链接前分配并随程序嵌入。远端 `wwo-build-sequence` 保留已分配编号。首页、窗口标题、地图右下角和 `--version` 读取同一构建身份。F10 可查看完整 Git 提交、资源路径和数据来源。F10 打开后，F11 可重新读取主题、城市分片和资源目录下 `debug-resources` 的 `globe.wgsl`、`landscape.wgsl`、`land-material.png` 及 `urban_landscape_r40.glb`。加载失败会报告对应资源并保留有效版本。
+
+`wwo-cargo.ps1 build -ReleaseProfile --offline --bin wwo-map-lab` 使用共享缓存构建本机性能候选。候选不会触发正式程序更新。正式 Windows 构建仍由 GitHub CI 执行。
 
 `wwo-cargo.ps1 build -Restart` 构建后请求已安装程序正常退出。旧程序通过原退出对话框保存。新版渲染首个就绪画面后删除临时回退文件。更新期间写入的自动存档可由新版恢复。读取失败时，首页显示原因。
 
