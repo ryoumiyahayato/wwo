@@ -81,6 +81,22 @@ def street_width(index):
     return 15.0 if index % 5 == 0 else 7.0
 
 
+def maximum_covered_grade(footprint, cell_grade):
+    """Include every relief cell that touches the footprint."""
+    left, bottom, right, top = footprint.bounds
+    spacing = RELIEF_SPACING
+    columns = range(math.ceil(left / spacing - 0.5), math.floor(right / spacing + 0.5) + 1)
+    rows = range(math.ceil(bottom / spacing - 0.5), math.floor(top / spacing + 0.5) + 1)
+    half = spacing / 2.0
+    return max(
+        cell_grade(column, row)
+        for column in columns
+        for row in rows
+        if footprint.intersects(box(column * spacing - half, row * spacing - half,
+                                    column * spacing + half, row * spacing + half))
+    )
+
+
 def waterfront_blocks(candidates, wet, block_size, reference, count):
     """Select a connected dry block group at a substantial QWG water edge."""
     shore_water = shapely.union_all([part for part in shapely.get_parts(wet) if part.area >= block_size**2])
@@ -179,10 +195,11 @@ def build_city(city, terrain, transport_data):
     def height(x, y):
         return terrain.elevation(*backward.transform(x, y))
 
-    def grade(x, y):
+    @cache
+    def cell_grade(column, row):
         # The QPK grid cannot resolve individual street grades.
-        nx = round(x / RELIEF_SPACING) * RELIEF_SPACING
-        ny = round(y / RELIEF_SPACING) * RELIEF_SPACING
+        nx = column * RELIEF_SPACING
+        ny = row * RELIEF_SPACING
         half = RELIEF_SPACING / 2.0
         return math.hypot(height(nx + half, ny) - height(nx - half, ny),
                           height(nx, ny + half) - height(nx, ny - half)) / RELIEF_SPACING
@@ -203,9 +220,10 @@ def build_city(city, terrain, transport_data):
             if distance > radius or (peer and math.hypot(cx - peer[0], cy - peer[1]) < distance + half_diagonal):
                 continue
             block = box(x, y, x + spacing_x, y + spacing_y)
-            if not land.covers(block.buffer(7.5)) or guarded.intersects(block):
+            footprint = block.buffer(7.5)
+            if not land.covers(footprint) or guarded.intersects(block):
                 continue
-            slope = grade(cx, cy)
+            slope = maximum_covered_grade(footprint, cell_grade)
             if slope > MAX_STREET_GRADE:
                 continue
             cells[i, j] = (block, distance, slope)
@@ -250,9 +268,8 @@ def build_city(city, terrain, transport_data):
             if approach.is_empty or approach.geom_type != "LineString":
                 continue
             clearance = approach.buffer(3.5, cap_style="flat")
-            halfway = approach.interpolate(0.5, normalized=True)
             if (not land.covers(clearance) or other_guards.intersects(clearance)
-                    or grade(halfway.x, halfway.y) > MAX_STREET_GRADE):
+                    or maximum_covered_grade(clearance, cell_grade) > MAX_STREET_GRADE):
                 continue
             access_clearance.append(clearance)
             feature(approach, "road", width_m=7.0, role="transport_approach", anchor_id=anchor_id)
