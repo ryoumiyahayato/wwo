@@ -11,6 +11,8 @@ use wwo_character_core::{
     Education, Family, Language, OpeningHealth, Prologue, Temperament, Youth,
 };
 
+pub const CHAPTER_FADE: std::time::Duration = std::time::Duration::from_millis(340);
+
 const STAGES: [(&str, &str); 5] = [
     ("家庭", "Family"),
     ("教育", "Schooling"),
@@ -59,9 +61,11 @@ const EXPERIENCES: [Experience; 4] = [
     },
 ];
 
+#[derive(Clone)]
 pub struct Draft {
     pub country: usize,
     pub stage: usize,
+    pub previous_stage: Option<usize>,
     pub place: String,
     pub changed: Instant,
     pub opening: Prologue,
@@ -74,6 +78,7 @@ impl Draft {
         Self {
             country,
             stage: 0,
+            previous_stage: None,
             place,
             changed: Instant::now(),
             health: None,
@@ -92,8 +97,9 @@ impl Draft {
         self.stage == STAGES.len() - 1
     }
 
-    pub fn advance(&mut self) {
-        self.stage = (self.stage + 1).min(STAGES.len() - 1);
+    pub fn change_stage(&mut self, stage: usize) {
+        self.previous_stage = Some(self.stage);
+        self.stage = stage;
         self.changed = Instant::now();
     }
 

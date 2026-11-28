@@ -533,12 +533,25 @@ impl Display<'_> {
                 if let Some((draft, opening)) = draft.and_then(|draft| {
                     world.polities.get(draft.country).and_then(|polity| state?.opening(polity)).map(|opening| (draft, opening))
                 }) {
+                    let elapsed = draft.changed.elapsed();
+                    let duration = crate::prologue_ui::CHAPTER_FADE;
+                    let previous = draft.previous_stage.filter(|_| !self.hud.reduce_opening_motion && elapsed < duration);
+                    if let Some(stage) = previous {
+                        let mut previous = (*draft).clone();
+                        previous.stage = stage;
+                        self.draw_prologue(&mut Mesh::default(), &mut paper, &mut panels, &mut text,
+                            &mut Vec::new(), &previous, opening, world);
+                    }
+                    let previous_lengths = [paper.vertices.len(), panels.vertices.len(), text.vertices.len()];
                     self.draw_prologue(&mut scenes, &mut paper, &mut panels, &mut text, &mut hits, draft, opening, world);
-                    if !self.hud.reduce_opening_motion {
-                        let opacity = 0.65 + 0.35 * ease_cloud(draft.changed.elapsed().as_secs_f32() / 0.34);
-                        for mesh in [&mut paper, &mut panels, &mut text] {
-                            for vertex in &mut mesh.vertices {
-                                vertex.color[3] = (f32::from(vertex.color[3]) * opacity).round() as u8;
+                    if previous.is_some() {
+                        let progress = ease_cloud(elapsed.as_secs_f32() / duration.as_secs_f32());
+                        for (mesh, length) in [&mut paper, &mut panels, &mut text].into_iter().zip(previous_lengths) {
+                            for vertex in &mut mesh.vertices[..length] {
+                                vertex.color[3] = (f32::from(vertex.color[3]) * (1. - progress)).round() as u8;
+                            }
+                            for vertex in &mut mesh.vertices[length..] {
+                                vertex.color[3] = (f32::from(vertex.color[3]) * progress).round() as u8;
                             }
                         }
                     }

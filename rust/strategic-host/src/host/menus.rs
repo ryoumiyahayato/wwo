@@ -356,7 +356,7 @@ impl Host {
                     self.dirty = true;
                 }
             }
-            Page::Prologue if self.prologue.as_ref().is_some_and(|draft| now.saturating_duration_since(draft.changed) < Duration::from_millis(340)) => {
+            Page::Prologue if self.prologue.as_ref().is_some_and(|draft| draft.previous_stage.is_some() && now.saturating_duration_since(draft.changed) < prologue_ui::CHAPTER_FADE) => {
                 self.dirty = true;
             }
             _ => (),
@@ -618,14 +618,13 @@ impl Host {
                             self.opening_focus(point, 800.);
                         }
                     } else {
-                        draft.stage -= 1;
-                        draft.changed = Instant::now();
+                        draft.change_stage(draft.stage - 1);
                     }
                 }
             }
             Command::PrologueNext if self.lobby_page == Page::Prologue && !self.lobby_request => {
                 if let Some(draft) = &mut self.prologue {
-                    if !draft.confirm() { draft.advance(); }
+                    if !draft.confirm() { draft.change_stage(draft.stage + 1); }
                     else if self.hud.reduce_opening_motion { self.enter_prologue_world(); }
                     else { self.opening_nav.departure_cloud = Some(Instant::now()); }
                 }

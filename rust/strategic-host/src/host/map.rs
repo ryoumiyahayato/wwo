@@ -258,7 +258,12 @@ impl Host {
         agrees.then_some(polity)
     }
     pub(super) fn click(&mut self,p:[f64;2]) {
-        if self.opening_transition_active() {return;}
+        if self.opening_transition_active() {
+            if lobby::contains(lobby::cloud_skip_rect(self.size), p) {
+                self.skip_opening_transition();
+            }
+            return;
+        }
         if let (Some(view),Some((_,terrain)))=(&mut self.battle_view,&self.battle_terrain){
             let command=view.left_button(true,p,self.size,terrain);
             view.left_button(false,p,self.size,terrain);
