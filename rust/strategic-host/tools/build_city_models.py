@@ -1,12 +1,16 @@
-"""Pack surveyed London footprints and reconstructed Paris building placements."""
+"""Pack established city models or generate a city from formal roster inputs."""
 
 import argparse
 import json
 import math
+import os
+import re
 import sqlite3
 import struct
 from collections import defaultdict
+from contextlib import contextmanager
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 import shapely
@@ -30,6 +34,47 @@ LONDON_PARKS = {
 
 def read(path):
     return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def roster_city(city_id, roster=None):
+    if roster is None:
+        from city_landscape_roster import read_roster
+        roster = read_roster()
+    city = next((row for row in roster["candidates"] if row["city_id"] == city_id), None)
+    if not city or not city.get("construction"):
+        raise ValueError(f"City is outside the frozen construction roster: {city_id}")
+    point = city.get("point")
+    population = (city.get("selected_observation") or {}).get("population_value")
+    if not point or len(point) != 2 or not (-180 <= point[0] <= 180 and -90 <= point[1] <= 90):
+        raise ValueError(f"Missing WGS84 roster point for {city_id}")
+    if type(population) is not int or population <= 0:
+        raise ValueError(f"Missing roster population for {city_id}")
+    return city
+
+
+class CityTerrain:
+    def __init__(self, water, elevation):
+        self.water = water
+        self.relief = elevation
+
+    def water_area(self, lon, lat):
+        return self.water.area(lon, lat)
+
+    def land_geometry(self, bounds):
+        return self.water.land_geometry(bounds)
+
+    def elevation(self, lon, lat):
+        return self.relief.elevation(lon, lat)
+
+
+@contextmanager
+def open_city_terrain(terrain_root):
+    from build_natural_terrain import PackedElevation, WaterGeometry, pack_path, PACK_MAX_LEVEL
+
+    terrain_root = Path(terrain_root)
+    with (terrain_root/"water-geometry.qwg").open("rb") as water, \
+            pack_path(terrain_root, PACK_MAX_LEVEL).open("rb") as relief:
+        yield CityTerrain(WaterGeometry(water), PackedElevation(relief))
 
 
 def transforms(center):
@@ -215,10 +260,11 @@ def paris(sources):
                             break
 
 
-def pack(output, key, source, attribution, rows):
+def pack(output, key, source, attribution, rows, modern_format=False):
     tiles = defaultdict(list)
+    tile_size = 512 if modern_format else TILE
     for x, y, lon, lat, angle, width, depth, height, module in rows:
-        tiles[math.floor(x/TILE),math.floor(y/TILE)].append((lon,lat,angle,width,depth,height,module))
+        tiles[math.floor(x/tile_size),math.floor(y/tile_size)].append((lon,lat,angle,width,depth,height,module))
     compressor = ZstdCompressor(level=5)
     entries = []
     for (x, y), records in sorted(tiles.items()):
@@ -230,35 +276,121 @@ def pack(output, key, source, attribution, rows):
             heading = (math.degrees(angle)+180.)%360.-180.
             payload += RECORD.pack(round(lon*1e6), round(lat*1e6), round(heading*100),
                                    round(width*10), round(depth*10), round(height*10), module, 0)
-        (output/name).write_bytes(b"WWOWCB01" + struct.pack("<I", len(records)) + compressor.compress(payload))
+        magic = b"WWOWCB02" if modern_format else b"WWOWCB01"
+        (output/name).write_bytes(magic + struct.pack("<I", len(records)) + compressor.compress(payload))
         entries.append(dict(file=name, bounds=bounds, buildings=len(records)))
     print(f"{key}: {sum(len(r) for r in tiles.values()):,} building placements in {len(tiles)} tiles", flush=True)
     return dict(name=key.title(), source=source, attribution=attribution, tiles=entries)
 
 
+def generate_roster_city(output, city_id, terrain, transport_data, revision):
+    from build_procedural_city import build_city
+
+    city = roster_city(city_id)
+    prefix = city_id.replace(":", "-")
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", prefix):
+        raise ValueError(f"Roster identifier cannot be used as a page name: {city_id}")
+    layout, rows = build_city(city, terrain, transport_data)
+    key = f"{prefix}-r{revision}"
+    source = "Procedural 1900 city layout"
+    entry = pack(output, key, source, "Formal roster, regional Kit, QWG and QPK.", rows, modern_format=True)
+    if not entry["tiles"]:
+        raise ValueError(f"No buildable plots for {city_id}")
+    layout_file = f"{key}.geojson"
+    (output/layout_file).write_text(json.dumps(layout, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    entry.update(id=city_id, name=city["name"], kit=layout["wwo"]["kit"], plan=layout_file, revision=revision,
+                 transport=layout["wwo"]["transport"], reserves=layout["wwo"]["reserves"])
+    return entry
+
+
+@contextmanager
+def lock_catalogue(output):
+    with (output / ".catalogue.lock").open("a+b") as lock:
+        lock.seek(0)
+        if os.name == "nt":
+            import msvcrt
+            msvcrt.locking(lock.fileno(), msvcrt.LK_LOCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        yield
+
+
+def write_catalogue(pending, catalog, data):
+    pending.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    pending.replace(catalog)
+
+
+def publish_roster_cities(output, selected, terrain_root, transport_data, revision):
+    output.mkdir(parents=True, exist_ok=True)
+    catalog = output / "catalogue.json"
+    with TemporaryDirectory(prefix=".wwo-city-", dir=output) as folder:
+        stage = Path(folder)
+        with open_city_terrain(terrain_root) as terrain:
+            entries = [generate_roster_city(stage, city_id, terrain, transport_data, revision)
+                       for city_id in dict.fromkeys(selected)]
+        with lock_catalogue(output):
+            previous = read(catalog) if catalog.is_file() else {"version": "wwo-city-models-v2", "cities": []}
+            if previous["version"] not in {"wwo-city-models-v1", "wwo-city-models-v2"}:
+                raise ValueError(f"Unsupported city model catalogue: {catalog}")
+            updates = {row["id"]: row for row in entries}
+            if any(row.get("id") in updates and row.get("revision", 0) > revision for row in previous["cities"]):
+                raise ValueError("A newer revision is already in the catalogue")
+            cities = [row for row in previous["cities"] if row.get("id") not in updates] + entries
+            cities.sort(key=lambda row: row.get("id") or row["name"])
+            sites = {site["id"]: site for site in previous.get("sites", [])}
+            for entry in entries:
+                city_id = entry["id"]
+                sites[city_id] = {"id": city_id, "name": entry["name"], "point": roster_city(city_id)["point"],
+                                  "source": entry["source"]}
+            assets = sorted(stage.iterdir())
+            for asset in assets:
+                target = output / asset.name
+                if target.exists() and asset.read_bytes() != target.read_bytes():
+                    raise ValueError(f"Page {asset.name} has changed. Increase --revision.")
+            for asset in assets:
+                target = output / asset.name
+                if not target.exists():
+                    asset.replace(target)
+            data = {**previous, "version": "wwo-city-models-v2", "cities": cities,
+                    "sites": [sites[city_id] for city_id in sorted(sites)]}
+            write_catalogue(stage / "catalogue.json", catalog, data)
+
+
 if __name__ == "__main__":
     cli = argparse.ArgumentParser(description=__doc__)
-    cli.add_argument("sources", type=Path)
+    cli.add_argument("sources", type=Path, help="Original survey sources, or the formal data directory with --city-id")
     cli.add_argument("output", type=Path)
-    cli.add_argument("--city", choices=("london", "paris"), help="Update one city in the output catalogue")
+    selection = cli.add_mutually_exclusive_group()
+    selection.add_argument("--city", choices=("london", "paris"), help="Update one legacy city in the output catalogue")
+    selection.add_argument("--city-id", action="append", help="Generate a frozen roster city. Repeat within the current batch.")
+    cli.add_argument("--terrain", type=Path, help="Directory holding formal QWG and QPK assets")
+    cli.add_argument("--revision", type=int, default=1, help="Positive procedural page revision")
     args = cli.parse_args()
+    if args.city_id and not args.terrain:
+        cli.error("--city-id requires --terrain")
+    if args.city_id:
+        if args.revision < 1:
+            cli.error("--revision must be positive")
+        try:
+            publish_roster_cities(args.output, args.city_id, args.terrain, args.sources, args.revision)
+        except (ValueError, OSError, KeyError) as error:
+            cli.exit(1, f"{error}\n")
+        cli.exit()
     args.output.mkdir(parents=True, exist_ok=args.city is not None)
     catalog = args.output/"catalogue.json"
-    cities = read(catalog)["cities"] if catalog.is_file() else []
+    previous = read(catalog) if catalog.is_file() else {"version": "wwo-city-models-v1", "cities": []}
+    cities = previous["cities"]
     if args.city in (None, "london"):
-        cities = [city for city in cities if city["name"] != "London"]
+        cities = [city for city in cities if city["name"] != "London" or city.get("kit")]
         cities.append(pack(args.output, "london", "Surveyed 1891–1896 footprints. Roof form and height reconstructed.",
              "Petitpierre et al., https://doi.org/10.5281/zenodo.19497435 (CC BY 4.0). "
              "OpenHistoricalMap dated centerlines and OpenStreetMap park outlines (ODbL).",
              london(args.sources)))
     if args.city in (None, "paris"):
-        cities = [city for city in cities if city["name"] != "Paris"]
+        cities = [city for city in cities if city["name"] != "Paris" or city.get("kit")]
         cities.append(pack(args.output, "paris", "Paris 1900 reconstructed streets and blocks. Individual buildings simulated.",
              "Paris Time Machine, https://doi.org/10.34847/nkl.cbf5ecd0 (ODbL 1.0). "
              "Institut Paris Region, land use c. 1900 (Licence Ouverte).",
              paris(args.sources)))
-    pending = catalog.with_suffix(".tmp")
-    pending.write_text(
-        json.dumps(dict(version="wwo-city-models-v1", cities=cities), ensure_ascii=False, indent=2),
-        encoding="utf-8")
-    pending.replace(catalog)
+    write_catalogue(catalog.with_suffix(".tmp"), catalog, {**previous, "cities": cities})

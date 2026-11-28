@@ -1,0 +1,24 @@
+{
+  "reba:chandler:996": {"kit": "north_american_masonry_timber", "peer": "us_city_new_jersey_jersey_city", "pilot": true},
+  "reba:chandler:1282": {"kit": "south_chinese_lane", "pilot": true},
+  "landscape:hankou": {"kit": "south_chinese_lane", "peer": "landscape:wuchang", "pilot": true},
+  "landscape:wuchang": {"kit": "south_chinese_lane", "peer": "landscape:hankou", "pilot": true},
+  "reba:chandler:585": {"kit": "south_chinese_lane", "pilot": true},
+  "reba:chandler:1494": {"kit": "latin_american_court", "pilot": true},
+  "reba:chandler:307": {"kit": "south_chinese_lane", "pilot": true},
+  "reba:chandler:1081": {
+    "place": "place:paris",
+    "kit": "francophone_stone",
+    "shard": "local/paris_northern_france_1900.json",
+    "rail": [
+      {
+        "station": "transport_reference:paris_nord",
+        "corridor": "rail:rfn_272000:r1:p0"
+      },
+      {
+        "station": "transport_reference:paris_saint_lazare",
+        "corridor": "rail:rfn_340000:r1:p0"
+      }
+    ]
+  }
+}

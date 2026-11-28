@@ -1,0 +1,146 @@
+[
+  {
+    "id": "francophone_stone",
+    "roof": "mansard",
+    "work_roof": "sawtooth",
+    "court": "enclosed",
+    "parapet": false,
+    "arcade": false,
+    "eave": 0.75,
+    "wall": [
+      0.59,
+      0.48,
+      0.32
+    ],
+    "tile": [
+      0.22,
+      0.23,
+      0.24
+    ],
+    "frontage_m": [
+      8,
+      15
+    ],
+    "depth_m": [
+      12,
+      25
+    ],
+    "storeys": [
+      3,
+      5
+    ],
+    "setback_m": [
+      0,
+      1
+    ],
+    "basis": "Paris Time Machine blocks and R40 stone streets; high street wall and interior court."
+  },
+  {
+    "id": "south_chinese_lane",
+    "roof": "gable",
+    "work_roof": "hip",
+    "court": "passage",
+    "parapet": false,
+    "arcade": false,
+    "eave": 0.76,
+    "wall": [
+      0.53,
+      0.39,
+      0.27
+    ],
+    "tile": [
+      0.2,
+      0.18,
+      0.16
+    ],
+    "frontage_m": [
+      4,
+      8
+    ],
+    "depth_m": [
+      10,
+      22
+    ],
+    "storeys": [
+      1,
+      3
+    ],
+    "setback_m": [
+      0,
+      1
+    ],
+    "basis": "Guangzhou historical lanes and port constraints from frozen cards; narrow deep plan and side passages are a reconstruction."
+  },
+  {
+    "id": "north_american_masonry_timber",
+    "roof": "gable",
+    "work_roof": "sawtooth",
+    "court": "rear",
+    "parapet": false,
+    "arcade": false,
+    "eave": 0.84,
+    "wall": [
+      0.43,
+      0.25,
+      0.17
+    ],
+    "tile": [
+      0.22,
+      0.21,
+      0.19
+    ],
+    "frontage_m": [
+      6,
+      12
+    ],
+    "depth_m": [
+      12,
+      24
+    ],
+    "storeys": [
+      2,
+      4
+    ],
+    "setback_m": [
+      0,
+      5
+    ],
+    "basis": "New York and Jersey City period plans record differentiated blocks and rail yards; masonry and timber proportions are inferred."
+  },
+  {
+    "id": "latin_american_court",
+    "roof": "hip",
+    "work_roof": "gable",
+    "court": "enclosed",
+    "parapet": false,
+    "arcade": true,
+    "eave": 0.85,
+    "wall": [
+      0.56,
+      0.43,
+      0.28
+    ],
+    "tile": [
+      0.38,
+      0.21,
+      0.14
+    ],
+    "frontage_m": [
+      6,
+      14
+    ],
+    "depth_m": [
+      10,
+      23
+    ],
+    "storeys": [
+      1,
+      3
+    ],
+    "setback_m": [
+      0,
+      2
+    ],
+    "basis": "Rio 1900 plan sets roads, openings, shore and slopes; low block perimeter and courtyard massing are inferred."
+  }
+]
