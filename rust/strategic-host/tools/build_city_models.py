@@ -292,9 +292,11 @@ def pack(output, key, source, attribution, rows, modern_format=False):
     for x, y, lon, lat, angle, width, depth, height, module in rows:
         tiles[math.floor(x/tile_size),math.floor(y/tile_size)].append((lon,lat,angle,width,depth,height,module))
     compressor = ZstdCompressor(level=5)
+    magic = b"WWOWCB02" if modern_format else b"WWOWCB01"
     entries = []
-    for (x, y), records in sorted(tiles.items()):
-        name = f"{key}-{x}-{y}.wcb"
+
+    def write_page(stem, records):
+        name = f"{stem}.wcb"
         bounds = [min(r[0] for r in records), min(r[1] for r in records),
                   max(r[0] for r in records), max(r[1] for r in records)]
         payload = bytearray()
@@ -302,10 +304,18 @@ def pack(output, key, source, attribution, rows, modern_format=False):
             heading = (math.degrees(angle)+180.)%360.-180.
             payload += RECORD.pack(round(lon*1e6), round(lat*1e6), round(heading*100),
                                    round(width*10), round(depth*10), round(height*10), module, 0)
-        magic = b"WWOWCB02" if modern_format else b"WWOWCB01"
         (output/name).write_bytes(magic + struct.pack("<I", len(records)) + compressor.compress(payload))
         entries.append(dict(file=name, bounds=bounds, buildings=len(records)))
-    print(f"{key}: {sum(len(r) for r in tiles.values()):,} building placements in {len(tiles)} tiles", flush=True)
+
+    for (x, y), records in sorted(tiles.items()):
+        stem = f"{key}-{x}-{y}"
+        # A local page spanning the seam must not be centered between ±180°.
+        if modern_format and max(row[0] for row in records) - min(row[0] for row in records) > 180:
+            write_page(f"{stem}-west", [row for row in records if row[0] < 0])
+            write_page(f"{stem}-east", [row for row in records if row[0] >= 0])
+        else:
+            write_page(stem, records)
+    print(f"{key}: {sum(entry['buildings'] for entry in entries):,} building placements in {len(entries)} tiles", flush=True)
     return dict(name=key.title(), source=source, attribution=attribution, tiles=entries)
 
 

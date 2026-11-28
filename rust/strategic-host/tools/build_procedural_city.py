@@ -83,6 +83,18 @@ def street_width(index):
     return 15.0 if index % 5 == 0 else 7.0
 
 
+def city_bounds(backward, longitude, extent):
+    west, south, east, north = backward.transform_bounds(-extent, -extent, extent, extent)
+    # QWG reads ordered longitudes, including beyond ±180°. Both rectangles
+    # must use the same branch when only the larger one crosses the seam.
+    if east < west:
+        if longitude < 0:
+            west -= 360
+        else:
+            east += 360
+    return west, south, east, north
+
+
 def polygonal(geometry):
     if geometry.geom_type in {"Polygon", "MultiPolygon"}:
         return geometry
@@ -183,9 +195,10 @@ def build_city(city, terrain, transport_data):
     spacing_y = 2 * kit["depth_m"][1] + 6 * kit["frontage_m"][1]
     block_size = max(spacing_x, spacing_y)
     shore_margin = radius + 2.0 * block_size
-    extent = backward.transform_bounds(-shore_margin, -shore_margin, shore_margin, shore_margin)
+    center_lon = city["point"][0]
+    extent = city_bounds(backward, center_lon, shore_margin)
     shoreline_land = terrain.land_geometry(extent)
-    city_extent = backward.transform_bounds(-radius, -radius, radius, radius)
+    city_extent = city_bounds(backward, center_lon, radius)
     land = transform(shoreline_land.intersection(box(*city_extent)), forward)
     shapely.prepare(land)
     dry_blocks = land.buffer(-7.5)
