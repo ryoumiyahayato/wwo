@@ -380,7 +380,7 @@ impl Host {
         }
         let polity=hit.and_then(|v|v.checked_sub(1)).map(usize::from);
         self.select_transport(None);
-        if coordinates.is_some_and(|q|self.click_military_cell(q,polity)){return;}
+        if coordinates.is_some_and(|q|self.click_military_cell(q)){return;}
         if self.hud.page==HudPage::Map {
             if let Some(i)=polity.filter(|_|self.hud.menu==HudMenu::None){self.click_country(i,p);return;}
         }

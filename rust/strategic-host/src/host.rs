@@ -92,7 +92,7 @@ struct Host {
     debug:bool,perf_at:Instant,perf_frames:u32,perf:Diagnostics,
     population_debug:Option<pop_debug_ui::Panel>,
     screenshot:Option<PathBuf>,screenshot_status:Option<(Instant,String)>,
-    grid_step:f32,last_present:Instant,employment:state::EmploymentReference,market_focus_serial:u64,
+    last_present:Instant,employment:state::EmploymentReference,market_focus_serial:u64,
     military_cell:Option<SelectedMilitaryCell>,
     battle_terrain:Option<(MilitaryCell,BattlefieldTerrain)>,
     battle_terrain_timing:Option<(Vec<[u32;3]>,f64)>,
@@ -207,7 +207,7 @@ impl Host {
             bridge_wait:Instant::now(),seen_lobby_busy:false,departure_requested:false,
             loading_fade:None,loading_status:String::new(),debug:false,perf_at:Instant::now(),perf_frames:0,population_debug:None,
             perf:Diagnostics{rate:0.,cpu_ms:0.,tiles:0,visible:0,mib:0.,streaming:false},
-            screenshot:None,screenshot_status:None,grid_step:50000.,last_present:started,employment,market_focus_serial:0,
+            screenshot:None,screenshot_status:None,last_present:started,employment,market_focus_serial:0,
             military_cell:None,battle_terrain:None,battle_terrain_timing:None,battle_view:None,
             battle_terrain_wanted:None,battle_terrain_loading:None,battle_enter_requested:None})
     }
@@ -556,8 +556,9 @@ impl Host {
             }
             return;
         }
-        let entry = self.battle_enter_requested.take().zip(self.military_cell)
-            .filter(|(_,selection)| self.military_grid_active() && selection.cell.region() == region);
+        let entry = self.battle_enter_requested.take().zip(self.visible_military_selection())
+            .filter(|(_,selection)| self.military_grid_active() && selection.cell.size_km >= 25
+                && selection.cell.region() == region);
         match result {
             Ok(prepared) => {
                 if let Some(renderer) = &mut self.renderer {renderer.clear_battle();}
@@ -576,6 +577,7 @@ impl Host {
     }
 
     fn open_battle(&mut self, selection:SelectedMilitaryCell, terrain_wait_ms:f64) -> io::Result<()> {
+        if selection.cell.size_km < 25 {return Err(io::Error::other(self.small_military_cell_message()));}
         let Some(world)=self.written_world() else{return Ok(());};
         let timing=self.trial.timing_frame(false).map(|frame|(frame,Instant::now()));
         let region=selection.cell.region();
@@ -634,10 +636,39 @@ impl Host {
             && self.hud.menu==HudMenu::None && self.camera.mpp<5000. && self.written_world().is_some()
     }
 
-    fn click_military_cell(&mut self,coordinates:[f64;2],owner:Option<usize>)->bool {
+    fn military_grid_size(&self)->u8 {
+        if self.camera.mpp<180. {5} else if self.camera.mpp<800. {25} else {50}
+    }
+
+    fn visible_military_selection(&self)->Option<SelectedMilitaryCell> {
+        let size=self.military_grid_size();
+        self.military_cell.filter(|selection| {
+            let visible_size=if selection.cell.band.is_some(){size}else{size.max(25)};
+            selection.cell.size_km==visible_size
+        })
+    }
+
+    fn legacy_military_region(&self)->Option<MilitaryCell> {
+        self.written_world()?.land_battle_region().filter(|region|region.band.is_none())
+    }
+
+    fn map_military_cell(coordinates:[f64;2],size_km:u8,legacy:Option<MilitaryCell>)->Option<MilitaryCell> {
+        if let Some(region)=legacy {
+            if MilitaryCell::legacy_at(coordinates,50)==Some(region) {
+                return MilitaryCell::legacy_at(coordinates,size_km.max(25));
+            }
+        }
+        MilitaryCell::at(coordinates,size_km)
+    }
+
+    fn small_military_cell_message(&self)->&str {
+        self.skin.choose("已选择 5 公里格 · 当前可进入 25 或 50 公里战场",
+            "5 km cell selected · Battlefield entry is available at 25 or 50 km")
+    }
+
+    fn click_military_cell(&mut self,coordinates:[f64;2])->bool {
         if !self.military_grid_active(){return false;}
-        let selection=owner.filter(|&i|self.world.polities[i].id=="country_fra")
-            .and_then(|_|MilitaryCell::at(coordinates,(self.grid_step/1000.) as u8))
+        let selection=Self::map_military_cell(coordinates,self.military_grid_size(),self.legacy_military_region())
             .map(|cell|SelectedMilitaryCell{cell,coordinates});
         if let Some(selection)=selection {
             let cell=selection.cell;
@@ -648,7 +679,9 @@ impl Host {
             else {
                 self.battle_enter_requested=None;
                 self.battle_terrain_wanted=None;
-                if let Some(message)=self.battle_location_message(cell.region()) {
+                if cell.size_km < 25 {
+                    self.feedback=format!("{}  {}",cell.id(),self.small_military_cell_message());
+                } else if let Some(message)=self.battle_location_message(cell.region()) {
                     self.feedback=message;
                 } else {
                     let world=self.written_world().unwrap();
@@ -676,7 +709,12 @@ impl Host {
     }
 
     fn enter_selected_battle(&mut self) {
-        if let Some(selection)=self.military_cell {
+        if let Some(selection)=self.visible_military_selection() {
+            if selection.cell.size_km < 25 {
+                self.feedback=format!("{}  {}",selection.cell.id(),self.small_military_cell_message());
+                self.dirty=true;
+                return;
+            }
             let region=selection.cell.region();
             if let Some(message)=self.battle_location_message(region) {
                 self.feedback=message;
@@ -789,14 +827,18 @@ impl Host {
         let mut view=View::new(&self.camera,self.size);
         view.road_layer[0]=self.trial.road_layer;
         let active=World::active_politics(&date);
-        if self.camera.mpp<700.{self.grid_step=25000.;}else if self.camera.mpp>900.{self.grid_step=50000.;}
         view.settings=[self.state.date.season_day(),self.mode.index() as f32,u8::from(active) as f32,u8::from(self.theme) as f32];
         view.map_style[1]=self.renderer.as_ref().unwrap().terrain_max_level() as f32;
         let land_detail=!self.in_lobby();
         view.close_sample=self.renderer.as_mut().unwrap().update_close_terrain(&self.camera,self.size,land_detail,now);
-        view.map_style[3]=if self.hud.military_grid{self.grid_step}else{0.};
+        let coord=self.camera.vector(self.cursor,self.size).map(camera::geographic);
         if self.military_grid_active(){
-            if let Some(selection)=self.military_cell {view.military_cell=selection.cell.highlight();}
+            let size=self.military_grid_size();
+            let legacy=self.legacy_military_region();
+            let on_map=self.cursor.into_iter().zip(self.size).all(|(pixel,limit)|pixel>=0.&&pixel<f64::from(limit))
+                && !self.is_panel(self.cursor) && self.population_debug.is_none() && self.drag.is_none();
+            let hover=coord.filter(|_|on_map).and_then(|point|Self::map_military_cell(point,size,legacy));
+            view.set_military_grid(size,self.visible_military_selection().map(|selection|selection.cell),hover,legacy);
         }
         view.selection[3]=self.world.polities.iter().position(|p|p.id=="country_fra").map_or(0.,|i|(i+1) as f32);
         view.map_style[0]=self.player_polity().map_or(0.,|i|(i+1) as f32);
@@ -827,7 +869,6 @@ impl Host {
             view.selection[1]=count as f32;
         }
         let center=self.camera.coordinates();
-        let coord=self.camera.vector(self.cursor,self.size).map(camera::geographic);
         let owner=coord.map_or([0,0],|p|self.object_at(p));
         let admin=if active {owner[1].checked_sub(1).and_then(|i|self.world.admin.get(i as usize))
             .map_or(String::new(),|p|self.skin.division_name(p).into())}else{String::new()};

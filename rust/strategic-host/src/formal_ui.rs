@@ -666,7 +666,7 @@ impl Display<'_> {
             let shortcut=match self.mode {
                 Mode::Economic if s.is_some()=>Some((visual.choose("打开市场","Market"),Command::Market("open",0),false)),
                 Mode::Political if s.is_some()=>Some((visual.choose("国家概况","My country"),Command::PlayerCountry,false)),
-                Mode::Military=>Some((visual.choose("25 / 50 千米方格","25 / 50 km grid"),Command::MilitaryGrid,self.hud.military_grid)),
+                Mode::Military=>Some((visual.choose("50 / 25 / 5 公里格网","50 / 25 / 5 km grid"),Command::MilitaryGrid,self.hud.military_grid)),
                 _=>None,
             };
             if let Some((label,command,active))=shortcut {
