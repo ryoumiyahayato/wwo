@@ -322,6 +322,22 @@ fn paper_choice(
 }
 
 impl Display<'_> {
+    pub(crate) fn draw_prologue_reference(&self, surface: &mut Mesh, text: &mut Mesh, draft: &Draft, country: &Opening) {
+        let image = &ART[scene_index(country, &draft.place)];
+        if image.places.contains(&draft.place.as_str()) {
+            return;
+        }
+        let label = if image.places.is_empty() {
+            self.skin.choose("时代场景示意", "Illustrative period scene")
+        } else {
+            self.skin.choose("区域时代场景示意", "Illustrative regional scene")
+        };
+        let width = self.skin.width(label, 0) + 20.;
+        let y = self.size[1] as f32 - 27.;
+        surface.rect(14., y, width, 21., [52, 36, 25, 209]);
+        self.skin.text(text, label, 0, [23., y + 2.], width - 16., formal_ui::IVORY);
+    }
+
     pub(crate) fn draw_prologue(
         &self,
         art: &mut Mesh,

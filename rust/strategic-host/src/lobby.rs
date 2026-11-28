@@ -555,6 +555,7 @@ impl Display<'_> {
                             }
                         }
                     }
+                    self.draw_prologue_reference(&mut panels, &mut text, draft, opening);
                 }
             }
             Page::Load=>{
