@@ -4,15 +4,15 @@
     "city_id": "reba:chandler:1194",
     "name": "Rio de Janeiro",
     "key": "rio-reis-1900",
-    "revision": 1,
+    "revision": 2,
     "status": "candidate_sample",
     "origin": [
       -43.1738,
       -22.903
     ],
-    "method": "Reis cadastral street axes follow the old ferry city, port-side streets, the Gloria and Catete coast and the northwestern railway edge. Coast, port working ground, undeveloped contour slopes, parks, and enclosed drawn street blocks use different historical geometry. Cloth seam, hand-read controls and incomplete individual building evidence keep this plan provisional. Park centers are approximate registration controls. Approximate placement from the low block archetype is confined to drawn blocks with selected street frontages.",
+    "method": "The Reis cadastral plan supplies drawn streets, working shores, pre-fill beaches, contours and bounded street blocks. Revision 2 retraces the Gamboa to Saúde approach and ordinary blocks, the Glória to Flamengo shore and the Catete connections. Registration is locally adjusted around Saúde. Inferred building massing uses only drawn ordinary-block perimeters. West-sheet alignment and individual buildings remain provisional.",
     "registration": {
-      "model": "Single affine from hand-read source pixels to WGS84. Near-north raster is the 3840 px public-domain derivative cropped to x=590..2280/y=820..1940 and rotated 138 degrees counterclockwise with expansion to 2006 by 1964.",
+      "model": "Single affine from hand-read source pixels to WGS84. Near-north raster is the 3840 px public-domain derivative cropped to x=590..2280/y=820..1940 and rotated 138 degrees counterclockwise with expansion to 2006 by 1964. Revision 2 adds a bounded smooth shift around the Saúde church mark; all other controls and the base matrix are unchanged.",
       "matrix": [
         [
           4.675630741921863e-05,
@@ -114,7 +114,31 @@
           "leave_one_out_m": 44.9
         }
       ],
-      "limitations": "Controls are plot markers or area centers, with image-center interpretation noted. Church marks are point candidates only. Sao Cristovao parish church, moved entrance gates and ambiguously placed names were excluded. The cross-sheet track and port slopes cannot yet be used for meter-scale alignment."
+      "limitations": "Controls are plot markers or area centers, with image-center interpretation noted. Church marks are point candidates only. Sao Cristovao parish church, moved entrance gates and ambiguously placed names were excluded. The cross-sheet track and port slopes cannot yet be used for meter-scale alignment. The 124.7 m Saúde leave-one-out value describes the original affine. Local residual at the one translation anchor cannot measure block- or street-level accuracy. The original west-sheet rail position has no independent local residual.",
+      "local_adjustments": [
+        {
+          "area": "Saúde and nearby Gamboa and Valongo transition",
+          "note": "Local one-point translation. Weight is full through 0.33 of the elliptical source-pixel radius, then smoothly fades to zero at a radius of 1.0. No citywide accuracy claim follows from this correction.",
+          "center_pixel": [
+            1128.0,
+            629.0
+          ],
+          "radius_xy_pixels": [
+            169,
+            198
+          ],
+          "wgs84": [
+            -43.19142836,
+            -22.89374046
+          ],
+          "delta_lon_lat": [
+            0.0006215982961279565,
+            0.0002443489489145634
+          ],
+          "control_url": "https://pgeo3.rio.rj.gov.br/arcgis/rest/services/Hosted/CAMADA/FeatureServer/1",
+          "basis": "Centroid of the small church mark read at this scan resolution and location in the municipal protected-property catalogue. Nearby municipal monument markers have not been established as independent source-image centers."
+        }
+      ]
     },
     "road_validity": {
       "start": 1900,
@@ -137,6 +161,20 @@
         "licence": "Historic public-domain map. Credit Library of Congress Geography and Map Division.",
         "precision": "Printed on two sheets, viewed in the joined 3840 by 2165 public-domain copy. Solid street traces and mapped physical edges only. Consult control residuals for the limits of hand registration.",
         "digital_copy": "https://commons.wikimedia.org/wiki/File:Planta_da_cidade_do_Rio_de_Janeiro_LOC_2012593122.jpg"
+      },
+      {
+        "id": "bn-gutierrez-gloria-1890s",
+        "url": "https://brasilianafotografica.bn.gov.br/brasiliana/handle/20.500.12156.1/6372",
+        "date": "Juan Gutierrez, 1890s. Biblioteca Nacional, Brasiliana Fotográfica.",
+        "licence": "Archive link and dated visual reference. No historic photograph is redistributed.",
+        "precision": "Corroborates the unfilled Glória bay and headland. All mapped coordinates are traced from Reis."
+      },
+      {
+        "id": "museu-republica-catete-gardens",
+        "url": "https://museudarepublica.museus.gov.br/o-museu/",
+        "date": "Museu da República institutional history; presidential garden redesigned for the 1897 relocation.",
+        "licence": "Institutional history cited for factual context. No page assets are redistributed.",
+        "precision": "Corroborates estate use near the shore. Parcel edges are taken from the 1900 plan."
       }
     ]
   },
@@ -189,16 +227,16 @@
               -22.8947158
             ],
             [
-              -43.1856805,
-              -22.8950186
+              -43.185564917,
+              -22.894973165
             ],
             [
-              -43.1917833,
-              -22.892376
+              -43.191161701,
+              -22.892131651
             ],
             [
-              -43.1993423,
-              -22.8943911
+              -43.199319723,
+              -22.894382224
             ],
             [
               -43.2087789,
@@ -524,8 +562,8 @@
             -22.8993654
           ],
           [
-            -43.1853723,
-            -22.898211
+            -43.185367409,
+            -22.898209077
           ]
         ]
       },
@@ -576,8 +614,8 @@
             -22.9007528
           ],
           [
-            -43.1861529,
-            -22.8998822
+            -43.186152058,
+            -22.899881868
           ]
         ]
       },
@@ -624,8 +662,8 @@
             -22.9025186
           ],
           [
-            -43.1882906,
-            -22.9014528
+            -43.188275584,
+            -22.901446895
           ]
         ]
       },
@@ -776,16 +814,16 @@
             -22.899076
           ],
           [
-            -43.1853723,
-            -22.898211
+            -43.185367409,
+            -22.898209077
           ],
           [
-            -43.1864493,
-            -22.8980549
+            -43.186357965,
+            -22.898018995
           ],
           [
-            -43.187482,
-            -22.8976149
+            -43.187222365,
+            -22.897512836
           ]
         ]
       },
@@ -808,56 +846,80 @@
         "type": "LineString",
         "coordinates": [
           [
-            -43.187482,
-            -22.8976149
+            -43.187222365,
+            -22.897512836
           ],
           [
-            -43.188605,
-            -22.8975543
+            -43.187927753,
+            -22.897248286
           ],
           [
-            -43.1897287,
-            -22.8973995
+            -43.188826052,
+            -22.89703887
           ],
           [
-            -43.1912733,
-            -22.8972574
+            -43.189470105,
+            -22.896895617
           ],
           [
-            -43.1923483,
-            -22.8973366
+            -43.190473271,
+            -22.897058037
           ],
           [
-            -43.1936571,
-            -22.8974228
+            -43.191590794,
+            -22.897136984
           ],
           [
-            -43.1948231,
-            -22.8977872
+            -43.192733493,
+            -22.897320289
           ],
           [
-            -43.1957099,
-            -22.898002
+            -43.193519142,
+            -22.897404637
           ],
           [
-            -43.1967353,
-            -22.8984093
+            -43.194284089,
+            -22.89754506
           ],
           [
-            -43.1976655,
-            -22.8990021
+            -43.195388043,
+            -22.897716852
           ],
           [
-            -43.1984079,
-            -22.8996835
+            -43.196289508,
+            -22.897735283
           ],
           [
-            -43.1992902,
-            -22.9004161
+            -43.197027746,
+            -22.897646037
           ],
           [
-            -43.2006884,
-            -22.9009758
+            -43.197767247,
+            -22.897698978
+          ],
+          [
+            -43.198237871,
+            -22.897920059
+          ],
+          [
+            -43.198694038,
+            -22.898560533
+          ],
+          [
+            -43.19920642,
+            -22.899283601
+          ],
+          [
+            -43.199716664,
+            -22.899769675
+          ],
+          [
+            -43.200273257,
+            -22.900304218
+          ],
+          [
+            -43.20092377,
+            -22.900794484
           ],
           [
             -43.2018991,
@@ -874,7 +936,7 @@
         "source_year": 1900,
         "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
         "surface_basis": "Display paving inferred from the use of the street.",
-        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+        "use_basis": "Centerline follows the unbroken paired street edges drawn between the Gamboa working shore and the Saúde hill-foot blocks."
       }
     },
     {
@@ -884,32 +946,28 @@
         "type": "LineString",
         "coordinates": [
           [
-            -43.1903349,
-            -22.897606
+            -43.192719311,
+            -22.897851233
           ],
           [
-            -43.1912188,
-            -22.8981503
+            -43.192285344,
+            -22.897833484
           ],
           [
-            -43.1924284,
-            -22.8988927
+            -43.191571159,
+            -22.897760245
           ],
           [
-            -43.1937351,
-            -22.8992143
+            -43.191012169,
+            -22.897744297
           ],
           [
-            -43.1949012,
-            -22.8995787
+            -43.19051466,
+            -22.897829996
           ],
           [
-            -43.1959327,
-            -22.8992799
-          ],
-          [
-            -43.1967353,
-            -22.8984093
+            -43.190473271,
+            -22.897058037
           ]
         ]
       },
@@ -917,12 +975,12 @@
         "kind": "road",
         "source": "reis-rio-1900",
         "display_rank": 1,
-        "width_m": 7,
+        "width_m": 6,
         "display_surface": "setts",
         "source_year": 1900,
         "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
         "surface_basis": "Display paving inferred from the use of the street.",
-        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+        "use_basis": "The terrace street follows the two small closed blocks and turns back to the waterfront street. The nearby rising curves are contours."
       }
     },
     {
@@ -932,36 +990,36 @@
         "type": "LineString",
         "coordinates": [
           [
-            -43.1957099,
-            -22.898002
+            -43.195388043,
+            -22.897716852
           ],
           [
-            -43.1963079,
-            -22.8991499
+            -43.196134776,
+            -22.899081827
           ],
           [
-            -43.1966714,
-            -22.9003849
+            -43.196630503,
+            -22.900368831
           ],
           [
-            -43.1963327,
-            -22.9016931
+            -43.196331342,
+            -22.901692565
           ],
           [
-            -43.1955748,
-            -22.9028004
+            -43.195574806,
+            -22.902800425
           ],
           [
-            -43.1942542,
-            -22.9040793
+            -43.19425422,
+            -22.904079271
           ],
           [
-            -43.1934057,
-            -22.9048543
+            -43.193405679,
+            -22.904854315
           ],
           [
-            -43.1929828,
-            -22.9050771
+            -43.192982835,
+            -22.905077091
           ]
         ]
       },
@@ -974,7 +1032,7 @@
         "source_year": 1900,
         "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
         "surface_basis": "Display paving inferred from the use of the street.",
-        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+        "use_basis": "Mapped inland crossing at the Gamboa shore and the lower hill streets."
       }
     },
     {
@@ -1676,20 +1734,28 @@
         "type": "LineString",
         "coordinates": [
           [
-            -43.1771389,
-            -22.9254612
+            -43.177138949,
+            -22.925461163
           ],
           [
-            -43.1762961,
-            -22.9255772
+            -43.176901907,
+            -22.92583074
           ],
           [
-            -43.1749882,
-            -22.9253969
+            -43.176200563,
+            -22.92580978
           ],
           [
-            -43.17372560825503,
-            -22.925131767324057
+            -43.175172332,
+            -22.925731968
+          ],
+          [
+            -43.174097344,
+            -22.925652759
+          ],
+          [
+            -43.173816806,
+            -22.925644375
           ]
         ]
       },
@@ -1702,7 +1768,7 @@
         "source_year": 1900,
         "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
         "surface_basis": "Display paving inferred from the use of the street.",
-        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+        "use_basis": "Reis shows a continuous connecting street on the north side of the presidential garden from Catete to the old shore."
       }
     },
     {
@@ -1712,20 +1778,24 @@
         "type": "LineString",
         "coordinates": [
           [
-            -43.177178,
-            -22.9263569
+            -43.177177963,
+            -22.926356898
           ],
           [
-            -43.1762863,
-            -22.9267069
+            -43.177127131,
+            -22.926826204
           ],
           [
-            -43.1752077,
-            -22.9270513
+            -43.176142804,
+            -22.927079283
           ],
           [
-            -43.174271693366826,
-            -22.927381258489344
+            -43.175298745,
+            -22.927336553
+          ],
+          [
+            -43.174361582,
+            -22.927543958
           ]
         ]
       },
@@ -1738,7 +1808,7 @@
         "source_year": 1900,
         "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
         "surface_basis": "Display paving inferred from the use of the street.",
-        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+        "use_basis": "Reis shows a continuous connecting street on the south side of the presidential garden from Catete to the old shore."
       }
     },
     {
@@ -1748,20 +1818,20 @@
         "type": "LineString",
         "coordinates": [
           [
-            -43.1774007,
-            -22.9276348
+            -43.177400742,
+            -22.927634785
           ],
           [
-            -43.1766047,
-            -22.9277522
+            -43.17660344,
+            -22.927893453
           ],
           [
-            -43.1754321,
-            -22.9281409
+            -43.175572356,
+            -22.928145133
           ],
           [
-            -43.174545101056616,
-            -22.92830215441465
+            -43.174540865,
+            -22.928443885
           ]
         ]
       },
@@ -1774,7 +1844,7 @@
         "source_year": 1900,
         "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
         "surface_basis": "Display paving inferred from the use of the street.",
-        "use_basis": "Centerline read from solid street lines on the 1900 plan."
+        "use_basis": "The next drawn transverse street connects Catete to the old shore."
       }
     },
     {
@@ -2085,52 +2155,52 @@
               -22.9038066
             ],
             [
-              -43.1929052,
-              -22.9032386
+              -43.192905162,
+              -22.903238583
             ],
             [
-              -43.1915635,
-              -22.9015506
+              -43.191447362,
+              -22.901504947
             ],
             [
-              -43.1898393,
-              -22.9008399
+              -43.189695275,
+              -22.900783283
             ],
             [
-              -43.1884911,
-              -22.899905
+              -43.188339096,
+              -22.899845248
             ],
             [
-              -43.1882659,
-              -22.8989096
+              -43.188028805,
+              -22.898816399
             ],
             [
-              -43.1894848,
-              -22.8985693
+              -43.189075841,
+              -22.898408538
             ],
             [
-              -43.1910712,
-              -22.8989934
+              -43.190610608,
+              -22.898812344
             ],
             [
-              -43.19233,
-              -22.8994548
+              -43.191913044,
+              -22.899290893
             ],
             [
-              -43.1934497,
-              -22.8997707
+              -43.193108168,
+              -22.899636445
             ],
             [
-              -43.1946068,
-              -22.9011707
+              -43.194508638,
+              -22.90113211
             ],
             [
-              -43.1959615,
-              -22.9013524
+              -43.195940552,
+              -22.901344165
             ],
             [
-              -43.1969027,
-              -22.9006743
+              -43.196887466,
+              -22.90066831
             ],
             [
               -43.1979769,
@@ -2345,36 +2415,36 @@
         "coordinates": [
           [
             [
-              -43.1977245,
-              -22.8975914
+              -43.197603557,
+              -22.897543857
             ],
             [
-              -43.1979489,
-              -22.898681
+              -43.197907379,
+              -22.898664679
             ],
             [
-              -43.1977102,
-              -22.8992389
+              -43.197676111,
+              -22.8992255
             ],
             [
-              -43.1971935,
-              -22.8995059
+              -43.197135339,
+              -22.899483038
             ],
             [
-              -43.1965429,
-              -22.8990157
+              -43.19638342,
+              -22.898953008
             ],
             [
-              -43.1964125,
-              -22.8978818
+              -43.196132936,
+              -22.897771905
             ],
             [
-              -43.1971622,
-              -22.8977159
+              -43.196974462,
+              -22.897642099
             ],
             [
-              -43.1977245,
-              -22.8975914
+              -43.197603557,
+              -22.897543857
             ]
           ]
         ]
@@ -2393,44 +2463,44 @@
         "coordinates": [
           [
             [
-              -43.1903464,
-              -22.896288
+              -43.189724801,
+              -22.896043653
             ],
             [
-              -43.190244760262296,
-              -22.89608991298945
+              -43.189623162,
+              -22.895845566
             ],
             [
-              -43.1906334,
-              -22.8955433
+              -43.190011802,
+              -22.895298951
             ],
             [
-              -43.19015356529669,
-              -22.895286264101692
+              -43.189531966,
+              -22.895041915
             ],
             [
-              -43.190263,
-              -22.8951085
+              -43.1896414,
+              -22.894864153
             ],
             [
-              -43.190968,
-              -22.8947058
+              -43.190346403,
+              -22.894461451
             ],
             [
-              -43.1912006,
-              -22.894854
+              -43.190579004,
+              -22.89460965
             ],
             [
-              -43.1910542,
-              -22.8955559
+              -43.190432603,
+              -22.895311551
             ],
             [
-              -43.1908631,
-              -22.896021
+              -43.190241503,
+              -22.895776651
             ],
             [
-              -43.1903464,
-              -22.896288
+              -43.189724801,
+              -22.896043653
             ]
           ]
         ]
@@ -2453,24 +2523,24 @@
               -22.8970063
             ],
             [
-              -43.18461469964959,
-              -22.896615046273528
+              -43.184613951,
+              -22.896614753
             ],
             [
-              -43.18484031003166,
-              -22.896462439100866
+              -43.184832003,
+              -22.896459174
             ],
             [
-              -43.1862281,
-              -22.8965887
+              -43.186085491,
+              -22.89653264
             ],
             [
-              -43.1866424,
-              -22.8973544
+              -43.186483878,
+              -22.897292083
             ],
             [
-              -43.1862651,
-              -22.8977198
+              -43.186175585,
+              -22.897684613
             ],
             [
               -43.18449,
@@ -2593,8 +2663,8 @@
               -22.9033859
             ],
             [
-              -43.1912216,
-              -22.9032353
+              -43.191221597,
+              -22.903235299
             ],
             [
               -43.1929418,
@@ -2833,96 +2903,96 @@
               -22.8956885
             ],
             [
-              -43.1989593,
-              -22.8954154
+              -43.198911068,
+              -22.895396438
             ],
             [
-              -43.1979294,
-              -22.8955259
+              -43.197747014,
+              -22.895454205
             ],
             [
-              -43.1972216,
-              -22.8962581
+              -43.196952463,
+              -22.896152304
             ],
             [
-              -43.1969394,
-              -22.896438
+              -43.196633852,
+              -22.896317892
             ],
             [
-              -43.1953977,
-              -22.8962507
+              -43.194860779,
+              -22.896039636
             ],
             [
-              -43.194563,
-              -22.8954253
+              -43.193943281,
+              -22.895181692
             ],
             [
-              -43.1938251,
-              -22.8942262
+              -43.193203502,
+              -22.893981851
             ],
             [
-              -43.1931774,
-              -22.8934064
+              -43.1925558,
+              -22.893162053
             ],
             [
-              -43.1923883,
-              -22.8927237
+              -43.191766703,
+              -22.892479352
             ],
             [
-              -43.191408,
-              -22.8925061
+              -43.190786404,
+              -22.892261753
             ],
             [
-              -43.1906107,
-              -22.8927647
+              -43.189989102,
+              -22.89252035
             ],
             [
-              -43.1899968,
-              -22.8934526
+              -43.1893752,
+              -22.893208251
             ],
             [
-              -43.1894288,
-              -22.8942361
+              -43.188807244,
+              -22.893991767
             ],
             [
-              -43.1899817,
-              -22.8951942
+              -43.189360104,
+              -22.89494985
             ],
             [
-              -43.1906334,
-              -22.8955433
+              -43.190011802,
+              -22.895298951
             ],
             [
-              -43.1902073,
-              -22.8961426
+              -43.189585707,
+              -22.895898255
             ],
             [
-              -43.1895043,
-              -22.8963099
+              -43.188907415,
+              -22.896075266
             ],
             [
-              -43.188757,
-              -22.8961934
+              -43.188217353,
+              -22.895981267
             ],
             [
-              -43.1881939,
-              -22.896412
+              -43.187737517,
+              -22.896232596
             ],
             [
-              -43.187817,
-              -22.8967303
+              -43.187437461,
+              -22.896581103
             ],
             [
-              -43.1870197,
-              -22.896989
+              -43.186781895,
+              -22.896895519
             ],
             [
-              -43.1865558,
-              -22.8965514
+              -43.186363004,
+              -22.896475615
             ],
             [
-              -43.1849202,
-              -22.8964084
+              -43.184907392,
+              -22.896403364
             ],
             [
               -43.1841204,
@@ -2961,8 +3031,8 @@
               -22.8907717
             ],
             [
-              -43.1949884,
-              -22.8895056
+              -43.194604516,
+              -22.889354694
             ],
             [
               -43.2032829,
@@ -2999,171 +3069,247 @@
           [
             [
               -43.177205,
-              -22.8962249
+              -22.896224898
             ],
             [
               -43.1766288,
               -22.8979497
             ],
             [
-              -43.1757364,
-              -22.8983939
+              -43.175736402,
+              -22.898393898
             ],
             [
-              -43.1746,
-              -22.9000078
+              -43.174600002,
+              -22.900007802
             ],
             [
-              -43.1736071,
-              -22.9012493
+              -43.173607099,
+              -22.901249301
             ],
             [
-              -43.1726622,
-              -22.9023511
+              -43.172662202,
+              -22.902351101
             ],
             [
-              -43.1723255,
-              -22.9034239
+              -43.172325498,
+              -22.903423899
             ],
             [
-              -43.1716148,
-              -22.9044856
+              -43.171614799,
+              -22.904485601
             ],
             [
-              -43.1702056,
-              -22.9051968
+              -43.170205599,
+              -22.905196798
             ],
             [
-              -43.1685183,
-              -22.9056172
+              -43.168518302,
+              -22.905617198
             ],
             [
-              -43.1692151,
-              -22.9061559
+              -43.169215099,
+              -22.906155902
             ],
             [
-              -43.1704719,
-              -22.9068526
+              -43.170471898,
+              -22.906852599
             ],
             [
-              -43.1716326,
+              -43.171632599,
               -22.907829
             ],
             [
-              -43.172745,
-              -22.9089922
+              -43.172744999,
+              -22.908992198
             ],
             [
-              -43.1743229,
-              -22.9104047
+              -43.174322901,
+              -22.910404702
             ],
             [
-              -43.1750165,
-              -22.91132
+              -43.175016499,
+              -22.911319999
             ],
             [
               -43.1760362,
-              -22.9123863
+              -22.912386299
             ],
             [
-              -43.1765887,
-              -22.9133916
+              -43.176588699,
+              -22.913391601
             ],
             [
-              -43.1768106,
-              -22.9147636
+              -43.176810598,
+              -22.914763599
             ],
             [
-              -43.1769411,
-              -22.9158975
+              -43.176941101,
+              -22.915897499
             ],
             [
-              -43.1769289,
-              -22.9173096
+              -43.176928899,
+              -22.917309602
             ],
             [
-              -43.1769126,
-              -22.9191924
+              -43.176912599,
+              -22.919192399
             ],
             [
-              -43.1764861,
-              -22.9198388
+              -43.176863,
+              -22.919520513
             ],
             [
-              -43.1755937,
-              -22.920283
+              -43.176532446,
+              -22.919887295
             ],
             [
-              -43.1748919,
-              -22.9203091
+              -43.176108786,
+              -22.920204212
             ],
             [
-              -43.1745581,
-              -22.9210524
+              -43.175731883,
+              -22.920522526
             ],
             [
-              -43.172822,
-              -22.9217068
+              -43.175169585,
+              -22.920646969
             ],
             [
-              -43.1734245,
-              -22.9223369
+              -43.174514997,
+              -22.920627406
             ],
             [
-              -43.1735095,
-              -22.9233281
+              -43.174464981,
+              -22.921002572
             ],
             [
-              -43.17364,
-              -22.924462
+              -43.174321859,
+              -22.921327872
             ],
             [
-              -43.1738152,
-              -22.9258327
+              -43.174038876,
+              -22.921601911
             ],
             [
-              -43.1741786,
-              -22.9270677
+              -43.173616847,
+              -22.921730546
             ],
             [
-              -43.1745876,
-              -22.9284453
+              -43.173055364,
+              -22.921760848
             ],
             [
-              -43.1748088,
-              -22.9299115
+              -43.172539415,
+              -22.921933759
             ],
             [
-              -43.1716236,
-              -22.9304754
+              -43.172770344,
+              -22.922270238
             ],
             [
-              -43.169057,
-              -22.9244192
+              -43.173095193,
+              -22.922562442
             ],
             [
-              -43.167741,
-              -22.9197658
+              -43.173326122,
+              -22.922898921
             ],
             [
-              -43.1659961,
-              -22.9160412
+              -43.173415152,
+              -22.92341949
             ],
             [
-              -43.1665468,
-              -22.9064528
+              -43.173409039,
+              -22.924125546
             ],
             [
-              -43.1691824,
-              -22.8991396
+              -43.173358616,
+              -22.924547782
             ],
             [
-              -43.1728123,
-              -22.8958111
+              -43.173585877,
+              -22.925307895
+            ],
+            [
+              -43.17385908,
+              -22.926163546
+            ],
+            [
+              -43.1740404,
+              -22.926828121
+            ],
+            [
+              -43.174221313,
+              -22.927539766
+            ],
+            [
+              -43.174400596,
+              -22.928439693
+            ],
+            [
+              -43.17453516,
+              -22.92910287
+            ],
+            [
+              -43.174763236,
+              -22.929768842
+            ],
+            [
+              -43.17480714,
+              -22.930099732
+            ],
+            [
+              -43.174846969,
+              -22.930901326
+            ],
+            [
+              -43.174934369,
+              -22.931610177
+            ],
+            [
+              -43.175066895,
+              -22.932508706
+            ],
+            [
+              -43.17506119,
+              -22.933167691
+            ],
+            [
+              -43.175007914,
+              -22.93391942
+            ],
+            [
+              -43.171267409,
+              -22.933807633
+            ],
+            [
+              -43.169057035,
+              -22.924419227
+            ],
+            [
+              -43.167741037,
+              -22.919765806
+            ],
+            [
+              -43.165996083,
+              -22.916041218
+            ],
+            [
+              -43.166546776,
+              -22.906452832
+            ],
+            [
+              -43.16918235,
+              -22.899139635
+            ],
+            [
+              -43.172812333,
+              -22.895811092
             ],
             [
               -43.177205,
-              -22.8962249
+              -22.896224898
             ]
           ]
         ]
@@ -3171,8 +3317,9 @@
       "properties": {
         "kind": "water_surface",
         "source": "reis-rio-1900",
-        "use_basis": "Charted waterfront from the historic ferry bay around Calabouco and the old Rua da Lapa to the Glória and Catete coast. The outer mask boundary is offshore.",
-        "basin": "coast"
+        "use_basis": "Reis shows the outer beach of the pre-fill Praia do Russel and the shore of Praia do Flamengo. The Glória headland and beach meet this shoreline. The mask closes through offshore water.",
+        "basin": "coast",
+        "use_reference": "bn-gutierrez-gloria-1890s"
       }
     },
     {
@@ -3794,32 +3941,40 @@
         "coordinates": [
           [
             [
-              -43.1935725,
-              -22.8963844
+              -43.193858511,
+              -22.896221418
             ],
             [
-              -43.1947362,
-              -22.8970313
+              -43.192997292,
+              -22.896188559
             ],
             [
-              -43.1944971,
-              -22.8976362
+              -43.192950614,
+              -22.896612268
             ],
             [
-              -43.1934241,
-              -22.8973217
+              -43.19286553,
+              -22.897037862
             ],
             [
-              -43.1923499,
-              -22.8971483
+              -43.192733493,
+              -22.897320289
             ],
             [
-              -43.1926386,
-              -22.8962153
+              -43.193519142,
+              -22.897404637
             ],
             [
-              -43.1935725,
-              -22.8963844
+              -43.194284089,
+              -22.89754506
+            ],
+            [
+              -43.19448923,
+              -22.89683233
+            ],
+            [
+              -43.193858511,
+              -22.896221418
             ]
           ]
         ]
@@ -3827,7 +3982,7 @@
       "properties": {
         "kind": "zone",
         "source": "reis-rio-1900",
-        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred.",
         "role": "low_home",
         "gap_m": 1.5
       }
@@ -3840,32 +3995,40 @@
         "coordinates": [
           [
             [
-              -43.1935725,
-              -22.8963844
+              -43.193858511,
+              -22.896221418
             ],
             [
-              -43.1947362,
-              -22.8970313
+              -43.192997292,
+              -22.896188559
             ],
             [
-              -43.1944971,
-              -22.8976362
+              -43.192950614,
+              -22.896612268
             ],
             [
-              -43.1934241,
-              -22.8973217
+              -43.19286553,
+              -22.897037862
             ],
             [
-              -43.1923499,
-              -22.8971483
+              -43.192733493,
+              -22.897320289
             ],
             [
-              -43.1926386,
-              -22.8962153
+              -43.193519142,
+              -22.897404637
             ],
             [
-              -43.1935725,
-              -22.8963844
+              -43.194284089,
+              -22.89754506
+            ],
+            [
+              -43.19448923,
+              -22.89683233
+            ],
+            [
+              -43.193858511,
+              -22.896221418
             ]
           ]
         ]
@@ -3873,7 +4036,7 @@
       "properties": {
         "kind": "block_ground",
         "source": "reis-rio-1900",
-        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
       }
     },
     {
@@ -3884,32 +4047,44 @@
         "coordinates": [
           [
             [
-              -43.1922646,
-              -22.8962041
+              -43.192997292,
+              -22.896188559
             ],
             [
-              -43.1921158,
-              -22.8971884
+              -43.192484195,
+              -22.896031977
             ],
             [
-              -43.1912266,
-              -22.897256
+              -43.191736502,
+              -22.895962549
             ],
             [
-              -43.1901512,
-              -22.8972238
+              -43.191686078,
+              -22.896384786
             ],
             [
-              -43.1903907,
-              -22.8965718
+              -43.191635654,
+              -22.896807022
             ],
             [
-              -43.1909562,
-              -22.8960708
+              -43.191590794,
+              -22.897136984
             ],
             [
-              -43.1922646,
-              -22.8962041
+              -43.192733493,
+              -22.897320289
+            ],
+            [
+              -43.19286553,
+              -22.897037862
+            ],
+            [
+              -43.192950614,
+              -22.896612268
+            ],
+            [
+              -43.192997292,
+              -22.896188559
             ]
           ]
         ]
@@ -3917,7 +4092,7 @@
       "properties": {
         "kind": "zone",
         "source": "reis-rio-1900",
-        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred.",
         "role": "street_row",
         "gap_m": 1.5
       }
@@ -3930,32 +4105,44 @@
         "coordinates": [
           [
             [
-              -43.1922646,
-              -22.8962041
+              -43.192997292,
+              -22.896188559
             ],
             [
-              -43.1921158,
-              -22.8971884
+              -43.192484195,
+              -22.896031977
             ],
             [
-              -43.1912266,
-              -22.897256
+              -43.191736502,
+              -22.895962549
             ],
             [
-              -43.1901512,
-              -22.8972238
+              -43.191686078,
+              -22.896384786
             ],
             [
-              -43.1903907,
-              -22.8965718
+              -43.191635654,
+              -22.896807022
             ],
             [
-              -43.1909562,
-              -22.8960708
+              -43.191590794,
+              -22.897136984
             ],
             [
-              -43.1922646,
-              -22.8962041
+              -43.192733493,
+              -22.897320289
+            ],
+            [
+              -43.19286553,
+              -22.897037862
+            ],
+            [
+              -43.192950614,
+              -22.896612268
+            ],
+            [
+              -43.192997292,
+              -22.896188559
             ]
           ]
         ]
@@ -3963,7 +4150,7 @@
       "properties": {
         "kind": "block_ground",
         "source": "reis-rio-1900",
-        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
       }
     },
     {
@@ -3974,40 +4161,28 @@
         "coordinates": [
           [
             [
-              -43.1935611,
-              -22.8977024
+              -43.192733493,
+              -22.897320289
             ],
             [
-              -43.1942063,
-              -22.8988046
+              -43.191590794,
+              -22.897136984
             ],
             [
-              -43.193503,
-              -22.899019
+              -43.191571159,
+              -22.897760245
             ],
             [
-              -43.19285,
-              -22.8988111
+              -43.192285344,
+              -22.897833484
             ],
             [
-              -43.1918726,
-              -22.898264
+              -43.192719311,
+              -22.897851233
             ],
             [
-              -43.1906622,
-              -22.8976158
-            ],
-            [
-              -43.1912721,
-              -22.8973986
-            ],
-            [
-              -43.1924406,
-              -22.8974806
-            ],
-            [
-              -43.1935611,
-              -22.8977024
+              -43.192733493,
+              -22.897320289
             ]
           ]
         ]
@@ -4015,7 +4190,7 @@
       "properties": {
         "kind": "zone",
         "source": "reis-rio-1900",
-        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred.",
         "role": "low_home",
         "gap_m": 1.5
       }
@@ -4028,40 +4203,28 @@
         "coordinates": [
           [
             [
-              -43.1935611,
-              -22.8977024
+              -43.192733493,
+              -22.897320289
             ],
             [
-              -43.1942063,
-              -22.8988046
+              -43.191590794,
+              -22.897136984
             ],
             [
-              -43.193503,
-              -22.899019
+              -43.191571159,
+              -22.897760245
             ],
             [
-              -43.19285,
-              -22.8988111
+              -43.192285344,
+              -22.897833484
             ],
             [
-              -43.1918726,
-              -22.898264
+              -43.192719311,
+              -22.897851233
             ],
             [
-              -43.1906622,
-              -22.8976158
-            ],
-            [
-              -43.1912721,
-              -22.8973986
-            ],
-            [
-              -43.1924406,
-              -22.8974806
-            ],
-            [
-              -43.1935611,
-              -22.8977024
+              -43.192733493,
+              -22.897320289
             ]
           ]
         ]
@@ -4069,7 +4232,7 @@
       "properties": {
         "kind": "block_ground",
         "source": "reis-rio-1900",
-        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
       }
     },
     {
@@ -4160,104 +4323,6 @@
             [
               -43.1787776,
               -22.9198602
-            ]
-          ]
-        ]
-      },
-      "properties": {
-        "kind": "block_ground",
-        "source": "reis-rio-1900",
-        "use_basis": "Mapped street-block perimeter. The physical ground material is interpreted."
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "catete-paved-lower-front",
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -43.1769035,
-              -22.9256425
-            ],
-            [
-              -43.1768982,
-              -22.9262544
-            ],
-            [
-              -43.1754435,
-              -22.926823
-            ],
-            [
-              -43.1743657,
-              -22.9270733
-            ],
-            [
-              -43.174138,
-              -22.9263602
-            ],
-            [
-              -43.1739591,
-              -22.9254132
-            ],
-            [
-              -43.1755468,
-              -22.9256961
-            ],
-            [
-              -43.1769035,
-              -22.9256425
-            ]
-          ]
-        ]
-      },
-      "properties": {
-        "kind": "zone",
-        "source": "reis-rio-1900",
-        "use_basis": "Enclosed, drawn street block read from Reis. Buildings, plots, roofs and heights are inferred within the mapped perimeter.",
-        "role": "courtyard_home",
-        "gap_m": 1.5
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "catete-paved-lower-front-ground",
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -43.1769035,
-              -22.9256425
-            ],
-            [
-              -43.1768982,
-              -22.9262544
-            ],
-            [
-              -43.1754435,
-              -22.926823
-            ],
-            [
-              -43.1743657,
-              -22.9270733
-            ],
-            [
-              -43.174138,
-              -22.9263602
-            ],
-            [
-              -43.1739591,
-              -22.9254132
-            ],
-            [
-              -43.1755468,
-              -22.9256961
-            ],
-            [
-              -43.1769035,
-              -22.9256425
             ]
           ]
         ]
@@ -4582,6 +4647,933 @@
         "kind": "block_ground",
         "source": "reis-rio-1900",
         "use_basis": "Drawn enclosed block west of the ferry approach. Ground material is inferred."
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-upper-block-street",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 7,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "The upper street spans the drawn rows below the Saúde contour and stops before the harbour parcel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.194608723,
+            -22.896167127
+          ],
+          [
+            -43.193858511,
+            -22.896221418
+          ],
+          [
+            -43.192997292,
+            -22.896188559
+          ],
+          [
+            -43.192484195,
+            -22.896031977
+          ],
+          [
+            -43.191736502,
+            -22.895962549
+          ],
+          [
+            -43.190988808,
+            -22.895893122
+          ],
+          [
+            -43.190006926,
+            -22.895863778
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-west-block-lane",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Paired street edges link the upper ordinary block, waterfront corridor and lower terrace."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.192997292,
+            -22.896188559
+          ],
+          [
+            -43.192950614,
+            -22.896612268
+          ],
+          [
+            -43.19286553,
+            -22.897037862
+          ],
+          [
+            -43.192733493,
+            -22.897320289
+          ],
+          [
+            -43.192719311,
+            -22.897851233
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-east-block-lane",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 6,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Paired street edges link the upper ordinary block, waterfront corridor and lower terrace."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.191736502,
+            -22.895962549
+          ],
+          [
+            -43.191686078,
+            -22.896384786
+          ],
+          [
+            -43.191635654,
+            -22.896807022
+          ],
+          [
+            -43.191590794,
+            -22.897136984
+          ],
+          [
+            -43.191571159,
+            -22.897760245
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-upper-east-row",
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "role": "street_row",
+        "gap_m": 1.5,
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.191736502,
+              -22.895962549
+            ],
+            [
+              -43.190988808,
+              -22.895893122
+            ],
+            [
+              -43.190053275,
+              -22.895912245
+            ],
+            [
+              -43.189470105,
+              -22.896895617
+            ],
+            [
+              -43.190473271,
+              -22.897058037
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.191635654,
+              -22.896807022
+            ],
+            [
+              -43.191686078,
+              -22.896384786
+            ],
+            [
+              -43.191736502,
+              -22.895962549
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-upper-east-row-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.191736502,
+              -22.895962549
+            ],
+            [
+              -43.190988808,
+              -22.895893122
+            ],
+            [
+              -43.190053275,
+              -22.895912245
+            ],
+            [
+              -43.189470105,
+              -22.896895617
+            ],
+            [
+              -43.190473271,
+              -22.897058037
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.191635654,
+              -22.896807022
+            ],
+            [
+              -43.191686078,
+              -22.896384786
+            ],
+            [
+              -43.191736502,
+              -22.895962549
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-lower-east-row",
+      "properties": {
+        "kind": "zone",
+        "source": "reis-rio-1900",
+        "role": "street_row",
+        "gap_m": 1.5,
+        "use_basis": "Bounded ordinary block on the 1900 cadastral plan. Individual lots, façades, paving and heights are inferred."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.190473271,
+              -22.897058037
+            ],
+            [
+              -43.19051466,
+              -22.897829996
+            ],
+            [
+              -43.191012169,
+              -22.897744297
+            ],
+            [
+              -43.191571159,
+              -22.897760245
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-lower-east-row-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "reis-rio-1900",
+        "use_basis": "Street-block perimeter traced on the 1900 plan. Ground material is interpreted."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.191590794,
+              -22.897136984
+            ],
+            [
+              -43.190473271,
+              -22.897058037
+            ],
+            [
+              -43.19051466,
+              -22.897829996
+            ],
+            [
+              -43.191012169,
+              -22.897744297
+            ],
+            [
+              -43.191571159,
+              -22.897760245
+            ],
+            [
+              -43.191590794,
+              -22.897136984
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "saude-cape-contour-margin",
+      "properties": {
+        "kind": "steep",
+        "source": "reis-rio-1900",
+        "use_basis": "Contoured area above the drawn ordinary blocks and below the summit. No individual contour elevation is assigned."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.194443974,
+              -22.895822698
+            ],
+            [
+              -43.193709639,
+              -22.894938619
+            ],
+            [
+              -43.192822084,
+              -22.894817929
+            ],
+            [
+              -43.192078873,
+              -22.894230727
+            ],
+            [
+              -43.191610088,
+              -22.894357964
+            ],
+            [
+              -43.191558034,
+              -22.894968482
+            ],
+            [
+              -43.190997366,
+              -22.894904644
+            ],
+            [
+              -43.190478564,
+              -22.895407047
+            ],
+            [
+              -43.190662737,
+              -22.895742129
+            ],
+            [
+              -43.191784888,
+              -22.895775665
+            ],
+            [
+              -43.192532581,
+              -22.895845093
+            ],
+            [
+              -43.193139191,
+              -22.89600447
+            ],
+            [
+              -43.19404942,
+              -22.895992382
+            ],
+            [
+              -43.194443974,
+              -22.895822698
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "praia-do-flamengo-old-front",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 2,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Solid road along the landward edge of the old beach shown by Reis. The last mapped segment in this extraction ends on the same shore road."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.173546048,
+            -22.924506301
+          ],
+          [
+            -43.173726146,
+            -22.925312087
+          ],
+          [
+            -43.173816806,
+            -22.925644375
+          ],
+          [
+            -43.173999349,
+            -22.926167738
+          ],
+          [
+            -43.174180669,
+            -22.926832313
+          ],
+          [
+            -43.174361582,
+            -22.927543958
+          ],
+          [
+            -43.174540865,
+            -22.928443885
+          ],
+          [
+            -43.174675428,
+            -22.929107062
+          ],
+          [
+            -43.174903505,
+            -22.929773034
+          ],
+          [
+            -43.174947409,
+            -22.930103924
+          ],
+          [
+            -43.174987238,
+            -22.930905518
+          ],
+          [
+            -43.175074638,
+            -22.931614369
+          ],
+          [
+            -43.175207164,
+            -22.932512898
+          ],
+          [
+            -43.175201459,
+            -22.933171883
+          ],
+          [
+            -43.175148183,
+            -22.933923612
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "catete-shore-to-machado",
+      "properties": {
+        "kind": "road",
+        "source": "reis-rio-1900",
+        "display_rank": 1,
+        "width_m": 8,
+        "display_surface": "setts",
+        "source_year": 1900,
+        "width_basis": "Display width estimated from the street hierarchy on the printed plan.",
+        "surface_basis": "Display paving inferred from the use of the street.",
+        "use_basis": "Mapped lower cross street links Rua do Catete to the pre-fill Praia do Flamengo-front street."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -43.178083341,
+            -22.929820983
+          ],
+          [
+            -43.176959968,
+            -22.929928658
+          ],
+          [
+            -43.175930514,
+            -22.929992057
+          ],
+          [
+            -43.174947409,
+            -22.930103924
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "catete-presidential-garden",
+      "properties": {
+        "kind": "park",
+        "source": "reis-rio-1900",
+        "use_basis": "Mapped parcel east of the presidential palace. The museum documents the garden renovation for the presidential seat in 1897.",
+        "use_reference": "museu-republica-catete-gardens"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.176012315,
+              -22.925945401
+            ],
+            [
+              -43.174984084,
+              -22.92586759
+            ],
+            [
+              -43.174003016,
+              -22.925744105
+            ],
+            [
+              -43.174184744,
+              -22.926361609
+            ],
+            [
+              -43.174364434,
+              -22.927214465
+            ],
+            [
+              -43.175066186,
+              -22.927188355
+            ],
+            [
+              -43.176144842,
+              -22.926843931
+            ],
+            [
+              -43.176379846,
+              -22.926709706
+            ],
+            [
+              -43.17628837,
+              -22.92647156
+            ],
+            [
+              -43.176054996,
+              -22.926417503
+            ],
+            [
+              -43.176012315,
+              -22.925945401
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gloria-flamengo-offshore-no-roads",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17668789778433,
+              -22.919580371
+            ],
+            [
+              -43.168067264,
+              -22.919580371
+            ],
+            [
+              -43.168067264,
+              -22.920588632673137
+            ],
+            [
+              -43.16914363845769,
+              -22.924394735345988
+            ],
+            [
+              -43.16914463976226,
+              -22.924398601636252
+            ],
+            [
+              -43.17131363987514,
+              -22.933611275
+            ],
+            [
+              -43.17493952689188,
+              -22.933611275
+            ],
+            [
+              -43.17497121757046,
+              -22.9331641167653
+            ],
+            [
+              -43.17497683783259,
+              -22.932514919843133
+            ],
+            [
+              -43.17484533223991,
+              -22.931623309225746
+            ],
+            [
+              -43.174845045406684,
+              -22.931621190431674
+            ],
+            [
+              -43.174757645406686,
+              -22.930912339431675
+            ],
+            [
+              -43.174757079891734,
+              -22.93090579234243
+            ],
+            [
+              -43.17471743471314,
+              -22.93010789791142
+            ],
+            [
+              -43.17467519394144,
+              -22.929789543115813
+            ],
+            [
+              -43.17445001477934,
+              -22.929132029756488
+            ],
+            [
+              -43.174446957411504,
+              -22.929120767021637
+            ],
+            [
+              -43.174312393411505,
+              -22.928457590021637
+            ],
+            [
+              -43.174312330515605,
+              -22.928457277204984
+            ],
+            [
+              -43.1741335074445,
+              -22.927559658859074
+            ],
+            [
+              -43.1739533674486,
+              -22.92685105457199
+            ],
+            [
+              -43.17377275959069,
+              -22.926189089718893
+            ],
+            [
+              -43.17350014123839,
+              -22.92533526979098
+            ],
+            [
+              -43.173499648540016,
+              -22.92533367585896
+            ],
+            [
+              -43.17327238754002,
+              -22.92457356285896
+            ],
+            [
+              -43.173270204808574,
+              -22.924564618306906
+            ],
+            [
+              -43.17326894733112,
+              -22.924555497557023
+            ],
+            [
+              -43.173268628267586,
+              -22.92454629606114
+            ],
+            [
+              -43.17326925095709,
+              -22.92453711011613
+            ],
+            [
+              -43.17331908534907,
+              -22.924119803047255
+            ],
+            [
+              -43.1733250858247,
+              -22.92342674369491
+            ],
+            [
+              -43.173240739843756,
+              -22.922933562711485
+            ],
+            [
+              -43.17302704554656,
+              -22.92262219582631
+            ],
+            [
+              -43.172710155396075,
+              -22.922337150868398
+            ],
+            [
+              -43.172702673550965,
+              -22.922329573573872
+            ],
+            [
+              -43.17269613903699,
+              -22.922321165629672
+            ],
+            [
+              -43.17246521003699,
+              -22.921984686629674
+            ],
+            [
+              -43.17246061310317,
+              -22.921977236132566
+            ],
+            [
+              -43.17245676178811,
+              -22.92196937425747
+            ],
+            [
+              -43.17245369253272,
+              -22.921961175392973
+            ],
+            [
+              -43.17245143437811,
+              -22.92195271711623
+            ],
+            [
+              -43.17245000869079,
+              -22.921944079458946
+            ],
+            [
+              -43.17244942896053,
+              -22.921935344150103
+            ],
+            [
+              -43.172449700672715,
+              -22.92192659384267
+            ],
+            [
+              -43.17245082125641,
+              -22.92191791133152
+            ],
+            [
+              -43.17245278010872,
+              -22.921909378770046
+            ],
+            [
+              -43.17245555869511,
+              -22.921901076892823
+            ],
+            [
+              -43.172459130724754,
+              -22.921893084251714
+            ],
+            [
+              -43.172463462399335,
+              -22.921885476472603
+            ],
+            [
+              -43.172468512732806,
+              -22.92187832553983
+            ],
+            [
+              -43.17247423393923,
+              -22.921871699115087
+            ],
+            [
+              -43.172480571884876,
+              -22.921865659897204
+            ],
+            [
+              -43.1724874666005,
+              -22.921860265028894
+            ],
+            [
+              -43.17249485284873,
+              -22.92185556555607
+            ],
+            [
+              -43.17250266074132,
+              -22.92185160594486
+            ],
+            [
+              -43.17251081640048,
+              -22.921848423660865
+            ],
+            [
+              -43.17302676540048,
+              -22.921675512660865
+            ],
+            [
+              -43.17303453499688,
+              -22.921673291431837
+            ],
+            [
+              -43.17304247251229,
+              -22.921671776065338
+            ],
+            [
+              -43.173050513956156,
+              -22.921670978777936
+            ],
+            [
+              -43.173601072118075,
+              -22.921641266367367
+            ],
+            [
+              -43.173991865031,
+              -22.921522152168215
+            ],
+            [
+              -43.17424658134029,
+              -22.921275486457976
+            ],
+            [
+              -43.17437745812601,
+              -22.92097801843492
+            ],
+            [
+              -43.17442578629789,
+              -22.920615512698163
+            ],
+            [
+              -43.174427375471566,
+              -22.9206068519796
+            ],
+            [
+              -43.17442980336197,
+              -22.92059838800493
+            ],
+            [
+              -43.17443304672922,
+              -22.92059020179165
+            ],
+            [
+              -43.174437074527695,
+              -22.92058237169852
+            ],
+            [
+              -43.174441848203145,
+              -22.920574972675496
+            ],
+            [
+              -43.17444732206176,
+              -22.92056807554632
+            ],
+            [
+              -43.17445344370755,
+              -22.920561746330584
+            ],
+            [
+              -43.17446015454388,
+              -22.920556045611786
+            ],
+            [
+              -43.17446739033436,
+              -22.920551027957437
+            ],
+            [
+              -43.17447508181771,
+              -22.92054674139672
+            ],
+            [
+              -43.174483155370766,
+              -22.92054322696076
+            ],
+            [
+              -43.174491533713145,
+              -22.920540518289883
+            ],
+            [
+              -43.17450013664703,
+              -22.920538641311584
+            ],
+            [
+              -43.174508881824806,
+              -22.920537613992384
+            ],
+            [
+              -43.174517685537275,
+              -22.920537446165813
+            ],
+            [
+              -43.17516107570033,
+              -22.920556674507548
+            ],
+            [
+              -43.17569076729454,
+              -22.92043944767932
+            ],
+            [
+              -43.17605071542893,
+              -22.92013545293678
+            ],
+            [
+              -43.17605487618545,
+              -22.920132144449088
+            ],
+            [
+              -43.176471485270525,
+              -22.919820501854986
+            ],
+            [
+              -43.17668789778433,
+              -22.919580371
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "kind": "road_coverage",
+        "source": "reis-rio-1900",
+        "categories": 3,
+        "coverage_state": "confirmed_empty",
+        "coverage_basis": "Open water on the 1900 sheet east of the Glória and Flamengo shore, with a coastal setback. No modern reclamation roads are present."
       }
     }
   ]
