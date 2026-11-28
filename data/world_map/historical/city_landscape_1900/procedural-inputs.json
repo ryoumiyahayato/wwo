@@ -9,6 +9,7 @@
   "reba:chandler:1081": {
     "place": "place:paris",
     "kit": "francophone_stone",
+    "pilot": true,
     "shard": "local/paris_northern_france_1900.json",
     "rail": [
       {
