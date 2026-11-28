@@ -739,7 +739,7 @@ fn building_extent(building_bounds: impl Iterator<Item = Bounds>) -> Option<Boun
     });
     let first = pages.next()?;
     let origin = first[0] + longitude_width(first[0], first[2]) * 0.5;
-    let unwrap = |[west, south, east, north]| {
+    let unwrap = |[west, south, east, north]: [f64; 4]| {
         let start = origin + relative_longitude(west, origin);
         [start, south, start + longitude_width(west, east), north]
     };
