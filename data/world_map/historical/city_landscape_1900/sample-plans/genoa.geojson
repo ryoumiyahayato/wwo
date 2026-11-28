@@ -1,0 +1,7351 @@
+{
+  "type": "FeatureCollection",
+  "wwo": {
+    "city_id": "reba:chandler:480",
+    "name": "Genoa",
+    "key": "genoa-meyers-1894",
+    "revision": 1,
+    "status": "candidate_sample",
+    "origin": [
+      8.9314,
+      44.4078
+    ],
+    "method": "The circa 1894 Meyers city panel supplies related street axes, port basins, blocks, open ground and hachured slopes. The 1899 Baedeker consultation and archival records constrain use for the 1900 opening date. Parcel dimensions and heights are inferred within mapped blocks. The northern approach follows the Darsena quay, Via Pre and Via Balbi toward Carmine and the hillside belt. The seaward approach follows the old harbour and Sarzano through Carignano toward the historic mouth of the Bisagno.",
+    "registration": {
+      "model": "Least-squares affine from the 1280 by 983 Meyers reproduction to WGS84. Period structures were matched to surviving metric point references. City-center point references within large features are approximate.",
+      "matrix": [
+        [
+          3.7750908511978446e-05,
+          1.5620851580084119e-06
+        ],
+        [
+          2.9343193887372554e-06,
+          -2.6944393970537717e-05
+        ],
+        [
+          8.901483436171066,
+          44.419444562877764
+        ]
+      ],
+      "controls": [
+        {
+          "name": "Commenda di Pre church",
+          "pixel": [
+            532,
+            166
+          ],
+          "wgs84": [
+            8.922207,
+            44.415753
+          ],
+          "url": "https://www.wikimedia.it/wlm2015-liste-monumenti-ed-elenco-enti/Liguria/",
+          "residual_m": 13.4,
+          "leave_one_out_m": 22.3
+        },
+        {
+          "name": "Palazzo Reale main block",
+          "pixel": [
+            632,
+            211
+          ],
+          "wgs84": [
+            8.926161,
+            44.414911
+          ],
+          "url": "https://www.wikidata.org/wiki/Q1514006",
+          "residual_m": 24.2,
+          "leave_one_out_m": 32.1
+        },
+        {
+          "name": "Albergo dei Poveri central court group",
+          "pixel": [
+            730,
+            98
+          ],
+          "wgs84": [
+            8.92917,
+            44.418
+          ],
+          "url": "https://aroundus.com/p/8131254-albergo-dei-poveri",
+          "residual_m": 14.1,
+          "leave_one_out_m": 21.9
+        },
+        {
+          "name": "Palazzo San Giorgio main block",
+          "pixel": [
+            696,
+            419
+          ],
+          "wgs84": [
+            8.928694,
+            44.409167
+          ],
+          "url": "https://en.wikipedia.org/wiki/Palazzo_San_Giorgio",
+          "residual_m": 24.8,
+          "leave_one_out_m": 29.5
+        },
+        {
+          "name": "San Lorenzo cathedral",
+          "pixel": [
+            754,
+            477
+          ],
+          "wgs84": [
+            8.93135,
+            44.40766
+          ],
+          "url": "https://es.wikivoyage.org/wiki/G%C3%A9nova",
+          "residual_m": 12.2,
+          "leave_one_out_m": 14.6
+        },
+        {
+          "name": "San Donato church",
+          "pixel": [
+            760,
+            546
+          ],
+          "wgs84": [
+            8.931569,
+            44.405719
+          ],
+          "url": "https://www.wikidata.org/wiki/Q3585330",
+          "residual_m": 27.8,
+          "leave_one_out_m": 36.1
+        },
+        {
+          "name": "Santa Maria Assunta precinct",
+          "pixel": [
+            838,
+            688
+          ],
+          "wgs84": [
+            8.935279,
+            44.402467
+          ],
+          "url": "https://www.visitgenoa.it/it/node/7868",
+          "residual_m": 30.1,
+          "leave_one_out_m": 54.2
+        },
+        {
+          "name": "Acquasola park center",
+          "pixel": [
+            986,
+            462
+          ],
+          "wgs84": [
+            8.94028,
+            44.40853
+          ],
+          "url": "https://commons.wikimedia.org/wiki/Category:Acquasola",
+          "residual_m": 17.4,
+          "leave_one_out_m": 23.0
+        },
+        {
+          "name": "Piazza Manin road junction",
+          "pixel": [
+            1183,
+            277
+          ],
+          "wgs84": [
+            8.9469,
+            44.4138
+          ],
+          "url": "https://www.blia.it/in/94138-29469",
+          "residual_m": 5.5,
+          "leave_one_out_m": 22.5
+        }
+      ],
+      "control_rmse_m": 20.4,
+      "limitation": "Control fit measures consistency at recognized places. Printed building blocks and projected controls do not establish individual facade locations. The western quay and lower river are extrapolations."
+    },
+    "road_validity": {
+      "start": 1900,
+      "end": 1901
+    },
+    "ground_validity": {
+      "start": 1900,
+      "end": 1901
+    },
+    "water_validity": {
+      "start": 1900,
+      "end": 1901
+    },
+    "sources": [
+      {
+        "id": "meyers-genoa-1894",
+        "url": "https://commons.wikimedia.org/wiki/File:1894_Genoa_map_from_Meyers_5th_ed.jpg",
+        "date": "circa 1894",
+        "licence": "Public domain",
+        "precision": "Meyers Konversationslexikon, fifth edition, volume 7, 1:13,300 city panel. Digitized from 1280 px faithful reproduction. Printed scale bar gives about 3 m per source pixel. Positional uncertainty also includes generalization and registration."
+      },
+      {
+        "id": "baedeker-genoa-1899-consultation",
+        "url": "https://www.antiquemapsandprints.com/products/genova-genoa-town-city-plan-piano-urbanistico-genes-italy-mappa-1899-old-p-6-057540",
+        "date": "1899",
+        "licence": "Period printed map. Modern seller reproduction consulted only. No image redistribution rights asserted.",
+        "precision": "Baedeker Northern Italy, eleventh edition, Wagner and Debes 1:10,000. Compared visible period features for persistence and changed approaches."
+      },
+      {
+        "id": "genova-circonvallazione-history",
+        "url": "https://www.visitgenoa.it/it/itinerario-3-villa-gruber-%25E2%2580%2593-castello-dalbertis",
+        "date": "1865–1900 historical dates",
+        "licence": "City history cited for facts",
+        "precision": "Documents the new belt road and expansion up from the former walls."
+      },
+      {
+        "id": "liguria-circonvallazione-archeology",
+        "url": "https://srvcarto.regione.liguria.it/dtuff/img/Vincoli_Archeologici/decreti/070572.pdf",
+        "date": "1891 street extension",
+        "licence": "Italian heritage report cited for facts",
+        "precision": "Identifies the period sea ring road extension, today Corso Aurelio Saffi."
+      },
+      {
+        "id": "brignole-heritage-history",
+        "url": "https://www.sigecweb.beniculturali.it/images/fullsize/ICCD1029647/ICCD11992332_Relazione%20storica%20stazione%20Brignole.pdf",
+        "date": "1897–1905 railway works",
+        "licence": "Italian heritage report cited for facts",
+        "precision": "Later Brignole station area and widening work. Excluded from period geometry."
+      },
+      {
+        "id": "porta-pila-archive-history",
+        "url": "https://catalogo.museidigenova.it/oggetti/170407-porta-pila?i=26",
+        "date": "1899–1900 gate relocation",
+        "licence": "Museum record cited for facts",
+        "precision": "Original gate demolished June 1899 and reassembled at a different site in 1900. Excluded from building geometry."
+      },
+      {
+        "id": "san-benigno-excavation-history",
+        "url": "https://smart.comune.genova.it/asita-geoportale/analisi-della-cartografia-storica-la-ricostruzione-tridimensionale-della-genova",
+        "date": "1832–1838 historical survey and later excavation",
+        "licence": "City research record cited for facts",
+        "precision": "Documents later excavation of approximately 70 m at San Benigno. Modern terrain alone cannot reconstruct period ridge heights."
+      }
+    ],
+    "limitations": [
+      "The sample does not finish Sampierdarena or Albaro. The source inset is 1:125,000 and supplies regional context only.",
+      "Landforms are preserved as mapped constraints. The current elevation input cannot recover the subsequently excavated San Benigno hill.",
+      "Shore and open river traces are generalized. The old quay structures and pre-1905 harbor footprint remain provisional at close range.",
+      "The 1899 works near Porta Pila and Brignole and later twentieth-century coastal additions remain outside inferred blocks.",
+      "No individual building is asserted from the small printed marks. The period streets and basin edges remain candidates for runtime inspection.",
+      "The upland belt reaches printed hachured open ground. Neither that belt nor the river sample closes a verified geometry seam beyond the traced patch.",
+      "The 1894 map does not supply dated elevation or sufficient surveyed position for close building placement. The 1899 reproduction was consulted only."
+    ]
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "darsena-and-core-sample",
+      "properties": {
+        "kind": "coverage",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Digitized old-port and old-city sample extent. Open coverage edges lead to untraced ground."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9209094,
+              44.4162156
+            ],
+            [
+              8.9251877,
+              44.4155806
+            ],
+            [
+              8.9272472,
+              44.4151245
+            ],
+            [
+              8.9295248,
+              44.4144068
+            ],
+            [
+              8.9315729,
+              44.4137066
+            ],
+            [
+              8.933903,
+              44.4128558
+            ],
+            [
+              8.9374166,
+              44.4105382
+            ],
+            [
+              8.938525,
+              44.4087165
+            ],
+            [
+              8.9380085,
+              44.4057991
+            ],
+            [
+              8.9355852,
+              44.4043726
+            ],
+            [
+              8.9337186,
+              44.403754
+            ],
+            [
+              8.9304842,
+              44.4031601
+            ],
+            [
+              8.9280313,
+              44.4047908
+            ],
+            [
+              8.9249899,
+              44.4055581
+            ],
+            [
+              8.9241373,
+              44.4071197
+            ],
+            [
+              8.9247368,
+              44.408579
+            ],
+            [
+              8.9258362,
+              44.4096259
+            ],
+            [
+              8.9253808,
+              44.4117182
+            ],
+            [
+              8.9232077,
+              44.4125215
+            ],
+            [
+              8.9217401,
+              44.4134622
+            ],
+            [
+              8.9209094,
+              44.4162156
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carmine-and-north-slope-sample",
+      "properties": {
+        "kind": "coverage",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Mapped hillside sample including the last continuous urban blocks and the open slope above them."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9266767,
+              44.4137476
+            ],
+            [
+              8.9266285,
+              44.4152343
+            ],
+            [
+              8.9268069,
+              44.4167303
+            ],
+            [
+              8.9277558,
+              44.4174191
+            ],
+            [
+              8.9279026,
+              44.4185078
+            ],
+            [
+              8.9299085,
+              44.4192404
+            ],
+            [
+              8.9323279,
+              44.4189616
+            ],
+            [
+              8.9341642,
+              44.4181173
+            ],
+            [
+              8.9344099,
+              44.4165577
+            ],
+            [
+              8.933125,
+              44.4151242
+            ],
+            [
+              8.9334466,
+              44.4132158
+            ],
+            [
+              8.9320942,
+              44.412402
+            ],
+            [
+              8.9294257,
+              44.4121833
+            ],
+            [
+              8.9266767,
+              44.4137476
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-and-bisagno-sample",
+      "properties": {
+        "kind": "coverage",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Sarzano to Carignano and the seaward Bisagno edge. Foce parcels and east shore are incomplete."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9299621,
+              44.4051684
+            ],
+            [
+              8.9329759,
+              44.4056991
+            ],
+            [
+              8.9353743,
+              44.4059607
+            ],
+            [
+              8.9384208,
+              44.4058432
+            ],
+            [
+              8.9423477,
+              44.405302
+            ],
+            [
+              8.9457201,
+              44.4046295
+            ],
+            [
+              8.9474955,
+              44.4036474
+            ],
+            [
+              8.9482719,
+              44.4027864
+            ],
+            [
+              8.948169,
+              44.4012935
+            ],
+            [
+              8.9463107,
+              44.39851
+            ],
+            [
+              8.9449624,
+              44.3966138
+            ],
+            [
+              8.9427586,
+              44.3963061
+            ],
+            [
+              8.9393657,
+              44.3971671
+            ],
+            [
+              8.9354421,
+              44.3973295
+            ],
+            [
+              8.9333147,
+              44.3987572
+            ],
+            [
+              8.9314827,
+              44.4009549
+            ],
+            [
+              8.9296624,
+              44.4030449
+            ],
+            [
+              8.9299621,
+              44.4051684
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lanterna-side-sample",
+      "properties": {
+        "kind": "coverage",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Western harbour and the foot of the San Benigno ridge. The separate Sampierdarena town lies beyond this sample."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9042456,
+              44.4087055
+            ],
+            [
+              8.9057926,
+              44.4094732
+            ],
+            [
+              8.9077432,
+              44.4103659
+            ],
+            [
+              8.9090996,
+              44.4100972
+            ],
+            [
+              8.9099736,
+              44.4076433
+            ],
+            [
+              8.910098,
+              44.4054561
+            ],
+            [
+              8.9090393,
+              44.4043838
+            ],
+            [
+              8.9065866,
+              44.4032268
+            ],
+            [
+              8.904197,
+              44.4028843
+            ],
+            [
+              8.9037982,
+              44.403761
+            ],
+            [
+              8.9040399,
+              44.4057197
+            ],
+            [
+              8.9042456,
+              44.4087055
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-quay-front",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 10,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Generalized landside quay traffic axis through the old port, then Corso Oddone and the seaward continuation. Historical widths are inferred."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9218422,
+            44.4156587
+          ],
+          [
+            8.9228212,
+            44.4153744
+          ],
+          [
+            8.9239981,
+            44.4146653
+          ],
+          [
+            8.925329,
+            44.4139355
+          ],
+          [
+            8.9264682,
+            44.4132248
+          ],
+          [
+            8.9271627,
+            44.4127663
+          ],
+          [
+            8.9275058,
+            44.4124016
+          ],
+          [
+            8.9280121,
+            44.4115835
+          ],
+          [
+            8.9283816,
+            44.4109763
+          ],
+          [
+            8.9286001,
+            44.4103628
+          ],
+          [
+            8.9286617,
+            44.409797
+          ],
+          [
+            8.9285723,
+            44.4092249
+          ],
+          [
+            8.9283059,
+            44.4085372
+          ],
+          [
+            8.9279522,
+            44.4079542
+          ],
+          [
+            8.9277555,
+            44.4073236
+          ],
+          [
+            8.9278461,
+            44.4068401
+          ],
+          [
+            8.9278641,
+            44.4063266
+          ],
+          [
+            8.9281463,
+            44.405824
+          ],
+          [
+            8.9287713,
+            44.4053086
+          ],
+          [
+            8.9292888,
+            44.4047345
+          ],
+          [
+            8.929879,
+            44.4041906
+          ],
+          [
+            8.9306,
+            44.4034896
+          ],
+          [
+            8.9314023,
+            44.4027379
+          ],
+          [
+            8.9318414,
+            44.4021877
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "via-pre-to-vacca",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 4.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9215599,
+            44.4161613
+          ],
+          [
+            8.9226085,
+            44.415934
+          ],
+          [
+            8.9234772,
+            44.4156181
+          ],
+          [
+            8.9243576,
+            44.4151944
+          ],
+          [
+            8.9251944,
+            44.4148231
+          ],
+          [
+            8.9258105,
+            44.4143884
+          ],
+          [
+            8.9264586,
+            44.4140093
+          ],
+          [
+            8.9270546,
+            44.4134114
+          ],
+          [
+            8.9274849,
+            44.412942
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "via-balbi-to-annunziata",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 10,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9211208,
+            44.4167115
+          ],
+          [
+            8.9221635,
+            44.4165381
+          ],
+          [
+            8.9228955,
+            44.4164331
+          ],
+          [
+            8.9240343,
+            44.4160742
+          ],
+          [
+            8.9250338,
+            44.4156013
+          ],
+          [
+            8.9261147,
+            44.4150777
+          ],
+          [
+            8.9271637,
+            44.4144986
+          ],
+          [
+            8.928172,
+            44.4139448
+          ],
+          [
+            8.9284627,
+            44.4137133
+          ],
+          [
+            8.9291191,
+            44.4136051
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "vacca-to-zecca",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9274849,
+            44.412942
+          ],
+          [
+            8.9280218,
+            44.4132349
+          ],
+          [
+            8.9284627,
+            44.4137133
+          ],
+          [
+            8.9291191,
+            44.4136051
+          ],
+          [
+            8.9297378,
+            44.4134954
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carmine-climb",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel.",
+        "use_reference": "genova-circonvallazione-history"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9297378,
+            44.4134954
+          ],
+          [
+            8.9297895,
+            44.4140659
+          ],
+          [
+            8.9297597,
+            44.4146872
+          ],
+          [
+            8.9298374,
+            44.415367
+          ],
+          [
+            8.9298454,
+            44.4159899
+          ],
+          [
+            8.9298589,
+            44.4169107
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carbonara-slope-belt",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 10,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "The nineteenth-century hillside belt road and its visible east curve between hachured ground and building frontage.",
+        "use_reference": "genova-circonvallazione-history"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9280666,
+            44.4173508
+          ],
+          [
+            8.9285313,
+            44.4172617
+          ],
+          [
+            8.9294231,
+            44.4170821
+          ],
+          [
+            8.9298589,
+            44.4169107
+          ],
+          [
+            8.9305677,
+            44.4166694
+          ],
+          [
+            8.9310438,
+            44.4168244
+          ],
+          [
+            8.9315979,
+            44.4173074
+          ],
+          [
+            8.9321928,
+            44.4177651
+          ],
+          [
+            8.9329008,
+            44.4182275
+          ],
+          [
+            8.9335191,
+            44.4184696
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carmine-builders-lanes",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 4,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9297597,
+            44.4146872
+          ],
+          [
+            8.9291469,
+            44.414743
+          ],
+          [
+            8.9285748,
+            44.4147735
+          ],
+          [
+            8.9278197,
+            44.4147422
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "slope-upper-masonry-frontage",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9315979,
+            44.4173074
+          ],
+          [
+            8.9322141,
+            44.4168728
+          ],
+          [
+            8.9325807,
+            44.4162925
+          ],
+          [
+            8.9326511,
+            44.4156459
+          ],
+          [
+            8.9328754,
+            44.4149785
+          ],
+          [
+            8.9331342,
+            44.4146915
+          ],
+          [
+            8.9335293,
+            44.4145454
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "zecca-to-portello",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 12,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9297378,
+            44.4134954
+          ],
+          [
+            8.9303565,
+            44.4133857
+          ],
+          [
+            8.9310217,
+            44.4131967
+          ],
+          [
+            8.9318875,
+            44.4129077
+          ],
+          [
+            8.9329566,
+            44.4124918
+          ],
+          [
+            8.933991,
+            44.4120474
+          ],
+          [
+            8.9348655,
+            44.4116776
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "via-garibaldi-mapped-old-axis",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 7,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9301378,
+            44.4115632
+          ],
+          [
+            8.9307855,
+            44.4115359
+          ],
+          [
+            8.9316802,
+            44.4113293
+          ],
+          [
+            8.9325459,
+            44.4110403
+          ],
+          [
+            8.9334058,
+            44.4108052
+          ],
+          [
+            8.9343294,
+            44.4106811
+          ],
+          [
+            8.9348692,
+            44.410947
+          ],
+          [
+            8.9351998,
+            44.4113937
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "fossatello-to-zecca",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9280121,
+            44.4115835
+          ],
+          [
+            8.9289617,
+            44.4115687
+          ],
+          [
+            8.9292721,
+            44.4118522
+          ],
+          [
+            8.9295272,
+            44.4122958
+          ],
+          [
+            8.9295876,
+            44.4127855
+          ],
+          [
+            8.9296598,
+            44.4131674
+          ],
+          [
+            8.9297378,
+            44.4134954
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-north-caruggio",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 3.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9288291,
+            44.4106971
+          ],
+          [
+            8.9293429,
+            44.4108537
+          ],
+          [
+            8.9299876,
+            44.4108533
+          ],
+          [
+            8.9306789,
+            44.4107736
+          ],
+          [
+            8.931376,
+            44.4106401
+          ],
+          [
+            8.9321633,
+            44.4103749
+          ],
+          [
+            8.9333076,
+            44.410314
+          ],
+          [
+            8.9343294,
+            44.4106811
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-central-caruggio",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 3.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.928894,
+            44.4097525
+          ],
+          [
+            8.9294951,
+            44.4098044
+          ],
+          [
+            8.9303168,
+            44.4099196
+          ],
+          [
+            8.9311939,
+            44.4098747
+          ],
+          [
+            8.9317342,
+            44.4097888
+          ],
+          [
+            8.9324866,
+            44.4094951
+          ],
+          [
+            8.9329807,
+            44.4091366
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-south-caruggio",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 3.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9289498,
+            44.4092405
+          ],
+          [
+            8.9294552,
+            44.4091261
+          ],
+          [
+            8.9303524,
+            44.4092444
+          ],
+          [
+            8.9311712,
+            44.4093866
+          ],
+          [
+            8.931758,
+            44.4092214
+          ],
+          [
+            8.9323595,
+            44.4089215
+          ],
+          [
+            8.9329807,
+            44.4091366
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sottoripa-inland",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 3.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9290024,
+            44.4115433
+          ],
+          [
+            8.929244,
+            44.4110661
+          ],
+          [
+            8.9293429,
+            44.4108537
+          ],
+          [
+            8.9293958,
+            44.4103687
+          ],
+          [
+            8.9294951,
+            44.4098044
+          ],
+          [
+            8.9294552,
+            44.4091261
+          ],
+          [
+            8.9290173,
+            44.4086208
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "san-siro-alley",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 2.7,
+        "display_rank": 0,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9301378,
+            44.4115632
+          ],
+          [
+            8.9301064,
+            44.4111559
+          ],
+          [
+            8.9299876,
+            44.4108533
+          ],
+          [
+            8.9300841,
+            44.4103159
+          ],
+          [
+            8.9303168,
+            44.4099196
+          ],
+          [
+            8.9303524,
+            44.4092444
+          ],
+          [
+            8.930623,
+            44.4088496
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "via-san-lorenzo",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 10,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9290173,
+            44.4086208
+          ],
+          [
+            8.9297203,
+            44.4084334
+          ],
+          [
+            8.930464,
+            44.4082205
+          ],
+          [
+            8.9312135,
+            44.4079538
+          ],
+          [
+            8.9320385,
+            44.4076902
+          ],
+          [
+            8.9328665,
+            44.4073997
+          ],
+          [
+            8.9331689,
+            44.4070604
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "via-luccoli",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 4.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9329807,
+            44.4091366
+          ],
+          [
+            8.9333289,
+            44.4094217
+          ],
+          [
+            8.9339791,
+            44.4097193
+          ],
+          [
+            8.9343155,
+            44.4101121
+          ],
+          [
+            8.9343294,
+            44.4106811
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "de-ferrari-old-axial-approach",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 12,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9331689,
+            44.4070604
+          ],
+          [
+            8.9334881,
+            44.407263
+          ],
+          [
+            8.9337231,
+            44.4075434
+          ],
+          [
+            8.9342021,
+            44.4076715
+          ],
+          [
+            8.9353086,
+            44.407609
+          ],
+          [
+            8.9361714,
+            44.407347
+          ],
+          [
+            8.9371504,
+            44.4070627
+          ],
+          [
+            8.9378156,
+            44.4068737
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "via-carlo-felice",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 10,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9342021,
+            44.4076715
+          ],
+          [
+            8.9349014,
+            44.4082147
+          ],
+          [
+            8.9354177,
+            44.4086962
+          ],
+          [
+            8.9361606,
+            44.409187
+          ],
+          [
+            8.9371011,
+            44.4096049
+          ],
+          [
+            8.9381954,
+            44.410002
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "corvetto-acquasola-perimeter",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 10,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9381954,
+            44.410002
+          ],
+          [
+            8.9387474,
+            44.4098083
+          ],
+          [
+            8.9392357,
+            44.4095037
+          ],
+          [
+            8.9394948,
+            44.4088649
+          ],
+          [
+            8.9395363,
+            44.4081358
+          ],
+          [
+            8.9394788,
+            44.4076192
+          ],
+          [
+            8.9389511,
+            44.4068936
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "west-cavour-to-sarzano",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9277555,
+            44.4073236
+          ],
+          [
+            8.9285864,
+            44.4070061
+          ],
+          [
+            8.9295335,
+            44.4066663
+          ],
+          [
+            8.9303585,
+            44.4064028
+          ],
+          [
+            8.9311517,
+            44.4060837
+          ],
+          [
+            8.9314776,
+            44.4055288
+          ],
+          [
+            8.9315363,
+            44.4049899
+          ],
+          [
+            8.9317082,
+            44.4044557
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "castello-caruggio",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 3.8,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9281463,
+            44.405824
+          ],
+          [
+            8.9287734,
+            44.4059853
+          ],
+          [
+            8.9295486,
+            44.4061798
+          ],
+          [
+            8.9303179,
+            44.4064281
+          ],
+          [
+            8.93082,
+            44.4066925
+          ],
+          [
+            8.9311157,
+            44.4071107
+          ],
+          [
+            8.9312693,
+            44.4074419
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sarzanofront-blocks",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 4.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9300526,
+            44.404685
+          ],
+          [
+            8.9308513,
+            44.4046639
+          ],
+          [
+            8.9317082,
+            44.4044557
+          ],
+          [
+            8.9324922,
+            44.4045694
+          ],
+          [
+            8.9333747,
+            44.4048224
+          ],
+          [
+            8.9341876,
+            44.4050185
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sarzano-carignano-bridge-approach",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9317082,
+            44.4044557
+          ],
+          [
+            8.9321297,
+            44.4040672
+          ],
+          [
+            8.9325047,
+            44.4037579
+          ],
+          [
+            8.9331381,
+            44.4035135
+          ],
+          [
+            8.9337832,
+            44.4031612
+          ],
+          [
+            8.9342861,
+            44.4027219
+          ],
+          [
+            8.9346581,
+            44.4024396
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "castello-carignano-low-approach",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9306,
+            44.4034896
+          ],
+          [
+            8.9311427,
+            44.4037286
+          ],
+          [
+            8.9317438,
+            44.4037806
+          ],
+          [
+            8.9324351,
+            44.4037009
+          ],
+          [
+            8.9331381,
+            44.4035135
+          ],
+          [
+            8.9336142,
+            44.4036685
+          ],
+          [
+            8.9343281,
+            44.404077
+          ],
+          [
+            8.935045,
+            44.4044585
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-basilica-lanes",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9318414,
+            44.4021877
+          ],
+          [
+            8.932367,
+            44.4022365
+          ],
+          [
+            8.932945,
+            44.4021522
+          ],
+          [
+            8.9337235,
+            44.4019679
+          ],
+          [
+            8.9341388,
+            44.4019851
+          ],
+          [
+            8.9346581,
+            44.4024396
+          ],
+          [
+            8.9351078,
+            44.4028371
+          ],
+          [
+            8.9354559,
+            44.4031222
+          ],
+          [
+            8.936042,
+            44.4036607
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-crinale",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 8,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9346581,
+            44.4024396
+          ],
+          [
+            8.9349861,
+            44.4025614
+          ],
+          [
+            8.9354248,
+            44.4023631
+          ],
+          [
+            8.9359101,
+            44.4020854
+          ],
+          [
+            8.9364361,
+            44.4017824
+          ],
+          [
+            8.9370841,
+            44.4014032
+          ],
+          [
+            8.9376625,
+            44.400967
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-bixio-crossing",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5.8,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9349861,
+            44.4025614
+          ],
+          [
+            8.9346438,
+            44.4022225
+          ],
+          [
+            8.9341769,
+            44.4016348
+          ],
+          [
+            8.9338493,
+            44.4011611
+          ],
+          [
+            8.9334462,
+            44.4006843
+          ],
+          [
+            8.9331068,
+            44.4003184
+          ],
+          [
+            8.9329939,
+            44.3999619
+          ],
+          [
+            8.9332615,
+            44.399594
+          ],
+          [
+            8.9337208,
+            44.3992071
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bixio-to-coast",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 8,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9376625,
+            44.400967
+          ],
+          [
+            8.9376776,
+            44.4004805
+          ],
+          [
+            8.9377015,
+            44.3999131
+          ],
+          [
+            8.9377283,
+            44.3993187
+          ],
+          [
+            8.9377899,
+            44.3987529
+          ],
+          [
+            8.9378255,
+            44.3980777
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-inner-front",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5.6,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9361574,
+            44.3991184
+          ],
+          [
+            8.9356084,
+            44.3992852
+          ],
+          [
+            8.9353148,
+            44.3995437
+          ],
+          [
+            8.9353928,
+            44.3998717
+          ],
+          [
+            8.9357234,
+            44.4003184
+          ],
+          [
+            8.9363413,
+            44.4009124
+          ],
+          [
+            8.9367763,
+            44.4014446
+          ],
+          [
+            8.9370841,
+            44.4014032
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-east-lane",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9359101,
+            44.4020854
+          ],
+          [
+            8.9366501,
+            44.4026032
+          ],
+          [
+            8.937242,
+            44.4030878
+          ],
+          [
+            8.9378657,
+            44.4036279
+          ],
+          [
+            8.938458,
+            44.4037607
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "circonvallazione-a-mare-1891",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 10,
+        "display_rank": 2,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Historic Corso di Circonvallazione a Mare, traced by its city shoreline alignment to the bank turn near the Bisagno mouth.",
+        "use_reference": "liguria-circonvallazione-archeology"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9318414,
+            44.4021877
+          ],
+          [
+            8.9325016,
+            44.4013489
+          ],
+          [
+            8.9330804,
+            44.4005609
+          ],
+          [
+            8.9335489,
+            44.3997413
+          ],
+          [
+            8.9337208,
+            44.3992071
+          ],
+          [
+            8.934363,
+            44.3988818
+          ],
+          [
+            8.9352635,
+            44.3986213
+          ],
+          [
+            8.9362366,
+            44.3983909
+          ],
+          [
+            8.9371661,
+            44.3982129
+          ],
+          [
+            8.9378255,
+            44.3980777
+          ],
+          [
+            8.9390193,
+            44.3979106
+          ],
+          [
+            8.9401811,
+            44.397688
+          ],
+          [
+            8.9414562,
+            44.3974701
+          ],
+          [
+            8.9425107,
+            44.397189
+          ],
+          [
+            8.9430392,
+            44.3972108
+          ],
+          [
+            8.9434717,
+            44.3974182
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bixio-east-rise",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 6,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9376625,
+            44.400967
+          ],
+          [
+            8.9375665,
+            44.4011525
+          ],
+          [
+            8.9379637,
+            44.4016832
+          ],
+          [
+            8.9385061,
+            44.402274
+          ],
+          [
+            8.9390196,
+            44.4027825
+          ],
+          [
+            8.9390305,
+            44.4033784
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "south-hospital-short-approach",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9376625,
+            44.400967
+          ],
+          [
+            8.9382317,
+            44.4009635
+          ],
+          [
+            8.9388534,
+            44.4008269
+          ],
+          [
+            8.939626,
+            44.4006964
+          ],
+          [
+            8.9401696,
+            44.4002317
+          ],
+          [
+            8.9406871,
+            44.3996577
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bisagno-west-bank-landside-road",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5.5,
+        "display_rank": 1,
+        "display_surface": "gravel",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street on the land side of the printed west-bank hachures, along the inland edge of the parade ground."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9434717,
+            44.3974182
+          ],
+          [
+            8.943947,
+            44.3982769
+          ],
+          [
+            8.9441203,
+            44.3991231
+          ],
+          [
+            8.9440818,
+            44.3998252
+          ],
+          [
+            8.9439937,
+            44.4006336
+          ],
+          [
+            8.9437375,
+            44.4012455
+          ],
+          [
+            8.9434695,
+            44.4019652
+          ],
+          [
+            8.9436487,
+            44.4027575
+          ],
+          [
+            8.943819,
+            44.4036306
+          ],
+          [
+            8.9439344,
+            44.4043121
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "san-benigno-lower-road",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 5,
+        "display_rank": 1,
+        "display_surface": "gravel",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Readable street axis on the Meyers city panel."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9053004,
+            44.4056365
+          ],
+          [
+            8.9058193,
+            44.4064429
+          ],
+          [
+            8.9062132,
+            44.4073524
+          ],
+          [
+            8.9063982,
+            44.4080908
+          ],
+          [
+            8.9068475,
+            44.4088402
+          ],
+          [
+            8.9075174,
+            44.4096528
+          ],
+          [
+            8.9081613,
+            44.4103561
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "pre-balbi-north-frontage-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9216526,
+              44.4163546
+            ],
+            [
+              8.9226778,
+              44.4163429
+            ],
+            [
+              8.9238862,
+              44.416041
+            ],
+            [
+              8.9251965,
+              44.4154998
+            ],
+            [
+              8.9257254,
+              44.4151698
+            ],
+            [
+              8.92529,
+              44.4149894
+            ],
+            [
+              8.9243429,
+              44.4153292
+            ],
+            [
+              8.9234307,
+              44.4156974
+            ],
+            [
+              8.9224865,
+              44.4160102
+            ],
+            [
+              8.9216526,
+              44.4163546
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "pre-balbi-north-frontage-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9216526,
+              44.4163546
+            ],
+            [
+              8.9226778,
+              44.4163429
+            ],
+            [
+              8.9238862,
+              44.416041
+            ],
+            [
+              8.9251965,
+              44.4154998
+            ],
+            [
+              8.9257254,
+              44.4151698
+            ],
+            [
+              8.92529,
+              44.4149894
+            ],
+            [
+              8.9243429,
+              44.4153292
+            ],
+            [
+              8.9234307,
+              44.4156974
+            ],
+            [
+              8.9224865,
+              44.4160102
+            ],
+            [
+              8.9216526,
+              44.4163546
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "pre-darsena-frontage-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9228266,
+              44.4156724
+            ],
+            [
+              8.9236022,
+              44.415515
+            ],
+            [
+              8.9244042,
+              44.4151152
+            ],
+            [
+              8.925212,
+              44.4146614
+            ],
+            [
+              8.9258223,
+              44.4142807
+            ],
+            [
+              8.9263222,
+              44.4138683
+            ],
+            [
+              8.9255932,
+              44.4139464
+            ],
+            [
+              8.924579,
+              44.414554
+            ],
+            [
+              8.9238119,
+              44.4149824
+            ],
+            [
+              8.9228266,
+              44.4156724
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "pre-darsena-frontage-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9228266,
+              44.4156724
+            ],
+            [
+              8.9236022,
+              44.415515
+            ],
+            [
+              8.9244042,
+              44.4151152
+            ],
+            [
+              8.925212,
+              44.4146614
+            ],
+            [
+              8.9258223,
+              44.4142807
+            ],
+            [
+              8.9263222,
+              44.4138683
+            ],
+            [
+              8.9255932,
+              44.4139464
+            ],
+            [
+              8.924579,
+              44.414554
+            ],
+            [
+              8.9238119,
+              44.4149824
+            ],
+            [
+              8.9228266,
+              44.4156724
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "vacca-lower-frontage-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9262027,
+              44.4142693
+            ],
+            [
+              8.9268676,
+              44.4144322
+            ],
+            [
+              8.9277421,
+              44.4140624
+            ],
+            [
+              8.9283872,
+              44.4137102
+            ],
+            [
+              8.9280013,
+              44.4134235
+            ],
+            [
+              8.9274207,
+              44.413183
+            ],
+            [
+              8.9269237,
+              44.4135684
+            ],
+            [
+              8.9262027,
+              44.4142693
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "vacca-lower-frontage-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9262027,
+              44.4142693
+            ],
+            [
+              8.9268676,
+              44.4144322
+            ],
+            [
+              8.9277421,
+              44.4140624
+            ],
+            [
+              8.9283872,
+              44.4137102
+            ],
+            [
+              8.9280013,
+              44.4134235
+            ],
+            [
+              8.9274207,
+              44.413183
+            ],
+            [
+              8.9269237,
+              44.4135684
+            ],
+            [
+              8.9262027,
+              44.4142693
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "zecca-carmine-block-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9282379,
+              44.4147325
+            ],
+            [
+              8.9289699,
+              44.4146274
+            ],
+            [
+              8.9294317,
+              44.4145654
+            ],
+            [
+              8.9294585,
+              44.413971
+            ],
+            [
+              8.9296506,
+              44.4136
+            ],
+            [
+              8.9291481,
+              44.4136875
+            ],
+            [
+              8.9284191,
+              44.4137656
+            ],
+            [
+              8.9278524,
+              44.414094
+            ],
+            [
+              8.9282379,
+              44.4147325
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "zecca-carmine-block-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9282379,
+              44.4147325
+            ],
+            [
+              8.9289699,
+              44.4146274
+            ],
+            [
+              8.9294317,
+              44.4145654
+            ],
+            [
+              8.9294585,
+              44.413971
+            ],
+            [
+              8.9296506,
+              44.4136
+            ],
+            [
+              8.9291481,
+              44.4136875
+            ],
+            [
+              8.9284191,
+              44.4137656
+            ],
+            [
+              8.9278524,
+              44.414094
+            ],
+            [
+              8.9282379,
+              44.4147325
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carmine-middle-block-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9282317,
+              44.4151382
+            ],
+            [
+              8.9283324,
+              44.4159544
+            ],
+            [
+              8.9286684,
+              44.416699
+            ],
+            [
+              8.9294641,
+              44.4167049
+            ],
+            [
+              8.929256,
+              44.4158302
+            ],
+            [
+              8.9292513,
+              44.4148285
+            ],
+            [
+              8.9287606,
+              44.4148082
+            ],
+            [
+              8.9282317,
+              44.4151382
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carmine-middle-block-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9282317,
+              44.4151382
+            ],
+            [
+              8.9283324,
+              44.4159544
+            ],
+            [
+              8.9286684,
+              44.416699
+            ],
+            [
+              8.9294641,
+              44.4167049
+            ],
+            [
+              8.929256,
+              44.4158302
+            ],
+            [
+              8.9292513,
+              44.4148285
+            ],
+            [
+              8.9287606,
+              44.4148082
+            ],
+            [
+              8.9282317,
+              44.4151382
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carmine-lower-east-front-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.929837,
+              44.4157189
+            ],
+            [
+              8.9303332,
+              44.4160371
+            ],
+            [
+              8.9308353,
+              44.4163015
+            ],
+            [
+              8.9311553,
+              44.4158005
+            ],
+            [
+              8.9310542,
+              44.4153362
+            ],
+            [
+              8.9306452,
+              44.4149133
+            ],
+            [
+              8.9297916,
+              44.4147426
+            ],
+            [
+              8.929837,
+              44.4157189
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carmine-lower-east-front-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.929837,
+              44.4157189
+            ],
+            [
+              8.9303332,
+              44.4160371
+            ],
+            [
+              8.9308353,
+              44.4163015
+            ],
+            [
+              8.9311553,
+              44.4158005
+            ],
+            [
+              8.9310542,
+              44.4153362
+            ],
+            [
+              8.9306452,
+              44.4149133
+            ],
+            [
+              8.9297916,
+              44.4147426
+            ],
+            [
+              8.929837,
+              44.4157189
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "upper-belt-lower-front-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.931639,
+              44.4169302
+            ],
+            [
+              8.9322057,
+              44.4166018
+            ],
+            [
+              8.9324095,
+              44.4161231
+            ],
+            [
+              8.9324304,
+              44.4155826
+            ],
+            [
+              8.9325906,
+              44.4151562
+            ],
+            [
+              8.9320126,
+              44.4152405
+            ],
+            [
+              8.9315446,
+              44.4157083
+            ],
+            [
+              8.9313609,
+              44.4163503
+            ],
+            [
+              8.931639,
+              44.4169302
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "upper-belt-lower-front-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          6,
+          10
+        ],
+        "depth_m": [
+          10,
+          17
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.931639,
+              44.4169302
+            ],
+            [
+              8.9322057,
+              44.4166018
+            ],
+            [
+              8.9324095,
+              44.4161231
+            ],
+            [
+              8.9324304,
+              44.4155826
+            ],
+            [
+              8.9325906,
+              44.4151562
+            ],
+            [
+              8.9320126,
+              44.4152405
+            ],
+            [
+              8.9315446,
+              44.4157083
+            ],
+            [
+              8.9313609,
+              44.4163503
+            ],
+            [
+              8.931639,
+              44.4169302
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "slope-occupied-pocket-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9313916,
+              44.4174613
+            ],
+            [
+              8.9316642,
+              44.4177432
+            ],
+            [
+              8.9319344,
+              44.4177003
+            ],
+            [
+              8.931897,
+              44.4173469
+            ],
+            [
+              8.9316474,
+              44.4172012
+            ],
+            [
+              8.9313916,
+              44.4174613
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "slope-occupied-pocket-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "low_home",
+        "frontage_m": [
+          5,
+          8
+        ],
+        "depth_m": [
+          8,
+          11
+        ],
+        "storeys": [
+          2,
+          3
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9313916,
+              44.4174613
+            ],
+            [
+              8.9316642,
+              44.4177432
+            ],
+            [
+              8.9319344,
+              44.4177003
+            ],
+            [
+              8.931897,
+              44.4173469
+            ],
+            [
+              8.9316474,
+              44.4172012
+            ],
+            [
+              8.9313916,
+              44.4174613
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "fossatello-west-block-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9288283,
+              44.4114007
+            ],
+            [
+              8.9291681,
+              44.4114148
+            ],
+            [
+              8.9292498,
+              44.4110122
+            ],
+            [
+              8.9291777,
+              44.4106303
+            ],
+            [
+              8.9286433,
+              44.4106623
+            ],
+            [
+              8.9284512,
+              44.4110333
+            ],
+            [
+              8.9288283,
+              44.4114007
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "fossatello-west-block-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9288283,
+              44.4114007
+            ],
+            [
+              8.9291681,
+              44.4114148
+            ],
+            [
+              8.9292498,
+              44.4110122
+            ],
+            [
+              8.9291777,
+              44.4106303
+            ],
+            [
+              8.9286433,
+              44.4106623
+            ],
+            [
+              8.9284512,
+              44.4110333
+            ],
+            [
+              8.9288283,
+              44.4114007
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "fossatello-carbonaio-block-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9293975,
+              44.4113972
+            ],
+            [
+              8.9300712,
+              44.4114792
+            ],
+            [
+              8.9305648,
+              44.4114726
+            ],
+            [
+              8.9309977,
+              44.4113281
+            ],
+            [
+              8.9308878,
+              44.4109447
+            ],
+            [
+              8.9305598,
+              44.4108228
+            ],
+            [
+              8.9299788,
+              44.4109341
+            ],
+            [
+              8.9293719,
+              44.4109361
+            ],
+            [
+              8.9293975,
+              44.4113972
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "fossatello-carbonaio-block-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9293975,
+              44.4113972
+            ],
+            [
+              8.9300712,
+              44.4114792
+            ],
+            [
+              8.9305648,
+              44.4114726
+            ],
+            [
+              8.9309977,
+              44.4113281
+            ],
+            [
+              8.9308878,
+              44.4109447
+            ],
+            [
+              8.9305598,
+              44.4108228
+            ],
+            [
+              8.9299788,
+              44.4109341
+            ],
+            [
+              8.9293719,
+              44.4109361
+            ],
+            [
+              8.9293975,
+              44.4113972
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-block-west-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9293924,
+              44.4107474
+            ],
+            [
+              8.9299587,
+              44.4107709
+            ],
+            [
+              8.9299738,
+              44.4102843
+            ],
+            [
+              8.9301977,
+              44.4099688
+            ],
+            [
+              8.9296432,
+              44.4098376
+            ],
+            [
+              8.9293903,
+              44.4100707
+            ],
+            [
+              8.9293924,
+              44.4107474
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-block-west-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9293924,
+              44.4107474
+            ],
+            [
+              8.9299587,
+              44.4107709
+            ],
+            [
+              8.9299738,
+              44.4102843
+            ],
+            [
+              8.9301977,
+              44.4099688
+            ],
+            [
+              8.9296432,
+              44.4098376
+            ],
+            [
+              8.9293903,
+              44.4100707
+            ],
+            [
+              8.9293924,
+              44.4107474
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-block-west-lower-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9296172,
+              44.4097282
+            ],
+            [
+              8.9301776,
+              44.4098056
+            ],
+            [
+              8.9303814,
+              44.4093268
+            ],
+            [
+              8.9295626,
+              44.4091847
+            ],
+            [
+              8.9293563,
+              44.4093385
+            ],
+            [
+              8.9296172,
+              44.4097282
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-block-west-lower-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9296172,
+              44.4097282
+            ],
+            [
+              8.9301776,
+              44.4098056
+            ],
+            [
+              8.9303814,
+              44.4093268
+            ],
+            [
+              8.9295626,
+              44.4091847
+            ],
+            [
+              8.9293563,
+              44.4093385
+            ],
+            [
+              8.9296172,
+              44.4097282
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-above-market-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9301969,
+              44.4106725
+            ],
+            [
+              8.9307632,
+              44.4106959
+            ],
+            [
+              8.93135,
+              44.4105307
+            ],
+            [
+              8.9310601,
+              44.4100586
+            ],
+            [
+              8.9303546,
+              44.4099212
+            ],
+            [
+              8.9302003,
+              44.4102937
+            ],
+            [
+              8.9301969,
+              44.4106725
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-above-market-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9301969,
+              44.4106725
+            ],
+            [
+              8.9307632,
+              44.4106959
+            ],
+            [
+              8.93135,
+              44.4105307
+            ],
+            [
+              8.9310601,
+              44.4100586
+            ],
+            [
+              8.9303546,
+              44.4099212
+            ],
+            [
+              8.9302003,
+              44.4102937
+            ],
+            [
+              8.9301969,
+              44.4106725
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-below-market-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9304855,
+              44.4097642
+            ],
+            [
+              8.9310865,
+              44.4098161
+            ],
+            [
+              8.9310899,
+              44.4094373
+            ],
+            [
+              8.930425,
+              44.4092745
+            ],
+            [
+              8.9304855,
+              44.4097642
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-below-market-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9304855,
+              44.4097642
+            ],
+            [
+              8.9310865,
+              44.4098161
+            ],
+            [
+              8.9310899,
+              44.4094373
+            ],
+            [
+              8.930425,
+              44.4092745
+            ],
+            [
+              8.9304855,
+              44.4097642
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-deep-core-west-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9315098,
+              44.4104561
+            ],
+            [
+              8.9322099,
+              44.4102956
+            ],
+            [
+              8.9330463,
+              44.4102761
+            ],
+            [
+              8.9325504,
+              44.409606
+            ],
+            [
+              8.9318822,
+              44.409822
+            ],
+            [
+              8.9312229,
+              44.4099571
+            ],
+            [
+              8.931272,
+              44.4102027
+            ],
+            [
+              8.9315098,
+              44.4104561
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-deep-core-west-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          11,
+          20
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9315098,
+              44.4104561
+            ],
+            [
+              8.9322099,
+              44.4102956
+            ],
+            [
+              8.9330463,
+              44.4102761
+            ],
+            [
+              8.9325504,
+              44.409606
+            ],
+            [
+              8.9318822,
+              44.409822
+            ],
+            [
+              8.9312229,
+              44.4099571
+            ],
+            [
+              8.931272,
+              44.4102027
+            ],
+            [
+              8.9315098,
+              44.4104561
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-deep-core-east-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9328927,
+              44.409945
+            ],
+            [
+              8.9333889,
+              44.4102632
+            ],
+            [
+              8.934222,
+              44.4106225
+            ],
+            [
+              8.9341586,
+              44.4101598
+            ],
+            [
+              8.9340051,
+              44.4098286
+            ],
+            [
+              8.9332794,
+              44.4095279
+            ],
+            [
+              8.9330474,
+              44.4092206
+            ],
+            [
+              8.9325651,
+              44.4094713
+            ],
+            [
+              8.9328927,
+              44.409945
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-deep-core-east-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          10,
+          20
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9328927,
+              44.409945
+            ],
+            [
+              8.9333889,
+              44.4102632
+            ],
+            [
+              8.934222,
+              44.4106225
+            ],
+            [
+              8.9341586,
+              44.4101598
+            ],
+            [
+              8.9340051,
+              44.4098286
+            ],
+            [
+              8.9332794,
+              44.4095279
+            ],
+            [
+              8.9330474,
+              44.4092206
+            ],
+            [
+              8.9325651,
+              44.4094713
+            ],
+            [
+              8.9328927,
+              44.409945
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-above-cathedral-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9295395,
+              44.4090484
+            ],
+            [
+              8.9304019,
+              44.4091382
+            ],
+            [
+              8.9310349,
+              44.4092456
+            ],
+            [
+              8.9316624,
+              44.409055
+            ],
+            [
+              8.9323335,
+              44.4088121
+            ],
+            [
+              8.9321162,
+              44.4083701
+            ],
+            [
+              8.9314631,
+              44.4080995
+            ],
+            [
+              8.9307282,
+              44.4082315
+            ],
+            [
+              8.9298218,
+              44.4085458
+            ],
+            [
+              8.9295395,
+              44.4090484
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "maddalena-above-cathedral-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "shop",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9295395,
+              44.4090484
+            ],
+            [
+              8.9304019,
+              44.4091382
+            ],
+            [
+              8.9310349,
+              44.4092456
+            ],
+            [
+              8.9316624,
+              44.409055
+            ],
+            [
+              8.9323335,
+              44.4088121
+            ],
+            [
+              8.9321162,
+              44.4083701
+            ],
+            [
+              8.9314631,
+              44.4080995
+            ],
+            [
+              8.9307282,
+              44.4082315
+            ],
+            [
+              8.9298218,
+              44.4085458
+            ],
+            [
+              8.9295395,
+              44.4090484
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sarzano-castello-frontages-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9287173,
+              44.4068491
+            ],
+            [
+              8.929432,
+              44.4065539
+            ],
+            [
+              8.9300217,
+              44.4063618
+            ],
+            [
+              8.9295544,
+              44.4061259
+            ],
+            [
+              8.9289651,
+              44.4059662
+            ],
+            [
+              8.9285117,
+              44.4062993
+            ],
+            [
+              8.9287173,
+              44.4068491
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sarzano-castello-frontages-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          8,
+          15
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9287173,
+              44.4068491
+            ],
+            [
+              8.929432,
+              44.4065539
+            ],
+            [
+              8.9300217,
+              44.4063618
+            ],
+            [
+              8.9295544,
+              44.4061259
+            ],
+            [
+              8.9289651,
+              44.4059662
+            ],
+            [
+              8.9285117,
+              44.4062993
+            ],
+            [
+              8.9287173,
+              44.4068491
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "castello-lower-slope-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.929723,
+              44.4059705
+            ],
+            [
+              8.9303732,
+              44.406268
+            ],
+            [
+              8.9309688,
+              44.406022
+            ],
+            [
+              8.93128,
+              44.4056019
+            ],
+            [
+              8.931423,
+              44.4049853
+            ],
+            [
+              8.930918,
+              44.4047478
+            ],
+            [
+              8.9302007,
+              44.4047182
+            ],
+            [
+              8.9298778,
+              44.4052461
+            ],
+            [
+              8.929723,
+              44.4059705
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "castello-lower-slope-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.929723,
+              44.4059705
+            ],
+            [
+              8.9303732,
+              44.406268
+            ],
+            [
+              8.9309688,
+              44.406022
+            ],
+            [
+              8.93128,
+              44.4056019
+            ],
+            [
+              8.931423,
+              44.4049853
+            ],
+            [
+              8.930918,
+              44.4047478
+            ],
+            [
+              8.9302007,
+              44.4047182
+            ],
+            [
+              8.9298778,
+              44.4052461
+            ],
+            [
+              8.929723,
+              44.4059705
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sarzano-south-block-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9316096,
+              44.4043163
+            ],
+            [
+              8.9320979,
+              44.4040117
+            ],
+            [
+              8.9325018,
+              44.4037849
+            ],
+            [
+              8.9319993,
+              44.4038723
+            ],
+            [
+              8.9313982,
+              44.4038204
+            ],
+            [
+              8.930907,
+              44.4041519
+            ],
+            [
+              8.9316096,
+              44.4043163
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sarzano-south-block-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "street_row",
+        "frontage_m": [
+          5,
+          9
+        ],
+        "depth_m": [
+          9,
+          16
+        ],
+        "storeys": [
+          3,
+          5
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9316096,
+              44.4043163
+            ],
+            [
+              8.9320979,
+              44.4040117
+            ],
+            [
+              8.9325018,
+              44.4037849
+            ],
+            [
+              8.9319993,
+              44.4038723
+            ],
+            [
+              8.9313982,
+              44.4038204
+            ],
+            [
+              8.930907,
+              44.4041519
+            ],
+            [
+              8.9316096,
+              44.4043163
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-west-front-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9321288,
+              44.4023349
+            ],
+            [
+              8.9327126,
+              44.4021967
+            ],
+            [
+              8.9334999,
+              44.4019316
+            ],
+            [
+              8.9337935,
+              44.4016731
+            ],
+            [
+              8.9333963,
+              44.4011424
+            ],
+            [
+              8.9329177,
+              44.4006624
+            ],
+            [
+              8.9325628,
+              44.4011349
+            ],
+            [
+              8.9323909,
+              44.4016691
+            ],
+            [
+              8.9321288,
+              44.4023349
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-west-front-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "courtyard_home",
+        "frontage_m": [
+          7,
+          12
+        ],
+        "depth_m": [
+          12,
+          18
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9321288,
+              44.4023349
+            ],
+            [
+              8.9327126,
+              44.4021967
+            ],
+            [
+              8.9334999,
+              44.4019316
+            ],
+            [
+              8.9337935,
+              44.4016731
+            ],
+            [
+              8.9333963,
+              44.4011424
+            ],
+            [
+              8.9329177,
+              44.4006624
+            ],
+            [
+              8.9325628,
+              44.4011349
+            ],
+            [
+              8.9323909,
+              44.4016691
+            ],
+            [
+              8.9321288,
+              44.4023349
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-bixio-block-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9353003,
+              44.4021143
+            ],
+            [
+              8.9359248,
+              44.4019507
+            ],
+            [
+              8.9366047,
+              44.401627
+            ],
+            [
+              8.9360506,
+              44.4011439
+            ],
+            [
+              8.9353773,
+              44.4007101
+            ],
+            [
+              8.9347649,
+              44.4004141
+            ],
+            [
+              8.9340946,
+              44.3999533
+            ],
+            [
+              8.9336596,
+              44.399421
+            ],
+            [
+              8.9334008,
+              44.3997081
+            ],
+            [
+              8.933223,
+              44.4002962
+            ],
+            [
+              8.9335389,
+              44.4008776
+            ],
+            [
+              8.9342117,
+              44.4016633
+            ],
+            [
+              8.9347168,
+              44.4019007
+            ],
+            [
+              8.9353003,
+              44.4021143
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-bixio-block-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "courtyard_home",
+        "frontage_m": [
+          7,
+          12
+        ],
+        "depth_m": [
+          12,
+          20
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9353003,
+              44.4021143
+            ],
+            [
+              8.9359248,
+              44.4019507
+            ],
+            [
+              8.9366047,
+              44.401627
+            ],
+            [
+              8.9360506,
+              44.4011439
+            ],
+            [
+              8.9353773,
+              44.4007101
+            ],
+            [
+              8.9347649,
+              44.4004141
+            ],
+            [
+              8.9340946,
+              44.3999533
+            ],
+            [
+              8.9336596,
+              44.399421
+            ],
+            [
+              8.9334008,
+              44.3997081
+            ],
+            [
+              8.933223,
+              44.4002962
+            ],
+            [
+              8.9335389,
+              44.4008776
+            ],
+            [
+              8.9342117,
+              44.4016633
+            ],
+            [
+              8.9347168,
+              44.4019007
+            ],
+            [
+              8.9353003,
+              44.4021143
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-ordinary-south-front-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9348676,
+              44.399471
+            ],
+            [
+              8.9357061,
+              44.4001282
+            ],
+            [
+              8.9364025,
+              44.4006984
+            ],
+            [
+              8.9369595,
+              44.4011545
+            ],
+            [
+              8.9376277,
+              44.4009385
+            ],
+            [
+              8.9377275,
+              44.4000224
+            ],
+            [
+              8.9376502,
+              44.3989907
+            ],
+            [
+              8.9374938,
+              44.3986865
+            ],
+            [
+              8.9361402,
+              44.3989282
+            ],
+            [
+              8.9355186,
+              44.3990649
+            ],
+            [
+              8.9348676,
+              44.399471
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-ordinary-south-front-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "courtyard_home",
+        "frontage_m": [
+          7,
+          12
+        ],
+        "depth_m": [
+          12,
+          20
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9348676,
+              44.399471
+            ],
+            [
+              8.9357061,
+              44.4001282
+            ],
+            [
+              8.9364025,
+              44.4006984
+            ],
+            [
+              8.9369595,
+              44.4011545
+            ],
+            [
+              8.9376277,
+              44.4009385
+            ],
+            [
+              8.9377275,
+              44.4000224
+            ],
+            [
+              8.9376502,
+              44.3989907
+            ],
+            [
+              8.9374938,
+              44.3986865
+            ],
+            [
+              8.9361402,
+              44.3989282
+            ],
+            [
+              8.9355186,
+              44.3990649
+            ],
+            [
+              8.9348676,
+              44.399471
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-east-front-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9364965,
+              44.4022721
+            ],
+            [
+              8.9369345,
+              44.4027774
+            ],
+            [
+              8.9375641,
+              44.4032636
+            ],
+            [
+              8.9382755,
+              44.4033471
+            ],
+            [
+              8.9389177,
+              44.4030218
+            ],
+            [
+              8.939377,
+              44.4026349
+            ],
+            [
+              8.9388518,
+              44.4022342
+            ],
+            [
+              8.9380975,
+              44.4014993
+            ],
+            [
+              8.9376185,
+              44.4013712
+            ],
+            [
+              8.9372058,
+              44.4016789
+            ],
+            [
+              8.9364965,
+              44.4022721
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carignano-east-front-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "courtyard_home",
+        "frontage_m": [
+          7,
+          12
+        ],
+        "depth_m": [
+          12,
+          20
+        ],
+        "storeys": [
+          2,
+          4
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9364965,
+              44.4022721
+            ],
+            [
+              8.9369345,
+              44.4027774
+            ],
+            [
+              8.9375641,
+              44.4032636
+            ],
+            [
+              8.9382755,
+              44.4033471
+            ],
+            [
+              8.9389177,
+              44.4030218
+            ],
+            [
+              8.939377,
+              44.4026349
+            ],
+            [
+              8.9388518,
+              44.4022342
+            ],
+            [
+              8.9380975,
+              44.4014993
+            ],
+            [
+              8.9376185,
+              44.4013712
+            ],
+            [
+              8.9372058,
+              44.4016789
+            ],
+            [
+              8.9364965,
+              44.4022721
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bisagno-left-bank-sparse-front-ground",
+      "properties": {
+        "kind": "block_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Generalized built block bounded by readable streets in the original city map."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9438189,
+              44.4011947
+            ],
+            [
+              8.9445508,
+              44.4010897
+            ],
+            [
+              8.9449954,
+              44.4008374
+            ],
+            [
+              8.9449815,
+              44.4002685
+            ],
+            [
+              8.9447353,
+              44.399744
+            ],
+            [
+              8.9441313,
+              44.399719
+            ],
+            [
+              8.9440205,
+              44.4000392
+            ],
+            [
+              8.9438189,
+              44.4011947
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bisagno-left-bank-sparse-front-frontages",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "low_home",
+        "frontage_m": [
+          7,
+          12
+        ],
+        "depth_m": [
+          10,
+          16
+        ],
+        "storeys": [
+          2,
+          3
+        ],
+        "setback_m": [
+          0.1,
+          0.8
+        ],
+        "gap_m": 0.8,
+        "use_basis": "Generalized built block bounded by readable streets in the original city map.",
+        "form_basis": "Inferred narrow masonry frontages from the frozen mediterranean court kit."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9438189,
+              44.4011947
+            ],
+            [
+              8.9445508,
+              44.4010897
+            ],
+            [
+              8.9449954,
+              44.4008374
+            ],
+            [
+              8.9449815,
+              44.4002685
+            ],
+            [
+              8.9447353,
+              44.399744
+            ],
+            [
+              8.9441313,
+              44.399719
+            ],
+            [
+              8.9440205,
+              44.4000392
+            ],
+            [
+              8.9438189,
+              44.4011947
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "acquasola-walks-and-trees",
+      "properties": {
+        "kind": "park",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Distinct tree rows and enclosure of the printed public garden."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9390465,
+              44.4098478
+            ],
+            [
+              8.9406496,
+              44.4097517
+            ],
+            [
+              8.9410133,
+              44.4091984
+            ],
+            [
+              8.9411537,
+              44.4082569
+            ],
+            [
+              8.9411545,
+              44.4075532
+            ],
+            [
+              8.939993,
+              44.4074239
+            ],
+            [
+              8.9394671,
+              44.407727
+            ],
+            [
+              8.9394021,
+              44.4086716
+            ],
+            [
+              8.9393317,
+              44.4093182
+            ],
+            [
+              8.9390465,
+              44.4098478
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "piazza-sarzano",
+      "properties": {
+        "kind": "open_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Open plaza distinguishable on the city plan."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9307061,
+              44.4046037
+            ],
+            [
+              8.9315077,
+              44.4045557
+            ],
+            [
+              8.9316067,
+              44.4043433
+            ],
+            [
+              8.9309825,
+              44.4041551
+            ],
+            [
+              8.930358,
+              44.4043187
+            ],
+            [
+              8.9307061,
+              44.4046037
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "piazza-bixio",
+      "properties": {
+        "kind": "open_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Open circular junction at the printed piazza."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9373865,
+              44.4010639
+            ],
+            [
+              8.9375984,
+              44.401208
+            ],
+            [
+              8.9379151,
+              44.4010858
+            ],
+            [
+              8.9380111,
+              44.4009003
+            ],
+            [
+              8.9378429,
+              44.4007038
+            ],
+            [
+              8.9375786,
+              44.4006929
+            ],
+            [
+              8.9373723,
+              44.4008468
+            ],
+            [
+              8.9373865,
+              44.4010639
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bisagno-spianata-south",
+      "properties": {
+        "kind": "open_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Period west-bank public open ground south of Ponte Pila. Its locally changing northern approach is outside the polygon."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9440708,
+              44.404453
+            ],
+            [
+              8.9460166,
+              44.4043441
+            ],
+            [
+              8.9458169,
+              44.4037404
+            ],
+            [
+              8.9455304,
+              44.4028895
+            ],
+            [
+              8.9452962,
+              44.4019054
+            ],
+            [
+              8.9451079,
+              44.4015458
+            ],
+            [
+              8.9437749,
+              44.4015989
+            ],
+            [
+              8.9436902,
+              44.4020284
+            ],
+            [
+              8.9438983,
+              44.4029031
+            ],
+            [
+              8.9439642,
+              44.4036908
+            ],
+            [
+              8.9440708,
+              44.404453
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carmine-bare-north-flank",
+      "properties": {
+        "kind": "steep",
+        "source": "meyers-genoa-1894",
+        "use_reference": "genova-circonvallazione-history",
+        "use_basis": "Printed hachures above the last continuous hillside frontage."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9302054,
+              44.4186031
+            ],
+            [
+              8.9305972,
+              44.4188358
+            ],
+            [
+              8.931132,
+              44.418452
+            ],
+            [
+              8.9314898,
+              44.4179525
+            ],
+            [
+              8.9313219,
+              44.4174043
+            ],
+            [
+              8.9310291,
+              44.4169591
+            ],
+            [
+              8.9302246,
+              44.4170341
+            ],
+            [
+              8.9297104,
+              44.4172293
+            ],
+            [
+              8.929835,
+              44.4174781
+            ],
+            [
+              8.9302054,
+              44.4186031
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "north-ridge-east-hachures",
+      "properties": {
+        "kind": "steep",
+        "source": "meyers-genoa-1894",
+        "use_reference": "genova-circonvallazione-history",
+        "use_basis": "Open hachured steep ground beyond a narrow group of urban buildings."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.93189,
+              44.4184563
+            ],
+            [
+              8.9323833,
+              44.4188015
+            ],
+            [
+              8.9333413,
+              44.4190577
+            ],
+            [
+              8.9340527,
+              44.4191412
+            ],
+            [
+              8.9344193,
+              44.4185609
+            ],
+            [
+              8.9339579,
+              44.4182712
+            ],
+            [
+              8.9333975,
+              44.4181939
+            ],
+            [
+              8.9328924,
+              44.4179564
+            ],
+            [
+              8.9322074,
+              44.4176304
+            ],
+            [
+              8.9317112,
+              44.4173121
+            ],
+            [
+              8.9319109,
+              44.4179158
+            ],
+            [
+              8.93189,
+              44.4184563
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "san-benigno-ridge-toe",
+      "properties": {
+        "kind": "steep",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Bare hachured ground between the west quay and the barracks ridge. Later excavation changed the ground."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9046054,
+              44.4064468
+            ],
+            [
+              8.905183,
+              44.4067143
+            ],
+            [
+              8.9056818,
+              44.4073575
+            ],
+            [
+              8.9058638,
+              44.4081228
+            ],
+            [
+              8.9063769,
+              44.4089831
+            ],
+            [
+              8.9068467,
+              44.4095439
+            ],
+            [
+              8.9074273,
+              44.4097844
+            ],
+            [
+              8.9072107,
+              44.4086387
+            ],
+            [
+              8.9068663,
+              44.407623
+            ],
+            [
+              8.906516,
+              44.4066612
+            ],
+            [
+              8.9060957,
+              44.4059942
+            ],
+            [
+              8.9059044,
+              44.4056615
+            ],
+            [
+              8.9055533,
+              44.4054034
+            ],
+            [
+              8.9050189,
+              44.4054354
+            ],
+            [
+              8.9045625,
+              44.4057955
+            ],
+            [
+              8.9046054,
+              44.4064468
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "bisagno-bank-hachures",
+      "properties": {
+        "kind": "steep",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Printed steep bank between the west-bank street and the historic lower river."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9438856,
+              44.4012787
+            ],
+            [
+              8.9451431,
+              44.4012224
+            ],
+            [
+              8.9450797,
+              44.4007597
+            ],
+            [
+              8.9448016,
+              44.4001798
+            ],
+            [
+              8.9445234,
+              44.3995999
+            ],
+            [
+              8.9441845,
+              44.3988822
+            ],
+            [
+              8.9438803,
+              44.398193
+            ],
+            [
+              8.9436051,
+              44.3975861
+            ],
+            [
+              8.9434428,
+              44.3973358
+            ],
+            [
+              8.9429319,
+              44.3971523
+            ],
+            [
+              8.9428765,
+              44.3973124
+            ],
+            [
+              8.9431811,
+              44.3976498
+            ],
+            [
+              8.9434621,
+              44.3982027
+            ],
+            [
+              8.9436182,
+              44.3988588
+            ],
+            [
+              8.9435767,
+              44.3995878
+            ],
+            [
+              8.9437764,
+              44.4001915
+            ],
+            [
+              8.9437786,
+              44.4008683
+            ],
+            [
+              8.9438856,
+              44.4012787
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "darsena-principe-rail-approach",
+      "properties": {
+        "kind": "rail",
+        "source": "meyers-genoa-1894",
+        "use_basis": "A bounded part of the printed rail approach. Track and land width are diagrammatic."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9210956,
+              44.4158985
+            ],
+            [
+              8.9218942,
+              44.4158774
+            ],
+            [
+              8.9228354,
+              44.4155916
+            ],
+            [
+              8.9235967,
+              44.4152171
+            ],
+            [
+              8.923504,
+              44.4150238
+            ],
+            [
+              8.9226295,
+              44.4153936
+            ],
+            [
+              8.9218539,
+              44.415551
+            ],
+            [
+              8.9211278,
+              44.4156021
+            ],
+            [
+              8.9210956,
+              44.4158985
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "darsena-operating-quay",
+      "properties": {
+        "kind": "work_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Ground behind the printed dry quay edge, enclosing the Dogana and Arsenal area. The dark quay perimeter and Darsena Reale basin define its seaward edge."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9200423,
+              44.4151241
+            ],
+            [
+              8.9210209,
+              44.4151917
+            ],
+            [
+              8.9218455,
+              44.4152799
+            ],
+            [
+              8.9227402,
+              44.4150734
+            ],
+            [
+              8.9235652,
+              44.4148098
+            ],
+            [
+              8.9240564,
+              44.4144783
+            ],
+            [
+              8.9232816,
+              44.4139319
+            ],
+            [
+              8.923035,
+              44.4137593
+            ],
+            [
+              8.9225178,
+              44.4139815
+            ],
+            [
+              8.921684,
+              44.414326
+            ],
+            [
+              8.9208124,
+              44.4146688
+            ],
+            [
+              8.9200716,
+              44.4148547
+            ],
+            [
+              8.9200423,
+              44.4151241
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "molo-vecchio-apron",
+      "properties": {
+        "kind": "work_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Long narrow operating apron on the printed old mole. Present-day extensions remain outside."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9202998,
+              44.408233
+            ],
+            [
+              8.9190775,
+              44.4079659
+            ],
+            [
+              8.9179273,
+              44.4080807
+            ],
+            [
+              8.9180699,
+              44.4078159
+            ],
+            [
+              8.9192897,
+              44.4077582
+            ],
+            [
+              8.9204424,
+              44.4079682
+            ],
+            [
+              8.9218069,
+              44.4083224
+            ],
+            [
+              8.923421,
+              44.4088223
+            ],
+            [
+              8.9231798,
+              44.4089476
+            ],
+            [
+              8.9227781,
+              44.408864
+            ],
+            [
+              8.9216787,
+              44.4085401
+            ],
+            [
+              8.920534,
+              44.4082407
+            ],
+            [
+              8.9205279,
+              44.4082971
+            ],
+            [
+              8.9202998,
+              44.408233
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "molo-giano-apron",
+      "properties": {
+        "kind": "work_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Narrow Piers and port working ground as historically drawn, without later extensions."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9260466,
+              44.40073
+            ],
+            [
+              8.9266301,
+              44.4009436
+            ],
+            [
+              8.9287727,
+              44.4014653
+            ],
+            [
+              8.9313565,
+              44.4021135
+            ],
+            [
+              8.9314845,
+              44.4019835
+            ],
+            [
+              8.9287177,
+              44.4012736
+            ],
+            [
+              8.9264677,
+              44.4006933
+            ],
+            [
+              8.9260466,
+              44.40073
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "grazie-dry-dock-apron",
+      "properties": {
+        "kind": "work_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Working land east and south of the eastern Bacini di Carenaggio. The two water basins and their westward approaches are separately traced."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9285056,
+              44.4039172
+            ],
+            [
+              8.9289931,
+              44.4043163
+            ],
+            [
+              8.9297657,
+              44.4041859
+            ],
+            [
+              8.9304808,
+              44.4035388
+            ],
+            [
+              8.9314665,
+              44.402497
+            ],
+            [
+              8.9316934,
+              44.4021545
+            ],
+            [
+              8.9299891,
+              44.4017863
+            ],
+            [
+              8.9296024,
+              44.4022033
+            ],
+            [
+              8.9298172,
+              44.4023205
+            ],
+            [
+              8.9296427,
+              44.4025298
+            ],
+            [
+              8.9291163,
+              44.4031847
+            ],
+            [
+              8.9285056,
+              44.4039172
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "inner-port-mercanzia",
+      "properties": {
+        "kind": "work_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Port-side customs ground west of the city-side traffic alignment."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9276901,
+              44.40862
+            ],
+            [
+              8.9280324,
+              44.408959
+            ],
+            [
+              8.9284506,
+              44.4089492
+            ],
+            [
+              8.9283118,
+              44.4084833
+            ],
+            [
+              8.9278969,
+              44.4081143
+            ],
+            [
+              8.9274439,
+              44.4080956
+            ],
+            [
+              8.9276901,
+              44.40862
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "molo-quay-finger",
+      "properties": {
+        "kind": "known_dry",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Secure land inside the printed Molo Vecchio outline. The water perimeter defines the nearside return toward the Mandraccio."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9200062,
+              44.4084915
+            ],
+            [
+              8.918627,
+              44.408272
+            ],
+            [
+              8.9178661,
+              44.4082947
+            ],
+            [
+              8.9175209,
+              44.4079827
+            ],
+            [
+              8.9177272,
+              44.4078288
+            ],
+            [
+              8.918715,
+              44.4074637
+            ],
+            [
+              8.9194415,
+              44.4070607
+            ],
+            [
+              8.920452,
+              44.4071837
+            ],
+            [
+              8.9214972,
+              44.4073353
+            ],
+            [
+              8.9223915,
+              44.4074805
+            ],
+            [
+              8.9232657,
+              44.4074626
+            ],
+            [
+              8.923881,
+              44.4077316
+            ],
+            [
+              8.9245488,
+              44.4078675
+            ],
+            [
+              8.9252342,
+              44.4078417
+            ],
+            [
+              8.925722,
+              44.407889
+            ],
+            [
+              8.9258059,
+              44.4081631
+            ],
+            [
+              8.9252741,
+              44.40852
+            ],
+            [
+              8.9245564,
+              44.4088422
+            ],
+            [
+              8.9242167,
+              44.4088281
+            ],
+            [
+              8.9233429,
+              44.4084943
+            ],
+            [
+              8.9230329,
+              44.4084565
+            ],
+            [
+              8.9228181,
+              44.4083639
+            ],
+            [
+              8.922744,
+              44.4084214
+            ],
+            [
+              8.9226693,
+              44.4084122
+            ],
+            [
+              8.9227113,
+              44.4084467
+            ],
+            [
+              8.9226069,
+              44.4085277
+            ],
+            [
+              8.9229397,
+              44.4086337
+            ],
+            [
+              8.9229478,
+              44.4086403
+            ],
+            [
+              8.9237897,
+              44.4089187
+            ],
+            [
+              8.9239956,
+              44.4091167
+            ],
+            [
+              8.9238239,
+              44.4091202
+            ],
+            [
+              8.9228541,
+              44.4088864
+            ],
+            [
+              8.9216787,
+              44.4085401
+            ],
+            [
+              8.920534,
+              44.4082407
+            ],
+            [
+              8.9204953,
+              44.4085968
+            ],
+            [
+              8.9200062,
+              44.4084915
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "darsena-and-inner-port-water",
+      "properties": {
+        "kind": "water_surface",
+        "source": "meyers-genoa-1894",
+        "basin": "coast",
+        "use_basis": "Generalized wet area around the Darsena Reale, Ponte Calvi, Ponte Spinola and the Mandraccio. The western mask closure lies inside the period basin."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9199126,
+              44.4142256
+            ],
+            [
+              8.9222283,
+              44.4131576
+            ],
+            [
+              8.9212601,
+              44.4116018
+            ],
+            [
+              8.9223293,
+              44.411186
+            ],
+            [
+              8.9236431,
+              44.4127019
+            ],
+            [
+              8.9245525,
+              44.4123606
+            ],
+            [
+              8.9248398,
+              44.4125078
+            ],
+            [
+              8.9245953,
+              44.4130119
+            ],
+            [
+              8.9241188,
+              44.4132087
+            ],
+            [
+              8.9232355,
+              44.4136594
+            ],
+            [
+              8.9241378,
+              44.4144275
+            ],
+            [
+              8.9253554,
+              44.413693
+            ],
+            [
+              8.9250567,
+              44.4133017
+            ],
+            [
+              8.9254833,
+              44.4135629
+            ],
+            [
+              8.926451,
+              44.4130346
+            ],
+            [
+              8.9254669,
+              44.4126691
+            ],
+            [
+              8.9252433,
+              44.4126328
+            ],
+            [
+              8.9254149,
+              44.4124504
+            ],
+            [
+              8.9261116,
+              44.4126687
+            ],
+            [
+              8.9263674,
+              44.4124086
+            ],
+            [
+              8.9258305,
+              44.4121157
+            ],
+            [
+              8.9253804,
+              44.4120701
+            ],
+            [
+              8.9255142,
+              44.4118861
+            ],
+            [
+              8.9264169,
+              44.4123024
+            ],
+            [
+              8.9273413,
+              44.4114745
+            ],
+            [
+              8.925942,
+              44.4110919
+            ],
+            [
+              8.9260876,
+              44.4108002
+            ],
+            [
+              8.9274839,
+              44.4112098
+            ],
+            [
+              8.9277637,
+              44.4103823
+            ],
+            [
+              8.9263002,
+              44.4102406
+            ],
+            [
+              8.9263761,
+              44.4098919
+            ],
+            [
+              8.9278454,
+              44.4099797
+            ],
+            [
+              8.9274889,
+              44.4094237
+            ],
+            [
+              8.9268383,
+              44.4094779
+            ],
+            [
+              8.9266877,
+              44.4091198
+            ],
+            [
+              8.9273122,
+              44.4089562
+            ],
+            [
+              8.9270542,
+              44.4085396
+            ],
+            [
+              8.9267438,
+              44.4082561
+            ],
+            [
+              8.9276972,
+              44.4075106
+            ],
+            [
+              8.9274505,
+              44.407338
+            ],
+            [
+              8.9264015,
+              44.4079171
+            ],
+            [
+              8.9258231,
+              44.4083533
+            ],
+            [
+              8.9251315,
+              44.4087848
+            ],
+            [
+              8.9243937,
+              44.4089437
+            ],
+            [
+              8.9236563,
+              44.4087508
+            ],
+            [
+              8.9228232,
+              44.4083916
+            ],
+            [
+              8.9226575,
+              44.40852
+            ],
+            [
+              8.9238303,
+              44.4088933
+            ],
+            [
+              8.9241496,
+              44.409096
+            ],
+            [
+              8.9240623,
+              44.4092007
+            ],
+            [
+              8.922843,
+              44.4089066
+            ],
+            [
+              8.9216672,
+              44.4085602
+            ],
+            [
+              8.9205611,
+              44.4082709
+            ],
+            [
+              8.9199126,
+              44.4142256
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "lower-bisagno-open-channel",
+      "properties": {
+        "kind": "water_surface",
+        "source": "meyers-genoa-1894",
+        "basin": "river",
+        "use_basis": "Open channel below the former Ponte Pila alignment. The blue river fill and both black bank edges are visible. The southern mask closes in water."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9461936,
+              44.4044597
+            ],
+            [
+              8.9467309,
+              44.4044007
+            ],
+            [
+              8.9475791,
+              44.4042734
+            ],
+            [
+              8.9473706,
+              44.4037505
+            ],
+            [
+              8.94711,
+              44.403009
+            ],
+            [
+              8.9468872,
+              44.402269
+            ],
+            [
+              8.9466095,
+              44.4013373
+            ],
+            [
+              8.9462764,
+              44.4005656
+            ],
+            [
+              8.945781,
+              44.3995437
+            ],
+            [
+              8.9453841,
+              44.3986612
+            ],
+            [
+              8.9449205,
+              44.3976947
+            ],
+            [
+              8.9445119,
+              44.3969199
+            ],
+            [
+              8.9443584,
+              44.3965888
+            ],
+            [
+              8.9428744,
+              44.3966356
+            ],
+            [
+              8.9431151,
+              44.3968621
+            ],
+            [
+              8.9434256,
+              44.3971456
+            ],
+            [
+              8.9436575,
+              44.397453
+            ],
+            [
+              8.943869,
+              44.3979489
+            ],
+            [
+              8.9441094,
+              44.3985272
+            ],
+            [
+              8.9444513,
+              44.399218
+            ],
+            [
+              8.944854,
+              44.4000467
+            ],
+            [
+              8.9451842,
+              44.4008452
+            ],
+            [
+              8.9454418,
+              44.4016137
+            ],
+            [
+              8.9456788,
+              44.4025708
+            ],
+            [
+              8.94591,
+              44.4035818
+            ],
+            [
+              8.9461936,
+              44.4044597
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "carmine-upper-belt-main-road-support",
+      "properties": {
+        "kind": "road_coverage",
+        "source": "meyers-genoa-1894",
+        "categories": 2,
+        "coverage_state": "mapped_network",
+        "coverage_basis": "Only the traced primary hillside belt is covered. The adjoining hachured plots and local streets have no replacement statement."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9289902,
+              44.4172266
+            ],
+            [
+              8.9296118,
+              44.4170899
+            ],
+            [
+              8.9301231,
+              44.4169216
+            ],
+            [
+              8.930553,
+              44.4168041
+            ],
+            [
+              8.931064,
+              44.4169876
+            ],
+            [
+              8.9315514,
+              44.4173867
+            ],
+            [
+              8.9319025,
+              44.4176448
+            ],
+            [
+              8.932129,
+              44.4176542
+            ],
+            [
+              8.931926,
+              44.4174293
+            ],
+            [
+              8.9315111,
+              44.4170603
+            ],
+            [
+              8.9310585,
+              44.4166897
+            ],
+            [
+              8.9305795,
+              44.4165616
+            ],
+            [
+              8.9301843,
+              44.4167076
+            ],
+            [
+              8.9295569,
+              44.4168982
+            ],
+            [
+              8.928973,
+              44.4170364
+            ],
+            [
+              8.9289902,
+              44.4172266
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "old-quay-main-road-support",
+      "properties": {
+        "kind": "road_coverage",
+        "source": "meyers-genoa-1894",
+        "categories": 2,
+        "coverage_state": "mapped_network",
+        "coverage_basis": "Only the continuous mapped waterfront avenue between Cattaneo and San Giorgio. The parallel quay yards and caruggi remain outside.",
+        "use_basis": "Coverage is limited to the mapped primary road corridor. Parallel rail and quay workings remain outside."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.92789,
+              44.4116596
+            ],
+            [
+              8.9281224,
+              44.4116151
+            ],
+            [
+              8.9284831,
+              44.4110887
+            ],
+            [
+              8.9287452,
+              44.4104229
+            ],
+            [
+              8.9288475,
+              44.4098317
+            ],
+            [
+              8.9287262,
+              44.4092042
+            ],
+            [
+              8.9285085,
+              44.409114
+            ],
+            [
+              8.9284213,
+              44.4092186
+            ],
+            [
+              8.9285107,
+              44.4097907
+            ],
+            [
+              8.928452,
+              44.4103296
+            ],
+            [
+              8.9282335,
+              44.4109431
+            ],
+            [
+              8.92789,
+              44.4116596
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "darsena-service-wharf",
+      "properties": {
+        "kind": "work_ground",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Exposed foot of the working pier on the harbour side of the Darsena Reale."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9213675,
+              44.4116604
+            ],
+            [
+              8.9215999,
+              44.4116159
+            ],
+            [
+              8.9223087,
+              44.4113746
+            ],
+            [
+              8.9223901,
+              44.4113238
+            ],
+            [
+              8.9223205,
+              44.4112668
+            ],
+            [
+              8.9213675,
+              44.4116604
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "grazie-dry-dock-west-water",
+      "properties": {
+        "kind": "water_surface",
+        "source": "meyers-genoa-1894",
+        "basin": "coast",
+        "use_basis": "Printed west graving dock and basin-side entrance."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9272481,
+              44.4039735
+            ],
+            [
+              8.9276055,
+              44.4038259
+            ],
+            [
+              8.9279951,
+              44.4033819
+            ],
+            [
+              8.9285999,
+              44.4027032
+            ],
+            [
+              8.9289808,
+              44.40234
+            ],
+            [
+              8.9288793,
+              44.4022275
+            ],
+            [
+              8.9286846,
+              44.4022736
+            ],
+            [
+              8.9282573,
+              44.4027161
+            ],
+            [
+              8.927699,
+              44.4033155
+            ],
+            [
+              8.9275333,
+              44.4034439
+            ],
+            [
+              8.9272427,
+              44.4036755
+            ],
+            [
+              8.9272481,
+              44.4039735
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "grazie-dry-dock-east-water",
+      "properties": {
+        "kind": "water_surface",
+        "source": "meyers-genoa-1894",
+        "basin": "coast",
+        "use_basis": "Printed east graving dock and basin-side entrance."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9278345,
+              44.4041601
+            ],
+            [
+              8.9282179,
+              44.4041219
+            ],
+            [
+              8.9288227,
+              44.4034432
+            ],
+            [
+              8.929256,
+              44.4029468
+            ],
+            [
+              8.9297299,
+              44.4024251
+            ],
+            [
+              8.9297098,
+              44.4022619
+            ],
+            [
+              8.9294862,
+              44.4022256
+            ],
+            [
+              8.92905,
+              44.4027489
+            ],
+            [
+              8.9286197,
+              44.4032182
+            ],
+            [
+              8.9280614,
+              44.4038177
+            ],
+            [
+              8.9278345,
+              44.4041601
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "piazza-san-filippo-quay-link",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 4.5,
+        "display_rank": 1,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Open approach from the lower quay corridor into the San Filippo and Vacca junction."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9271627,
+            44.4127663
+          ],
+          [
+            8.9273108,
+            44.4127995
+          ],
+          [
+            8.9274849,
+            44.412942
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "darsena-service-wharf-sample",
+      "properties": {
+        "kind": "coverage",
+        "source": "meyers-genoa-1894",
+        "use_basis": "Sample extent follows the outline of the documented service pier."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9213356,
+              44.411605
+            ],
+            [
+              8.9222283,
+              44.4131576
+            ],
+            [
+              8.9229368,
+              44.4132681
+            ],
+            [
+              8.9235995,
+              44.4127542
+            ],
+            [
+              8.9223612,
+              44.4112414
+            ],
+            [
+              8.9213356,
+              44.411605
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "darsena-service-wharf-access",
+      "properties": {
+        "kind": "road",
+        "source": "meyers-genoa-1894",
+        "width_m": 3.4,
+        "display_rank": 0,
+        "display_surface": "setts",
+        "source_year": 1894,
+        "width_basis": "Display width inferred from printed road hierarchy.",
+        "surface_basis": "Display surface inferred from the street or path type.",
+        "use_basis": "Short access space between the two elongated pink buildings printed on the service pier."
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            8.9228151,
+            44.4129924
+          ],
+          [
+            8.9226587,
+            44.4126882
+          ],
+          [
+            8.9224644,
+            44.4123824
+          ],
+          [
+            8.9221657,
+            44.4119912
+          ],
+          [
+            8.9218352,
+            44.4115444
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "darsena-service-pier-west-sheds",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "warehouse",
+        "frontage_m": [
+          11,
+          18
+        ],
+        "depth_m": [
+          10,
+          18
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "setback_m": [
+          8,
+          14
+        ],
+        "gap_m": 0.9,
+        "use_basis": "The map prints an elongated built strip on one side of the pier access. Individual shed divisions are unresolved.",
+        "form_basis": "Inferred one- and two-storey dock warehouse massing. Setback reflects the printable band between the access and the built strip."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9223156,
+              44.4130529
+            ],
+            [
+              8.9226352,
+              44.4129038
+            ],
+            [
+              8.9224091,
+              44.4125426
+            ],
+            [
+              8.9220873,
+              44.412015
+            ],
+            [
+              8.9217568,
+              44.4115683
+            ],
+            [
+              8.921443,
+              44.4116635
+            ],
+            [
+              8.9218633,
+              44.4123305
+            ],
+            [
+              8.9223156,
+              44.4130529
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "darsena-service-pier-east-sheds",
+      "properties": {
+        "kind": "zone",
+        "source": "meyers-genoa-1894",
+        "role": "warehouse",
+        "frontage_m": [
+          11,
+          18
+        ],
+        "depth_m": [
+          10,
+          18
+        ],
+        "storeys": [
+          1,
+          2
+        ],
+        "setback_m": [
+          8,
+          14
+        ],
+        "gap_m": 0.9,
+        "use_basis": "The map prints an elongated built strip on one side of the pier access. Individual shed divisions are unresolved.",
+        "form_basis": "Inferred one- and two-storey dock warehouse massing. Setback reflects the printable band between the access and the built strip."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.9229053,
+              44.4128608
+            ],
+            [
+              8.9234166,
+              44.4126925
+            ],
+            [
+              8.9229149,
+              44.4120763
+            ],
+            [
+              8.9223465,
+              44.4113761
+            ],
+            [
+              8.9220298,
+              44.4114984
+            ],
+            [
+              8.9224531,
+              44.4121384
+            ],
+            [
+              8.9229053,
+              44.4128608
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
