@@ -658,7 +658,11 @@ impl Display<'_> {
         self.skin.paragraph(text, field_text, 0, [fx + 8., fy + 4., fw - 36., fh - 4.], IVORY, 0.9);
         if has_sites { self.skin.text(text, if nav.drawer { "−" } else { "+" }, 0, [fx + fw - 19., fy + 4.], 14., MUTED); }
         let can_enter = !busy && (nav.site.is_some() || legacy);
-        let begin = say("开始", "Start");
+        let begin = if legacy {
+            say("开始", "Start")
+        } else {
+            say("开始人生序章", "Begin prologue")
+        };
         let button_width = self.skin.width(begin, 0) + 30.;
         self.row(panels, text, hits, [x + w - 14. - button_width, y + h - 40., button_width, 29.],
             begin, can_enter.then_some(action(Command::Enter)), can_enter);
