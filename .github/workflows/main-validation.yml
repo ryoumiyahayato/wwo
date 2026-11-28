@@ -116,12 +116,12 @@ jobs:
           name: wwo-rust-windows
           path: ${{ runner.temp }}/wwo-rust-windows
       - name: Archive the requested main Windows game in a release draft
-        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.archive_windows_game
+        if: github.event_name == 'workflow_dispatch' && inputs.archive_windows_game
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $exe = Join-Path $env:RUNNER_TEMP 'wwo-rust-windows/wwo-map-lab.exe'
+          $exe = 'rust/strategic-host/target/release/wwo-map-lab.exe'
           $shortCommit = $env:GITHUB_SHA.Substring(0, 10)
           $tag = "wwo-rust-windows-$shortCommit-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
           $runUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
