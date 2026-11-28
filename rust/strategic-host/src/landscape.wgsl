@@ -78,18 +78,41 @@ fn class_fraction(classes: vec4u, weights: vec4f, code: u32) -> f32 {
     return dot(weights, select(vec4f(0.), vec4f(1.), classes == vec4u(code)));
 }
 
-fn cover_axis(t: f32) -> vec4f {
+fn cover_spline(t: f32) -> vec4f {
     let t2 = t*t;
     let t3 = t2*t;
     let u = 1.-t;
-    let spline = vec4f(u*u*u,4.-6.*t2+3.*t3,1.+3.*t+3.*t2-3.*t3,t3)/6.;
+    return vec4f(u*u*u,4.-6.*t2+3.*t3,1.+3.*t+3.*t2-3.*t3,t3)/6.;
+}
+
+fn cover_axis(t: f32) -> vec4f {
     // Use a narrow symmetric transition at the reconstructed edge; the
     // wider spline still carries the area of small patches at the fringe.
     let edge=smoothstep(.28,.72,t);
-    return mix(vec4f(0.,1.-edge,edge,0.),spline,.46);
+    return mix(vec4f(0.,1.-edge,edge,0.),cover_spline(t),.46);
 }
 
-fn legacy_landscape_material(page: LandscapePage) -> LandCover {
+struct CoverStencil {
+    classes: array<vec4u,4>,
+    weights: array<vec4f,4>,
+};
+
+fn cover_stencil(slot: i32, sample: vec2f, wx: vec4f, wy: vec4f) -> CoverStencil {
+    let a = vec4u(round(textureGather(3,landscape_data,linear,(sample+vec2f(-1.,-1.))/264.,slot)*15.));
+    let b = vec4u(round(textureGather(3,landscape_data,linear,(sample+vec2f(1.,-1.))/264.,slot)*15.));
+    let c = vec4u(round(textureGather(3,landscape_data,linear,(sample+vec2f(-1.,1.))/264.,slot)*15.));
+    let d = vec4u(round(textureGather(3,landscape_data,linear,(sample+vec2f(1.,1.))/264.,slot)*15.));
+    return CoverStencil(array(a,b,c,d),array(wx.xyyx*wy.yyxx,wx.zwwz*wy.yyxx,wx.xyyx*wy.wwzz,wx.zwwz*wy.wwzz));
+}
+
+fn stencil_fraction(stencil: CoverStencil, code: u32) -> f32 {
+    return class_fraction(stencil.classes[0],stencil.weights[0],code)
+        +class_fraction(stencil.classes[1],stencil.weights[1],code)
+        +class_fraction(stencil.classes[2],stencil.weights[2],code)
+        +class_fraction(stencil.classes[3],stencil.weights[3],code);
+}
+
+fn legacy_landscape_material(page: LandscapePage, smooth_snow: bool) -> LandCover {
     // Shear along each axis in turn. The artwork rounds source corners on a
     // sub-texel scale while preserving area. The phase matches across gutters.
     let cycle = (2.*PI)/256.;
@@ -97,22 +120,29 @@ fn legacy_landscape_material(page: LandscapePage) -> LandCover {
     let y = page.texel.y+.28*sin(cycle*53.*x)+.13*sin(cycle*23.*x);
     let sample = vec2f(x,y);
     let f = fract(sample-.5);
-    let wx = cover_axis(f.x);
-    let wy = cover_axis(f.y);
-
-    let a = vec4u(round(textureGather(3,landscape_data,linear,(sample+vec2f(-1.,-1.))/264.,page.slot)*15.));
-    let b = vec4u(round(textureGather(3,landscape_data,linear,(sample+vec2f(1.,-1.))/264.,page.slot)*15.));
-    let c = vec4u(round(textureGather(3,landscape_data,linear,(sample+vec2f(-1.,1.))/264.,page.slot)*15.));
-    let d = vec4u(round(textureGather(3,landscape_data,linear,(sample+vec2f(1.,1.))/264.,page.slot)*15.));
-    let wa = wx.xyyx*wy.yyxx;
-    let wb = wx.zwwz*wy.yyxx;
-    let wc = wx.xyyx*wy.wwzz;
-    let wd = wx.zwwz*wy.wwzz;
+    let stencil = cover_stencil(page.slot,sample,cover_axis(f.x),cover_axis(f.y));
 
     var fraction = array<f32,12>();
     for (var code=1u; code<12u; code+=1u) {
-        fraction[code] = class_fraction(a,wa,code)+class_fraction(b,wb,code)
-            +class_fraction(c,wc,code)+class_fraction(d,wd,code);
+        fraction[code] = stencil_fraction(stencil,code);
+    }
+    let snow = fraction[7];
+    if smooth_snow && snow > .01 && snow < .99 {
+        let total = 1.-stencil_fraction(stencil,0u);
+        let exposed = total-snow;
+        let edge = smoothstep(.01,.16,min(snow,exposed));
+        if edge > .001 {
+            // Interpolate the snow mask on the source grid. The shear used by
+            // the other materials makes conspicuous teeth at snow edges.
+            let phase = fract(page.texel-.5);
+            let unwarped = cover_stencil(page.slot,page.texel,cover_spline(phase.x),cover_spline(phase.y));
+            let snow_mix = mix(snow,min(total,stencil_fraction(unwarped,7u)),edge);
+            let exposed_scale = (total-snow_mix)/exposed;
+            for (var code=1u; code<12u; code+=1u) {
+                fraction[code] *= exposed_scale;
+            }
+            fraction[7] = snow_mix;
+        }
     }
     return LandCover(fraction[1]+fraction[10],fraction[2],fraction[3],
         fraction[9]+fraction[11],fraction[4],fraction[5],fraction[6],fraction[7],0.);
@@ -155,20 +185,20 @@ fn forest_contour(page: LandscapePage) -> f32 {
     return cover;
 }
 
-fn landscape_material(page: LandscapePage, scale_weight: f32, forest_detail: f32, near_weight: f32) -> LandCover {
+fn landscape_material(page: LandscapePage, scale_weight: f32, forest_detail: f32, near_weight: f32, smooth_snow: bool) -> LandCover {
     let regional_weight = scale_weight*select(1.,near_weight,page.regional_near_only);
     if page.regional_slot < 0 || regional_weight <= .001 {
-        return legacy_landscape_material(page);
+        return legacy_landscape_material(page,smooth_snow);
     }
     let uv = page.texel / vec2f(792.,264.);
     let b = textureSampleLevel(regional_cover,linear,uv+vec2f(2./3.,0.),page.regional_slot,0.);
-    if b.a*regional_weight <= .001 { return legacy_landscape_material(page); }
+    if b.a*regional_weight <= .001 { return legacy_landscape_material(page,smooth_snow); }
     let a = textureSampleLevel(regional_cover,linear,uv+vec2f(1./3.,0.),page.regional_slot,0.);
     let broad = dot(textureSampleLevel(regional_cover,linear,uv,page.regional_slot,0.),vec4f(.25));
     let open = dot(a.rgb+b.rgb,vec3f(1.));
     let observed = smoothstep(.01,.50,broad+open+a.a);
     let weight = b.a * regional_weight * observed;
-    if weight <= .001 { return legacy_landscape_material(page); }
+    if weight <= .001 { return legacy_landscape_material(page,smooth_snow); }
     var forest = broad;
     var rest = 1.;
     if forest_detail > .001 {
@@ -185,7 +215,7 @@ fn landscape_material(page: LandscapePage, scale_weight: f32, forest_detail: f32
     }
     let land = LandCover(forest,a.r*rest,a.g*rest,b.b*rest,a.b*rest,a.a,b.r*rest,b.g*rest,1.);
     if weight >= .999 { return land; }
-    return mix_cover(legacy_landscape_material(page),land,weight);
+    return mix_cover(legacy_landscape_material(page,smooth_snow),land,weight);
 }
 
 const FOREST_GROUND: vec3f = vec3f(.318,.391,.277);
@@ -252,10 +282,10 @@ fn blended_landcover(layers: array<LandscapeLayer,2>, weight: f32, mpp: f32) -> 
     let forest_detail = 1.-smoothstep(95.,230.,mpp);
     // Supplemental near cover takes over between the 10 km and 5 km ruler marks.
     let near_weight = 1.-smoothstep(80.,125.,mpp);
-    if layers[0].weight <= .001 { return landscape_material(layers[1].page,regional,forest_detail,near_weight); }
-    let a = landscape_material(layers[0].page,regional,forest_detail,near_weight);
+    if layers[0].weight <= .001 { return landscape_material(layers[1].page,regional,forest_detail,near_weight,true); }
+    let a = landscape_material(layers[0].page,regional,forest_detail,near_weight,true);
     if layers[1].weight <= .001 { return a; }
-    return mix_cover(a,landscape_material(layers[1].page,regional,forest_detail,near_weight),layers[1].weight/weight);
+    return mix_cover(a,landscape_material(layers[1].page,regional,forest_detail,near_weight,true),layers[1].weight/weight);
 }
 
 fn rural_cover(land: LandCover, grade: f32, height: f32, detail: f32) -> LandCover {
@@ -1310,7 +1340,7 @@ fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     if landscape_coverage(page) >= .20 { return; }
     let height = landscape_elevation(page,vec2f(0.));
     let slope = landscape_slope(page,ll.y,.83,7u);
-    let cover = rural_cover(landscape_material(page,1.,1.,1.),length(slope),height,1.);
+    let cover = rural_cover(landscape_material(page,1.,1.,1.,false),length(slope),height,1.);
     let historic = historic_surface_page(ll,0.);
     let habitat = landscape_habitat(cover,historic);
     let closure = woodland_structure(landscape_world(ll));
@@ -1528,7 +1558,7 @@ fn landscape_object_mask(page: LandscapePage, historic: HistoricSurfacePage, inp
     }
     let height = landscape_elevation(page,vec2f(0.));
     let clearance = input.site.z-height;
-    let cover = rural_cover(landscape_material(page,1.,1.,1.),input.grade,height,1.);
+    let cover = rural_cover(landscape_material(page,1.,1.,1.,false),input.grade,height,1.);
     let habitat = landscape_habitat(cover,historic);
     if input.kind==4u {
         return land*habitat.unassigned*farm_ground(cover)*smoothstep(-4.,0.,clearance);
