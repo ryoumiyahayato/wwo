@@ -823,7 +823,7 @@ pub fn cloud_cover(size: [u32; 2], coverage: f32, travel: f32, skin: &crate::for
     let rect = cloud_skip_rect(size);
     let [x, y, width, _] = rect;
     formal_ui::panel(&mut layers[2].0, rect, [6, 14, 23, 247]);
-    layers[3].1 = Ink::Text;
+    layers[3].1 = Ink::HudText;
     skin.text(&mut layers[3].0, skin.choose("跳过过场 · Esc", "Skip transition · Esc"), 0,
         [x + 11., y + 8.], width - 22., IVORY);
     layers
