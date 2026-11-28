@@ -792,7 +792,7 @@ impl Host {
         if self.camera.mpp<700.{self.grid_step=25000.;}else if self.camera.mpp>900.{self.grid_step=50000.;}
         view.settings=[self.state.date.season_day(),self.mode.index() as f32,u8::from(active) as f32,u8::from(self.theme) as f32];
         view.map_style[1]=self.renderer.as_ref().unwrap().terrain_max_level() as f32;
-        let land_detail=!self.in_lobby();
+        let land_detail=self.mode==Mode::Geographic && !self.in_lobby();
         view.close_sample=self.renderer.as_mut().unwrap().update_close_terrain(&self.camera,self.size,land_detail,now);
         view.map_style[3]=if self.hud.military_grid{self.grid_step}else{0.};
         if self.military_grid_active(){

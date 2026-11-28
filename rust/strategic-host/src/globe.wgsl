@@ -572,24 +572,25 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
         let surveyed=clamp((sample.a-.02)/.98,0.,1.);
         let fractions=clamp(sample.rgb/max(sample.a,.02),vec3f(0.),vec3f(1.));
         let occupied=fractions/max(1.,dot(fractions,vec3f(1.)));
+        // The survey footprint also limits the separate river line overlay.
+        let edge=distance*span_metres;
+        let crop=smoothstep(0.,400.,min(edge.x,edge.y));
+        if base.a<0. {return vec4f(base.rgb,mix(base.a,occupied.r,surveyed*weight*crop));}
         let other=max(0.,1.-dot(occupied,vec3f(1.)));
         let crop_ink=vec3f(.57,.54,.36);
         var crop_surface=crop_ink;
-        if base.a>=0. && occupied.b>.12 && footprint<180. {
+        if occupied.b>.12 && footprint<180. {
             let crop=occupied.b*(1.-smoothstep(.04,.26,occupied.r));
             let contact=FarmContact(vec2f(0.),vec2f(0.),0.,0.,0.,LandscapePage(vec2f(0.),-1,-1,0.,false));
             crop_surface=mix(crop_ink,cultivated_fields(crop_ink,ll,landscape_world(ll),footprint,0.,contact),
                 smoothstep(.12,.72,crop));
         }
-        let surface=other*vec3f(.43,.51,.33)
-            +occupied.r*vec3f(.20,.38,.45)
+        let dry=1.-occupied.r;
+        let surface=(other*vec3f(.43,.51,.33)
             +occupied.g*vec3f(.255,.41,.31)
-            +occupied.b*crop_surface;
-        // Give explicitly cropped packages a short edge fade too. The survey
-        // raster already feathers the actual mapped boundary in metres.
-        let edge=distance*span_metres;
-        let crop=smoothstep(0.,400.,min(edge.x,edge.y));
-        return mix(base,vec4f(surface,occupied.r),surveyed*weight*crop);
+            +occupied.b*crop_surface)/max(.001,dry);
+        let blend=surveyed*weight*crop*dry*(1.-base.a);
+        return vec4f(mix(base.rgb,surface,blend),base.a);
     }
     if streamed {
         // Keep the global albedo and the authoritative water coverage. The
@@ -600,7 +601,8 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
         let coverage=smoothstep(0.,.14,distance.x)*smoothstep(0.,.14,distance.y);
         return vec4f(clamp(base.rgb+detail*(weight*coverage*land),vec3f(0.),vec3f(1.)),base.a);
     }
-    return mix(base,sample,weight);
+    let land=1.-max(base.a,sample.a);
+    return vec4f(mix(base.rgb,sample.rgb,weight*land),base.a);
 }
 
 fn water_packets(point:vec3f, planes:vec3f, footprint:f32, period:f32, channel:u32) -> f32 {
@@ -724,7 +726,9 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
             terrain=close_terrain(ll,detail_footprint,terrain);
             color=terrain.rgb;
         }
-        color=landscape_relief(color,ll,normal_world,terrain.a,base_mpp);
+        if view.settings.y<.5 || base_mpp>=180. {
+            color=landscape_relief(color,ll,normal_world,terrain.a,base_mpp);
+        }
         if view.chart_origin.w <= .5 {
             color=natural_water_color(color,normal_world,max(0.,-z)*data.a,terrain.a,base_mpp,area);
         }
@@ -1103,6 +1107,7 @@ fn road_raster_fraction(ll: vec2f) -> f32 {
 }
 
 fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
+    let overview=view.settings.y>.5;
     let level=road_level(mpp);
     let ranks=road_coverage(mpp);
     let footprint=max(.25,mpp*.57);
@@ -1120,6 +1125,7 @@ fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
             let bridge=(style&4u)!=0u;
             if (area&3u)>1u && !bridge {continue;}
             let rank=(style>>3u)&3u;
+            if overview && rank<2u {continue;}
             let weight=ranks[rank]*support;
             if weight<=.001 {continue;}
             let width=bitcast<f32>(city_water[i+4u]);
@@ -1144,6 +1150,7 @@ fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
     if strength<=.001 {return vec4f(0.);}
     if !on_bridge && (area&3u)==0u && natural_surface(ll).a>.5 {return vec4f(0.);}
     let paris=ll.x>1.;
+    if overview {return vec4f(city_road(paris,arterial),strength);}
     let layers=array<i32,3>(DIRT_ROAD,GRAVEL,SETTS);
     let spans=array<f32,3>(18.,8.,5.);
     let setts=select(vec3f(.620,.601,.564),vec3f(.614,.607,.585),paris);
@@ -1157,15 +1164,23 @@ fn city_street(ll:vec2f,earth:vec3f,mpp:f32,area:u32) -> vec4f {
 
 fn city_ink(ll:vec2f,earth:vec3f,uv:vec2f,mpp:f32,edge_distance:f32,area:u32) -> vec4f {
     let historical=tile.options.z>1.5;
-    let surveyed=historic_surface_page(ll,mpp);
-    let historic=surveyed.weight;
-    let legacy_ground=1.-historic;
     let detail=1.-smoothstep(16.,CITY_INK_MPP,mpp);
     if !historical && detail<=0. {return vec4f(0.);}
     let du=1./vec2f(textureDimensions(city_data));
     let pixel_metres=(tile.extent.zw-tile.extent.xy)*du*111195.*vec2f(max(.08,cos(radians(ll.y))),1.);
     let mip=max(0.,log2(mpp/max(1.,min(pixel_metres.x,pixel_metres.y))));
     var buildings=textureSampleLevel(city_data,linear,uv,mip).rg;
+    if view.settings.y>.5 && view.road_layer.x!=2u {
+        // Thematic views keep a block silhouette and use the main-road layer.
+        if (area&3u)>1u || (tile.options.z>3.5 && tile.options.z<4.5) {return vec4f(0.);}
+        let blocks=textureSampleLevel(city_data,linear,uv,max(3.,mip+.8)).r;
+        if blocks<=.001 {return vec4f(0.);}
+        let dry=1.-water_coverage(area,natural_surface(ll).a);
+        let support=smoothstep(0.,360.,edge_distance);
+        return vec4f(.53,.50,.45,blocks*dry*support*.49);
+    }
+    let historic=historic_surface_page(ll,mpp).weight;
+    let legacy_ground=1.-historic;
     if tile.options.z>3.5 && tile.options.z<4.5 {
         let major=buildings.r;
         let local=buildings.g*(1.-smoothstep(34.,98.,mpp));
@@ -1403,7 +1418,7 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
         let ink=city_ink(ll,v,uv,mpp,edge_distance,area);
         color=mix(color,ink.rgb,ink.a);
     }
-    if is_world || tile.options.z<.5 {
+    if view.settings.y<.5 && (is_world || tile.options.z<.5) {
         color=park_ground(color,ll,v,mpp,area);
     }
     if is_world {
